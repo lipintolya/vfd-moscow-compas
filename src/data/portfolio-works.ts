@@ -6,14 +6,13 @@
 
 const CDN_OW = 'https://storage.yandexcloud.net/catalog-vfd/invisible/ourworks/'
 
-export type WorkCategory = 'interior' | 'hidden' | 'partitions' | 'entrance'
+export type WorkCategory = 'interior' | 'hidden' | 'partitions'
 export type ObjectType   = 'apartment' | 'house' | 'office' | 'commercial'
 
 export const CATEGORY_LABELS: Record<WorkCategory, string> = {
   interior:   'Межкомнатные',
   hidden:     'Скрытые двери',
   partitions: 'Перегородки',
-  entrance:   'Входные',
 }
 
 /** Цвет бейджа категории на карточке/странице работы — разные цвета на
@@ -22,7 +21,6 @@ export const CATEGORY_BADGE_COLORS: Record<WorkCategory, string> = {
   interior:   'bg-[oklch(50.5%_0.213_27.518)]', // красный
   hidden:     'bg-accent-600',                  // фирменный акцент — флагманский продукт
   partitions: 'bg-indigo-600',                  // холодный синий — алюминий/стекло
-  entrance:   'bg-amber-600',                   // тёплый янтарный — входная группа
 }
 
 /** Тот же цветовой код категории, но как цвет текста подписи — вместо
@@ -31,7 +29,6 @@ export const CATEGORY_TEXT_COLORS: Record<WorkCategory, string> = {
   interior:   'text-[oklch(50.5%_0.213_27.518)]',
   hidden:     'text-accent-600',
   partitions: 'text-indigo-600',
-  entrance:   'text-amber-600',
 }
 
 export const OBJECT_TYPE_LABELS: Record<ObjectType, string> = {

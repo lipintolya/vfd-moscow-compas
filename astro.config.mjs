@@ -107,7 +107,8 @@ const SITE_URL = 'https://domain-placeholder.example'
    пока пустые и закрыты noindex (SITE.features в src/config/site.ts);
    /catalog/skrytye-dveri/raboty/ — noindex, пока пуст INVISIBLE_WORKS.
    Включили раздел там — уберите его отсюда. */
-const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/portfolio/', '/catalog/skrytye-dveri/raboty/']
+// /about/ — пока заглушка (noindex), вернуть в сайтмап вместе с наполнением.
+const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/portfolio/', '/catalog/skrytye-dveri/raboty/', '/about/']
 
 const modelImages = await fetchModelImages()
 
@@ -128,7 +129,10 @@ export default defineConfig({
         // Старые UUID-маршруты моделей остаются доступными (чтобы не 404'ить уже
         // проиндексированные ссылки), но в сайтмап должен попадать только
         // канонический слаг-адрес — иначе сайтмап задвоит каждую модель.
-        !/\/models\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/.test(page),
+        !/\/models\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/.test(page) &&
+        // Блог — пока заглушки (placeholder: true в src/content/articles),
+        // страницы закрыты noindex; вернуть в сайтмап вместе с настоящими статьями.
+        !/\/articles(\/|$)/.test(page),
       serialize(item) {
         const u = item.url
 
@@ -146,7 +150,7 @@ export default defineConfig({
         if (u === `${SITE_URL}/` || u === SITE_URL) {
           return { ...item, changefreq: 'weekly', priority: 1.0 }
         }
-        if (/\/(catalog|about|contacts|partitions|vhodnye-dveri|designers)\/?$/.test(u)) {
+        if (/\/(catalog|about|contacts|partitions|designers)\/?$/.test(u)) {
           return { ...item, changefreq: 'weekly', priority: 0.8 }
         }
         if (/\/catalog\/series(\/.+)?\/?$/.test(u)) {

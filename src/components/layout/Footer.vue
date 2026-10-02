@@ -25,7 +25,6 @@ const LEGAL_LINKS = [
 const CATEGORY_LINKS = [
   { href: '/catalog/',                label: 'Межкомнатные' },
   { href: '/catalog/skrytye-dveri/',  label: 'Скрытые двери' },
-  { href: '/vhodnye-dveri/',          label: 'Входные' },
   { href: '/partitions/',             label: 'Перегородки' },
   { href: '/catalog/decor/',          label: 'Декор' },
 ] as const
@@ -34,6 +33,7 @@ const CONTACTS = {
   phones:  companyLegalInfo.contacts.phone,
   email:   companyLegalInfo.contacts.email,
   address: companyLegalInfo.address.postal,
+  worktime: companyLegalInfo.workingHours.shortDisplay,
 }
 
 /* Раньше здесь был живой iframe Yandex Maps (свой JS + тайлы) — карта
@@ -228,45 +228,19 @@ onUnmounted(() => {
               <span class="text-xs text-white/40 uppercase tracking-widest">Компас</span>
             </a>
             <p class="text-sm leading-relaxed text-white/60 max-w-xs">
-              Салон дверей и интерьерных решений в Москве —
-              ТЦ «Компас», 3 этаж.
+              {{ SITE.studioName }} — шоу-рум Владимирской фабрики дверей
+              в Москве, {{ SITE.address.mall }}, {{ SITE.address.floor }}.
             </p>
-            <!-- Socials -->
-            <div class="flex gap-4 mt-5" role="list" aria-label="Социальные сети">
-              <div role="listitem">
-                <a
-                  :href="SITE.social.vk"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="ВКонтакте (открывается в новой вкладке)"
-                  class="opacity-60 hover:opacity-100 transition-opacity duration-200 block"
-                >
-                  <img src="/icons/w_vk.webp" alt="" class="w-6 h-6" width="24" height="24" loading="eager" fetchpriority="high" />
-                </a>
-              </div>
-              <div role="listitem">
-                <a
-                  :href="SITE.social.telegram"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Telegram (открывается в новой вкладке)"
-                  class="opacity-60 hover:opacity-100 transition-opacity duration-200 block"
-                >
-                  <img src="/svg/w_tg_logo.svg" alt="" class="w-6 h-6" width="24" height="24" loading="eager" fetchpriority="high" />
-                </a>
-              </div>
-              <div role="listitem">
-                <a
-                  :href="SITE.social.max"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Max (открывается в новой вкладке)"
-                  class="opacity-60 hover:opacity-100 transition-opacity duration-200 block"
-                >
-                  <img src="/icons/w_max.webp" alt="" class="w-6 h-6" width="24" height="24" loading="eager" fetchpriority="high" />
-                </a>
-              </div>
-            </div>
+            <!-- Единственная соцсеть салона — Telegram-канал -->
+            <a
+              :href="SITE.social.telegram"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-5 inline-flex items-center gap-2.5 text-sm text-white/60 hover:text-white transition-colors duration-200"
+            >
+              <img src="/svg/w_tg_logo.svg" alt="" class="w-6 h-6" width="24" height="24" loading="lazy" />
+              <span>Telegram-канал <span class="text-white/40">{{ SITE.social.telegramHandle }}</span></span>
+            </a>
           </div>
 
           <!-- Navigation -->
@@ -316,7 +290,9 @@ onUnmounted(() => {
                 >
                   {{ p.label }}
                 </a>
+                <span class="block text-white/40">{{ p.title }}</span>
               </li>
+              <li class="text-white/60">{{ CONTACTS.worktime }}</li>
               <li>
                 <a
                   :href="`mailto:${CONTACTS.email}`"

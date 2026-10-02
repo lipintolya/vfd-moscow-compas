@@ -12,7 +12,6 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: 'interior',   label: CATEGORY_LABELS.interior },
   { key: 'hidden',     label: CATEGORY_LABELS.hidden },
   { key: 'partitions', label: CATEGORY_LABELS.partitions },
-  { key: 'entrance',   label: CATEGORY_LABELS.entrance },
 ]
 
 const active = ref<FilterKey>('all')
@@ -32,17 +31,15 @@ function selectAndScroll(key: FilterKey) {
 }
 
 /* Обложки для строки категорий — рендеры реальных работ (интерьер, скрытые
-   двери) и, там где готовых фотоотчётов ещё нет (перегородки, входные),
+   двери) и, там где готовых фотоотчётов ещё нет (перегородки),
    рендер модели из каталога — честнее пустого состояния фильтра. */
 const CATEGORY_COVERS: Record<WorkCategory, string> = {
   interior:   '/renders/portfolio/2026-03-12-urban-1-beton-antik-loft.webp',
   hidden:     '/renders/portfolio/2026-01-05-sekret-chernaya-kromka.webp',
   partitions: '/renders/alum-covers/3.webp',
-  entrance:   '/renders/portfolio/category-entrance.webp',
 }
 const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   partitions: '/partitions/',
-  entrance:   '/vhodnye-dveri/',
 }
 </script>
 
@@ -69,7 +66,7 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
     <!-- Строка категорий — квадратные образцы (снимок + подпись + счётчик),
          не постеры с градиентом: это навигация, а не витрина. -->
     <ul class="pf-cat-row" role="list">
-      <li v-for="key in (['interior','hidden','partitions','entrance'] as WorkCategory[])" :key="key">
+      <li v-for="key in (['interior','hidden','partitions'] as WorkCategory[])" :key="key">
         <a
           :href="CATEGORY_HREF[key]"
           class="pf-cat"

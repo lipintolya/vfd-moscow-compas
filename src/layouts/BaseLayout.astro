@@ -20,13 +20,17 @@ interface Props {
       2.5s на десктопе). Опционально: только для картинок, у которых
       есть заранее сгенерированный уменьшенный вариант. */
   preloadImageSrcset?: string
+  /** sizes для preloadImageSrcset — должен совпадать с sizes у самого <img>,
+      иначе браузер выберет для preload один вариант, а для картинки другой
+      и скачает оба. */
+  preloadImageSizes?: string
   /** ISO-дата публикации — только для ogType="article" (og:article:published_time) */
   publishedTime?: string
 }
 
 const {
   title        = 'Двери ВФД в ТЦ «Компас» — Салон дверей в Москве',
-  description  = 'Фирменный салон дверей и алюминиевых перегородок в ТЦ «Компас» (ул. Красная Сосна, 2А, 3 этаж): межкомнатные, скрытые и входные двери Владимирской фабрики дверей.',
+  description  = 'Фирменный салон дверей и алюминиевых перегородок в ТЦ «Компас» (ул. Красная Сосна, 2А, 3 этаж): межкомнатные и скрытые двери Владимирской фабрики дверей.',
   ogImage      = HERO_COVER_IMAGE,
   ogType       = 'website',
   noIndex      = false,
@@ -34,6 +38,7 @@ const {
   structuredData,
   preloadImage,
   preloadImageSrcset,
+  preloadImageSizes = '(max-width: 1023px) 100vw, 55vw',
   publishedTime,
 } = Astro.props
 
@@ -114,7 +119,7 @@ const structuredDataJson = structuredData
         href={preloadImage}
         fetchpriority="high"
         imagesrcset={preloadImageSrcset}
-        imagesizes={preloadImageSrcset ? '(max-width: 1023px) 100vw, 55vw' : undefined}
+        imagesizes={preloadImageSrcset ? preloadImageSizes : undefined}
       />
     )}
 

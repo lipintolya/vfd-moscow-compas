@@ -151,7 +151,7 @@ const renderLightbox = renderGallery
               отечественное производство, минималистичный дизайн, сборно-разборная конструкция.
             </p>
             <div class="flex gap-2.5 flex-wrap mt-5">
-              <a href={SITE.social.telegram} target="_blank" rel="noopener" class="btn btn-ghost">Получить расчёт</a>
+              <a href={`tel:${PHONE.raw}`} class="btn btn-ghost">Получить расчёт</a>
               <a href="/contacts/" class="btn btn-ghost">Контакты</a>
             </div>
           </div>
@@ -165,7 +165,7 @@ const renderLightbox = renderGallery
               <span class="block text-xs text-white/50 leading-snug mt-1">{s.desc}</span>
             </div>
             {s.cta && (
-              <a href={s.href} target="_blank" rel="noopener" class="pt-stat-cta mt-3">
+              <a href={s.href} class="pt-stat-cta mt-3">
                 {s.cta}
                 <IconArrowRight size={12} />
               </a>
@@ -499,12 +499,6 @@ const renderLightbox = renderGallery
       </div>
       <Downloads />
 
-      <p class="mt-8 text-center text-sm text-slate-600">
-        Хотите разобраться подробнее в видах и материалах?
-        <a href="/articles/alyuminievye-peregorodki-zonirovanie/" class="font-semibold text-secondary-700 hover:text-secondary-600 transition-colors">
-          Гид по зонированию алюминиевыми перегородками →
-        </a>
-      </p>
     </div>
   </section>
 
@@ -520,9 +514,10 @@ const renderLightbox = renderGallery
     <div class="container">
       <QuoteCta
         image="https://storage.yandexcloud.net/catalog-vfd/alum/rener-2.webp"
-        primaryHref={SITE.social.telegram}
+        primaryHref={`tel:${PHONE.raw}`}
+        primaryExternal={false}
         secondaryHref="/contacts/"
-        secondaryLabel="Написать нам"
+        secondaryLabel="Контакты"
       />
     </div>
   </section>

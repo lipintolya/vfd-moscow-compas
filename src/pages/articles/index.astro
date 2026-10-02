@@ -25,6 +25,7 @@ const breadcrumbSchema = {
   title="Статьи о дверях и ремонте — ВФД Москва"
   description="Полезные статьи о выборе дверей, покрытиях, монтаже и интерьере от специалистов салона ВФД в Москве."
   structuredData={[breadcrumbSchema]}
+  noIndex={articles.every(a => a.data.placeholder === true)}
 >
   <section class="section">
     <div class="container">

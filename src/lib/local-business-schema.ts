@@ -58,7 +58,7 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
         bestRating: '5',
       },
     } : {}),
-    sameAs: [SITE.social.vk, SITE.social.telegram, SITE.social.max, ...MAP_PROFILES],
+    sameAs: [SITE.social.telegram, ...MAP_PROFILES],
     ...overrides,
   }
 }

@@ -20,9 +20,7 @@ import {
 import { PHONE as SITE_PHONE, SITE } from '../../config/site'
 
 const PHONE = SITE_PHONE.raw
-const TG    = SITE.social.telegram
-const VK    = SITE.social.vk
-const MAX   = SITE.social.max
+const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
@@ -108,7 +106,7 @@ const plinthWork = PORTFOLIO_WORKS.find(w => w.id === '2026-09-27-belyy-plintus-
           пола или полотна, декоративные рейки для акцентных стен.
         </p>
         <div class="dc-hero__actions">
-          <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Получить расчёт</a>
+          <a href={CALL} class="btn btn-ghost">Получить расчёт</a>
           <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
         </div>
       </div>
@@ -298,14 +296,7 @@ const plinthWork = PORTFOLIO_WORKS.find(w => w.id === '2026-09-27-belyy-plintus-
           </p>
         </div>
         <div class="dc-cta__actions">
-          <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
           <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
-          <a href={VK} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в VK">
-            <img src="/icons/w_vk.webp" alt="" width="18" height="18" />
-          </a>
-          <a href={MAX} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в MAX">
-            <img src="/icons/w_max.webp" alt="" width="18" height="18" />
-          </a>
         </div>
       </div>
 

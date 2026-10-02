@@ -1,0 +1,386 @@
+---
+/**
+ * Первый экран главной.
+ *
+ * Сцена — интерьер на скруглённой подложке, поверх неё H1 и плавающая
+ * панель «Подбор двери»; под сценой три плитки с фактами о салоне.
+ *
+ * Панель — обычная GET-форма на /catalog/ с теми же параметрами, что
+ * каталог читает из URL (series / coating / color), поэтому работает и без
+ * JS. Скрипт ниже лишь отключает варианты, для которых нет моделей при уже
+ * выбранных фильтрах, и пишет число найденных моделей на кнопке.
+ *
+ * H1 — единственный на странице и несёт ключевой запрос («ВФД Москва»).
+ */
+import { SITE } from '../../config/site'
+import type { FinderData } from '../../data/home-finder'
+
+interface Props {
+  finder: FinderData
+  modelCount: number
+  minPrice: number | null
+}
+const { finder, modelCount, minPrice } = Astro.props
+
+const fmt = (n: number) => n.toLocaleString('ru-RU')
+const plural = (n: number) => {
+  const m10 = n % 10, m100 = n % 100
+  if (m10 === 1 && m100 !== 11) return 'модель'
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'модели'
+  return 'моделей'
+}
+
+const fields = [
+  { name: 'series',  label: 'Серия',    any: 'Любая',  options: finder.series },
+  { name: 'coating', label: 'Покрытие', any: 'Любое',  options: finder.coatings },
+  { name: 'color',   label: 'Цвет',     any: 'Любой',  options: finder.colors },
+]
+---
+
+<section class="hero" aria-labelledby="hero-heading">
+  <div class="container">
+    <div class="stage">
+      <img
+        class="stage__img"
+        src="/renders/hero/designers-hero.webp"
+        srcset="/renders/hero/designers-hero-960.webp 960w, /renders/hero/designers-hero.webp 1672w"
+        sizes="(min-width: 1280px) 1216px, 100vw"
+        alt="Интерьер со скрытой дверью ВФД заподлицо со стеной"
+        width="1672"
+        height="941"
+        fetchpriority="high"
+        decoding="async"
+      />
+
+      <div class="stage__copy">
+        <h1 id="hero-heading" class="stage__title">
+          ВФД Москва&nbsp;— двери в&nbsp;ТЦ&nbsp;«Компас»
+        </h1>
+        <p class="stage__lead">
+          Официальный дилер Владимирской фабрики дверей. Межкомнатные и&nbsp;скрытые
+          двери, алюминиевые перегородки — с&nbsp;замером и&nbsp;установкой.
+        </p>
+        <a href="/catalog/" class="h-pill h-pill--white stage__cta">
+          Смотреть каталог
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+
+      <div class="finder">
+        <nav class="finder__tabs" aria-label="Тип двери">
+          <span class="finder__tab is-active" aria-current="true">Межкомнатные</span>
+          <a href="/catalog/skrytye-dveri/" class="finder__tab">Скрытые</a>
+          <a href="/partitions/" class="finder__tab">Перегородки</a>
+        </nav>
+
+        <form class="finder__form" action="/catalog/" method="get" data-finder data-rows={JSON.stringify(finder.rows)}>
+          {fields.map((f) => (
+            <label class="field">
+              <span class="field__label">{f.label}</span>
+              <select name={f.name} class="field__select">
+                <option value="">{f.any}</option>
+                {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
+              </select>
+            </label>
+          ))}
+          <button type="submit" class="finder__submit" data-finder-submit>
+            Показать {modelCount} {plural(modelCount)}
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <ul class="tiles" role="list">
+      <li>
+        <a href="/catalog/" class="h-tile h-tile--light tile">
+          <span class="h-tile__corner h-arrow" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="h-num">{modelCount}</span>
+          <span class="h-cap">моделей межкомнатных дверей в&nbsp;каталоге</span>
+        </a>
+      </li>
+      {minPrice && (
+        <li>
+          <a href="/catalog/" class="h-tile h-tile--photo tile">
+            <img src="/renders/home/tehno-1.webp" alt="" loading="lazy" decoding="async" style="object-position: 50% 40%" />
+            <span class="h-num"><small>от</small>{fmt(minPrice)}&nbsp;₽</span>
+            <span class="h-cap">за полотно межкомнатной двери</span>
+          </a>
+        </li>
+      )}
+      <li>
+        <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-tile h-tile--dark tile">
+          <span class="tile__mark" aria-hidden="true">Компас</span>
+          <span class="h-num">{SITE.address.floor}</span>
+          <span class="h-cap">{SITE.address.mall}, {SITE.address.street}</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<script>
+  const plural = (n: number) => {
+    const m10 = n % 10, m100 = n % 100
+    if (m10 === 1 && m100 !== 11) return 'модель'
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'модели'
+    return 'моделей'
+  }
+
+  document.querySelectorAll<HTMLFormElement>('[data-finder]').forEach((form) => {
+    type Row = [string, string, string[]]
+    const rows: Row[] = JSON.parse(form.dataset.rows ?? '[]')
+    const selects = [...form.querySelectorAll('select')]
+    const submit = form.querySelector<HTMLButtonElement>('[data-finder-submit]')!
+
+    const fits = (row: Row, key: string, value: string) => {
+      if (!value) return true
+      if (key === 'series') return row[0] === value
+      if (key === 'coating') return row[1] === value
+      return row[2].includes(value)
+    }
+    const count = (skip?: string, key?: string, value?: string) =>
+      rows.filter((row) =>
+        selects.every((s) => s.name === skip || fits(row, s.name, s.value)) &&
+        (!key || fits(row, key, value!))
+      ).length
+
+    const update = () => {
+      for (const s of selects) {
+        for (const o of s.options) {
+          if (o.value) o.disabled = count(s.name, s.name, o.value) === 0
+        }
+      }
+      const n = count()
+      submit.textContent = n ? `Показать ${n} ${plural(n)}` : 'Нет подходящих моделей'
+      submit.disabled = n === 0
+    }
+
+    form.addEventListener('change', update)
+    // Пустые поля не попадают в URL: /catalog/?coating=emalex, а не ?series=&coating=emalex&color=
+    form.addEventListener('submit', () => {
+      for (const s of selects) s.disabled = !s.value
+    })
+    // После «назад» из каталога браузер восстанавливает выбор в форме
+    window.addEventListener('pageshow', () => {
+      for (const s of selects) s.disabled = false
+      update()
+    })
+  })
+</script>
+
+<style>
+  .hero { padding-top: clamp(0.5rem, 1.5vw, 1rem); }
+
+  /* ── Сцена ───────────────────────────────────────────── */
+  .stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: clamp(36rem, 46vw, 41rem);
+    overflow: hidden;
+    border-radius: 1.75rem;
+    background: var(--color-slate-800);
+    isolation: isolate;
+  }
+  .stage__img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% 50%;
+  }
+  /* Затемнение только под текстом (слева сверху) — для контраста белого
+     заголовка; правая часть кадра остаётся чистой. */
+  .stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(100deg, rgb(19 19 22 / 0.62) 0%, rgb(19 19 22 / 0.34) 38%, rgb(19 19 22 / 0) 66%),
+      linear-gradient(180deg, rgb(19 19 22 / 0.18) 0%, rgb(19 19 22 / 0) 40%);
+  }
+
+  .stage__copy {
+    max-width: 40rem;
+    padding: clamp(1.75rem, 4vw, 3.5rem);
+    color: #fff;
+  }
+  .stage__title {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: #fff;
+    text-wrap: balance;
+  }
+  .stage__lead {
+    margin: 1.125rem 0 0;
+    max-width: 26rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: rgb(255 255 255 / 0.82);
+  }
+  .stage__cta { margin-top: 1.75rem; }
+
+  /* ── Панель подбора ──────────────────────────────────── */
+  .finder {
+    margin: 0 clamp(0.75rem, 2.5vw, 2.5rem) clamp(0.75rem, 2.5vw, 2.5rem);
+    padding: 1.25rem clamp(1.25rem, 2vw, 1.75rem) clamp(1.25rem, 2vw, 1.5rem);
+    border-radius: 1.25rem;
+    background: #fff;
+    color: var(--h-ink);
+  }
+  .finder__tabs {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .finder__tab {
+    position: relative;
+    flex: none;
+    padding-bottom: 0.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-slate-400);
+    text-decoration: none;
+    transition: color 180ms var(--ease-out);
+  }
+  .finder__tab:hover { color: var(--h-ink); }
+  .finder__tab.is-active { color: var(--h-ink); }
+  .finder__tab.is-active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--h-ink);
+  }
+
+  .finder__form {
+    display: grid;
+    gap: 0;
+    margin-top: 0.75rem;
+  }
+  @media (min-width: 900px) {
+    .finder__form {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+      align-items: center;
+    }
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--h-rule);
+  }
+  @media (min-width: 900px) {
+    .field {
+      padding: 0.25rem 1.5rem;
+      border-bottom: 0;
+      border-left: 1px solid var(--h-rule);
+    }
+    .field:first-child { padding-left: 0; border-left: 0; }
+  }
+  .field__label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--h-muted);
+  }
+  .field__select {
+    width: 100%;
+    padding: 0 1.5rem 0 0;
+    border: 0;
+    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%239c9ca4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right center / 14px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--h-ink);
+    cursor: pointer;
+    appearance: none;
+    text-overflow: ellipsis;
+  }
+  .field__select:focus-visible { outline: 2px solid var(--color-secondary-500); outline-offset: 4px; border-radius: 4px; }
+
+  .finder__submit {
+    min-height: 3.25rem;
+    margin-top: 1rem;
+    padding: 0 1.5rem;
+    border: 0;
+    border-radius: 0.75rem;
+    background: var(--h-ink);
+    color: #fff;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 180ms var(--ease-out);
+  }
+  .finder__submit:hover { background: var(--color-slate-700); }
+  .finder__submit:disabled { background: var(--color-slate-300); cursor: default; }
+  @media (min-width: 900px) {
+    .finder__submit { margin: 0 0 0 1.5rem; min-width: 13.5rem; }
+  }
+
+  /* ── Плитки ──────────────────────────────────────────── */
+  .tiles {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Телефон: две плитки в ряд, «где мы» — на всю ширину */
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tiles > li:last-child { grid-column: 1 / -1; }
+  @media (min-width: 760px) {
+    .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--h-tile-gap); margin-top: var(--h-tile-gap); }
+    .tiles > li:last-child { grid-column: auto; }
+  }
+  .tile { min-height: 10.5rem; }
+
+  /* Крупное «Компас» еле заметным контуром — опознавательный знак ТЦ,
+     как вывеска; несёт смысл (где мы), а не просто декор. */
+  .tile__mark {
+    position: absolute;
+    top: 50%;
+    right: -0.5rem;
+    z-index: -1;
+    transform: translateY(-62%);
+    font-size: clamp(3.5rem, 6vw, 5.5rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: rgb(255 255 255 / 0.06);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* ── Мобильная сцена: кадр выше, панель под текстом ── */
+  @media (max-width: 759px) {
+    .tile { min-height: 8.5rem; }
+    .tile :global(.h-cap) { margin-top: 0.5rem; font-size: 0.8125rem; }
+  }
+  @media (max-width: 899px) {
+    .stage { min-height: 0; border-radius: 1.25rem; }
+    .stage__copy { padding-bottom: 11rem; }
+    .stage::before {
+      background: linear-gradient(180deg, rgb(19 19 22 / 0.6) 0%, rgb(19 19 22 / 0.3) 45%, rgb(19 19 22 / 0.05) 70%);
+    }
+    .stage__img { object-position: 50% 50%; }
+  }
+
+</style>

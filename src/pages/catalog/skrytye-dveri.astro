@@ -5,10 +5,8 @@ import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import ColorSelector      from '../../components/catalog/ColorSelector.vue'
 import InfoImageViewer    from '../../components/catalog/InfoImageViewer.vue'
 import WorksGallery      from '../../components/catalog/WorksGallery.vue'
-import PromoBanner       from '../../components/ui/PromoBanner.vue'
 import PhotoAutoplaySlider from '../../components/ui/PhotoAutoplaySlider.vue'
 import { INVISIBLE_WORKS } from '../../data/skrytye-dveri-works'
-import { PROMOS } from '../../data/promos'
 import { merchantPolicy } from '../../lib/contacts-data'
 import {
   IMAGES,
@@ -43,7 +41,6 @@ import {
 } from '../../data/skrytye-dveri-products'
 import { PHONE as SITE_PHONE, SITE } from '../../config/site'
 
-const secretPromo = PROMOS.find(p => p.id === 3)
 
 const REFLEX_CDN = 'https://storage.yandexcloud.net/vfd74ru/invisible/'
 const REFLEX_IMAGES = [
@@ -54,9 +51,7 @@ const REFLEX_IMAGES = [
 ]
 
 const PHONE = SITE_PHONE.raw
-const TG    = SITE.social.telegram
-const VK    = SITE.social.vk
-const MAX   = SITE.social.max
+const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
 
 const WORKS_LIMIT = 4
 const ARCHIVE_HREF = '/catalog/skrytye-dveri/raboty/'
@@ -143,7 +138,6 @@ const structuredData = canonicalUrl ? [
         { '@type': 'AdministrativeArea', name: 'Московская область' },
       ],
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-      shippingDetails:         merchantPolicy.shipping,
     },
   },
   {
@@ -164,7 +158,6 @@ const structuredData = canonicalUrl ? [
         { '@type': 'AdministrativeArea', name: 'Московская область' },
       ],
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-      shippingDetails:         merchantPolicy.shipping,
     },
   },
 ] : undefined
@@ -179,9 +172,6 @@ const structuredData = canonicalUrl ? [
   structuredData={structuredData}
 >
 
-  {secretPromo && (
-    <PromoBanner client:only="vue" promo={secretPromo} anchor="secret-prices" />
-  )}
 
   <div class="breadcrumb-bar">
     <div class="container">
@@ -216,7 +206,7 @@ const structuredData = canonicalUrl ? [
           в проём — снаружи только чистая плоскость.
         </p>
         <div class="sd-hero__actions">
-          <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Получить расчёт</a>
+          <a href={CALL} class="btn btn-ghost">Получить расчёт</a>
           <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
         </div>
       </div>
@@ -288,7 +278,7 @@ const structuredData = canonicalUrl ? [
                 </span>
               </div>
             </div>
-            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary sd-product__btn">
+            <a href={CALL} class="btn btn-primary sd-product__btn">
               Рассчитать стоимость
             </a>
           </div>
@@ -352,7 +342,7 @@ const structuredData = canonicalUrl ? [
                 </span>
               </div>
             </div>
-            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary sd-product__btn">
+            <a href={CALL} class="btn btn-primary sd-product__btn">
               Рассчитать стоимость
             </a>
           </div>
@@ -520,7 +510,7 @@ const structuredData = canonicalUrl ? [
                 <span class="sd-price-val">от {fmt(REFLEX_MIN_KIT_PRICE + REFLEX_TWO_SIDED_MIRROR_SURCHARGE)}</span>
               </div>
             </div>
-            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary sd-product__btn">
+            <a href={CALL} class="btn btn-primary sd-product__btn">
               Рассчитать стоимость
             </a>
           </div>
@@ -783,14 +773,8 @@ const structuredData = canonicalUrl ? [
             по Москве, проект, доставка и монтаж бригадой с гарантией.
           </p>
           <div class="sd-about__actions">
-            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary">Написать в Telegram</a>
+            <a href={CALL} class="btn btn-primary">Позвонить</a>
             <a href="/contacts/" class="btn btn-outline">Контакты</a>
-            <a href={VK} target="_blank" rel="noopener" class="btn btn-outline btn-icon" aria-label="Написать в VK">
-              <img src="/icons/b_vk_logo.webp" alt="" width="18" height="18" />
-            </a>
-            <a href={MAX} target="_blank" rel="noopener" class="btn btn-outline btn-icon" aria-label="Написать в MAX">
-              <img src="/icons/b_max_logo.webp" alt="" width="18" height="18" />
-            </a>
           </div>
         </div>
         <div class="sd-about__photo sd-about__photo--info">
@@ -823,7 +807,7 @@ const structuredData = canonicalUrl ? [
             карточек, кроме первой открытой за сессию: клик по фото 2-й/3-й/4-й
             работы просто ничего не делает (TypeError: insertBefore на null),
             без видимой ошибки для пользователя — баг был живым на проде. */}
-        <WorksGallery client:only="vue" works={INVISIBLE_WORKS} tgHref={TG} limit={WORKS_LIMIT} archiveHref={ARCHIVE_HREF} />
+        <WorksGallery client:only="vue" works={INVISIBLE_WORKS} ctaHref={CALL} limit={WORKS_LIMIT} archiveHref={ARCHIVE_HREF} />
       </div>
     </section>
   )}
@@ -851,14 +835,7 @@ const structuredData = canonicalUrl ? [
           </p>
         </div>
         <div class="sd-cta__actions">
-          <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
           <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
-          <a href={VK} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в VK">
-            <img src="/icons/w_vk.webp" alt="" width="18" height="18" />
-          </a>
-          <a href={MAX} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в MAX">
-            <img src="/icons/w_max.webp" alt="" width="18" height="18" />
-          </a>
         </div>
       </div>
 

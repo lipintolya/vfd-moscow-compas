@@ -16,6 +16,9 @@ const articles = defineCollection({
         SEO-лендингах этой серии для блока "Статья по теме": перелинковка
         каталог → блог, которой раньше не было (только блог → каталог). */
     relatedSeriesSlugs: z.array(z.string()).optional(),
+    /** Заглушка (PLACEHOLDER): статьи ещё нет — страница закрыта noindex,
+        не попадает в sitemap и в блоки «Статья по теме». */
+    placeholder: z.boolean().optional(),
   }),
 })
 

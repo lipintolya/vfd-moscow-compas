@@ -1,0 +1,188 @@
+---
+/**
+ * «Новинки и наличие» — заменяет четыре отдельных промо-блока (Техно, Штрих,
+ * «Секрет», «Рефлекс»). Композиция журнальная: главный материал слева,
+ * остальные — списком справа. Цены Техно/Штрих — пропы из index.astro
+ * (живой каталог), скрытых — из skrytye-dveri-products.
+ */
+import {
+  SECRET_MIN_BLADE_PRICE, SECRET_MIN_BLADE_PRICE_ORIGINAL, SECRET_PROMO_ACTIVE,
+  REFLEX_MIN_BLADE_PRICE,
+} from '../../data/skrytye-dveri-products'
+
+interface Props {
+  tehnoBlade: number | null
+  tehnoKit: number | null
+  shtrihHref: string | null
+  shtrihBlade: number | null
+}
+const { tehnoBlade, tehnoKit, shtrihHref, shtrihBlade } = Astro.props
+
+const fmt = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
+
+type Status = 'new' | 'stock'
+interface Row {
+  status: Status
+  statusText: string
+  title: string
+  text: string
+  image: string
+  alt: string
+  href: string
+  price: number | null
+  priceWas?: number
+}
+
+const rows: Row[] = [
+  ...(shtrihHref ? [{
+    status: 'stock' as const,
+    statusText: 'На складе',
+    title: 'Урбан Штрих 2А',
+    text: 'Эмалекс бежевый с чёрным молдингом, алюминиевая кромка',
+    image: '/renders/home/shtrih-2a-1.webp',
+    alt: 'Дверь Урбан Штрих 2А, Эмалекс бежевый с чёрным молдингом',
+    href: shtrihHref,
+    price: shtrihBlade,
+  }] : []),
+  {
+    status: 'stock',
+    statusText: 'В наличии',
+    title: 'Скрытые двери «Секрет»',
+    text: 'Заподлицо со стеной, под покраску или обои',
+    image: '/renders/home/secret-2.webp',
+    alt: 'Скрытая дверь «Секрет»',
+    href: '/catalog/skrytye-dveri/',
+    price: SECRET_MIN_BLADE_PRICE,
+    priceWas: SECRET_PROMO_ACTIVE ? SECRET_MIN_BLADE_PRICE_ORIGINAL : undefined,
+  },
+  {
+    status: 'new',
+    statusText: 'Новинка',
+    title: 'Скрытая дверь «Рефлекс»',
+    text: 'Зеркало во всю высоту полотна, до 2,5 м',
+    image: '/renders/home/reflex-1.webp',
+    alt: 'Скрытая дверь с зеркалом «Рефлекс»',
+    href: '/catalog/skrytye-dveri/#reflex',
+    price: REFLEX_MIN_BLADE_PRICE,
+  },
+]
+---
+
+<section class="h-sec h-sec--wall" aria-labelledby="insalon-heading">
+  <div class="container">
+    <header class="h-head">
+      <h2 id="insalon-heading" class="h-h2">Новинки и&nbsp;наличие</h2>
+      <p class="h-lead">Модели, которые можно забрать со склада без ожидания изготовления, и последние поступления фабрики.</p>
+    </header>
+
+    <div class="spread">
+      <a href="/catalog/series/tehno/" class="lead">
+        <span class="h-media lead__media">
+          <img src="/renders/home/tehno-1.webp" alt="Межкомнатная дверь серии «Техно», Эмалекс белый" width="1254" height="1254" loading="lazy" decoding="async" />
+        </span>
+        <span class="lead__body">
+          <span class="status h-meta" data-status="new">Новинка, Техно 1 белый на складе</span>
+          <span class="lead__title">Серия Техно</span>
+          <span class="h-body lead__text">Покрытие Эмалекс устойчиво к царапинам и сколам, не боится влажности и ультрафиолета. Сдержанный технологичный характер для современного интерьера.</span>
+          {tehnoBlade && (
+            <span class="lead__prices">
+              <span class="h-meta">Полотно <span class="h-price">{fmt(tehnoBlade)}</span></span>
+              {tehnoKit && <span class="h-meta">Комплект <span class="h-price">{fmt(tehnoKit)}</span></span>}
+            </span>
+          )}
+        </span>
+      </a>
+
+      <ul class="list" role="list">
+        {rows.map((r) => (
+          <li>
+            <a href={r.href} class="row">
+              <span class="h-media row__media">
+                <img src={r.image} alt={r.alt} loading="lazy" decoding="async" />
+              </span>
+              <span class="row__body">
+                <span class="status h-meta" data-status={r.status}>{r.statusText}</span>
+                <span class="h-h3 row__title">{r.title}</span>
+                <span class="h-meta row__text">{r.text}</span>
+                {r.price && (
+                  <span class="row__price">
+                    {r.priceWas && <s class="h-meta">{fmt(r.priceWas)}</s>}
+                    <span class="h-price">от {fmt(r.price)}</span>
+                  </span>
+                )}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .spread {
+    display: grid;
+    gap: 3rem var(--h-gutter);
+  }
+  @media (min-width: 1000px) {
+    .spread { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+    .lead { grid-column: 1 / span 7; }
+    .list { grid-column: 8 / span 5; }
+  }
+  @media (min-width: 1200px) {
+    .list { grid-column: 9 / span 4; }
+  }
+
+  /* Статус — цветная точка перед текстом: красная «новинка», голубая
+     «в наличии» (те же значения цветов, что у бейджей каталога). */
+  .status { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--h-ink); }
+  .status::before {
+    content: '';
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 50%;
+    background: var(--color-secondary-500);
+  }
+  .status[data-status='new']::before { background: var(--h-signal); }
+
+  /* ── Главный материал ── */
+  .lead { display: block; color: inherit; text-decoration: none; }
+  .lead__media { aspect-ratio: 5 / 4; }
+  .lead__media img, .row__media img { transition: transform 700ms var(--ease-out); }
+  .lead:hover .lead__media img, .row:hover .row__media img { transform: scale(1.025); }
+  .lead__body { display: flex; flex-direction: column; margin-top: 1.5rem; max-width: 36rem; }
+  .lead__title {
+    margin-top: 0.625rem;
+    font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .lead:hover .lead__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  .lead__text { margin-top: 0.75rem; }
+  .lead__prices { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; margin-top: 1rem; }
+  .lead__prices .h-price { margin-left: 0.25rem; font-size: 1rem; }
+
+  /* ── Список справа ── */
+  .list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--color-slate-300); }
+  .list li { border-bottom: 1px solid var(--color-slate-300); }
+  .row {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1.25rem;
+    padding-block: 1.5rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .row__media { aspect-ratio: 4 / 5; background: var(--color-slate-200); }
+  .row__body { display: flex; flex-direction: column; min-width: 0; }
+  .row__title { margin-top: 0.375rem; }
+  .row:hover .row__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+  .row__text { margin-top: 0.25rem; }
+  .row__price { display: flex; gap: 0.5rem; align-items: baseline; margin-top: auto; padding-top: 0.75rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lead__media img, .row__media img { transition: none; }
+    .lead:hover .lead__media img, .row:hover .row__media img { transform: none; }
+  }
+</style>

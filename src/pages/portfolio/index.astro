@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import PortfolioGrid from '../../components/portfolio/PortfolioGrid.vue'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
 import { PORTFOLIO_WORKS } from '../../data/portfolio-works'
-import { SITE } from '../../config/site'
+import { PHONE, SITE } from '../../config/site'
 
 const works = [...PORTFOLIO_WORKS].sort(
   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -21,7 +21,7 @@ const breadcrumbSchema = {
 
 <BaseLayout
   title="Наши работы — фотоотчёты монтажей дверей | ВФД Москва"
-  description="Фотоотчёты установки межкомнатных, скрытых, входных дверей и алюминиевых перегородок — реальные объекты салона ВФД по Москве и области."
+  description="Фотоотчёты установки межкомнатных и скрытых дверей и алюминиевых перегородок — реальные объекты салона ВФД по Москве и области."
   structuredData={[breadcrumbSchema]}
   noIndex={!SITE.features.portfolio}
 >
@@ -55,8 +55,9 @@ const breadcrumbSchema = {
           image="https://storage.yandexcloud.net/vfd74ru/works_prod/26.08.26_fenix2/2O_3moxea9jLTgH8uZbsCVECujmF4v2E8dAsl3IohqVkozfek8vkSMU-5ubzeHE-84tIMAWD5FI_0U8-suQqLLWL.webp"
           title="Понравился результат?"
           description="Все модели, которые видите на фото, в наличии в шоуруме — выбирайте по каталогу или приезжайте посмотреть вживую"
-          primaryHref={SITE.social.telegram}
-          primaryLabel="Написать в Telegram"
+          primaryHref={`tel:${PHONE.raw}`}
+          primaryLabel="Позвонить"
+          primaryExternal={false}
           secondaryHref="/catalog/"
           secondaryLabel="Смотреть каталог"
         />

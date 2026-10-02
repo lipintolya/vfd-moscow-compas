@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import type { InvisibleWork } from '../../data/skrytye-dveri-works'
 import WorkDetailCard from './WorkDetailCard.vue'
 
-defineProps<{ works: InvisibleWork[]; tgHref: string }>()
+defineProps<{ works: InvisibleWork[]; ctaHref: string }>()
 
 const openWork = ref<InvisibleWork | null>(null)
 
@@ -95,7 +95,7 @@ onUnmounted(() => {
                 </svg>
               </button>
             </div>
-            <WorkDetailCard :work="openWork" :tg-href="tgHref" />
+            <WorkDetailCard :work="openWork" :cta-href="ctaHref" />
           </div>
         </div>
       </Transition>

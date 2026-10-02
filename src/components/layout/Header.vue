@@ -10,24 +10,13 @@ const headerEl = ref<HTMLElement | null>(null)
 
 const LOGO_URL = '/svg/logo.svg'
 
+/* Единственная соцсеть салона — Telegram-канал (см. SITE.social) */
 const SOCIAL_NETWORKS = [
   {
-    name: 'VK',
-    label: 'ВКонтакте',
-    url: SITE.social.vk,
-    icon: '/icons/b_vk_logo.webp',
-  },
-  {
     name: 'Telegram',
-    label: 'Telegram',
+    label: 'Telegram-канал',
     url: SITE.social.telegram,
     icon: '/icons/b_tg_logo.webp',
-  },
-  {
-    name: 'MAX',
-    label: 'Max',
-    url: SITE.social.max,
-    icon: '/icons/b_max_logo.webp',
   },
 ] as const
 
@@ -35,10 +24,8 @@ const CONTACTS = {
   phones:  companyLegalInfo.contacts.phone,
   address: companyLegalInfo.address.postal,
   entrance: companyLegalInfo.address.entrance,
-  /** Будни/выходные — отдельные строки, а не одна склеенная через «·»:
-      на узкой карточке попапа она переносилась посередине слова, неровно. */
-  worktimeWeekdays: companyLegalInfo.workingHours.weekdays.label,
-  worktimeWeekend:  `Сб–Вс: ${companyLegalInfo.workingHours.saturday.opens}–${companyLegalInfo.workingHours.saturday.closes}`,
+  /** Салон работает ежедневно по одному графику — одна строка */
+  worktime: companyLegalInfo.workingHours.shortDisplay,
   email:   companyLegalInfo.contacts.email,
 }
 
@@ -54,18 +41,20 @@ const NAV_LINKS = [
 const CATALOG_DROPDOWN = [
   { href: '/catalog/',               label: 'Все двери',      desc: 'Межкомнатные' },
   { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери', desc: 'Скрытый монтаж' },
-  { href: '/vhodnye-dveri/',         label: 'Входные двери', desc: 'С монтажом' },
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
 ] as const
 
 const ABOUT_DROPDOWN = [
-  { href: '/about/',     label: 'О салоне',   desc: 'Адрес, реквизиты, руководство' },
+  { href: '/about/',     label: 'О салоне',   desc: 'Шоу-рум в ТЦ «Компас»' },
   { href: '/o-fabrike/', label: 'О фабрике',  desc: 'Производитель дверей ВФД' },
 ] as const
 
+/* Часы — из contacts-data (единственный источник), а не числами здесь:
+   раньше тут жил старый график 10–20/10–18, расходившийся с остальным сайтом. */
+const hourOf = (hhmm: string) => Number(hhmm.split(':')[0])
 const WORK_SCHEDULE = {
-  weekday: { open: 10, close: 20 }, // Пн-Пт: 10:00-20:00
-  weekend: { open: 10, close: 18 }, // Сб-Вс: 10:00-18:00
+  weekday: { open: hourOf(companyLegalInfo.workingHours.weekdays.opens), close: hourOf(companyLegalInfo.workingHours.weekdays.closes) },
+  weekend: { open: hourOf(companyLegalInfo.workingHours.saturday.opens), close: hourOf(companyLegalInfo.workingHours.saturday.closes) },
 } as const
 
 /* ============================================================
@@ -265,7 +254,7 @@ onUnmounted(() => {
       >
 
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-3 shrink-0 group" aria-label="ВФД в ТЦ «Компас» — главная">
+        <a href="/" class="flex items-center gap-3 shrink-0 group" :aria-label="`${SITE.studioName} — салон ВФД в ТЦ «Компас», главная`">
           <div class="relative w-9 h-9 flex items-center justify-center">
             <div
               v-if="!logoLoaded && !logoError"
@@ -300,7 +289,7 @@ onUnmounted(() => {
                    transition-colors duration-300 ease-in-out
                    group-hover:text-accent-600"
           >
-            ДВЕРИ В ТЦ «КОМПАС»
+            {{ SITE.studioName }}
           </span>
         </a>
 
@@ -493,7 +482,10 @@ onUnmounted(() => {
                                  transition-colors duration-200"
                         >
                           <img src="/icons/phone-call.webp" alt="" class="w-8 h-8 shrink-0" loading="eager" fetchpriority="high" />
-                          {{ p.label }}
+                          <span class="flex flex-col">
+                            {{ p.label }}
+                            <span class="text-xs font-medium text-slate-500">{{ p.title }}</span>
+                          </span>
                         </a>
                       </div>
                     </div>
@@ -510,8 +502,7 @@ onUnmounted(() => {
                       </div>
                       <div class="rounded-xl bg-slate-50 p-3.5">
                         <p class="text-[0.6875rem] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Часы работы</p>
-                        <p class="text-slate-800 leading-snug text-step-0">{{ CONTACTS.worktimeWeekdays }}</p>
-                        <p class="text-slate-500 leading-snug text-xs mt-0.5">{{ CONTACTS.worktimeWeekend }}</p>
+                        <p class="text-slate-800 leading-snug text-step-0">{{ CONTACTS.worktime }}</p>
                         <p
                           class="mt-3 border-t border-slate-200/80 pt-2.5 text-sm leading-snug"
                           aria-live="polite"
@@ -750,8 +741,7 @@ onUnmounted(() => {
               </div>
             </div>
             <p class="mt-3 flex flex-wrap gap-x-4 gap-y-0.5 border-t border-white/10 pt-2.5 text-xs text-white/45 tabular-nums">
-              <span>{{ CONTACTS.worktimeWeekdays }}</span>
-              <span>{{ CONTACTS.worktimeWeekend }}</span>
+              <span>{{ CONTACTS.worktime }}</span>
             </p>
           </div>
         </nav>

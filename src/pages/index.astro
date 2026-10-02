@@ -4,26 +4,21 @@
  * Header больше не нужен здесь — он подключён в BaseLayout.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
-import HeroSlider from '../components/home/HeroSlider.vue'
-import { HERO_COVER_IMAGE, HERO_COVER_IMAGE_SRCSET } from '../data/hero-image'
-import PromoStripBanner from '../components/home/PromoStripBanner.astro'
-import HiddenDoorsPromo from '../components/home/HiddenDoorsPromo.vue'
-import MirrorDoorPromo from '../components/home/MirrorDoorPromo.vue'
-import TehnoPromo from '../components/home/TehnoPromo.vue'
-import ShtrihPromo from '../components/home/ShtrihPromo.vue'
-import Features from '../components/home/Features.vue'
-import CatalogCategories from '../components/home/CatalogCategories.vue'
+import '../styles/home.css'
+import { HERO_COVER_IMAGE } from '../data/hero-image'
+import { buildFinder } from '../data/home-finder'
+import ShowroomHero from '../components/home/ShowroomHero.astro'
+import Directions from '../components/home/Directions.astro'
+import InSalon from '../components/home/InSalon.astro'
+import StepsRow from '../components/home/StepsRow.astro'
+import VisitBand from '../components/home/VisitBand.astro'
 import Promo from '../components/home/Promo.vue'
-import Reviews from '../components/home/Reviews.vue'
 import LatestArticles from '../components/home/LatestArticles.astro'
-import PortfolioPreview from '../components/portfolio/PortfolioPreview.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import { faqs } from '../components/home/faq-data'
-import HowWeWork from '../components/home/HowWeWork.astro'
 import { howToSchema } from '../data/how-it-works'
 import { getCatalogCards } from '../lib/catalog-data'
 import { calcKitPrice } from '../data/accessories'
-import { companyLegalInfo } from '../lib/contacts-data'
 import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
 import { PHONE, SITE } from '../config/site'
 
@@ -53,6 +48,12 @@ const shtrihKitPrice = shtrihCard?.price
   : null
 const shtrihHref = shtrihCard ? `/models/${shtrihCard.slug}/` : null
 
+/* Первый экран: панель подбора (см. home-finder.ts), число моделей и
+   минимальная цена межкомнатных — из того же запроса каталога. */
+const finder = buildFinder(catalogCards)
+const interiorPrices = catalogCards.map(c => c.price).filter((p): p is number => p != null)
+const interiorMinPrice = interiorPrices.length ? Math.min(...interiorPrices) : null
+
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -71,53 +72,86 @@ const localBusinessSchema = buildLocalBusiness()
 
 <BaseLayout
   title="ВФД Москва — салон дверей в ТЦ «Компас»"
-  description="ВФД Москва — фирменный салон в ТЦ «Компас» (ул. Красная Сосна, 2А): входные и межкомнатные двери, алюминиевые перегородки. Каталог и цены, бесплатный замер межкомнатных дверей при заказе, установка."
+  description="ВФД Москва — фирменный салон в ТЦ «Компас» (ул. Красная Сосна, 2А): межкомнатные и скрытые двери, алюминиевые перегородки. Каталог и цены, бесплатный замер межкомнатных дверей при заказе, установка."
   structuredData={[faqSchema, localBusinessSchema, howToSchema]}
-  preloadImage={HERO_COVER_IMAGE}
-  preloadImageSrcset={HERO_COVER_IMAGE_SRCSET}
+  preloadImage="/renders/hero/designers-hero.webp"
+  preloadImageSrcset="/renders/hero/designers-hero-960.webp 960w, /renders/hero/designers-hero.webp 1672w"
+  preloadImageSizes="(min-width: 1280px) 1216px, 100vw"
   ogImage={HERO_COVER_IMAGE}
 >
-  <HeroSlider client:load />
-  <HowWeWork />
-  <TehnoPromo bladePrice={tehnoBladePrice} kitPrice={tehnoKitPrice} client:visible />
-  <PromoStripBanner />
-  {shtrihHref && (
-    <ShtrihPromo modelHref={shtrihHref} bladePrice={shtrihBladePrice} kitPrice={shtrihKitPrice} client:visible />
-  )}
-  <HiddenDoorsPromo client:visible />
-  <MirrorDoorPromo client:visible />
-  <Features client:visible />
-  <CatalogCategories client:visible />
-  {SITE.features.reviews && <Reviews client:visible />}
-  {SITE.features.portfolio && <PortfolioPreview />}
-  <Promo client:idle />
-  <LatestArticles />
+  <div class="home">
+    <ShowroomHero finder={finder} modelCount={catalogCards.length} minPrice={interiorMinPrice} />
+    <Directions interiorMinPrice={interiorMinPrice} modelCount={catalogCards.length} />
+    <InSalon
+      tehnoBlade={tehnoBladePrice}
+      tehnoKit={tehnoKitPrice}
+      shtrihHref={shtrihHref}
+      shtrihBlade={shtrihBladePrice}
+    />
+    <StepsRow />
+    <VisitBand />
+    <Promo client:idle />
+    <LatestArticles />
 
-  <!-- padding-top у смежных .section обычно зануляется (см. global.css),
-       но LatestArticles перед этой секцией — сплошной bg-graphite, а не
-       карточка на белом: без своего отступа сверху белый фон FAQ упирался
-       прямо в чёрный край без миллиметра воздуха. Тот же фикс, что и в
-       LatestArticles.astro. -->
-  <section class="section bg-white pt-[clamp(2.5rem,4vw,3.5rem)]!">
-    <div class="container">
-      <FaqAccordion items={faqItems} />
-
-      <div class="mt-12 flex flex-col items-start gap-6 rounded-2xl bg-fg p-[clamp(2.5rem,5vw,4rem)] text-white sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 class="m-0 mb-2 text-2xl font-medium tracking-tight">Остались вопросы?</h3>
-          <p class="m-0 text-step-1 text-white/60">Свяжитесь с нами — поможем с выбором и проконсультируем.</p>
+    <section class="h-sec h-sec--tight-top" aria-label="Частые вопросы">
+      <div class="container">
+        <div class="faq">
+          <FaqAccordion items={faqItems} />
         </div>
-        <div class="flex shrink-0 flex-wrap gap-2.5">
-          <a href={SITE.social.telegram} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
-          <a href={`tel:${PHONE.raw}`} class="btn btn-ghost">Позвонить</a>
-          <a href={SITE.social.vk} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в VK">
-            <img src="/icons/w_vk.webp" alt="" width="18" height="18" />
-          </a>
-          <a href={SITE.social.max} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в MAX">
-            <img src="/icons/w_max.webp" alt="" width="18" height="18" />
-          </a>
+
+        <div class="ask">
+          <div>
+            <h2 class="h-h3">Не нашли ответ?</h2>
+            <p class="h-body ask__text">Позвоните — {SITE.contactPerson} подскажет по моделям, размерам и срокам.</p>
+          </div>
+          <div class="ask__actions">
+            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--ink">Позвонить {PHONE.label}</a>
+            <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-btn h-btn--quiet">Telegram-канал</a>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </BaseLayout>
+
+<style>
+  /* FAQ — журнальная раскладка: заголовок в левых 4 колонках,
+     вопросы — в правых 8. FaqAccordion отдаёт h2 и список соседями,
+     поэтому они сами становятся ячейками сетки. */
+  .faq {
+    display: grid;
+    gap: 1.5rem var(--h-gutter);
+    padding-top: var(--h-sec);
+    border-top: 1px solid var(--h-rule);
+  }
+  @media (min-width: 1000px) {
+    .faq { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+    .faq > :global(.faq-h2) { grid-column: 1 / span 4; }
+    .faq > :global(.faq-list) { grid-column: 5 / span 8; }
+  }
+  .faq > :global(.faq-h2) {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--h-ink);
+  }
+
+  .ask {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem 2rem;
+    margin-top: clamp(3rem, 6vw, 5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--h-rule);
+  }
+  @media (min-width: 1000px) {
+    .ask { margin-left: calc((100% + var(--h-gutter)) / 3); }
+  }
+  .ask__text { margin-top: 0.375rem; }
+  .ask__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+</style>

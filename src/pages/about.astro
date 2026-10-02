@@ -1,90 +1,150 @@
 ---
+/**
+ * /about/ — «О салоне».
+ *
+ * PLACEHOLDER: прежние тексты и фото были другого салона и удалены (см.
+ * историю git). Пока здесь заглушки текста и фото + реальные контакты из
+ * конфига. Страница закрыта noindex — снять вместе с наполнением.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro'
-import AboutSection from '../components/about/AboutSection.vue'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
-import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import { companyLegalInfo } from '../lib/contacts-data'
-import { localBusinessSchema as buildLocalBusiness, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
-import { SITE } from '../config/site'
+import { SITE, PHONE } from '../config/site'
 
-const title       = 'О салоне дверей ВФД в Москве — ТЦ «Компас»'
-const description = 'Салон дверей ВФД в ТЦ «Компас» — официальный дилер Владимирской фабрики дверей в Москве. 60+ моделей в выставочном зале, замер и монтаж.'
-const canonicalUrl = Astro.site ? new URL('/about/', Astro.site).href : undefined
+const title       = `О салоне — ${SITE.studioName}, ВФД в ТЦ «Компас»`
+const description = `${SITE.studioName} — шоу-рум Владимирской фабрики дверей в Москве: ${SITE.address.full}.`
 
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
-  { label: 'О нас' },
+  { label: 'О салоне' },
 ]
 
-const faq = [
-  {
-    q: 'Вы официальный дилер Владимирской фабрики дверей?',
-    a: 'Да. Салон ВФД в ТЦ «Компас» — фирменный салон, который работает с фабрикой напрямую, без посредников. Подробнее о самом производителе — на странице «О фабрике».',
-  },
-  ...(companyLegalInfo.activity.founded ? [{
-    q: 'С какого года работает салон?',
-    a: `Салон работает в Москве с ${companyLegalInfo.activity.founded} года.`,
-  }] : []),
-  {
-    q: 'Можно ли посмотреть двери вживую?',
-    a: `Да, в выставочном зале представлено более 60 моделей дверей, образцы покрытий и профилей перегородок. Адрес: ${SITE.address.full}. Работаем без выходных: ${companyLegalInfo.workingHours.shortDisplay}.`,
-  },
-  {
-    q: 'Какая гарантия на двери и монтаж?',
-    a: 'На монтажные работы — 12 месяцев, на сами двери и перегородки — по условиям производителя. С гарантийными вопросами обращайтесь напрямую в салон.',
-  },
-  {
-    q: 'Работаете ли вы с дизайнерами и юридическими лицами?',
-    a: 'Да. Для дизайнеров и архитекторов есть партнёрская программа, для юридических лиц и ИП — оплата по счёту безналичным расчётом.',
-  },
-]
-
-const storeSchema = buildLocalBusiness()
-
-const aboutPageSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'AboutPage',
-  name: title,
-  description,
-  url: canonicalUrl,
-  about: { '@id': LOCAL_BUSINESS_ID },
-}
-
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faq.map(f => ({
-    '@type': 'Question',
-    name: f.q,
-    acceptedAnswer: { '@type': 'Answer', text: f.a },
-  })),
-}
-
+const photoSlots = [1, 2, 3]
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  canonical={canonicalUrl}
-  ogImage={`${SITE.url}/renders/about/vfd-out-900.webp`}
-  structuredData={[storeSchema, aboutPageSchema, faqSchema]}
->
+<BaseLayout title={title} description={description} noIndex>
   <div class="breadcrumb-bar">
     <div class="container">
       <Breadcrumbs items={breadcrumbItems} />
     </div>
   </div>
 
-  <AboutSection client:visible />
-
   <section class="section">
     <div class="container">
-      <FaqAccordion items={faq} />
-      <p class="mt-6 text-sm text-slate-600">
-        Ещё по теме: <a href="/o-fabrike/" class="font-semibold text-secondary-700 hover:text-secondary-600">о фабрике-производителе</a>,
-        <a href="/designers/" class="font-semibold text-secondary-700 hover:text-secondary-600">партнёрская программа для дизайнеров</a>,
-        <a href="/contacts/" class="font-semibold text-secondary-700 hover:text-secondary-600">контакты и схема проезда</a>.
+      <header class="max-w-3xl">
+        <h1 class="t-h1 m-0">О салоне</h1>
+        <p class="t-lead mt-4 mb-0">{`${SITE.studioName} — шоу-рум Владимирской фабрики дверей в Москве, ${SITE.address.mall}, ${SITE.address.floor}.`}</p>
+      </header>
+
+      <!-- PLACEHOLDER: текст о салоне -->
+      <div class="about-ph about-ph--text mt-10">
+        <p class="m-0">Текст о салоне появится позже.</p>
+      </div>
+
+      <!-- PLACEHOLDER: фото салона -->
+      <ul class="about-photos" role="list">
+        {photoSlots.map(() => (
+          <li class="about-ph about-ph--photo">Фото салона</li>
+        ))}
+      </ul>
+
+      <!-- Реальные контакты — из src/config/site.ts и contacts-data.ts -->
+      <dl class="about-facts">
+        <div>
+          <dt>Адрес</dt>
+          <dd>
+            {SITE.address.street}<br />{SITE.address.mall}, {SITE.address.floor}
+            <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="about-link">Построить маршрут</a>
+          </dd>
+        </div>
+        <div>
+          <dt>Часы работы</dt>
+          <dd>{companyLegalInfo.workingHours.shortDisplay}</dd>
+        </div>
+        <div>
+          <dt>Телефон</dt>
+          <dd>
+            <a href={`tel:${PHONE.raw}`} class="about-link about-link--strong">{PHONE.label}</a>
+            <span class="about-note">{SITE.contactPerson}</span>
+          </dd>
+        </div>
+        <div>
+          <dt>Telegram-канал</dt>
+          <dd>
+            <a href={SITE.social.telegram} target="_blank" rel="noopener" class="about-link about-link--strong">{SITE.social.telegramHandle}</a>
+          </dd>
+        </div>
+      </dl>
+
+      <p class="mt-10 mb-0 text-sm text-slate-600">
+        Ещё по теме: <a href="/o-fabrike/" class="about-link">о фабрике-производителе</a>,{' '}<a href="/contacts/" class="about-link">контакты и схема проезда</a>.
       </p>
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .about-ph {
+    display: grid;
+    place-items: center;
+    border-radius: 1.25rem;
+    background: var(--color-slate-100);
+    color: var(--color-slate-500);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+  .about-ph--text { min-height: 10rem; padding: 2rem; }
+  .about-photos {
+    display: grid;
+    gap: 1rem;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 768px) {
+    .about-photos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  .about-ph--photo { aspect-ratio: 4 / 3; }
+
+  .about-facts {
+    display: grid;
+    gap: 0;
+    margin: 3rem 0 0;
+    border-top: 1px solid var(--color-slate-200);
+  }
+  @media (min-width: 900px) {
+    .about-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 0; }
+    .about-facts > div + div { border-left: 1px solid var(--color-slate-200); padding-left: 1.5rem; }
+  }
+  .about-facts > div {
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--color-slate-200);
+  }
+  @media (min-width: 900px) {
+    .about-facts > div { padding-block: 0; border-bottom: 0; }
+  }
+  .about-facts dt { font-size: 0.8125rem; color: var(--color-slate-500); }
+  .about-facts dd {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 0.375rem 0 0;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--color-ink);
+  }
+  .about-note { font-size: 0.875rem; font-weight: 400; color: var(--color-slate-500); }
+  .about-link {
+    width: fit-content;
+    color: var(--color-ink);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--color-slate-300);
+    text-underline-offset: 0.25em;
+  }
+  .about-link:hover { text-decoration-color: currentColor; }
+  .about-link--strong { font-size: 1.0625rem; font-weight: 500; text-decoration: none; }
+  .about-link--strong:hover { text-decoration: underline; }
+</style>

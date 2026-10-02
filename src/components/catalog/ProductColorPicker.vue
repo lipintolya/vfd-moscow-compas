@@ -19,7 +19,6 @@ import { calcKitPrice, BASE_KIT_DESCRIPTION } from '../../data/accessories'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { isMadeToOrder, isInStock } from '../../lib/made-to-order'
 import PriceCalculatorModal from './PriceCalculatorModal.vue'
-import { SITE } from '../../config/site'
 
 const props = defineProps<{
   colors:      ColorVariant[]
@@ -258,14 +257,8 @@ const shareModel = async () => {
 
     <!-- CTA -->
     <div class="color-picker__cta">
-      <a :href="SITE.social.telegram" target="_blank" rel="noopener" class="btn btn-primary">Написать в Telegram</a>
-      <a :href="SITE.social.vk" target="_blank" rel="noopener" class="btn btn-outline color-picker__social-btn" aria-label="Написать в VK">
-        <img src="/icons/b_vk_logo.webp" alt="" width="18" height="18" />
-      </a>
-      <a :href="SITE.social.max" target="_blank" rel="noopener" class="btn btn-outline color-picker__social-btn" aria-label="Написать в MAX">
-        <img src="/icons/b_max_logo.webp" alt="" width="18" height="18" />
-      </a>
-      <a :href="`tel:${phone.raw}`" class="btn btn-outline">
+      <!-- Связь — только звонок: у салона один Telegram-канал, писать в него нельзя -->
+      <a :href="`tel:${phone.raw}`" class="btn btn-primary">
         <svg class="color-picker__phone-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 0 1 2-2h2.28a1 1 0 0 1 .95.68l1.1 3.3a1 1 0 0 1-.44 1.18l-1.7 1a11.05 11.05 0 0 0 5.6 5.6l1-1.7a1 1 0 0 1 1.18-.44l3.3 1.1a1 1 0 0 1 .68.95V19a2 2 0 0 1-2 2h-1C9.72 21 3 14.28 3 6V5Z" />
         </svg>
@@ -615,11 +608,6 @@ const shareModel = async () => {
   flex: 0 0 auto;
   padding: 0.6rem;
 }
-.color-picker__social-btn {
-  flex: 0 0 auto;
-  padding: 0.6rem;
-}
-.color-picker__social-btn img { width: 1.1rem; height: 1.1rem; }
 .color-picker__share-btn svg { width: 1.1rem; height: 1.1rem; }
 .color-picker__share-tip {
   position: absolute;

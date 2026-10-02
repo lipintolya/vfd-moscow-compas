@@ -23,7 +23,7 @@ import {
 import { PHONE as SITE_PHONE, SITE } from '../../config/site'
 
 const PHONE = SITE_PHONE.raw
-const TG    = SITE.social.telegram
+const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
@@ -91,7 +91,6 @@ const structuredData = canonicalUrl ? [
       availability: 'https://schema.org/InStock',
       seller: { '@type': 'Organization', name: 'Салон дверей ВФД' },
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-      shippingDetails:         merchantPolicy.shipping,
     },
   },
 ] : undefined
@@ -128,7 +127,7 @@ const structuredData = canonicalUrl ? [
             по проекту дизайнера Екатерины Квашниной.
           </p>
           <div class="flex gap-2.5 flex-wrap">
-            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary">Обсудить проект</a>
+            <a href={CALL} class="btn btn-primary">Обсудить проект</a>
             <a href={`tel:${PHONE}`} class="btn btn-outline">Позвонить</a>
           </div>
         </div>
@@ -257,7 +256,6 @@ const structuredData = canonicalUrl ? [
             </p>
           </div>
           <div class="flex gap-2.5 flex-wrap">
-            <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
             <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
           </div>
         </div>

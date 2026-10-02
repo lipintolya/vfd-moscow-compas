@@ -4,9 +4,10 @@ import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import WorksGrid from '../../../components/catalog/WorksGrid.vue'
 import { INVISIBLE_WORKS } from '../../../data/skrytye-dveri-works'
 import { IMAGES } from '../../../data/skrytye-dveri-products'
-import { SITE } from '../../../config/site'
+import { PHONE } from '../../../config/site'
 
-const TG = SITE.social.telegram
+// «Хочу такой же результат» — звонок: у салона только Telegram-канал, написать в него нельзя
+const CALL = `tel:${PHONE.raw}`
 
 const pluralWorks = (n: number) => {
   const mod100 = n % 100
@@ -71,7 +72,7 @@ const structuredData = canonicalUrl ? [
       <p class="sd-p" style="margin-top: -0.75rem; margin-bottom: 1.75rem">
         Все объекты нашей бригады в Москве и Московской области — {INVISIBLE_WORKS.length} {pluralWorks(INVISIBLE_WORKS.length)} с фото монтажа. Нажмите на фото, чтобы посмотреть полную спецификацию.
       </p>
-      <WorksGrid client:load works={INVISIBLE_WORKS} tgHref={TG} />
+      <WorksGrid client:load works={INVISIBLE_WORKS} ctaHref={CALL} />
     </div>
   </section>
 

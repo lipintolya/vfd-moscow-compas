@@ -14,15 +14,16 @@ const director = companyLegalInfo.director
 const req      = companyLegalInfo.requisites
 
 const TG  = SITE.social.telegram
-const VK  = SITE.social.vk
-const MAX = SITE.social.max
 const ROUTE = SITE.address.mapUrl
 
-/* Сб и Вс сейчас по одному графику — одна строка «Сб–Вс», без дубля времени. */
+/* Одинаковый график всю неделю — одна строка «Ежедневно»; если выходные
+   разойдутся с буднями, строки разделятся сами. */
 const [weekdays, saturday, sunday] = getFormattedHours()
-const hours = saturday!.time === sunday!.time
-  ? [weekdays!, { day: 'Сб–Вс', time: saturday!.time }]
-  : [weekdays!, saturday!, sunday!]
+const hours = weekdays!.time === saturday!.time && saturday!.time === sunday!.time
+  ? [{ day: 'Ежедневно', time: weekdays!.time }]
+  : saturday!.time === sunday!.time
+    ? [weekdays!, { day: 'Сб–Вс', time: saturday!.time }]
+    : [weekdays!, saturday!, sunday!]
 
 /* Yandex-карта — тяжёлый сторонний iframe (свой JS + тайлы): до клика
    показываем статичный снимок карты с меткой салона (тот же, что в футере). */
@@ -40,8 +41,8 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
         <p class="t-eyebrow mb-3">Салон в ТЦ «Компас»</p>
         <h1 class="t-h1 mb-4">Контакты салона дверей ВФД в Москве</h1>
         <p class="m-0 mb-6 t-lead text-slate-600">
-          Позвоните, напишите в мессенджер или приезжайте в салон — покажем двери и перегородки
-          вживую и выедем на замер — по Москве бесплатно при оформлении заказа.
+          Позвоните или приезжайте в салон — покажем двери и перегородки вживую
+          и выедем на замер — по Москве бесплатно при оформлении заказа.
         </p>
 
         <div class="flex flex-wrap items-center gap-2.5">
@@ -56,13 +57,7 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
               </svg>
             </span>
           </a>
-          <a :href="TG" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Написать в Telegram</a>
-          <a :href="VK" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-icon" aria-label="Написать во ВКонтакте">
-            <img src="/icons/b_vk_logo.webp" alt="" width="18" height="18" />
-          </a>
-          <a :href="MAX" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-icon" aria-label="Написать в MAX">
-            <img src="/icons/b_max_logo.webp" alt="" width="18" height="18" />
-          </a>
+          <a :href="TG" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Telegram-канал {{ SITE.social.telegramHandle }}</a>
         </div>
       </header>
 
@@ -221,14 +216,14 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
 
           <article class="wtg-card wtg-card--2" style="--wtg-i: 1">
             <div class="wtg-card__body">
-              <h3 class="wtg-card__title">Бесплатный выезд на замер</h3>
+              <h3 class="wtg-card__title">Выезд на замер</h3>
               <div class="wtg-card__tags">
                 <span>Москва и область</span>
                 <span>Точные размеры</span>
-                <span>Без обязательств</span>
+                <span>Расчёт сметы</span>
               </div>
               <p class="wtg-card__text">
-                Мастер выезжает на объект, снимает точные размеры проёма и учитывает особенности стен — от этого зависят итоговая смета и корректность монтажа. Выезд бесплатный независимо от того, оформите вы заказ или нет.
+                Мастер выезжает на объект, снимает точные размеры проёма и учитывает особенности стен — от этого зависят итоговая смета и корректность монтажа. По Москве замер бесплатный при оформлении заказа, выезд за город — стоимость уточнит менеджер.
               </p>
             </div>
           </article>

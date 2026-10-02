@@ -36,12 +36,12 @@ export const companyLegalInfo = {
     fss_number: '',
   },
 
-  // Время работы — PLACEHOLDER, уточнить график ТЦ «Компас»
+  // Время работы салона — ежедневно 11:00–20:00
   workingHours: {
-    weekdays: { opens: '10:00', closes: '22:00', label: 'Пн–Пт: 10:00–22:00' },
-    saturday: { opens: '10:00', closes: '22:00', label: 'Сб: 10:00–22:00' },
-    sunday: { opens: '10:00', closes: '22:00', label: 'Вс: 10:00–22:00' },
-    shortDisplay: 'Ежедневно: 10:00–22:00',
+    weekdays: { opens: '11:00', closes: '20:00', label: 'Пн–Пт: 11:00–20:00' },
+    saturday: { opens: '11:00', closes: '20:00', label: 'Сб: 11:00–20:00' },
+    sunday: { opens: '11:00', closes: '20:00', label: 'Вс: 11:00–20:00' },
+    shortDisplay: 'Ежедневно: 11:00–20:00',
   },
 
   // Сведения о руководителе — PLACEHOLDER
@@ -58,7 +58,7 @@ export const companyLegalInfo = {
   activity: {
     founded: 0, // TODO: год открытия салона
     registered: '',
-    description: `${SITE.fullName}. Межкомнатные и входные двери, скрытые двери, алюминиевые перегородки — подбор, замер и монтаж ${SITE.city.in}.`,
+    description: `${SITE.fullName}. Межкомнатные и скрытые двери, алюминиевые перегородки — подбор, замер и монтаж ${SITE.city.in}.`,
     license: 'Торговля допускается без лицензии',
   },
 
@@ -71,17 +71,15 @@ export const companyLegalInfo = {
 
   // Рабочее время для поисковых систем (schema.org) — синхронно с workingHours
   schemaOrgHours: [
-    { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '10:00', closes: '22:00' },
+    { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
   ],
 
   // Способы оплаты
   paymentMethods: ['Наличные', 'Карты (Visa, MasterCard, Maestro)', 'Переводы через Сбербанк'],
 
-  // Социальные сети
+  // Социальные сети — только Telegram-канал (см. SITE.social)
   socialMedia: [
-    { name: 'VK', label: 'ВКонтакте', url: SITE.social.vk, icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/vk_logo.svg' },
-    { name: 'Telegram', label: 'Telegram', url: SITE.social.telegram, icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/tg_logo.svg' },
-    { name: 'MAX', label: 'Max', url: SITE.social.max, icon: 'https://storage.yandexcloud.net/catalog-vfd/svg/max-logo.svg' },
+    { name: 'Telegram', label: 'Telegram-канал', url: SITE.social.telegram, icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/tg_logo.svg' },
   ],
 
   // Дополнительная информация
@@ -94,10 +92,10 @@ export const companyLegalInfo = {
 }
 
 /**
- * Условия возврата и доставки для structured data (schema.org Offer) —
- * единый источник для всех Product/Offer JSON-LD на сайте (модели, входные
- * двери, скрытые двери). Актуально на 22.09.2026 — при изменении сроков/цен
- * обновить здесь, а не в каждой странице по отдельности.
+ * Условия возврата для structured data (schema.org Offer) — единый источник
+ * для всех Product/Offer JSON-LD на сайте (модели, скрытые двери).
+ * Доставка (shippingDetails) убрана: цены доставки по Москве пока не
+ * публикуются — вернуть сюда, когда салон утвердит тариф.
  */
 export const merchantPolicy = {
   /** Двери — товар, изготовленный по индивидуальному заказу (размер, цвет,
@@ -107,20 +105,6 @@ export const merchantPolicy = {
     '@type': 'MerchantReturnPolicy' as const,
     applicableCountry: 'RU',
     returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
-  },
-  /** Доставка по городу — фиксированная цена (PLACEHOLDER: тариф
-      перенесён из московского салона, уточнить московский). В schema
-      указан только городской тариф; условия за город — текстом на
-      странице/у менеджера. */
-  shipping: {
-    '@type': 'OfferShippingDetails' as const,
-    shippingRate: { '@type': 'MonetaryAmount' as const, value: 1000, currency: 'RUB' },
-    shippingDestination: { '@type': 'DefinedRegion' as const, addressCountry: 'RU', addressLocality: SITE.city.name },
-    deliveryTime: {
-      '@type': 'ShippingDeliveryTime' as const,
-      handlingTime: { '@type': 'QuantitativeValue' as const, minValue: 0, maxValue: 1, unitCode: 'DAY' },
-      transitTime:  { '@type': 'QuantitativeValue' as const, minValue: 42, maxValue: 56, unitCode: 'DAY' },
-    },
   },
 }
 

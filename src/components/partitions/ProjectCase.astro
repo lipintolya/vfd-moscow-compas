@@ -3,7 +3,7 @@ import PhotoSlider from './PhotoSlider.astro'
 import FeatureList from './FeatureList.astro'
 import IconTelegram from '../ui/icons/IconTelegram.astro'
 import type { ProjectCase } from '../../data/partitions'
-import { SITE } from '../../config/site'
+import { PHONE } from '../../config/site'
 
 interface Props {
   data:   ProjectCase
@@ -16,11 +16,8 @@ const badgeTone = {
   teal:  'bg-accent-50 text-accent-700 border-accent-100',
 }
 
-const socials = [
-  { href: SITE.social.vk,          icon: '/icons/w_vk.webp',      label: 'ВКонтакте' },
-  { href: SITE.social.telegram,            icon: '/svg/w_tg_logo.svg', label: 'Telegram' },
-  { href: SITE.social.max,  icon: '/icons/w_max.webp',     label: 'Max' },
-]
+/* «Заказать расчёт» — звонок: у салона только Telegram-канал, написать в него нельзя */
+const callHref = `tel:${PHONE.raw}`
 ---
 <section class="section bg-white">
   <div class="container">
@@ -61,13 +58,10 @@ const socials = [
           <div class="mt-auto pt-5 border-t border-slate-100">
             <p class="text-[0.6875rem] font-semibold uppercase tracking-widest mb-3 text-slate-400">Заказать расчёт проекта</p>
             <div class="flex gap-2 flex-wrap">
-              {socials.map(s => (
-                <a href={s.href} target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl no-underline text-step-0 font-semibold text-white bg-ink hover:opacity-90 transition-opacity duration-200">
-                  <img src={s.icon} alt="" width="15" height="15" aria-hidden="true" />
-                  {s.label}
-                </a>
-              ))}
+              <a href={callHref}
+                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl no-underline text-step-0 font-semibold text-white bg-ink hover:opacity-90 transition-opacity duration-200">
+                Позвонить {PHONE.label}
+              </a>
             </div>
           </div>
         )}

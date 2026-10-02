@@ -1,0 +1,127 @@
+---
+/**
+ * Три направления салона — бенто-сетка из фото-плиток (система .h-tile
+ * из src/styles/home.css, та же, что у плиток первого экрана).
+ *
+ * Межкомнатные — главная плитка на две строки слева; скрытые двери и
+ * перегородки — друг под другом справа. Цена «от» в плашке — из живых
+ * данных: каталог (проп из index.astro), скрытые — skrytye-dveri-products.
+ */
+import { SECRET_MIN_BLADE_PRICE } from '../../data/skrytye-dveri-products'
+
+interface Props {
+  interiorMinPrice: number | null
+  modelCount: number
+}
+const { interiorMinPrice, modelCount } = Astro.props
+
+const fmt = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
+
+const items = [
+  {
+    key: 'interior',
+    title: 'Межкомнатные двери',
+    text: `${modelCount} моделей: Эмалекс, эмаль, ПЭТ и экошпон — цвета и фурнитура под любой интерьер`,
+    chip: interiorMinPrice ? `от ${fmt(interiorMinPrice)}` : null,
+    image: 'https://storage.yandexcloud.net/vfd74ru/Main_page/left_bento/cover_doors.webp',
+    position: '50% 35%',
+    href: '/catalog/',
+  },
+  {
+    key: 'hidden',
+    title: 'Скрытые двери',
+    text: 'Полотно заподлицо со стеной, алюминиевый короб без наличников',
+    chip: `от ${fmt(SECRET_MIN_BLADE_PRICE)}`,
+    image: '/renders/home/secret-cover.webp',
+    position: '50% 50%',
+    href: '/catalog/skrytye-dveri/',
+  },
+  {
+    key: 'partitions',
+    title: 'Алюминиевые перегородки',
+    text: 'Стекло в алюминиевом профиле — проект, изготовление и монтаж под ключ',
+    chip: 'изготовление 45 дней',
+    image: 'https://storage.yandexcloud.net/catalog-vfd/catalog_preview/catalog-preview3.webp',
+    position: '50% 55%',
+    href: '/partitions/',
+  },
+]
+---
+
+<section class="h-sec" aria-labelledby="dir-heading">
+  <div class="container">
+    <header class="dir-head">
+      <div>
+        <h2 id="dir-heading" class="h-h2">Всё для проёма&nbsp;— в&nbsp;одном зале</h2>
+        <p class="h-lead dir-head__lead">
+          Двери и перегородки стоят в экспозиции: покрытия, фурнитуру и цвета
+          можно сравнить вживую.
+        </p>
+      </div>
+      <a href="/catalog/" class="h-pill h-pill--line">
+        Весь каталог
+        <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </header>
+
+    <ul class="bento" role="list">
+      {items.map((it) => (
+        <li class={`bento__cell bento__cell--${it.key}`}>
+          <a href={it.href} class="h-tile h-tile--photo dir">
+            <img src={it.image} alt="" loading="lazy" decoding="async" style={`object-position: ${it.position}`} />
+            {it.chip && <span class="h-tile__corner h-tile__corner--left h-chip">{it.chip}</span>}
+            <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true">
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <h3 class="h-tile__title">{it.title}</h3>
+            <span class="h-cap">{it.text}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .dir-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.25rem 2rem;
+    margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+  }
+  .dir-head__lead { margin-top: 0.875rem; max-width: 32rem; }
+
+  /* ── Бенто ──
+     Десктоп: 12 колонок × 2 строки. Межкомнатные — 7 колонок на обе
+     строки; скрытые двери и перегородки — по 5 колонок друг под другом. */
+  .bento {
+    display: grid;
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .bento__cell { display: grid; min-height: 15rem; }
+  .bento__cell--interior { min-height: 22rem; }
+
+  @media (min-width: 640px) {
+    .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bento__cell--interior { grid-column: 1 / -1; min-height: 26rem; }
+  }
+  @media (min-width: 1000px) {
+    .bento {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: repeat(2, clamp(16rem, 22vw, 19rem));
+    }
+    .bento__cell { min-height: 0; }
+    .bento__cell--interior   { grid-column: 1 / span 7; grid-row: 1 / span 2; min-height: 0; }
+    .bento__cell--hidden     { grid-column: 8 / span 5; grid-row: 1; }
+    .bento__cell--partitions { grid-column: 8 / span 5; grid-row: 2; }
+  }
+
+  /* Главная плитка — заголовок крупнее, на ступень заголовка секции */
+  .bento__cell--interior .h-tile__title { font-size: clamp(1.625rem, 2.8vw, 2.25rem); }
+  .bento__cell--interior .h-cap { max-width: 24rem; }
+</style>

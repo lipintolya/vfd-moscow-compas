@@ -1,0 +1,86 @@
+---
+/**
+ * «Приезжайте в салон» — адрес, часы, телефон и карта. Данные из конфига.
+ */
+import { SITE, PHONE } from '../../config/site'
+import { companyLegalInfo } from '../../lib/contacts-data'
+
+const hours = companyLegalInfo.workingHours
+---
+
+<section class="h-sec" aria-labelledby="visit-heading">
+  <div class="container visit">
+    <div class="visit__info">
+      <h2 id="visit-heading" class="h-h2">Приезжайте в&nbsp;салон</h2>
+      <p class="h-lead visit__lead">
+        Потрогайте покрытия, сравните цвета и фурнитуру, рассчитайте комплект
+        вместе с менеджером.
+      </p>
+
+      <dl class="visit__data">
+        <div>
+          <dt class="h-meta">Адрес</dt>
+          <dd>{SITE.address.street}<br />{SITE.address.mall}, {SITE.address.floor}</dd>
+        </div>
+        <div>
+          <dt class="h-meta">Часы работы</dt>
+          <dd>{hours.shortDisplay}</dd>
+        </div>
+        <div>
+          <dt class="h-meta">Телефон</dt>
+          <dd><a href={`tel:${PHONE.raw}`} class="h-link">{PHONE.label}</a></dd>
+        </div>
+      </dl>
+
+      <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-btn h-btn--ink visit__btn">Построить маршрут</a>
+    </div>
+
+    <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-media visit__map" aria-label="Открыть салон на Яндекс Картах">
+      <img
+        src="/renders/footer-map.webp"
+        alt={`Карта: ${SITE.address.full}`}
+        width="650"
+        height="450"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+  </div>
+</section>
+
+<style>
+  .visit {
+    display: grid;
+    gap: 3rem var(--h-gutter);
+    align-items: center;
+  }
+  @media (min-width: 1000px) {
+    .visit { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .visit__info { grid-column: 1 / span 5; }
+    .visit__map { grid-column: 7 / span 6; }
+  }
+  .visit__lead { margin-top: 1.25rem; }
+
+  .visit__data { margin: 2.5rem 0 0; border-top: 1px solid var(--h-rule); }
+  .visit__data > div {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: var(--h-gutter);
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--h-rule);
+  }
+  .visit__data dt { padding-top: 0.125rem; }
+  .visit__data dd {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.45;
+    font-variant-numeric: tabular-nums;
+  }
+  .visit__btn { margin-top: 2rem; }
+  .visit__map { aspect-ratio: 650 / 450; }
+
+  @media (max-width: 479px) {
+    .visit__data > div { grid-template-columns: 1fr; gap: 0.25rem; }
+  }
+</style>

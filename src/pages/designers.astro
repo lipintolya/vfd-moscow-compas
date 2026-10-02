@@ -7,7 +7,7 @@ import ProcessSteps from '../components/partitions/ProcessSteps.astro'
 import { PHONE as SITE_PHONE, SITE } from '../config/site'
 
 const PHONE = SITE_PHONE.raw
-const TG    = SITE.social.telegram
+const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
 
 /* ════════════════════════════════════════════════════════════
    ИЗОБРАЖЕНИЯ
@@ -28,7 +28,7 @@ const CATALOG_HREF = 'https://crm.vfd.ru/~W8Bcr'
    карточка ~400px CSS-ширины (grid-cols-3). */
 const crossLinks = [
   {
-    title: 'Межкомнатные и входные двери',
+    title: 'Межкомнатные двери',
     desc: '60+ моделей в выставочном зале, эмаль/ПЭТ/полипропилен, бесплатный замер при заказе',
     image: '/renders/designers/cross-doors.webp',
     href: '/catalog/',
@@ -285,7 +285,7 @@ const structuredData = canonicalUrl ? [
             и платим бонус за каждый реализованный проект.
           </p>
           <div class="flex gap-2.5 flex-wrap">
-            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary">Стать партнёром</a>
+            <a href={CALL} class="btn btn-primary">Стать партнёром</a>
             <a href={CATALOG_HREF} target="_blank" rel="noopener" class="btn btn-outline">Получить каталог</a>
           </div>
         </div>

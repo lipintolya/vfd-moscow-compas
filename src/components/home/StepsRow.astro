@@ -1,0 +1,53 @@
+---
+/**
+ * «Как мы работаем» — четыре шага (нумерация оправдана: это реальная
+ * последовательность). Текст тот же, что в HowTo-разметке (howItWorksSteps).
+ * Единственный тёмный блок главной.
+ */
+import { howItWorksSteps } from '../../data/how-it-works'
+---
+
+<section class="h-sec steps" aria-labelledby="steps-heading">
+  <div class="container">
+    <header class="h-head">
+      <h2 id="steps-heading" class="h-h2 steps__h2">Как мы работаем</h2>
+      <p class="h-lead steps__lead">От выбора модели до установки — без посредников и субподрядчиков.</p>
+    </header>
+
+    <ol class="steps__list" role="list">
+      {howItWorksSteps.map((s) => (
+        <li class="step">
+          <span class="step__num" aria-hidden="true">{s.num}</span>
+          <h3 class="h-h3 step__title">{s.title}</h3>
+          <p class="h-body step__text">{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .steps { background: var(--color-slate-900); }
+  .steps__h2 { color: #fff; }
+  .steps__lead { color: var(--color-slate-400); }
+
+  .steps__list {
+    display: grid;
+    gap: 2.5rem var(--h-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 700px) { .steps__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1100px) { .steps__list { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .step { padding-top: 1.25rem; border-top: 1px solid var(--color-slate-700); }
+  .step__num {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-slate-400);
+  }
+  .step__title { margin-top: 2.5rem; color: #fff; }
+  .step__text { margin-top: 0.75rem; max-width: 24rem; font-size: 0.9375rem; color: var(--color-slate-300); }
+</style>

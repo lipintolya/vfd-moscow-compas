@@ -33,6 +33,7 @@ const activePromos = PROMOS
             <li>
               <div class="pa-card">
                 <div class="pa-image-wrap">
+                  {promo.image ? (
                   <img
                     src={promo.image}
                     srcset={promo.imageSrcset}
@@ -44,12 +45,16 @@ const activePromos = PROMOS
                     height="288"
                     class="pa-image"
                   />
+                  ) : (
+                    <span class="pa-noimg">Фото акции</span>
+                  )}
                   {promo.discount && <span class="pa-badge">{promo.discount}</span>}
                 </div>
                 <div class="pa-content">
                   <h2 class="pa-card-title">{promo.title}</h2>
                   <p class="pa-card-subtitle">{promo.subtitle}</p>
                   <p class="pa-card-desc">{promo.description}</p>
+                  {!promo.placeholder && (
                   <div class="pa-card-footer">
                     <time datetime={promo.validUntil} class="pa-card-date">
                       До {formatDate(promo.validUntil)} · {getDaysLeft(promo.validUntil)} дн.
@@ -63,6 +68,7 @@ const activePromos = PROMOS
                       </a>
                     )}
                   </div>
+                  )}
                 </div>
               </div>
             </li>
@@ -136,6 +142,16 @@ const activePromos = PROMOS
   height: 18rem;
   overflow: hidden;
   background: var(--color-slate-100);
+}
+.pa-noimg {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--color-slate-100);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-slate-500);
 }
 .pa-image {
   width: 100%;

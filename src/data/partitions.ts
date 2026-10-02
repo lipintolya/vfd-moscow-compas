@@ -1,4 +1,4 @@
-import { SITE } from '../config/site'
+import { PHONE } from '../config/site'
 /* ============================================================
    Данные страницы «Перегородки»
    Контент отделён от вёрстки — добавление кейсов/блоков
@@ -37,7 +37,7 @@ export interface ProjectCase {
   featureSize?: 'md' | 'sm'             // плотность буллетов (по умолчанию sm)
   noteHtml?:  string                    // допускает <strong>
   attribution?: { href: string; label: string }
-  social?:    boolean                   // блок соцсетей (VK/TG/Max)
+  social?:    boolean                   // блок «Заказать расчёт» (кнопка звонка)
   images:     SlideImage[]
 }
 
@@ -51,7 +51,7 @@ export const imgs = {
 export const heroStats = [
   { val: '45',  lbl: 'дней изготовление', desc: 'С момента согласования до монтажа' },
   { val: '3',   lbl: 'типа направляющих', desc: '1, 2 или 3 трека на выбор' },
-  { val: '13+', lbl: 'цветов профиля',    desc: 'Порошковые и анодированные', cta: 'Рассчитать', href: SITE.social.telegram },
+  { val: '13+', lbl: 'цветов профиля',    desc: 'Порошковые и анодированные', cta: 'Рассчитать', href: `tel:${PHONE.raw}` },
 ]
 
 /* ── Раздвижные системы — типы направляющих ─────────────── */

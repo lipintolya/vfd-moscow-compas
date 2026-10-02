@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import type { InvisibleWork } from '../../data/skrytye-dveri-works'
 
-const props = defineProps<{ work: InvisibleWork; tgHref: string }>()
+const props = defineProps<{ work: InvisibleWork; ctaHref: string }>()
 
 type Spec = { label: string; value: string }
 
@@ -204,7 +204,7 @@ onUnmounted(() => {
         <p v-if="work.story" class="mb-0 mt-4 text-sm leading-relaxed text-slate-600" itemprop="description">
           {{ work.story }}
         </p>
-        <a :href="tgHref" target="_blank" rel="noopener" class="btn btn-primary mt-5 self-start">
+        <a :href="ctaHref" class="btn btn-primary mt-5 self-start">
           Хочу такой же результат
         </a>
       </div>

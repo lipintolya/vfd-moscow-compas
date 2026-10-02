@@ -390,15 +390,6 @@ astro-island:has(> .section) + .section,
   padding-top: clamp(1rem, 2vw, 1.5rem);
 }
 
-/* Промо-строка на главной зажата между двумя .section — те уже дают
-   свой padding-top/bottom (по clamp(2.5rem,4vw,3.5rem) с каждой стороны),
-   поэтому сама строка без вертикальных отступов, иначе они складываются
-   и зазор после неё становится заметно больше, чем перед ней. */
-.promo-strip-wrap {
-  padding-top:    0;
-  padding-bottom: 0;
-}
-
 /* ── Buttons ── */
 .btn {
   display: inline-flex;

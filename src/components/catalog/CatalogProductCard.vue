@@ -45,7 +45,7 @@ const activeSwatchUnavailable = computed(() => activeSwatch.value?.available ===
 
 const selectSwatch = (idx: number) => { activeSwatchIdx.value = idx }
 
-/* Свайп по фото листает цвета — тот же паттерн, что в HeroSlider/EntranceDoorShowcase.
+/* Свайп по фото листает цвета — тот же паттерн свайпа по фото, что и в других галереях сайта.
    Порог 40px: реальный свайп (>40px) браузер сам не превращает в click по
    растянутой ссылке карточки (стандартная эвристика тач-жестов), поэтому
    тап по фото по-прежнему открывает товар, а свайп — просто меняет цвет.

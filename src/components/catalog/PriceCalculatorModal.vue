@@ -7,7 +7,7 @@ import {
   WC_PRICE, WC_LABEL, WC_QTY, WC_IMAGES,
   type HingeType, type HardwareImages,
 } from '../../data/hardware'
-import { SITE } from '../../config/site'
+import { PHONE, SITE } from '../../config/site'
 
 /* ============================================================
    mounted — гейт для Teleport ниже, прокинут пропом от родителя
@@ -92,16 +92,10 @@ const lines = computed<Line[]>(() => {
 const total = computed(() => props.bladePrice + lines.value.reduce((sum, l) => sum + l.total, 0))
 
 /* ============================================================
-   "Отправить запрос" — бэкенда нет, поэтому собираем расчёт текстом
-   и открываем мессенджер с готовым сообщением. Telegram поддерживает
-   ?text= — подставляется прямо в диалог. У VK/MAX такого URL-параметра
-   нет (для VK проверяли оба диплинка, vk.me/<screen_name> и
-   vk.ru/write-<id> — ни один текст не подставляет; официальный способ —
-   JS-виджет CommunityMessages, отдельный скрипт, не стали тащить ради
-   этого). Поэтому для всех трёх кнопок клик ещё и копирует текст расчёта
-   в буфер — в Telegram это просто подстраховка (вдруг ?text= не сработает
-   в конкретном браузере), а для VK/MAX это единственный способ передать
-   готовый текст: пользователь открывает диалог и вставляет вручную.
+   Текст расчёта — бэкенда нет, мессенджера для заявок у салона тоже
+   (есть только Telegram-канал). Расчёт собирается текстом, его можно
+   скопировать в буфер, чтобы продиктовать или переслать менеджеру
+   при звонке.
    ============================================================ */
 const calcMessage = computed(() => {
   const parts: string[] = [
@@ -115,12 +109,13 @@ const calcMessage = computed(() => {
   return parts.join('\n')
 })
 
-const telegramHref = computed(() => `${SITE.social.telegram}?text=${encodeURIComponent(calcMessage.value)}`)
-const vkHref  = SITE.social.vk
-const maxHref = SITE.social.max
+/* Отправить расчёт в мессенджер нельзя: у салона только Telegram-канал.
+   Поэтому — звонок менеджеру и копирование текста расчёта (чтобы
+   продиктовать или переслать). */
+const callHref = `tel:${PHONE.raw}`
 
 /** Best-effort — если буфер недоступен (нет разрешения/старый браузер),
-    просто ничего не происходит, переход по ссылке всё равно сработает. */
+    просто ничего не происходит. */
 const copied = ref(false)
 let copiedTimer: ReturnType<typeof setTimeout> | null = null
 const copyCalcMessage = () => {
@@ -305,35 +300,17 @@ onUnmounted(() => {
               </p>
 
               <div class="calc-send">
-                <p class="calc-send__label">Отправить запрос менеджеру</p>
+                <p class="calc-send__label">Обсудить расчёт с менеджером — {{ SITE.contactPerson }}</p>
                 <div class="calc-send__row">
-                  <a
-                    :href="telegramHref" target="_blank" rel="noopener"
-                    class="calc-send__btn" aria-label="Отправить запрос в Telegram"
-                    @click="copyCalcMessage"
-                  >
-                    <img src="/icons/b_tg_logo.webp" alt="" width="20" height="20" />
-                    Telegram
+                  <a :href="callHref" class="calc-send__btn" :aria-label="`Позвонить: ${PHONE.label}`">
+                    Позвонить {{ PHONE.label }}
                   </a>
-                  <a
-                    :href="vkHref" target="_blank" rel="noopener"
-                    class="calc-send__btn" aria-label="Написать в VK (текст расчёта скопируется в буфер)"
-                    @click="copyCalcMessage"
-                  >
-                    <img src="/icons/b_vk_logo.webp" alt="" width="20" height="20" />
-                    VK
-                  </a>
-                  <a
-                    :href="maxHref" target="_blank" rel="noopener"
-                    class="calc-send__btn" aria-label="Написать в MAX (текст расчёта скопируется в буфер)"
-                    @click="copyCalcMessage"
-                  >
-                    <img src="/icons/b_max_logo.webp" alt="" width="20" height="20" />
-                    MAX
-                  </a>
+                  <button type="button" class="calc-send__btn" @click="copyCalcMessage">
+                    Скопировать расчёт
+                  </button>
                 </div>
-                <p class="calc-send__hint" :class="{ 'calc-send__hint--copied': copied }">
-                  {{ copied ? 'Текст расчёта скопирован — вставьте в сообщение' : 'Текст расчёта скопируется в буфер — вставьте в сообщение' }}
+                <p class="calc-send__hint" :class="{ 'calc-send__hint--copied': copied }" aria-live="polite">
+                  {{ copied ? 'Текст расчёта скопирован' : 'Расчёт можно скопировать, чтобы переслать или продиктовать по телефону' }}
                 </p>
               </div>
             </div>
@@ -599,6 +576,9 @@ onUnmounted(() => {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-slate-800);
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
   transition: border-color 150ms ease, transform 150ms ease;
 }
 .calc-send__btn:hover {

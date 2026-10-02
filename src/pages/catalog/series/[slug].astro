@@ -40,9 +40,7 @@ const paletteColors = await getColorsByCoatingSlug(series.coatingSlug, series.sl
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
 const PHONE = SITE_PHONE.raw
-const TG    = SITE.social.telegram
-const VK    = SITE.social.vk
-const MAX   = SITE.social.max
+const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
 
 const canonicalUrl = Astro.site ? new URL(`/catalog/series/${series.slug}/`, Astro.site).href : undefined
 
@@ -124,7 +122,6 @@ const structuredData = canonicalUrl ? [
                 availability:            'https://schema.org/InStoreOnly',
                 seller:                  { '@type': 'Organization', name: 'Салон дверей ВФД' },
                 hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-                shippingDetails:         merchantPolicy.shipping,
               },
             }
           : {}),
@@ -172,7 +169,7 @@ const structuredData = canonicalUrl ? [
         </h1>
         {spec.tagline && <p class="sr-hero__tagline">{spec.tagline}</p>}
         <div class="sr-hero__actions">
-          <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Получить расчёт</a>
+          <a href={CALL} class="btn btn-ghost">Получить расчёт</a>
           <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
         </div>
       </div>
@@ -406,14 +403,7 @@ const structuredData = canonicalUrl ? [
           <p class="sr-cta__lead">Замер, расчёт стоимости и монтаж — в шоуруме в ТЦ «Компас».</p>
         </div>
         <div class="sr-cta__actions">
-          <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
           <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
-          <a href={VK} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в VK">
-            <img src="/icons/w_vk.webp" alt="" width="18" height="18" />
-          </a>
-          <a href={MAX} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в MAX">
-            <img src="/icons/w_max.webp" alt="" width="18" height="18" />
-          </a>
         </div>
       </div>
     </div>

@@ -55,15 +55,25 @@ export const SITE = {
     mapUrl: 'https://yandex.ru/maps/?pt=37.6792174,55.8509296&z=17&l=map',
   },
 
+  /** Название в шапке сайта рядом с логотипом ВФД */
+  studioName: 'Студия Зизевского',
+
+  /** Контактное лицо салона — подпись к основному телефону */
+  contactPerson: 'Константин Зизевский',
+
   phones: [
-    { raw: '+70000000000', label: '+7 (000) 000-00-00', title: 'Основной номер' }, // PLACEHOLDER
+    { raw: '+79687748820', label: '+7 (968) 774-88-20', title: 'Константин Зизевский' },
   ],
   email: 'info@domain-placeholder.example',
 
+  /** Единственная соцсеть салона — Telegram-КАНАЛ (не личный чат):
+      «Владимирская Фабрика Дверей. Шоу-рум в Москве, ул. Красная Сосна, 2А,
+      ТЦ «Компас», 3 этаж». Написать в канал нельзя, поэтому кнопки
+      «написать/отправить расчёт» на сайте ведут на телефон, а канал —
+      это ссылка «Telegram-канал». ВК и MAX у салона нет. */
   social: {
-    telegram: 'https://t.me/TELEGRAM_PLACEHOLDER',
-    vk:       'https://vk.com/VK_PLACEHOLDER',
-    max:      'https://max.ru/MAX_PLACEHOLDER',
+    telegram: 'https://t.me/zizekos_studio',
+    telegramHandle: '@zizekos_studio',
   },
 
   /** Разделы, которые появляются на сайте, когда в них есть данные.

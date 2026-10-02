@@ -5,7 +5,7 @@ import WorkDetailCard from './WorkDetailCard.vue'
 
 const props = defineProps<{
   works: InvisibleWork[]
-  tgHref: string
+  ctaHref: string
   limit?: number
   archiveHref?: string
 }>()
@@ -17,7 +17,7 @@ const hasMore = computed(() => !!props.archiveHref && hiddenCount.value > 0)
 
 <template>
   <div class="flex flex-col gap-10 sm:gap-14">
-    <WorkDetailCard v-for="work in featured" :key="work.id" :work="work" :tg-href="tgHref" />
+    <WorkDetailCard v-for="work in featured" :key="work.id" :work="work" :cta-href="ctaHref" />
 
     <div v-if="hasMore" class="flex justify-center">
       <a :href="archiveHref" class="btn btn-outline">

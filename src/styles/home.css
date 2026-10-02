@@ -1,0 +1,309 @@
+/* ============================================================
+   ГЛАВНАЯ — дизайн-система «Экспозиция»
+   Подключается только из src/pages/index.astro.
+
+   Принципы
+   1. Товар — главное изображение: интерьеры с дверями ВФД и реальные
+      модели каталога, без абстрактных картинок «для настроения».
+   2. Текст не лежит на фото — подпись под изображением, как табличка
+      у образца в зале. Исключение — сцена первого экрана и плитки под
+      ней: там затемнение только под текстом, ради контраста, а не декора.
+   3. Линейки — только для данных. 1px slate-200 разделяет адрес/часы,
+      шаги, строки списка; рамок и теней у блоков нет.
+   4. Красный — одно целевое действие на экран (кнопка). Ссылки —
+      графитовые, подчёркивание на hover; голубой — только фокус.
+   5. Цифры — табличные: цены и часы не «прыгают» в колонках.
+
+   Шрифт — одна гарнитура Manrope (уже грузится сайтом): иерархия
+   строится размером, весом и трекингом, а не сменой гарнитур.
+   Шкала — 13·15·16·19·21·28·40·48: H1 48, H2 40, заголовок плитки 28,
+   H3 21. Заголовки — вес 500 и плотный трекинг, крупные цифры — 300.
+   Интерлиньяж уменьшается с ростом кегля.
+   Сетка — 12 колонок контейнера сайта, межколонник 24px (между плитками
+   16px); вертикальный ритм — шаг 8px, секции 64–104px.
+   Форма — скругления по уровню вложенности: сцена 28px, плитка 20px,
+   поле/кнопка в плитке 12px, пилюли и иконки — полностью круглые.
+   ============================================================ */
+
+.home {
+  --h-wall:   var(--color-slate-100);
+  --h-paper:  #ffffff;
+  --h-ink:    var(--color-slate-900);
+  --h-muted:  var(--color-slate-500);
+  --h-soft:   var(--color-slate-600);
+  --h-rule:   var(--color-slate-200);
+  --h-signal: var(--color-accent-500);
+
+  --h-gutter: 1.5rem;
+  --h-sec:    clamp(4rem, 7vw, 6.5rem);
+  --h-radius: 6px;
+  --h-tile-radius: 1.25rem;
+  --h-tile-gap: 1rem;
+  /* Затемнение под текстом на фото — только снизу, где лежит подпись */
+  --h-scrim: linear-gradient(0deg, rgb(19 19 22 / 0.72) 0%, rgb(19 19 22 / 0.38) 50%, rgb(19 19 22 / 0.06) 85%);
+
+  --h-font: var(--font-sans);
+
+  font-family: var(--h-font);
+  color: var(--h-ink);
+  background: var(--h-paper);
+}
+
+/* ── Секция и шапка секции ─────────────────────────────── */
+.h-sec { padding-block: var(--h-sec); }
+.h-sec--wall { background: var(--h-wall); }
+.h-sec--tight-top { padding-top: 0; }
+
+/* Шапка секции: заголовок слева (7 колонок), пояснение справа
+   выровнено по нижней линии заголовка. */
+.h-head {
+  display: grid;
+  gap: 1rem var(--h-gutter);
+  align-items: end;
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+@media (min-width: 900px) {
+  .h-head { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .h-head > :first-child { grid-column: 1 / span 7; }
+  .h-head > :nth-child(2) { grid-column: 9 / span 4; }
+}
+
+/* ── Типографские роли ─────────────────────────────────── */
+.h-h2,
+.h-h3 {
+  margin: 0;
+  font-family: var(--h-font);
+  color: var(--h-ink);
+}
+.h-h2 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);    /* 28 → 40, на ступень ниже H1 */
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.h-h3 {
+  font-size: 1.3125rem;                      /* 21 */
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+.h-lead {
+  margin: 0;
+  max-width: 34em;
+  font-size: clamp(1.0625rem, 1.4vw, 1.1875rem); /* 17 → 19 */
+  line-height: 1.6;
+  color: var(--h-soft);
+  text-wrap: pretty;
+}
+.h-body {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--h-soft);
+  text-wrap: pretty;
+}
+.h-meta {
+  font-size: 0.8125rem;                      /* 13 */
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--h-muted);
+  font-variant-numeric: tabular-nums;
+}
+.h-price {
+  font-weight: 600;
+  color: var(--h-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Действия ──────────────────────────────────────────── */
+.h-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding: 0 1.75rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.h-btn--signal { background: var(--h-signal); color: #fff; }
+.h-btn--signal:hover { background: var(--color-accent-600); }
+.h-btn--ink { background: var(--h-ink); color: #fff; }
+.h-btn--ink:hover { background: var(--color-slate-700); }
+.h-btn--quiet { border-color: var(--color-slate-300); color: var(--h-ink); }
+.h-btn--quiet:hover { border-color: var(--h-ink); }
+
+.h-link {
+  color: var(--h-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-slate-300);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  transition: text-decoration-color 180ms var(--ease-out);
+}
+.h-link:hover { text-decoration-color: currentColor; }
+
+.home :is(a, button):focus-visible {
+  outline: 2px solid var(--color-secondary-500);
+  outline-offset: 3px;
+}
+
+/* ── Медиа ─────────────────────────────────────────────── */
+.h-media {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--h-radius);
+  background: var(--h-wall);
+}
+.h-media > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Пилюля и круглая кнопка-стрелка ───────────────────── */
+.h-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.125rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.h-pill--white { background: #fff; color: var(--h-ink); }
+.h-pill--white:hover { background: var(--color-slate-100); }
+.h-pill--line { border-color: var(--color-slate-300); color: var(--h-ink); }
+.h-pill--line:hover { border-color: var(--h-ink); }
+.h-pill svg { flex: none; }
+
+/* Стрелка поворачивается на hover родителя-ссылки (.h-tile) */
+.h-arrow {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--h-ink);
+  color: #fff;
+  transition: transform 220ms var(--ease-out);
+}
+.h-arrow--white { background: #fff; color: var(--h-ink); }
+
+/* Плашка-«стекло» поверх фото: цена, срок. Высота = .h-arrow, чтобы
+   плашка и стрелка в верхних углах плитки стояли на одной линии. */
+.h-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 2.25rem;
+  padding: 0 0.875rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.9);
+  color: var(--h-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+}
+
+/* ── Плитка ────────────────────────────────────────────────
+   Три вида: --light (серая подложка), --photo (фото + затемнение
+   снизу, текст белый), --dark (графит). Содержимое прижато к низу;
+   угловые элементы (.h-tile__corner) — абсолютно в правом верхнем углу. */
+.h-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  padding: clamp(1.125rem, 2vw, 1.75rem);
+  overflow: hidden;
+  border-radius: var(--h-tile-radius);
+  text-decoration: none;
+  isolation: isolate;
+}
+.h-tile__corner {
+  position: absolute;
+  top: clamp(0.875rem, 1.4vw, 1.25rem);
+  right: clamp(0.875rem, 1.4vw, 1.25rem);
+}
+.h-tile__corner--left { right: auto; left: clamp(0.875rem, 1.4vw, 1.25rem); }
+.h-tile:hover .h-arrow { transform: rotate(45deg); }
+
+.h-tile--light { background: var(--h-wall); color: var(--h-ink); }
+.h-tile--dark  { background: var(--color-slate-900); color: #fff; }
+.h-tile--photo { background: var(--color-slate-700); color: #fff; }
+.h-tile--photo > img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms var(--ease-out);
+}
+.h-tile--photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--h-scrim);
+}
+.h-tile--photo:hover > img { transform: scale(1.04); }
+
+/* Крупная цифра плитки — лёгкий вес, «от» и единицы мельче */
+.h-num {
+  font-size: clamp(1.875rem, 3.6vw, 3.25rem);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+.h-num small {
+  margin-right: 0.3em;
+  font-size: 0.45em;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+/* Заголовок плитки-раздела */
+.h-tile__title {
+  margin: 0;
+  font-family: var(--h-font);
+  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: inherit;
+}
+.h-cap {
+  margin-top: 0.625rem;
+  max-width: 19rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--h-soft);
+}
+.h-tile--photo .h-cap { color: rgb(255 255 255 / 0.82); }
+.h-tile--dark .h-cap  { color: var(--color-slate-400); }
+
+@media (prefers-reduced-motion: reduce) {
+  .h-arrow, .h-tile--photo > img { transition: none; }
+  .h-tile:hover .h-arrow { transform: none; }
+  .h-tile--photo:hover > img { transform: none; }
+}
