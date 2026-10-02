@@ -1,0 +1,157 @@
+---
+/**
+ * src/components/catalog/StyleCategoryLanding.astro
+ *
+ * Шаблон SEO-лендингов /catalog/<slug> по стилю интерьера (см.
+ * src/data/style-categories.ts — там же объяснение источника серий).
+ * Карточки отбираются по членству seriesSlug в category.seriesSlugs, либо,
+ * если у категории задан colorFilter (напр. «скандинавский стиль» = белый
+ * цвет + Эмалекс/Эмаль), тем же принципом substring-матча по цвету, что и
+ * ColorCategoryLanding.astro — см. комментарии там же.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../ui/Breadcrumbs.astro'
+import FaqAccordion from '../ui/FaqAccordion.astro'
+import CatalogClient from './CatalogClient.vue'
+import type { StyleCategory } from '../../data/style-categories'
+import type { CatalogCardItem } from './types'
+
+interface Props {
+  category: StyleCategory
+  cards: CatalogCardItem[]
+}
+
+const { category, cards } = Astro.props
+
+const colorFilter = category.colorFilter
+const matchesColor = (name: string) =>
+  colorFilter ? colorFilter.colorKeywords.some(kw => name.toLowerCase().includes(kw.toLowerCase())) : false
+
+/* Тот же приём, что в ColorCategoryLanding: переставляем совпавший цвет на
+   первое место, чтобы превью карточки показывало именно тот оттенок, из-за
+   которого она попала в подборку, а не дефолтный colorSwatches[0]. */
+const withMatchedColorFirst = (card: CatalogCardItem): CatalogCardItem => {
+  const idx = card.colorSwatches.findIndex(s => s.available && matchesColor(s.name))
+  const fallbackIdx = idx !== -1 ? idx : card.colorSwatches.findIndex(s => matchesColor(s.name))
+  if (fallbackIdx <= 0) return card
+
+  const swatch = card.colorSwatches[fallbackIdx]!
+  const reordered = [
+    swatch,
+    ...card.colorSwatches.slice(0, fallbackIdx),
+    ...card.colorSwatches.slice(fallbackIdx + 1),
+  ]
+  return {
+    ...card,
+    colorSwatches: reordered,
+    photo: swatch.photo || card.photo,
+    price: swatch.available === false ? card.price : (swatch.price ?? card.price),
+    colorName: swatch.name,
+    colorHex: swatch.hex,
+  }
+}
+
+const matchedCards = colorFilter
+  ? cards
+      .filter(c => colorFilter.coatingSlugs.includes(c.coatingSlug) && c.colorNames.some(matchesColor))
+      .map(withMatchedColorFirst)
+  : cards.filter(c => category.seriesSlugs.includes(c.seriesSlug))
+
+/* Фильтры — только из уже отобранной подборки. */
+const allSeries = [...new Map(
+  matchedCards.filter(c => c.seriesSlug).map(c => [c.seriesSlug, { label: c.series, value: c.seriesSlug }])
+).values()]
+const allCoatings = [...new Map(
+  matchedCards.filter(c => c.coatingSlug).map(c => [c.coatingSlug, { label: c.coating, value: c.coatingSlug }])
+).values()]
+const allColors = [...new Map(
+  matchedCards.flatMap(c => c.colorSwatches.filter(s => s.available && (!colorFilter || matchesColor(s.name)))
+    .map(s => [s.name, { label: s.name, value: s.name, color: s.hex }] as const))
+).values()]
+
+const canonicalUrl = Astro.site ? new URL(`/catalog/${category.slug}/`, Astro.site).href : undefined
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Каталог', href: '/catalog/' },
+  { label: category.h1 },
+]
+
+const structuredData = canonicalUrl ? [
+  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: category.h1,
+    description: category.metaDescription,
+    url: canonicalUrl,
+    numberOfItems: matchedCards.length,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: category.faq.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+] : undefined
+---
+
+<BaseLayout
+  title={category.metaTitle}
+  description={category.metaDescription}
+  canonical={canonicalUrl}
+  structuredData={structuredData}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <div class="section bg-white" style="padding-bottom: 0">
+    <div class="container">
+      <header class="max-w-2xl mb-8 md:mb-10">
+        <p class="t-eyebrow mb-3">{category.eyebrow}</p>
+        <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">{category.h1}</h1>
+        <p class="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">{category.intro}</p>
+      </header>
+
+      {allSeries.length > 0 && (
+        <div class="mb-8 md:mb-10">
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">Серии в подборке</p>
+          <ul class="flex flex-wrap gap-2.5" role="list">
+            {allSeries.map(s => (
+              <li class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
+                {s.label}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <div class="section bg-white" id="catalog-title">
+    <div class="container">
+      <CatalogClient
+        client:load
+        cards={matchedCards}
+        series={allSeries}
+        coatings={allCoatings}
+        colors={allColors}
+        initialSeries=""
+        initialCoating=""
+        initialColor=""
+      />
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <FaqAccordion items={category.faq} />
+    </div>
+  </section>
+</BaseLayout>

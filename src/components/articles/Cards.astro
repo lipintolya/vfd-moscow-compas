@@ -1,0 +1,23 @@
+---
+// Сетка карточек во всю ширину контейнера. Число колонок подстраивается само.
+interface Props {
+  min?: number   // мин. ширина карточки в px (по умолчанию 240)
+}
+const { min = 240 } = Astro.props
+---
+
+<div class="dcards" style={`--min:${min}px`}>
+  <slot />
+</div>
+
+<style>
+.dcards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--min), 100%), 1fr));
+  gap: 1rem;
+  margin: 1.75rem 0;
+}
+@media (min-width: 640px) {
+  .dcards { gap: 1.25rem; }
+}
+</style>

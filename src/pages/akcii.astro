@@ -1,0 +1,210 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { PROMOS } from '../data/promos'
+import { isPromoActive, getDaysLeft, formatDate } from '../lib/promo-dates'
+
+const activePromos = PROMOS
+  .filter(p => isPromoActive(p.validUntil))
+  .sort((a, b) => a.validUntil.localeCompare(b.validUntil))
+---
+
+<BaseLayout
+  title="Акции и специальные предложения — ВФД на Кашириных"
+  description="Все текущие акции и специальные предложения салона дверей ВФД на Кашириных в Челябинске."
+>
+  <div class="pa-page">
+    <div class="container">
+
+      <header class="pa-header">
+        <p class="t-eyebrow mb-3">Акции</p>
+        <h1 class="pa-title">Все акции</h1>
+        <p class="pa-lede">
+          Завершённые акции смотрите в <a href="/promo-archive/">архиве</a>.
+        </p>
+      </header>
+
+      {activePromos.length === 0 ? (
+        <div class="pa-empty">
+          <p>Сейчас активных акций нет. Следите за обновлениями.</p>
+        </div>
+      ) : (
+        <ul class="pa-grid" role="list">
+          {activePromos.map((promo, index) => (
+            <li>
+              <div class="pa-card">
+                <div class="pa-image-wrap">
+                  <img
+                    src={promo.image}
+                    srcset={promo.imageSrcset}
+                    sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                    alt={promo.title}
+                    loading={index < 3 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    width="600"
+                    height="288"
+                    class="pa-image"
+                  />
+                  {promo.discount && <span class="pa-badge">{promo.discount}</span>}
+                </div>
+                <div class="pa-content">
+                  <h2 class="pa-card-title">{promo.title}</h2>
+                  <p class="pa-card-subtitle">{promo.subtitle}</p>
+                  <p class="pa-card-desc">{promo.description}</p>
+                  <div class="pa-card-footer">
+                    <time datetime={promo.validUntil} class="pa-card-date">
+                      До {formatDate(promo.validUntil)} · {getDaysLeft(promo.validUntil)} дн.
+                    </time>
+                    {promo.ctaText && (
+                      <a href={promo.ctaLink || '#'} class="pa-card-cta">
+                        {promo.ctaText}
+                        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+.pa-page {
+  padding: 3rem 0 5rem;
+}
+.pa-header {
+  max-width: 42rem;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+.pa-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+.pa-lede {
+  margin-top: 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #475569;
+}
+.pa-lede a {
+  color: #0d9488;
+  text-decoration: underline;
+}
+.pa-lede a:hover { color: #0f766e; }
+.pa-empty {
+  padding: 5rem 0;
+  text-align: center;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 1.5rem;
+}
+.pa-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@media (min-width: 640px) {
+  .pa-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .pa-grid { grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+}
+.pa-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+.pa-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 18rem;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+.pa-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pa-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #0d9488;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.pa-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.25rem 1.5rem;
+}
+.pa-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.pa-card-subtitle {
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0d9488;
+}
+.pa-card-desc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #64748b;
+}
+.pa-card-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+.pa-card-date {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+.pa-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #0d9488;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+.pa-card-cta:hover { color: #0f766e; }
+.pa-card-cta svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+.pa-card-cta:hover svg { transform: translateX(2px); }
+</style>

@@ -1,0 +1,677 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Design tokens → Tailwind utilities (text-ink, bg-ink, …)
+   Семантические алиасы для часто используемых значений,
+   чтобы не плодить «магические» hex в разметке.
+   ============================================================ */
+@theme {
+  /* Semantic color tokens → Tailwind utilities (text-accent, bg-accent, …) */
+  --color-ink:          #0f172a;  /* = slate-900 — заголовки, тёмные плашки */
+  --color-body:         #374151;  /* = gray-700 — основной текст */
+  --color-accent:       #14b8a6;  /* = teal-500 — акцент */
+  --color-accent-hover: #0d9488;  /* = teal-600 — hover акцента */
+  --color-accent-light: #ccfbf1;  /* = teal-100 — лёгкий фон акцента */
+  --color-fg:           #212124;  /* почти чёрный — иконки */
+  --color-graphite:      #18181a; /* тёмные плашки/карточки на светлом фоне —
+     единый тон для всех "тёмных бенто"-карточек по сайту (hero, Features,
+     Reviews, ContactsSection, ProcessSteps, PromoStripBanner) и фона тёмных
+     секций (LatestArticles), было 3 близких хардкод-значения
+     (#18181a/#1A191C/#0B0B0C) в разных компонентах */
+  --color-graphite-card: #232227; /* карточка НА тёмной секции (на тон
+     светлее --color-graphite) — LatestArticles, hover #28272C задан рядом
+     в компоненте (одноразовый, не токенизируем) */
+  --color-fg-muted:     #6b7280;  /* = gray-500 — приглушённый текст */
+  --color-fg-subtle:    #9ca3af;  /* = gray-400 — очень приглушённый */
+  --color-surface:      #ffffff;  /* белый фон карточек */
+  --color-border:       #e5e7eb;  /* = gray-200 — границы */
+
+  /* Брейкпоинт под широкие/ультраширокие мониторы (1920px+) — Tailwind из
+     коробки останавливается на 2xl (1536px), выше контент просто центрируется
+     с растущими пустыми полями. Даёт утилиту `3xl:` и участвует в .container
+     ниже (там же и используется — единственное место, где это число живёт
+     во второй раз). */
+  --breakpoint-3xl: 1920px;
+
+  /* Типографическая шкала → утилиты text-step-0 … text-step-6.
+     Одна лестница на весь сайт. clamp() живёт здесь, в ступени, а не
+     в разметке: иначе каждый заголовок заводит свою формулу
+     (text-[clamp(2rem,4.5vw,3rem)], text-[clamp(1.375rem,3vw,1.875rem)]…)
+     и системы не остаётся. Веса задаются классами .t-* ниже. */
+  --text-step-0: 0.8125rem;                          /* 13 — подписи, мета */
+  --text-step-1: 0.9375rem;                          /* 15 — вторичный текст */
+  --text-step-2: 1.0625rem;                          /* 17 — основной текст */
+  --text-step-3: 1.25rem;                            /* 20 */
+  --text-step-4: clamp(1.375rem, 2.2vw, 1.625rem);   /* 22 → 26 */
+  --text-step-5: clamp(1.75rem, 3.4vw, 2.25rem);     /* 28 → 36 */
+  --text-step-6: clamp(2.125rem, 4.6vw, 3.25rem);    /* 34 → 52 */
+  --text-step-7: clamp(2.25rem, 5vw, 3.75rem);       /* 36 → 60 — display,
+     флагманские hero (/partitions). Страница намеренно набрана крупнее
+     остального сайта; ступень существует, чтобы это решение жило в шкале,
+     а не рукописным clamp в разметке. */
+}
+
+@font-face {
+  font-family: 'Manrope Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/manrope-cyrillic-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Manrope Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/manrope-cyrillic-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: 'Manrope Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/manrope-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* Шрифтовая пара: Rubik (display) — заголовки h1-h6,
+   Manrope — весь остальной текст. Диапазон весов 400-900 — сайт не
+   использует заголовки легче font-medium(500) (у Rubik есть 300, но он
+   не нужен). Заменяет Golos Text (снят с продакшена по решению заказчика,
+   изначально был запрошен TT Norms Pro — платный шрифт без доступных
+   файлов, Rubik выбран как ближайшая бесплатная замена под кириллицу). */
+@font-face {
+  font-family: 'Rubik Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('/fonts/rubik-cyrillic-ext-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Rubik Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('/fonts/rubik-cyrillic-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+}
+@font-face {
+  font-family: 'Rubik Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('/fonts/rubik-latin-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+/* ============================================================
+   VFD DESIGN SYSTEM — CSS Custom Properties
+   ============================================================ */
+:root {
+  /* Brand colours */
+  --color-accent:       #14b8a6;
+  --color-accent-hover: #0d9488;
+  --color-accent-light: #ccfbf1;
+  --color-fg:           #212124;
+  --color-fg-muted:     #6b7280;
+  --color-fg-subtle:    #9ca3af;
+  --color-bg:           #ffffff;
+  --color-surface:      #ffffff;
+  --color-border:       #e5e7eb;
+
+  /* Typography */
+  --font-sans:    'Manrope Variable', 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Rubik Variable', 'Rubik', 'Segoe UI', sans-serif;
+
+  /* Radius */
+  --radius-card: 1.5rem;
+  --radius-btn:  9999px;
+  --radius-sm:   0.75rem;
+
+  /* Shadows */
+  --shadow-card:  0 2px 12px rgba(0,0,0,.07);
+  --shadow-hover: 0 8px 28px rgba(0,0,0,.12);
+
+  /* Layout */
+  --header-height: 88px;
+
+  /* Motion */
+  --ease-out:      cubic-bezier(0.4,0,0.2,1);
+  --duration-base: 200ms;
+}
+
+/* ============================================================
+   Base reset
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-family: var(--font-sans);
+  color: var(--color-fg);
+  background-color: #030712; /* цвет футера — виден при overscroll вниз */
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+body {
+  background-color: var(--color-bg);
+  overflow-x: hidden;
+}
+
+/* Шрифтовая пара — заголовки на Rubik (display), весь
+   остальной текст (body/labels/buttons) остаётся на Manrope через
+   html{font-family}. Низкая specificity (тег, не класс) — намеренно:
+   компоненты, где на h1-h6 уже стоит своя font-family через утилиту
+   или .t-h*, переопределяют это без !important. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Заголовки чуть жирнее — 45 из 57 h1-h6 на сайте набраны через
+   font-medium (500), только 12 через font-semibold. Комбинированный
+   селектор (тег+класс) вместо правки всех 49 файлов вручную —
+   тег.font-medium имеет ту же specificity, что и class .font-medium
+   у Tailwind, поэтому важен порядок: этот блок должен идти в конце
+   файла, после @tailwind-слоёв, чтобы победить по каскаду. */
+h1.font-medium, h2.font-medium, h3.font-medium,
+h4.font-medium, h5.font-medium, h6.font-medium {
+  font-weight: 600;
+}
+
+/* ============================================================
+   Типографика — семантические роли
+
+   Веса это иерархия: когда жирное всё, не выделено ничто. Поэтому
+   400 — текст, 500 — заголовки, 600 — цифры/цена. Ступени размеров
+   объявлены в @theme выше; здесь к ним привязаны вес, трекинг и
+   интерлиньяж, чтобы роль задавалась одним классом, а не связкой
+   из четырёх утилит на каждом заголовке.
+
+   .t-* — это дефолт по РОЛИ, а не жёсткая привязка к кеглю. Если
+   странице нужен другой размер (флагманский hero крупнее обычного h1) —
+   берите ступень лестницы утилитой (text-step-7) вместе с .t-h1, а НЕ
+   пишите свой clamp в разметке: именно так и заводится зоопарк.
+
+   @layer components — обязателен, не косметика. Классы объявлены ниже
+   @import "tailwindcss", и при равной специфичности побеждал бы .t-h1:
+   `class="t-h1 text-white"` красил бы заголовок в ink вместо белого.
+   В слое components утилиты Tailwind (слой utilities) перебивают роль,
+   поэтому цвет/размер точечно переопределяются как обычно.
+   ============================================================ */
+@layer components {
+.t-h1 {
+  font-size: var(--text-step-6);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: var(--color-ink);
+}
+.t-h2 {
+  font-size: var(--text-step-5);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+}
+.t-h3 {
+  font-size: var(--text-step-4);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+.t-lead {
+  font-size: var(--text-step-2);
+  font-weight: 400;
+  line-height: 1.65;
+  color: #64748b;                                    /* slate-500 */
+}
+.t-body {
+  font-size: var(--text-step-1);
+  font-weight: 400;
+  line-height: 1.6;
+  color: #64748b;
+}
+.t-meta {
+  font-size: var(--text-step-0);
+  font-weight: 400;
+  line-height: 1.45;
+  color: #94a3b8;                                    /* slate-400 */
+}
+
+/* Надзаголовок секции. Был teal + uppercase + tracking-widest — троп
+   лендингов; акцент оставлен за выбранным состоянием и главным CTA. */
+.t-eyebrow {
+  font-size: var(--text-step-0);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #475569;                                    /* slate-600 */
+}
+/* Подпись над группой контролов */
+.t-label {
+  font-size: var(--text-step-0);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #64748b;
+}
+
+/* tabular-nums: цена пересчитывается при выборе опции — без моноширинных
+   цифр блок дёргается по ширине на каждом клике. */
+.t-price {
+  font-size: clamp(1.5rem, 2.6vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.t-price--sm {
+  font-size: var(--text-step-2);
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+.t-stat {
+  font-size: var(--text-step-5);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+}
+
+/* ============================================================
+   Shared utility classes
+
+   В @layer components (см. комментарий выше, перед первым таким
+   блоком) — без этого неслоистые правила (эта секция была объявлена
+   без layer) перебивают Tailwind-утилиты по спецификации CSS Cascade
+   Layers независимо от порядка в файле: например .btn{display:
+   inline-flex} побеждал Tailwind-утилиты hidden/lg:inline-flex на
+   кнопках, которые должны были переключаться по брейкпоинту, а не
+   показываться всегда. Одноимённые @layer-блоки объединяются, второй
+   не создаёт новый уровень приоритета.
+   ============================================================ */
+@layer components {
+
+.container {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+/* Шире на широких мониторах — иначе контент центрируется узкой колонкой с
+   огромными пустыми полями по бокам. Значение брейкпоинта — см.
+   --breakpoint-3xl в @theme выше. */
+@media (width >= 1920px) {
+  .container { max-width: 96rem; }
+}
+
+.section {
+  padding-top:    clamp(2.5rem, 4vw, 3.5rem);
+  padding-bottom: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+/* Соседние .section складывали padding-bottom + padding-top в двойной
+   отступ (~80-112px) — вторая секция полагается на padding-bottom первой.
+   Vue-острова (client:load/visible/idle) рендерят обёртку <astro-island>
+   вокруг своей .section, поэтому реальные DOM-соседи чаще не два <section>
+   напрямую, а `astro-island` и `section` (в любом порядке) — эти случаи
+   перекрыты через :has() отдельно от прямого .section + .section. */
+.section + .section,
+astro-island:has(> .section) + .section,
+.section + astro-island:has(> .section) > .section {
+  padding-top: 0;
+}
+
+.breadcrumb-bar {
+  padding-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+/* Секция сразу после крошек — убираем дублирующий отступ сверху */
+.breadcrumb-bar + .section {
+  padding-top: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* Промо-строка на главной зажата между двумя .section — те уже дают
+   свой padding-top/bottom (по clamp(2.5rem,4vw,3.5rem) с каждой стороны),
+   поэтому сама строка без вертикальных отступов, иначе они складываются
+   и зазор после неё становится заметно больше, чем перед ней. */
+.promo-strip-wrap {
+  padding-top:    0;
+  padding-bottom: 0;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-btn);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  outline: none;
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    color            var(--duration-base) var(--ease-out),
+    box-shadow       var(--duration-base) var(--ease-out);
+}
+/* Контур только при фокусе с клавиатуры, не анимируем */
+.btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+/* Убираем контур при фокусе от мыши */
+.btn:focus:not(:focus-visible) {
+  outline: none;
+}
+.btn-primary {
+  background: var(--color-fg);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--color-accent); }
+
+/* box-shadow: inset вместо border — рамка не добавляет высоту к боксу
+   (в отличие от border, даже с box-sizing:border-box), поэтому кайма
+   не делает эти варианты выше .btn-primary/.btn без рамки. */
+.btn-outline {
+  background: transparent;
+  color: var(--color-fg);
+  box-shadow: inset 0 0 0 1.5px var(--color-border);
+}
+.btn-outline:hover {
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  color: var(--color-accent);
+}
+
+/* Иконка-кнопка без текста — тот же .btn/.btn-outline, компактный квадрат
+   под 18-20px иконку соцсети (VK/MAX рядом с текстовой Telegram-кнопкой) */
+.btn-icon {
+  padding: 0.6rem;
+  gap: 0;
+}
+.btn-icon img,
+.btn-icon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* Pill-кнопка с заливкой teal при hover — для светлого фона (Features CTA, PortfolioPreview) */
+.btn-teal-fill {
+  background: var(--color-surface);
+  color: var(--color-fg);
+  box-shadow: inset 0 0 0 1.5px var(--color-border);
+}
+.btn-teal-fill:hover {
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  color: #fff;
+}
+.btn-teal-fill:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Teal accent pill — используется в карточках Features, Partitions и т.д. */
+.btn-accent {
+  background: transparent;
+  color: var(--color-accent-hover);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    color            var(--duration-base) var(--ease-out),
+    box-shadow       var(--duration-base) var(--ease-out),
+    transform        var(--duration-base) var(--ease-out);
+}
+.btn-accent:hover {
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.btn-accent:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* White ghost pill — для тёмных фонов (hero, bento) */
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    box-shadow       var(--duration-base) var(--ease-out),
+    transform        var(--duration-base) var(--ease-out);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 0 0 1.5px #fff;
+  transform: translateY(-1px);
+}
+.btn-ghost:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+/* Shared arrow icon inside pill buttons */
+.btn-arrow-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+.btn-accent:hover .btn-arrow-icon,
+.btn-ghost:hover .btn-arrow-icon,
+.btn-primary:hover .btn-arrow-icon,
+.btn-outline:hover .btn-arrow-icon {
+  transform: translateX(2px);
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition:
+    transform  var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ── Focus ring ── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* ── Dropdown / panel animation ── */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity .2s ease, transform .2s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* ── Полноэкранное мобильное меню ──
+   Лёгкий scale добавляет ощущение «выезда» карточки к пользователю
+   вместо плоского появления одним fade — на закрытии чуть быстрее
+   (leave короче enter — типичный паттерн для модалок: открытие
+   заметное, закрытие не должно ощущаться медленным). */
+.menu-fade-enter-active {
+  transition: opacity .26s ease, transform .26s cubic-bezier(.16,1,.3,1);
+}
+.menu-fade-leave-active {
+  transition: opacity .18s ease, transform .18s ease;
+}
+.menu-fade-enter-from,
+.menu-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+/* ============================================================
+   Dot-nav — общий вид точек-индикаторов слайдера/карусели поверх
+   фото (HeroSlider, Features, Reviews): чёткий маленький круг, у
+   активной — вытягивается в пилюлю вместо раздувания transform:scale
+   (тот баг с блюром/ореолом на кнопке разобран и пофикшен в HeroSlider,
+   appearance:none обязателен именно из-за круглого background+border:none
+   на <button> — нативный chrome браузера иначе рисует полупрозрачный
+   круг вокруг). Сам таймер/прогресс-бар — только у HeroSlider (единственный
+   с автопрокруткой), здесь просто статичный вид точки/пилюли. */
+.dot-nav__btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+}
+.dot-nav__btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.dot-nav__item {
+  position: relative;
+  display: block;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.45);
+  transition: width 250ms ease, background-color 250ms ease;
+}
+.dot-nav__btn:hover .dot-nav__item,
+.dot-nav__item--active {
+  background: #fff;
+}
+.dot-nav__item--active {
+  width: 1.25rem;
+}
+
+/* Прогресс-вариант — для слайдеров с автопрокруткой (HeroSlider,
+   HiddenDoorsPromo, SherwoodPromo): активная точка остаётся полупрозрачной
+   пилюлей-треком, чтобы внутри был виден бегущий белый прогресс-бар
+   (иначе он не отличим от сплошного белого фона обычной активной точки). */
+.dot-nav__item--active.dot-nav__item--progress {
+  background: rgba(255, 255, 255, 0.35);
+}
+.dot-nav__progress {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  border-radius: inherit;
+  transform-origin: left center;
+  animation-name: dot-nav-progress-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes dot-nav-progress-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dot-nav__item { transition: none; }
+}
+
+/* ── Thin scrollbar ── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-fg-subtle); }
+
+/* ============================================================
+   A11y helpers
+   ============================================================ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================
+   Breadcrumbs
+   ============================================================ */
+.breadcrumbs {
+  margin-bottom: clamp(2rem, 4vw, 2.75rem);
+}
+.breadcrumbs__list,
+.breadcrumbs__item {
+  display: flex;
+  align-items: center;
+}
+.breadcrumbs__list {
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: var(--color-fg-subtle);
+  font-size: 0.8125rem;
+}
+.breadcrumbs__item {
+  gap: 0;
+}
+.breadcrumbs__link,
+.breadcrumbs__current {
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color var(--duration-base) var(--ease-out);
+}
+.breadcrumbs__link:hover {
+  color: var(--color-accent-hover);
+  background: rgba(20, 184, 166, 0.08);
+}
+.breadcrumbs__current {
+  color: #4b5563;
+}
+.breadcrumbs__icon {
+  width: auto;
+  height: auto;
+  margin: 0 1rem;
+  color: #d1d5db;
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+}

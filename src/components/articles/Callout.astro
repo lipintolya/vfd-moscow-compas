@@ -1,0 +1,23 @@
+---
+interface Props {
+  type?: 'tip' | 'warning' | 'info'
+  title?: string
+}
+
+const { type = 'tip', title } = Astro.props
+
+const config = {
+  tip:     { bg: 'bg-teal-50',   border: 'border-teal-400',  icon: '💡', defaultTitle: 'Совет' },
+  info:    { bg: 'bg-slate-50',  border: 'border-slate-300', icon: 'ℹ️', defaultTitle: 'Важно' },
+  warning: { bg: 'bg-amber-50',  border: 'border-amber-400', icon: '⚠️', defaultTitle: 'Обратите внимание' },
+}[type]
+---
+
+<aside class:list={['my-6 rounded-xl border-l-4 p-4 sm:p-5', config.bg, config.border]}>
+  <p class="mb-1 text-sm font-semibold text-slate-700">
+    {config.icon} {title ?? config.defaultTitle}
+  </p>
+  <div class="text-sm leading-relaxed text-slate-600 [&_p]:mb-0">
+    <slot />
+  </div>
+</aside>

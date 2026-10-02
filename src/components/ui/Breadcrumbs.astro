@@ -1,0 +1,51 @@
+---
+interface BreadcrumbItem {
+  label: string
+  href?: string
+}
+
+interface Props {
+  items: BreadcrumbItem[]
+}
+
+const { items } = Astro.props
+
+// BreadcrumbList schema (SEO) — абсолютные URL через Astro.site
+const toAbs = (href?: string) =>
+  href && Astro.site ? new URL(href, Astro.site).href : href
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.label,
+    ...(item.href ? { item: toAbs(item.href) } : {}),
+  })),
+}
+const breadcrumbJson = JSON.stringify(breadcrumbSchema).replace(/</g, '\\u003c')
+---
+
+<script type="application/ld+json" is:inline set:html={breadcrumbJson} />
+
+<nav class="breadcrumbs" aria-label="Хлебные крошки">
+  <ol class="breadcrumbs__list">
+    {items.map((item, index) => {
+      const isLast = index === items.length - 1
+      return (
+        <li class="breadcrumbs__item">
+          {item.href && !isLast ? (
+            <a class="breadcrumbs__link" href={item.href}>{item.label}</a>
+          ) : (
+            <span class="breadcrumbs__current" aria-current={isLast ? 'page' : undefined}>
+              {item.label}
+            </span>
+          )}
+          {!isLast && (
+            <span class="breadcrumbs__icon" aria-hidden="true">/</span>
+          )}
+        </li>
+      )
+    })}
+  </ol>
+</nav>

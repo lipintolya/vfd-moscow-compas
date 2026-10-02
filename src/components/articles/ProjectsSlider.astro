@@ -1,0 +1,33 @@
+---
+/**
+ * Слайдер реализованных проектов перегородок для статей.
+ * Фото — кураторская подборка (по 3 с каждого кейса) из cases в
+ * src/data/partitions.ts, адаптированные локальные копии
+ * (public/renders/articles/partitions-cases/) вместо тяжёлых оригиналов
+ * с облака. Переиспользует ProjectSlider.vue — тот же слайдер+лайтбокс,
+ * что на страницах портфолио.
+ */
+import ProjectSlider from '../portfolio/ProjectSlider.vue'
+
+const images = [
+  '/renders/articles/partitions-cases/stationar-1.webp',
+  '/renders/articles/partitions-cases/stationar-2.webp',
+  '/renders/articles/partitions-cases/stationar-3.webp',
+  '/renders/articles/partitions-cases/waldorf-1.webp',
+  '/renders/articles/partitions-cases/waldorf-2.webp',
+  '/renders/articles/partitions-cases/waldorf-3.webp',
+  '/renders/articles/partitions-cases/lahta-1.webp',
+  '/renders/articles/partitions-cases/lahta-2.webp',
+  '/renders/articles/partitions-cases/lahta-3.webp',
+]
+---
+
+<div class="article-projects-slider">
+  <ProjectSlider images={images} client:load />
+</div>
+
+<style>
+.article-projects-slider {
+  margin: 2rem 0;
+}
+</style>

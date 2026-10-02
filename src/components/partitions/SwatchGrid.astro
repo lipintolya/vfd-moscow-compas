@@ -1,0 +1,27 @@
+---
+import IconExpand from '../ui/icons/IconExpand.astro'
+
+interface SwatchItem { src: string; alt: string; name: string; hex?: string }
+interface Props {
+  items:    SwatchItem[]
+  /** square — цвета профиля; portrait — остекление */
+  variant?: 'square' | 'portrait'
+  /** подпись над/под сеткой (HTML допускается) */
+}
+const { items, variant = 'square' } = Astro.props
+const w = variant === 'portrait' ? 300 : 300
+const h = variant === 'portrait' ? 400 : 300
+---
+<ul class:list={['pt-swatch-grid', variant === 'portrait' && 'pt-swatch-grid--portrait']} role="list">
+  {items.map(item => (
+    <li>
+      <button class="pt-swatch-card group" type="button" aria-label={`Рассмотреть: ${item.name}`}>
+        <span class="pt-swatch-media" style={item.hex ? `background:${item.hex}` : undefined}>
+          <img src={item.src} alt={item.alt} class="pt-swatch-img" loading="lazy" decoding="async" width={w} height={h} />
+          <span class="pt-swatch-zoom" aria-hidden="true"><IconExpand /></span>
+        </span>
+        <span class="pt-swatch-name">{item.name}</span>
+      </button>
+    </li>
+  ))}
+</ul>

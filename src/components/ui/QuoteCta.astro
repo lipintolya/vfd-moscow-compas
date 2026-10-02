@@ -1,0 +1,116 @@
+---
+/**
+ * Тизл-CTA с фото — изначально был только на /partitions/ (инлайн-разметка
+ * + .pt-cta* в partitions.css). Вынесен в переиспользуемый компонент,
+ * чтобы не дублировать один и тот же премиальный блок на каждой странице
+ * заново (сейчас используется на /partitions/ и /contacts/).
+ */
+interface Props {
+  title?: string
+  description?: string
+  image: string
+  primaryHref: string
+  primaryLabel?: string
+  primaryExternal?: boolean
+  secondaryHref: string
+  secondaryLabel: string
+}
+
+const {
+  title = 'Рассчитаем стоимость бесплатно',
+  description = 'Специалист выедет на замер, составит проект и коммерческое предложение за один рабочий день',
+  image,
+  primaryHref,
+  primaryLabel = 'Получить расчёт',
+  primaryExternal = true,
+  secondaryHref,
+  secondaryLabel,
+} = Astro.props
+---
+
+<div class="qc-cta">
+  <div class="qc-cta__text">
+    <h2 class="t-h2 m-0 text-white tracking-[-0.02em]">{title}</h2>
+    <p class="m-0 text-sm leading-relaxed text-white/82">{description}</p>
+  </div>
+  <div class="qc-cta__media">
+    <img
+      src={image}
+      alt=""
+      role="presentation"
+      class="qc-cta__img"
+      loading="lazy"
+      decoding="async"
+      width="600"
+      height="400"
+    />
+    <div class="qc-cta__btns">
+      {primaryExternal ? (
+        <a href={primaryHref} target="_blank" rel="noopener" class="btn btn-ghost">{primaryLabel}</a>
+      ) : (
+        <a href={primaryHref} class="btn btn-ghost">{primaryLabel}</a>
+      )}
+      <a href={secondaryHref} class="btn btn-ghost">{secondaryLabel}</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .qc-cta {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 60%, #0f766e 100%);
+    box-shadow: 0 8px 32px color-mix(in srgb, var(--color-accent-hover) 28%, transparent);
+  }
+
+  .qc-cta__text {
+    padding: clamp(2rem, 4vw, 3rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .qc-cta__media {
+    position: relative;
+    min-width: 260px;
+    overflow: hidden;
+  }
+
+  .qc-cta__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* Градиент: слева вливается в бирюзовый фон, справа лёгкое затемнение */
+  .qc-cta__media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to right, var(--color-accent-hover) 0%, color-mix(in srgb, var(--color-accent-hover) 50%, transparent) 35%, rgba(0, 0, 0, 0.28) 100%);
+  }
+
+  .qc-cta__btns {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  @media (max-width: 767px) {
+    .qc-cta { grid-template-columns: 1fr; }
+    .qc-cta__text { order: 1; }
+    .qc-cta__media { order: 2; min-height: 160px; }
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+/**
+ * src/components/catalog/SeriesCard.astro
+ * Карточка серии — светлая карточка, фото сверху (полный кроп, без
+ * паддинга — исходники это лайфстайл-рендеры интерьера, не изолированные
+ * предметки), название/tagline/цена снизу тёмным текстом на белом (по
+ * референсу: карточка-каталог, а не текст поверх фото). Используется на
+ * /catalog/series/ (полная сетка серий) и /catalog/<coating>/ SEO-лендингах
+ * (DoorCategoryLanding). Ширину/сетку задаёт родитель.
+ */
+interface Props {
+  series: {
+    slug:       string
+    name:       string
+    tagline:    string
+    cover:      string
+    minPrice:   number | null
+    modelCount: number
+  }
+  /** Карточка видна без прокрутки (первые серии первой группы) — грузим
+      сразу, а не лениво, иначе именно эта картинка становится LCP и
+      lazy-loading только откладывает её отрисовку. */
+  priority?: boolean
+}
+
+const { series: s, priority = false } = Astro.props
+const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
+---
+
+<a
+  href={`/catalog/series/${s.slug}/`}
+  class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/60"
+>
+  <div class="aspect-3/4 overflow-hidden bg-slate-100">
+    {s.cover && (
+      <img
+        src={s.cover}
+        alt={`Серия ${s.name} — ВФД`}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={priority ? 'high' : undefined}
+        width="300"
+        height="400"
+        class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+      />
+    )}
+  </div>
+  <div class="flex flex-1 flex-col gap-1 p-4 sm:p-5">
+    <span class="text-lg font-semibold text-ink sm:text-xl">{s.name}</span>
+    {s.tagline && (
+      <span class="text-sm text-slate-500">{s.tagline}</span>
+    )}
+    <span class="mt-auto pt-2">
+      <span class="text-lg font-bold text-ink sm:text-xl">
+        {s.minPrice ? `от ${fmt(s.minPrice)}` : `${s.modelCount} ${s.modelCount === 1 ? 'модель' : 'моделей'}`}
+      </span>
+      {s.minPrice && <span class="ml-1 text-xs font-semibold text-slate-500">за полотно</span>}
+    </span>
+  </div>
+</a>

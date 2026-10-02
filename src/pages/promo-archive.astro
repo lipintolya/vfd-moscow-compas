@@ -1,0 +1,180 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { PROMOS } from '../data/promos'
+import { isPromoActive, formatDate } from '../lib/promo-dates'
+
+const archivedPromos = PROMOS
+  .filter(p => !isPromoActive(p.validUntil))
+  .sort((a, b) => b.validUntil.localeCompare(a.validUntil))
+---
+
+<BaseLayout
+  title="Архив акций — ВФД на Кашириных"
+  description="Завершённые акции и специальные предложения салона дверей ВФД на Кашириных в Челябинске."
+  noIndex={true}
+>
+  <div class="pa-page">
+    <div class="container">
+
+      <header class="pa-header">
+        <p class="t-eyebrow mb-3">Архив</p>
+        <h1 class="pa-title">Архив акций</h1>
+        <p class="pa-lede">
+          Здесь — уже завершённые акции. Актуальные предложения смотрите
+          на <a href="/akcii/">странице акций</a>.
+        </p>
+      </header>
+
+      {archivedPromos.length === 0 ? (
+        <div class="pa-empty">
+          <p>Архив пока пуст — все акции ещё активны.</p>
+        </div>
+      ) : (
+        <ul class="pa-grid" role="list">
+          {archivedPromos.map((promo, index) => (
+            <li>
+              <div class="pa-card">
+                <div class="pa-image-wrap">
+                  <img
+                    src={promo.image}
+                    srcset={promo.imageSrcset}
+                    sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+                    alt={promo.title}
+                    loading={index < 3 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    width="600"
+                    height="288"
+                    class="pa-image"
+                  />
+                  <span class="pa-badge">Акция завершена</span>
+                </div>
+                <div class="pa-content">
+                  <h2 class="pa-card-title">{promo.title}</h2>
+                  <p class="pa-card-subtitle">{promo.subtitle}</p>
+                  <p class="pa-card-desc">{promo.description}</p>
+                  <time datetime={promo.validUntil} class="pa-card-date">
+                    Действовала до {formatDate(promo.validUntil)}
+                  </time>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+.pa-page {
+  padding: 3rem 0 5rem;
+}
+.pa-header {
+  max-width: 42rem;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+.pa-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+.pa-lede {
+  margin-top: 1rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #475569;
+}
+.pa-lede a {
+  color: #0d9488;
+  text-decoration: underline;
+}
+.pa-lede a:hover { color: #0f766e; }
+.pa-empty {
+  padding: 5rem 0;
+  text-align: center;
+  color: #64748b;
+  background: #f8fafc;
+  border-radius: 1.5rem;
+}
+.pa-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+@media (min-width: 640px) {
+  .pa-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .pa-grid { grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+}
+.pa-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+.pa-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 18rem;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+.pa-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.6);
+  opacity: 0.85;
+}
+.pa-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.pa-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.25rem 1.5rem;
+}
+.pa-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.pa-card-subtitle {
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+.pa-card-desc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #64748b;
+}
+.pa-card-date {
+  margin-top: auto;
+  padding-top: 1rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  border-top: 1px solid #f1f5f9;
+}
+</style>

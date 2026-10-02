@@ -1,0 +1,17 @@
+---
+interface Props {
+  eyebrow:   string
+  title:     string
+  /** HTML допускается (&nbsp;, <strong>) */
+  subtitle?: string
+  class?:    string
+}
+const { eyebrow, title, subtitle, class: cls = '' } = Astro.props
+---
+<header class:list={['mb-[clamp(2rem,4vw,3rem)]', cls]}>
+  <p class="t-eyebrow block mb-3">{eyebrow}</p>
+  <h2 class="t-h2 mb-4">{title}</h2>
+  {subtitle && (
+    <p class="t-lead max-w-160" set:html={subtitle} />
+  )}
+</header>

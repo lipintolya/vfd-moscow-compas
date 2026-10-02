@@ -1,0 +1,23 @@
+---
+import IconCheck from '../ui/icons/IconCheck.astro'
+
+interface Props {
+  items: string[]
+  /** md — 0.9375rem текст / 18px иконка; sm — 0.875rem / 17px */
+  size?:  'md' | 'sm'
+  class?: string
+}
+const { items, size = 'md', class: cls = '' } = Astro.props
+
+const text = size === 'md' ? 'text-[0.9375rem]' : 'text-[0.875rem]'
+const icon = size === 'md' ? 18 : 17
+const gap  = size === 'md' ? 'gap-3' : 'gap-2.5'
+---
+<ul class:list={['list-none p-0 m-0 flex flex-col', gap, cls]}>
+  {items.map(item => (
+    <li class:list={['flex items-start gap-2.5 leading-relaxed text-body', text]}>
+      <IconCheck size={icon} class="shrink-0 mt-0.75" />
+      {item}
+    </li>
+  ))}
+</ul>

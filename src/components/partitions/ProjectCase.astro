@@ -1,0 +1,88 @@
+---
+import PhotoSlider from './PhotoSlider.astro'
+import FeatureList from './FeatureList.astro'
+import IconTelegram from '../ui/icons/IconTelegram.astro'
+import type { ProjectCase } from '../../data/partitions'
+
+interface Props {
+  data:   ProjectCase
+  /** true — для спотлайта сразу под hero (виден без скролла), см. PhotoSlider.astro */
+  eager?: boolean
+}
+const { data, eager = false } = Astro.props
+const badgeTone = {
+  amber: 'bg-amber-100 text-amber-700 border-amber-200',
+  teal:  'bg-teal-50 text-teal-700 border-teal-100',
+}
+
+const socials = [
+  { href: 'https://vk.com/vfddoors74',          icon: '/icons/w_vk.webp',      label: 'ВКонтакте' },
+  { href: 'https://t.me/vfddoors74',            icon: '/svg/w_tg_logo.svg', label: 'Telegram' },
+  { href: 'https://max.ru/id452402308842_biz',  icon: '/icons/w_max.webp',     label: 'Max' },
+]
+---
+<section class="section bg-white">
+  <div class="container">
+    <div class="pt-case-grid" data-side={data.side}>
+
+      <!-- Слайдер -->
+      <PhotoSlider
+        images={data.images}
+        tone={data.sliderTone}
+        indicator={data.social ? 'dots' : 'counter'}
+        class="pt-case-media"
+        eager={eager}
+      />
+
+      <!-- Текстовая карточка -->
+      <div class="pt-case-text rounded-3xl border border-slate-200 bg-white shadow-sm flex flex-col p-[clamp(1.25rem,2.5vw,2rem)]">
+        {data.eyebrow.kind === 'plain' ? (
+          <p class="t-eyebrow block mb-3">{data.eyebrow.text}</p>
+        ) : (
+          <div class="inline-flex items-center gap-1.5 mb-3 self-start">
+            <span class:list={['inline-flex items-center px-2.5 py-1 rounded-lg text-[0.6875rem] font-medium tracking-widest uppercase border', badgeTone[data.eyebrow.tone]]}>
+              {data.eyebrow.text}
+            </span>
+          </div>
+        )}
+
+        <h2 class="t-h2 mb-3" set:html={data.titleHtml} />
+
+        {data.paragraphs.map(p => (
+          <p class="mb-5 t-lead text-slate-600 last:mb-0">{p}</p>
+        ))}
+
+        {data.features && <FeatureList items={data.features} size={data.featureSize ?? 'sm'} class="mt-1 mb-4" />}
+
+        {data.noteHtml && <p class="text-[0.875rem] leading-relaxed mb-0 text-slate-600" set:html={data.noteHtml} />}
+
+        {data.social && (
+          <div class="mt-auto pt-5 border-t border-slate-100">
+            <p class="text-[0.6875rem] font-semibold uppercase tracking-widest mb-3 text-slate-400">Заказать расчёт проекта</p>
+            <div class="flex gap-2 flex-wrap">
+              {socials.map(s => (
+                <a href={s.href} target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl no-underline text-step-0 font-semibold text-white bg-ink hover:opacity-90 transition-opacity duration-200">
+                  <img src={s.icon} alt="" width="15" height="15" aria-hidden="true" />
+                  {s.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.attribution && (
+          <div class="mt-auto pt-4 border-t border-slate-100">
+            <a href={data.attribution.href} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 no-underline group">
+              <IconTelegram class="text-slate-400 group-hover:text-teal-500 transition-colors duration-200 shrink-0" />
+              <span class="text-[0.6875rem] text-slate-400 group-hover:text-teal-500 transition-colors duration-200">
+                Источник: <span class="font-semibold">{data.attribution.label}</span>
+              </span>
+            </a>
+          </div>
+        )}
+      </div>
+
+    </div>
+  </div>
+</section>

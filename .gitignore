@@ -1,0 +1,68 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.*
+!.env.example
+
+# SSH-ключи, сертификаты, токены — не должны попадать в репозиторий
+beget_key
+beget_key.pub
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_ecdsa
+id_ecdsa.pub
+deploy/ssh-config
+!deploy/ssh-config.example
+credentials.json
+service-account*.json
+google-credentials*.json
+
+# npm/yarn — могут содержать auth-токен приватного реестра
+.npmrc
+.yarnrc
+.yarnrc.yml
+
+# macOS/Windows-specific files
+.DS_Store
+Thumbs.db
+
+# editor backup/swap files
+*.swp
+*.swo
+*~
+*.bak
+
+# jetbrains setting folder
+.idea/
+
+# Supabase local CLI cache/secrets
+supabase/.temp/
+supabase/.env
+
+# Claude Code — локальный тулинг (плагины/скиллы ставятся на машину, не код сайта)
+.claude/settings.json
+.claude/skills/
+skills-lock.json
+
+# Superpowers visual companion — временные mockup-файлы
+.superpowers/

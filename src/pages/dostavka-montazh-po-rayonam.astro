@@ -1,0 +1,222 @@
+---
+/**
+ * src/pages/dostavka-montazh-po-rayonam.astro
+ * Гео-SEO лендинг: замер/доставка/монтаж дверей по районам Челябинска.
+ * Одна страница на все 7 районов (не отдельный лендинг на район) —
+ * реальные портфолио-кейсы у нас пока только в 3 из 7 (Калининский,
+ * Курчатовский, Центральный), плодить тонкие страницы без содержания
+ * под остальные 4 — риск для SEO, а не польза. Единая страница честно
+ * закрывает гео-запросы («двери с установкой <район> Челябинск») и
+ * показывает кейсы там, где они реально есть.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import SectionHeading from '../components/partitions/SectionHeading.astro'
+import { companyLegalInfo } from '../lib/contacts-data'
+import { PORTFOLIO_WORKS } from '../data/portfolio-works'
+
+const HERO_IMAGE = '/renders/about/vfd-out-900.webp'
+
+const title       = 'Двери с замером и монтажом по районам Челябинска | ВФД'
+const description = 'Продажа, доставка и монтаж межкомнатных дверей ВФД во всех районах Челябинска — Калининский, Курчатовский, Центральный, Советский, Ленинский, Тракторозаводский, Металлургический. Бесплатный замер межкомнатных дверей при заказе, монтаж своей бригадой.'
+const canonicalUrl = Astro.site ? new URL('/dostavka-montazh-po-rayonam/', Astro.site).href : undefined
+
+const phones = companyLegalInfo.contacts.phone
+const hours  = companyLegalInfo.workingHours
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Доставка и монтаж по районам' },
+]
+
+/* Реальные районы Челябинска — все 7, салон обслуживает весь город.
+   Кейсы в портфолио есть только по 3 из них — те получают отдельную
+   карточку с реальным проектом, остальные 4 просто перечислены одной
+   строкой (не плодим 4 карточки-заглушки с одинаковым текстом). */
+const DISTRICTS_WITH_CASES = ['Калининский', 'Курчатовский', 'Центральный'] as const
+const OTHER_DISTRICTS = ['Советский', 'Ленинский', 'Тракторозаводский', 'Металлургический'] as const
+const ALL_DISTRICTS = [...DISTRICTS_WITH_CASES, ...OTHER_DISTRICTS]
+
+const caseworks: { district: string; work: typeof PORTFOLIO_WORKS[number] }[] = []
+for (const name of DISTRICTS_WITH_CASES) {
+  const work = PORTFOLIO_WORKS.find(w => w.location.toLowerCase().includes(`${name.toLowerCase()} район`))
+  if (work) caseworks.push({ district: name, work })
+}
+
+const structuredData = canonicalUrl ? [
+  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Замер, доставка и монтаж межкомнатных дверей',
+    provider: { '@type': 'Organization', name: 'Салон дверей ВФД' },
+    areaServed: ALL_DISTRICTS.map(name => ({ '@type': 'AdministrativeArea', name: `${name} район, Челябинск` })),
+  },
+] : undefined
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage={HERO_IMAGE}
+  structuredData={structuredData}
+>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <!-- HERO — фото салона рядом с текстом, мобайл-фёрст: фото первым. -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        <div class="order-2 lg:order-1">
+          <p class="t-eyebrow block mb-3">Замер · Доставка · Монтаж</p>
+          <h1 class="t-h1 mb-5">Двери с монтажом во всех районах Челябинска</h1>
+          <p class="m-0 mb-6 t-lead text-slate-600">
+            Выезжаем на замер (межкомнатные двери — бесплатно при оформлении заказа) и монтируем двери собственной бригадой в любом районе
+            Челябинска — от Калининского, где расположен наш салон, до Тракторозаводского и
+            Металлургического на другом конце города.
+          </p>
+          <div class="flex gap-2.5 flex-wrap">
+            <a href="/contacts/" class="btn btn-primary">Записаться на бесплатный замер</a>
+            <a href="/catalog/" class="btn btn-outline">Смотреть каталог дверей</a>
+          </div>
+        </div>
+        <div class="order-1 overflow-hidden rounded-3xl lg:order-2">
+          <img
+            src={HERO_IMAGE}
+            alt="Салон дверей ВФД на Братьев Кашириных в Челябинске"
+            width="900"
+            height="675"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            class="aspect-4/3 w-full object-cover lg:aspect-auto lg:h-full"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- УСЛОВИЯ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Условия"
+        title="Сколько стоит доставка и сколько занимает монтаж"
+        subtitle="Модели в наличии на складе доставляем за 3–5 дней. Под заказ — изготовление и доставка с завода занимает 6–8 недель, это срок работы самой фабрики, не наш. Монтаж бригада проводит за 1 день на стандартный объём заказа."
+      />
+      <div class="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+        <div class="rounded-2xl bg-graphite p-[clamp(1.25rem,3vw,2rem)] text-white">
+          <span class="block text-2xl font-medium leading-none sm:text-4xl">3–5 дней</span>
+          <span class="mt-2 block text-sm font-semibold leading-snug">Из наличия</span>
+          <span class="mt-1 block text-xs leading-snug text-white/65">Модели со склада в Челябинске</span>
+        </div>
+        <div class="rounded-2xl bg-graphite p-[clamp(1.25rem,3vw,2rem)] text-white">
+          <span class="block text-2xl font-medium leading-none sm:text-4xl">6–8 нед.</span>
+          <span class="mt-2 block text-sm font-semibold leading-snug">Под заказ</span>
+          <span class="mt-1 block text-xs leading-snug text-white/65">Изготовление и доставка с завода</span>
+        </div>
+        <div class="rounded-2xl bg-graphite p-[clamp(1.25rem,3vw,2rem)] text-white">
+          <span class="block text-2xl font-medium leading-none sm:text-4xl">1000 ₽</span>
+          <span class="mt-2 block text-sm font-semibold leading-snug">Доставка по городу</span>
+          <span class="mt-1 block text-xs leading-snug text-white/65">Фиксированная стоимость в любой район</span>
+        </div>
+        <div class="rounded-2xl bg-graphite p-[clamp(1.25rem,3vw,2rem)] text-white">
+          <span class="block text-2xl font-medium leading-none sm:text-4xl">+45 ₽/км</span>
+          <span class="mt-2 block text-sm font-semibold leading-snug">За город</span>
+          <span class="mt-1 block text-xs leading-snug text-white/65">1000 ₽ + 45 ₽ за каждый км</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- КЕЙСЫ ПО РАЙОНАМ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading eyebrow="Наши работы" title="Реальные проекты в разных районах города" />
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {caseworks.map(({ district, work }) => (
+          <a
+            href={`/portfolio/${work.id}/`}
+            class="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow duration-300 hover:shadow-lg hover:shadow-slate-200/60"
+          >
+            <div class="aspect-4/3 w-full overflow-hidden bg-slate-100">
+              <img
+                src={work.images[0]}
+                alt={work.title}
+                loading="lazy"
+                decoding="async"
+                width="480"
+                height="360"
+                class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              />
+            </div>
+            <div class="p-4">
+              <p class="m-0 mb-1 text-xs font-semibold text-teal-600">{district} район</p>
+              <h3 class="m-0 text-sm font-semibold leading-snug text-ink">{work.title}</h3>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div class="mt-8 flex flex-col items-start gap-4 rounded-2xl bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <p class="m-0 text-sm leading-relaxed text-slate-600">
+          Также работаем в Советском, Ленинском, Тракторозаводском и Металлургическом районах —
+          условия замера, доставки и монтажа те же, что и в остальном городе.
+        </p>
+        <a
+          href="/portfolio/"
+          class="group/link flex shrink-0 items-center gap-2 rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-sm ring-1 ring-slate-200 transition-shadow hover:shadow-md"
+        >
+          Все работы
+          <span
+            class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-teal-50 text-teal-600 transition-colors duration-200 group-hover/link:bg-teal-600 group-hover/link:text-white"
+            aria-hidden="true"
+          >
+            <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- КОНТАКТЫ / CTA -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="rounded-3xl border border-slate-200 bg-white p-[clamp(1.5rem,4vw,3rem)]">
+        <p class="t-eyebrow block mb-3">Салон в Челябинске</p>
+        <h2 class="t-h2 mb-3">Приезжайте в салон или вызовите замерщика на дом</h2>
+        <p class="m-0 mb-6 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+          Салон расположен в Калининском районе, но замерщик выезжает в любую точку Челябинска
+          и области.
+        </p>
+
+        <div class="mb-6 flex flex-col gap-2 text-sm text-slate-600 sm:text-base">
+          <p class="m-0"><strong class="font-medium text-ink">Адрес:</strong> {companyLegalInfo.address.legal}</p>
+          <p class="m-0">
+            <strong class="font-medium text-ink">Телефон:</strong>{' '}
+            {phones.map((p, i) => (
+              <>
+                {i > 0 && ', '}
+                <a href={`tel:${p.raw}`} class="text-teal-700 hover:text-teal-800">{p.label}</a>
+              </>
+            ))}
+          </p>
+          <p class="m-0"><strong class="font-medium text-ink">Часы работы:</strong> {hours.weekdays.label}, Сб–Вс: {hours.saturday.opens}–{hours.saturday.closes}</p>
+        </div>
+
+        <div class="flex gap-2.5 flex-wrap">
+          <a href="https://yandex.ru/maps/-/CPTwZPi-" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Построить маршрут</a>
+          <a href="/contacts/" class="btn btn-primary">Записаться на бесплатный замер</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

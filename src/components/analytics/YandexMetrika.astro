@@ -1,0 +1,51 @@
+---
+/**
+ * Яндекс Метрика — загружается только в production.
+ * Счётчик: 106993554
+ *
+ * Почему такая установка:
+ * - is:inline — Astro/Vite не трогает и не бандлит скрипт
+ * - import.meta.env.PROD — в dev счётчик молчит (статистика чистая, консоль не шумит)
+ * - dataLayer инициализируется до ym() — ecommerce события не потеряются
+ * - ssr:true убран — нужен только для Next.js/Nuxt SSR, не для Astro SSG
+ * - referrer/url убраны из init — Метрика детектит их автоматически
+ * - инициализация отложена до window 'load': вебвизор (webvisor: true) сканирует
+ *   и трогает DOM сразу после старта, и если это происходит одновременно
+ *   с гидратацией client:load Vue-островов (каталог, галереи), Vue видит DOM,
+ *   отличающийся от отрендеренного на сервере → "Hydration completed but
+ *   contains mismatches" в проде. К моменту window.load гидратация уже
+ *   гарантированно завершена.
+ */
+const isProd = import.meta.env.PROD
+---
+
+{isProd && (
+  <script is:inline>
+    window.addEventListener('load', function () {
+      window.dataLayer = window.dataLayer || [];
+
+      (function(m,e,t,r,i,k,a){
+        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
+        k=e.createElement(t);a=e.getElementsByTagName(t)[0];
+        k.async=1;k.src=r;a.parentNode.insertBefore(k,a)
+      })(window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
+
+      ym(106993554,'init',{
+        clickmap:            true,
+        trackLinks:          true,
+        accurateTrackBounce: true,
+        webvisor:            true,
+        ecommerce:           'dataLayer',
+      });
+    });
+  </script>
+)}
+{isProd && (
+  <noscript>
+    <div>
+      <img src="https://mc.yandex.ru/watch/106993554" style="position:absolute;left:-9999px;" alt="" />
+    </div>
+  </noscript>
+)}

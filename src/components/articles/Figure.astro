@@ -1,0 +1,82 @@
+---
+import FigureLightbox from './FigureLightbox.vue'
+import { articleImg } from '../../lib/article-images'
+
+interface Props {
+  /** Не обязателен — без src рендерится плейсхолдер «Фото скоро» (тот же
+      приём, что в Card.astro), чтобы можно было заранее разметить в статье
+      место под фото и добавить снимок позже без правки текста. */
+  src?: string
+  alt?: string
+  caption?: string
+  /** @deprecated фото больше не выходит за пределы колонки текста — проп оставлен,
+      чтобы не трогать существующий контент статей, но ни на что не влияет. */
+  wide?: boolean
+  /** Компактный вариант для схем/чертежей: без кропа 21:9 (естественные
+      пропорции картинки) и с ограниченной шириной по центру колонки. */
+  narrow?: boolean
+}
+
+const { src, alt = '', caption, narrow = false } = Astro.props
+
+/* В тексте — облегчённый вариант по ширине экрана (колонка статьи до 80rem,
+   narrow — до 26rem); по клику FigureLightbox открывает оригинал. */
+const inline = src ? articleImg(src) : undefined
+const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-width: 1312px) 1280px, calc(100vw - 32px)'
+---
+
+<figure class:list={['article-figure', narrow && 'article-figure--narrow']}>
+  {src ? (
+    <FigureLightbox src={src} inlineSrc={inline?.src} inlineSrcset={inline?.srcset} sizes={sizes} alt={alt} natural={narrow} client:visible />
+  ) : (
+    <div class="article-figure__placeholder" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="3" width="16" height="18" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+        <circle cx="9.5" cy="9" r="1.5" fill="currentColor"/>
+        <path d="M4 16l4.5-4.5a1.5 1.5 0 0 1 2.12 0L15 16M13.5 14.5 15.5 12.5a1.5 1.5 0 0 1 2.12 0L20 15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Фото скоро{alt ? `: ${alt}` : ''}</span>
+    </div>
+  )}
+  {caption && (
+    <figcaption class="mt-2 text-center text-sm text-slate-400">
+      {caption}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+.article-figure {
+  margin: 2rem 0;
+}
+.article-figure--narrow {
+  max-width: 26rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.article-figure__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  aspect-ratio: 21 / 9;
+  width: 100%;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #f8fafc, #eef2f7);
+  color: #cbd5e1;
+}
+.article-figure__placeholder svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.article-figure__placeholder span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  text-align: center;
+  padding: 0 1rem;
+}
+</style>

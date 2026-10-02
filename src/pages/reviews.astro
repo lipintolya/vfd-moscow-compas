@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Reviews from '../components/home/Reviews.vue'
+import { reviews } from '../data/reviews'
+
+const reviewCount = reviews.length
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://vfd74.ru' },
+    { '@type': 'ListItem', position: 2, name: 'Отзывы',  item: 'https://vfd74.ru/reviews/' },
+  ],
+}
+
+const aggregateRatingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'ВФД — Салон дверей в Челябинске',
+  url: 'https://vfd74.ru',
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    reviewCount: String(reviewCount),
+    bestRating: '5',
+  },
+}
+---
+
+<BaseLayout
+  title="Отзывы клиентов — салон дверей ВФД в Челябинске"
+  description={`Реальные отзывы клиентов салона ВФД на Братьев Кашириных в Челябинске — ${reviewCount} отзывов с Яндекс Карт и 2ГИС, с фото и датами.`}
+  structuredData={[breadcrumbSchema, aggregateRatingSchema]}
+>
+  <div class="section pb-0!">
+    <div class="container">
+      <nav aria-label="Хлебные крошки" class="mb-6">
+        <ol class="flex items-center gap-2 text-sm text-slate-500">
+          <li><a href="/" class="hover:text-teal-600 transition-colors">Главная</a></li>
+          <li aria-hidden="true" class="text-slate-300">/</li>
+          <li class="text-slate-700 font-medium">Отзывы</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <Reviews headingTag="h1" eagerFirst={true} client:visible />
+</BaseLayout>

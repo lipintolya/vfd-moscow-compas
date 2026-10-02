@@ -1,0 +1,583 @@
+---
+/**
+ * src/pages/catalog.astro
+ * Данные грузятся на сервере — полный JOIN через Supabase (src/lib/catalog-data.ts).
+ * Фильтрация — клиентская (Vue island), без перезагрузки страницы.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import SectionNav from '../components/partitions/SectionNav.astro'
+import CatalogClient from '../components/catalog/CatalogClient.vue'
+import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import { getCatalogCards, getSeriesCardsData } from '../lib/catalog-data'
+import { getSeriesSpec, coatingGroupCopy } from '../data/series-descriptions'
+import { DOOR_CATEGORIES } from '../data/door-categories'
+import { COLOR_CATEGORIES } from '../data/color-categories'
+import { STYLE_CATEGORIES } from '../data/style-categories'
+import { pluralRu } from '../lib/product-text'
+
+const { cards, error } = await getCatalogCards()
+const seriesCardsData = getSeriesCardsData(cards)
+
+/* ── Превью серий сверху каталога — группировка по покрытию, как в
+   фильтре ниже: Эмалекс / Эмаль / Протач / ПЭТ. Порядок фиксирован для
+   известных покрытий, всё остальное — следом по алфавиту, чтобы новая
+   группа (напр. будущее покрытие) не потерялась молча. ── */
+const COATING_ORDER = ['emalex', 'emal', 'protach', 'pet']
+
+/* coatingSlug → слаг SEO-лендинга покрытия (/catalog/<slug>), см.
+   src/data/door-categories.ts — единый источник, не дублируем маппинг. */
+const COATING_LANDING_SLUG = Object.fromEntries(
+  DOOR_CATEGORIES.map(c => [c.coatingSlug, c.slug])
+) as Record<string, string>
+
+
+/* Акцент группы по покрытию — раньше вся панель и карточка красились в
+   насыщенную заливку цвета (bg-blue-100/70 и т.п.), рядом с остальным
+   строгим бело-серым сайтом смотрелось аляписто. Теперь акцент — только
+   тонкая цветная полоска слева (border-l-4, как референс-карточки серий:
+   светлый нейтральный фон + одна цветная деталь) и цвет текста ценника/
+   лейбла; panel/card — единый нейтральный тон для всех покрытий. */
+const COATING_ACCENT: Record<string, { stripe: string; label: string; price: string }> = {
+  emalex:  { stripe: 'border-l-blue-500',   label: 'text-blue-700',   price: 'text-blue-700' },
+  pet:     { stripe: 'border-l-rose-500',   label: 'text-rose-700',   price: 'text-rose-700' },
+  protach: { stripe: 'border-l-violet-500', label: 'text-violet-700', price: 'text-violet-700' },
+  emal:    { stripe: 'border-l-slate-600',  label: 'text-slate-700',  price: 'text-slate-700' },
+}
+const DEFAULT_ACCENT = { stripe: 'border-l-teal-500', label: 'text-teal-700', price: 'text-teal-700' }
+const PANEL = 'border-slate-200 bg-white'
+const PILL_ACCENT = 'bg-graphite shadow-black/20 hover:bg-teal-600'
+
+/* Краткая выжимка покрытия для свёрнутого summary панели — раньше там
+   был только счётчик «N серий», непонятно чем покрытия отличаются друг
+   от друга без раскрытия панели. */
+const COATING_SUMMARY: Record<string, string> = {
+  emalex:  'Полипропилен от Ренолит (Германия)',
+  emal:    'Специальная защитно-декоративная эмаль',
+  protach: 'Двери с эффектом «софт-тач»',
+  pet:     'Современное покрытие повышенной износостойкости',
+  ekoshpon: 'Имитация древесной структуры',
+}
+
+const seriesCoatingGroups = [...new Map(
+  seriesCardsData.map(s => [s.coatingSlug, { slug: s.coatingSlug, name: s.coatingName }])
+).values()]
+  .sort((a, b) => {
+    const ai = COATING_ORDER.indexOf(a.slug)
+    const bi = COATING_ORDER.indexOf(b.slug)
+    if (ai === -1 && bi === -1) return a.name.localeCompare(b.name, 'ru')
+    if (ai === -1) return 1
+    if (bi === -1) return -1
+    return ai - bi
+  })
+  .map(coating => {
+    const series = seriesCardsData.filter(s => s.coatingSlug === coating.slug)
+    /* Копирайтинг покрытия одинаковый для всех серий внутри группы (coating/
+       material в SeriesSpec завязаны на coatingSlug, не на серию) — берём
+       у первой серии группы, не плодим повторный запрос/текст. Если для
+       покрытия ещё нет полного текста (tagline/benefits/closing) — падаем
+       на короткое derived-описание (coating+material), без остальных полей. */
+    const spec = getSeriesSpec(series[0]!.slug, coating.slug)
+    const copy = coatingGroupCopy[coating.slug]
+    const description = copy?.description
+      ?? [spec.coating, spec.material].filter(Boolean).join(' ')
+    const prices = series.map(s => s.minPrice).filter((p): p is number => p != null)
+    const minPrice = prices.length ? Math.min(...prices) : null
+    return { ...coating, series, description, tagline: copy?.tagline ?? '', benefits: copy?.benefits ?? [], closing: copy?.closing ?? '', minPrice }
+  })
+
+const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
+
+/* ── Уникальные опции для фильтров ── */
+const allSeries = [...new Map(
+  cards
+    .filter(c => c.seriesSlug)
+    .map(c => [c.seriesSlug, { label: c.series, value: c.seriesSlug }])
+).values()]
+
+const allCoatings = [...new Map(
+  cards
+    .filter(c => c.coatingSlug)
+    .map(c => [c.coatingSlug, { label: c.coating, value: c.coatingSlug }])
+).values()]
+
+/* Из colorSwatches (полный набор цветов на модель, не только первого) —
+   свотчи уже содержат все цвета каждой модели, так что колонка не теряет
+   цвета, которые ни у одной модели не оказались «первыми». available:false
+   (цвет покрытия без фото под конкретную модель) сюда не попадает —
+   фильтр по нему дал бы пустую выдачу. */
+const allColors = [...new Map(
+  cards
+    .flatMap(c => c.colorSwatches.filter(s => s.available).map(s => [s.name, { label: s.name, value: s.name, color: s.hex }] as const))
+).values()]
+
+/* ── Начальные фильтры из URL ── */
+const urlSeries  = Astro.url.searchParams.get('series')  ?? ''
+const urlCoating = Astro.url.searchParams.get('coating') ?? ''
+const urlColor   = Astro.url.searchParams.get('color')   ?? ''
+
+const canonicalUrl = Astro.site ? new URL('/catalog/', Astro.site).href : undefined
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Каталог' },
+]
+
+const catalogFaq = [
+  {
+    q: 'Сколько стоит межкомнатная дверь с установкой?',
+    a: 'Итоговая цена складывается из полотна, погонажа (короб, наличники, добор), фурнитуры и монтажа — и зависит от серии и покрытия. Цены на полотна каждой модели указаны в каталоге, а полный комплект удобно посчитать в калькуляторе на странице модели. Точный расчёт под ваш проём — бесплатно после замера.',
+  },
+  {
+    q: 'Какое покрытие выбрать — эмаль, ПЭТ, Эмалекс или Протач?',
+    a: 'Эмаль — гладкая окрашенная поверхность и широкая палитра, классика. ПЭТ — самое стойкое к царапинам и отпечаткам, выбор для семей с детьми и животными. Эмалекс — гладкое полимерное покрытие, устойчивое к влаге и царапинам, по виду близко к эмали, но практичнее по цене. Протач — плотное покрытие с текстурой, стойкое к износу. Образцы всех покрытий можно посмотреть вживую в салоне на Братьев Кашириных.',
+  },
+  {
+    q: 'Есть ли двери в наличии в Челябинске?',
+    a: 'Да, часть популярных моделей держим на складе в Челябинске — их можно забрать без ожидания производства. Наличие конкретной модели и цвета уточняйте у менеджера, актуальные складские акции публикуем на главной странице.',
+  },
+  {
+    q: 'Вы делаете замер и установку?',
+    a: 'Да. Замер по Челябинску — бесплатный при заказе дверей. Монтаж выполняет наша бригада с гарантией на работы: те же специалисты, что помогают с подбором, ведут заказ до установленной двери.',
+  },
+  {
+    q: 'Можно ли заказать дверь нестандартного размера?',
+    a: 'Да, полотна изготавливаются под заказ по нестандартной высоте и ширине. Доплаты за ширину 900 мм у ВФД нет. Возможные размеры и сроки для конкретной серии подскажет менеджер при расчёте.',
+  },
+  {
+    q: 'Как посчитать полную стоимость комплекта?',
+    a: 'На странице каждой модели есть калькулятор: выбираете цвет, короб, наличники, доборы, тип петель и замок — и сразу видите итоговую сумму комплекта. Это ориентир до замера; финальную смету составляем после бесплатного замера проёмов.',
+  },
+]
+
+const structuredData = canonicalUrl ? [
+  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Каталог дверей ВФД на Кашириных',
+    description: 'Каталог межкомнатных и входных дверей с ценами, сериями, покрытиями и цветами.',
+    url: canonicalUrl,
+    numberOfItems: cards.length,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: catalogFaq.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+] : undefined
+---
+
+<BaseLayout
+  title="Купить межкомнатные двери в Челябинске — каталог и цены | ВФД"
+  description="Межкомнатные двери в Челябинске от официального дилера ВФД: каталог с ценами, покрытия эмаль, ПЭТ, Эмалекс, Протач. Бесплатный замер по Челябинску при заказе, монтаж, салон на Братьев Кашириных."
+  canonical={canonicalUrl}
+  structuredData={structuredData}
+>
+  {error && (
+    <div class="container pt-8">
+      <div class="rounded-2xl bg-red-50 border border-red-100 px-5 py-4 text-red-700 text-sm">
+        Ошибка загрузки каталога: {error}
+      </div>
+    </div>
+  )}
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <SectionNav items={[
+    { id: 'series-title',  label: 'Серии' },
+    { id: 'catalog-title', label: 'Каталог' },
+  ]} />
+
+  {seriesCoatingGroups.length > 0 && (
+    <div id="series" class="section bg-white" style="padding-bottom: 0; scroll-margin-top: 5.5rem">
+      <div class="container">
+        <header id="series-title" class="max-w-2xl mb-8 md:mb-10" style="scroll-margin-top: 7.5rem">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p class="t-eyebrow mb-3">Каталог дверей ВФД</p>
+              <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">Межкомнатные двери в Челябинске</h1>
+            </div>
+            {/* Полные карточки серий (фото+цена каждой) переехали на
+               /catalog/series/ — здесь превью группы компактнее (см. ниже),
+               но кому нужен весь список серий сразу — один клик отсюда. */}
+            <a href="/catalog/series/" class="mt-1 inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-teal-700 hover:text-teal-800">
+              Все серии
+              <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+
+          {/* Быстрый переход по покрытию вместо общей фразы не по делу —
+             сразу к нужной панели, а не пролистывать все подряд. Цвет
+             пилюли — единый графит (PILL_ACCENT), не цвет группы: пробовали
+             красить каждую в свой акцент (синий/фиолетовый/розовый), рядом
+             друг с другом это читалось пёстро и дёшево, не в языке сайта. */}
+          <ul class="mt-5 flex flex-wrap gap-2.5" role="list" aria-label="Перейти к покрытию">
+            {seriesCoatingGroups.map(group => (
+              <li>
+                <a
+                  href={`#panel-${group.slug}`}
+                  class={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold text-white shadow-lg transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-xl ${PILL_ACCENT}`}
+                >
+                  {group.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </header>
+        {seriesCoatingGroups.map((group, groupIndex) => {
+          const accent = COATING_ACCENT[group.slug] ?? DEFAULT_ACCENT
+          return (
+          /* Вся группа (карточки + преимущества + вывод) — в едином панельном
+             контейнере с рамкой/фоном: без него нижний ряд карточек серий
+             визуально сливался со след. группой, а блок преимуществ читался
+             как отдельная, не связанная с группой секция. Цвет панели —
+             мягкий акцент по покрытию (та же палитра, что у бейджей серии
+             на карточках товара), чтобы группы отличались с первого взгляда.
+
+             <details> вместо простого div — на мобильном 4 покрытия × сетка
+             карточек серий каждое давали очень длинный скролл до фильтров/
+             каталога. Первая группа раскрыта сразу (самая частая — Эмалекс),
+             остальные свёрнуты до клика; быстрый переход сверху (#panel-slug)
+             ведёт на саму панель, браузер разворачивает details-предка
+             при переходе по якорю нативно, без JS. */
+          <details id={`panel-${group.slug}`} open={groupIndex === 0} class={`group/panel mb-4 scroll-mt-24 rounded-3xl border ${PANEL} p-4 sm:p-6 last:mb-0`}>
+            <summary class={`-m-4 flex cursor-pointer list-none items-center justify-between gap-3 p-4 sm:-m-6 sm:p-6 [&::-webkit-details-marker]:hidden`}>
+              <span class="flex min-w-0 flex-col gap-1">
+                <span class="flex items-center gap-2.5">
+                  <span class="text-lg font-medium text-ink sm:text-xl">{group.name}</span>
+                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">{group.series.length} {pluralRu(group.series.length, ['серия', 'серии', 'серий'])}</span>
+                </span>
+                {COATING_SUMMARY[group.slug] && (
+                  <span class="text-sm text-slate-500">{COATING_SUMMARY[group.slug]}</span>
+                )}
+              </span>
+              <span class="flex shrink-0 items-center gap-3">
+                {/* Мини-превью серий группы — раньше свёрнутая панель была
+                   чистым текстом, непонятно что за двери внутри без клика.
+                   До 3 фото внахлёст (avatar-stack), только на самой
+                   панели — превью нужно свёрнутому состоянию, раскрытая
+                   и так показывает полные SeriesCard ниже. */}
+                <span class="hidden -space-x-3 sm:flex">
+                  {group.series.slice(0, 3).map(s => s.thumb && (
+                    <span class="h-10 w-10 overflow-hidden rounded-full border-2 border-white bg-slate-100 shadow-sm">
+                      <img src={s.thumb} alt="" aria-hidden="true" loading="lazy" decoding="async" width="40" height="40" class="h-full w-full object-cover" />
+                    </span>
+                  ))}
+                </span>
+                <svg class="h-5 w-5 shrink-0 text-graphite transition-transform duration-200 group-open/panel:rotate-180" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </summary>
+            <div class="mt-4 sm:mt-5">
+            {/* Раньше здесь была сетка отдельных SeriesCard (фото+название+цена
+               на каждую серию) — на большом покрытии (Эмаль — 7 серий) это
+               разрасталось в длинную ленту карточек внутри и так уже длинной
+               страницы. Теперь одна карточка на группу: список серий текстом
+               слева (кликабельно, ведёт на страницу серии) + одно
+               представительное фото группы справа — компактнее, при этом
+               видно, что за двери внутри. Полные карточки серий с фото
+               остаются на /catalog/series/. */}
+            <div data-series-card class={`grid gap-0 overflow-hidden rounded-2xl border border-l-4 sm:grid-cols-2 ${PANEL} ${accent.stripe}`}>
+              <div class="flex flex-col justify-between gap-6 p-5 sm:p-7">
+                <div>
+                  <p class={`m-0 mb-2 text-xs font-semibold uppercase tracking-wide ${accent.label}`}>
+                    Покрытие
+                  </p>
+                  <h2 class="m-0 mb-3 text-2xl font-medium text-ink sm:text-3xl">{group.name}</h2>
+                  {group.tagline && (
+                    <p class="m-0 mb-2 text-sm font-semibold text-ink">{group.tagline}</p>
+                  )}
+                  {group.description && (
+                    <details class="group/desc m-0 mb-4">
+                      <summary class={`-my-1 inline-flex cursor-pointer list-none items-center gap-1 py-1 text-sm font-semibold [&::-webkit-details-marker]:hidden ${accent.label}`}>
+                        Подробнее о покрытии
+                        <svg class="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-open/desc:rotate-180" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </summary>
+                      <p class="m-0 mt-2 text-sm leading-relaxed text-slate-700">{group.description}</p>
+                    </details>
+                  )}
+                  {/* Список серий — «сгруппированный список» с разделителями: на
+                     мобильном строка на всю ширину высотой 48px (удобно попасть
+                     пальцем), стрелка перехода справа, отклик на нажатие. Раньше
+                     строки были ~36px без разделителей и со стрелкой слева —
+                     читалось как маркированный текст, а не как ссылки. */}
+                  <ul data-series-list class="m-0 divide-y divide-slate-200 overflow-hidden rounded-xl border border-slate-200 bg-white p-0" role="list">
+                    {group.series.map(s => (
+                      <li>
+                        <a
+                          href={`/catalog/series/${s.slug}/`}
+                          data-cover={s.cover || undefined}
+                          data-cover-alt={`Серия ${s.name} — покрытие ${group.name}`}
+                          class="group/series-link flex min-h-12 items-center justify-between gap-3 px-4 py-2.5 text-ink transition-colors hover:bg-slate-50 active:bg-slate-100"
+                        >
+                          <span class="flex min-w-0 items-center gap-3">
+                            {/* Мобильный: наведения нет, большая картинка скрыта —
+                                миниатюра обложки прямо в строке, цена под названием
+                                (иначе название не помещается и переносится). На sm+
+                                роль превью играет большая картинка справа. */}
+                            {s.thumb && (
+                              <img
+                                src={s.thumb}
+                                alt=""
+                                aria-hidden="true"
+                                loading="lazy"
+                                decoding="async"
+                                width="36"
+                                height="44"
+                                class="h-11 w-9 shrink-0 rounded-md bg-slate-100 object-cover sm:hidden"
+                              />
+                            )}
+                            <span class="min-w-0">
+                              <span class="block text-[0.9375rem] font-medium">Серия {s.name}</span>
+                              {s.minPrice && <span class="mt-0.5 block text-sm tabular-nums text-slate-500 sm:hidden">от {fmt(s.minPrice)}</span>}
+                            </span>
+                          </span>
+                          <span class="flex shrink-0 items-center gap-2">
+                            {s.minPrice && <span class="hidden text-sm tabular-nums text-slate-500 sm:inline">от {fmt(s.minPrice)}</span>}
+                            <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-150 group-hover/series-link:translate-x-0.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div class="flex flex-col gap-3">
+                  <p class={`m-0 text-lg font-medium sm:text-xl ${accent.price}`}>
+                    {group.minPrice ? `от ${fmt(group.minPrice)}` : `${group.series.length} ${pluralRu(group.series.length, ['серия', 'серии', 'серий'])}`}
+                    {group.minPrice && <span class="ml-1 text-xs font-semibold opacity-70">за полотно</span>}
+                  </p>
+                  <a
+                    href={COATING_LANDING_SLUG[group.slug] ? `/catalog/${COATING_LANDING_SLUG[group.slug]}/` : `/catalog/?coating=${group.slug}#catalog-title`}
+                    class="btn btn-primary w-full sm:w-fit"
+                  >
+                    Смотреть модели
+                  </a>
+                </div>
+              </div>
+              {group.series[0]?.cover && (
+                /* Превью серии: на ПК при наведении на строку списка здесь
+                   плавно показывается обложка этой серии (скрипт внизу
+                   страницы). Два слоя — кросс-фейд без мигания: новая картинка
+                   сначала декодируется во втором слое, потом слои меняются. */
+                <div data-series-preview class="relative hidden min-h-80 overflow-hidden sm:block">
+                  <img
+                    src={group.series[0].cover}
+                    alt={`Серия ${group.series[0].name} — покрытие ${group.name}`}
+                    loading={groupIndex === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    fetchpriority={groupIndex === 0 ? 'high' : undefined}
+                    width="600"
+                    height="500"
+                    class="absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ease-out motion-reduce:transition-none"
+                  />
+                  <img
+                    src={group.series[0].cover}
+                    alt=""
+                    aria-hidden="true"
+                    loading="lazy"
+                    decoding="async"
+                    width="600"
+                    height="500"
+                    class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 ease-out motion-reduce:transition-none"
+                  />
+                </div>
+              )}
+            </div>
+
+            {group.benefits.length > 0 && (
+              <details class="group/benefits mt-6 border-t border-slate-200 pt-6">
+                <summary class={`m-0 flex w-fit cursor-pointer list-none items-center gap-1.5 text-xs font-semibold uppercase tracking-wide [&::-webkit-details-marker]:hidden ${accent.label}`}>
+                  Почему выбирают {group.name}
+                  <svg class="h-3 w-3 shrink-0 transition-transform duration-200 group-open/benefits:rotate-180" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </summary>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+                  {group.benefits.map(b => (
+                    <div class="rounded-xl border border-slate-200 bg-white p-5">
+                      <p class="m-0 mb-1.5 text-sm font-semibold text-ink">{b.title}</p>
+                      <p class="m-0 text-sm leading-relaxed text-slate-600">{b.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+            {group.closing && (
+              <p class="m-0 mt-5 text-sm font-medium leading-relaxed text-slate-700">{group.closing}</p>
+            )}
+            </div>
+          </details>
+          )
+        })}
+
+        <!-- Двери по покрытию/цвету/стилю — второстепенная SEO-навигация, не
+             основной путь к товару. Горизонтальный скролл на мобильном убран —
+             непонятно было, что список вообще скроллится, ничего не
+             намекало на свайп. Простой flex-wrap на всех брейкпоинтах:
+             не влезает в строку — переносится на следующую.
+
+             «По покрытию» — не все DOOR_CATEGORIES автоматически (тут уже
+             есть полноценные quick-jump пилюли по покрытию вверху страницы,
+             дублировать все 5 незачем), только 3 конкретных лендинга с
+             формулировкой под пользу, а не название материала —
+             «Не оставляют отпечатков» продаёт лучше, чем «Двери ПЭТ». -->
+        <div class="mt-2 mb-8 grid gap-4 sm:grid-cols-3 md:mb-10">
+          <div class="min-w-0">
+            <p class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400">Двери по покрытию</p>
+            <ul class="flex flex-wrap gap-2" role="list">
+              {[
+                { slug: 'dveri-emal',     label: 'Двери в эмали' },
+                { slug: 'dveri-ekoshpon', label: 'Двери экошпон' },
+                { slug: 'dveri-pet',      label: 'Не оставляют отпечатков' },
+              ].map(c => (
+                <li>
+                  <a
+                    href={`/catalog/${c.slug}/`}
+                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+                  >
+                    {c.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="min-w-0">
+            <p class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400">Двери по цвету</p>
+            <ul class="flex flex-wrap gap-2" role="list">
+              {COLOR_CATEGORIES.map(c => (
+                <li>
+                  <a
+                    href={`/catalog/${c.slug}/`}
+                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+                  >
+                    {c.h1.replace(' в Челябинске', '')}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="min-w-0">
+            <p class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400">Двери по стилю</p>
+            <ul class="flex flex-wrap gap-2" role="list">
+              {STYLE_CATEGORIES.map(c => (
+                <li>
+                  <a
+                    href={`/catalog/${c.slug}/`}
+                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+                  >
+                    {c.h1.replace(' в Челябинске', '')}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <div class="section bg-white">
+    <div class="container">
+      <CatalogClient
+        client:idle
+        cards={cards}
+        series={allSeries}
+        coatings={allCoatings}
+        colors={allColors}
+        initialSeries={urlSeries}
+        initialCoating={urlCoating}
+        initialColor={urlColor}
+      />
+    </div>
+  </div>
+
+  <!-- FAQ (SEO — FAQPage schema + аккордеон) -->
+  <section class="section">
+    <div class="container">
+      <FaqAccordion items={catalogFaq} />
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  /* Превью серии в карточке покрытия (ПК): наведение мышью или фокус
+     с клавиатуры на строку серии → в правой колонке плавно показывается
+     обложка этой серии; курсор ушёл со списка → исходная обложка.
+     Обложки группы подгружаются заранее при входе курсора в список, чтобы
+     смена была без задержки. На тач-устройствах не срабатывает — там
+     миниатюры прямо в строках. */
+  document.querySelectorAll<HTMLElement>('[data-series-card]').forEach(card => {
+    const frame = card.querySelector<HTMLElement>('[data-series-preview]')
+    const list  = card.querySelector<HTMLElement>('[data-series-list]')
+    if (!frame || !list) return
+    const layers = frame.querySelectorAll<HTMLImageElement>('img')
+    if (layers.length < 2) return
+    let front = layers[0]!
+    let back  = layers[1]!
+    const defaultSrc = front.getAttribute('src') ?? ''
+    const defaultAlt = front.alt
+    let current = defaultSrc
+    let token = 0
+
+    const show = (src: string, alt: string) => {
+      if (!src || src === current) return
+      current = src
+      const my = ++token
+      const pre = new Image()
+      pre.src = src
+      const swap = () => {
+        if (my !== token) return // пока грузилась — навели на другую строку
+        back.src = src
+        back.alt = alt
+        back.removeAttribute('aria-hidden')
+        back.classList.remove('opacity-0')
+        front.classList.add('opacity-0')
+        front.alt = ''
+        front.setAttribute('aria-hidden', 'true')
+        ;[front, back] = [back, front]
+      }
+      pre.decode().then(swap, swap)
+    }
+
+    const rowFrom = (t: EventTarget | null) =>
+      (t as HTMLElement | null)?.closest<HTMLElement>('[data-cover]') ?? null
+
+    list.addEventListener('pointerenter', (e) => {
+      if (e.pointerType !== 'mouse') return
+      list.querySelectorAll<HTMLElement>('[data-cover]').forEach(r => { new Image().src = r.dataset.cover! })
+    }, { once: true })
+    list.addEventListener('pointerover', (e) => {
+      if (e.pointerType !== 'mouse') return
+      const row = rowFrom(e.target)
+      if (row) show(row.dataset.cover!, row.dataset.coverAlt ?? '')
+    })
+    list.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') show(defaultSrc, defaultAlt)
+    })
+    list.addEventListener('focusin', (e) => {
+      const row = rowFrom(e.target)
+      if (row) show(row.dataset.cover!, row.dataset.coverAlt ?? '')
+    })
+    list.addEventListener('focusout', (e) => {
+      if (!list.contains(e.relatedTarget as Node | null)) show(defaultSrc, defaultAlt)
+    })
+  })
+</script>
+

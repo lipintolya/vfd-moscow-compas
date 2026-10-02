@@ -1,0 +1,22 @@
+---
+import ProcessSteps from '../partitions/ProcessSteps.astro'
+import { howItWorksSteps } from '../../data/how-it-works'
+---
+
+<section class="section bg-white" aria-labelledby="how-we-work-heading">
+  <div class="container">
+
+    <header class="max-w-2xl mb-8 md:mb-10">
+      <p class="t-eyebrow mb-2">Процесс</p>
+      <h2 id="how-we-work-heading" class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-4xl">
+        Как мы работаем
+      </h2>
+      <p class="mt-2 text-base text-slate-600">
+        От выбора модели до готовой установки — 4 понятных шага, без скрытых доплат
+      </p>
+    </header>
+
+    <ProcessSteps items={howItWorksSteps} dark />
+
+  </div>
+</section>

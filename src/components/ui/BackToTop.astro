@@ -1,0 +1,79 @@
+---
+---
+<button
+  id="btt-btn"
+  aria-label="Наверх — прокрутить страницу в начало"
+  title="Наверх"
+>
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<style>
+  @keyframes btt-pulse {
+    0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 0 rgba(20,184,166,0.28); }
+    50%       { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 7px rgba(20,184,166,0); }
+  }
+
+  #btt-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #f0fdfa 0%, #fff 60%);
+    border: 1px solid #99f6e4;
+    color: #0d9488;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+    pointer-events: none;
+    transition: opacity 220ms ease, transform 220ms ease,
+                background 150ms ease, border-color 150ms ease;
+    z-index: 48;
+  }
+  #btt-btn svg { width: 1.125rem; height: 1.125rem; }
+
+  #btt-btn.btt-visible {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    animation: btt-pulse 2.4s ease-in-out infinite;
+  }
+  #btt-btn:hover {
+    background: linear-gradient(135deg, #ccfbf1 0%, #f0fdfa 100%);
+    border-color: #2dd4bf;
+    box-shadow: 0 6px 20px rgba(13, 148, 136, 0.22);
+    animation: none;
+  }
+  #btt-btn:active { transform: scale(0.94); animation: none; }
+
+  @media (max-width: 640px) {
+    #btt-btn { bottom: 1.25rem; right: 1rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #btt-btn.btt-visible { animation: none; }
+  }
+</style>
+
+<script>
+  ;(function () {
+    var btn = document.getElementById('btt-btn')
+    if (!btn) return
+
+    function onScroll() {
+      btn.classList.toggle('btt-visible', window.scrollY > 400)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    btn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  })()
+</script>

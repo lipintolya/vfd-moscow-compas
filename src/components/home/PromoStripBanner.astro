@@ -1,0 +1,85 @@
+---
+/**
+ * src/components/home/PromoStripBanner.astro
+ *
+ * Компактная строка-анонс акций между хиро и остальным контентом главной.
+ * Ведёт к блоку #promo (Promo.vue). Раньше была высокая тёмная секция
+ * с фоновой картинкой интерьера, несвязанной с конкретными акциями —
+ * заменена на тонкий info-bar с реальной актуальной акцией.
+ *
+ * Переход — не обычный якорь: страница длинная (~9-10к px), а ниже
+ * PromoStripBanner ещё лежат несколько client:visible/client:idle
+ * островов — пока анимированный scroll-behavior:smooth едет вниз, их
+ * картинки и разметка догружаются и меняют высоту документа под ногами
+ * (замерено: +~440px за первые ~300мс скролла). Анимация целится в
+ * зафиксированную на старте точку, поэтому скролл иногда не долетает и
+ * приземляется в блок «Портфолио» прямо перед #promo, а не в сами акции.
+ * Мгновенный прыжок (behavior:'instant') снимает саму возможность гонки —
+ * он не анимируется, значит нечему "не долетать".
+ */
+---
+
+<div class="promo-strip-wrap">
+  <div class="container">
+    <a
+      href="#promo"
+      class="promo-strip group relative flex flex-col items-start gap-3 overflow-hidden rounded-2xl bg-graphite px-6 py-6 no-underline sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-7"
+    >
+      <p class="relative z-10 text-base font-medium text-white sm:text-lg">
+        Бесплатный замер по Челябинску — при заказе межкомнатных дверей
+      </p>
+      <span class="promo-strip__cta relative z-10 inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-teal-400 transition-transform group-hover:translate-x-0.5">
+        Все акции
+        <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.promo-strip').forEach((el) => {
+    el.addEventListener('click', (e) => {
+      const target = document.getElementById('promo')
+      if (!target) return
+      e.preventDefault()
+      target.scrollIntoView({ behavior: 'instant', block: 'start' })
+      history.pushState(null, '', '#promo')
+    })
+  })
+</script>
+
+<style>
+  /* Тот же hover-язык, что у тёмных карточек ProcessSteps (.ps--dark) —
+     градиентная teal-подсветка через ::before (браузеры не интерполируют
+     плавно между solid и gradient background напрямую) + приподнятая
+     рамка/тень/translateY, для визуальной консистентности тёмных
+     элементов на главной. */
+  .promo-strip {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: box-shadow 300ms ease, transform 300ms ease, border-color 300ms ease;
+  }
+  .promo-strip::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background: linear-gradient(155deg, transparent 40%, rgba(20, 184, 166, 0.16) 100%);
+    opacity: 0;
+    transition: opacity 400ms ease;
+    pointer-events: none;
+  }
+  .promo-strip:hover {
+    border-color: rgba(45, 212, 191, 0.4);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    transform: translateY(-3px);
+  }
+  .promo-strip:hover::before {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .promo-strip { transition: none; }
+    .promo-strip:hover { transform: none; }
+  }
+</style>

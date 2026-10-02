@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import PortfolioGrid from '../../components/portfolio/PortfolioGrid.vue'
+import QuoteCta from '../../components/ui/QuoteCta.astro'
+import { PORTFOLIO_WORKS } from '../../data/portfolio-works'
+
+const works = [...PORTFOLIO_WORKS].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+)
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://vfd74.ru' },
+    { '@type': 'ListItem', position: 2, name: 'Наши работы', item: 'https://vfd74.ru/portfolio/' },
+  ],
+}
+---
+
+<BaseLayout
+  title="Наши работы — фотоотчёты монтажей дверей | ВФД Челябинск"
+  description="Фотоотчёты установки межкомнатных, скрытых, входных дверей и алюминиевых перегородок — реальные объекты салона ВФД по Челябинску и области."
+  structuredData={[breadcrumbSchema]}
+>
+  <section class="section">
+    <div class="container">
+
+      <nav aria-label="Хлебные крошки" class="mb-6">
+        <ol class="flex items-center gap-2 text-sm text-slate-500">
+          <li><a href="/" class="hover:text-teal-600 transition-colors">Главная</a></li>
+          <li aria-hidden="true" class="text-slate-300">/</li>
+          <li class="text-slate-700 font-medium">Наши работы</li>
+        </ol>
+      </nav>
+
+      <header class="max-w-3xl mb-10 md:mb-12">
+        <p class="t-eyebrow mb-3">
+          Портфолио
+        </p>
+        <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">
+          Наши работы — фотоотчёты с объектов
+        </h1>
+        <p class="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">
+          Реальные объекты наших клиентов — монтаж дверей и перегородок по Челябинску и области
+        </p>
+      </header>
+
+      <PortfolioGrid works={works} client:visible />
+
+      <div class="mt-14 md:mt-16">
+        <QuoteCta
+          image="https://storage.yandexcloud.net/vfd74ru/works_prod/26.08.26_fenix2/2O_3moxea9jLTgH8uZbsCVECujmF4v2E8dAsl3IohqVkozfek8vkSMU-5ubzeHE-84tIMAWD5FI_0U8-suQqLLWL.webp"
+          title="Понравился результат?"
+          description="Все модели, которые видите на фото, в наличии в шоуруме — выбирайте по каталогу или приезжайте посмотреть вживую"
+          primaryHref="https://t.me/vfddoors74"
+          primaryLabel="Написать в Telegram"
+          secondaryHref="/catalog/"
+          secondaryLabel="Смотреть каталог"
+        />
+      </div>
+
+    </div>
+  </section>
+</BaseLayout>

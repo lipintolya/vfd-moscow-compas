@@ -1,0 +1,440 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import ProcessSteps from '../components/partitions/ProcessSteps.astro'
+import EntranceDoorShowcase from '../components/entrance-doors/EntranceDoorShowcase.vue'
+import { ENTRANCE_DOOR_MODELS, ENTRANCE_SKINS, minPriceOf } from '../data/entrance-doors'
+import { companyLegalInfo, merchantPolicy } from '../lib/contacts-data'
+
+const PHONE = companyLegalInfo.contacts.phone[0]!.raw
+const TG    = 'https://t.me/vfddoors74'
+const VK    = 'https://vk.com/vfddoors74'
+const MAX   = 'https://max.ru/id452402308842_biz'
+
+const heroModel = ENTRANCE_DOOR_MODELS[0]!
+const minPrice  = Math.min(...ENTRANCE_DOOR_MODELS.map(minPriceOf))
+
+const apartmentModels = ENTRANCE_DOOR_MODELS.filter(m => m.purpose === 'apartment')
+const houseModels     = ENTRANCE_DOOR_MODELS.filter(m => m.purpose === 'house')
+
+const heroStats = [
+  { val: '2014',                       lbl: 'год основания салона',      desc: 'Официальный дилер в Челябинске' },
+  { val: '12 месяцев',                 lbl: 'гарантия качества',         desc: 'На монтажные работы нашей бригады' },
+  { val: `${ENTRANCE_SKINS.length}+`,  lbl: 'вариантов накладок изнутри', desc: 'Под интерьер и под другие двери в доме' },
+]
+
+interface Step { num: string; title: string; text: string; details: string[] }
+
+const steps: Step[] = [
+  {
+    num: '01',
+    title: 'Выбираете модель и накладку',
+    text: 'Смотрите модели входных дверей и подбираете отделку изнутри — под интерьер или в цвет межкомнатных дверей в квартире.',
+    details: ['Каталог с ценами прямо на сайте', 'Можно посмотреть образцы в салоне'],
+  },
+  {
+    num: '02',
+    title: 'Замер проёма',
+    text: 'Замерщик выезжает на объект, уточняет размер проёма и особенности монтажа.',
+    details: ['Выезд по Челябинску — 500 ₽', 'Согласование размера короба'],
+  },
+  {
+    num: '03',
+    title: 'Оформление заказа',
+    text: 'Фиксируем модель, накладку, фурнитуру и итоговую стоимость — договор и предоплата.',
+    details: ['Понятная смета без скрытых доплат', 'Срок изготовления уточняется у менеджера'],
+  },
+  {
+    num: '04',
+    title: 'Доставка и монтаж',
+    text: 'Привозим и устанавливаем дверь под ключ — с регулировкой петель и фурнитуры.',
+    details: ['Монтаж собственной бригадой', 'Гарантия на дверь и монтажные работы'],
+  },
+]
+
+const faq = [
+  {
+    q: 'Сколько стоит входная дверь под ключ?',
+    a: `Цена зависит от модели двери и выбранной накладки изнутри — в каталоге на этой странице указана цена за каждый вариант отделки. Минимальная цена сейчас — от ${minPrice.toLocaleString('ru-RU')} ₽. Точную стоимость с учётом монтажа уточнит менеджер.`,
+  },
+  {
+    q: 'Можно ли подобрать накладку под межкомнатные двери в квартире?',
+    a: 'Да — часть накладок повторяют дизайн и цвет наших межкомнатных серий (Niuta, ER1/ER2, Stockholm, Glanta, Dorren и другие), чтобы входная дверь визуально сочеталась с дверьми внутри квартиры.',
+  },
+  {
+    q: 'Какая гарантия на входную дверь?',
+    a: 'Гарантия на дверь — согласно условиям производителя, гарантия на монтажные работы нашей бригады — 12 месяцев.',
+  },
+  {
+    q: 'Есть ли выезд замерщика?',
+    a: 'Да, выезд замерщика по Челябинску — 500 ₽. Стоимость выезда за пределы города уточнит менеджер.',
+  },
+  {
+    q: 'Можно ли купить дверь без монтажа?',
+    a: 'Да, возможна поставка без монтажа, но рекомендуем монтаж силами нашей бригады — это условие действующей гарантии на работы.',
+  },
+]
+
+const title       = 'Входные двери в Челябинске — цены, каталог, монтаж | ВФД'
+const description = `Входные двери для квартиры с монтажом в Челябинске. ${ENTRANCE_SKINS.length}+ вариантов накладок изнутри, цены от ${minPrice.toLocaleString('ru-RU')} ₽. Замер от 300 ₽, гарантия на монтаж.`
+const canonicalUrl = Astro.site ? new URL('/vhodnye-dveri/', Astro.site).href : undefined
+const heroOgImage  = Astro.site ? new URL(heroModel.coverImage, Astro.site).href : heroModel.coverImage
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Входные двери' },
+]
+
+/* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+const productSchemas = ENTRANCE_DOOR_MODELS.map(model => ({
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: `Входная дверь ${model.name}`,
+  description: model.description,
+  image: new URL(model.coverImage, Astro.site ?? 'https://vfd74.ru').href,
+  brand: { '@type': 'Brand', name: 'ВФД' },
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'RUB',
+    lowPrice: minPriceOf(model),
+    highPrice: Math.max(...model.skinOptions.map(o => o.price)),
+    offerCount: model.skinOptions.length,
+    availability: 'https://schema.org/InStoreOnly',
+    seller: { '@type': 'Organization', name: 'Салон дверей ВФД' },
+    hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
+    shippingDetails:         merchantPolicy.shipping,
+  },
+}))
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map(f => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
+/* Service + LocalBusiness — геосигнал для локальной выдачи ("входные двери
+   Челябинск"), тот же паттерн, что на /partitions и /contacts. Product-схемы
+   выше уже покрывают цены/варианты по каждой модели — этот блок покрывает
+   "кто и где оказывает услугу". */
+const serviceSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  serviceType: 'Установка входных металлических дверей',
+  name: 'Входные металлические двери с монтажом',
+  description,
+  url: canonicalUrl,
+  areaServed: {
+    '@type': 'City',
+    name: 'Челябинск',
+    containedInPlace: { '@type': 'AdministrativeArea', name: 'Челябинская область' },
+  },
+  provider: {
+    '@type': 'LocalBusiness',
+    name: 'Салон дверей ВФД',
+    telephone: PHONE,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'ул. Братьев Кашириных, 131Б',
+      addressLocality: 'Челябинск',
+      addressCountry: 'RU',
+    },
+  },
+}
+
+const structuredData = [faqSchema, serviceSchema, ...productSchemas]
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage={heroOgImage}
+  preloadImage={heroModel.coverImage}
+  structuredData={structuredData}
+>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div>
+          <p class="t-eyebrow mb-3">Входные двери · Челябинск и область</p>
+          <h1 class="t-h1 mb-4">Входные двери для квартиры и дома: от бюджетных до уличных с терморазрывом</h1>
+          <p class="t-lead mb-6 max-w-125">
+            Надёжные стальные двери с монтажом для квартиры и частного дома. Тёплый короб,
+            дизайн под интерьер и защита от промерзания. Честная фиксированная цена —
+            платите только за то, что выбрали.
+          </p>
+          <div class="flex gap-2.5 flex-wrap items-center">
+            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary w-full sm:w-auto">Написать в Telegram</a>
+            <a href={`tel:${PHONE}`} class="btn btn-outline">Позвонить</a>
+            {/* VK+MAX — один флекс-элемент для переноса: на узких экранах должны
+               уезжать на новую строку вместе, а не по одной иконке-сироте. */}
+            <div class="flex shrink-0 gap-2.5">
+              <a href={VK} target="_blank" rel="noopener" class="btn btn-outline btn-icon" aria-label="Написать в VK">
+                <img src="/icons/b_vk_logo.webp" alt="" width="18" height="18" />
+              </a>
+              <a href={MAX} target="_blank" rel="noopener" class="btn btn-outline btn-icon" aria-label="Написать в MAX">
+                <img src="/icons/b_max_logo.webp" alt="" width="18" height="18" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div id="hero-swipe" class="relative aspect-4/5 w-full overflow-hidden rounded-3xl shadow-lg bg-slate-100">
+          {ENTRANCE_DOOR_MODELS.map((model, i) => (
+            <img
+              src={model.coverImage}
+              alt={`Входная дверь ${model.name}`}
+              class:list={[
+                'hero-render absolute inset-0 h-full w-full object-contain transition-opacity duration-500',
+                i === 0 ? 'opacity-100' : 'opacity-0',
+              ]}
+              data-idx={i}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              fetchpriority={i === 0 ? 'high' : 'auto'}
+              decoding="async"
+            />
+          ))}
+          {ENTRANCE_DOOR_MODELS.length > 1 && (
+            <div class="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5" role="group" aria-label="Переключить модель двери">
+              {ENTRANCE_DOOR_MODELS.map((model, i) => (
+                <button
+                  type="button"
+                  class="hero-dot dot-nav__btn flex h-6 w-6 items-center justify-center"
+                  data-idx={i}
+                  aria-label={model.name}
+                >
+                  <span class:list={['dot-nav__item', i === 0 && 'dot-nav__item--active']} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div class="mt-12 lg:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-6 lg:gap-x-12">
+        {heroStats.map((s, i) => (
+          <div class:list={['flex flex-col', i > 0 && 'border-t sm:border-t-0 sm:border-l border-slate-200 pt-6 sm:pt-0 sm:pl-8 lg:pl-12']}>
+            <span class="t-stat block">{s.val}</span>
+            <span class="block text-ink mt-2 text-step-1 font-medium leading-snug">{s.lbl}</span>
+            <span class="t-meta block mt-1">{s.desc}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       КАТАЛОГ МОДЕЛЕЙ
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white" id="catalog">
+    <div class="container">
+      <header class="mb-[clamp(2rem,4vw,3rem)]">
+        <p class="t-eyebrow mb-3">Каталог</p>
+        <h2 class="t-h2 mb-4">Модели входных дверей</h2>
+        <p class="t-lead max-w-160">Цена уже включает выбранную накладку изнутри — переключайтесь между вариантами, чтобы увидеть точную стоимость.</p>
+      </header>
+
+      <!-- Для квартиры (подъездная дверь) vs для дома (уличная, с терморазрывом) —
+           две обложки-категории с ценой "от" по минимуму внутри группы, клик
+           скроллит к первой модели этой группы в списке ниже. -->
+      <div class="mb-12 grid grid-cols-2 gap-4 lg:mb-16 lg:gap-6">
+        {[
+          { label: 'Для квартиры', hint: 'подъездные', models: apartmentModels, cover: 'https://storage.yandexcloud.net/vfd74ru/metal_doors/covers/render_hall.webp' },
+          { label: 'Для дома',     hint: 'уличные, с терморазрывом', models: houseModels, cover: 'https://storage.yandexcloud.net/vfd74ru/metal_doors/covers/homecover_render.webp' },
+        ].map(group => group.models.length > 0 && (
+          <a
+            href={`#${group.models[0]!.id}`}
+            class="group relative flex aspect-16/10 flex-col justify-end overflow-hidden rounded-2xl bg-slate-100 no-underline focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2"
+            aria-label={`${group.label} — от ${Math.min(...group.models.map(minPriceOf)).toLocaleString('ru-RU')} ₽`}
+          >
+            <img
+              src={group.cover}
+              alt=""
+              aria-hidden="true"
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              loading="lazy"
+              decoding="async"
+            />
+            <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/15 to-transparent" aria-hidden="true" />
+            <div class="relative z-10 p-4 sm:p-6">
+              <h3 class="text-lg font-medium leading-snug text-white sm:text-2xl">{group.label}</h3>
+              <p class="mt-1 text-xs text-white/70 sm:text-sm">{group.hint}</p>
+              <p class="mt-2 text-sm font-semibold text-white sm:text-base">от {Math.min(...group.models.map(minPriceOf)).toLocaleString('ru-RU')} ₽</p>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <!-- Фильтр по назначению — те же детальные карточки ниже, без отдельной
+           параллельной галереи, просто скрывает лишние.
+           Сортировку по цене убрали: у каждой двери 37 вариантов накладки
+           с разной ценой, карточка по умолчанию показывает цену Niuta (флагманская
+           накладка-дефолт), а не минимум — сортировка "по возрастанию" по факту
+           шла по минимуму среди всех накладок, и видимые цифры на карточках
+           не совпадали с порядком. Показывать вместо Niuta самую дешёвую
+           накладку ради сортировки — то же самое, только с другой стороны. -->
+      <div id="purpose-filter" class="mb-8 flex flex-wrap gap-2" role="tablist" aria-label="Тип двери">
+        <button type="button" class="purpose-filter-btn rounded-full border-[1.5px] px-4 py-2 text-sm font-medium transition-colors" data-purpose="all">Все двери</button>
+        <button type="button" class="purpose-filter-btn rounded-full border-[1.5px] px-4 py-2 text-sm font-medium transition-colors" data-purpose="apartment">Для квартиры</button>
+        <button type="button" class="purpose-filter-btn rounded-full border-[1.5px] px-4 py-2 text-sm font-medium transition-colors" data-purpose="house">Для дома</button>
+      </div>
+
+      <div id="catalog-list" class="flex flex-col gap-16 lg:gap-20">
+        {ENTRANCE_DOOR_MODELS.map((model, i) => (
+          <article id={model.id} class="scroll-mt-24" data-purpose={model.purpose}>
+            <EntranceDoorShowcase model={model} eager={i === 0} client:visible />
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       КАК ПРОХОДИТ ПОКУПКА
+  ══════════════════════════════════════════════ -->
+  <!-- Тонированная — единственная на странице. Задаёт ритм: каталог и FAQ
+       белые, процесс между ними отбит фоном. Идиома сайта (`section bg-slate-50`
+       на других страницах), а не новый приём. -->
+  <section class="section bg-slate-50">
+    <div class="container">
+      <header class="mb-[clamp(2rem,4vw,3rem)]">
+        <p class="t-eyebrow mb-3">Как купить</p>
+        <h2 class="t-h2 mb-4">От выбора до монтажа</h2>
+        <p class="t-lead max-w-160">Прозрачный процесс — от заявки до установленной двери.</p>
+      </header>
+      <ProcessSteps items={steps} />
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       FAQ
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white">
+    <div class="container">
+      <FaqAccordion items={faq} />
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       CTA — та же плашка, что на /catalog/skrytye-dveri/ и в портфолио:
+       страница раньше уходила из FAQ прямо в футер, без финального призыва
+  ══════════════════════════════════════════════ -->
+  <section class="section">
+    <div class="container">
+      <div class="flex flex-col gap-6 rounded-2xl p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8" style="background: #212124">
+        <div>
+          <h2 class="text-2xl font-medium text-white sm:text-3xl">Рассчитаем бесплатно</h2>
+          <p class="mt-2 max-w-md text-sm text-white/60 sm:text-base">
+            Замер по Челябинску, точная стоимость, подбор накладки и цвета.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2.5">
+          <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost w-full sm:w-auto">Написать в Telegram</a>
+          <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
+          <div class="flex shrink-0 gap-2.5">
+            <a href={VK} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в VK">
+              <img src="/icons/w_vk.webp" alt="" width="18" height="18" />
+            </a>
+            <a href={MAX} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в MAX">
+              <img src="/icons/w_max.webp" alt="" width="18" height="18" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script>
+  // Фильтр "Все / Для квартиры / Для дома" — показывает/скрывает готовые
+  // article-блоки каталога по data-purpose.
+  const purposeButtons  = document.querySelectorAll<HTMLButtonElement>('.purpose-filter-btn')
+  const purposeArticles = document.querySelectorAll<HTMLElement>('#catalog-list > [data-purpose]')
+
+  const setPurposeFilter = (purpose: string) => {
+    purposeButtons.forEach(btn => {
+      const active = btn.dataset.purpose === purpose
+      btn.setAttribute('aria-selected', String(active))
+      btn.classList.toggle('border-ink', active)
+      btn.classList.toggle('bg-ink', active)
+      btn.classList.toggle('text-white', active)
+      btn.classList.toggle('border-slate-200', !active)
+      btn.classList.toggle('bg-white', !active)
+      btn.classList.toggle('text-slate-600', !active)
+    })
+    purposeArticles.forEach(article => {
+      article.classList.toggle('hidden', purpose !== 'all' && article.dataset.purpose !== purpose)
+    })
+  }
+
+  purposeButtons.forEach(btn => {
+    btn.addEventListener('click', () => setPurposeFilter(btn.dataset.purpose!))
+  })
+
+  setPurposeFilter('all')
+</script>
+
+<script>
+  // Переключение рендеров моделей в hero — клик по точке и свайп по фото на
+  // мобиле (без автоплея, как договорились на Features.vue: авто-листание
+  // визуально "нагружено", жест/клик — ок).
+  const heroDots  = document.querySelectorAll<HTMLButtonElement>('.hero-dot')
+  const heroImgs  = document.querySelectorAll<HTMLImageElement>('.hero-render')
+  const heroSwipe = document.getElementById('hero-swipe')
+
+  let heroIdx = 0
+  const setActiveHero = (idx: number) => {
+    heroIdx = idx
+    const idxStr = String(idx)
+    heroImgs.forEach(img => {
+      img.classList.toggle('opacity-100', img.dataset.idx === idxStr)
+      img.classList.toggle('opacity-0', img.dataset.idx !== idxStr)
+    })
+    heroDots.forEach(d => {
+      d.querySelector('.dot-nav__item')?.classList.toggle('dot-nav__item--active', d.dataset.idx === idxStr)
+    })
+  }
+
+  heroDots.forEach(dot => {
+    dot.addEventListener('click', () => setActiveHero(Number(dot.dataset.idx)))
+  })
+
+  if (heroSwipe && heroImgs.length > 1) {
+    const SWIPE_THRESHOLD = 40
+    let touchStartX = 0
+    let touchStartY = 0
+
+    heroSwipe.addEventListener('touchstart', (e: TouchEvent) => {
+      if (!e.touches[0]) return
+      touchStartX = e.touches[0].clientX
+      touchStartY = e.touches[0].clientY
+    }, { passive: true })
+
+    heroSwipe.addEventListener('touchend', (e: TouchEvent) => {
+      if (!e.changedTouches[0]) return
+      const dx = touchStartX - e.changedTouches[0].clientX
+      const dy = touchStartY - e.changedTouches[0].clientY
+      if (Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) <= SWIPE_THRESHOLD) return
+
+      const total = heroImgs.length
+      const nextIdx = dx > 0 ? (heroIdx + 1) % total : (heroIdx - 1 + total) % total
+      setActiveHero(nextIdx)
+    })
+  }
+</script>

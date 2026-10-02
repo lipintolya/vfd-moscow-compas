@@ -1,0 +1,36 @@
+---
+/**
+ * src/components/articles/PhotoGrid.astro
+ * Сетка равных фото-плиток в статье — {% photogrid %}{% photo /%}{% /photogrid %}.
+ * Число колонок = число фото по умолчанию (2 или 3 в ряд), меньше на мобильном.
+ * Ячейки — квадрат + object-fit:cover: разные по пропорциям источники (портрет/
+ * ландшафт/квадрат) всегда дают одинаковые по ширине и высоте плитки без
+ * искажения (обрезка, а не растяжение).
+ */
+interface Props {
+  cols?: number // сколько колонок на desktop (по умолчанию 3)
+}
+const { cols = 3 } = Astro.props
+---
+
+<div class="dphotogrid" style={`--cols:${cols}`}>
+  <slot />
+</div>
+
+<style>
+.dphotogrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin: 1.75rem 0;
+}
+@media (min-width: 480px) {
+  .dphotogrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 640px) {
+  .dphotogrid {
+    grid-template-columns: repeat(var(--cols), 1fr);
+    gap: 1.25rem;
+  }
+}
+</style>

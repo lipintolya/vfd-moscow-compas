@@ -1,0 +1,685 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import PhotoLightbox from '../components/ui/PhotoLightbox.vue'
+import DoorLeafViewer from '../components/partitions/DoorLeafViewer.vue'
+
+import SectionHeading from '../components/partitions/SectionHeading.astro'
+import FeatureList from '../components/partitions/FeatureList.astro'
+import SwatchGrid from '../components/partitions/SwatchGrid.astro'
+import ProjectCase from '../components/partitions/ProjectCase.astro'
+import BenefitsShowcase from '../components/partitions/BenefitsShowcase.astro'
+import ProcessSteps from '../components/partitions/ProcessSteps.astro'
+import Downloads from '../components/partitions/Downloads.astro'
+import SectionNav from '../components/partitions/SectionNav.astro'
+import ReplayButton from '../components/partitions/ReplayButton.astro'
+import QuoteCta from '../components/ui/QuoteCta.astro'
+import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import IconArrowRight from '../components/ui/icons/IconArrowRight.astro'
+import IconTelegram from '../components/ui/icons/IconTelegram.astro'
+import IconExpand from '../components/ui/icons/IconExpand.astro'
+
+import {
+  imgs, heroStats, tracks, mountings, colorSwatches, glassSwatches,
+  partitionBenefits, steps, sectionalModels, sectionalDecor, overlayModels, overlayDecor, cases,
+  renderGallery, aspenCase,
+} from '../data/partitions'
+import '../styles/partitions.css'
+
+const title       = 'Алюминиевые перегородки в Челябинске — цены, изготовление на заказ | ВФД'
+const description = 'Раздвижные и распашные алюминиевые перегородки из профилей GRAFIA. Бесплатный замер при заказе, монтаж по Челябинску. Срок изготовления 45 рабочих дней.'
+const canonicalUrl = Astro.site ? new URL('/partitions/', Astro.site).href : undefined
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Перегородки' },
+]
+
+const partitionsFaq = [
+  {
+    q: 'Сколько времени изготавливается перегородка?',
+    a: 'Срок изготовления — 45 рабочих дней после оформления заказа и утверждения чертежей. Расчёт стоимости по вашим размерам делаем оперативно, обычно в течение дня.',
+  },
+  {
+    q: 'Какое стекло используется в перегородках?',
+    a: 'Закалённые стёкла толщиной 4, 6 или 8 мм повышенной прочности — прозрачные, тонированные или сатин. Возможна установка зеркала.',
+  },
+  {
+    q: 'Можно ли покрасить профиль в свой цвет?',
+    a: 'Да. Профили окрашиваются порошковой полимерной краской, доступна индивидуальная покраска по каталогам RAL/NCS под ваш интерьер.',
+  },
+  {
+    q: 'Сколько стоит алюминиевая перегородка?',
+    a: 'Цена зависит от размеров проёма, типа профиля, стекла и системы открывания, поэтому считается индивидуально по вашим размерам. Пришлите размеры проёма — сделаем расчёт в течение дня, бесплатно.',
+  },
+  {
+    q: 'Вы делаете перегородки по индивидуальным чертежам?',
+    a: 'Да, изготавливаем перегородки по индивидуальным размерам и чертежам: от простых экранов до комбинаций «дверь + гардеробная» в едином стиле.',
+  },
+  {
+    q: 'Кто устанавливает перегородку?',
+    a: 'Монтаж по Челябинску выполняет наша бригада — те же специалисты ведут заказ от замера до установки, с гарантией на работы.',
+  },
+]
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type':    'Service',
+  name:        'Алюминиевые перегородки GRAFIA',
+  description,
+  url:         canonicalUrl,
+  image:       [imgs.hero, ...renderGallery.map(r => Astro.site ? new URL(r.src, Astro.site).href : r.src)],
+  provider: {
+    '@type':    'LocalBusiness',
+    name:       'Салон дверей ВФД',
+    telephone:  '+79000297888',
+    address: {
+      '@type':         'PostalAddress',
+      streetAddress:   'ул. Братьев Кашириных, 131Б',
+      addressLocality: 'Челябинск',
+      addressCountry:  'RU',
+    },
+  },
+}
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: partitionsFaq.map(f => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
+/* Превью для бенто-плиток — заранее сгенерированные маленькие копии
+   (public/renders/alum-covers/N-preview.webp), см. README в той же папке. */
+const renderPreviews = renderGallery.slice(0, 3).map(img => ({
+  src: img.src.replace(/\.webp$/, '-preview.webp'),
+  alt: img.alt,
+}))
+const renderLightbox = renderGallery
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage={imgs.hero}
+  preloadImage={imgs.hero}
+  structuredData={[structuredData, faqSchema]}
+>
+  <SectionNav />
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <!-- HERO — Bento: большая карточка + 3 стата -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="pt-hero-bento">
+
+        <div class="col-start-1 row-span-full relative rounded-3xl overflow-hidden min-h-110 flex flex-col justify-end bg-ink">
+          <!-- Картинка — мгновенный LCP-фон, никогда не убирается из DOM (fallback
+               без JS / при prefers-reduced-motion). Видео поверх неё — необязательное
+               улучшение, догружается только после window.load, чтобы не спорить
+               с критичными ресурсами страницы за полосу. -->
+          <img
+            class="absolute inset-0 w-full h-full object-cover object-center"
+            src={imgs.hero}
+            alt="Алюминиевые раздвижные перегородки GRAFIA в современном интерьере"
+            width="1920" height="1080" loading="eager" decoding="async" fetchpriority="high"
+          />
+          <video
+            id="pt-hero-video"
+            class="absolute inset-0 w-full h-full object-cover object-center opacity-0 transition-opacity duration-700"
+            muted loop playsinline preload="none"
+            aria-hidden="true"
+          >
+            <source data-src="https://storage.yandexcloud.net/vfd74ru/alum_cover/alum_cover.mp4" type="video/mp4" />
+          </video>
+          <div class="absolute inset-0 bg-linear-to-t from-black/70 via-black/35 to-black/8" aria-hidden="true"></div>
+          <div class="relative z-10 p-[clamp(1.5rem,3vw,2.5rem)]">
+            <p class="block mb-3 text-xs font-medium tracking-widest uppercase text-white/55">Официальный партнёр VFD</p>
+            <h1 class="t-h1 text-step-7 m-0 text-white leading-none tracking-[-0.04em]">Алюминиевые <br />перегородки</h1>
+            <p class="mt-3 mb-0 text-step-1 leading-relaxed max-w-125 text-white/78">
+              Раздвижные и распашные системы из профилей&nbsp;<strong class="text-white font-semibold">GRAFIA</strong>&nbsp;—
+              отечественное производство, минималистичный дизайн, сборно-разборная конструкция.
+            </p>
+            <div class="flex gap-2.5 flex-wrap mt-5">
+              <a href="https://t.me/vfddoors74" target="_blank" rel="noopener" class="btn btn-ghost">Получить расчёт</a>
+              <a href="/contacts/" class="btn btn-ghost">Контакты</a>
+            </div>
+          </div>
+        </div>
+
+        {heroStats.map(s => (
+          <div class="pt-hero-stat rounded-3xl flex flex-col justify-between p-5 bg-fg">
+            <div>
+              <span class="t-stat block text-teal-400 tracking-[-0.04em]">{s.val}</span>
+              <span class="block text-sm font-semibold text-white mt-1 leading-snug">{s.lbl}</span>
+              <span class="block text-xs text-white/50 leading-snug mt-1">{s.desc}</span>
+            </div>
+            {s.cta && (
+              <a href={s.href} target="_blank" rel="noopener" class="pt-stat-cta mt-3">
+                {s.cta}
+                <IconArrowRight size={12} />
+              </a>
+            )}
+          </div>
+        ))}
+
+      </div>
+    </div>
+  </section>
+
+  <!-- СПОТЛАЙТ: система Aspen -->
+  <ProjectCase data={aspenCase} eager />
+
+  <!-- О СИСТЕМЕ — текст | видео -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="pt-about__grid">
+
+        <div class="rounded-3xl border border-slate-200 bg-white shadow-sm p-[clamp(1.5rem,3vw,2.25rem)] flex flex-col justify-center">
+          <p class="t-eyebrow block mb-3">Система GRAFIA</p>
+          <h2 class="t-h2 text-step-6 mb-4">Современный подход к зонированию</h2>
+          <p class="mb-5 t-lead text-slate-600">
+            Алюминиевые перегородки с остеклением — без капитального ремонта и без сноса стен.
+            Профили GRAFIA производятся в России, прошли сертификацию и отличаются
+            повышенной прочностью при минимальной ширине рамы.
+          </p>
+          <ul class="pt-list">
+            <li>Раздвижные и распашные системы под любой проём</li>
+            <li>Закалённое стекло 4, 6 и 8&nbsp;мм</li>
+            <li>Полотна высотой до 5&nbsp;м при секционном декоре</li>
+            <li>Демонтаж без следов при перепланировке</li>
+            <li>Окраска профиля по RAL/NCS</li>
+          </ul>
+          <a href="tel:+79000297888" class="btn btn-accent">
+            Узнать стоимость
+            <IconArrowRight />
+          </a>
+        </div>
+
+        <div class="pt-video-wrap rounded-3xl border border-slate-200 bg-slate-900 shadow-sm overflow-hidden min-h-105 p-0 relative">
+          <video
+            class="pt-autoplay-video absolute inset-0 w-full h-full object-cover object-center"
+            preload="metadata" muted playsinline
+            aria-label="Анимация открытия алюминиевых перегородок GRAFIA"
+          >
+            <source data-src="https://storage.yandexcloud.net/catalog-vfd/video/alum_animation.mp4" type="video/mp4" />
+          </video>
+          <ReplayButton />
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- СИСТЕМА PIVOT — видео | текст -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="pt-pivot-grid">
+
+        <div class="flex flex-col gap-2">
+          <div class="pt-video-wrap relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-800 aspect-9/16">
+            <video
+              class="pt-autoplay-video absolute inset-0 w-full h-full object-cover"
+              preload="metadata" muted playsinline
+              aria-label="Демонстрация работы алюминиевой двери на системе PIVOT"
+            >
+              <source data-src="https://storage.yandexcloud.net/catalog-vfd/video/pivot_system.mp4" type="video/mp4" />
+            </video>
+            <div class="absolute top-3 left-3 flex flex-col rounded-xl px-3 py-1.5 pointer-events-none bg-slate-900/72 backdrop-blur-sm">
+              <span class="text-step-0 font-medium tracking-[0.08em] leading-tight text-teal-300">PIVOT</span>
+              <span class="text-[0.625rem] font-semibold leading-tight text-slate-400">система открывания</span>
+            </div>
+            <ReplayButton />
+          </div>
+
+          <a href="https://t.me/VFD_Design" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-1.5 no-underline group">
+            <IconTelegram class="text-slate-400 group-hover:text-teal-500 transition-colors duration-200 shrink-0" />
+            <span class="text-[0.6875rem] text-slate-400 group-hover:text-teal-500 transition-colors duration-200">
+              Видео: <span class="font-semibold">ВФД Дизайн</span>
+            </span>
+          </a>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-white shadow-sm flex flex-col p-[clamp(1.25rem,2.5vw,2rem)]">
+          <p class="t-eyebrow block mb-3">Специальное решение</p>
+          <h2 class="t-h2 mb-3">Система PIVOT</h2>
+          <p class="mb-5 t-lead text-slate-600">
+            Алюминиевая дверь на системе PIVOT — современное и практичное решение для дома или офиса.
+          </p>
+          <FeatureList
+            class="mb-6"
+            items={[
+              'Легко открывается, экономит место и обеспечивает плавное движение',
+              'Закалённое стекло повышает безопасность и сохраняет естественное освещение',
+            ]}
+          />
+          <a
+            href="https://crm.vfd.ru/~ogWix" target="_blank" rel="noopener noreferrer"
+            class="inline-flex items-center gap-2.5 self-start px-5 py-3 rounded-xl no-underline text-sm font-semibold border border-slate-200 bg-slate-50 text-ink hover:border-teal-400 hover:bg-teal-50 transition-colors duration-200"
+          >
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true" class="text-teal-600 shrink-0">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Каталог решений — Скачать PDF
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- РЕАЛИЗОВАННЫЕ ПРОЕКТЫ: Стационарные · Waldorf · Лахта -->
+  <div id="pt-projects">
+    {cases.map(c => <ProjectCase data={c} />)}
+  </div>
+
+  <!-- ГАЛЕРЕЯ РЕНДЕРОВ: перегородки и алюминиевые двери -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Визуализация"
+        title="Перегородки и двери в интерьере"
+        subtitle={`Дизайн-рендеры алюминиевых перегородок и дверей GRAFIA — ${renderGallery.length} вариантов оформления для разных стилей интерьера`}
+      />
+      <div class="pt-render-bento">
+        {renderGallery.slice(0, 3).map((img, i) => (
+          <button
+            type="button"
+            class="relative overflow-hidden rounded-3xl bg-slate-100 cursor-zoom-in group"
+            data-render-tile
+            data-index={i}
+            aria-label={i === 2 ? `Открыть все ${renderGallery.length} рендеров` : `Открыть рендер крупнее: ${img.alt}`}
+          >
+            <img
+              src={renderPreviews[i].src}
+              alt={img.alt}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            />
+            {i === 2 ? (
+              <div class="absolute inset-0 flex flex-col items-center justify-center gap-0.5 bg-slate-900/55 text-white backdrop-blur-xs transition-colors duration-200 group-hover:bg-slate-900/65">
+                <span class="text-2xl font-medium tracking-tight">+{renderGallery.length - 3}</span>
+                <span class="text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-200">рендеров</span>
+              </div>
+            ) : (
+              <div class="absolute top-2.5 left-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-900/55 backdrop-blur-xs text-white">
+                  <IconExpand size={13} />
+                </div>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ renderGalleryImages: renderLightbox }}>
+    document.querySelectorAll('[data-render-tile]').forEach(function (tile) {
+      tile.addEventListener('click', function () {
+        var index = Number(tile.dataset.index)
+        window.dispatchEvent(new CustomEvent('open-lightbox', { detail: { images: renderGalleryImages, index: index } }))
+      })
+    })
+  </script>
+
+  <!-- ТИПЫ НАПРАВЛЯЮЩИХ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Раздвижные системы"
+        title="Типы направляющих"
+        subtitle="Количество треков определяет конфигурацию и максимальное число полотен"
+      />
+      <div class="pt-3col">
+        {tracks.map(t => (
+          <article class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col p-0">
+            <div class="relative aspect-4/3 overflow-hidden bg-slate-100 pt-track-slider group cursor-zoom-in">
+              <div class="pt-stat-slides">
+                {t.imgs.map(img => (
+                  <img src={img.src} alt={img.alt} class="pt-stat-slide" loading="lazy" decoding="async" width="800" height="450" />
+                ))}
+              </div>
+              <button class="pt-stat-arrow pt-stat-prev" type="button" aria-label="Предыдущее фото">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="pt-stat-arrow pt-stat-next" type="button" aria-label="Следующее фото">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="pt-stat-dots">
+                {t.imgs.map((_, i) => (
+                  <button class={`pt-stat-dot${i === 0 ? ' is-active' : ''}`} type="button" aria-label={`Фото ${i + 1}`} />
+                ))}
+              </div>
+              <div class="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-900/55 backdrop-blur-xs text-white">
+                  <IconExpand size={13} />
+                </div>
+              </div>
+              <div class="absolute bottom-3 right-3 flex flex-col items-end px-2.5 py-1.5 rounded-xl leading-tight bg-slate-900/82 backdrop-blur-sm">
+                <b class="text-xl font-medium tracking-tight text-teal-300">{t.stat}</b>
+                <span class="text-[0.6rem] font-semibold whitespace-nowrap text-slate-400">{t.statLbl}</span>
+              </div>
+            </div>
+            <div class="p-[clamp(1.1rem,2vw,1.375rem)] flex flex-col gap-[0.45rem] flex-1">
+              <p class="m-0 text-[0.7rem] font-medium tracking-widest uppercase text-teal-600">{t.num}</p>
+              <h3 class="m-0 text-base font-medium text-ink">{t.title}</h3>
+              <p class="m-0 text-sm text-slate-500 leading-relaxed">{t.desc}</p>
+              <ul class="list-none p-0 mt-1 flex flex-col gap-1 pt-track-card__list">
+                {t.items.map(v => <li>{v}</li>)}
+              </ul>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ТИПЫ КРЕПЛЕНИЯ -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Конструкция"
+        title="Типы крепления"
+        subtitle="Способ крепления выбирается в зависимости от конструкции перекрытий"
+      />
+      <div class="pt-3col">
+        {mountings.map(m => (
+          <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col">
+            <button
+              class="relative w-full aspect-square overflow-hidden group cursor-zoom-in border-0 p-0 bg-transparent"
+              data-lb-src={m.img} data-lb-alt={m.title} type="button" aria-label={`Открыть фото: ${m.title}`}
+            >
+              <img
+                src={m.img} alt={m.title}
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading="lazy" decoding="async" width="800" height="450"
+              />
+              <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900/28">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/20 backdrop-blur-[6px] text-white">
+                  <IconExpand size={16} />
+                </div>
+              </div>
+            </button>
+            <div class="p-6 flex flex-col gap-2">
+              <span class="text-[0.7rem] font-medium tracking-widest uppercase text-teal-700 font-mono">{m.n}</span>
+              <h3 class="m-0 text-base font-medium text-ink">{m.title}</h3>
+              <p class="m-0 text-sm text-slate-500 leading-snug">{m.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- МОДЕЛЬНЫЙ РЯД СТВОРОК -->
+  <section id="pt-profiles" class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Ассортимент"
+        title="Модельный ряд створок"
+        subtitle="Секционный и накладной декор — варианты разбивки и оформления стекла"
+      />
+      <DoorLeafViewer client:visible models={sectionalModels} decor={sectionalDecor} />
+      <div class="mt-[clamp(2rem,4vw,3rem)]">
+        <DoorLeafViewer client:visible models={overlayModels} decor={overlayDecor} />
+      </div>
+    </div>
+  </section>
+
+  <!-- ЦВЕТА ПРОФИЛЯ -->
+  <section id="pt-colors" class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Отделка"
+        title="Цветовые решения профиля"
+        subtitle="Профили окрашены порошковой полимерной краской, что обеспечивает идеальный внешний вид и гарантирует стойкость покрытия. Можно выбрать индивидуальную покраску, подходящую под ваш интерьер, по&nbsp;RAL/NCS."
+      />
+      <SwatchGrid items={colorSwatches} variant="square" />
+    </div>
+  </section>
+
+  <!-- ОСТЕКЛЕНИЕ -->
+  <section id="pt-glass" class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Остекление"
+        title="Заполнение перегородок"
+        subtitle="Закалённые стёкла 4, 6 и 8&nbsp;мм повышенной прочности. Возможна установка зеркала"
+      />
+      <SwatchGrid items={glassSwatches} variant="portrait" />
+      <p class="pt-swatch-note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 11v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="12" cy="7.75" r="1.1" fill="currentColor"/>
+        </svg>
+        Наличие отдельных цветов и фактур стекла уточняйте у менеджера.
+      </p>
+    </div>
+  </section>
+
+  <!-- ПРЕИМУЩЕСТВА АЛЮМИНИЕВЫХ ПЕРЕГОРОДОК -->
+  <section id="pt-benefits" class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Преимущества"
+        title="Преимущества алюминиевых перегородок"
+        subtitle="Почему алюминий — оптимальный материал для современных перегородок: прочность, долговечность и эстетика без компромиссов."
+      />
+      <BenefitsShowcase items={partitionBenefits} />
+    </div>
+  </section>
+
+  <!-- КАК МЫ РАБОТАЕМ -->
+  <section id="pt-process" class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Процесс"
+        title="Как мы работаем"
+        subtitle="От первого обращения в фирменный салон ВФД на Кашириных до готовой перегородки в Челябинске — чётко и прозрачно"
+      />
+      <ProcessSteps items={steps} />
+
+      <div class="pt-dl-head">
+        <h3 class="pt-dl-head__title">Полезные материалы</h3>
+        <p class="pt-dl-head__sub">Подготовьтесь к замеру заранее — скачайте бланк и требования к проёму</p>
+      </div>
+      <Downloads />
+
+      <p class="mt-8 text-center text-sm text-slate-600">
+        Хотите разобраться подробнее в видах и материалах?
+        <a href="/articles/alyuminievye-peregorodki-zonirovanie/" class="font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+          Гид по зонированию алюминиевыми перегородками →
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ (SEO — FAQPage schema + аккордеон) -->
+  <section class="section bg-white">
+    <div class="container">
+      <FaqAccordion items={partitionsFaq} />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container">
+      <QuoteCta
+        image="https://storage.yandexcloud.net/catalog-vfd/alum/rener-2.webp"
+        primaryHref="https://t.me/vfddoors74"
+        secondaryHref="/contacts/"
+        secondaryLabel="Написать нам"
+      />
+    </div>
+  </section>
+
+<script is:inline>
+  // ── Hero-видео: грузим только после полной загрузки страницы (не спорит
+  // за полосу с критичными ресурсами) и только если пользователь не просил
+  // сократить анимации — тогда просто остаётся статичная картинка. ──
+  (function () {
+    var heroVideo = document.getElementById('pt-hero-video')
+    if (!heroVideo) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    function startHeroVideo() {
+      var source = heroVideo.querySelector('source[data-src]')
+      if (!source) return
+      source.setAttribute('src', source.getAttribute('data-src'))
+      heroVideo.addEventListener('loadeddata', function () {
+        heroVideo.classList.remove('opacity-0')
+      }, { once: true })
+      heroVideo.load()
+      heroVideo.play().catch(function () {})
+    }
+
+    if (document.readyState === 'complete') {
+      startHeroVideo()
+    } else {
+      window.addEventListener('load', startHeroVideo)
+    }
+  })()
+
+  ;(function () {
+    var videos = document.querySelectorAll('.pt-autoplay-video')
+    if (!videos.length || !('IntersectionObserver' in window)) return
+
+    // Плавное появление контейнера — как только первый кадр готов
+    videos.forEach(function (v) {
+      v.addEventListener('loadeddata', function () {
+        var wrap = v.closest('.pt-video-wrap')
+        if (wrap) wrap.classList.add('pt-video-ready')
+      }, { once: true })
+    })
+
+    // Кнопка повтора: показывается после окончания, скрывается при клике
+    videos.forEach(function (v) {
+      var btn = v.parentElement && v.parentElement.querySelector('.pt-pivot-replay')
+      if (!btn) return
+      v.addEventListener('ended', function () { btn.classList.add('is-visible') })
+      btn.addEventListener('click', function () {
+        btn.classList.remove('is-visible')
+        v.currentTime = 0
+        v.play().catch(function () {})
+      })
+    })
+
+    // Ранний префетч: начинаем качать файл задолго до того, как видео
+    // реально попадёт в кадр — на медленном канале успевает добуфериться
+    // к моменту скролла, вместо стопора «чёрный экран, пока грузится».
+    var ioPrefetch = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var v = entry.target
+        var source = v.querySelector('source[data-src]')
+        if (source && !source.getAttribute('src')) {
+          source.setAttribute('src', source.getAttribute('data-src'))
+          v.load()
+        }
+        ioPrefetch.unobserve(v)
+      })
+    }, { rootMargin: '800px 0px' })
+
+    // Реальная видимость: play/pause, не тратим ресурс на видео за кадром
+    var ioPlay = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var v = entry.target
+        if (entry.isIntersecting) {
+          if (!v.ended) v.play().catch(function () {})
+        } else {
+          if (!v.ended) v.pause()
+        }
+      })
+    }, { threshold: 0.4 })
+
+    videos.forEach(function (v) { ioPrefetch.observe(v); ioPlay.observe(v) })
+  })()
+
+  // ── Лайтбокс: открыть через custom event ──
+  function openLightbox(images, index) {
+    window.dispatchEvent(new CustomEvent('open-lightbox', { detail: { images: images, index: index } }))
+  }
+
+  // ── Слайдеры (общая функция) ──
+  function initSlider(container, withLightbox) {
+    if (!container) return
+    var slides  = container.querySelector('.pt-stat-slides')
+    var dots    = container.querySelectorAll('.pt-stat-dot')
+    var counter = container.querySelector('.pt-hotel-cur')
+    var prev    = container.querySelector('.pt-stat-prev')
+    var next    = container.querySelector('.pt-stat-next')
+    var total   = counter
+      ? container.querySelectorAll('.pt-stat-slide').length
+      : dots.length
+    var cur     = 0
+
+    function goTo(idx) {
+      cur = (idx + total) % total
+      slides.style.transform = 'translateX(' + (-cur * 100) + '%)'
+      if (dots.length) dots.forEach(function (d, i) { d.classList.toggle('is-active', i === cur) })
+      if (counter) counter.textContent = cur + 1
+    }
+
+    if (prev) prev.addEventListener('click', function (e) { e.stopPropagation(); goTo(cur - 1) })
+    if (next) next.addEventListener('click', function (e) { e.stopPropagation(); goTo(cur + 1) })
+    dots.forEach(function (d, i) {
+      d.addEventListener('click', function (e) { e.stopPropagation(); goTo(i) })
+    })
+
+    var startX = 0
+    container.addEventListener('touchstart', function (e) { startX = e.touches[0].clientX }, { passive: true })
+    container.addEventListener('touchend', function (e) {
+      var dx = e.changedTouches[0].clientX - startX
+      if (Math.abs(dx) > 40) goTo(dx < 0 ? cur + 1 : cur - 1)
+    }, { passive: true })
+
+    if (withLightbox) {
+      var slideImgs = container.querySelectorAll('.pt-stat-slide')
+      container.addEventListener('click', function (e) {
+        if (e.target.closest('.pt-stat-dot, .pt-stat-prev, .pt-stat-next')) return
+        var imgs = Array.from(slideImgs).map(function (img) { return { src: img.src, alt: img.alt } })
+        openLightbox(imgs, cur)
+      })
+    }
+  }
+
+  // Слайдеры проектов и треки — оба с лайтбоксом (клик по фото открывает
+  // крупный просмотр). Перебор по классу: новый кейс/слайдер подхватывается
+  // автоматически, без правки этого скрипта.
+  document.querySelectorAll('.pt-stat-slider').forEach(function (s) { initSlider(s, true) })
+  document.querySelectorAll('.pt-track-slider').forEach(function (s) { initSlider(s, true) })
+
+  // ── Лайтбокс для одиночных фото (крепления) ──
+  document.querySelectorAll('[data-lb-src]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      openLightbox([{ src: btn.dataset.lbSrc, alt: btn.dataset.lbAlt }], 0)
+    })
+  })
+
+  // ── Лайтбокс-галереи для swatch-сеток (цвета профиля, остекление) ──
+  document.querySelectorAll('.pt-swatch-grid').forEach(function (grid) {
+    var cards  = grid.querySelectorAll('.pt-swatch-card')
+    var images = Array.prototype.map.call(cards, function (card) {
+      var img = card.querySelector('img')
+      return { src: img.src, alt: img.alt }
+    })
+    cards.forEach(function (card, i) {
+      card.addEventListener('click', function () { openLightbox(images, i) })
+    })
+  })
+</script>
+
+  <PhotoLightbox client:only="vue" />
+</BaseLayout>

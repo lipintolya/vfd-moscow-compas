@@ -1,0 +1,77 @@
+---
+export interface FaqItem {
+  q: string
+  a: string
+}
+
+interface Props {
+  items: readonly FaqItem[]
+  title?: string
+}
+
+const { items, title = 'Частые вопросы' } = Astro.props
+---
+
+<h2 class="faq-h2">{title}</h2>
+<div class="faq-list">
+  {items.map(f => (
+    <details class="faq-item">
+      <summary class="faq-q">
+        <span>{f.q}</span>
+        <svg class="faq-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </summary>
+      <p class="faq-a">{f.a}</p>
+    </details>
+  ))}
+</div>
+
+<style>
+  .faq-h2 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.625rem, 3vw, 2.125rem);
+    font-weight: 500;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .faq-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .faq-item {
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .faq-item:first-child { border-top: 1px solid #f1f5f9; }
+  .faq-q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1.125rem 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+    font-weight: 600;
+    color: #0f172a;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-chev {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: transform 220ms ease, color 150ms ease;
+  }
+  .faq-item[open] .faq-chev { transform: rotate(180deg); color: #0f172a; }
+  .faq-a {
+    margin: 0;
+    padding: 0 0 1.125rem;
+    color: #64748b;
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    max-width: 44rem;
+  }
+</style>

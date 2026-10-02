@@ -1,0 +1,317 @@
+---
+import { getCollection, render } from 'astro:content'
+import { articleCoverImg } from '../../lib/article-images'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import FaqAccordion from '../../components/ui/FaqAccordion.astro'
+import ArticleCard from '../../components/articles/ArticleCard.astro'
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles')
+  return articles.map((article) => {
+    const slug = article.id
+    return { params: { slug }, props: { article, allArticles: articles } }
+  })
+}
+
+const { article, allArticles } = Astro.props
+
+/* Читайте также — 3 других статьи, свежие сверху. Со временем статей
+   станет больше 4 — тогда есть смысл подбирать по теме, а не просто
+   «остальные», но пока их 6, ротации достаточно. */
+const relatedArticles = allArticles
+  .filter(a => a.id !== article.id)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, 3)
+const { Content } = await render(article)
+
+const slug = article.id
+const canonicalUrl = `https://vfd74.ru/articles/${slug}/`
+
+const blogPostingSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: article.data.title,
+  description: article.data.description,
+  ...(article.data.coverImage ? { image: new URL(article.data.coverImage, Astro.site).href } : {}),
+  datePublished: article.data.publishDate.toISOString(),
+  /* dateModified обязателен для валидного BlogPosting (Google Rich Results) —
+     если updatedDate не задан во фронтматтере статьи, честно берём дату
+     публикации (не выдумываем более свежую). */
+  dateModified: (article.data.updatedDate ?? article.data.publishDate).toISOString(),
+  author: {
+    '@type': 'Organization',
+    name: 'ВФД — Салон дверей в Челябинске',
+    url: 'https://vfd74.ru',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'ВФД — Салон дверей в Челябинске',
+    /* PNG, не SVG — Google Rich Results Test помечает SVG в publisher.logo
+       как невалидный формат, только растр. */
+    logo: { '@type': 'ImageObject', url: 'https://vfd74.ru/logo-schema.png', width: 512, height: 512 },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://vfd74.ru' },
+    { '@type': 'ListItem', position: 2, name: 'Статьи', item: 'https://vfd74.ru/articles/' },
+    { '@type': 'ListItem', position: 3, name: article.data.title, item: canonicalUrl },
+  ],
+}
+
+const faq = article.data.faq ?? []
+const faqSchema = faq.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+} : null
+
+const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])]
+---
+
+<BaseLayout
+  title={`${article.data.title} — ВФД Челябинск`}
+  description={article.data.description}
+  structuredData={structuredData}
+  ogType="article"
+  publishedTime={article.data.publishDate.toISOString()}
+  ogImage={article.data.coverImage ? new URL(article.data.coverImage, Astro.site).href : undefined}
+>
+  <article>
+
+    <!-- Контент во всю ширину контейнера -->
+    <div class="section">
+      <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="Хлебные крошки" class="mb-6">
+          <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
+            <li><a href="/" class="hover:text-teal-600 transition-colors">Главная</a></li>
+            <li aria-hidden="true" class="text-slate-300">/</li>
+            <li><a href="/articles/" class="hover:text-teal-600 transition-colors">Статьи</a></li>
+            <li aria-hidden="true" class="text-slate-300">/</li>
+            <li class="font-medium text-slate-700 truncate max-w-52">{article.data.title}</li>
+          </ol>
+        </nav>
+
+        <!-- Cover — 16:9, рассчитан на 1920×1080 -->
+        <div class="relative aspect-21/9 w-full overflow-hidden rounded-2xl bg-slate-100 mb-10">
+          {article.data.coverImage ? (
+            <img
+              {...articleCoverImg(article.data.coverImage, 'hero')}
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              alt={article.data.coverImageAlt ?? article.data.title}
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+              class="w-full h-full object-cover"
+            />
+          ) : (
+            <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-100 to-slate-200">
+              <svg class="w-14 h-14 text-slate-300" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+                <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="text-sm font-medium text-slate-400">Обложка скоро появится</span>
+            </div>
+          )}
+        </div>
+
+          <!-- Header -->
+          <header class="mb-10">
+            <time
+              datetime={article.data.publishDate.toISOString()}
+              class="mb-4 block text-sm text-slate-400 tabular-nums"
+            >
+              {article.data.publishDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </time>
+            <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
+              {article.data.title}
+            </h1>
+            <p class="mt-4 text-base leading-relaxed text-slate-500 sm:text-lg">
+              {article.data.description}
+            </p>
+          </header>
+
+          <!-- Body -->
+          <div class="article-body">
+            <Content />
+          </div>
+
+          <!-- FAQ (SEO — FAQPage schema + аккордеон) -->
+          {faq.length > 0 && (
+            <section class="article-faq" aria-label="Частые вопросы">
+              <FaqAccordion items={faq} />
+            </section>
+          )}
+
+          <!-- Читайте также — перелинковка между статьями -->
+          {relatedArticles.length > 0 && (
+            <section class="article-related mt-14 border-t border-slate-200 pt-10" aria-label="Читайте также">
+              <h2 class="mb-6 text-xl font-medium tracking-tight text-slate-900">Читайте также</h2>
+              <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
+                {relatedArticles.map((related) => (
+                  <li>
+                    <ArticleCard
+                      href={`/articles/${related.id}/`}
+                      title={related.data.title}
+                      description={related.data.description}
+                      publishDate={related.data.publishDate}
+                      coverImage={related.data.coverImage}
+                      coverImageAlt={related.data.coverImageAlt}
+                      loading="lazy"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <!-- Back link -->
+          <div class="mt-10 pt-2">
+            <a
+              href="/articles/"
+              class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+            >
+              <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">
+                <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Все статьи
+            </a>
+          </div>
+
+      </div>
+    </div>
+
+  </article>
+</BaseLayout>
+
+<style>
+  /* Ширина .container растёт на широких мониторах (см. global.css) — для
+     карточек и сеток это благо, а для сплошного текста лишний простор
+     только вредит чтению. Держим колонку на прежней ширине независимо от
+     контейнера. */
+  .article-body {
+    max-width: 80rem;
+    margin-inline: auto;
+  }
+  .article-body :global(h2) {
+    font-size: clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
+    font-weight: 500;
+    color: var(--color-ink);
+    margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .article-body :global(h3) {
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.35;
+  }
+  .article-body :global(p) {
+    color: var(--color-body);
+    line-height: 1.8;
+    margin-bottom: 1.25rem;
+    font-size: clamp(1rem, 0.95rem + 0.35vw, 1.1875rem);
+  }
+  .article-body :global(ul),
+  .article-body :global(ol) {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+    color: var(--color-body);
+    line-height: 1.8;
+  }
+  .article-body :global(ul) { list-style-type: disc; }
+  .article-body :global(ol) { list-style-type: decimal; }
+  .article-body :global(li) { margin-bottom: 0.35rem; }
+  .article-body :global(strong) {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .article-body :global(a) {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .article-body :global(a:hover) {
+    color: var(--color-accent);
+  }
+  .article-body :global(blockquote) {
+    border-left: 3px solid var(--color-accent);
+    padding: 0.75rem 1.25rem;
+    background: var(--color-accent-light);
+    border-radius: 0 0.5rem 0.5rem 0;
+    font-style: normal;
+    color: var(--color-body);
+    margin: 1.5rem 0;
+  }
+  .article-body :global(blockquote p) {
+    margin-bottom: 0;
+  }
+  /* ── Премиум-таблицы во всю ширину ── */
+  .article-body :global(table) {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 2rem 0;
+    font-size: 0.9375rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+  .article-body :global(thead th) {
+    background: #0f172a;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.9rem 1.15rem;
+    text-align: left;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+  .article-body :global(tbody td) {
+    padding: 0.85rem 1.15rem;
+    text-align: left;
+    vertical-align: top;
+    border-top: 1px solid #eef2f7;
+    color: var(--color-body);
+  }
+  .article-body :global(tbody tr:nth-child(even)) { background: #f8fafc; }
+  .article-body :global(tbody td:first-child) {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+  .article-body :global(tbody tr:hover) { background: #f0fdfa; }
+  @media (max-width: 640px) {
+    .article-body :global(table) {
+      display: block;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+
+  /* Изображения внутри статьи */
+  .article-body :global(img) {
+    width: 100%;
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+  }
+
+  /* ── FAQ ── */
+  .article-faq { max-width: 80rem; margin-inline: auto; margin-top: 3rem; }
+
+  /* ── Читайте также ── */
+  .article-related { max-width: 80rem; margin-inline: auto; }
+</style>

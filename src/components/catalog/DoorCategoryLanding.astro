@@ -1,0 +1,237 @@
+---
+/**
+ * src/components/catalog/DoorCategoryLanding.astro
+ *
+ * Общий шаблон SEO-лендингов /catalog/<slug> — по одному на покрытие (см.
+ * src/data/door-categories.ts). Собственные <title>/<h1>/мета под
+ * коммерческий запрос + живая сетка моделей (CatalogClient, тот же фильтр,
+ * что на /catalog/?coating=...). Описание покрытия (tagline/benefits/closing)
+ * берётся напрямую из coatingGroupCopy — единый источник с /catalog.
+ */
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../ui/Breadcrumbs.astro'
+import SeriesCard from './SeriesCard.astro'
+import FaqAccordion from '../ui/FaqAccordion.astro'
+import CatalogClient from './CatalogClient.vue'
+import { getSeriesCardsData } from '../../lib/catalog-data'
+import { getSeriesSpec, coatingGroupCopy } from '../../data/series-descriptions'
+import type { DoorCategory } from '../../data/door-categories'
+import type { CatalogCardItem } from './types'
+
+interface Props {
+  category: DoorCategory
+  cards: CatalogCardItem[]
+}
+
+const { category, cards } = Astro.props
+
+const seriesCardsData = getSeriesCardsData(cards).filter(s => s.coatingSlug === category.coatingSlug)
+const coatingLabel = seriesCardsData[0]?.coatingName ?? category.h1
+
+const copy = coatingGroupCopy[category.coatingSlug]
+const firstSeries = seriesCardsData[0]
+const spec = firstSeries ? getSeriesSpec(firstSeries.slug, category.coatingSlug) : null
+const description = copy?.description ?? [spec?.coating, spec?.material].filter(Boolean).join(' ')
+const benefits = copy?.benefits ?? []
+
+const prices = seriesCardsData.map(s => s.minPrice).filter((p): p is number => p != null)
+const minPrice = prices.length ? Math.min(...prices) : null
+const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
+
+/* Статья по теме — та же перелинковка каталог → блог, что на моделях
+   (models/[id].astro): ищем статью, чей relatedSeriesSlugs пересекается
+   с сериями этого покрытия. */
+const landingSeriesSlugs = new Set(seriesCardsData.map(s => s.slug))
+const allArticles = await getCollection('articles')
+const relatedArticle = allArticles.find(a => a.data.relatedSeriesSlugs?.some(s => landingSeriesSlugs.has(s)))
+
+/* Фильтры для CatalogClient — те же опции, что на /catalog/, лендинг
+   только меняет стартовое состояние (initialCoating) и контент вокруг. */
+const allSeries = [...new Map(
+  cards.filter(c => c.seriesSlug).map(c => [c.seriesSlug, { label: c.series, value: c.seriesSlug }])
+).values()]
+const allCoatings = [...new Map(
+  cards.filter(c => c.coatingSlug).map(c => [c.coatingSlug, { label: c.coating, value: c.coatingSlug }])
+).values()]
+const allColors = [...new Map(
+  cards.flatMap(c => c.colorSwatches.filter(s => s.available).map(s => [s.name, { label: s.name, value: s.name, color: s.hex }] as const))
+).values()]
+
+const canonicalUrl = Astro.site ? new URL(`/catalog/${category.slug}/`, Astro.site).href : undefined
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Каталог', href: '/catalog/' },
+  { label: category.h1 },
+]
+
+const structuredData = canonicalUrl ? [
+  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: category.h1,
+    description: category.metaDescription,
+    url: canonicalUrl,
+    numberOfItems: seriesCardsData.reduce((sum, s) => sum + s.modelCount, 0),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: category.faq.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+] : undefined
+---
+
+<BaseLayout
+  title={category.metaTitle}
+  description={category.metaDescription}
+  canonical={canonicalUrl}
+  structuredData={structuredData}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <div class="section bg-white" style="padding-bottom: 0">
+    <div class="container">
+      <header class="max-w-2xl mb-8 md:mb-10">
+        <p class="t-eyebrow mb-3">{category.eyebrow}</p>
+        <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">{category.h1}</h1>
+        <p class="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">{category.intro}</p>
+      </header>
+
+      {seriesCardsData.length > 0 && (
+        <div class="mb-10 rounded-3xl border border-slate-200 bg-slate-50/60 p-4 sm:p-6">
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5">
+            <div class="col-span-2 flex h-full flex-col justify-between gap-6 rounded-2xl border border-slate-200 bg-white p-5 sm:col-span-1 sm:p-7">
+              <div>
+                <p class="m-0 mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  <span class="h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden="true"></span>
+                  Покрытие
+                </p>
+                <h2 class="m-0 mb-3 text-2xl font-medium text-ink sm:text-3xl">{coatingLabel}</h2>
+                {copy?.tagline && <p class="m-0 mb-2 text-sm font-semibold text-ink">{copy.tagline}</p>}
+                {description && <p class="m-0 text-sm leading-relaxed text-slate-700">{description}</p>}
+              </div>
+              <div class="flex flex-col gap-3">
+                <p class="m-0 text-lg font-medium text-slate-500 sm:text-xl">
+                  {minPrice ? `от ${fmt(minPrice)}` : `${seriesCardsData.length} ${seriesCardsData.length === 1 ? 'серия' : 'серий'}`}
+                  {minPrice && <span class="ml-1 text-xs font-semibold opacity-70">за полотно</span>}
+                </p>
+              </div>
+            </div>
+            {seriesCardsData.map((s, i) => <SeriesCard series={s} priority={i < 2} />)}
+          </div>
+
+          {benefits.length > 0 && (
+            <div class="mt-6 border-t border-slate-200 pt-6">
+              <p class="m-0 mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">Почему выбирают {coatingLabel}</p>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5">
+                {benefits.map(b => (
+                  <div class="rounded-xl border border-slate-200 bg-white p-5">
+                    <p class="m-0 mb-1.5 text-sm font-semibold text-ink">{b.title}</p>
+                    <p class="m-0 text-sm leading-relaxed text-slate-600">{b.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {copy?.closing && (
+            <p class="m-0 mt-5 text-sm font-medium leading-relaxed text-slate-700">{copy.closing}</p>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+
+  <div class="section bg-white" id="catalog-title">
+    <div class="container">
+      <CatalogClient
+        client:load
+        cards={cards}
+        series={allSeries}
+        coatings={allCoatings}
+        colors={allColors}
+        initialSeries=""
+        initialCoating={category.coatingSlug}
+        initialColor=""
+      />
+    </div>
+  </div>
+
+  {relatedArticle && (
+    <section class="section">
+      <div class="container">
+        <a href={`/articles/${relatedArticle.id}/`} class="related-article-card">
+          <span class="related-article-card__eyebrow">Статья по теме</span>
+          <span class="related-article-card__title">{relatedArticle.data.title}</span>
+          <span class="related-article-card__cta">
+            Читать
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+        </a>
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="container">
+      <FaqAccordion items={category.faq} />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+.related-article-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  text-decoration: none;
+  transition: border-color 200ms ease, background-color 200ms ease;
+}
+.related-article-card:hover {
+  border-color: #99f6e4;
+  background: #f0fdfa;
+}
+.related-article-card__eyebrow {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #64748b;
+}
+.related-article-card__title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+.related-article-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0d9488;
+}
+.related-article-card__cta svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+</style>

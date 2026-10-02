@@ -1,0 +1,135 @@
+---
+/**
+ * {% coatingPrices /%} — цены и серии по покрытиям прямо из каталога
+ * (Supabase, та же getCatalogCards, что у /catalog). В тексте статьи цены
+ * устаревали бы при каждом повышении (price-adjustments.ts) — здесь они
+ * пересчитываются при каждой сборке и всегда совпадают с каталогом.
+ */
+import { getCatalogCards, getSeriesList } from '../../lib/catalog-data'
+import { DOOR_CATEGORIES } from '../../data/door-categories'
+import { pluralRu } from '../../lib/product-text'
+
+/* Порядок — как разделы статьи. Покрытие, которого здесь нет (новое
+   в базе), выводится последним, чтобы не потеряться молча. */
+const ORDER = ['emal', 'emalex', 'pet', 'protach', 'ekoshpon']
+
+const { cards } = await getCatalogCards()
+const series = getSeriesList(cards)
+
+const groups = [...new Set(series.map(s => s.coatingSlug))]
+  .sort((a, b) => {
+    const ai = ORDER.indexOf(a), bi = ORDER.indexOf(b)
+    return (ai === -1 ? ORDER.length : ai) - (bi === -1 ? ORDER.length : bi)
+  })
+  .map(slug => {
+    const items = series
+      .filter(s => s.coatingSlug === slug)
+      .sort((a, b) => (a.minPrice ?? Infinity) - (b.minPrice ?? Infinity))
+    const prices = items.map(s => s.minPrice).filter((p): p is number => p != null)
+    return {
+      slug,
+      name:     items[0]?.coatingName ?? slug,
+      items,
+      minPrice: prices.length ? Math.min(...prices) : null,
+      landing:  DOOR_CATEGORIES.find(c => c.coatingSlug === slug)?.slug,
+    }
+  })
+
+const fmt = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
+---
+
+{groups.length > 0 && (
+  <div class="cprices">
+    <ul class="cprices__list" role="list">
+      {groups.map(g => (
+        <li class="cprices__row">
+          <div class="cprices__head">
+            {g.landing
+              ? <a href={`/catalog/${g.landing}/`} class="cprices__name">{g.name}</a>
+              : <span class="cprices__name">{g.name}</span>}
+            {g.minPrice && <span class="cprices__price">от {fmt(g.minPrice)}</span>}
+          </div>
+          <p class="cprices__series">
+            {g.items.length} {pluralRu(g.items.length, ['серия', 'серии', 'серий'])}:{' '}
+            {g.items.map((s, i) => (
+              <>
+                <a href={`/catalog/series/${s.slug}/`}>{s.name}</a>{i < g.items.length - 1 ? ', ' : ''}
+              </>
+            ))}
+          </p>
+        </li>
+      ))}
+    </ul>
+    <p class="cprices__note">
+      Цены — за дверное полотно, берутся из каталога и обновляются вместе с ним.
+      Стоимость комплекта с коробкой и наличниками считается на странице модели.
+    </p>
+  </div>
+)}
+
+<style>
+/* Все правила с префиксом .cprices: статья задаёт глобальные стили ul/li/p/a
+   (.article-body :global(...)) — без повышенной специфичности список
+   получал маркеры, отступы и подчёркнутые ссылки. */
+.cprices {
+  margin: 1.75rem 0;
+}
+.cprices .cprices__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #fff;
+}
+.cprices .cprices__row {
+  margin: 0;
+  padding: 1rem 1.25rem;
+}
+.cprices .cprices__row + .cprices__row {
+  border-top: 1px solid #e5e7eb;
+}
+.cprices .cprices__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+.cprices .cprices__name {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #0f172a;
+  text-decoration: none;
+}
+.cprices a.cprices__name:hover {
+  color: #0f766e;
+}
+.cprices .cprices__price {
+  flex-shrink: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+.cprices .cprices__series {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #64748b;
+}
+.cprices .cprices__series a {
+  color: #0f766e;
+  text-decoration: none;
+}
+.cprices .cprices__series a:hover {
+  text-decoration: underline;
+}
+.cprices .cprices__note {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+</style>

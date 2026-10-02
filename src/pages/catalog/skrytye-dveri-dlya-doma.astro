@@ -1,0 +1,324 @@
+---
+/**
+ * src/pages/catalog/skrytye-dveri-dlya-doma.astro
+ * SEO-лендинг под сегмент «частные дома/коттеджи» — акцент на условиях,
+ * специфичных для загородного строительства: толщина капитальных стен
+ * (не всегда 90 мм как в квартирах), нестандартные высоты потолков,
+ * возможность заказать «Рефлекс» с зеркалом для просторных прихожих.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../../components/ui/FaqAccordion.astro'
+import SectionHeading from '../../components/partitions/SectionHeading.astro'
+import { INVISIBLE_WORKS } from '../../data/skrytye-dveri-works'
+import { merchantPolicy } from '../../lib/contacts-data'
+import {
+  IMAGES,
+  REFLEX_IMAGE,
+  SECRET_MIN_BLADE_PRICE,
+  SECRET_MIN_KIT_PRICE,
+  REFLEX_MIN_KIT_PRICE,
+  CUSTOM_HEIGHT_TIERS,
+  CUSTOM_LEAD_TIME,
+} from '../../data/skrytye-dveri-products'
+
+const PHONE = '+79000297888'
+const TG    = 'https://t.me/vfddoors74'
+
+const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
+
+const canonicalUrl = Astro.site
+  ? new URL('/catalog/skrytye-dveri-dlya-doma/', Astro.site).href
+  : undefined
+
+const title       = 'Скрытые двери для частного дома в Челябинске — под нестандартную высоту | ВФД'
+const description = `Скрытые двери для частных домов и коттеджей в Челябинской области: нестандартные высоты потолков до 2700 мм, зеркальная дверь «Рефлекс». Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}.`
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Каталог', href: '/catalog/' },
+  { label: 'Скрытые двери', href: '/catalog/skrytye-dveri/' },
+  { label: 'Для частного дома' },
+]
+
+const houseWork = INVISIBLE_WORKS.find(w => w.location?.includes('частный объект'))
+const maxTier = CUSTOM_HEIGHT_TIERS[CUSTOM_HEIGHT_TIERS.length - 1]!
+
+const faq = [
+  {
+    q: 'Подойдёт ли скрытая дверь для дома с высокими потолками?',
+    a: `Да, под нестандартную высоту потолка предусмотрены отдельные тиры надбавки — от 2050 до 2700 мм, максимальная надбавка ${maxTier.pct} к цене полотна и короба. Изготовление занимает ${CUSTOM_LEAD_TIME}, стандартная высота 2000 мм — без ожидания.`,
+  },
+  {
+    q: 'Какая нужна толщина стены в частном доме?',
+    a: 'Минимум 90 мм — для газобетонных и кирпичных внутренних перегородок это обычно не проблема. Если перегородка каркасная и тоньше, потребуется небольшое утолщение в проёме — замерщик определит это на выезде и предложит решение.',
+  },
+  {
+    q: 'Можно ли поставить скрытую дверь с зеркалом в прихожей загородного дома?',
+    a: `Да, серия «Рефлекс» — зеркальное полотно во всю высоту двери, изготавливается индивидуально до 2,5 м. В просторной прихожей загородного дома это одновременно дверь и зеркало в полный рост, без отдельного места на стене. Комплект от ${fmt(REFLEX_MIN_KIT_PRICE)}.`,
+  },
+  {
+    q: 'Выдержит ли скрытая петля тяжёлую входную межкомнатную дверь в доме?',
+    a: 'Скрытые петли рассчитаны на нагрузку до 70 кг — этого достаточно для стандартного полотна из массива или МДФ с шумоизоляционным наполнением. Для более тяжёлых конструкций обсуждайте усиленный вариант короба с менеджером на замере.',
+  },
+  {
+    q: 'Работаете ли в Челябинской области, не только в городе?',
+    a: 'Да, выезжаем на замер и монтаж по Челябинской области. Один из последних объектов «Секрет» был установлен именно в частном доме — фото ниже.',
+  },
+]
+
+const structuredData = canonicalUrl ? [
+  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'Скрытые двери для частного дома — серия «Секрет»',
+    description: 'Двери скрытого монтажа для загородных домов: нестандартные высоты под потолки от 2050 до 2700 мм, монтаж заподлицо со стеной.',
+    brand: { '@type': 'Brand', name: 'ВФД' },
+    image: IMAGES.invisible,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'RUB',
+      price: SECRET_MIN_KIT_PRICE,
+      availability: 'https://schema.org/InStock',
+      seller: { '@type': 'Organization', name: 'Салон дверей ВФД' },
+      areaServed: [
+        { '@type': 'City', name: 'Челябинск' },
+        { '@type': 'AdministrativeArea', name: 'Челябинская область' },
+      ],
+      hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
+      shippingDetails:         merchantPolicy.shipping,
+    },
+  },
+] : undefined
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage={IMAGES.invisible}
+  structuredData={structuredData}
+>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        <div class="order-2 lg:order-1">
+          <p class="t-eyebrow mb-3">Для частного дома</p>
+          <h1 class="t-h1 mb-5">Скрытые двери для дома и коттеджа</h1>
+          <p class="m-0 mb-4 t-lead text-slate-600">
+            В частном доме потолки часто выше стандартных 2000 мм, а стены — капитальнее
+            квартирных перегородок. Под оба условия у скрытых дверей есть решение: тиры
+            нестандартной высоты до 2700 мм и минимальное требование к толщине стены — 90 мм.
+          </p>
+          <p class="m-0 mb-6 t-lead text-slate-600">
+            Работаем не только в Челябинске, но и по области — выезд на замер и монтаж бригадой
+            в частные дома и коттеджные посёлки.
+          </p>
+          <div class="flex gap-2.5 flex-wrap">
+            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary">Рассчитать стоимость</a>
+            <a href={`tel:${PHONE}`} class="btn btn-outline">Позвонить</a>
+          </div>
+        </div>
+        <div class="order-1 overflow-hidden rounded-3xl lg:order-2">
+          <img
+            src={IMAGES.invisible}
+            alt="Скрытая дверь в частном доме — монтаж заподлицо со стеной"
+            width="900"
+            height="675"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            class="aspect-4/3 w-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- НЕСТАНДАРТНЫЕ ВЫСОТЫ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Высокие потолки"
+        title="Нестандартная высота — под заказ"
+        subtitle={`Надбавка применяется к полотну и коробу. Максимальная высота — 2700 мм. Срок изготовления: ${CUSTOM_LEAD_TIME}.`}
+      />
+      <div class="sd-table-wrap">
+        <table class="sd-compare">
+          <thead>
+            <tr>
+              <th scope="col">Высота</th>
+              <th scope="col">Надбавка</th>
+            </tr>
+          </thead>
+          <tbody>
+            {CUSTOM_HEIGHT_TIERS.map(tier => (
+              <tr>
+                <th scope="row">{tier.range} мм</th>
+                <td>{tier.pct}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- РЕФЛЕКС ДЛЯ ПРИХОЖЕЙ -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        <div class="order-2 overflow-hidden rounded-3xl lg:order-1">
+          <img
+            src={REFLEX_IMAGE}
+            alt="Скрытая дверь с зеркалом «Рефлекс» для прихожей частного дома"
+            width="700"
+            height="525"
+            loading="lazy"
+            decoding="async"
+            class="aspect-4/3 w-full object-cover"
+          />
+        </div>
+        <div class="order-1 lg:order-2">
+          <p class="t-eyebrow mb-3">Для просторной прихожей</p>
+          <h2 class="t-h2 mb-4">«Рефлекс» — дверь и зеркало в одном полотне</h2>
+          <p class="m-0 mb-4 text-sm leading-relaxed text-slate-600 sm:text-base">
+            В прихожей загородного дома часто нет отдельного места под большое зеркало —
+            «Рефлекс» решает это без лишней мебели: зеркальное полотно во всю высоту двери,
+            изготавливается индивидуально до 2,5 м, тот же скрытый монтаж заподлицо со стеной.
+          </p>
+          <a href="/catalog/skrytye-dveri/#reflex" class="btn btn-outline">Подробнее о «Рефлекс»</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ЦЕНЫ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Стоимость"
+        title="Сколько стоит скрытая дверь для дома"
+        subtitle={`Полотно от ${fmt(SECRET_MIN_BLADE_PRICE)}, комплект с коробом от ${fmt(SECRET_MIN_KIT_PRICE)}. Точная цена — с учётом кромки, стороны открывания и высоты потолка.`}
+      />
+      <div class="flex flex-wrap gap-3">
+        <a href="/catalog/skrytye-dveri/#secret-prices" class="btn btn-outline">Смотреть таблицу цен «Секрет»</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- РАБОТА В ЧАСТНОМ ДОМЕ -->
+  {houseWork && (
+    <section class="section bg-white">
+      <div class="container">
+        <SectionHeading eyebrow="Наш пример" title="Скрытая дверь в частном доме" />
+        <div class="grid grid-cols-1 gap-4 overflow-hidden rounded-2xl border border-slate-200 sm:grid-cols-2">
+          <div class="aspect-4/3 overflow-hidden bg-slate-100 sm:aspect-auto">
+            <img
+              src={houseWork.images[0]}
+              alt={houseWork.title}
+              loading="lazy"
+              decoding="async"
+              width="600"
+              height="450"
+              class="h-full w-full object-cover"
+            />
+          </div>
+          <div class="flex flex-col justify-center p-6">
+            <p class="m-0 mb-2 text-xs font-semibold text-teal-600">{houseWork.location}</p>
+            <h3 class="m-0 mb-2 text-lg font-medium leading-snug text-ink">{houseWork.title}</h3>
+            {houseWork.story && <p class="m-0 mb-4 text-sm leading-relaxed text-slate-600">{houseWork.story}</p>}
+            <a href="/catalog/skrytye-dveri/raboty/" class="w-fit text-sm font-semibold text-teal-600 hover:text-teal-700">
+              Смотреть все работы →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- FAQ -->
+  <section class="section bg-white">
+    <div class="container">
+      <FaqAccordion items={faq} />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="rounded-3xl bg-graphite p-[clamp(2rem,5vw,3rem)] text-white">
+        <div class="flex flex-wrap items-center justify-between gap-6">
+          <div>
+            <h2 class="m-0 mb-2 text-2xl font-medium">Замерим двери для дома в Челябинске и области</h2>
+            <p class="m-0 max-w-xl text-sm leading-relaxed text-white/70">
+              Укажите высоту потолков и толщину стен — сразу скажем, нужна ли надбавка
+              за нестандарт и сколько займёт изготовление.
+            </p>
+          </div>
+          <div class="flex gap-2.5 flex-wrap">
+            <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
+            <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+.sd-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+}
+.sd-compare {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  background: #fff;
+}
+.sd-compare thead tr { border-bottom: 2px solid #0f172a; }
+.sd-compare thead th {
+  padding: 1rem 1.375rem;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+.sd-compare tbody th {
+  padding: 0.875rem 1.375rem;
+  text-align: left;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0f172a;
+  border-bottom: 1px solid #f8fafc;
+}
+.sd-compare tbody td {
+  padding: 0.875rem 1.375rem;
+  color: #334155;
+  font-weight: 600;
+  border-bottom: 1px solid #f8fafc;
+}
+.sd-compare tbody tr:last-child th,
+.sd-compare tbody tr:last-child td { border-bottom: none; }
+</style>

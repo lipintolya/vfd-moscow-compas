@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import QuoteCta from '../components/ui/QuoteCta.astro'
+import ContactsSection from '../components/contacts/ContactsSection.vue'
+import { companyLegalInfo } from '../lib/contacts-data'
+
+const title = 'Контакты салона дверей ВФД в Челябинске — адрес, телефон, часы работы'
+const description =
+  'Контакты фирменного салона дверей ВФД на Братьев Кашириных, 131Б. Телефон, email, часы работы, реквизиты согласно РФ. Консультации по дверям и перегородкам.'
+
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Салон ВФД (Владимирская фабрика дверей)',
+  image: 'https://storage.yandexcloud.net/catalog-vfd/logo.webp',
+  description: companyLegalInfo.activity.description,
+  telephone: companyLegalInfo.contacts.phone.map((p) => p.raw),
+  email: companyLegalInfo.contacts.email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'ул. Братьев Кашириных, 131Б',
+    addressLocality: 'Челябинск',
+    addressRegion: 'Челябинская область',
+    postalCode: '454128',
+    addressCountry: 'RU',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: companyLegalInfo.address.coordinates.lat,
+    longitude: companyLegalInfo.address.coordinates.lng,
+  },
+  openingHoursSpecification: companyLegalInfo.schemaOrgHours.map((h) => ({
+    '@type': 'OpeningHoursSpecification',
+    ...h,
+  })),
+  url: 'https://vfd74.ru/contacts/',
+  foundingDate: '2014',
+  priceRange: '₽₽',
+  acceptsPaymentMethod: ['Cash', 'CreditCard', 'DebitCard'],
+  sameAs: [
+    'https://t.me/vfddoors74',
+    'https://vk.com/vfddoors74',
+    'https://max.ru/id452402308842_biz',
+  ],
+}
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Контакты' },
+]
+
+
+const faq = [
+  {
+    q: 'Нужно ли записываться заранее, чтобы приехать в салон?',
+    a: 'Нет, предварительная запись не обязательна — заходите в рабочие часы. Если хотите, чтобы вас проконсультировал конкретный специалист или показал образцы под ваш проект, удобнее предупредить заранее в Telegram.',
+  },
+  {
+    q: 'Работаете ли вы в выходные?',
+    a: 'Да, салон работает без выходных: суббота и воскресенье — с 10:00 до 18:00.',
+  },
+  {
+    q: 'Есть ли парковка у салона?',
+    a: 'Да, у здания на Братьев Кашириных, 131Б есть места для парковки. Вход в салон — со стороны улицы Чичерина.',
+  },
+  {
+    q: 'Выезжаете ли вы на замер за пределы Челябинска?',
+    a: 'Да, выезжаем и в Челябинскую область — стоимость выезда зависит от адреса, её уточнит менеджер. По Челябинску замер бесплатный при оформлении заказа (для входных дверей — 500 ₽).',
+  },
+  {
+    q: 'Как быстрее всего получить консультацию?',
+    a: 'Быстрее всего — написать в Telegram или позвонить по основному номеру. Отвечаем в мессенджере в течение рабочего дня.',
+  },
+]
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
+const structuredData = [localBusinessSchema, faqSchema]
+---
+
+<BaseLayout title={title} description={description} structuredData={structuredData}>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <ContactsSection client:visible />
+
+  <section class="section pt-0">
+    <div class="container">
+      <QuoteCta
+        image="https://storage.yandexcloud.net/vfd74ru/Main_page/left_bento/cover_doors.webp"
+        title="Готовы выбрать двери или перегородки?"
+        description="Приходите в салон, звоните или пишите в Telegram — поможем подобрать модель и рассчитаем стоимость с монтажом"
+        primaryHref="https://t.me/vfddoors74"
+        primaryLabel="Написать в Telegram"
+        secondaryHref="/catalog/"
+        secondaryLabel="Смотреть каталог"
+      />
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="container">
+      <FaqAccordion items={faq} />
+    </div>
+  </section>
+</BaseLayout>

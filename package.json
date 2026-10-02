@@ -1,0 +1,43 @@
+{
+  "name": "vfd-astro",
+  "description": "ВФД на Кашириных — маркетинговый сайт и каталог дверей/перегородок. Astro 6 + Vue 3 + Tailwind v4 + Supabase.",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "homepage": "https://vfd74.ru",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lipintolya/vfd74.git"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "prerender": "astro build --experimental-rebalance-chunks",
+    "sitemap": "echo 'Sitemap generation handled by astro-sitemap integration'",
+    "gen:renders": "node scripts/gen-render-gallery.mjs",
+    "gen:portfolio-thumbs": "node scripts/gen-portfolio-thumbs.mjs",
+    "gen:hero-mobile": "node scripts/gen-hero-mobile.mjs",
+    "gen:hero-bento": "node scripts/gen-hero-bento.mjs",
+    "gen:about": "node scripts/gen-about-images.mjs",
+    "gen:footer-map": "node scripts/gen-footer-map.mjs",
+    "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",
+    "gen:how-it-works": "node scripts/gen-how-it-works-images.mjs",
+    "gen:promo": "node scripts/gen-promo-images.mjs",
+    "deploy": "git push production main"
+  },
+  "dependencies": {
+    "@astrojs/markdoc": "^2.0.9",
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/vue": "^7.0.2",
+    "@supabase/supabase-js": "^2.106.0",
+    "@tailwindcss/vite": "^4.3.0",
+    "astro": "^7.3.2",
+    "tailwindcss": "^4.3.0",
+    "vue": "^3.5.34"
+  }
+}

@@ -1,0 +1,194 @@
+---
+/**
+ * Плавающая пилюля-навигация по секциям страницы — появляется после
+ * прокрутки, подсвечивает активный раздел, сворачивается в сессии.
+ * Изначально писалась только под /partitions/, теперь принимает `items`
+ * снаружи, чтобы тот же паттерн переиспользовать на /catalog/ (Серии/Каталог)
+ * без копипасты компонента.
+ *
+ * Пилюля по ширине равна своему содержимому (w-fit), а не всему .container —
+ * с 2 пунктами (/catalog/) полноширинный бар выглядел пустым посередине.
+ */
+interface Props {
+  items?: { id: string; label: string }[]
+}
+
+const {
+  items = [
+    { id: 'pt-profiles', label: 'Профили' },
+    { id: 'pt-colors',   label: 'Цвета' },
+    { id: 'pt-glass',    label: 'Остекление' },
+    { id: 'pt-benefits', label: 'Преимущества' },
+    { id: 'pt-process',  label: 'Процесс' },
+    { id: 'pt-projects', label: 'Проекты' },
+  ],
+} = Astro.props
+---
+
+<nav
+  id="pt-snav"
+  class="pt-snav fixed inset-x-0 z-45 -translate-y-2 px-4 opacity-0 transition-[opacity,transform] duration-200 ease-out pointer-events-none"
+  style={`top: calc(var(--header-height, 88px) + 0.75rem)`}
+  aria-label="Разделы страницы"
+  aria-hidden="true"
+>
+  <div class="container">
+    {/* max-w-full один не спасал от переполнения на узких экранах — бар
+       физически вылезал за .container вправо, обрезая крестик/последний
+       пункт без возможности их увидеть. На мобильном при нехватке места
+       список переносится на новую строку внутри той же панели (flex-wrap);
+       rounded-2xl вместо капсульного rounded-full — на 2+ строках капсула
+       смотрелась как вытянутый овал, а не два аккуратных ряда. На desktop
+       (sm:) пункты почти всегда помещаются в одну строку — там оставлена
+       капсула. */}
+    <div class="pt-snav__glass mx-auto flex w-fit max-w-full flex-wrap items-center justify-center gap-0.5 rounded-2xl p-1.5 sm:rounded-full">
+      <ul class="pt-snav__list flex flex-wrap list-none items-center justify-center gap-0.5" role="list">
+        {items.map(it => (
+          <li>
+            <a
+              href={`#${it.id}`}
+              class="pt-snav__link inline-block whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-150"
+              data-snav={it.id}
+            >
+              {it.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <button
+        id="pt-snav-close"
+        class="ml-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-fg-subtle transition-colors duration-150 hover:bg-red-50 hover:text-red-500"
+        type="button"
+        aria-label="Скрыть навигационное меню"
+        title="Скрыть навигационное меню"
+      >
+        <svg viewBox="0 0 14 14" fill="none" class="h-3 w-3" aria-hidden="true">
+          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* Видимость двигаем через JS-класс, а не инлайн-стиль, — переключается
+     чаще, чем рендерится компонент. */
+  .pt-snav.pt-snav--visible {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  /* Liquid-glass — раньше был плоский bg-white/80 + border + один blur,
+     на скролле сливался с фоном страницы и не читался как отдельный
+     плавающий объект. Настоящее стекло — это не просто blur, а три слоя:
+     1) сильный blur+saturate для эффекта préломления фона под собой,
+     2) тонкий градиентный highlight сверху (имитация света, падающего на
+        выпуклую кромку стекла) через ::before,
+     3) многослойная тень — мягкая дальняя (глубина) + резкая близкая
+        (контакт с поверхностью) вместо одной размытой. */
+  .pt-snav__glass {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.55));
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.6);
+    box-shadow:
+      0 1px 1px rgba(255,255,255,0.8) inset,
+      0 -1px 1px rgba(15,23,42,0.04) inset,
+      0 10px 30px -8px rgba(15,23,42,0.22),
+      0 2px 8px rgba(15,23,42,0.08);
+  }
+  /* Верхняя световая кромка — тонкая дуга света вдоль верхнего края,
+     как на настоящей выпуклой стеклянной поверхности. */
+  .pt-snav__glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0) 40%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Активный/hover-цвет — завязан на токены темы. Composite-селектор
+     .pt-snav__link.pt-snav--active специфичнее, чем :hover на одном
+     классе, поэтому активный пункт не перекрашивается при наведении. */
+  .pt-snav__link {
+    position: relative;
+    z-index: 1;
+    color: var(--color-fg-muted);
+  }
+  .pt-snav__link:hover {
+    background: var(--color-accent-light);
+    color: var(--color-accent-hover);
+  }
+  .pt-snav__link.pt-snav--active {
+    background: var(--color-graphite);
+    color: #fff;
+    box-shadow: 0 2px 8px -2px rgba(24,24,26,0.5);
+  }
+</style>
+
+<script>
+  ;(function () {
+    const nav = document.getElementById('pt-snav')
+    if (!(nav instanceof HTMLElement)) return
+
+    let dismissed = sessionStorage.getItem('pt-snav-dismissed') === '1'
+
+    const onScroll = () => {
+      if (dismissed) return
+      const show = window.scrollY > 380
+      nav.classList.toggle('pt-snav--visible', show)
+      nav.setAttribute('aria-hidden', show ? 'false' : 'true')
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+
+    const closeBtn = document.getElementById('pt-snav-close')
+    if (closeBtn instanceof HTMLElement) {
+      closeBtn.addEventListener('click', () => {
+        dismissed = true
+        sessionStorage.setItem('pt-snav-dismissed', '1')
+        nav.classList.remove('pt-snav--visible')
+        nav.setAttribute('aria-hidden', 'true')
+      })
+    }
+
+    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>('[data-snav]'))
+    const ids = links.map((l) => l.dataset.snav).filter((id): id is string => Boolean(id))
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (!e.isIntersecting) return
+            links.forEach((l) => {
+              l.classList.toggle('pt-snav--active', l.dataset.snav === e.target.id)
+            })
+            nav.querySelector('.pt-snav--active')?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+          })
+        },
+        { rootMargin: '-15% 0px -75% 0px' },
+      )
+      ids.forEach((id) => {
+        const el = document.getElementById(id)
+        if (el) io.observe(el)
+      })
+    }
+
+    links.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault()
+        const target = document.getElementById(link.dataset.snav ?? '')
+        if (!target) return
+        const offset =
+          (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 88) + 48
+        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' })
+      })
+    })
+  })()
+</script>

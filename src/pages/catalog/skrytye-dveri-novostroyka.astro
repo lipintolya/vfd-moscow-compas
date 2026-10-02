@@ -1,0 +1,258 @@
+---
+/**
+ * src/pages/catalog/skrytye-dveri-novostroyka.astro
+ * SEO-лендинг под сегмент «новостройки/квартиры» — акцент на том, что
+ * скрытые двери проще всего заложить именно на этапе ремонта с нуля
+ * (черновая отделка, готовые проёмы без выравнивания под старую коробку),
+ * и на реальных ЖК Челябинска, где двери уже установлены.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../../components/ui/FaqAccordion.astro'
+import SectionHeading from '../../components/partitions/SectionHeading.astro'
+import { INVISIBLE_WORKS } from '../../data/skrytye-dveri-works'
+import { merchantPolicy } from '../../lib/contacts-data'
+import {
+  IMAGES,
+  SECRET_MIN_BLADE_PRICE,
+  SECRET_MIN_KIT_PRICE,
+} from '../../data/skrytye-dveri-products'
+
+const PHONE = '+79000297888'
+const TG    = 'https://t.me/vfddoors74'
+
+const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
+
+const canonicalUrl = Astro.site
+  ? new URL('/catalog/skrytye-dveri-novostroyka/', Astro.site).href
+  : undefined
+
+const title       = 'Скрытые двери в новостройку в Челябинске — цены и монтаж | ВФД'
+const description = `Скрытые двери в новостройку под черновую отделку в Челябинске: замер до финишной штукатурки, монтаж заподлицо со стеной. Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}.`
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Каталог', href: '/catalog/' },
+  { label: 'Скрытые двери', href: '/catalog/skrytye-dveri/' },
+  { label: 'В новостройку' },
+]
+
+// Реальные объекты в жилых комплексах Челябинска — не выдуманные примеры,
+// а конкретные ЖК из портфолио монтажной бригады.
+const newBuildWorks = INVISIBLE_WORKS.filter(w =>
+  w.location?.includes('Привилегия') || w.location?.includes('Притяжение')
+)
+
+const faq = [
+  {
+    q: 'На каком этапе ремонта нужно заказывать скрытую дверь?',
+    a: 'До финишной штукатурки и стяжки пола. Короб монтируется в проём на этапе чернового ремонта — если стены уже отделаны, придётся частично их вскрывать. Замерщик выезжает на объект и определяет точный момент установки короба под ваш график ремонта.',
+  },
+  {
+    q: 'Подходит ли скрытая дверь для проёма в новостройке без выравнивания?',
+    a: 'Требование одно: проём и откосы должны быть в одной плоскости со стеной после отделки, минимальная толщина стены — 90 мм. В новостройках со стандартной перегородкой из газобетона или пеноблока это условие обычно выполняется без доработок.',
+  },
+  {
+    q: 'Успеет ли дверь встать в срок, если ремонт уже идёт?',
+    a: 'Стандартные ширины «Секрет» и «Секрет Реверс» — регулярно повторяющаяся позиция, сроки поставки уточняем на замере под конкретную дату монтажа. Нестандартная высота (от 2050 мм) — изготовление под заказ, 6–8 недель, это стоит учитывать заранее в графике ремонта.',
+  },
+  {
+    q: 'Можно ли доклеить обои или положить плитку после установки короба?',
+    a: 'Да, это стандартная последовательность: короб монтируется первым, затем отделочники доводят стену вплотную к профилю. Один из наших объектов на Кашириных именно так и финишировался — обоями поверх уже смонтированного короба.',
+  },
+  {
+    q: 'Сколько дверей ставите на квартиру одновременно?',
+    a: 'Обычно 2–4 двери на квартиру — санузел, спальня, кладовая. Замерщик выезжает один раз на все проёмы, монтаж всей партии занимает 2–3 дня в зависимости от количества и высоты.',
+  },
+]
+
+const structuredData = canonicalUrl ? [
+  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: 'Скрытые двери в новостройку — серия «Секрет»',
+    description: 'Двери скрытого монтажа для новостроек: устанавливаются на этапе черновой отделки, полотно заподлицо со стеной без наличников.',
+    brand: { '@type': 'Brand', name: 'ВФД' },
+    image: IMAGES.invisible,
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'RUB',
+      price: SECRET_MIN_KIT_PRICE,
+      availability: 'https://schema.org/InStock',
+      seller: { '@type': 'Organization', name: 'Салон дверей ВФД' },
+      hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
+      shippingDetails:         merchantPolicy.shipping,
+    },
+  },
+] : undefined
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage={IMAGES.invisible}
+  structuredData={structuredData}
+>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
+        <div class="order-2 lg:order-1">
+          <p class="t-eyebrow mb-3">В новостройку</p>
+          <h1 class="t-h1 mb-5">Скрытые двери в новостройку с нуля</h1>
+          <p class="m-0 mb-4 t-lead text-slate-600">
+            Ремонт с нуля — единственный момент, когда скрытую дверь можно заложить без
+            компромиссов: короб встаёт в проём на этапе черновой отделки, до штукатурки
+            и стяжки, и потом просто зашивается заподлицо со стеной.
+          </p>
+          <p class="m-0 mb-6 t-lead text-slate-600">
+            Мы уже монтировали такие двери в ЖК «Привилегия» и мкр. Притяжение —
+            ниже реальные объекты, а не рендеры.
+          </p>
+          <div class="flex gap-2.5 flex-wrap">
+            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary">Рассчитать стоимость</a>
+            <a href={`tel:${PHONE}`} class="btn btn-outline">Позвонить</a>
+          </div>
+        </div>
+        <div class="order-1 overflow-hidden rounded-3xl lg:order-2">
+          <img
+            src={IMAGES.invisible}
+            alt="Скрытая дверь в новостройке — монтаж заподлицо со стеной"
+            width="900"
+            height="675"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            class="aspect-4/3 w-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПОЧЕМУ НОВОСТРОЙКА — ИДЕАЛЬНЫЙ МОМЕНТ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading eyebrow="Почему сейчас" title="Новостройка — точка входа без переплат" />
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="rounded-2xl border border-slate-200 p-6">
+          <h3 class="m-0 mb-2 text-base font-medium text-ink">Проём без переделок</h3>
+          <p class="m-0 text-sm leading-relaxed text-slate-600">
+            В квартире с черновой отделкой не нужно демонтировать старую коробку и штукатурку
+            вокруг неё — короб встаёт в готовый проём сразу под финишную отделку.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 p-6">
+          <h3 class="m-0 mb-2 text-base font-medium text-ink">Один этап под весь ремонт</h3>
+          <p class="m-0 text-sm leading-relaxed text-slate-600">
+            Замерщик приезжает один раз на все проёмы квартиры — короба монтируются
+            бригадой параллельно с остальными черновыми работами, без второго заезда.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-slate-200 p-6">
+          <h3 class="m-0 mb-2 text-base font-medium text-ink">Отделка в цвет стен</h3>
+          <p class="m-0 text-sm leading-relaxed text-slate-600">
+            Полотно в грунте красится, штукатурится или клеится обоями заодно с ремонтом стен —
+            отдельного визита финишной отделки под дверь не требуется.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ЦЕНЫ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Стоимость"
+        title="Сколько стоит скрытая дверь в новостройку"
+        subtitle={`Полотно от ${fmt(SECRET_MIN_BLADE_PRICE)}, комплект с коробом от ${fmt(SECRET_MIN_KIT_PRICE)}. На 2–4 двери одной квартиры расчёт делаем одним списком.`}
+      />
+      <div class="flex flex-wrap gap-3">
+        <a href="/catalog/skrytye-dveri/#secret-prices" class="btn btn-outline">Смотреть таблицу цен «Секрет»</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- РАБОТЫ В ЖК -->
+  {newBuildWorks.length > 0 && (
+    <section class="section bg-white">
+      <div class="container">
+        <SectionHeading eyebrow="Наши объекты" title="Скрытые двери в жилых комплексах Челябинска" />
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {newBuildWorks.map(w => (
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <div class="aspect-4/3 w-full overflow-hidden bg-slate-100">
+                <img
+                  src={w.images[0]}
+                  alt={w.title}
+                  loading="lazy"
+                  decoding="async"
+                  width="480"
+                  height="360"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+              <div class="p-4">
+                <p class="m-0 mb-1 text-xs font-semibold text-teal-600">{w.location}</p>
+                <h3 class="m-0 text-sm font-semibold leading-snug text-ink">{w.title}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div class="mt-6 text-center">
+          <a href="/catalog/skrytye-dveri/raboty/" class="inline-flex items-center gap-1 text-sm font-semibold text-teal-600 hover:text-teal-700">
+            Все работы →
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- FAQ -->
+  <section class="section bg-white">
+    <div class="container">
+      <FaqAccordion items={faq} />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section bg-white">
+    <div class="container">
+      <div class="rounded-3xl bg-graphite p-[clamp(2rem,5vw,3rem)] text-white">
+        <div class="flex flex-wrap items-center justify-between gap-6">
+          <div>
+            <h2 class="m-0 mb-2 text-2xl font-medium">Заложите скрытые двери в план ремонта</h2>
+            <p class="m-0 max-w-xl text-sm leading-relaxed text-white/70">
+              Пришлите планировку квартиры и этап ремонта — скажем, когда выезжать на замер
+              и когда монтировать короба.
+            </p>
+          </div>
+          <div class="flex gap-2.5 flex-wrap">
+            <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
+            <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>

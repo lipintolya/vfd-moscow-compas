@@ -1,0 +1,66 @@
+---
+import IconChevron from '../ui/icons/IconChevron.astro'
+import IconExpand from '../ui/icons/IconExpand.astro'
+import type { SlideImage } from '../../data/partitions'
+
+interface Props {
+  images:     SlideImage[]
+  tone?:      'dark' | 'light'
+  indicator?: 'dots' | 'counter'
+  class?:     string
+  /** true — первый кадр слайдера уходит с loading="eager"/fetchpriority="high"
+      (слайдер виден сразу при заходе на страницу, напр. спотлайт сразу под hero).
+      По умолчанию false — все кадры lazy, верно для слайдеров ниже по странице. */
+  eager?:     boolean
+}
+const { images, tone = 'dark', indicator = 'counter', class: cls = '', eager = false } = Astro.props
+---
+<div
+  class:list={[
+    'group relative rounded-3xl overflow-hidden h-full pt-stat-slider cursor-zoom-in',
+    tone === 'dark' ? 'bg-slate-900' : 'bg-slate-100',
+    cls,
+  ]}
+>
+  <div class="pt-stat-slides">
+    {images.map((img, i) => (
+      <img
+        src={img.src}
+        alt={img.alt}
+        class="pt-stat-slide"
+        loading={eager && i === 0 ? 'eager' : 'lazy'}
+        fetchpriority={eager && i === 0 ? 'high' : undefined}
+        decoding="async"
+        width="1080"
+        height="1920"
+      />
+    ))}
+  </div>
+
+  <div class="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-900/55 backdrop-blur-xs text-white">
+      <IconExpand size={13} />
+    </div>
+  </div>
+
+  <button class="pt-stat-arrow pt-stat-prev" type="button" aria-label="Предыдущее фото">
+    <IconChevron dir="left" />
+  </button>
+  <button class="pt-stat-arrow pt-stat-next" type="button" aria-label="Следующее фото">
+    <IconChevron dir="right" />
+  </button>
+
+  {indicator === 'counter' ? (
+    <div class="pt-hotel-counter" aria-live="polite">
+      <span class="pt-hotel-cur">1</span>
+      <span class="text-white/35">/</span>
+      <span>{images.length}</span>
+    </div>
+  ) : (
+    <div class="pt-stat-dots">
+      {images.map((_, i) => (
+        <button class:list={['pt-stat-dot', i === 0 && 'is-active']} type="button" aria-label={`Перейти к фото ${i + 1}`} />
+      ))}
+    </div>
+  )}
+</div>

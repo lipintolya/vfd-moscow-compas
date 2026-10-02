@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
+import WorksGrid from '../../../components/catalog/WorksGrid.vue'
+import { INVISIBLE_WORKS } from '../../../data/skrytye-dveri-works'
+import { IMAGES } from '../../../data/skrytye-dveri-products'
+
+const TG = 'https://t.me/vfddoors74'
+
+const pluralWorks = (n: number) => {
+  const mod100 = n % 100
+  const mod10 = n % 10
+  if (mod100 >= 11 && mod100 <= 14) return 'работ'
+  if (mod10 === 1) return 'работа'
+  if (mod10 >= 2 && mod10 <= 4) return 'работы'
+  return 'работ'
+}
+
+const canonicalUrl = Astro.site
+  ? new URL('/catalog/skrytye-dveri/raboty/', Astro.site).href
+  : undefined
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Каталог', href: '/catalog/' },
+  { label: 'Скрытые двери', href: '/catalog/skrytye-dveri/' },
+  { label: 'Наши работы' },
+]
+
+const structuredData = canonicalUrl ? [
+  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Наши работы — монтаж скрытых дверей в Челябинске и Челябинской области',
+    itemListElement: INVISIBLE_WORKS.map((w, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'CreativeWork',
+        name: w.title,
+        ...(w.story ? { description: w.story } : {}),
+        dateCreated: w.date,
+        image: w.images,
+        ...(w.location ? { locationCreated: { '@type': 'Place', name: w.location } } : {}),
+      },
+    })),
+  },
+] : undefined
+---
+
+<BaseLayout
+  title="Наши работы — скрытые двери в Челябинске, фото объектов | ВФД"
+  description={`Реальные объекты монтажа скрытых дверей «Секрет» и «Секрет Реверс» в Челябинске и Челябинской области — ${INVISIBLE_WORKS.length} ${pluralWorks(INVISIBLE_WORKS.length)} с фото и спецификацией. Бесплатный замер по Челябинску при заказе.`}
+  ogImage={IMAGES.invisible}
+  canonical={canonicalUrl}
+  structuredData={structuredData}
+>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <h1 class="sd-h2">Наши работы</h1>
+      <p class="sd-p" style="margin-top: -0.75rem; margin-bottom: 1.75rem">
+        Все объекты нашей бригады в Челябинске и Челябинской области — {INVISIBLE_WORKS.length} {pluralWorks(INVISIBLE_WORKS.length)} с фото монтажа. Нажмите на фото, чтобы посмотреть полную спецификацию.
+      </p>
+      <WorksGrid client:load works={INVISIBLE_WORKS} tgHref={TG} />
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+.sd-h2 {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.625rem, 3vw, 2.125rem);
+  font-weight: 500;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.sd-p {
+  margin: 0 0 1rem;
+  color: #64748b;
+  font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+  line-height: 1.75;
+}
+@media (max-width: 640px) {
+  .sd-h2 { margin-bottom: 1rem; }
+}
+</style>

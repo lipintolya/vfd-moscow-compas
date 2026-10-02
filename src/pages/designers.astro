@@ -1,0 +1,488 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import SectionHeading from '../components/partitions/SectionHeading.astro'
+import ProcessSteps from '../components/partitions/ProcessSteps.astro'
+
+const PHONE = '+79000297888'
+const TG    = 'https://t.me/vfddoors74'
+
+/* ════════════════════════════════════════════════════════════
+   ИЗОБРАЖЕНИЯ
+   ════════════════════════════════════════════════════════════ */
+const HERO_SLIDER_IMAGES = [
+  // Локальные копии — оба оригинала на CDN весили больше 1МБ (image2.webp
+  // был 1.26МБ), пересжаты sharp'ом (см. gen-designers-images.mjs), итог
+  // ~65-70КБ каждый.
+  '/renders/hero/designers-hero.webp',
+  '/renders/designers/hero-slide-2.webp',
+]
+const CATALOG_HREF = 'https://crm.vfd.ru/~W8Bcr'
+
+/* Перелинковка на товарные разделы — что ещё есть у ВФД для проектов.
+   Локальные ресайзы (см. gen-designers-images.mjs) — те же оригиналы,
+   что переиспользуются на других страницах (contacts.astro,
+   CatalogCategories.vue, decor-products.ts) в другом размере, здесь
+   карточка ~400px CSS-ширины (grid-cols-3). */
+const crossLinks = [
+  {
+    title: 'Межкомнатные и входные двери',
+    desc: '60+ моделей в выставочном зале, эмаль/ПЭТ/полипропилен, бесплатный замер при заказе',
+    image: '/renders/designers/cross-doors.webp',
+    href: '/catalog/',
+    cta: 'Смотреть каталог',
+  },
+  {
+    title: 'Алюминиевые перегородки',
+    desc: 'Раздвижные и стационарные системы GRAFIA, 13+ цветов профиля',
+    image: '/renders/designers/cross-partitions.webp',
+    href: '/partitions/',
+    cta: 'Смотреть перегородки',
+  },
+  {
+    title: 'Декор: плинтус, фрамуги, рейки',
+    desc: 'Декоративные элементы в цвет дверей и интерьера',
+    image: '/renders/designers/cross-decor.webp',
+    href: '/catalog/decor/',
+    cta: 'Смотреть декор',
+  },
+]
+
+const heroStats = [
+  { val: '150+',  lbl: 'реализованных проектов', desc: 'с дизайнерами и архитекторами Челябинска' },
+  { val: 'Бонус', lbl: 'за реализованный проект', desc: 'размеры бонусов определяются при встрече с руководителем салона' },
+  { val: '5 минут', lbl: 'на ответ менеджера', desc: 'Пришлите проект в Telegram или в любом удобном для вас мессенджере' },
+]
+
+const partnerEligibility = [
+  {
+    title: 'Кто может участвовать',
+    items: [
+      'Индивидуальные условия сотрудничества',
+      'Дизайнер интерьера — ИП или самозанятый',
+      'Архитектор — ИП или самозанятый',
+      'Студия дизайна',
+      'Архитектурное бюро',
+      'Ремонтно-снабженческая компания полного цикла',
+      'Компания-застройщик ИЖС и малоэтажного строительства',
+    ],
+  },
+  {
+    title: 'Что получает партнёр',
+    items: [
+      'Информационная и техническая поддержка на всех этапах проекта',
+      'Бесплатный каталог на бумаге по запросу',
+      'Образцы цвета, покрытий и стекла для презентации заказчику',
+      'По желанию — публикация ваших работ с указанием авторства и ссылкой на ваши соцсети',
+    ],
+  },
+]
+
+// Локальные ресайзы (см. gen-designers-images.mjs) — оригиналы 1448-1536px
+// (142-285КБ) отображаются на ~300px CSS-ширины в grid-cols-4 на десктопе.
+const cooperationFormat = [
+  {
+    title: 'Выбор моделей и консультация',
+    text: 'Дизайнер формирует концепцию, а менеджер салона предлагает актуальный ассортимент и технические решения, подходящие под стиль проекта.',
+    image: '/renders/designers/step-consultation.webp',
+  },
+  {
+    title: 'Предоставление ТЗ и замер',
+    text: 'Дизайнер передаёт размеры проёмов и толщину стен, салон организует профессиональный замер для точной спецификации.',
+    image: '/renders/designers/step-tz.webp',
+  },
+  {
+    title: 'Заключение договора',
+    text: 'Оформление заказа, выбор покрытия, систем открывания и фурнитуры. На этом этапе составляется финальная смета.',
+    image: '/renders/designers/step-dogovor.webp',
+  },
+  {
+    title: 'Логистика и монтаж',
+    text: 'Салон осуществляет доставку и профессиональный монтаж.',
+    image: '/renders/designers/step-dostavka.webp',
+  },
+]
+
+const title       = 'Дизайнерам и архитекторам — сотрудничество в Челябинске | ВФД'
+const description = 'Партнёрская программа для дизайнеров и архитекторов в Челябинске: подбор дверей и перегородок, дизайн-надзор на объекте, бонус за проект.'
+const canonicalUrl = Astro.site ? new URL('/designers/', Astro.site).href : undefined
+const heroOgImage  = Astro.site ? new URL(HERO_SLIDER_IMAGES[1], Astro.site).href : undefined
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Дизайнерам' },
+]
+
+interface Step { num: string; title: string; text: string; details: string[] }
+
+const steps: Step[] = [
+  {
+    num: '01',
+    title: 'Вы отправляете проект',
+    text: 'Делитесь концепцией, планировкой или техническим заданием в Telegram — без долгих согласований.',
+    details: ['Чертежи, эскизы, референсы — в любом виде', 'Можно прислать просто фото объекта'],
+  },
+  {
+    num: '02',
+    title: 'Мы анализируем задачу',
+    text: 'Изучаем планировку, материалы и концепцию интерьера, чтобы предложить решения, которые впишутся в проект.',
+    details: ['Оцениваем проём и условия монтажа', 'Учитываем стилистику и материалы интерьера'],
+  },
+  {
+    num: '03',
+    title: 'Подбираем решения и материалы',
+    text: 'Предлагаем серии дверей и перегородок, кромку, остекление и покрытие профиля под задачу.',
+    details: ['Скрытые двери «Секрет», «Секрет Реверс», перегородки GRAFIA', '13+ цветов профиля, варианты остекления'],
+  },
+  {
+    num: '04',
+    title: 'Готовим коммерческое предложение',
+    text: 'Формируем понятное КП с расчётом и спецификацией — удобно показать заказчику.',
+    details: ['Расчёт и КП в течение одного рабочего дня', 'Спецификация и чертежи для подрядчиков'],
+  },
+  {
+    num: '05',
+    title: 'Помогаем согласовать решение с заказчиком',
+    text: 'При необходимости подключаемся к диалогу с клиентом и аргументируем технические решения.',
+    details: ['Подключаемся к встрече или переписке', 'Поясняем технические детали клиенту'],
+  },
+  {
+    num: '06',
+    title: 'Сопровождаем реализацию проекта',
+    text: 'Контролируем замер, монтаж и финальный результат — дизайнерский надзор на каждом этапе.',
+    details: ['Замер и монтаж собственной бригадой по Челябинску и области', 'Дизайнерский надзор на объекте'],
+  },
+]
+
+const materials = [
+  {
+    badge: '3D',
+    title: '3D-модели алюминиевых дверей',
+    desc: 'Готовые 3D-модели для использования в проектах визуализации.',
+    href: 'https://3ddd.ru/3dmodels?query=alumdoor&order=relevance',
+  },
+  {
+    badge: 'CRM',
+    title: 'Каталог алюминиевых дверей',
+    desc: 'Каталог решений и моделей алюминиевых дверных конструкций.',
+    href: 'https://crm.vfd.ru/docs/pub/7c3fe99768a64437fc6c2a0371c7414f/default/?&',
+  },
+  {
+    badge: 'PDF',
+    title: 'Инструкции и технические чертежи',
+    desc: 'Размеры, технические материалы и документация для проектирования.',
+    href: 'https://crm.vfd.ru/docs/pub/1041f6446d1a6eb72c8f75161e08de65/default/?&',
+  },
+  {
+    badge: 'PDF',
+    title: 'Визуализация конструкций и профилей',
+    desc: 'Материалы для создания визуализаций интерьеров.',
+    href: 'https://crm.vfd.ru/docs/pub/ded5bbfb131cea40a5f33f05006e5bd4/default/?path=%2F%D0%BF%D1%80%D0%BE%D1%84%D0%B8%D0%BB%D1%8F%20%D0%BF%D0%BE%D0%BB%D0%BE%D1%82%D0%B5%D0%BD%2F',
+  },
+  {
+    badge: 'PDF',
+    title: 'Изображения стёкол и перегородок',
+    desc: 'Материалы для выбора стеклянных решений в проектах.',
+    href: 'https://crm.vfd.ru/docs/pub/8481c384fc078da3e1cea168258b98e0/default/?&',
+  },
+]
+
+const faq = [
+  {
+    q: 'Какие проекты подходят для сотрудничества?',
+    a: 'Любые — от квартир и частных домов до офисных и коммерческих интерьеров в Челябинске и области. Работаем как с готовыми проектами, так и с концепциями на стадии эскиза.',
+  },
+  {
+    q: 'Можно ли получить 3D-модели дверей?',
+    a: 'Да, готовые 3D-модели алюминиевых дверей доступны в библиотеке 3ddd.ru — ссылка в разделе «Полезные материалы» выше.',
+  },
+  {
+    q: 'Помогаете ли вы дизайнеру работать с заказчиком?',
+    a: 'Да. Готовим понятные коммерческие предложения и при необходимости подключаемся к диалогу с клиентом, чтобы аргументировать технические решения.',
+  },
+  {
+    q: 'Есть ли партнёрская программа?',
+    a: 'Да, для дизайнеров и архитекторов действует партнёрская программа с денежным бонусом за реализованные проекты. Точный размер и условия уточняйте у менеджера.',
+  },
+  {
+    q: 'Что входит в дизайнерский надзор?',
+    a: 'Контролируем замер, монтаж и финальный результат на объекте, чтобы реализация конструкций точно соответствовала дизайн-проекту.',
+  },
+  {
+    q: 'Как получить консультацию по проекту?',
+    a: 'Напишите в Telegram или позвоните — пришлите проект, чертежи или фото объекта, и мы предложим решения в течение рабочего дня.',
+  },
+]
+
+const structuredData = canonicalUrl ? [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map(f => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Партнёрская программа для дизайнеров интерьера и архитекторов',
+    name: 'Сотрудничество с дизайнерами интерьера и архитекторами в Челябинске',
+    description,
+    url: canonicalUrl,
+    audience: {
+      '@type': 'Audience',
+      audienceType: 'Дизайнеры интерьера, архитекторы, студии дизайна',
+    },
+    areaServed: [
+      { '@type': 'City', name: 'Челябинск' },
+      { '@type': 'AdministrativeArea', name: 'Челябинская область' },
+    ],
+    provider: {
+      '@type': 'LocalBusiness',
+      name: 'Салон дверей ВФД',
+      telephone: PHONE,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'ул. Братьев Кашириных, 131Б',
+        addressLocality: 'Челябинск',
+        addressCountry: 'RU',
+      },
+    },
+  },
+] : undefined
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage={heroOgImage}
+  preloadImage={HERO_SLIDER_IMAGES[0]}
+  structuredData={structuredData}
+>
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       HERO — текст + фото, статы строкой под ним (по аналогии с sofiadveri.ru)
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white" id="partner">
+    <div class="container">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div>
+          <p class="t-eyebrow block mb-3">Партнёрская программа · Челябинск и область</p>
+          <h1 class="t-h1 mb-4">Сотрудничество с дизайнерами и архитекторами в Челябинске</h1>
+          <p class="mb-6 max-w-125 t-lead text-slate-600">
+            Помогаем реализовывать проекты без проблем с подбором дверей, сроками и монтажом —
+            и платим бонус за каждый реализованный проект.
+          </p>
+          <div class="flex gap-2.5 flex-wrap">
+            <a href={TG} target="_blank" rel="noopener" class="btn btn-primary">Стать партнёром</a>
+            <a href={CATALOG_HREF} target="_blank" rel="noopener" class="btn btn-outline">Получить каталог</a>
+          </div>
+        </div>
+
+        <div class="relative overflow-hidden rounded-3xl shadow-lg min-h-80 lg:min-h-110">
+          <img
+            src={HERO_SLIDER_IMAGES[0]}
+            alt="Интерьер с дверями и перегородками ВФД"
+            class="absolute inset-0 w-full h-full object-cover object-center"
+            width="1672"
+            height="941"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </div>
+      </div>
+
+      <div class="mt-12 lg:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-6 lg:gap-x-12">
+        {heroStats.map((s, i) => (
+          <div class:list={['flex flex-col', i > 0 && 'border-t sm:border-t-0 sm:border-l border-slate-200 pt-6 sm:pt-0 sm:pl-8 lg:pl-12']}>
+            <span class="t-stat block">{s.val}</span>
+            <span class="block text-sm font-semibold text-ink mt-1.5 leading-snug">{s.lbl}</span>
+            <span class="block text-xs text-slate-500 leading-snug mt-1">{s.desc}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       ЧТО ЕЩЁ ЕСТЬ У ВФД — перелинковка на товарные разделы
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Каталог ВФД"
+        title="Больше решений для ваших проектов"
+        subtitle="Двери, алюминиевые перегородки и декор — с ценами, фото и техническими параметрами"
+      />
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 lg:gap-5">
+        {crossLinks.map(link => (
+          <a
+            href={link.href}
+            class="group relative flex min-h-70 flex-col justify-end overflow-hidden rounded-3xl no-underline focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-3"
+          >
+            <img
+              src={link.image}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              class="absolute inset-0 h-full w-full object-cover transition-transform duration-600 ease-out group-hover:scale-[1.06]"
+              aria-hidden="true"
+            />
+            <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/25 to-transparent" aria-hidden="true"></div>
+            <div class="relative z-10 p-5 lg:p-6">
+              <h3 class="mb-1.5 text-xl font-medium leading-snug text-white">{link.title}</h3>
+              <p class="mb-4 text-sm leading-relaxed text-white/75">{link.desc}</p>
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-white/50 px-4 py-2 text-sm font-semibold text-white transition-[background-color,border-color,transform] duration-200 ease-out group-hover:-translate-y-px group-hover:border-white group-hover:bg-white/15">
+                {link.cta}
+                <svg class="h-3.5 w-3.5 shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       КТО МОЖЕТ СТАТЬ ПАРТНЁРОМ
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white" id="eligibility">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Условия сотрудничества"
+        title="Кто может стать партнёром"
+        subtitle="Программа открыта для специалистов и компаний, которые работают с интерьерными и фасадными решениями — независимо от формы организации."
+      />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 lg:gap-5">
+        {partnerEligibility.map(group => (
+          <article class="motion-safe:opacity-0 motion-safe:translate-y-4 transition-all duration-700 ease-out rounded-2xl bg-slate-50 p-[clamp(1.25rem,2.5vw,1.75rem)]" data-reveal>
+            <h3 class="mb-3 text-step-2 font-medium text-ink">{group.title}</h3>
+            <ul class="flex flex-col gap-2 list-none p-0 m-0">
+              {group.items.map(item => (
+                <li class="flex gap-2.5 text-sm leading-relaxed text-slate-600">
+                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-teal-500" aria-hidden="true"></span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+
+      <div class="mt-3.5 lg:mt-5">
+        <h3 class="mb-3.5 text-step-2 font-medium text-ink">Формат взаимодействия</h3>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 lg:gap-5">
+          {cooperationFormat.map((step, i) => (
+            <article
+              class="motion-safe:opacity-0 motion-safe:translate-y-4 transition-all duration-700 ease-out group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white"
+              style={`transition-delay:${i * 90}ms`}
+              data-reveal
+            >
+              {step.image && (
+                <div class="relative aspect-4/3 overflow-hidden">
+                  <img
+                    src={step.image}
+                    alt=""
+                    class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              )}
+              <div class="flex flex-1 flex-col p-4">
+                <span class="mb-2 block text-xs font-medium tabular-nums text-teal-600">{String(i + 1).padStart(2, '0')}</span>
+                <h4 class="mb-1.5 text-base font-medium leading-tight text-ink">{step.title}</h4>
+                <p class="m-0 text-sm leading-relaxed text-slate-600">{step.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       КАК ПРОХОДИТ СОТРУДНИЧЕСТВО
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Процесс работы"
+        title="Как проходит сотрудничество"
+        subtitle="От первого сообщения до сдачи объекта — прозрачный процесс без лишних созвонов и согласований."
+      />
+      <ProcessSteps items={steps} />
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       ПОЛЕЗНЫЕ МАТЕРИАЛЫ ДЛЯ ДИЗАЙНЕРОВ
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Библиотека"
+        title="Полезные материалы для дизайнеров"
+        subtitle="3D-модели, каталоги и техническая документация для проектирования и визуализации."
+      />
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 lg:gap-5">
+        {materials.map(m => (
+          <a href={m.href} target="_blank" rel="noopener" class="group flex items-center gap-4 rounded-2xl bg-slate-50 p-[clamp(1rem,2vw,1.375rem)] no-underline transition hover:bg-teal-50/60 hover:-translate-y-0.5">
+            <span class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-600">
+              <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <b class="absolute -bottom-1 -right-1 rounded bg-teal-600 px-1 py-0.5 text-[0.5rem] font-medium leading-none tracking-wide text-white">{m.badge}</b>
+            </span>
+            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span class="text-step-1 font-medium leading-tight text-ink">{m.title}</span>
+              <span class="text-step-0 leading-snug text-slate-500">{m.desc}</span>
+            </span>
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors group-hover:bg-teal-500 group-hover:text-white">
+              <svg viewBox="0 0 24 24" fill="none" class="h-[1.05rem] w-[1.05rem]"><path d="M7 17L17 7M7 7h10v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       FAQ
+  ══════════════════════════════════════════════ -->
+  <section class="section bg-white">
+    <div class="container">
+      <FaqAccordion items={faq} />
+    </div>
+  </section>
+
+</BaseLayout>
+
+<script>
+  const revealItems = document.querySelectorAll('#eligibility [data-reveal]')
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove('motion-safe:opacity-0', 'motion-safe:translate-y-4')
+            io.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' },
+    )
+    revealItems.forEach((el) => io.observe(el))
+  }
+</script>

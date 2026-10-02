@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /privacy
+
+Sitemap: https://vfd74.ru/sitemap-index.xml

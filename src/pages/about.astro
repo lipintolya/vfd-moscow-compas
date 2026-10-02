@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import AboutSection from '../components/about/AboutSection.vue'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import { companyLegalInfo } from '../lib/contacts-data'
+
+const title       = 'О салоне дверей ВФД в Челябинске — официальный дилер с 2014 года'
+const description = 'Салон дверей ВФД на Братьев Кашириных, 131Б — официальный дилер Владимирской фабрики дверей в Челябинске с 2014 года. 60+ моделей в выставочном зале, замер и монтаж.'
+const canonicalUrl = Astro.site ? new URL('/about/', Astro.site).href : undefined
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'О нас' },
+]
+
+const faq = [
+  {
+    q: 'Вы официальный дилер Владимирской фабрики дверей?',
+    a: 'Да. Салон ВФД на Братьев Кашириных — фирменный салон, который работает с фабрикой напрямую, без посредников. Подробнее о самом производителе — на странице «О фабрике».',
+  },
+  {
+    q: 'С какого года работает салон?',
+    a: `Салон работает в Челябинске с ${companyLegalInfo.activity.founded} года.`,
+  },
+  {
+    q: 'Можно ли посмотреть двери вживую?',
+    a: `Да, в выставочном зале представлено более 60 моделей дверей, образцы покрытий и профилей перегородок. Адрес: ${companyLegalInfo.address.legal}, ${companyLegalInfo.address.entrance.charAt(0).toLowerCase() + companyLegalInfo.address.entrance.slice(1)}. Работаем без выходных: ${companyLegalInfo.workingHours.shortDisplay}.`,
+  },
+  {
+    q: 'Какая гарантия на двери и монтаж?',
+    a: 'На монтажные работы — 12 месяцев, на сами двери и перегородки — по условиям производителя. С гарантийными вопросами обращайтесь напрямую в салон.',
+  },
+  {
+    q: 'Работаете ли вы с дизайнерами и юридическими лицами?',
+    a: 'Да. Для дизайнеров и архитекторов есть партнёрская программа, для юридических лиц и ИП — оплата по счёту безналичным расчётом.',
+  },
+]
+
+const storeSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Store',
+  '@id': 'https://vfd74.ru/#localbusiness',
+  name: 'Салон дверей ВФД на Кашириных',
+  description:
+    `Фирменный салон межкомнатных, скрытых и входных дверей, алюминиевых перегородок в Челябинске. Официальный дилер Владимирской фабрики дверей с ${companyLegalInfo.activity.founded} года.`,
+  url: 'https://vfd74.ru',
+  image: 'https://vfd74.ru/renders/about/vfd-out-900.webp',
+  telephone: companyLegalInfo.contacts.phone.map(p => p.raw),
+  email: companyLegalInfo.contacts.email,
+  sameAs: [
+    'https://vk.com/vfddoors74',
+    'https://t.me/vfddoors74',
+    'https://max.ru/id452402308842_biz',
+    'https://2gis.ru/chelyabinsk/firm/70000001093506304',
+    'https://yandex.ru/maps/-/CPwenX08',
+  ],
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'ул. Братьев Кашириных, 131Б',
+    addressLocality: 'Челябинск',
+    addressRegion: 'Челябинская область',
+    postalCode: '454128',
+    addressCountry: 'RU',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: companyLegalInfo.address.coordinates.lat,
+    longitude: companyLegalInfo.address.coordinates.lng,
+  },
+  openingHoursSpecification: companyLegalInfo.schemaOrgHours.map(h => ({
+    '@type': 'OpeningHoursSpecification',
+    ...h,
+  })),
+  foundingDate: String(companyLegalInfo.activity.founded),
+  founder: { '@type': 'Person', name: companyLegalInfo.director.fullName },
+  priceRange: '₽₽',
+  acceptsPaymentMethod: ['Cash', 'CreditCard', 'DebitCard'],
+}
+
+const aboutPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: title,
+  description,
+  url: canonicalUrl,
+  about: { '@id': 'https://vfd74.ru/#localbusiness' },
+}
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map(f => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonicalUrl}
+  ogImage="https://vfd74.ru/renders/about/vfd-out-900.webp"
+  structuredData={[storeSchema, aboutPageSchema, faqSchema]}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <AboutSection client:visible />
+
+  <section class="section">
+    <div class="container">
+      <FaqAccordion items={faq} />
+      <p class="mt-6 text-sm text-slate-600">
+        Ещё по теме: <a href="/o-fabrike/" class="font-semibold text-teal-700 hover:text-teal-800">о фабрике-производителе</a>,
+        <a href="/designers/" class="font-semibold text-teal-700 hover:text-teal-800">партнёрская программа для дизайнеров</a>,
+        <a href="/contacts/" class="font-semibold text-teal-700 hover:text-teal-800">контакты и схема проезда</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

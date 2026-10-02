@@ -1,0 +1,363 @@
+---
+import type { Step } from '../../data/partitions'
+
+interface Props {
+  items: Step[]
+  /** Тёмные плитки (#18181a — тот же тон, что у карточек «Гарантия» на
+      /contacts/ и «О компании» на главной) вместо светлых карточек по
+      умолчанию. Логика reveal-анимации и разметка общие для обоих видов. */
+  dark?: boolean
+}
+const { items, dark = false } = Astro.props
+---
+
+<ol class:list={['ps', { 'ps--dark': dark }]} role="list">
+  {items.map((s, i) => (
+    <li class="ps-card" style={`--stagger:${i * 90}ms`}>
+      <span class="ps-bg-num" aria-hidden="true">{s.num}</span>
+      {s.image && (
+        <img
+          class="ps-corner-img"
+          src={s.image}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          decoding="async"
+          style={s.imageWidth ? `width:${s.imageWidth}` : undefined}
+        />
+      )}
+      <div class="ps-head">
+        {!dark && <span class="ps-badge" aria-hidden="true">{s.num}</span>}
+        <h3 class="ps-title">{s.title}</h3>
+      </div>
+      <p class="ps-text">{s.text}</p>
+      <ul class="ps-list" role="list">
+        {s.details.map(d => (
+          <li class="ps-item">
+            <svg class="ps-check" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M5 8.2l2 2 4-4.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {d}
+          </li>
+        ))}
+      </ul>
+      {s.cta && (
+        s.cta.external ? (
+          <a href={s.cta.href} target="_blank" rel="noopener noreferrer" class="ps-cta">
+            {s.cta.label}
+            <svg viewBox="0 0 16 16" fill="none" class="ps-cta-arrow" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        ) : (
+          <a href={s.cta.href} class="ps-cta">
+            {s.cta.label}
+            <svg viewBox="0 0 16 16" fill="none" class="ps-cta-arrow" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        )
+      )}
+    </li>
+  ))}
+</ol>
+
+<style>
+  .ps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1rem, 2vw, 1.375rem);
+  }
+
+  .ps-card {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.5rem, 2.5vw, 2rem);
+    border-radius: 1.5rem;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: box-shadow 300ms ease, transform 300ms ease, border-color 300ms ease;
+  }
+  .ps-card:hover {
+    border-color: #99f6e4;
+    box-shadow: 0 8px 28px rgba(13, 148, 136, 0.10);
+    transform: translateY(-3px);
+  }
+
+  /* Призрачный номер на фоне */
+  .ps-bg-num {
+    position: absolute;
+    z-index: 0;
+    top: -0.5rem;
+    right: 0.875rem;
+    font-size: clamp(5rem, 9vw, 8rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: color-mix(in srgb, #14b8a6 7%, transparent);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .ps-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .ps-badge {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.75rem;
+    background: #f0fdfa;
+    border: 1.5px solid #99f6e4;
+    display: grid;
+    place-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: #0d9488;
+    font-variant-numeric: tabular-nums;
+    transition: background 250ms ease, border-color 250ms ease;
+  }
+  .ps-card:hover .ps-badge {
+    background: #14b8a6;
+    border-color: #14b8a6;
+    color: #fff;
+  }
+
+  .ps-title {
+    margin: 0;
+    padding-top: 0.3rem;
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    font-weight: 500;
+    color: #0f172a;
+    line-height: 1.25;
+  }
+
+  .ps-text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: clamp(0.875rem, 1.15vw, 0.9375rem);
+    color: #475569;
+    line-height: 1.7;
+  }
+
+  .ps-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.875rem;
+    border-top: 1px solid #f1f5f9;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Декоративное фото шага — в углу, позади текста (paint-порядок: раньше
+     в DOM, чем ps-head/ps-text/ps-list → визуально под ними), проступает
+     в пустом месте плитки. */
+  .ps-corner-img {
+    position: absolute;
+    z-index: 0;
+    right: -0.5rem;
+    bottom: -0.5rem;
+    width: clamp(7.5rem, 17vw, 11.5rem);
+    height: auto;
+    object-fit: contain;
+    opacity: 0.9;
+    pointer-events: none;
+    user-select: none;
+    transition: transform 400ms ease;
+    will-change: transform;
+  }
+  .ps-card:hover .ps-corner-img {
+    transform: rotate(25deg);
+  }
+
+  .ps-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: #334155;
+    line-height: 1.5;
+  }
+
+  .ps-check {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.15rem;
+    color: #0d9488;
+  }
+
+  .ps-cta {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: fit-content;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #0d9488;
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+  .ps-cta:hover { color: #0f766e; }
+  .ps-cta-arrow {
+    width: 0.875rem;
+    height: 0.875rem;
+    flex-shrink: 0;
+    transition: transform 200ms ease;
+  }
+  .ps-cta:hover .ps-cta-arrow { transform: translateX(2px); }
+
+  @media (max-width: 640px) {
+    .ps { grid-template-columns: 1fr; }
+    .ps-card { gap: 0.875rem; }
+    /* Узкая колонка — декоративному фото некуда деться без наезда на
+       текст или неряшливого кропа. Плитка остаётся с призрачной цифрой
+       и reveal-анимацией, просто без фото. */
+    .ps-corner-img { display: none; }
+
+    /* «Как мы работаем» на главной (dark) — 4 карточки с абзацем + 4
+       пункта списка на мобильном превращались в лонгрид. Абзац дублирует
+       суть заголовка и списка — на мобильном оставляем только заголовок
+       и до 3 пунктов списка, абзац и 4-й пункт остаются в HowTo-разметке
+       для SEO и на десктопе. */
+    .ps--dark .ps-text { display: none; }
+    .ps--dark .ps-card { padding: 1.25rem; gap: 0.625rem; }
+    .ps--dark .ps-list { padding-top: 0; border-top: none; margin-top: 0; gap: 0.4rem; }
+    .ps--dark .ps-item:nth-child(n + 4) { display: none; }
+  }
+
+  /* ── Тёмный вариант (dark prop) ── */
+  .ps--dark .ps-card {
+    background: var(--color-graphite);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+  /* Hover-подсветка — псевдоэлемент с opacity-переходом, а не анимация
+     background напрямую: браузеры не умеют плавно интерполировать между
+     сплошным цветом и градиентом через background/background-image. */
+  .ps--dark .ps-card::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    background: linear-gradient(155deg, transparent 40%, rgba(20, 184, 166, 0.16) 100%);
+    opacity: 0;
+    transition: opacity 400ms ease;
+    pointer-events: none;
+  }
+  .ps--dark .ps-card:hover::before {
+    opacity: 1;
+  }
+  .ps--dark .ps-card:hover {
+    border-color: rgba(45, 212, 191, 0.4);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  }
+  .ps--dark .ps-bg-num {
+    color: rgba(255, 255, 255, 0.1);
+  }
+  .ps--dark .ps-badge {
+    background: rgba(45, 212, 191, 0.12);
+    border-color: rgba(45, 212, 191, 0.3);
+    color: #2dd4bf;
+  }
+  .ps--dark .ps-card:hover .ps-badge {
+    background: #14b8a6;
+    border-color: #14b8a6;
+    color: #0b0b0c;
+  }
+  .ps--dark .ps-title { color: #fff; }
+  .ps--dark .ps-text  { color: rgba(255, 255, 255, 0.6); }
+  .ps--dark .ps-list  { border-top-color: rgba(255, 255, 255, 0.1); }
+  .ps--dark .ps-item  { color: rgba(255, 255, 255, 0.7); }
+  .ps--dark .ps-check { color: #2dd4bf; }
+  .ps--dark .ps-cta { color: #2dd4bf; }
+  .ps--dark .ps-cta:hover { color: #5eead4; }
+
+  /* ── Scroll-reveal ── */
+  .ps.js-reveal .ps-card {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity  550ms ease var(--stagger, 0ms),
+      transform 550ms cubic-bezier(0.4, 0, 0.2, 1) var(--stagger, 0ms),
+      box-shadow 300ms ease,
+      border-color 300ms ease;
+    will-change: opacity, transform;
+  }
+  .ps.js-reveal .ps-card.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ── Тач-устройства: hover недоступен (залипает после тапа или не
+     срабатывает вовсе) — тот же наклон фото + teal-подсветка проигрывается
+     один раз коротким «миганием» сразу после появления карточки в скролле,
+     тем же IntersectionObserver, что и сам reveal. Только (hover: none),
+     на десктопе эффект остаётся честным :hover. */
+  @media (hover: none) {
+    .ps-card.is-visible .ps-corner-img {
+      animation: ps-corner-flourish 900ms ease 400ms 1;
+    }
+    .ps--dark .ps-card.is-visible::before {
+      animation: ps-tint-flourish 900ms ease 400ms 1;
+    }
+  }
+  @keyframes ps-corner-flourish {
+    0%, 100% { transform: rotate(0deg); }
+    50%      { transform: rotate(25deg); }
+  }
+  @keyframes ps-tint-flourish {
+    0%, 100% { opacity: 0; }
+    50%      { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ps.js-reveal .ps-card { opacity: 1; transform: none; transition: none; }
+    .ps-card { transition: none; }
+    .ps-corner-img { transition: none; animation: none; }
+    .ps-card:hover .ps-corner-img { transform: none; }
+    .ps--dark .ps-card::before { animation: none; }
+  }
+</style>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  document.querySelectorAll('.ps').forEach((wrap) => {
+    if (reduce || !('IntersectionObserver' in window)) return
+    wrap.classList.add('js-reveal')
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-visible')
+            io.unobserve(e.target)
+          }
+        })
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -5% 0px' },
+    )
+    wrap.querySelectorAll('.ps-card').forEach((c) => io.observe(c))
+  })
+</script>

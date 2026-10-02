@@ -1,0 +1,54 @@
+#!/bin/bash
+set -euo pipefail
+
+BRANCH="main"
+GIT_DIR="/var/repo/vfd74.git"
+BUILD_DIR="/var/www/vfd74.ru/build"
+WEB_ROOT="/var/www/vfd74.ru/html"
+ENV_FILE="$BUILD_DIR/.env.production"
+
+export GIT_DIR
+export GIT_WORK_TREE="$BUILD_DIR"
+
+while read -r _ _ ref; do
+  if [ "$ref" = "refs/heads/$BRANCH" ]; then
+    echo "==> Deploying branch: $BRANCH"
+
+    mkdir -p "$BUILD_DIR" "$WEB_ROOT"
+    git checkout -f "$BRANCH"
+    cd "$BUILD_DIR"
+
+    export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    export HOME="${HOME:-/root}"
+
+    if [ -f "$ENV_FILE" ]; then
+      set -a
+      # shellcheck disable=SC1090
+      source "$ENV_FILE"
+      set +a
+    elif [ -f "$WEB_ROOT/.env.production" ]; then
+      cp "$WEB_ROOT/.env.production" "$ENV_FILE"
+      set -a
+      # shellcheck disable=SC1090
+      source "$ENV_FILE"
+      set +a
+    else
+      echo "ERROR: Supabase env file not found"
+      exit 1
+    fi
+
+    echo "==> Node $(node -v), npm $(npm -v)"
+
+    echo "==> Installing dependencies"
+    npm ci
+
+    echo "==> Building site"
+    npm run build
+
+    echo "==> Publishing static files to $WEB_ROOT"
+    rsync -a --delete dist/ "$WEB_ROOT/"
+
+    chown -R www-data:www-data "$WEB_ROOT"
+    echo "==> Deploy complete: https://vfd74.ru"
+  fi
+done

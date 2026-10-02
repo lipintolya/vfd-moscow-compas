@@ -1,0 +1,677 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import ProductColorPicker from '../../components/catalog/ProductColorPicker.vue'
+import PlinthSection from '../../components/catalog/PlinthSection.astro'
+import { getSeriesSpec } from '../../data/series-descriptions'
+import { accessoriesByCoating, CATEGORY_LABELS, CATEGORY_NOTES, PRICE_LIST_UPDATED } from '../../data/accessories'
+import type { AccessoryCategory, CoatingSlug } from '../../data/accessories'
+import InfoImageViewer from '../../components/catalog/InfoImageViewer.vue'
+import { describeTrim } from '../../lib/trim-labels'
+import { merchantPolicy } from '../../lib/contacts-data'
+import { getModelEntries } from '../../lib/model-entries'
+import { DOOR_CATEGORIES } from '../../data/door-categories'
+import type { ModelEntry } from '../../lib/model-entries'
+import {
+  DOOR_TYPE, BRAND, cleanModelName, priceLabel,
+  productName, productTitle, productMetaDescription, productDescription,
+} from '../../lib/product-text'
+
+export async function getStaticPaths() {
+  /* Данные моделей — в lib/model-entries.ts: их же берёт товарный фид
+     /feed/yandex.xml, цена и фото в фиде обязаны совпадать со страницей. */
+  const entries = await getModelEntries()
+
+  /* ── Каждая модель доступна по двум путям: новому слагу (канонический)
+     и старому UUID (чтобы не 404'ить уже проиндексированные Яндексом ссылки) ── */
+  return [
+    ...entries.map(entry => ({ params: { id: entry.slug },     props: entry })),
+    ...entries.map(entry => ({ params: { id: entry.model.id }, props: entry })),
+  ]
+}
+
+const entry = Astro.props as ModelEntry
+const { model, slug, colors, minPrice, seriesName, seriesSlug, coatingName, coatingSlug, extraColors } = entry
+
+const spec        = getSeriesSpec(seriesSlug, coatingSlug)
+const accessories = accessoriesByCoating[coatingSlug as CoatingSlug] ?? []
+const hasPlinth   = accessories.some(item => item.category === 'plinth')
+
+/* Статья по теме — перелинковка каталог → блог (раньше была только в одну
+   сторону: статьи ссылались на каталог, карточки моделей — никогда обратно
+   на блог). Ищем первую статью, у которой seriesSlug модели указан
+   в relatedSeriesSlugs. */
+const allArticles = await getCollection('articles')
+const relatedArticle = allArticles.find(a => a.data.relatedSeriesSlugs?.includes(seriesSlug))
+
+const CATEGORY_ORDER: AccessoryCategory[] = ['kit', 'box', 'nalichnik', 'kapitel', 'dobor', 'plinth', 'decorative']
+
+const accessoryGroups: [AccessoryCategory, typeof accessories][] = Object.entries(
+  accessories.reduce<Record<string, typeof accessories>>((acc, item) => {
+    ;(acc[item.category] ??= []).push(item)
+    return acc
+  }, {})
+)
+  .sort(([a], [b]) => CATEGORY_ORDER.indexOf(a as AccessoryCategory) - CATEGORY_ORDER.indexOf(b as AccessoryCategory))
+  .map(([category, items]) => [category as AccessoryCategory, items])
+
+const canonicalUrl  = Astro.site ? new URL(`/models/${slug}/`, Astro.site).href : undefined
+/* UUID-маршрут — тот же контент, что и на slug-странице (см. комментарий
+   у getStaticPaths: оставлен, чтобы не 404'ить старые проиндексированные
+   ссылки). canonical выше уже указывает на slug-версию, но Яндекс.Вебмастер
+   всё равно считает title/description дублями по факту краулинга — noIndex
+   явно говорит роботу не индексировать и не учитывать эту версию отдельной
+   страницей, ссылка при этом продолжает открываться. */
+const isUuidRoute   = Astro.params.id !== slug
+/* Имя модели для показа: без лишних пробелов и латинских букв-двойников
+   внутри кириллических слов (см. cleanModelName). */
+const displayName = cleanModelName(model.name)
+
+/* Кромка/остекление — у некоторых моделей это единственное отличие между
+   SKU (4 «Урбан 1» — золото/серебро/чёрная). describeTrim() убирает мусорные
+   коды поставщика и битые записи ("true") и отличает остекление серии Некст,
+   которое в базе лежит в том же поле, от кромки. */
+const trim = describeTrim(model.trim)
+
+/* Перелинковка карточка → SEO-лендинг покрытия (/catalog/dveri-emal/ и т.п.).
+   Раньше с карточки вела только ссылка на серию, а лендинги под главные
+   запросы («двери эмаль челябинск») не получали ни одной ссылки из сотен
+   карточек. Анкор — H1 лендинга, т.е. сам целевой запрос. */
+const coatingLanding = DOOR_CATEGORIES.find(c => c.coatingSlug === coatingSlug)
+
+/* Title/description/название в schema — из lib/product-text.ts, те же
+   формулировки, что в товарном фиде. Тип товара («Межкомнатная дверь»)
+   первым словом: по нему ищут, а в имени модели («Иннова 02СТ», «ЕР1»)
+   его нет. Meta description — уникальная по модели (не spec.description:
+   это текст серии, общий на десятки моделей). */
+const pageTitle = productTitle(entry)
+const pageDesc  = productMetaDescription(entry)
+
+/* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+const breadcrumbs = [
+  { label: 'Главная',  href: '/' },
+  { label: 'Каталог',  href: '/catalog/' },
+  ...(seriesName ? [{ label: seriesName, href: `/catalog/series/${seriesSlug}/` }] : []),
+  { label: displayName },
+]
+
+const productImages = [...new Set(colors.map(c => c.photo).filter(Boolean))]
+
+const structuredData = [{
+  '@context': 'https://schema.org',
+  '@type':    'Product',
+  name:        productName(entry),
+  description: productDescription(entry),
+  url:         canonicalUrl,
+  image:       productImages,
+  brand:       { '@type': 'Brand', name: BRAND },
+  /* Offer требует price+priceCurrency вместе — без цены (price_rrp пуст
+     в Supabase) Google считает Offer невалидным и не даёт rich snippet
+     вообще. Без цены честнее не публиковать offers, чем отдавать
+     заведомо неполную/невалидную схему. */
+  ...(minPrice
+    ? {
+        offers: {
+          '@type':                  'Offer',
+          priceCurrency:            'RUB',
+          availability:             'https://schema.org/InStoreOnly',
+          seller:                   { '@type': 'Organization', name: 'Салон дверей ВФД' },
+          price:                    minPrice,
+          priceValidUntil:          new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          hasMerchantReturnPolicy:  merchantPolicy.returnPolicy,
+          shippingDetails:          merchantPolicy.shipping,
+        },
+      }
+    : {}),
+}]
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDesc}
+  canonical={canonicalUrl}
+  ogImage={colors[0]?.photo || undefined}
+  structuredData={structuredData}
+  noIndex={isUuidRoute}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+  </div>
+
+  <div class="section product-page">
+    <div class="container">
+      <div class="product-layout">
+
+        <!-- ── Фото + выбор цвета (Vue island) ── -->
+        <ProductColorPicker
+          client:load
+          colors={colors}
+          extraColors={extraColors}
+          modelName={displayName}
+          modelId={model.id}
+          seriesSlug={seriesSlug}
+        />
+
+        <!-- ── Характеристики (статический HTML для SEO) ── -->
+        <div class="product-info">
+          <div class="product-badges">
+            {model.isNew && <span class="product-badge product-badge--new">Новинка</span>}
+            {seriesName && <span class="product-badge">{seriesName}</span>}
+            {coatingName && <span class="product-badge product-badge--muted">{coatingName}</span>}
+          </div>
+
+          <h1 class="product-title">
+            <span class="product-title__type">{`${DOOR_TYPE} `}</span>{displayName}{coatingName && <span class="product-title__coating"> — {coatingName}</span>}
+          </h1>
+
+          {spec.description && (
+            <details class="product-description">
+              <summary class="product-description__toggle">Смотреть описание</summary>
+              <p class="product-description__text">{spec.description}</p>
+            </details>
+          )}
+
+          {(trim || spec.features.length > 0 || spec.coating || spec.material || spec.edge || spec.thickness) && (
+            <dl class="product-specs">
+              {trim && (
+                <div class="product-specs__row">
+                  <dt>{trim.kind === 'glass' ? 'Остекление' : 'Кромка'}</dt>
+                  <dd>{trim.label}</dd>
+                </div>
+              )}
+              {spec.features.length > 0 && (
+                <div class="product-specs__row">
+                  <dt>Особенности</dt>
+                  <dd>{spec.features.join('; ')}</dd>
+                </div>
+              )}
+              {spec.coating && (
+                <div class="product-specs__row">
+                  <dt>Покрытие / Отделка</dt>
+                  <dd>{spec.coating}</dd>
+                </div>
+              )}
+              {spec.material && (
+                <div class="product-specs__row">
+                  <dt>Материал / Конструктив</dt>
+                  <dd>{spec.material}</dd>
+                </div>
+              )}
+              {spec.edge && (
+                <div class="product-specs__row">
+                  <dt>Кромка</dt>
+                  <dd>{spec.edge}</dd>
+                </div>
+              )}
+              {spec.thickness && (
+                <div class="product-specs__row">
+                  <dt>Толщина</dt>
+                  <dd>{spec.thickness} мм</dd>
+                </div>
+              )}
+            </dl>
+          )}
+
+          <!-- Быстрый ориентир по цене (статика, всегда виден до гидратации) -->
+          {minPrice && (
+            <p class="product-price-hint">
+              Цена: <strong>{priceLabel(entry)}</strong> за полотно
+            </p>
+          )}
+
+          {coatingLanding && (
+            <a href={`/catalog/${coatingLanding.slug}/`} class="product-coating-link">
+              Все {coatingLanding.h1.charAt(0).toLowerCase() + coatingLanding.h1.slice(1)}
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          )}
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Плинтус к дверям (только для покрытий, где он есть — Эмаль/Эмалекс) ── -->
+  {hasPlinth && <PlinthSection title="Плинтус к дверям" />}
+
+  <!-- ── Погонажные изделия ── -->
+  {accessories.length > 0 && (
+    <section class="accessories-section">
+      <div class="container">
+        <div class="accessories-header">
+          <h2 class="accessories-title">Погонажные изделия</h2>
+          <p class="accessories-note">
+            Цены актуальны на момент публикации от {PRICE_LIST_UPDATED} — актуальный прайс уточняйте
+            у менеджера в фирменном салоне ВФД на Кашириных
+          </p>
+        </div>
+        <div class="accessories-groups">
+          {accessoryGroups.map(([category, items]) => (
+            <details class:list={['accessories-group', category === 'kit' && 'accessories-group--kit']}>
+              <summary class="accessories-group__label">
+                {CATEGORY_LABELS[category] ?? category}
+              </summary>
+              <ul class="accessories-list">
+                {items.map(item => (
+                  <li class="accessories-item">
+                    <span class="accessories-item__name">{item.name}</span>
+                    <span class="accessories-item__price">
+                      {item.price ? `${item.price.toLocaleString('ru-RU')} ₽ / ${item.unit}` : 'Цена уточняется'}
+                    </span>
+                    {(item.image || item.scheme) && (
+                      <div class="accessories-item__media">
+                        <InfoImageViewer
+                          client:visible
+                          variant="wide"
+                          aspectRatio={item.mediaAspect ?? '2 / 1'}
+                          images={[
+                            ...(item.image  ? [{ src: item.image,  caption: 'Фото',  alt: `Фото: ${item.name}` }]  : []),
+                            ...(item.scheme ? [{ src: item.scheme, caption: 'Схема', alt: `Схема с размерами: ${item.name}` }] : []),
+                          ]}
+                        />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {CATEGORY_NOTES[category] && (
+                <p class="accessories-note accessories-note--group">{CATEGORY_NOTES[category]}</p>
+              )}
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {relatedArticle && (
+    <section class="section">
+      <div class="container">
+        <a href={`/articles/${relatedArticle.id}/`} class="related-article-card">
+          <span class="related-article-card__eyebrow">Статья по теме</span>
+          <span class="related-article-card__title">{relatedArticle.data.title}</span>
+          <span class="related-article-card__cta">
+            Читать
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </span>
+        </a>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+/* ── Product layout ── */
+.product-page {
+  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.product-layout {
+  display: grid;
+  grid-template-columns: 34rem 1fr;
+  gap: 3.5rem;
+  margin-top: 1.75rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .product-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* ── Info panel ── */
+.product-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.product-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.875rem;
+  border-radius: 9999px;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  color: #0f766e;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.product-badge--muted {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #475569;
+}
+
+.product-badge--new {
+  background: oklch(57.7% 0.245 27.325);
+  border-color: oklch(57.7% 0.245 27.325);
+  color: #fff;
+}
+
+.product-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  margin: 0 0 1rem;
+}
+/* Тип товара — часть H1 (по нему ищут: «межкомнатная дверь иннова 02»),
+   но визуально — тихая строка над названием, вес остаётся на модели. */
+.product-title__type {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0;
+  color: #64748b;
+}
+/* Покрытие в самом H1, не только в бейдже сверху — модели с коротким кодом
+   (Р1, Е1, НР2) сами по себе не различимы в поиске без бренда покрытия,
+   а именно так их и ищут («эмалекс р1»). Визуально второстепенно —
+   приглушённым цветом, вес остаётся на названии модели. */
+.product-title__coating {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.product-description {
+  margin: 0 0 1.5rem;
+}
+
+.product-description__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0d9488;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+.product-description__toggle:hover { color: #0f766e; }
+
+.product-description__toggle::-webkit-details-marker {
+  display: none;
+}
+
+.product-description__toggle::after {
+  content: '';
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 200ms ease;
+}
+
+.product-description[open] > .product-description__toggle::after {
+  transform: rotate(-135deg);
+}
+
+.product-description__text {
+  margin: 0.75rem 0 0;
+  font-size: 1rem;
+  color: #475569;
+  line-height: 1.65;
+}
+
+/* ── Specs table ── */
+.product-specs {
+  margin: 0 0 1.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.product-specs__row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+}
+
+.product-specs__row + .product-specs__row {
+  border-top: 1px solid var(--color-border);
+}
+
+.product-specs__row dt {
+  padding: 0.75rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.product-specs__row dd {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.55;
+}
+
+@media (max-width: 480px) {
+  .product-specs__row {
+    grid-template-columns: 1fr;
+  }
+  .product-specs__row dt {
+    padding-bottom: 0.25rem;
+  }
+}
+
+/* ── Price hint + contacts ── */
+.product-price-hint {
+  font-size: 0.9375rem;
+  color: #475569;
+  margin: 0 0 1.25rem;
+}
+
+.product-price-hint strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.product-coating-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0d9488;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+.product-coating-link:hover { color: #0f766e; }
+.product-coating-link svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+/* ── Accessories ── */
+.accessories-section {
+  padding: clamp(2.5rem, 4vw, 4rem) 0;
+}
+
+.accessories-header {
+  margin-bottom: 2rem;
+}
+
+.accessories-title {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 500;
+  color: #0f172a;
+  margin: 0 0 0.375rem;
+}
+
+.accessories-note {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.accessories-note--group {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding: 1rem 1.5rem 1.375rem;
+  margin: 0;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.accessories-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.accessories-group {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.accessories-group__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: #0f172a;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.accessories-group__label::-webkit-details-marker {
+  display: none;
+}
+
+.accessories-group__label::after {
+  content: '';
+  flex-shrink: 0;
+  width: 0.5625rem;
+  height: 0.5625rem;
+  border-right: 2px solid #94a3b8;
+  border-bottom: 2px solid #94a3b8;
+  transform: rotate(45deg);
+  transition: transform 200ms ease;
+}
+
+.accessories-group[open] > .accessories-group__label::after {
+  transform: rotate(-135deg);
+}
+
+.accessories-list {
+  list-style: none;
+  padding: 0 1.5rem 1.25rem;
+  margin: 0;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.accessories-list > .accessories-item:first-child {
+  padding-top: 1rem;
+}
+
+.accessories-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.accessories-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.accessories-item__name {
+  color: #64748b;
+}
+
+.accessories-item__price {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.accessories-item__media {
+  margin-top: 0.5rem;
+  max-width: 26rem;
+}
+
+.accessories-group--kit {
+  background: #f0fdfa;
+  border-color: #99f6e4;
+}
+
+.accessories-group--kit .accessories-group__label {
+  color: #0f766e;
+}
+
+/* ── Related article ── */
+.related-article-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  text-decoration: none;
+  transition: border-color 200ms ease, background-color 200ms ease;
+}
+.related-article-card:hover {
+  border-color: #99f6e4;
+  background: #f0fdfa;
+}
+.related-article-card__eyebrow {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #64748b;
+}
+.related-article-card__title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0f172a;
+}
+.related-article-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #0d9488;
+}
+.related-article-card__cta svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+</style>

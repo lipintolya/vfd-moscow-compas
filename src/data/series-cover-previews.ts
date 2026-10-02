@@ -1,0 +1,81 @@
+/* СГЕНЕРИРОВАНО scripts/gen-series-covers.mjs — не править руками.
+   Оригинальная обложка серии → локальное превью 900w для карточек. */
+export const SERIES_COVER_PREVIEWS: Record<string, string> = {
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/stockholm.webp':
+    '/renders/series/emal-stockholm-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/skinel.webp':
+    '/renders/series/emal-skinel-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/winter.webp':
+    '/renders/series/emal-winter-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/elegant.webp':
+    '/renders/series/cover_first_section-elegant-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/antique_luxe.webp':
+    '/renders/series/emal-antique_luxe-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/basic.webp':
+    '/renders/series/cover_first_section-basic-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/linea.webp':
+    '/renders/series/emal-linea-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/premium.webp':
+    '/renders/series/emal-premium-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/urban.webp':
+    '/renders/series/cover_first_section-urban-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/sector.webp':
+    '/renders/series/emal-sector-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emalex.webp':
+    '/renders/series/cover_first_section-emalex-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emalex_modern.webp':
+    '/renders/series/cover_first_section-emalex_modern-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/doors-main_renders/tehno/tehno_render_1.webp':
+    '/renders/series/tehno-tehno_render_1-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/pet/innova.webp':
+    '/renders/series/pet-innova-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/pet/urban_pet.webp':
+    '/renders/series/pet-urban_pet-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/catalog/urban_wood/urban_z/urban_cover_wood.webp':
+    '/renders/series/urban_z-urban_cover_wood-900.webp',
+  'https://storage.yandexcloud.net/catalog-vfd/Smart/next/render/next_render.webp':
+    '/renders/series/render-next_render-900.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/protouch/smart.webp':
+    '/renders/series/protouch-smart-900.webp',
+}
+
+/* Оригинальная обложка серии → миниатюра 160×200 (строки
+   списка серий на мобильном, аватарки свёрнутых панелей на /catalog/). */
+export const SERIES_COVER_THUMBS: Record<string, string> = {
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/stockholm.webp':
+    '/renders/series/emal-stockholm-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/skinel.webp':
+    '/renders/series/emal-skinel-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/winter.webp':
+    '/renders/series/emal-winter-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/elegant.webp':
+    '/renders/series/cover_first_section-elegant-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/antique_luxe.webp':
+    '/renders/series/emal-antique_luxe-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/basic.webp':
+    '/renders/series/cover_first_section-basic-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/linea.webp':
+    '/renders/series/emal-linea-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/premium.webp':
+    '/renders/series/emal-premium-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/urban.webp':
+    '/renders/series/cover_first_section-urban-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/sector.webp':
+    '/renders/series/emal-sector-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emalex.webp':
+    '/renders/series/cover_first_section-emalex-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emalex_modern.webp':
+    '/renders/series/cover_first_section-emalex_modern-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/doors-main_renders/tehno/tehno_render_1.webp':
+    '/renders/series/tehno-tehno_render_1-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/pet/innova.webp':
+    '/renders/series/pet-innova-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/pet/urban_pet.webp':
+    '/renders/series/pet-urban_pet-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/catalog/urban_wood/urban_z/urban_cover_wood.webp':
+    '/renders/series/urban_z-urban_cover_wood-thumb.webp',
+  'https://storage.yandexcloud.net/catalog-vfd/Smart/next/render/next_render.webp':
+    '/renders/series/render-next_render-thumb.webp',
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/protouch/smart.webp':
+    '/renders/series/protouch-smart-thumb.webp',
+}

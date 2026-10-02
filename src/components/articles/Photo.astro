@@ -1,0 +1,56 @@
+---
+/**
+ * src/components/articles/Photo.astro
+ * Одна плитка внутри {% photogrid %} — квадратная ячейка, object-fit:cover
+ * (без искажений, только обрезка при несовпадении пропорций с квадратом).
+ * href — вся плитка становится ссылкой (напр. на страницу модели).
+ */
+import { articleImg } from '../../lib/article-images'
+
+interface Props {
+  src:     string
+  alt?:    string
+  caption?: string
+  href?:   string
+}
+const { src, alt = '', caption, href } = Astro.props
+const Tag = href ? 'a' : 'div'
+---
+
+<figure class="dphoto">
+  <Tag class="dphoto__frame" {...(href ? { href } : {})}>
+    <img {...articleImg(src)} sizes="(min-width: 640px) 50vw, 100vw" alt={alt} loading="lazy" decoding="async" />
+  </Tag>
+  {caption && <figcaption class="dphoto__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+.dphoto {
+  margin: 0;
+}
+.dphoto__frame {
+  display: block;
+  aspect-ratio: 1 / 1;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #f4f6f9;
+}
+a.dphoto__frame {
+  transition: opacity 200ms ease;
+}
+a.dphoto__frame:hover {
+  opacity: 0.88;
+}
+.dphoto__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.dphoto__caption {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: #94a3b8;
+}
+</style>
