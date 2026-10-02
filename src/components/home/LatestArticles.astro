@@ -43,7 +43,9 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
                   {dateStr(article.data.publishDate)}
                 </time>
               )}
-              <h3 class:list={['h-h3 post__title', { 'post__title--first': article.data.placeholder }]}>{article.data.title}</h3>
+              {article.data.placeholder
+                ? <p class="h-h3 post__title post__title--first">{article.data.title}</p>
+                : <h3 class="h-h3 post__title">{article.data.title}</h3>}
               <p class="h-body post__desc">{article.data.description}</p>
             </a>
           </li>

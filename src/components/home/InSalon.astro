@@ -25,7 +25,7 @@ interface Row {
 const rows: Row[] = [
   ...(shtrihHref ? [{
     status: 'stock' as const,
-    statusText: 'На складе',
+    statusText: 'В наличии',
     title: 'Урбан Штрих 2А',
     text: 'Эмалекс бежевый с чёрным молдингом, алюминиевая кромка',
     image: '/renders/home/shtrih-2a-1.webp',
@@ -56,8 +56,8 @@ const rows: Row[] = [
 <section class="h-sec h-sec--wall" aria-labelledby="insalon-heading">
   <div class="container">
     <header class="h-head">
-      <h2 id="insalon-heading" class="h-h2">Новинки и&nbsp;наличие</h2>
-      <p class="h-lead">Модели, которые можно забрать со склада без ожидания изготовления, и последние поступления фабрики.</p>
+      <h2 id="insalon-heading" class="h-h2">Новинки и&nbsp;двери в&nbsp;наличии</h2>
+      <p class="h-lead">Модели, которые можно забрать со&nbsp;склада без ожидания изготовления, и&nbsp;новые двери фабрики.</p>
     </header>
 
     <div class="spread">
@@ -65,11 +65,11 @@ const rows: Row[] = [
         <span class="h-media lead__media">
           <img src="/renders/home/tehno-1.webp" alt="Межкомнатная дверь серии «Техно», Эмалекс белый" width="1254" height="1254" loading="lazy" decoding="async" />
         </span>
-        <span class="lead__body">
-          <span class="status h-meta" data-status="new">Новинка, Техно 1 белый на складе</span>
-          <span class="lead__title">Серия Техно</span>
-          <span class="h-body lead__text">Покрытие Эмалекс устойчиво к царапинам и сколам, не боится влажности и ультрафиолета. Сдержанный технологичный характер для современного интерьера.</span>
-        </span>
+        <div class="lead__body">
+          <span class="status h-meta" data-status="new">Новинка</span>
+          <h3 class="lead__title">Серия Техно</h3>
+          <span class="h-body lead__text">Покрытие Эмалекс устойчиво к&nbsp;царапинам и&nbsp;сколам, не&nbsp;боится влажности и&nbsp;ультрафиолета. Строгий лаконичный дизайн подойдёт для современного интерьера. Модель Техно&nbsp;1 в&nbsp;белом цвете есть на&nbsp;складе.</span>
+        </div>
       </a>
 
       <ul class="list" role="list">
@@ -79,11 +79,11 @@ const rows: Row[] = [
               <span class="h-media row__media">
                 <img src={r.image} alt={r.alt} loading="lazy" decoding="async" />
               </span>
-              <span class="row__body">
+              <div class="row__body">
                 <span class="status h-meta" data-status={r.status}>{r.statusText}</span>
-                <span class="h-h3 row__title">{r.title}</span>
+                <h3 class="h-h3 row__title">{r.title}</h3>
                 <span class="h-meta row__text">{r.text}</span>
-              </span>
+              </div>
             </a>
           </li>
         ))}
@@ -125,7 +125,8 @@ const rows: Row[] = [
   .lead:hover .lead__media img, .row:hover .row__media img { transform: scale(1.025); }
   .lead__body { display: flex; flex-direction: column; margin-top: 1.5rem; max-width: 36rem; }
   .lead__title {
-    margin-top: 0.625rem;
+    margin: 0.625rem 0 0;
+    font-family: var(--h-font);
     font-size: clamp(1.75rem, 2.6vw, 2.25rem);
     font-weight: 600;
     line-height: 1.1;

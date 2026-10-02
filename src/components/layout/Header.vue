@@ -10,6 +10,9 @@ const headerEl = ref<HTMLElement | null>(null)
 
 const LOGO_URL = '/svg/logo.svg'
 
+/* Брейкпоинт полной шапки — тот же, что в стилях ниже (80rem = xl). */
+const DESKTOP_MQ = '(min-width: 80rem)'
+
 /* Единственная соцсеть салона — Telegram-канал (см. SITE.social) */
 const SOCIAL_NETWORKS = [
   {
@@ -28,6 +31,8 @@ const CONTACTS = {
   worktime: companyLegalInfo.workingHours.shortDisplay,
   email:   companyLegalInfo.contacts.email,
 }
+
+const BRAND_SUB = `Салон ВФД в ${SITE.address.mall}`
 
 const NAV_LINKS = [
   { href: '/',            label: 'Главная' },
@@ -52,6 +57,11 @@ const ABOUT_DROPDOWN = [
   { href: '/about/',     label: 'О салоне',   desc: 'Шоу-рум в ТЦ «Компас»' },
   { href: '/o-fabrike/', label: 'О фабрике',  desc: 'Производитель дверей ВФД' },
 ] as const
+
+const SUBMENU: Record<string, readonly { href: string; label: string; desc: string }[]> = {
+  '/catalog/': CATALOG_DROPDOWN,
+  '/about/':   ABOUT_DROPDOWN,
+}
 
 /* Часы — из contacts-data (единственный источник), а не числами здесь:
    раньше тут жил старый график 10–20/10–18, расходившийся с остальным сайтом. */
@@ -81,8 +91,10 @@ const contactsBtnRef   = ref<HTMLButtonElement | null>(null)
 const contactsPanelRef = ref<HTMLDivElement | null>(null)
 const mobileMenuRef    = ref<HTMLDivElement | null>(null)
 const burgerBtnRef     = ref<HTMLButtonElement | null>(null)
+const menuCloseRef     = ref<HTMLButtonElement | null>(null)
 
 let timerId: ReturnType<typeof setInterval> | null = null
+let desktopMql: MediaQueryList | null = null
 
 /* ============================================================
    Active link
@@ -116,9 +128,9 @@ const isOpen = computed(() => {
 
 const pad2 = (h: number) => `${String(h).padStart(2, '0')}:00`
 
-/* Статус — обычным текстом, без индикатора-точки и тревожной красной
-   заливки: закрытый вечером салон — штатная ситуация, а не ошибка.
-   Посекундный обратный отсчёт убран — полезнее время закрытия. */
+/* Статус — обычным текстом: закрытый вечером салон — штатная ситуация,
+   а не ошибка, поэтому «закрыто» не красим в красный. «Открыто» —
+   голубым (тот же цвет, что «В наличии» в каталоге). */
 const statusTitle = computed(() => (isOpen.value ? 'Сейчас открыто' : 'Сейчас закрыто'))
 
 const statusDetail = computed(() => {
@@ -137,32 +149,44 @@ const statusDetail = computed(() => {
 /* ============================================================
    Handlers
    ============================================================ */
-/* Раньше высота считалась хардкодом (72 + 16px top-offset), без учёта
-   env(safe-area-inset-top) — на iOS с чёлкой/Dynamic Island реальный низ
-   шапки оказывался кратно ниже расчётных 88px, и SectionNav (плавающая
-   пилюля-навигация на /catalog, /partitions), позиционированный по
-   --header-height, наслаивался прямо на шапку вместо появления под ней.
-   Меряем реальный DOM-элемент — единственный источник истины, учитывающий
-   safe-area, перенос строк и любые будущие правки разметки шапки. */
+/* Реальный низ шапки (с учётом safe-area на iOS) — в --header-height:
+   по нему встают плавающие навигации страниц (SectionNav). Это замер
+   DOM, а не заданное число. */
 const setHeaderVar = () => {
   if (!headerEl.value) return
   const rect = headerEl.value.getBoundingClientRect()
   document.documentElement.style.setProperty('--header-height', `${Math.ceil(rect.bottom)}px`)
 }
 
-const onScroll = () => { scrolled.value = window.scrollY > 20 }
+const onScroll = () => { scrolled.value = window.scrollY > 0 }
 
-const onResize = () => {
-  setHeaderVar()
-  if (window.innerWidth >= 1280) {
-    closeMobileMenu()
-    // Закрываем contacts-попап тоже — он hidden на мобильном через CSS,
-    // но state может остаться true если resized с открытым мобильным меню
-    closeContacts(false)
-  }
+/* Переход на широкий экран с открытым мобильным меню (поворот планшета) —
+   меню и панель контактов закрываются, иначе осталась бы блокировка прокрутки. */
+const onDesktopChange = (e: MediaQueryListEvent) => {
+  if (!e.matches) return
+  closeMobileMenu(false)
+  closeContacts(false)
+}
+
+/* Меню на телефоне — модальное окно: Tab и Shift+Tab ходят по кругу
+   внутри него и не уходят на страницу под ним. */
+const focusables = () =>
+  [...(mobileMenuRef.value?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])') ?? [])]
+
+const trapFocus = (e: KeyboardEvent) => {
+  const items = focusables()
+  if (!items.length) return
+  const first = items[0]
+  const last = items[items.length - 1]
+  const active = document.activeElement as HTMLElement | null
+  const inside = !!active && !!mobileMenuRef.value?.contains(active)
+
+  if (e.shiftKey && (active === first || !inside)) { e.preventDefault(); last.focus() }
+  else if (!e.shiftKey && (active === last || !inside)) { e.preventDefault(); first.focus() }
 }
 
 const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Tab' && mobileOpen.value) { trapFocus(e); return }
   if (e.key !== 'Escape') return
   // Закрываем только верхний слой
   if (contactsOpen.value) { closeContacts(); return }
@@ -178,17 +202,22 @@ const onClickOutside = (e: MouseEvent) => {
     !contactsPanelRef.value.contains(t) &&
     !contactsBtnRef.value?.contains(t)
   ) closeContacts(false)
-
-  if (
-    mobileOpen.value &&
-    mobileMenuRef.value &&
-    !mobileMenuRef.value.contains(t) &&
-    !burgerBtnRef.value?.contains(t)
-  ) closeMobileMenu()
 }
 
-const openMobileMenu   = () => { mobileOpen.value = true;  document.body.style.overflow = 'hidden' }
-const closeMobileMenu  = () => { mobileOpen.value = false; document.body.style.overflow = '' }
+const openMobileMenu = async () => {
+  mobileOpen.value = true
+  document.body.style.overflow = 'hidden'
+  await nextTick()
+  menuCloseRef.value?.focus({ preventScroll: true })
+}
+/* Фокус возвращается на кнопку меню — клавиатурный пользователь
+   продолжает с того же места, а не с начала страницы. */
+const closeMobileMenu = (returnFocus = true) => {
+  if (!mobileOpen.value) return
+  mobileOpen.value = false
+  document.body.style.overflow = ''
+  if (returnFocus) burgerBtnRef.value?.focus({ preventScroll: true })
+}
 const toggleMobileMenu = () => mobileOpen.value ? closeMobileMenu() : openMobileMenu()
 
 const openCatalog  = () => { if (catalogTimer !== null) clearTimeout(catalogTimer); catalogOpen.value = true }
@@ -196,6 +225,10 @@ const closeCatalog = () => { catalogTimer = setTimeout(() => { catalogOpen.value
 
 const openAbout  = () => { if (aboutTimer !== null) clearTimeout(aboutTimer); aboutOpen.value = true }
 const closeAbout = () => { aboutTimer = setTimeout(() => { aboutOpen.value = false }, 150) }
+
+const isDropOpen = (href: string) => (href === '/catalog/' ? catalogOpen.value : aboutOpen.value)
+const openDrop   = (href: string) => (href === '/catalog/' ? openCatalog() : openAbout())
+const closeDrop  = (href: string) => (href === '/catalog/' ? closeCatalog() : closeAbout())
 
 const openContacts = async () => {
   contactsOpen.value = true
@@ -213,30 +246,28 @@ const closeContacts = (returnFocus = true) => {
 }
 const toggleContacts = () => contactsOpen.value ? closeContacts() : openContacts()
 
-// Используем первый телефон — optional chaining страхует от пустого массива
-const callPrimary = () => {
-  const phone = CONTACTS.phones[0]
-  if (phone) window.location.href = `tel:${phone.raw}`
-}
-
 /* ============================================================
    Lifecycle
    ============================================================ */
 onMounted(() => {
   currentPath.value = window.location.pathname
+  onScroll()
   setHeaderVar()
   nextTick(setHeaderVar)
-  window.addEventListener('scroll',  onScroll,       { passive: true })
+  desktopMql = window.matchMedia(DESKTOP_MQ)
+  desktopMql.addEventListener('change', onDesktopChange)
+  window.addEventListener('scroll',  onScroll,     { passive: true })
+  window.addEventListener('resize',  setHeaderVar, { passive: true })
   window.addEventListener('keydown', onKeydown)
-  window.addEventListener('resize',  onResize,       { passive: true })
   document.addEventListener('click', onClickOutside, { capture: true })
   timerId = setInterval(() => { now.value = new Date() }, 30_000)
 })
 
 onUnmounted(() => {
+  desktopMql?.removeEventListener('change', onDesktopChange)
   window.removeEventListener('scroll',  onScroll)
+  window.removeEventListener('resize',  setHeaderVar)
   window.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('resize',  onResize)
   document.removeEventListener('click', onClickOutside, { capture: true })
   document.body.style.overflow = ''
   if (timerId !== null) clearInterval(timerId)
@@ -246,15 +277,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header
-    ref="headerEl"
-    class="fixed inset-x-0 z-50"
-    :style="{
-      top: 'calc(env(safe-area-inset-top, 0px) + 0.75rem)',
-      paddingLeft:  'env(safe-area-inset-left)',
-      paddingRight: 'env(safe-area-inset-right)',
-    }"
-  >
+  <header ref="headerEl" class="site-header">
     <div class="container">
 
       <!-- ── Графитовая панель. Ширина = контейнер, как у сцены hero под ней:
@@ -263,17 +286,15 @@ onUnmounted(() => {
       <div class="hdr" :class="{ 'hdr--scrolled': scrolled }">
 
         <!-- Бренд: знак + две строки -->
-        <a href="/" class="hdr-brand" :aria-label="`${SITE.studioName} — салон ВФД в ТЦ «Компас», главная`">
+        <a href="/" class="hdr-brand" :aria-label="`${SITE.studioName}. ${BRAND_SUB} — на главную`">
           <span class="hdr-mark" aria-hidden="true">
             <img
               v-if="!logoError"
               :src="LOGO_URL"
               alt=""
-              width="36"
-              height="36"
               loading="eager"
               decoding="async"
-              :class="logoLoaded ? 'opacity-100' : 'opacity-0'"
+              :class="{ 'is-loaded': logoLoaded }"
               @load="logoLoaded = true"
               @error="logoError = true"
             />
@@ -281,7 +302,7 @@ onUnmounted(() => {
           </span>
           <span class="hdr-brand__text">
             <span class="hdr-brand__name">{{ SITE.studioName }}</span>
-            <span class="hdr-brand__sub">Салон ВФД в {{ SITE.address.mall }}</span>
+            <span class="hdr-brand__sub">{{ BRAND_SUB }}</span>
           </span>
         </a>
 
@@ -290,34 +311,33 @@ onUnmounted(() => {
           <template v-for="link in DESKTOP_NAV" :key="link.href">
 
             <a
-              v-if="link.href !== '/catalog/' && link.href !== '/about/'"
+              v-if="!SUBMENU[link.href]"
               :href="link.href"
               class="hdr-link"
               :class="{ 'is-active': isSection(link.href) }"
               :aria-current="isActive(link.href) ? 'page' : undefined"
             >{{ link.label }}</a>
 
-            <!-- Каталог / О нас — с выпадающим списком -->
+            <!-- Каталог / О нас — с выпадающим списком ссылок -->
             <div
               v-else
-              class="relative"
-              @mouseenter="link.href === '/catalog/' ? openCatalog() : openAbout()"
-              @mouseleave="link.href === '/catalog/' ? closeCatalog() : closeAbout()"
-              @focusin="link.href === '/catalog/' ? openCatalog() : openAbout()"
-              @focusout="link.href === '/catalog/' ? closeCatalog() : closeAbout()"
+              class="hdr-dropwrap"
+              @mouseenter="openDrop(link.href)"
+              @mouseleave="closeDrop(link.href)"
+              @focusin="openDrop(link.href)"
+              @focusout="closeDrop(link.href)"
             >
               <a
                 :href="link.href"
                 class="hdr-link"
                 :class="{ 'is-active': isSection(link.href) }"
                 :aria-current="isActive(link.href) ? 'page' : undefined"
-                aria-haspopup="true"
-                :aria-expanded="link.href === '/catalog/' ? catalogOpen : aboutOpen"
+                :aria-expanded="isDropOpen(link.href)"
               >
                 {{ link.label }}
                 <svg
                   class="hdr-link__chev"
-                  :class="{ 'rotate-180': link.href === '/catalog/' ? catalogOpen : aboutOpen }"
+                  :class="{ 'is-open': isDropOpen(link.href) }"
                   viewBox="0 0 24 24" fill="none" aria-hidden="true"
                 >
                   <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -325,25 +345,20 @@ onUnmounted(() => {
               </a>
 
               <Transition name="fade-slide">
-                <div
-                  v-if="link.href === '/catalog/' ? catalogOpen : aboutOpen"
-                  class="hdr-drop"
-                  role="menu"
-                  :aria-label="link.href === '/catalog/' ? 'Категории каталога' : 'О компании'"
-                >
-                  <a
-                    v-for="item in (link.href === '/catalog/' ? CATALOG_DROPDOWN : ABOUT_DROPDOWN)"
-                    :key="item.href"
-                    :href="item.href"
-                    class="hdr-drop__item"
-                    :class="{ 'is-active': isActive(item.href) }"
-                    role="menuitem"
-                    @click="catalogOpen = false; aboutOpen = false"
-                  >
-                    <span class="hdr-drop__label">{{ item.label }}</span>
-                    <span class="hdr-drop__desc">{{ item.desc }}</span>
-                  </a>
-                </div>
+                <ul v-if="isDropOpen(link.href)" class="hdr-drop" role="list">
+                  <li v-for="item in SUBMENU[link.href]" :key="item.href">
+                    <a
+                      :href="item.href"
+                      class="hdr-drop__item"
+                      :class="{ 'is-active': isActive(item.href) }"
+                      :aria-current="isActive(item.href) ? 'page' : undefined"
+                      @click="catalogOpen = false; aboutOpen = false"
+                    >
+                      <span class="hdr-drop__label">{{ item.label }}</span>
+                      <span class="hdr-drop__desc">{{ item.desc }}</span>
+                    </a>
+                  </li>
+                </ul>
               </Transition>
             </div>
 
@@ -363,10 +378,10 @@ onUnmounted(() => {
             <svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
-            <span class="tabular-nums">{{ CONTACTS.phones[0].label }}</span>
+            <span class="hdr-num">{{ CONTACTS.phones[0].label }}</span>
           </a>
 
-          <div class="relative hidden xl:block">
+          <div class="hdr-contacts">
             <button
               ref="contactsBtnRef"
               type="button"
@@ -395,7 +410,7 @@ onUnmounted(() => {
                   :href="`tel:${p.raw}`"
                   class="hdr-pop__phone"
                 >
-                  <span class="hdr-pop__phone-num tabular-nums">{{ p.label }}</span>
+                  <span class="hdr-pop__phone-num hdr-num">{{ p.label }}</span>
                   <span class="hdr-pop__muted">{{ p.title }}</span>
                 </a>
 
@@ -437,7 +452,7 @@ onUnmounted(() => {
             class="hdr-round hdr-round--mobile"
             :aria-label="`Позвонить: ${CONTACTS.phones[0].label}`"
           >
-            <svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg class="hdr-ico hdr-ico--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
           </a>
@@ -447,7 +462,7 @@ onUnmounted(() => {
             class="hdr-round hdr-round--light hdr-round--mobile burger-btn"
             :class="{ 'is-open': mobileOpen }"
             :aria-expanded="mobileOpen"
-            :aria-label="mobileOpen ? 'Закрыть меню' : 'Открыть меню'"
+            aria-label="Меню"
             aria-controls="mobile-menu"
             @click="toggleMobileMenu"
           >
@@ -462,59 +477,42 @@ onUnmounted(() => {
 
     </div><!-- /container -->
 
-    <!-- ── Mobile menu — полноэкранная тёмная панель (не плавающая карточка):
-         своя шапка (метка города + закрыть), звонок и соцсети сверху,
-         прокручиваемая навигация в середине, номер телефона закреплён внизу.
-         Teleport на body: внутри <header z-50> собственный z-index панели
-         (10000) сравнивался бы только относительно других детей header —
-         cookie-баннер (z-index:9999) висит в root, вне header, и перекрывал
-         бы панель, будь она вложена. -->
-    <!-- top:-100px + компенсирующий paddingTop ниже: iOS Safari закрашивает
-         зону safe-area (чёлку) отдельным композитинг-проходом, привязанным
-         к границе вьюпорта — если фон fixed-элемента начинается ровно на
-         top:0, при появлении элемента эта полоса на кадр-два остаётся
-         непрокрашенной (виден фон страницы под меню). translateZ(0)/GPU-слой
-         это не чинит — проблема не в промоутинге слоя, а в самой границе.
-         Уводим фон на 100px выше вьюпорта (граница исчезает, чёлка — уже
-         середина закрашенной области, а не край) и добавляем те же 100px
-         к paddingTop, чтобы контент визуально остался на прежнем месте. -->
+    <!-- ── Мобильное меню — полноэкранная графитовая панель, модальное окно.
+         Teleport на body: внутри <header> собственный z-index панели
+         сравнивался бы только с другими детьми header, и cookie-баннер
+         в корне документа перекрыл бы её. -->
     <Teleport to="body">
     <Transition name="menu-fade">
       <div
         v-if="mobileOpen"
         id="mobile-menu"
         ref="mobileMenuRef"
+        class="mnav"
         role="dialog"
-        aria-label="Мобильное меню"
         aria-modal="true"
-        class="xl:hidden fixed inset-0 z-10000 flex flex-col bg-slate-900"
-        :style="{
-          top:           '-100px',
-          paddingTop:    'calc(env(safe-area-inset-top, 0px) + 100px)',
-          paddingLeft:   'env(safe-area-inset-left)',
-          paddingRight:  'env(safe-area-inset-right)',
-        }"
+        aria-label="Меню сайта"
       >
         <!-- Верхняя строка повторяет закрытую панель шапки (та же геометрия:
-             контейнер, отступ 0.75rem, высота) — при открытии меню бренд
+             контейнер, отступ сверху, высота) — при открытии меню бренд
              остаётся на месте, а бургер превращается в «закрыть». -->
-        <div class="container shrink-0" style="margin-top: 0.75rem">
+        <div class="container mnav__top">
           <div class="hdr hdr--flat">
-            <a href="/" class="hdr-brand" @click="closeMobileMenu">
+            <a href="/" class="hdr-brand" @click="closeMobileMenu(false)">
               <span class="hdr-mark" aria-hidden="true">
-                <img :src="LOGO_URL" alt="" width="36" height="36" />
+                <img :src="LOGO_URL" alt="" class="is-loaded" />
               </span>
               <span class="hdr-brand__text">
                 <span class="hdr-brand__name">{{ SITE.studioName }}</span>
-                <span class="hdr-brand__sub">Салон ВФД в {{ SITE.address.mall }}</span>
+                <span class="hdr-brand__sub">{{ BRAND_SUB }}</span>
               </span>
             </a>
             <div class="hdr-actions">
               <button
+                ref="menuCloseRef"
                 type="button"
                 class="hdr-round hdr-round--light burger-btn is-open"
                 aria-label="Закрыть меню"
-                @click="closeMobileMenu"
+                @click="closeMobileMenu()"
               >
                 <span class="burger-icon" aria-hidden="true">
                   <span class="burger-icon__line" />
@@ -526,136 +524,110 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- Адрес -->
-        <p class="px-[clamp(1rem,4vw,2rem)] pt-5 pb-4 m-0 text-sm text-white/55 shrink-0">
-          {{ SITE.address.full }}
-        </p>
+        <div class="container mnav__body">
+          <p class="mnav__address">{{ SITE.address.full }}</p>
 
-        <!-- Звонок + соцсети -->
-        <div class="flex items-center gap-2.5 px-[clamp(1rem,4vw,2rem)] pb-4 shrink-0">
-          <a
-            :href="`tel:${CONTACTS.phones[0]?.raw}`"
-            class="flex-1 flex items-center justify-center gap-2 rounded-full bg-white text-ink font-semibold text-sm py-3 transition-opacity active:opacity-80"
-            @click="closeMobileMenu"
-          >
-            <img src="/icons/phone-call.webp" alt="" class="w-5 h-5" width="20" height="20" loading="eager" fetchpriority="high" />
-            Позвонить
-          </a>
-          <a
-            v-for="s in SOCIAL_NETWORKS"
-            :key="s.name"
-            :href="s.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            :aria-label="`${s.label} (открывается в новой вкладке)`"
-            class="w-11 h-11 shrink-0 flex items-center justify-center rounded-full bg-white transition-opacity active:opacity-80"
-          >
-            <img :src="s.icon" :alt="s.label" class="w-5 h-5" width="20" height="20" loading="eager" fetchpriority="high" />
-          </a>
-        </div>
+          <!-- Звонок + Telegram-канал -->
+          <div class="mnav__actions">
+            <a
+              v-if="CONTACTS.phones[0]"
+              :href="`tel:${CONTACTS.phones[0].raw}`"
+              class="mnav__call"
+              @click="closeMobileMenu(false)"
+            >
+              <svg class="hdr-ico hdr-ico--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              Позвонить
+            </a>
+            <a
+              v-for="s in SOCIAL_NETWORKS"
+              :key="s.name"
+              :href="s.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              :aria-label="`${s.label} (откроется в новой вкладке)`"
+              class="hdr-round hdr-round--light mnav__social"
+            >
+              <img :src="s.icon" alt="" class="hdr-ico hdr-ico--lg" />
+            </a>
+          </div>
 
-        <!-- Навигация — прокручиваемая середина. Активный пункт получает
-             акцентную полоску слева (не только смену цвета текста — на
-             белом-по-серому разница слишком тонкая для беглого взгляда).
-             Стрелка вправо — только у пунктов с реальным переходом (без
-             подменю); у «Каталог»/«О нас» её нет — там ниже сразу видны
-             дочерние ссылки, стрелка-«обещание перехода» была бы обманчива. -->
-        <nav class="flex-1 overflow-y-auto px-[clamp(1rem,4vw,2rem)]" aria-label="Мобильная навигация">
-          <ul class="border-t border-white/10" role="list">
-            <li v-for="link in NAV_LINKS" :key="link.href" class="nav-item border-b border-white/10" :class="{ 'nav-item--active': isActive(link.href) }">
-              <a
-                :href="link.href"
-                class="flex items-center justify-between py-4 pl-3 -ml-3 text-base font-semibold transition-colors"
-                :class="isActive(link.href) ? 'text-white' : 'text-white/85 hover:text-white'"
-                :aria-current="isActive(link.href) ? 'page' : undefined"
-                @click="closeMobileMenu"
+          <!-- Навигация. Активный пункт — красная черта слева (не только
+               цвет текста: так его видно и при беглом взгляде). Стрелка —
+               только у пунктов без подразделов: у «Каталог»/«О нас» ниже
+               сразу видны вложенные ссылки. -->
+          <nav class="mnav__nav" aria-label="Разделы сайта">
+            <ul class="mnav__list" role="list">
+              <li
+                v-for="link in NAV_LINKS"
+                :key="link.href"
+                class="mnav__item"
+                :class="{ 'is-active': isSection(link.href) }"
               >
-                {{ link.label }}
-                <svg
-                  v-if="link.href !== '/catalog/' && link.href !== '/about/'"
-                  class="w-4 h-4 shrink-0 text-white/30"
-                  fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"
+                <a
+                  :href="link.href"
+                  class="mnav__link"
+                  :aria-current="isActive(link.href) ? 'page' : undefined"
+                  @click="closeMobileMenu(false)"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
-                </svg>
-              </a>
-              <!-- Подразделы каталога -->
-              <ul v-if="link.href === '/catalog/'" class="mb-3 -mt-1 space-y-0.5" role="list">
-                <li v-for="item in CATALOG_DROPDOWN" :key="item.href">
-                  <a
-                    :href="item.href"
-                    class="block rounded-xl px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white/90"
-                    @click="closeMobileMenu"
-                  >{{ item.label }}</a>
-                </li>
-              </ul>
-              <!-- Подразделы «О нас» -->
-              <ul v-if="link.href === '/about/'" class="mb-3 -mt-1 space-y-0.5" role="list">
-                <li v-for="item in ABOUT_DROPDOWN" :key="item.href">
-                  <a
-                    :href="item.href"
-                    class="block rounded-xl px-3 py-2 text-sm font-medium text-white/55 transition-colors hover:bg-white/5 hover:text-white/90"
-                    @click="closeMobileMenu"
-                  >{{ item.label }}</a>
-                </li>
-              </ul>
-            </li>
-          </ul>
+                  {{ link.label }}
+                  <svg v-if="!SUBMENU[link.href]" class="hdr-ico mnav__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
+                  </svg>
+                </a>
+                <ul v-if="SUBMENU[link.href]" class="mnav__sub" role="list">
+                  <li v-for="item in SUBMENU[link.href]" :key="item.href">
+                    <a
+                      :href="item.href"
+                      class="mnav__sublink"
+                      :aria-current="isActive(item.href) ? 'page' : undefined"
+                      @click="closeMobileMenu(false)"
+                    >{{ item.label }}</a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
 
-          <!-- Статус салона + график. Та же поверхность и круглая иконка,
-               что у кнопок телефонов внизу — единый язык карточек меню. -->
-          <div
-            class="mt-4 mb-5 rounded-xl bg-white/[0.06] px-4 py-3.5 text-sm leading-snug"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <div class="flex items-center gap-3">
-              <span
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-                :class="isOpen ? 'bg-accent-400/15 text-accent-300' : 'bg-white/10 text-white'"
-                aria-hidden="true"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Статус салона + график -->
+            <div class="mnav__status" aria-live="polite" aria-atomic="true">
+              <span class="mnav__status-ico" :class="{ 'is-open': isOpen }" aria-hidden="true">
+                <svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 6v6l4 2" />
                 </svg>
               </span>
-              <div class="min-w-0">
-                <p class="font-semibold" :class="isOpen ? 'text-accent-300' : 'text-white'">{{ statusTitle }}</p>
-                <p class="text-white/55">{{ statusDetail }}</p>
-              </div>
+              <span class="mnav__status-text">
+                <span class="mnav__status-title" :class="{ 'is-open': isOpen }">{{ statusTitle }}</span>
+                <span class="mnav__muted">{{ statusDetail }}. {{ CONTACTS.worktime }}</span>
+              </span>
             </div>
-            <p class="mt-3 flex flex-wrap gap-x-4 gap-y-0.5 border-t border-white/10 pt-2.5 text-xs text-white/45 tabular-nums">
-              <span>{{ CONTACTS.worktime }}</span>
-            </p>
-          </div>
-        </nav>
+          </nav>
+        </div>
 
-        <!-- Телефоны — закреплены внизу. Каждый номер — отдельная
-             кнопка звонка: подпись + иконка трубки, чтобы было видно,
-             что это действие, а не просто текст. -->
-        <div
-          class="shrink-0 border-t border-white/10 bg-slate-900 px-[clamp(1rem,4vw,2rem)] pt-3 flex flex-col gap-2"
-          :style="{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }"
-        >
-          <a
-            v-for="p in CONTACTS.phones"
-            :key="p.raw"
-            :href="`tel:${p.raw}`"
-            :aria-label="`Позвонить: ${p.label}`"
-            class="flex items-center justify-between gap-3 rounded-xl bg-white/[0.06] px-4 py-2.5 transition-colors active:bg-white/[0.12]"
-            @click="closeMobileMenu"
-          >
-            <span class="min-w-0">
-              <span class="block text-base font-semibold text-white tabular-nums">{{ p.label }}</span>
-              <span class="block text-xs text-white/45">{{ p.title }}</span>
-            </span>
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-              </svg>
-            </span>
-          </a>
+        <!-- Телефоны — закреплены внизу: номер + подпись + иконка трубки,
+             чтобы было видно, что это действие, а не просто текст. -->
+        <div class="mnav__foot">
+          <div class="container mnav__phones">
+            <a
+              v-for="p in CONTACTS.phones"
+              :key="p.raw"
+              :href="`tel:${p.raw}`"
+              :aria-label="`Позвонить: ${p.label}, ${p.title}`"
+              class="mnav__phone"
+              @click="closeMobileMenu(false)"
+            >
+              <span class="mnav__phone-text" aria-hidden="true">
+                <span class="mnav__phone-num hdr-num">{{ p.label }}</span>
+                <span class="mnav__muted">{{ p.title }}</span>
+              </span>
+              <span class="mnav__phone-ico" aria-hidden="true">
+                <svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </span>
+            </a>
+          </div>
         </div>
       </div>
     </Transition>
@@ -667,43 +639,83 @@ onUnmounted(() => {
 <style scoped>
 /* ============================================================
    Шапка — графитовая панель в ширину контейнера (как сцена hero).
-   Мобильные: бренд + звонок + меню; ≥1280px: бренд | навигация | действия.
-   Цвета — токены палитры; белый текст с прозрачностью задаёт иерархию.
+   Телефон: бренд + звонок + меню; ≥80rem: бренд | навигация | действия.
+
+   Токены шапки — производные палитры (global.css), без своих цветов.
+   Белый с прозрачностью задаёт иерархию; минимум для текста — 60%
+   (контраст ≥ 6:1 на графите, WCAG AA для мелкого текста — 4.5:1).
+   Зона нажатия на телефоне — не меньше 2.75rem (44px, WCAG 2.5.5 /
+   Apple HIG). Все размеры — в rem: шапка растёт вместе с системным
+   размером шрифта.
    ============================================================ */
+.site-header,
+.mnav {
+  --hdr-bg:         var(--color-slate-900);
+  --hdr-fg:         var(--color-white);
+  --hdr-fg-soft:    color-mix(in srgb, var(--color-white) 72%, transparent);
+  --hdr-fg-muted:   color-mix(in srgb, var(--color-white) 60%, transparent);
+  --hdr-fg-faint:   color-mix(in srgb, var(--color-white) 35%, transparent); /* только иконки-стрелки */
+  --hdr-fill:       color-mix(in srgb, var(--color-white) 8%, transparent);
+  --hdr-fill-hover: color-mix(in srgb, var(--color-white) 14%, transparent);
+  --hdr-line:       color-mix(in srgb, var(--color-white) 10%, transparent);
+  --hdr-shadow:     color-mix(in srgb, var(--color-slate-950) 60%, transparent);
+  --hdr-focus:      var(--color-secondary-400);
+  --hdr-hair:       0.0625rem;
+  --hdr-tap:        2.75rem;
+  --hdr-inset:      0.75rem;   /* отступ панели от края экрана сверху */
+  --hdr-h:          3.5rem;
+  --hdr-ease:       var(--ease-out);
+}
+
+.site-header {
+  position: fixed;
+  inset-inline: 0;
+  top: calc(env(safe-area-inset-top, 0rem) + var(--hdr-inset));
+  z-index: 50;
+  padding-inline: env(safe-area-inset-left, 0rem) env(safe-area-inset-right, 0rem);
+}
+
 .hdr {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1rem;
-  height: 3.5rem;
-  padding: 0 0.5rem 0 0.625rem;
+  gap: 0.75rem;
+  height: var(--hdr-h);
+  /* Справа отступ = (высота панели − кнопка) / 2: круглые кнопки стоят
+     на равном расстоянии от верхнего, нижнего и правого края */
+  padding-inline: 0.625rem calc((var(--hdr-h) - var(--hdr-tap)) / 2);
   border-radius: 1rem;
-  background: var(--color-slate-900);
-  color: #fff;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
-  transition: background-color 250ms var(--ease-out), box-shadow 250ms var(--ease-out);
+  background: var(--hdr-bg);
+  color: var(--hdr-fg);
+  box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line);
+  transition: background-color 250ms var(--hdr-ease), box-shadow 250ms var(--hdr-ease);
 }
-@media (min-width: 1280px) {
+@media (min-width: 80rem) {
+  .site-header, .mnav { --hdr-h: 4rem; }
   .hdr {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    height: 4rem;
-    padding: 0 0.75rem 0 0.875rem;
+    padding-left: 0.875rem;
     border-radius: 1.25rem;
   }
 }
 /* После прокрутки — лёгкая прозрачность с размытием и тень: панель
    отделяется от светлого контента под ней. */
 .hdr--scrolled {
-  background: color-mix(in srgb, var(--color-slate-900) 90%, transparent);
-  backdrop-filter: blur(14px) saturate(1.2);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 18px 40px -18px rgb(19 19 22 / 0.6);
+  background: color-mix(in srgb, var(--hdr-bg) 90%, transparent);
+  backdrop-filter: blur(0.875rem) saturate(1.2);
+  box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line), 0 1.125rem 2.5rem -1.125rem var(--hdr-shadow);
 }
 .hdr--flat { box-shadow: none; }
 
-.hdr :is(a, button):focus-visible {
-  outline: 2px solid var(--color-secondary-400);
-  outline-offset: 2px;
+.site-header :is(a, button):focus-visible,
+.mnav :is(a, button):focus-visible {
+  outline: 0.125rem solid var(--hdr-focus);
+  outline-offset: 0.125rem;
 }
+
+.hdr-ico { flex: none; width: 1rem; height: 1rem; }
+.hdr-ico--lg { width: 1.25rem; height: 1.25rem; }
+.hdr-num { font-variant-numeric: tabular-nums; }
 
 /* ── Бренд ── */
 .hdr-brand {
@@ -711,9 +723,11 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
+  min-height: var(--hdr-tap);
   justify-self: start;
-  color: #fff;
+  color: var(--hdr-fg);
   text-decoration: none;
+  border-radius: 0.75rem;
 }
 .hdr-mark {
   display: block;
@@ -721,7 +735,7 @@ onUnmounted(() => {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.1);
+  background: var(--hdr-fill);
 }
 /* Знак ВФД — тёмный круг; на графите инвертируем в светлый */
 .hdr-mark img {
@@ -729,8 +743,10 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   filter: invert(1);
-  transition: opacity 300ms ease;
+  opacity: 0;
+  transition: opacity 300ms var(--hdr-ease);
 }
+.hdr-mark img.is-loaded { opacity: 1; }
 .hdr-mark__fallback {
   display: grid;
   place-items: center;
@@ -751,38 +767,40 @@ onUnmounted(() => {
   margin-top: 0.1875rem;
   overflow: hidden;
   font-size: 0.75rem;
-  color: rgb(255 255 255 / 0.5);
+  color: var(--hdr-fg-muted);
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-/* ── Навигация ── */
+/* ── Навигация (десктоп) ── */
 .hdr-nav { display: none; }
-@media (min-width: 1280px) {
+@media (min-width: 80rem) {
   .hdr-nav { display: flex; align-items: center; gap: 0.125rem; }
 }
+.hdr-dropwrap { position: relative; }
 .hdr-link {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 999px;
+  min-height: 2.5rem;
+  padding: 0 0.875rem;
+  border-radius: 999rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: rgb(255 255 255 / 0.62);
+  color: var(--hdr-fg-soft);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 180ms var(--ease-out), background-color 180ms var(--ease-out);
+  transition: color 180ms var(--hdr-ease), background-color 180ms var(--hdr-ease);
 }
-.hdr-link:hover { color: #fff; background: rgb(255 255 255 / 0.06); }
-.hdr-link.is-active { color: #fff; }
+.hdr-link:hover { color: var(--hdr-fg); background: var(--hdr-fill); }
+.hdr-link.is-active { color: var(--hdr-fg); }
 /* Текущий раздел — красная точка под пунктом */
 .hdr-link.is-active::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: 0.0625rem;
+  bottom: 0.1875rem;
   width: 0.25rem;
   height: 0.25rem;
   margin-left: -0.125rem;
@@ -793,30 +811,34 @@ onUnmounted(() => {
   width: 0.875rem;
   height: 0.875rem;
   opacity: 0.6;
-  transition: transform 200ms var(--ease-out);
+  transition: transform 200ms var(--hdr-ease);
 }
+.hdr-link__chev.is-open { transform: rotate(180deg); }
 
 /* Выпадающий список — тот же графит, что и панель. Центрируем через
    margin, а не transform: transform занят анимацией fade-slide. */
 .hdr-drop {
+  --drop-w: 15rem;
+  --drop-gap: 1.125rem; /* от пункта до края списка = до низа панели + зазор */
   position: absolute;
-  top: calc(100% + 1.375rem);
+  top: calc(100% + var(--drop-gap));
   left: 50%;
   z-index: 50;
-  width: 15rem;
-  margin-left: -7.5rem;
+  width: var(--drop-w);
+  margin: 0 0 0 calc(var(--drop-w) / -2);
   padding: 0.375rem;
+  list-style: none;
   border-radius: 1rem;
-  background: var(--color-slate-900);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08), 0 24px 48px -16px rgb(19 19 22 / 0.6);
+  background: var(--hdr-bg);
+  box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line), 0 1.5rem 3rem -1rem var(--hdr-shadow);
 }
 /* Невидимый мост через зазор до панели — иначе курсор «падает» в щель
    и список закрывается по пути к нему. */
 .hdr-drop::before {
   content: '';
   position: absolute;
-  inset: -1.375rem 0 auto;
-  height: 1.375rem;
+  inset: calc(var(--drop-gap) * -1) 0 auto;
+  height: var(--drop-gap);
 }
 .hdr-drop__item {
   display: flex;
@@ -825,12 +847,12 @@ onUnmounted(() => {
   padding: 0.625rem 0.875rem;
   border-radius: 0.75rem;
   text-decoration: none;
-  transition: background-color 150ms ease;
+  transition: background-color 150ms var(--hdr-ease);
 }
 .hdr-drop__item:hover,
-.hdr-drop__item.is-active { background: rgb(255 255 255 / 0.07); }
-.hdr-drop__label { font-size: 0.875rem; font-weight: 600; color: #fff; }
-.hdr-drop__desc  { font-size: 0.75rem; color: rgb(255 255 255 / 0.5); }
+.hdr-drop__item.is-active { background: var(--hdr-fill); }
+.hdr-drop__label { font-size: 0.875rem; font-weight: 600; color: var(--hdr-fg); }
+.hdr-drop__desc  { font-size: 0.75rem; color: var(--hdr-fg-muted); }
 
 /* ── Действия ── */
 .hdr-actions {
@@ -840,79 +862,83 @@ onUnmounted(() => {
   gap: 0.5rem;
   justify-self: end;
 }
-.hdr-ico { flex: none; width: 1rem; height: 1rem; }
 
-.hdr-phone { display: none; }
-@media (min-width: 1280px) {
+.hdr-phone,
+.hdr-contacts { display: none; }
+@media (min-width: 80rem) {
+  .hdr-contacts { display: block; position: relative; }
   .hdr-phone {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    height: 2.5rem;
+    height: var(--hdr-tap);
     padding: 0 1rem;
-    border-radius: 999px;
-    background: rgb(255 255 255 / 0.07);
-    color: #fff;
+    border-radius: 999rem;
+    background: var(--hdr-fill);
+    color: var(--hdr-fg);
     font-size: 0.875rem;
     font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color 180ms var(--ease-out);
+    transition: background-color 180ms var(--hdr-ease);
   }
-  .hdr-phone:hover { background: rgb(255 255 255 / 0.13); }
+  .hdr-phone:hover { background: var(--hdr-fill-hover); }
 }
 
 .hdr-cta {
-  height: 2.5rem;
-  padding: 0 1.125rem;
+  height: var(--hdr-tap);
+  padding: 0 1.25rem;
   border: 0;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--color-slate-900);
+  border-radius: 999rem;
+  background: var(--hdr-fg);
+  color: var(--hdr-bg);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 180ms var(--ease-out);
+  transition: background-color 180ms var(--hdr-ease);
 }
 .hdr-cta:hover,
 .hdr-cta[aria-expanded='true'] { background: var(--color-slate-200); }
 
-/* Круглые кнопки мобильной шапки: звонок (на графите) и меню (белая) */
+/* Круглые кнопки: звонок (на графите), меню и Telegram (белые) */
 .hdr-round {
   display: grid;
   place-items: center;
   flex: none;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: var(--hdr-tap);
+  height: var(--hdr-tap);
+  padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgb(255 255 255 / 0.08);
-  color: #fff;
+  background: var(--hdr-fill);
+  color: var(--hdr-fg);
   cursor: pointer;
-  transition: background-color 180ms var(--ease-out);
+  transition: background-color 180ms var(--hdr-ease);
 }
-.hdr-round:hover { background: rgb(255 255 255 / 0.14); }
-.hdr-round--light { background: #fff; color: var(--color-slate-900); }
+.hdr-round:hover { background: var(--hdr-fill-hover); }
+.hdr-round--light { background: var(--hdr-fg); color: var(--hdr-bg); }
 .hdr-round--light:hover { background: var(--color-slate-200); }
-@media (min-width: 1280px) {
+@media (min-width: 80rem) {
   .hdr-round--mobile { display: none; }
 }
 
 /* ── Панель «Связаться» (десктоп) ── */
 .hdr-pop {
   position: absolute;
-  top: calc(100% + 1.25rem);
+  top: calc(100% + 1.125rem);
   right: 0;
   z-index: 50;
   width: 20rem;
   padding: 1rem;
   border-radius: 1.25rem;
-  background: #fff;
+  background: var(--color-white);
   color: var(--color-slate-900);
   text-align: left;
-  box-shadow: 0 0 0 1px rgb(19 19 22 / 0.06), 0 24px 60px -16px rgb(19 19 22 / 0.35);
+  box-shadow:
+    0 0 0 var(--hdr-hair) color-mix(in srgb, var(--color-slate-950) 6%, transparent),
+    0 1.5rem 3.75rem -1rem color-mix(in srgb, var(--color-slate-950) 35%, transparent);
 }
 .hdr-pop__phone {
   display: flex;
@@ -922,7 +948,7 @@ onUnmounted(() => {
   background: var(--color-slate-100);
   color: inherit;
   text-decoration: none;
-  transition: background-color 150ms ease;
+  transition: background-color 150ms var(--hdr-ease);
 }
 .hdr-pop__phone:hover { background: var(--color-slate-200); }
 .hdr-pop__phone-num { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
@@ -933,7 +959,7 @@ onUnmounted(() => {
   grid-template-columns: 4.5rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.625rem 0.125rem;
-  border-top: 1px solid var(--color-slate-200);
+  border-top: var(--hdr-hair) solid var(--color-slate-200);
 }
 .hdr-pop__list dt { font-size: 0.8125rem; color: var(--color-slate-500); }
 .hdr-pop__list dd { margin: 0; font-size: 0.875rem; font-weight: 500; line-height: 1.4; }
@@ -951,23 +977,20 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 2.75rem;
+  min-height: var(--hdr-tap);
   margin-top: 0.5rem;
   border-radius: 0.75rem;
   background: var(--color-slate-900);
-  color: #fff;
+  color: var(--color-white);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color 150ms ease;
+  transition: background-color 150ms var(--hdr-ease);
 }
 .hdr-pop__cta:hover { background: var(--color-slate-700); }
+.hdr-pop :is(a, button):focus-visible { outline-color: var(--color-secondary-600); }
 
-@media (prefers-reduced-motion: reduce) {
-  .hdr, .hdr-link, .hdr-link__chev, .hdr-phone, .hdr-cta, .hdr-round { transition: none; }
-}
-
-/* ── Burger → крестик: 3 линии transform'ятся вместо переключения svg ── */
+/* ── Бургер → крестик: 3 линии transform'ятся вместо переключения svg ── */
 .burger-icon {
   position: relative;
   display: block;
@@ -978,10 +1001,13 @@ onUnmounted(() => {
   position: absolute;
   left: 0;
   width: 100%;
-  height: 2px;
-  border-radius: 1px;
+  height: 0.125rem;
+  border-radius: 0.0625rem;
   background: currentColor;
-  transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .2s ease, top .28s cubic-bezier(.4,0,.2,1);
+  transition:
+    transform 280ms var(--hdr-ease),
+    opacity 200ms var(--hdr-ease),
+    top 280ms var(--hdr-ease);
 }
 .burger-icon__line:nth-child(1) { top: 0; }
 .burger-icon__line:nth-child(2) { top: 50%; transform: translateY(-50%); }
@@ -991,33 +1017,186 @@ onUnmounted(() => {
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
 }
-.burger-btn.is-open .burger-icon__line:nth-child(2) {
-  opacity: 0;
-}
+.burger-btn.is-open .burger-icon__line:nth-child(2) { opacity: 0; }
 .burger-btn.is-open .burger-icon__line:nth-child(3) {
   top: 50%;
   transform: translateY(-50%) rotate(-45deg);
 }
 
-/* Уважение к prefers-reduced-motion — линии просто переключаются без анимации */
-@media (prefers-reduced-motion: reduce) {
-  .burger-icon__line { transition: none; }
+/* ============================================================
+   Мобильное меню
+   Фон уходит на --mnav-bleed выше вьюпорта и компенсируется таким же
+   верхним отступом: iOS Safari закрашивает зону чёлки отдельным
+   проходом, и если фон fixed-элемента начинается ровно на top:0, при
+   появлении меню полоса на кадр-два остаётся непрокрашенной.
+   ============================================================ */
+.mnav {
+  --mnav-bleed: 6.25rem;
+  position: fixed;
+  inset: calc(var(--mnav-bleed) * -1) 0 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(env(safe-area-inset-top, 0rem) + var(--mnav-bleed));
+  padding-inline: env(safe-area-inset-left, 0rem) env(safe-area-inset-right, 0rem);
+  background: var(--hdr-bg);
+  color: var(--hdr-fg);
+}
+@media (min-width: 80rem) {
+  .mnav { display: none; }
 }
 
-/* ── Активный пункт мобильной навигации — акцентная полоска слева.
-   Смены цвета текста (white/85 → white) недостаточно для быстрого
-   сканирования списка — полоска даёт однозначный визуальный якорь. */
-.nav-item {
-  position: relative;
+.mnav__top { flex: none; margin-top: var(--hdr-inset); }
+
+/* Середина прокручивается, телефон внизу закреплён */
+.mnav__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
-.nav-item--active::before {
+
+.mnav__address {
+  margin: 1.25rem 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--hdr-fg-muted);
+}
+
+.mnav__actions { display: flex; align-items: center; gap: 0.625rem; }
+.mnav__call {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--hdr-tap);
+  border-radius: 999rem;
+  background: var(--hdr-fg);
+  color: var(--hdr-bg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 180ms var(--hdr-ease);
+}
+.mnav__call:active { background: var(--color-slate-200); }
+.mnav__social img { display: block; }
+
+.mnav__list {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hdr-hair) solid var(--hdr-line);
+}
+.mnav__item {
+  position: relative;
+  border-bottom: var(--hdr-hair) solid var(--hdr-line);
+}
+/* Активный раздел — красная черта слева, в поле контейнера */
+.mnav__item.is-active::before {
   content: '';
   position: absolute;
   left: -0.75rem;
-  top: 0.875rem;
-  bottom: 0.875rem;
-  width: 3px;
-  border-radius: 2px;
-  background: var(--color-accent, var(--color-accent-500));
+  top: 1rem;
+  height: 1.5rem;
+  width: 0.1875rem;
+  border-radius: 0.125rem;
+  background: var(--color-accent-500);
+}
+.mnav__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--hdr-fg-soft);
+  text-decoration: none;
+  transition: color 150ms var(--hdr-ease);
+}
+.mnav__link:hover,
+.mnav__item.is-active > .mnav__link { color: var(--hdr-fg); }
+.mnav__chev { color: var(--hdr-fg-faint); }
+
+.mnav__sub {
+  margin: -0.25rem 0 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+.mnav__sublink {
+  display: flex;
+  align-items: center;
+  min-height: var(--hdr-tap);
+  margin-inline: -0.75rem;
+  padding-inline: 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--hdr-fg-muted);
+  text-decoration: none;
+  transition: background-color 150ms var(--hdr-ease), color 150ms var(--hdr-ease);
+}
+.mnav__sublink:hover,
+.mnav__sublink[aria-current='page'] { background: var(--hdr-fill); color: var(--hdr-fg); }
+
+/* Статус салона: та же поверхность и круглая иконка, что у телефона внизу */
+.mnav__status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  padding: 0.875rem 1rem;
+  border-radius: 0.875rem;
+  background: var(--hdr-fill);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.mnav__status-ico,
+.mnav__phone-ico {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--hdr-fill);
+  color: var(--hdr-fg);
+}
+.mnav__status-ico.is-open { color: var(--color-secondary-300); }
+.mnav__status-text { display: flex; flex-direction: column; min-width: 0; }
+.mnav__status-title { font-weight: 600; }
+.mnav__status-title.is-open { color: var(--color-secondary-300); }
+.mnav__muted { font-size: 0.8125rem; color: var(--hdr-fg-muted); }
+
+.mnav__foot {
+  flex: none;
+  padding-block: 0.75rem calc(0.75rem + env(safe-area-inset-bottom, 0rem));
+  border-top: var(--hdr-hair) solid var(--hdr-line);
+  background: var(--hdr-bg);
+}
+.mnav__phones { display: flex; flex-direction: column; gap: 0.5rem; }
+.mnav__phone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  padding: 0.5rem 0.625rem 0.5rem 1rem;
+  border-radius: 0.875rem;
+  background: var(--hdr-fill);
+  color: var(--hdr-fg);
+  text-decoration: none;
+  transition: background-color 150ms var(--hdr-ease);
+}
+.mnav__phone:active { background: var(--hdr-fill-hover); }
+.mnav__phone-text { display: flex; flex-direction: column; min-width: 0; }
+.mnav__phone-num { font-size: 1rem; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hdr, .hdr-link, .hdr-link__chev, .hdr-phone, .hdr-cta, .hdr-round,
+  .hdr-mark img, .burger-icon__line, .mnav__link, .mnav__sublink, .mnav__call, .mnav__phone {
+    transition: none;
+  }
 }
 </style>

@@ -92,7 +92,9 @@ function toggleExpanded(id: string) {
               до {{ formatDate(promo.validUntil) }}<template v-if="clientReady">, осталось {{ getDaysLeft(promo.validUntil) }} дн.</template>
             </time>
           </p>
-          <h3 class="h-h3 offer__title" :class="{ 'offer__title--first': promo.placeholder }">{{ promo.title }}</h3>
+          <!-- Заглушка — не заголовок: «Название акции» не должно попасть
+               в структуру страницы для поисковиков -->
+          <component :is="promo.placeholder ? 'p' : 'h3'" class="h-h3 offer__title" :class="{ 'offer__title--first': promo.placeholder }">{{ promo.title }}</component>
           <p class="h-body offer__sub">{{ promo.subtitle }}</p>
 
           <p v-if="expandedIds.has(promo.id)" class="h-body offer__desc">{{ promo.description }}</p>
