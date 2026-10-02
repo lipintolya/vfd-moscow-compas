@@ -8,14 +8,14 @@
  * визуально, кратно легче.
  *
  * Запуск:        node scripts/gen-footer-map.mjs
- * Когда запускать снова: если координаты салона в contacts-data.ts
+ * Когда запускать снова: если координаты салона в src/config/site.ts
  * (address.coordinates) поменяются.
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
 
-const LAT = 55.172868
-const LNG = 61.306572
+const LAT = 55.8509296  // = SITE.address.coordinates (src/config/site.ts)
+const LNG = 37.6792174
 const OUT = new URL('../public/renders/footer-map.webp', import.meta.url)
 
 await mkdir(new URL('../public/renders/', import.meta.url), { recursive: true })

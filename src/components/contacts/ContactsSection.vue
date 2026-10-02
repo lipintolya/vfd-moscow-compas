@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { companyLegalInfo, getFormattedHours } from '../../lib/contacts-data'
 import { paymentMethods } from '../about/about-data'
+import { SITE } from '../../config/site'
 
 /* Все контакты — из contacts-data.ts (единый источник для футера, шапки,
    /about/ и структурированных данных), а не хардкодом: раньше номера, часы
@@ -12,9 +13,9 @@ const address  = companyLegalInfo.address
 const director = companyLegalInfo.director
 const req      = companyLegalInfo.requisites
 
-const TG  = 'https://t.me/vfddoors74'
-const VK  = 'https://vk.com/vfddoors74'
-const MAX = 'https://max.ru/id452402308842_biz'
+const TG  = SITE.social.telegram
+const VK  = SITE.social.vk
+const MAX = SITE.social.max
 const ROUTE = 'https://yandex.ru/maps/-/CPTwZPi-'
 
 /* Сб и Вс сейчас по одному графику — одна строка «Сб–Вс», без дубля времени. */

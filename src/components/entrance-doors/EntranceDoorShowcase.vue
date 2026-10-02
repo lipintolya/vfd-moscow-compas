@@ -2,6 +2,7 @@
 import { ref, computed, nextTick } from 'vue'
 import { getSkin, type EntranceDoorModel } from '../../data/entrance-doors'
 import { companyLegalInfo } from '../../lib/contacts-data'
+import { SITE } from '../../config/site'
 
 const props = withDefaults(defineProps<{
   model:  EntranceDoorModel
@@ -14,9 +15,9 @@ const phone = companyLegalInfo.contacts.phone[0]!
 
 /* Мессенджеры — те же иконки/ссылки, что в шапке сайта (Header.vue SOCIAL_NETWORKS) */
 const SOCIAL_NETWORKS = [
-  { name: 'VK',       label: 'ВК',       url: 'https://vk.com/vfddoors74',              icon: '/icons/b_vk_logo.webp' },
-  { name: 'Telegram', label: 'Телеграм', url: 'https://t.me/vfddoors74',                icon: '/icons/b_tg_logo.webp' },
-  { name: 'MAX',      label: 'Макс',     url: 'https://max.ru/id452402308842_biz',      icon: '/icons/b_max_logo.webp' },
+  { name: 'VK',       label: 'ВК',       url: SITE.social.vk,              icon: '/icons/b_vk_logo.webp' },
+  { name: 'Telegram', label: 'Телеграм', url: SITE.social.telegram,                icon: '/icons/b_tg_logo.webp' },
+  { name: 'MAX',      label: 'Макс',     url: SITE.social.max,      icon: '/icons/b_max_logo.webp' },
 ] as const
 
 type View = 'outside' | 'render' | 'inside'
@@ -46,7 +47,7 @@ const skinLabel = computed(() => {
 const telegramHref = computed(() => {
   const skinPart = selectedSkin.value ? `, накладка ${skinLabel.value}` : ''
   const text = `Здравствуйте! Хочу узнать про дверь «${props.model.name}»${skinPart} — ${formatPrice(currentPrice.value)}`
-  return `https://t.me/vfddoors74?text=${encodeURIComponent(text)}`
+  return `${SITE.social.telegram}?text=${encodeURIComponent(text)}`
 })
 
 /* Накладки — двухшаговый выбор (сначала модель — Niuta, ER 1, Atum Pro 28…,

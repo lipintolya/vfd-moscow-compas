@@ -75,7 +75,7 @@ export const PROMOS: Promo[] = [
     image: '/renders/promo/basic-z-800.webp',
     imageSrcset: '/renders/promo/basic-z-640.webp 640w, /renders/promo/basic-z-800.webp 800w',
     ctaText: 'Смотреть в каталоге',
-    ctaLink: 'https://vfd74.ru/catalog/series/basic/',
+    ctaLink: '/catalog/series/basic/',
     discount: '-8%',
     validUntil: '2026-09-30',
   },

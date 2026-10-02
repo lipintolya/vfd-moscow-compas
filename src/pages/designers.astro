@@ -4,9 +4,10 @@ import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import SectionHeading from '../components/partitions/SectionHeading.astro'
 import ProcessSteps from '../components/partitions/ProcessSteps.astro'
+import { PHONE as SITE_PHONE, SITE } from '../config/site'
 
-const PHONE = '+79000297888'
-const TG    = 'https://t.me/vfddoors74'
+const PHONE = SITE_PHONE.raw
+const TG    = SITE.social.telegram
 
 /* ════════════════════════════════════════════════════════════
    ИЗОБРАЖЕНИЯ

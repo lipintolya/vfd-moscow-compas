@@ -13,6 +13,7 @@ import { getSeriesSpec } from '../../../data/series-descriptions'
 import type { CatalogCardItem } from '../../../components/catalog/types'
 import { merchantPolicy } from '../../../lib/contacts-data'
 import { coatingInline, hasWords, pluralRu } from '../../../lib/product-text'
+import { PHONE as SITE_PHONE, SITE } from '../../../config/site'
 
 export async function getStaticPaths() {
   const { cards } = await getCatalogCards()
@@ -38,10 +39,10 @@ const paletteColors = await getColorsByCoatingSlug(series.coatingSlug, series.sl
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
-const PHONE = '+79000297888'
-const TG    = 'https://t.me/vfddoors74'
-const VK    = 'https://vk.com/vfddoors74'
-const MAX   = 'https://max.ru/id452402308842_biz'
+const PHONE = SITE_PHONE.raw
+const TG    = SITE.social.telegram
+const VK    = SITE.social.vk
+const MAX   = SITE.social.max
 
 const canonicalUrl = Astro.site ? new URL(`/catalog/series/${series.slug}/`, Astro.site).href : undefined
 

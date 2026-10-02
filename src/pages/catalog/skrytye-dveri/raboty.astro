@@ -4,8 +4,9 @@ import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import WorksGrid from '../../../components/catalog/WorksGrid.vue'
 import { INVISIBLE_WORKS } from '../../../data/skrytye-dveri-works'
 import { IMAGES } from '../../../data/skrytye-dveri-products'
+import { SITE } from '../../../config/site'
 
-const TG = 'https://t.me/vfddoors74'
+const TG = SITE.social.telegram
 
 const pluralWorks = (n: number) => {
   const mod100 = n % 100

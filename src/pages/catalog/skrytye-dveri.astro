@@ -41,6 +41,7 @@ import {
   REFLEX_HEIGHT_TIERS,
   REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
 } from '../../data/skrytye-dveri-products'
+import { PHONE as SITE_PHONE, SITE } from '../../config/site'
 
 const secretPromo = PROMOS.find(p => p.id === 3)
 
@@ -52,10 +53,10 @@ const REFLEX_IMAGES = [
   REFLEX_IMAGE,
 ]
 
-const PHONE = '+79000297888'
-const TG    = 'https://t.me/vfddoors74'
-const VK    = 'https://vk.com/vfddoors74'
-const MAX   = 'https://max.ru/id452402308842_biz'
+const PHONE = SITE_PHONE.raw
+const TG    = SITE.social.telegram
+const VK    = SITE.social.vk
+const MAX   = SITE.social.max
 
 const WORKS_LIMIT = 4
 const ARCHIVE_HREF = '/catalog/skrytye-dveri/raboty/'

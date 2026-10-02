@@ -4,7 +4,6 @@
  * Header больше не нужен здесь — он подключён в BaseLayout.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { reviews } from '../data/reviews'
 import HeroSlider from '../components/home/HeroSlider.vue'
 import { HERO_COVER_IMAGE, HERO_COVER_IMAGE_SRCSET } from '../data/hero-image'
 import PromoStripBanner from '../components/home/PromoStripBanner.astro'
@@ -25,6 +24,8 @@ import { howToSchema } from '../data/how-it-works'
 import { getCatalogCards } from '../lib/catalog-data'
 import { calcKitPrice } from '../data/accessories'
 import { companyLegalInfo } from '../lib/contacts-data'
+import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
+import { PHONE, SITE } from '../config/site'
 
 const faqItems = faqs.map(f => ({ q: f.question, a: f.answer }))
 
@@ -65,62 +66,7 @@ const faqSchema = {
   })),
 }
 
-const localBusinessSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
-  '@id': 'https://vfd74.ru/#localbusiness',
-  name: 'Салон дверей ВФД на Кашириных',
-  /* Разговорное имя, которым пользователи фактически ищут салон в поиске
-     ("вфд челябинск") — честный алиас, не выдумка: это реальное название
-     бренда + город, под которым бизнес и так известен. Помогает Google/
-     Яндексу связать сущность с этим запросом (Knowledge Graph), не подменяет
-     основное юридическое/витринное имя. */
-  /* Массив, а не строка — латинское "VFD" встречается в поиске наравне
-     с кириллическим (бренд сам пишется латиницей на логотипе/фасаде),
-     оба варианта честно относятся к этому же салону. */
-  alternateName: ['ВФД Челябинск', 'VFD Челябинск'],
-  description: 'Фирменный салон входных и межкомнатных дверей, алюминиевых перегородок в Челябинске. Работаем с 2014 года.',
-  url: 'https://vfd74.ru',
-  telephone: ['+79000297888', '+79630807888'],
-  email: 'vfddoors74@mail.ru',
-  image: 'https://storage.yandexcloud.net/vfd74ru/promo_main/main_render_innova.webp',
-  /* logo — отдельно от image: Google берёт его для бренд-логотипа в Knowledge
-     Panel/поиске, PNG-растр (см. logo-schema.png — тот же файл, что у
-     BlogPosting.publisher.logo на статьях, единый источник бренд-лого). */
-  logo: 'https://vfd74.ru/logo-schema.png',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'ул. Братьев Кашириных, 131Б',
-    addressLocality: 'Челябинск',
-    addressRegion: 'Челябинская область',
-    postalCode: '454128',
-    addressCountry: 'RU',
-  },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 55.172868,
-    longitude: 61.306572,
-  },
-  openingHoursSpecification: companyLegalInfo.schemaOrgHours.map((h) => ({
-    '@type': 'OpeningHoursSpecification',
-    ...h,
-  })),
-  foundingDate: '2014',
-  priceRange: '₽₽',
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    reviewCount: String(reviews.length),
-    bestRating: '5',
-  },
-  sameAs: [
-    'https://vk.com/vfddoors74',
-    'https://t.me/vfddoors74',
-    'https://max.ru/id452402308842_biz',
-    'https://2gis.ru/chelyabinsk/firm/70000001093506304',
-    'https://yandex.ru/maps/-/CPwenX08',
-  ],
-}
+const localBusinessSchema = buildLocalBusiness()
 ---
 
 <BaseLayout
@@ -142,8 +88,8 @@ const localBusinessSchema = {
   <MirrorDoorPromo client:visible />
   <Features client:visible />
   <CatalogCategories client:visible />
-  <Reviews client:visible />
-  <PortfolioPreview />
+  {SITE.features.reviews && <Reviews client:visible />}
+  {SITE.features.portfolio && <PortfolioPreview />}
   <Promo client:idle />
   <LatestArticles />
 
@@ -162,12 +108,12 @@ const localBusinessSchema = {
           <p class="m-0 text-step-1 text-white/60">Свяжитесь с нами — поможем с выбором и проконсультируем.</p>
         </div>
         <div class="flex shrink-0 flex-wrap gap-2.5">
-          <a href="https://t.me/vfddoors74" target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
-          <a href="tel:+79000297888" class="btn btn-ghost">Позвонить</a>
-          <a href="https://vk.com/vfddoors74" target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в VK">
+          <a href={SITE.social.telegram} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>
+          <a href={`tel:${PHONE.raw}`} class="btn btn-ghost">Позвонить</a>
+          <a href={SITE.social.vk} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в VK">
             <img src="/icons/w_vk.webp" alt="" width="18" height="18" />
           </a>
-          <a href="https://max.ru/id452402308842_biz" target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в MAX">
+          <a href={SITE.social.max} target="_blank" rel="noopener" class="btn btn-ghost btn-icon" aria-label="Написать в MAX">
             <img src="/icons/w_max.webp" alt="" width="18" height="18" />
           </a>
         </div>

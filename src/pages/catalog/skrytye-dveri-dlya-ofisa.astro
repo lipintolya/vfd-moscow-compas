@@ -21,9 +21,10 @@ import {
   SECRET_MIN_KIT_PRICE,
   CUSTOM_LEAD_TIME,
 } from '../../data/skrytye-dveri-products'
+import { PHONE as SITE_PHONE, SITE } from '../../config/site'
 
-const PHONE = '+79000297888'
-const TG    = 'https://t.me/vfddoors74'
+const PHONE = SITE_PHONE.raw
+const TG    = SITE.social.telegram
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 

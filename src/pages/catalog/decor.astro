@@ -17,11 +17,12 @@ import {
   type PriceRow,
   type Material,
 } from '../../data/decor-products'
+import { PHONE as SITE_PHONE, SITE } from '../../config/site'
 
-const PHONE = '+79000297888'
-const TG    = 'https://t.me/vfddoors74'
-const VK    = 'https://vk.com/vfddoors74'
-const MAX   = 'https://max.ru/id452402308842_biz'
+const PHONE = SITE_PHONE.raw
+const TG    = SITE.social.telegram
+const VK    = SITE.social.vk
+const MAX   = SITE.social.max
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 

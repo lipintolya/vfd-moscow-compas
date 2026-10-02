@@ -7,6 +7,7 @@ import {
   WC_PRICE, WC_LABEL, WC_QTY, WC_IMAGES,
   type HingeType, type HardwareImages,
 } from '../../data/hardware'
+import { SITE } from '../../config/site'
 
 /* ============================================================
    mounted — гейт для Teleport ниже, прокинут пропом от родителя
@@ -114,9 +115,9 @@ const calcMessage = computed(() => {
   return parts.join('\n')
 })
 
-const telegramHref = computed(() => `https://t.me/vfddoors74?text=${encodeURIComponent(calcMessage.value)}`)
-const vkHref  = 'https://vk.com/vfddoors74'
-const maxHref = 'https://max.ru/id452402308842_biz'
+const telegramHref = computed(() => `${SITE.social.telegram}?text=${encodeURIComponent(calcMessage.value)}`)
+const vkHref  = SITE.social.vk
+const maxHref = SITE.social.max
 
 /** Best-effort — если буфер недоступен (нет разрешения/старый браузер),
     просто ничего не происходит, переход по ссылке всё равно сработает. */

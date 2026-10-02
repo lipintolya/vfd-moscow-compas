@@ -19,6 +19,7 @@ import { calcKitPrice, BASE_KIT_DESCRIPTION } from '../../data/accessories'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { isMadeToOrder, isInStock } from '../../lib/made-to-order'
 import PriceCalculatorModal from './PriceCalculatorModal.vue'
+import { SITE } from '../../config/site'
 
 const props = defineProps<{
   colors:      ColorVariant[]
@@ -257,11 +258,11 @@ const shareModel = async () => {
 
     <!-- CTA -->
     <div class="color-picker__cta">
-      <a href="https://t.me/vfddoors74" target="_blank" rel="noopener" class="btn btn-primary">Написать в Telegram</a>
-      <a href="https://vk.com/vfddoors74" target="_blank" rel="noopener" class="btn btn-outline color-picker__social-btn" aria-label="Написать в VK">
+      <a :href="SITE.social.telegram" target="_blank" rel="noopener" class="btn btn-primary">Написать в Telegram</a>
+      <a :href="SITE.social.vk" target="_blank" rel="noopener" class="btn btn-outline color-picker__social-btn" aria-label="Написать в VK">
         <img src="/icons/b_vk_logo.webp" alt="" width="18" height="18" />
       </a>
-      <a href="https://max.ru/id452402308842_biz" target="_blank" rel="noopener" class="btn btn-outline color-picker__social-btn" aria-label="Написать в MAX">
+      <a :href="SITE.social.max" target="_blank" rel="noopener" class="btn btn-outline color-picker__social-btn" aria-label="Написать в MAX">
         <img src="/icons/b_max_logo.webp" alt="" width="18" height="18" />
       </a>
       <a :href="`tel:${phone.raw}`" class="btn btn-outline">

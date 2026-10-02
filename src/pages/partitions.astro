@@ -25,6 +25,7 @@ import {
   renderGallery, aspenCase,
 } from '../data/partitions'
 import '../styles/partitions.css'
+import { PHONE, SITE } from '../config/site'
 
 const title       = 'Алюминиевые перегородки в Челябинске — цены, изготовление на заказ | ВФД'
 const description = 'Раздвижные и распашные алюминиевые перегородки из профилей GRAFIA. Бесплатный замер при заказе, монтаж по Челябинску. Срок изготовления 45 рабочих дней.'
@@ -72,7 +73,7 @@ const structuredData = {
   provider: {
     '@type':    'LocalBusiness',
     name:       'Салон дверей ВФД',
-    telephone:  '+79000297888',
+    telephone:  PHONE.raw,
     address: {
       '@type':         'PostalAddress',
       streetAddress:   'ул. Братьев Кашириных, 131Б',
@@ -150,7 +151,7 @@ const renderLightbox = renderGallery
               отечественное производство, минималистичный дизайн, сборно-разборная конструкция.
             </p>
             <div class="flex gap-2.5 flex-wrap mt-5">
-              <a href="https://t.me/vfddoors74" target="_blank" rel="noopener" class="btn btn-ghost">Получить расчёт</a>
+              <a href={SITE.social.telegram} target="_blank" rel="noopener" class="btn btn-ghost">Получить расчёт</a>
               <a href="/contacts/" class="btn btn-ghost">Контакты</a>
             </div>
           </div>
@@ -199,7 +200,7 @@ const renderLightbox = renderGallery
             <li>Демонтаж без следов при перепланировке</li>
             <li>Окраска профиля по RAL/NCS</li>
           </ul>
-          <a href="tel:+79000297888" class="btn btn-accent">
+          <a href={`tel:${PHONE.raw}`} class="btn btn-accent">
             Узнать стоимость
             <IconArrowRight />
           </a>
@@ -519,7 +520,7 @@ const renderLightbox = renderGallery
     <div class="container">
       <QuoteCta
         image="https://storage.yandexcloud.net/catalog-vfd/alum/rener-2.webp"
-        primaryHref="https://t.me/vfddoors74"
+        primaryHref={SITE.social.telegram}
         secondaryHref="/contacts/"
         secondaryLabel="Написать нам"
       />

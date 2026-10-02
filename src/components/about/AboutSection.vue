@@ -8,6 +8,7 @@ import {
   paymentMethods,
 } from './about-data'
 import { companyLegalInfo, getFormattedHours } from '../../lib/contacts-data'
+import { SITE } from '../../config/site'
 
 /* Часы работы — из единого источника (contacts-data.ts), не статичной
    строкой на карточке, чтобы график не расходился между страницами. */
@@ -110,7 +111,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 
             <div class="mb-8 flex flex-wrap items-center gap-2.5">
               <a
-                href="https://t.me/vfddoors74"
+                :href="SITE.social.telegram"
                 target="_blank"
                 rel="noopener"
                 class="group/link inline-flex w-fit items-center gap-2 whitespace-nowrap rounded-full bg-fg py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white transition-colors duration-200 ease-out hover:bg-accent"
@@ -124,7 +125,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
               </a>
 
               <a
-                href="https://vk.com/vfddoors74"
+                :href="SITE.social.vk"
                 target="_blank"
                 rel="noopener"
                 aria-label="Написать в VK"
@@ -134,7 +135,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
               </a>
 
               <a
-                href="https://max.ru/id452402308842_biz"
+                :href="SITE.social.max"
                 target="_blank"
                 rel="noopener"
                 aria-label="Написать в MAX"

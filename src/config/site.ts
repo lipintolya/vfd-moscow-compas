@@ -1,0 +1,82 @@
+/**
+ * Глобальная конфигурация сайта — бренд, домен, город, контакты, соцсети,
+ * аналитика. Единый источник: компоненты и страницы берут эти значения
+ * отсюда, а не зашивают строками.
+ *
+ * Юридические реквизиты, часы работы и адрес в развёрнутом виде —
+ * в src/lib/contacts-data.ts (он собирается из этого файла).
+ *
+ * ⚠ Значения с PLACEHOLDER / placeholder — временные заглушки, их нужно
+ * заменить реальными данными салона до запуска:
+ *   grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public
+ */
+
+/** Домен без завершающего слэша. Используется в canonical, OG, sitemap,
+    JSON-LD, фиде. Дублируется в astro.config.mjs (SITE_URL) — конфиг
+    Astro не импортирует .ts, при смене домена поправить оба места
+    и public/robots.txt. */
+export const SITE_URL = 'https://domain-placeholder.example'
+
+export const SITE = {
+  url: SITE_URL,
+  /** Хост для подписи «Сайт: …» в UI */
+  host: SITE_URL.replace(/^https?:\/\//, ''),
+
+  /** Короткое имя бренда — в title, логотипе, JSON-LD name */
+  name: 'ВФД',
+  /** Полное имя салона — в подвале, «О компании», schema.org */
+  fullName: 'Салон Владимирской фабрики дверей в ТЦ «Компас»',
+  /** Фабрика-производитель (бренд каталога) */
+  manufacturer: 'Владимирская фабрика дверей',
+
+  city: {
+    /** Именительный: «Москва» */
+    name: 'Москва',
+    /** Предложный с предлогом: «в Москве» */
+    in: 'в Москве',
+    /** Родительный: «Москвы» */
+    of: 'Москвы',
+    region: 'Москва',
+  },
+
+  address: {
+    mall: 'ТЦ «Компас»',
+    street: 'ул. Красная Сосна, 2А',
+    floor: '3 этаж',
+    /** Одной строкой для UI */
+    full: 'г. Москва, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж',
+    postalCode: '129337',
+    district: 'Ярославский район',
+    /** Координаты ТЦ (OpenStreetMap, «Торговый центр "Компас"», 2А) —
+        для карты и schema.org GeoCoordinates. Уточнить по входу. */
+    coordinates: { lat: 55.8509296, lng: 37.6792174 },
+  },
+
+  phones: [
+    { raw: '+70000000000', label: '+7 (000) 000-00-00', title: 'Основной номер' }, // PLACEHOLDER
+  ],
+  email: 'info@domain-placeholder.example',
+
+  social: {
+    telegram: 'https://t.me/TELEGRAM_PLACEHOLDER',
+    vk:       'https://vk.com/VK_PLACEHOLDER',
+    max:      'https://max.ru/MAX_PLACEHOLDER',
+  },
+
+  /** Разделы, которые появляются на сайте, когда в них есть данные.
+      Включать вместе с наполнением src/data/reviews.ts / portfolio-works.ts:
+      false → ссылки в меню, блоки на главной и JSON-LD рейтинга скрыты,
+      а сами страницы закрыты noindex. */
+  features: {
+    reviews:   false,
+    portfolio: false,
+  },
+
+  analytics: {
+    /** ID счётчика Яндекс Метрики. Пусто → счётчик не подключается. */
+    yandexMetrikaId: '',
+  },
+} as const
+
+/** Основной телефон — самое частое обращение в разметке */
+export const PHONE = SITE.phones[0]

@@ -6,11 +6,12 @@ import ProcessSteps from '../components/partitions/ProcessSteps.astro'
 import EntranceDoorShowcase from '../components/entrance-doors/EntranceDoorShowcase.vue'
 import { ENTRANCE_DOOR_MODELS, ENTRANCE_SKINS, minPriceOf } from '../data/entrance-doors'
 import { companyLegalInfo, merchantPolicy } from '../lib/contacts-data'
+import { SITE } from '../config/site'
 
 const PHONE = companyLegalInfo.contacts.phone[0]!.raw
-const TG    = 'https://t.me/vfddoors74'
-const VK    = 'https://vk.com/vfddoors74'
-const MAX   = 'https://max.ru/id452402308842_biz'
+const TG    = SITE.social.telegram
+const VK    = SITE.social.vk
+const MAX   = SITE.social.max
 
 const heroModel = ENTRANCE_DOOR_MODELS[0]!
 const minPrice  = Math.min(...ENTRANCE_DOOR_MODELS.map(minPriceOf))
@@ -92,7 +93,7 @@ const productSchemas = ENTRANCE_DOOR_MODELS.map(model => ({
   '@type': 'Product',
   name: `Входная дверь ${model.name}`,
   description: model.description,
-  image: new URL(model.coverImage, Astro.site ?? 'https://vfd74.ru').href,
+  image: new URL(model.coverImage, Astro.site ?? SITE.url).href,
   brand: { '@type': 'Brand', name: 'ВФД' },
   offers: {
     '@type': 'AggregateOffer',

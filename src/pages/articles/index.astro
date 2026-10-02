@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
+import { SITE } from '../../config/site'
 
 const allArticles = await getCollection('articles')
 const articles = allArticles.sort(
@@ -14,8 +15,8 @@ const breadcrumbSchema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Главная', item: 'https://vfd74.ru' },
-    { '@type': 'ListItem', position: 2, name: 'Статьи', item: 'https://vfd74.ru/articles/' },
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
+    { '@type': 'ListItem', position: 2, name: 'Статьи', item: `${SITE.url}/articles/` },
   ],
 }
 ---

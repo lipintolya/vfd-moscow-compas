@@ -1,79 +1,77 @@
 /**
- * Данные компании согласно законодательству РФ
- * Обновлено: июнь 2026 г.
+ * Данные компании согласно законодательству РФ.
+ * Бренд, адрес, телефоны и соцсети берутся из src/config/site.ts.
+ * ⚠ Реквизиты и ФИО — PLACEHOLDER, заменить реальными данными салона.
  */
+import { SITE } from '../config/site'
 
 export const companyLegalInfo = {
   // Основные реквизиты
-  fullName: 'Индивидуальный предприниматель Липина Надежда Анатольевна',
-  shortName: 'ВФД (Фирменный салон Владимирской фабрики дверей)',
-  
+  fullName: 'FULL_LEGAL_NAME_PLACEHOLDER', // напр. «Индивидуальный предприниматель …» / «ООО …»
+  shortName: SITE.fullName,
+
   // Адреса
   address: {
-    legal: 'г. Челябинск, ул. Братьев Кашириных, 131Б',
-    postal: 'г. Челябинск, ул. Братьев Кашириных, 131Б',
-    entrance: 'Вход со стороны ул. Чичерина',
-    coordinates: { lat: 55.172868, lng: 61.306572 },
+    legal: 'LEGAL_ADDRESS_PLACEHOLDER',
+    postal: SITE.address.full,
+    entrance: `${SITE.address.mall}, ${SITE.address.floor}`,
+    coordinates: SITE.address.coordinates,
   },
 
   // Контакты
   contacts: {
-    phone: [
-      { raw: '+79000297888', label: '+7 (900) 029-78-88', title: 'Основной номер' },
-      { raw: '+79630807888', label: '+7 (963) 080-78-88', title: 'Дополнительный номер' },
-    ],
-    email: 'vfddoors74@mail.ru',
-    website: 'https://vfd74.ru',
+    phone: [...SITE.phones],
+    email: SITE.email,
+    website: SITE.url,
   },
 
   // Реквизиты
   requisites: {
-    ogrnip: '323745600047178',
-    inn: '452402308842',
-    okpo: '2021397319',
-    okato: '75401364000',
-    oktmo: '75701310000',
-    pfr_number: '1273789246',
-    fss_number: '1273789246',
+    ogrnip: 'OGRN_PLACEHOLDER',
+    inn: 'INN_PLACEHOLDER',
+    okpo: '',
+    okato: '',
+    oktmo: '',
+    pfr_number: '',
+    fss_number: '',
   },
 
-  // Время работы — единый круглогодичный график (без сезонных Вс)
+  // Время работы — PLACEHOLDER, уточнить график ТЦ «Компас»
   workingHours: {
-    weekdays: { opens: '10:00', closes: '20:00', label: 'Пн–Пт: 10:00–20:00' },
-    saturday: { opens: '10:00', closes: '18:00', label: 'Сб: 10:00–18:00' },
-    sunday: { opens: '10:00', closes: '18:00', label: 'Вс: 10:00–18:00' },
-    shortDisplay: 'Пн–Пт: 10:00–20:00, Сб–Вс: 10:00–18:00',
+    weekdays: { opens: '10:00', closes: '22:00', label: 'Пн–Пт: 10:00–22:00' },
+    saturday: { opens: '10:00', closes: '22:00', label: 'Сб: 10:00–22:00' },
+    sunday: { opens: '10:00', closes: '22:00', label: 'Вс: 10:00–22:00' },
+    shortDisplay: 'Ежедневно: 10:00–22:00',
   },
 
-  // Сведения о руководителе
+  // Сведения о руководителе — PLACEHOLDER
   director: {
-    firstName: 'Надежда',
-    lastName: 'Липина',
-    middleName: 'Анатольевна',
-    fullName: 'Липина Надежда Анатольевна',
-    position: 'Индивидуальный предприниматель',
-    experience: 'Более 20 лет в дверной отрасли',
+    firstName: '',
+    lastName: '',
+    middleName: '',
+    fullName: 'DIRECTOR_NAME_PLACEHOLDER',
+    position: '',
+    experience: '',
   },
 
   // Информация о деятельности
   activity: {
-    founded: 2014,
-    registered: '27 марта 2023 г.',
-    description: 'Фирменный салон Владимирской фабрики дверей. Реализация входных и межкомнатных дверей, алюминиевых перегородок, консультации по подбору, замер и монтаж.',
+    founded: 0, // TODO: год открытия салона
+    registered: '',
+    description: `${SITE.fullName}. Межкомнатные и входные двери, скрытые двери, алюминиевые перегородки — подбор, замер и монтаж ${SITE.city.in}.`,
     license: 'Торговля допускается без лицензии',
   },
 
-  // СПД и налоги
+  // СПД и налоги — PLACEHOLDER
   taxation: {
-    system: 'УСН (упрощённая система налогообложения)',
-    regime: '15% (доход минус расходы), ПСН',
-    tax_office: 'Межрайонная инспекция ФНС России № 17 по Челябинской области',
+    system: '',
+    regime: '',
+    tax_office: '',
   },
 
-  // Рабочее время для поисковых систем (schema.org)
+  // Рабочее время для поисковых систем (schema.org) — синхронно с workingHours
   schemaOrgHours: [
-    { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '10:00', closes: '20:00' },
-    { dayOfWeek: ['Saturday', 'Sunday'], opens: '10:00', closes: '18:00' },
+    { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '10:00', closes: '22:00' },
   ],
 
   // Способы оплаты
@@ -81,9 +79,9 @@ export const companyLegalInfo = {
 
   // Социальные сети
   socialMedia: [
-    { name: 'VK', label: 'ВКонтакте', url: 'https://vk.com/vfddoors74', icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/vk_logo.svg' },
-    { name: 'Telegram', label: 'Telegram', url: 'https://t.me/vfddoors74', icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/tg_logo.svg' },
-    { name: 'MAX', label: 'Max', url: 'https://max.ru/id452402308842_biz', icon: 'https://storage.yandexcloud.net/catalog-vfd/svg/max-logo.svg' },
+    { name: 'VK', label: 'ВКонтакте', url: SITE.social.vk, icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/vk_logo.svg' },
+    { name: 'Telegram', label: 'Telegram', url: SITE.social.telegram, icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/tg_logo.svg' },
+    { name: 'MAX', label: 'Max', url: SITE.social.max, icon: 'https://storage.yandexcloud.net/catalog-vfd/svg/max-logo.svg' },
   ],
 
   // Дополнительная информация
@@ -110,14 +108,14 @@ export const merchantPolicy = {
     applicableCountry: 'RU',
     returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
   },
-  /** Доставка по Челябинску — фиксированная цена. За город — переменная
-      (1000 ₽ + 45 ₽/км), в structured data не выражается (там нужна
-      фиксированная цена/диапазон), поэтому в schema указан только
-      городской тариф; условия за город — текстом на странице/у менеджера. */
+  /** Доставка по городу — фиксированная цена (PLACEHOLDER: тариф
+      перенесён из челябинского салона, уточнить московский). В schema
+      указан только городской тариф; условия за город — текстом на
+      странице/у менеджера. */
   shipping: {
     '@type': 'OfferShippingDetails' as const,
     shippingRate: { '@type': 'MonetaryAmount' as const, value: 1000, currency: 'RUB' },
-    shippingDestination: { '@type': 'DefinedRegion' as const, addressCountry: 'RU', addressLocality: 'Челябинск' },
+    shippingDestination: { '@type': 'DefinedRegion' as const, addressCountry: 'RU', addressLocality: SITE.city.name },
     deliveryTime: {
       '@type': 'ShippingDeliveryTime' as const,
       handlingTime: { '@type': 'QuantitativeValue' as const, minValue: 0, maxValue: 1, unitCode: 'DAY' },

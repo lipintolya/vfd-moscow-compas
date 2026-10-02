@@ -1,5 +1,5 @@
 /**
- * src/pages/feed/yandex.xml.ts → https://vfd74.ru/feed/yandex.xml
+ * src/pages/feed/yandex.xml.ts → <SITE.url>/feed/yandex.xml
  *
  * Товарный фид (YML) для Яндекс Товаров / Вебмастера: двери каталога
  * показываются в поиске Яндекса карточками с фото и ценой. Собирается при
@@ -25,6 +25,7 @@ import { describeTrim } from '../../lib/trim-labels'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { getSeriesSpec } from '../../data/series-descriptions'
 import { BRAND, coatingInline, productName, productDescription } from '../../lib/product-text'
+import { SITE } from '../../config/site'
 
 const ROOT_CATEGORY_ID = 1
 const ROOT_CATEGORY_NAME = 'Межкомнатные двери'
@@ -96,7 +97,7 @@ function offerXml(e: ModelEntry, site: URL): string {
 }
 
 export const GET: APIRoute = async ({ site }) => {
-  const base    = site ?? new URL('https://vfd74.ru')
+  const base    = site ?? new URL(SITE.url)
   const entries = await getModelEntries()
 
   /* Пустой фид Яндекс воспримет как «все товары сняты с продажи» — при сбое

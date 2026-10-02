@@ -9,10 +9,6 @@ export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero
     card: [{ src: '/renders/articles/covers/alyuminievye-peregorodki-zonirovanie-card-480.webp', w: 480 }, { src: '/renders/articles/covers/alyuminievye-peregorodki-zonirovanie-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/alyuminievye-peregorodki-zonirovanie-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/alyuminievye-peregorodki-zonirovanie-hero-1600.webp', w: 1600 }],
   },
-  '/renders/articles/artdom/cover.webp': {
-    card: [{ src: '/renders/articles/covers/artdom-2026-tkanevye-peregorodki-vfd-card-480.webp', w: 480 }, { src: '/renders/articles/covers/artdom-2026-tkanevye-peregorodki-vfd-card-800.webp', w: 800 }],
-    hero: [{ src: '/renders/articles/covers/artdom-2026-tkanevye-peregorodki-vfd-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/artdom-2026-tkanevye-peregorodki-vfd-hero-1600.webp', w: 1600 }],
-  },
   'https://storage.yandexcloud.net/vfd74ru/statya/white_doors_statya.webp': {
     card: [{ src: '/renders/articles/covers/belye-dveri-pachkayutsya-card-480.webp', w: 480 }, { src: '/renders/articles/covers/belye-dveri-pachkayutsya-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/belye-dveri-pachkayutsya-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/belye-dveri-pachkayutsya-hero-1600.webp', w: 1600 }],
@@ -47,16 +43,6 @@ export const ARTICLE_IMAGE_VARIANTS: Record<string, ImageVariant[]> = {
     [{ src: '/renders/articles/images/3-05793b-640.webp', w: 640 }, { src: '/renders/articles/images/3-05793b-960.webp', w: 960 }, { src: '/renders/articles/images/3-05793b-1280.webp', w: 1280 }, { src: '/renders/articles/images/3-05793b-1600.webp', w: 1600 }],
   '/renders/articles/alum-zonirovanie-studio.webp':
     [{ src: '/renders/articles/images/alum-zonirovanie-studio-f48776-640.webp', w: 640 }, { src: '/renders/articles/images/alum-zonirovanie-studio-f48776-960.webp', w: 960 }, { src: '/renders/articles/images/alum-zonirovanie-studio-f48776-1280.webp', w: 1280 }],
-  '/renders/articles/artdom/artdom-1.webp':
-    [{ src: '/renders/articles/images/artdom-1-c28801-640.webp', w: 640 }, { src: '/renders/articles/images/artdom-1-c28801-960.webp', w: 960 }],
-  '/renders/articles/artdom/artdom-2.webp':
-    [{ src: '/renders/articles/images/artdom-2-8071ce-640.webp', w: 640 }, { src: '/renders/articles/images/artdom-2-8071ce-960.webp', w: 960 }],
-  '/renders/articles/artdom/artdom-3.webp':
-    [{ src: '/renders/articles/images/artdom-3-72d714-640.webp', w: 640 }],
-  '/renders/articles/artdom/artdom-4.webp':
-    [{ src: '/renders/articles/images/artdom-4-116f07-640.webp', w: 640 }],
-  '/renders/articles/artdom/artdom-5.webp':
-    [{ src: '/renders/articles/images/artdom-5-474f0c-640.webp', w: 640 }, { src: '/renders/articles/images/artdom-5-474f0c-960.webp', w: 960 }],
   '/renders/hidden-doors/sekret-900.webp':
     [{ src: '/renders/articles/images/sekret-900-e26be8-640.webp', w: 640 }],
   'https://storage.yandexcloud.net/catalog-vfd/alum_info/glass_type/14.webp':

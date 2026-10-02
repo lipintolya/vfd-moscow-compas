@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { companyLegalInfo } from '../../lib/contacts-data'
+import { PHONE, SITE } from '../../config/site'
 
 /* ============================================================
    Data
@@ -13,13 +14,12 @@ const NAV_LINKS = [
   { href: '/partitions/', label: 'Перегородки' },
   { href: '/designers/',  label: 'Дизайнерам' },
   { href: '/about/',      label: 'О нас' },
-  { href: '/reviews/',    label: 'Отзывы' },
+  ...(SITE.features.reviews ? [{ href: '/reviews/', label: 'Отзывы' }] : []),
   { href: '/contacts/',   label: 'Контакты' },
 ] as const
 
 const LEGAL_LINKS = [
   { href: '/promo-archive/', label: 'Архив акций' },
-  { href: '/dostavka-montazh-po-rayonam/', label: 'Доставка и монтаж по районам' },
 ] as const
 
 const CATEGORY_LINKS = [
@@ -235,7 +235,7 @@ onUnmounted(() => {
             <div class="flex gap-4 mt-5" role="list" aria-label="Социальные сети">
               <div role="listitem">
                 <a
-                  href="https://vk.com/vfddoors74"
+                  :href="SITE.social.vk"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="ВКонтакте (открывается в новой вкладке)"
@@ -246,7 +246,7 @@ onUnmounted(() => {
               </div>
               <div role="listitem">
                 <a
-                  href="https://t.me/vfddoors74"
+                  :href="SITE.social.telegram"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Telegram (открывается в новой вкладке)"
@@ -257,7 +257,7 @@ onUnmounted(() => {
               </div>
               <div role="listitem">
                 <a
-                  href="https://max.ru/id452402308842_biz"
+                  :href="SITE.social.max"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Max (открывается в новой вкладке)"
@@ -474,7 +474,7 @@ onUnmounted(() => {
                 Все изображения, тексты и дизайн сайта являются объектами авторского права VFD Кашириных.
                 Любое использование материалов возможно только с письменного разрешения правообладателя
                 и обязательным указанием источника:
-                <a href="https://vfd74.ru" class="text-teal-600 hover:underline">vfd74.ru</a>
+                <a :href="SITE.url" class="text-teal-600 hover:underline">{{ SITE.host }}</a>
               </p>
             </div>
 
@@ -491,9 +491,9 @@ onUnmounted(() => {
               <h4 class="text-sm font-medium text-gray-900 mb-2">Контакты</h4>
               <p class="text-gray-600 leading-relaxed">
                 г. Челябинск, ул. Братьев Кашириных, 131Б<br />
-                Телефон: <a href="tel:+79000297888" class="text-teal-600 hover:underline">+7 (900) 029-78-88</a><br />
-                Email: <a href="mailto:vfddoors74@mail.ru" class="text-teal-600 hover:underline">vfddoors74@mail.ru</a><br />
-                Сайт: <a href="https://vfd74.ru" class="text-teal-600 hover:underline">vfd74.ru</a>
+                Телефон: <a :href="`tel:${PHONE.raw}`" class="text-teal-600 hover:underline">{{ PHONE.label }}</a><br />
+                Email: <a :href="`mailto:${SITE.email}`" class="text-teal-600 hover:underline">{{ SITE.email }}</a><br />
+                Сайт: <a :href="SITE.url" class="text-teal-600 hover:underline">{{ SITE.host }}</a>
               </p>
             </div>
 

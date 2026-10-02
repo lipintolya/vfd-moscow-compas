@@ -3,6 +3,7 @@ import PhotoSlider from './PhotoSlider.astro'
 import FeatureList from './FeatureList.astro'
 import IconTelegram from '../ui/icons/IconTelegram.astro'
 import type { ProjectCase } from '../../data/partitions'
+import { SITE } from '../../config/site'
 
 interface Props {
   data:   ProjectCase
@@ -16,9 +17,9 @@ const badgeTone = {
 }
 
 const socials = [
-  { href: 'https://vk.com/vfddoors74',          icon: '/icons/w_vk.webp',      label: 'ВКонтакте' },
-  { href: 'https://t.me/vfddoors74',            icon: '/svg/w_tg_logo.svg', label: 'Telegram' },
-  { href: 'https://max.ru/id452402308842_biz',  icon: '/icons/w_max.webp',     label: 'Max' },
+  { href: SITE.social.vk,          icon: '/icons/w_vk.webp',      label: 'ВКонтакте' },
+  { href: SITE.social.telegram,            icon: '/svg/w_tg_logo.svg', label: 'Telegram' },
+  { href: SITE.social.max,  icon: '/icons/w_max.webp',     label: 'Max' },
 ]
 ---
 <section class="section bg-white">

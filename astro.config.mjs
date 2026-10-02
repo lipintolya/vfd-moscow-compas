@@ -90,7 +90,7 @@ async function fetchModelImages() {
     const slugMap = buildModelSlugMap([...modelMeta.values()])
     for (const [id, images] of byModelId) {
       const slug = slugMap.get(id)
-      if (slug) map.set(`https://vfd74.ru/models/${slug}/`, images)
+      if (slug) map.set(`${SITE_URL}/models/${slug}/`, images)
     }
   } catch {
     return new Map()
@@ -98,21 +98,21 @@ async function fetchModelImages() {
   return map
 }
 
+/* Домен сайта — дублирует SITE_URL из src/config/site.ts (конфиг Astro
+   намеренно не импортирует .ts, см. комментарий у slugify выше). При
+   смене домена поправить оба места и public/robots.txt. */
+const SITE_URL = 'https://domain-placeholder.example'
+
+/* Страницы вне сайтмапа: /privacy/ — служебная; /reviews/ и /portfolio/ —
+   пока пустые и закрыты noindex (SITE.features в src/config/site.ts).
+   Включили раздел там — уберите его отсюда. */
+const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/portfolio/']
+
 const modelImages = await fetchModelImages()
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://vfd74.ru',
-
-  /* Постоянные переадресации удалённых страниц (статическая сборка —
-     HTML с мгновенным meta refresh + canonical на новый адрес). */
-  redirects: {
-    /* «Урбан 1» с чёрной кромкой был разбит в Supabase на две записи по
-       цветам; бежевый перенесён в основную (98075687), лишняя запись
-       9afc9b75 удалена — её адреса ведут на основную страницу модели. */
-    '/models/urban-1-urban-9afc9b/':                 '/models/urban-1-urban-980756/',
-    '/models/9afc9b75-148e-4c78-8bdd-5beb62d54308/':  '/models/urban-1-urban-980756/',
-  },
+  site: SITE_URL,
 
   vite: {
     plugins: [tailwindcss()]
@@ -123,7 +123,7 @@ export default defineConfig({
     markdoc(),
     sitemap({
       filter: (page) =>
-        page !== 'https://vfd74.ru/privacy/' && page !== 'https://vfd74.ru/privacy' &&
+        !SITEMAP_EXCLUDE.some(path => page === `${SITE_URL}${path}` || page === `${SITE_URL}${path.slice(0, -1)}`) &&
         // Старые UUID-маршруты моделей остаются доступными (чтобы не 404'ить уже
         // проиндексированные ссылки), но в сайтмап должен попадать только
         // канонический слаг-адрес — иначе сайтмап задвоит каждую модель.
@@ -139,10 +139,10 @@ export default defineConfig({
         }
         const portfolioMatch = u.match(/\/portfolio\/([a-z0-9-]+)\/?$/)
         const portfolioImg = portfolioMatch
-          ? { img: [{ url: `https://vfd74.ru/renders/portfolio/${portfolioMatch[1]}.webp` }] }
+          ? { img: [{ url: `${SITE_URL}/renders/portfolio/${portfolioMatch[1]}.webp` }] }
           : {}
 
-        if (u === 'https://vfd74.ru/' || u === 'https://vfd74.ru') {
+        if (u === `${SITE_URL}/` || u === SITE_URL) {
           return { ...item, changefreq: 'weekly', priority: 1.0 }
         }
         if (/\/(catalog|about|contacts|partitions|vhodnye-dveri|designers)\/?$/.test(u)) {

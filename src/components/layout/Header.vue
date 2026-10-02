@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { companyLegalInfo } from '../../lib/contacts-data'
+import { SITE } from '../../config/site'
 
 /* ============================================================
    Constants
@@ -13,19 +14,19 @@ const SOCIAL_NETWORKS = [
   {
     name: 'VK',
     label: 'ВКонтакте',
-    url: 'https://vk.com/vfddoors74',
+    url: SITE.social.vk,
     icon: '/icons/b_vk_logo.webp',
   },
   {
     name: 'Telegram',
     label: 'Telegram',
-    url: 'https://t.me/vfddoors74',
+    url: SITE.social.telegram,
     icon: '/icons/b_tg_logo.webp',
   },
   {
     name: 'MAX',
     label: 'Max',
-    url: 'https://max.ru/id452402308842_biz',
+    url: SITE.social.max,
     icon: '/icons/b_max_logo.webp',
   },
 ] as const
