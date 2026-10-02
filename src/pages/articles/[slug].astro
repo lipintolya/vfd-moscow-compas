@@ -95,9 +95,9 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
         <!-- Breadcrumb -->
         <nav aria-label="Хлебные крошки" class="mb-6">
           <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
-            <li><a href="/" class="hover:text-accent-600 transition-colors">Главная</a></li>
+            <li><a href="/" class="hover:text-secondary-600 transition-colors">Главная</a></li>
             <li aria-hidden="true" class="text-slate-300">/</li>
-            <li><a href="/articles/" class="hover:text-accent-600 transition-colors">Статьи</a></li>
+            <li><a href="/articles/" class="hover:text-secondary-600 transition-colors">Статьи</a></li>
             <li aria-hidden="true" class="text-slate-300">/</li>
             <li class="font-medium text-slate-700 truncate max-w-52">{article.data.title}</li>
           </ol>
@@ -181,7 +181,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
           <div class="mt-10 pt-2">
             <a
               href="/articles/"
-              class="inline-flex items-center gap-2 text-sm font-semibold text-accent-600 hover:text-accent-700 transition-colors"
+              class="inline-flex items-center gap-2 text-sm font-semibold text-secondary-700 hover:text-secondary-600 transition-colors"
             >
               <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">
                 <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -243,12 +243,12 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
     color: var(--color-ink);
   }
   .article-body :global(a) {
-    color: var(--color-accent-hover);
+    color: var(--color-link);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
   .article-body :global(a:hover) {
-    color: var(--color-accent);
+    color: var(--color-link-hover);
   }
   .article-body :global(blockquote) {
     border-left: 3px solid var(--color-accent);

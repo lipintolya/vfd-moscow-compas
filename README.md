@@ -36,7 +36,7 @@
 | [`src/config/site.ts`](src/config/site.ts) | домен, название, город (падежи), адрес ТЦ и координаты, телефоны, email, соцсети, ID Метрики, флаги разделов `features` |
 | [`src/lib/contacts-data.ts`](src/lib/contacts-data.ts) | юрлицо, реквизиты, часы работы (собирается из `site.ts`) |
 | [`src/lib/local-business-schema.ts`](src/lib/local-business-schema.ts) | единый JSON-LD `Store` для всех страниц |
-| [`src/styles/global.css`](src/styles/global.css) | дизайн-токены `@theme` — палитра меняется здесь |
+| [`src/styles/global.css`](src/styles/global.css) | палитра бренда: `accent-*` красный `#FF0020`, `secondary-*` голубой `#1FA0D3`, `slate-*` графит; семантические токены (`ink`, `link`, `graphite`…) |
 | `astro.config.mjs` → `SITE_URL`, `public/robots.txt` | домен для sitemap/robots (дубль `site.ts`, Astro-конфиг не импортирует TS) |
 
 ## Что заменить до запуска

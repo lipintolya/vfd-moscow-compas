@@ -2,47 +2,63 @@
 
 /* ============================================================
    ПАЛИТРА БРЕНДА — единственное место, где живут цвета сайта.
-   Сменить цветовую гамму = поменять две шкалы ниже.
+   Фирменные цвета ВФД Москва: красный #FF0020, голубой #1FA0D3,
+   графит. Сменить гамму = поменять шкалы ниже.
 
-   accent-*  — фирменный акцент (кнопки, ссылки, бейджи, активные
-               состояния). Исходный сайт vfd74 — бирюза (teal); здесь
-               тёплая бронза. Утилиты: text-accent-600, bg-accent-50 …
-   slate-*   — нейтральная шкала (текст, фоны, границы, тени).
-               Переопределяет встроенную Tailwind slate: все slate-*
-               (и бывшие gray-*) утилиты сайта берут цвета отсюда.
-               Тёплый «stone»-подтон вместо холодного сине-серого.
+   accent-*     — КРАСНЫЙ, основной акцент (500 = #FF0020): кнопки и
+                  CTA, активные состояния, выделения в заголовках,
+                  бейджи «Новинка»/«Акция», иконки.
+   secondary-*  — ГОЛУБОЙ, второй акцент (500 = #1FA0D3): текстовые
+                  ссылки, фокус, бейджи «В наличии», инфо-плашки.
+   slate-*      — ГРАФИТ, нейтральная шкала (текст, фоны, границы,
+                  тени, тёмные секции). Переопределяет встроенную
+                  Tailwind slate: все slate-* утилиты сайта — отсюда.
 
    В компонентах/scoped CSS — только var(--color-accent-500),
    var(--color-slate-200) и т.п., никаких hex.
    static — переменные выводятся всегда, даже если на них ссылаются
    только из scoped-стилей Vue/Astro (сканер Tailwind их не видит).
-   Контраст (WCAG, на белом): accent-600 = 5.4, accent-700 = 7.5,
-   slate-500 = 4.8 — текст не светлее этих ступеней.
+
+   Контраст на белом (WCAG): accent-500 = 4.0 (крупный/жирный текст,
+   плашки), accent-600 = 5.0, secondary-500 = 3.0 (только плашки и
+   иконки, не текст), secondary-700 = 6.1 (ссылки), slate-500 = 5.0.
    ============================================================ */
 @theme static {
-  --color-accent-50:  #faf6f0;
-  --color-accent-100: #f3e9da;
-  --color-accent-200: #e6d0b0;
-  --color-accent-300: #d5b182;
-  --color-accent-400: #c19259;
-  --color-accent-500: #a8773f;
-  --color-accent-600: #8d6132;
-  --color-accent-700: #714d2b;
-  --color-accent-800: #5c4027;
-  --color-accent-900: #4c3624;
-  --color-accent-950: #2a1c11;
+  --color-accent-50:  #fff1f2;
+  --color-accent-100: #ffe0e3;
+  --color-accent-200: #ffc6cc;
+  --color-accent-300: #ff9ba6;
+  --color-accent-400: #ff5f72;
+  --color-accent-500: #ff0020;
+  --color-accent-600: #e0001c;
+  --color-accent-700: #bc0018;
+  --color-accent-800: #9b0717;
+  --color-accent-900: #800d19;
+  --color-accent-950: #47000a;
 
-  --color-slate-50:  #fafaf9;
-  --color-slate-100: #f4f3f1;
-  --color-slate-200: #e7e5e2;
-  --color-slate-300: #d6d3cf;
-  --color-slate-400: #a8a29d;
-  --color-slate-500: #78716b;
-  --color-slate-600: #57524d;
-  --color-slate-700: #433e3a;
-  --color-slate-800: #2a2623;
-  --color-slate-900: #1c1917;
-  --color-slate-950: #0f0d0c;
+  --color-secondary-50:  #eff9fd;
+  --color-secondary-100: #dcf1fa;
+  --color-secondary-200: #b4e3f5;
+  --color-secondary-300: #7dceed;
+  --color-secondary-400: #3fb5e1;
+  --color-secondary-500: #1fa0d3;
+  --color-secondary-600: #1482b3;
+  --color-secondary-700: #126892;
+  --color-secondary-800: #145878;
+  --color-secondary-900: #164a64;
+  --color-secondary-950: #0e3043;
+
+  --color-slate-50:  #f7f7f8;
+  --color-slate-100: #efeff1;
+  --color-slate-200: #e0e0e3;
+  --color-slate-300: #c8c8cd;
+  --color-slate-400: #9c9ca4;
+  --color-slate-500: #6f6f78;
+  --color-slate-600: #56565e;
+  --color-slate-700: #44444b;
+  --color-slate-800: #2d2d32;
+  --color-slate-900: #1f1f23;
+  --color-slate-950: #131316;
 }
 
 /* ============================================================
@@ -52,9 +68,12 @@
 @theme {
   --color-ink:           var(--color-slate-900);  /* заголовки, тёмные плашки */
   --color-body:          var(--color-slate-700);  /* основной текст */
-  --color-accent:        var(--color-accent-500); /* акцент */
+  --color-accent:        var(--color-accent-500); /* красный акцент */
   --color-accent-hover:  var(--color-accent-600); /* hover акцента */
-  --color-accent-light:  var(--color-accent-100); /* лёгкий фон акцента */
+  --color-accent-light:  var(--color-accent-50);  /* лёгкий фон акцента */
+  --color-secondary:     var(--color-secondary-500); /* голубой акцент */
+  --color-link:          var(--color-secondary-700); /* текстовые ссылки */
+  --color-link-hover:    var(--color-secondary-600);
   --color-fg:            var(--color-slate-900);  /* почти чёрный — иконки, тёмные кнопки */
   --color-graphite:      var(--color-slate-900);  /* тёмные «бенто»-карточки и тёмные
      секции (hero, Features, Reviews, ContactsSection, ProcessSteps,
@@ -402,7 +421,7 @@ astro-island:has(> .section) + .section,
 }
 /* Контур только при фокусе с клавиатуры, не анимируем */
 .btn:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-secondary);
   outline-offset: 3px;
 }
 /* Убираем контур при фокусе от мыши */
@@ -452,7 +471,7 @@ astro-island:has(> .section) + .section,
   color: #fff;
 }
 .btn-teal-fill:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-secondary);
   outline-offset: 3px;
 }
 
@@ -474,7 +493,7 @@ astro-island:has(> .section) + .section,
   transform: translateY(-1px);
 }
 .btn-accent:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-secondary);
   outline-offset: 3px;
 }
 
@@ -529,7 +548,7 @@ astro-island:has(> .section) + .section,
 
 /* ── Focus ring ── */
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-secondary);
   outline-offset: 3px;
 }
 
@@ -690,8 +709,8 @@ astro-island:has(> .section) + .section,
   transition: color var(--duration-base) var(--ease-out);
 }
 .breadcrumbs__link:hover {
-  color: var(--color-accent-hover);
-  background: color-mix(in srgb, var(--color-accent-500) 8%, transparent);
+  color: var(--color-link);
+  background: color-mix(in srgb, var(--color-secondary-500) 8%, transparent);
 }
 .breadcrumbs__current {
   color: var(--color-slate-600);

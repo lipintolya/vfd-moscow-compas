@@ -156,7 +156,7 @@ const shareModel = async () => {
         </svg>
       </div>
 
-      <span v-if="inStock" class="color-picker__order-badge bg-accent-600 text-white">В наличии</span>
+      <span v-if="inStock" class="color-picker__order-badge bg-secondary-600 text-white">В наличии</span>
       <span v-else-if="madeToOrder" class="color-picker__order-badge bg-fg text-white">Под заказ</span>
     </div>
 
@@ -485,7 +485,7 @@ const shareModel = async () => {
 }
 
 .color-picker__swatch:focus-visible {
-  outline: 2px solid var(--color-accent-500);
+  outline: 2px solid var(--color-secondary);
   outline-offset: 3px;
 }
 

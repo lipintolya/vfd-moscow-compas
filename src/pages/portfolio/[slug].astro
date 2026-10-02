@@ -82,9 +82,9 @@ const breadcrumbSchema = {
       <!-- Breadcrumb -->
       <nav aria-label="Хлебные крошки" class="mb-6">
         <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
-          <li><a href="/" class="hover:text-accent-600 transition-colors">Главная</a></li>
+          <li><a href="/" class="hover:text-secondary-600 transition-colors">Главная</a></li>
           <li aria-hidden="true" class="text-slate-300">/</li>
-          <li><a href="/portfolio/" class="hover:text-accent-600 transition-colors">Наши работы</a></li>
+          <li><a href="/portfolio/" class="hover:text-secondary-600 transition-colors">Наши работы</a></li>
           <li aria-hidden="true" class="text-slate-300">/</li>
           <li class="text-slate-700 font-medium truncate max-w-64">{work.title}</li>
         </ol>
@@ -146,7 +146,7 @@ const breadcrumbSchema = {
           {work.relatedLink && (
             <a
               href={work.relatedLink.href}
-              class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800"
+              class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-secondary-700 hover:text-secondary-600"
             >
               {work.relatedLink.label}
               <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -204,7 +204,7 @@ const breadcrumbSchema = {
 
         <!-- Back link -->
         <div class="mt-8">
-          <a href="/portfolio/" class="inline-flex items-center gap-2 text-sm font-semibold text-accent-600 hover:text-accent-700 transition-colors">
+          <a href="/portfolio/" class="inline-flex items-center gap-2 text-sm font-semibold text-secondary-700 hover:text-secondary-600 transition-colors">
             <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">
               <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>

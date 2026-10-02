@@ -206,7 +206,7 @@ watch(
         <span class="relative inline-flex min-w-62">
           <select
             v-model="sortBy"
-            class="min-h-11.5 w-full appearance-none rounded-full border-2 border-slate-200 bg-white py-0 pl-4 pr-10 text-step-1 font-semibold text-ink focus:border-accent-500 focus:outline-none focus:ring-4 focus:ring-accent-500/15"
+            class="min-h-11.5 w-full appearance-none rounded-full border-2 border-slate-200 bg-white py-0 pl-4 pr-10 text-step-1 font-semibold text-ink focus:border-accent-500 focus:outline-none focus:ring-4 focus:ring-secondary-500/15"
           >
             <option value="popular">Популярные</option>
             <option value="price_asc">Цена: по возрастанию</option>

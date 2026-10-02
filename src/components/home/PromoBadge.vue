@@ -6,7 +6,8 @@
  * (серый, того же веса, что и остальные надзаголовки секций сайта) и
  * терялся на белом фоне. Теперь — плашка с цветным фоном, крупнее и
  * заметнее, тот же принцип, что у бейджей на карточках каталога
- * (CatalogProductCard.vue): красный для новинок, синий для наличия.
+ * (CatalogProductCard.vue): фирменный красный (accent) для новинок,
+ * фирменный голубой (secondary) для наличия.
  */
 withDefaults(defineProps<{
   tone?: 'new' | 'stock'
@@ -16,7 +17,7 @@ withDefaults(defineProps<{
 <template>
   <p
     class="mb-3 inline-flex w-fit items-center rounded-full px-3 py-1 text-sm font-semibold tracking-wide sm:text-[0.9375rem]"
-    :class="tone === 'stock' ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-600'"
+    :class="tone === 'stock' ? 'bg-secondary-50 text-secondary-700' : 'bg-accent-50 text-accent-600'"
   >
     <slot />
   </p>

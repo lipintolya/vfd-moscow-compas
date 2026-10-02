@@ -527,7 +527,7 @@ onUnmounted(() => {
                       <p class="text-[0.6875rem] font-semibold text-slate-400 uppercase tracking-[0.14em] mb-1.5">Email</p>
                       <a
                         :href="`mailto:${CONTACTS.email}`"
-                        class="font-medium text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-accent-600 hover:decoration-accent-400 transition-colors duration-200"
+                        class="font-medium text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-secondary-600 hover:decoration-secondary-700 transition-colors duration-200"
                       >
                         {{ CONTACTS.email }}
                       </a>

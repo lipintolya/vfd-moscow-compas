@@ -312,7 +312,7 @@ onUnmounted(() => {
               <li v-for="p in CONTACTS.phones" :key="p.raw">
                 <a
                   :href="`tel:${p.raw}`"
-                  class="text-white hover:text-accent-400 transition-colors duration-200 font-medium"
+                  class="text-white hover:text-secondary-600 transition-colors duration-200 font-medium"
                 >
                   {{ p.label }}
                 </a>
@@ -345,7 +345,7 @@ onUnmounted(() => {
               :href="MAP_LINK"
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent-400 hover:text-accent-300 transition-colors duration-200"
+              class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent-400 hover:text-secondary-600 transition-colors duration-200"
             >
               Построить маршрут
               <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -474,7 +474,7 @@ onUnmounted(() => {
                 Все изображения, тексты и дизайн сайта являются объектами авторского права правообладателя.
                 Любое использование материалов возможно только с письменного разрешения правообладателя
                 и обязательным указанием источника:
-                <a :href="SITE.url" class="text-accent-600 hover:underline">{{ SITE.host }}</a>
+                <a :href="SITE.url" class="text-secondary-700 hover:underline">{{ SITE.host }}</a>
               </p>
             </div>
 
@@ -491,9 +491,9 @@ onUnmounted(() => {
               <h4 class="text-sm font-medium text-slate-900 mb-2">Контакты</h4>
               <p class="text-slate-600 leading-relaxed">
                 г. Москва, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж<br />
-                Телефон: <a :href="`tel:${PHONE.raw}`" class="text-accent-600 hover:underline">{{ PHONE.label }}</a><br />
-                Email: <a :href="`mailto:${SITE.email}`" class="text-accent-600 hover:underline">{{ SITE.email }}</a><br />
-                Сайт: <a :href="SITE.url" class="text-accent-600 hover:underline">{{ SITE.host }}</a>
+                Телефон: <a :href="`tel:${PHONE.raw}`" class="text-secondary-700 hover:underline">{{ PHONE.label }}</a><br />
+                Email: <a :href="`mailto:${SITE.email}`" class="text-secondary-700 hover:underline">{{ SITE.email }}</a><br />
+                Сайт: <a :href="SITE.url" class="text-secondary-700 hover:underline">{{ SITE.host }}</a>
               </p>
             </div>
 

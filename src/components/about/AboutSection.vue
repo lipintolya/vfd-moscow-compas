@@ -98,7 +98,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 
             <p class="m-0 mb-4 t-lead text-slate-600">
               Мы работаем напрямую с
-              <a href="/o-fabrike/" class="text-accent-700 underline decoration-accent-700/30 underline-offset-4 hover:decoration-accent-700">Владимирской фабрикой дверей</a>
+              <a href="/o-fabrike/" class="text-secondary-700 underline decoration-secondary-700/30 underline-offset-4 hover:decoration-secondary-700">Владимирской фабрикой дверей</a>
               и собираем в одном салоне всё для интерьера: межкомнатные, скрытые и входные двери,
               алюминиевые перегородки, погонаж и фурнитуру.
             </p>

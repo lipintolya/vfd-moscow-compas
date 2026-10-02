@@ -102,7 +102,7 @@ const seriesBadgeClass = computed(() => {
   const slug = props.card.seriesSlug
   if (props.card.coatingSlug === 'protach') return 'bg-violet-500 text-white'
   if (RED_SERIES.has(slug))  return 'bg-rose-500 text-white'
-  if (BLUE_SERIES.has(slug)) return 'bg-blue-500 text-white'
+  if (BLUE_SERIES.has(slug)) return 'bg-secondary-600 text-white'
   return 'bg-slate-700 text-white'
 })
 
@@ -151,13 +151,13 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
         <span class="max-w-full truncate rounded-r-full px-2.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-wide" :class="seriesBadgeClass">{{ card.series }}</span>
         <span
           v-if="card.isNew"
-          class="max-w-full truncate rounded-r-full bg-red-600 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
+          class="max-w-full truncate rounded-r-full bg-accent-500 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
         >
           Новинка
         </span>
         <span
           v-else-if="card.isPopular"
-          class="max-w-full truncate rounded-r-full bg-accent-600 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
+          class="max-w-full truncate rounded-r-full bg-slate-900 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
         >
           Выбор клиентов
         </span>
@@ -165,7 +165,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
 
       <span
         v-if="inStock"
-        class="absolute right-0 bottom-3 max-w-[85%] truncate rounded-l-full bg-accent-600 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white shadow-sm"
+        class="absolute right-0 bottom-3 max-w-[85%] truncate rounded-l-full bg-secondary-600 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white shadow-sm"
       >
         В наличии
       </span>
@@ -192,7 +192,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
           type="button"
           class="h-6 w-6 shrink-0 rounded-full transition-transform active:scale-90 lg:h-5.5 lg:w-5.5"
           :class="[
-            idx === activeSwatchIdx ? 'ring-2 ring-offset-1 ring-accent-600' : '',
+            idx === activeSwatchIdx ? 'ring-2 ring-offset-1 ring-secondary-600' : '',
             swatch.available === false
               ? 'border-2 border-dashed border-black/30'
               : 'border border-black/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.55)]',

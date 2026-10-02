@@ -147,7 +147,7 @@ function toggleExpanded(id: string) {
 
               <button
                 type="button"
-                class="inline-flex w-fit items-center gap-1 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-2"
+                class="inline-flex w-fit items-center gap-1 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-secondary-500 focus-visible:outline-offset-2"
                 :aria-expanded="expandedIds.has(promo.id)"
                 @click="toggleExpanded(promo.id)"
               >
@@ -175,7 +175,7 @@ function toggleExpanded(id: string) {
                 <a
                   v-if="promo.ctaText"
                   :href="promo.ctaLink || '#'"
-                  class="inline-flex items-center gap-1 text-sm font-semibold text-accent-600 transition-transform hover:translate-x-0.5 focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-2"
+                  class="inline-flex items-center gap-1 text-sm font-semibold text-secondary-700 transition-transform hover:translate-x-0.5 focus-visible:outline-2 focus-visible:outline-secondary-500 focus-visible:outline-offset-2"
                 >
                   {{ promo.ctaText }}
                   <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -193,7 +193,7 @@ function toggleExpanded(id: string) {
       <div v-if="activePromos.length > 3" class="mt-8 text-center">
         <a
           href="/akcii/"
-          class="inline-flex items-center gap-1 text-sm font-semibold text-accent-600 hover:text-accent-700"
+          class="inline-flex items-center gap-1 text-sm font-semibold text-secondary-700 hover:text-secondary-600"
         >
           Все акции
           <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">

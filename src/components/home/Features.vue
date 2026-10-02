@@ -327,7 +327,7 @@ onBeforeUnmount(stopCycle)
 
               <a
                 :href="feature.cta.href"
-                class="group/link inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-400 transition-colors hover:text-accent-300"
+                class="group/link inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-400 transition-colors hover:text-secondary-600"
                 :target="feature.cta.external ? '_blank' : undefined"
                 :rel="feature.cta.external ? 'noopener noreferrer' : undefined"
                 :aria-label="feature.cta.external

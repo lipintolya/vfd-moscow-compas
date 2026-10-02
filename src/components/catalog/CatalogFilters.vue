@@ -77,7 +77,7 @@ const resetAll = () => {
         inputmode="search"
         autocomplete="off"
         placeholder="Поиск"
-        class="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-step-0 text-ink placeholder:text-slate-400 focus:border-accent-500 focus:outline-none focus:ring-4 focus:ring-accent-500/15"
+        class="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-step-0 text-ink placeholder:text-slate-400 focus:border-accent-500 focus:outline-none focus:ring-4 focus:ring-secondary-500/15"
       />
     </label>
 

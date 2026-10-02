@@ -4,7 +4,7 @@
   "description": "Салон дверей Владимирской фабрики дверей в ТЦ «Компас», Москва",
   "start_url": "/",
   "display": "browser",
-  "theme_color": "#212124",
+  "theme_color": "#1f1f23",
   "background_color": "#ffffff",
   "icons": [
     { "src": "/favicons/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
