@@ -7,7 +7,7 @@ interface Props {
 const { type = 'tip', title } = Astro.props
 
 const config = {
-  tip:     { bg: 'bg-teal-50',   border: 'border-teal-400',  icon: '💡', defaultTitle: 'Совет' },
+  tip:     { bg: 'bg-accent-50',   border: 'border-accent-400',  icon: '💡', defaultTitle: 'Совет' },
   info:    { bg: 'bg-slate-50',  border: 'border-slate-300', icon: 'ℹ️', defaultTitle: 'Важно' },
   warning: { bg: 'bg-amber-50',  border: 'border-amber-400', icon: '⚠️', defaultTitle: 'Обратите внимание' },
 }[type]

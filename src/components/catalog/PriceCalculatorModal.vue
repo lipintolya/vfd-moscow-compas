@@ -411,27 +411,27 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
+  background: var(--color-slate-100);
   border: none;
   border-radius: 50%;
-  color: #334155;
+  color: var(--color-slate-700);
   cursor: pointer;
   transition: background 150ms ease;
 }
-.calc-close:hover { background: #e2e8f0; }
+.calc-close:hover { background: var(--color-slate-200); }
 .calc-close svg { width: 1.25rem; height: 1.25rem; }
 
 .calc-title {
   margin: 0 0 0.25rem;
   font-size: 1.375rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   padding-right: 2.5rem;
 }
 .calc-subtitle {
   margin: 0 0 1.25rem;
   font-size: 0.9375rem;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 .calc-body {
@@ -457,7 +457,7 @@ onUnmounted(() => {
   padding: 0.5rem 0;
   cursor: pointer;
   font-size: 0.9375rem;
-  color: #1e293b;
+  color: var(--color-slate-800);
 }
 .calc-row--wrap { flex-wrap: wrap; }
 .calc-row--radio { padding: 0.375rem 0; }
@@ -471,34 +471,34 @@ onUnmounted(() => {
 .calc-row__control input[type='radio'] {
   width: 1.125rem;
   height: 1.125rem;
-  accent-color: #0d9488;
+  accent-color: var(--color-accent-600);
   flex-shrink: 0;
 }
 .calc-row__price {
   flex-shrink: 0;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
   white-space: nowrap;
 }
 
 .calc-select {
   padding: 0.25rem 0.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  color: #1e293b;
+  color: var(--color-slate-800);
 }
 
 .calc-hint {
   margin: -0.125rem 0 0.375rem;
   font-size: 0.75rem;
   line-height: 1.5;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 
 .calc-divider {
   height: 1px;
-  background: #f1f5f9;
+  background: var(--color-slate-100);
   margin: 0.25rem 0;
 }
 
@@ -514,14 +514,14 @@ onUnmounted(() => {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 
 .calc-summary {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  background: #f8fafc;
+  background: var(--color-slate-50);
   border-radius: 1rem;
   padding: 1.25rem;
   align-self: start;
@@ -544,7 +544,7 @@ onUnmounted(() => {
   align-items: baseline;
   gap: 0.75rem;
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 .calc-summary__line-label {
   min-width: 0;
@@ -559,27 +559,27 @@ onUnmounted(() => {
   align-items: baseline;
   gap: 0.75rem;
   padding-top: 0.625rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-slate-200);
   font-size: 1.375rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
 }
 .calc-summary__note {
   margin: 0;
   font-size: 0.75rem;
   line-height: 1.5;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 
 .calc-send {
   padding-top: 0.75rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-slate-200);
 }
 .calc-send__label {
   margin: 0 0 0.625rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
 }
 .calc-send__row {
   display: flex;
@@ -594,15 +594,15 @@ onUnmounted(() => {
   gap: 0.5rem;
   height: 3rem;
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 0.75rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-slate-800);
   transition: border-color 150ms ease, transform 150ms ease;
 }
 .calc-send__btn:hover {
-  border-color: #99f6e4;
+  border-color: var(--color-accent-200);
   transform: translateY(-1px);
 }
 .calc-send__btn img { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
@@ -610,10 +610,10 @@ onUnmounted(() => {
   margin: 0.625rem 0 0;
   font-size: 0.75rem;
   line-height: 1.4;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 .calc-send__hint--copied {
-  color: #0d9488;
+  color: var(--color-accent-600);
   font-weight: 600;
 }
 
@@ -633,12 +633,12 @@ onUnmounted(() => {
   border: none;
   border-radius: 9999px;
   background: transparent;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   flex-shrink: 0;
   transition: color 150ms ease, background-color 150ms ease;
 }
-.calc-hw-view:hover { color: #0d9488; background: #f0fdfa; }
+.calc-hw-view:hover { color: var(--color-accent-600); background: var(--color-accent-50); }
 .calc-hw-view svg { width: 1rem; height: 1rem; }
 
 /* ── Модалка "фото + схема" для петель/замка/WC — z-index выше
@@ -685,7 +685,7 @@ onUnmounted(() => {
   margin: 0 0 1rem;
   font-size: 1.0625rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
   padding-right: 2rem;
 }
 .hw-panel__images {
@@ -706,8 +706,8 @@ onUnmounted(() => {
   width: 100%;
   max-height: 22rem;
   object-fit: contain;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
+  background: var(--color-slate-50);
+  border: 1px solid var(--color-slate-100);
   border-radius: 0.75rem;
 }
 .hw-figure figcaption {
@@ -715,7 +715,7 @@ onUnmounted(() => {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--color-slate-400);
   text-align: center;
 }
 

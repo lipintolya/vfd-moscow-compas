@@ -51,6 +51,7 @@ const structuredData = canonicalUrl ? [
 ---
 
 <BaseLayout
+  noIndex={INVISIBLE_WORKS.length === 0}
   title="Наши работы — скрытые двери в Москве, фото объектов | ВФД"
   description={`Реальные объекты монтажа скрытых дверей «Секрет» и «Секрет Реверс» в Москве и Московской области — ${INVISIBLE_WORKS.length} ${pluralWorks(INVISIBLE_WORKS.length)} с фото и спецификацией. Бесплатный замер по Москве при заказе.`}
   ogImage={IMAGES.invisible}
@@ -81,13 +82,13 @@ const structuredData = canonicalUrl ? [
   margin: 0 0 1.5rem;
   font-size: clamp(1.625rem, 3vw, 2.125rem);
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
 .sd-p {
   margin: 0 0 1rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
   line-height: 1.75;
 }

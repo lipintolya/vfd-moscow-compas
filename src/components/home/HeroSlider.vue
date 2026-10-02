@@ -1,4 +1,13 @@
 <script setup lang="ts">
+import { SITE } from '../../config/site'
+
+/* Малая бенто-карточка hero: портфолио, когда оно наполнено
+   (SITE.features.portfolio), иначе — скрытые двери. */
+const secondaryCard = SITE.features.portfolio
+  ? { eyebrow: 'Портфолио', title: 'Фотоотчёты с объектов', short: 'Живые фото с объектов',
+      text: 'Живые фото с монтажей — помогут определиться с выбором', href: '/portfolio/' }
+  : { eyebrow: 'Скрытые двери', title: 'Двери заподлицо со стеной', short: 'Серии «Секрет» и «Секрет Реверс»',
+      text: 'Серии «Секрет» и «Секрет Реверс» — под покраску и в отделке', href: '/catalog/skrytye-dveri/' }
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { HERO_COVER_IMAGE, HERO_COVER_IMAGE_SRCSET } from '../../data/hero-image'
 
@@ -209,10 +218,10 @@ onUnmounted(stop)
                 <a
                   v-if="currentSlide.cta && currentSlide.ctaHref"
                   :href="currentSlide.ctaHref"
-                  class="group/link inline-flex w-fit items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_rgba(15,23,42,0.2)] transition-transform duration-200 ease-out hover:-translate-y-px"
+                  class="group/link inline-flex w-fit items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_color-mix(in_srgb,var(--color-slate-900)_20%,transparent)] transition-transform duration-200 ease-out hover:-translate-y-px"
                 >
                   {{ currentSlide.cta }}
-                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-teal-500 group-hover/link:text-white">
+                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-accent-500 group-hover/link:text-white">
                     <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                       <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -279,9 +288,9 @@ onUnmounted(stop)
               <p class="text-sm text-white/80 mb-4">
                 Изготовление в течение 45 дней после оформления заказа
               </p>
-              <a href="/partitions/" class="group/link inline-flex w-fit items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_rgba(15,23,42,0.2)] transition-transform duration-200 ease-out hover:-translate-y-px">
+              <a href="/partitions/" class="group/link inline-flex w-fit items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_color-mix(in_srgb,var(--color-slate-900)_20%,transparent)] transition-transform duration-200 ease-out hover:-translate-y-px">
                 Узнать больше
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-teal-500 group-hover/link:text-white">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-accent-500 group-hover/link:text-white">
                   <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -316,16 +325,16 @@ onUnmounted(stop)
               <div class="absolute inset-0 bg-linear-to-t from-black/75 via-black/40 to-black/10" aria-hidden="true" />
               <div class="relative z-10 h-full p-4 sm:p-6 flex flex-col justify-end text-white">
                 <div class="min-h-18 sm:min-h-21">
-                  <p class="text-xs uppercase tracking-widest text-white/60 mb-1">Портфолио</p>
-                  <h4 class="font-medium text-sm sm:text-base leading-snug mb-1 line-clamp-2">Фотоотчёты с объектов</h4>
+                  <p class="text-xs uppercase tracking-widest text-white/60 mb-1">{{ secondaryCard.eyebrow }}</p>
+                  <h4 class="font-medium text-sm sm:text-base leading-snug mb-1 line-clamp-2">{{ secondaryCard.title }}</h4>
                   <p class="text-sm text-white/75 line-clamp-2">
-                    <span class="sm:hidden">Живые фото с объектов</span>
-                    <span class="hidden sm:inline">Живые фото с монтажей — помогут определиться с выбором</span>
+                    <span class="sm:hidden">{{ secondaryCard.short }}</span>
+                    <span class="hidden sm:inline">{{ secondaryCard.text }}</span>
                   </p>
                 </div>
-                <a href="/portfolio/" class="group/link mt-4 inline-flex w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_rgba(15,23,42,0.2)] transition-transform duration-200 ease-out hover:-translate-y-px">
+                <a :href="secondaryCard.href" class="group/link mt-4 inline-flex w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_color-mix(in_srgb,var(--color-slate-900)_20%,transparent)] transition-transform duration-200 ease-out hover:-translate-y-px">
                   Смотреть
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-teal-500 group-hover/link:text-white">
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-accent-500 group-hover/link:text-white">
                     <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                       <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
@@ -343,9 +352,9 @@ onUnmounted(stop)
                   <h4 class="font-medium text-sm sm:text-base mb-1 leading-snug line-clamp-2">Полный цикл: от замера до монтажа</h4>
                   <p class="text-sm text-white/75 line-clamp-2">ТЦ «Компас», 3 этаж</p>
                 </div>
-                <a href="/about/" class="group/link mt-4 inline-flex w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_rgba(15,23,42,0.2)] transition-transform duration-200 ease-out hover:-translate-y-px">
+                <a href="/about/" class="group/link mt-4 inline-flex w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_color-mix(in_srgb,var(--color-slate-900)_20%,transparent)] transition-transform duration-200 ease-out hover:-translate-y-px">
                   Подробнее
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-teal-500 group-hover/link:text-white">
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-accent-500 group-hover/link:text-white">
                     <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                       <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>

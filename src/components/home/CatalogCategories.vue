@@ -74,12 +74,12 @@ const { sectionRef, visible } = useScrollReveal(0.15)
 
         <!-- Hero card -->
         <article
-          class="rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_12px_32px_-8px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/5 transition-[opacity,transform,box-shadow] duration-600 ease-out hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_20px_44px_-10px_rgba(15,23,42,0.24)] motion-reduce:transition-none"
+          class="rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_6%,transparent),0_12px_32px_-8px_color-mix(in_srgb,var(--color-slate-900)_16%,transparent)] ring-1 ring-slate-900/5 transition-[opacity,transform,box-shadow] duration-600 ease-out hover:shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_8%,transparent),0_20px_44px_-10px_color-mix(in_srgb,var(--color-slate-900)_24%,transparent)] motion-reduce:transition-none"
           :class="visible ? 'translate-y-0 opacity-100 blur-none' : 'translate-y-6 opacity-0 blur-sm'"
         >
           <a
             :href="CATEGORIES[0]!.href"
-            class="group relative flex h-full aspect-4/3 flex-col overflow-hidden rounded-[1.375rem] no-underline md:aspect-auto md:min-h-105 lg:min-h-135 focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-3"
+            class="group relative flex h-full aspect-4/3 flex-col overflow-hidden rounded-[1.375rem] no-underline md:aspect-auto md:min-h-105 lg:min-h-135 focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-3"
             :aria-label="CATEGORIES[0]!.title"
           >
             <!-- Background -->
@@ -100,11 +100,11 @@ const { sectionRef, visible } = useScrollReveal(0.15)
                 <p class="max-w-md text-sm leading-relaxed text-white/80">{{ CATEGORIES[0]!.subtitle }}</p>
               </div>
               <span
-                class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-step-0 font-semibold text-ink shadow-[0_2px_8px_rgba(15,23,42,0.15)] transition-transform duration-200 ease-out group-hover:-translate-y-px"
+                class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-step-0 font-semibold text-ink shadow-[0_2px_8px_color-mix(in_srgb,var(--color-slate-900)_15%,transparent)] transition-transform duration-200 ease-out group-hover:-translate-y-px"
                 aria-hidden="true"
               >
                 {{ CATEGORIES[0]!.cta }}
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover:translate-x-0.5 group-hover:bg-teal-500 group-hover:text-white">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover:translate-x-0.5 group-hover:bg-accent-500 group-hover:text-white">
                   <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -119,13 +119,13 @@ const { sectionRef, visible } = useScrollReveal(0.15)
           <article
             v-for="(cat, idx) in CATEGORIES.slice(1)"
             :key="cat.href"
-            class="rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_12px_32px_-8px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/5 transition-[opacity,transform,box-shadow] duration-600 ease-out hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_20px_44px_-10px_rgba(15,23,42,0.24)] motion-reduce:transition-none"
+            class="rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_6%,transparent),0_12px_32px_-8px_color-mix(in_srgb,var(--color-slate-900)_16%,transparent)] ring-1 ring-slate-900/5 transition-[opacity,transform,box-shadow] duration-600 ease-out hover:shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_8%,transparent),0_20px_44px_-10px_color-mix(in_srgb,var(--color-slate-900)_24%,transparent)] motion-reduce:transition-none"
             :class="visible ? 'translate-y-0 opacity-100 blur-none' : 'translate-y-6 opacity-0 blur-sm'"
             :style="{ transitionDelay: visible ? `${(idx + 1) * 130}ms` : '0ms' }"
           >
             <a
               :href="cat.href"
-              class="group relative flex h-full aspect-3/2 flex-col overflow-hidden rounded-[1.375rem] no-underline md:aspect-auto md:min-h-50 lg:min-h-63.75 focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-3"
+              class="group relative flex h-full aspect-3/2 flex-col overflow-hidden rounded-[1.375rem] no-underline md:aspect-auto md:min-h-50 lg:min-h-63.75 focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-3"
               :aria-label="cat.title"
             >
               <!-- Background -->
@@ -146,11 +146,11 @@ const { sectionRef, visible } = useScrollReveal(0.15)
                   <p class="max-w-md text-sm leading-relaxed text-white/80">{{ cat.subtitle }}</p>
                 </div>
                 <span
-                  class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-step-0 font-semibold text-ink shadow-[0_2px_8px_rgba(15,23,42,0.15)] transition-transform duration-200 ease-out group-hover:-translate-y-px"
+                  class="inline-flex items-center gap-2 self-start whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-step-0 font-semibold text-ink shadow-[0_2px_8px_color-mix(in_srgb,var(--color-slate-900)_15%,transparent)] transition-transform duration-200 ease-out group-hover:-translate-y-px"
                   aria-hidden="true"
                 >
                   {{ cat.cta }}
-                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover:translate-x-0.5 group-hover:bg-teal-500 group-hover:text-white">
+                  <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900/5 transition-[transform,background-color] duration-200 ease-out group-hover:translate-x-0.5 group-hover:bg-accent-500 group-hover:text-white">
                     <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                       <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>

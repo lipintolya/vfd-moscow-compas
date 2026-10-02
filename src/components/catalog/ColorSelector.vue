@@ -25,9 +25,9 @@ const FRAME_COLORS: FrameColor[] = [
     id:           'silver',
     label:        'Кромка серебро',
     badge:        'Натуральный алюминий',
-    mainHex:      '#b4bcc6',
-    highlightHex: '#dde3ea',
-    shadowHex:    '#8a9099',
+    mainHex:      'var(--color-slate-400)',
+    highlightHex: 'var(--color-slate-200)',
+    shadowHex:    'var(--color-slate-500)',
     isGradient:   true,
   },
   {
@@ -86,13 +86,13 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
             aria-hidden="true"
           >
             <!-- Wall background -->
-            <rect width="280" height="360" fill="#F1F5F9"/>
+            <rect width="280" height="360" fill="var(--color-slate-100)"/>
             <!-- Wall sections (left + right) -->
-            <rect x="0"   y="0" width="62"  height="360" fill="#E8EDF3"/>
-            <rect x="218" y="0" width="62"  height="360" fill="#E8EDF3"/>
+            <rect x="0"   y="0" width="62"  height="360" fill="var(--color-slate-100)"/>
+            <rect x="218" y="0" width="62"  height="360" fill="var(--color-slate-100)"/>
             <!-- Wall texture hint -->
-            <line x1="0" y1="180" x2="58" y2="180" stroke="#D4DAE2" stroke-width="0.75"/>
-            <line x1="222" y1="180" x2="280" y2="180" stroke="#D4DAE2" stroke-width="0.75"/>
+            <line x1="0" y1="180" x2="58" y2="180" stroke="var(--color-slate-300)" stroke-width="0.75"/>
+            <line x1="222" y1="180" x2="280" y2="180" stroke="var(--color-slate-300)" stroke-width="0.75"/>
 
             <!-- Frame: top bar -->
             <rect
@@ -122,13 +122,13 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
               :fill="current.highlightHex" opacity="0.6"/>
 
             <!-- Door panel (грунтованное полотно) -->
-            <rect x="75" y="51" width="130" height="299" fill="#FAFBFC"/>
+            <rect x="75" y="51" width="130" height="299" fill="var(--color-slate-50)"/>
             <!-- Panel subtle shading -->
             <rect x="75" y="51" width="130" height="299"
               fill="url(#panelGrad)" opacity="0.5"/>
             <!-- Panel inner contour -->
             <rect x="79" y="55" width="122" height="291"
-              stroke="#E4E9EF" stroke-width="0.75" fill="none"/>
+              stroke="var(--color-slate-200)" stroke-width="0.75" fill="none"/>
 
             <!-- Handle (скрытый монтаж, заподлицо) -->
             <rect
@@ -143,13 +143,13 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
               :fill="current.highlightHex" opacity="0.55"/>
 
             <!-- "Заподлицо со стеной" annotation -->
-            <line x1="62" y1="12" x2="62" y2="30" stroke="#14B8A6" stroke-width="1.5" stroke-dasharray="2 2.5"/>
-            <line x1="218" y1="12" x2="218" y2="30" stroke="#14B8A6" stroke-width="1.5" stroke-dasharray="2 2.5"/>
-            <line x1="57"  y1="21" x2="223" y2="21" stroke="#14B8A6" stroke-width="1"/>
+            <line x1="62" y1="12" x2="62" y2="30" stroke="var(--color-accent-500)" stroke-width="1.5" stroke-dasharray="2 2.5"/>
+            <line x1="218" y1="12" x2="218" y2="30" stroke="var(--color-accent-500)" stroke-width="1.5" stroke-dasharray="2 2.5"/>
+            <line x1="57"  y1="21" x2="223" y2="21" stroke="var(--color-accent-500)" stroke-width="1"/>
             <text
               x="140" y="17"
               text-anchor="middle"
-              fill="#14B8A6"
+              fill="var(--color-accent-500)"
               font-size="7.5"
               font-family="system-ui,sans-serif"
               font-weight="700"
@@ -157,13 +157,13 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
             >ЗАПОДЛИЦО СО СТЕНОЙ</text>
 
             <!-- "Кромка" side label -->
-            <line x1="62" y1="90" x2="44" y2="90" stroke="#94A3B8" stroke-width="0.75"/>
-            <line x1="62" y1="270" x2="44" y2="270" stroke="#94A3B8" stroke-width="0.75"/>
-            <line x1="44" y1="90" x2="44" y2="270" stroke="#94A3B8" stroke-width="0.75"/>
+            <line x1="62" y1="90" x2="44" y2="90" stroke="var(--color-slate-400)" stroke-width="0.75"/>
+            <line x1="62" y1="270" x2="44" y2="270" stroke="var(--color-slate-400)" stroke-width="0.75"/>
+            <line x1="44" y1="90" x2="44" y2="270" stroke="var(--color-slate-400)" stroke-width="0.75"/>
             <text
               x="38" y="180"
               text-anchor="middle"
-              fill="#94A3B8"
+              fill="var(--color-slate-400)"
               font-size="7"
               font-family="system-ui,sans-serif"
               font-weight="600"
@@ -175,7 +175,7 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
               <linearGradient id="panelGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop offset="0%"   stop-color="#fff"    stop-opacity="0.8"/>
                 <stop offset="60%"  stop-color="#fff"    stop-opacity="0"/>
-                <stop offset="100%" stop-color="#C8D0DA" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="var(--color-slate-300)" stop-opacity="0.4"/>
               </linearGradient>
             </defs>
           </svg>
@@ -230,15 +230,15 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
   justify-content: center;
   gap: 0.5rem;
   padding: 0.875rem 1.375rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--color-slate-200);
   border-radius: 1.25rem;
   background: #fff;
   cursor: pointer;
   min-height: 7.75rem;
   transition: border-color 200ms ease, box-shadow 200ms ease, transform 150ms ease;
 }
-.cs-swatch:hover { border-color: #99f6e4; transform: translateY(-2px); }
-.cs-swatch--active { border-color: #14b8a6; }
+.cs-swatch:hover { border-color: var(--color-accent-200); transform: translateY(-2px); }
+.cs-swatch--active { border-color: var(--color-accent-500); }
 .cs-swatch__dot {
   width: 2.25rem;
   height: 2.25rem;
@@ -247,7 +247,7 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
 .cs-swatch__label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
   line-height: 1;
 }
 .cs-swatch__badge {
@@ -255,7 +255,7 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 /* ── Door preview ── */
@@ -274,7 +274,7 @@ const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!
   gap: 0.5rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-slate-600);
 }
 .cs-label__dot {
   width: 0.75rem;

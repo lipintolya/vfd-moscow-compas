@@ -160,7 +160,7 @@ const renderLightbox = renderGallery
         {heroStats.map(s => (
           <div class="pt-hero-stat rounded-3xl flex flex-col justify-between p-5 bg-fg">
             <div>
-              <span class="t-stat block text-teal-400 tracking-[-0.04em]">{s.val}</span>
+              <span class="t-stat block text-accent-400 tracking-[-0.04em]">{s.val}</span>
               <span class="block text-sm font-semibold text-white mt-1 leading-snug">{s.lbl}</span>
               <span class="block text-xs text-white/50 leading-snug mt-1">{s.desc}</span>
             </div>
@@ -236,15 +236,15 @@ const renderLightbox = renderGallery
               <source data-src="https://storage.yandexcloud.net/catalog-vfd/video/pivot_system.mp4" type="video/mp4" />
             </video>
             <div class="absolute top-3 left-3 flex flex-col rounded-xl px-3 py-1.5 pointer-events-none bg-slate-900/72 backdrop-blur-sm">
-              <span class="text-step-0 font-medium tracking-[0.08em] leading-tight text-teal-300">PIVOT</span>
+              <span class="text-step-0 font-medium tracking-[0.08em] leading-tight text-accent-300">PIVOT</span>
               <span class="text-[0.625rem] font-semibold leading-tight text-slate-400">система открывания</span>
             </div>
             <ReplayButton />
           </div>
 
           <a href="https://t.me/VFD_Design" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-1.5 no-underline group">
-            <IconTelegram class="text-slate-400 group-hover:text-teal-500 transition-colors duration-200 shrink-0" />
-            <span class="text-[0.6875rem] text-slate-400 group-hover:text-teal-500 transition-colors duration-200">
+            <IconTelegram class="text-slate-400 group-hover:text-accent-500 transition-colors duration-200 shrink-0" />
+            <span class="text-[0.6875rem] text-slate-400 group-hover:text-accent-500 transition-colors duration-200">
               Видео: <span class="font-semibold">ВФД Дизайн</span>
             </span>
           </a>
@@ -265,9 +265,9 @@ const renderLightbox = renderGallery
           />
           <a
             href="https://crm.vfd.ru/~ogWix" target="_blank" rel="noopener noreferrer"
-            class="inline-flex items-center gap-2.5 self-start px-5 py-3 rounded-xl no-underline text-sm font-semibold border border-slate-200 bg-slate-50 text-ink hover:border-teal-400 hover:bg-teal-50 transition-colors duration-200"
+            class="inline-flex items-center gap-2.5 self-start px-5 py-3 rounded-xl no-underline text-sm font-semibold border border-slate-200 bg-slate-50 text-ink hover:border-accent-400 hover:bg-accent-50 transition-colors duration-200"
           >
-            <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true" class="text-teal-600 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true" class="text-accent-600 shrink-0">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -369,12 +369,12 @@ const renderLightbox = renderGallery
                 </div>
               </div>
               <div class="absolute bottom-3 right-3 flex flex-col items-end px-2.5 py-1.5 rounded-xl leading-tight bg-slate-900/82 backdrop-blur-sm">
-                <b class="text-xl font-medium tracking-tight text-teal-300">{t.stat}</b>
+                <b class="text-xl font-medium tracking-tight text-accent-300">{t.stat}</b>
                 <span class="text-[0.6rem] font-semibold whitespace-nowrap text-slate-400">{t.statLbl}</span>
               </div>
             </div>
             <div class="p-[clamp(1.1rem,2vw,1.375rem)] flex flex-col gap-[0.45rem] flex-1">
-              <p class="m-0 text-[0.7rem] font-medium tracking-widest uppercase text-teal-600">{t.num}</p>
+              <p class="m-0 text-[0.7rem] font-medium tracking-widest uppercase text-accent-600">{t.num}</p>
               <h3 class="m-0 text-base font-medium text-ink">{t.title}</h3>
               <p class="m-0 text-sm text-slate-500 leading-relaxed">{t.desc}</p>
               <ul class="list-none p-0 mt-1 flex flex-col gap-1 pt-track-card__list">
@@ -414,7 +414,7 @@ const renderLightbox = renderGallery
               </div>
             </button>
             <div class="p-6 flex flex-col gap-2">
-              <span class="text-[0.7rem] font-medium tracking-widest uppercase text-teal-700 font-mono">{m.n}</span>
+              <span class="text-[0.7rem] font-medium tracking-widest uppercase text-accent-700 font-mono">{m.n}</span>
               <h3 class="m-0 text-base font-medium text-ink">{m.title}</h3>
               <p class="m-0 text-sm text-slate-500 leading-snug">{m.desc}</p>
             </div>
@@ -501,7 +501,7 @@ const renderLightbox = renderGallery
 
       <p class="mt-8 text-center text-sm text-slate-600">
         Хотите разобраться подробнее в видах и материалах?
-        <a href="/articles/alyuminievye-peregorodki-zonirovanie/" class="font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+        <a href="/articles/alyuminievye-peregorodki-zonirovanie/" class="font-semibold text-accent-600 hover:text-accent-700 transition-colors">
           Гид по зонированию алюминиевыми перегородками →
         </a>
       </p>

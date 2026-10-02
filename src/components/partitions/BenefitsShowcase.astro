@@ -24,12 +24,12 @@ const icons: Record<Benefit['icon'], string> = {
 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
   {items.map((b, i) => (
     <article
-      class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_12px_32px_-8px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_20px_44px_-10px_rgba(15,23,42,0.24)]"
+      class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_6%,transparent),0_12px_32px_-8px_color-mix(in_srgb,var(--color-slate-900)_16%,transparent)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_8%,transparent),0_20px_44px_-10px_color-mix(in_srgb,var(--color-slate-900)_24%,transparent)]"
       data-reveal
     >
       <div class="relative h-full overflow-hidden rounded-[1.375rem] bg-slate-50 p-6 sm:p-7">
 
-        <span class="pointer-events-none absolute -right-2 -top-4 text-7xl font-medium leading-none tracking-tight text-teal-600/8 select-none" aria-hidden="true">
+        <span class="pointer-events-none absolute -right-2 -top-4 text-7xl font-medium leading-none tracking-tight text-accent-600/8 select-none" aria-hidden="true">
           {String(i + 1).padStart(2, '0')}
         </span>
 

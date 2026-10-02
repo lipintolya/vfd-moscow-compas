@@ -100,7 +100,7 @@ const onDetailsClick = () => {
   border: none;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  color: var(--color-slate-400);
   cursor: pointer;
   transition: background-color 150ms ease, color 150ms ease;
 }
@@ -112,7 +112,7 @@ const onDetailsClick = () => {
   padding: 0.3rem 0.75rem;
   margin-bottom: 0.75rem;
   border-radius: 9999px;
-  background: #0d9488;
+  background: var(--color-accent-600);
   color: #fff;
   font-size: 0.8125rem;
   font-weight: 700;
@@ -128,13 +128,13 @@ const onDetailsClick = () => {
 .promo-banner__subtitle {
   margin: 0 0 0.5rem;
   font-size: 0.875rem;
-  color: #2dd4bf;
+  color: var(--color-accent-400);
   font-weight: 500;
 }
 .promo-banner__note {
   margin: 0;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 .promo-banner__cta {
   display: inline-flex;
@@ -144,12 +144,12 @@ const onDetailsClick = () => {
   padding: 0.6rem 1.1rem;
   border-radius: 9999px;
   background: #fff;
-  color: #0f172a;
+  color: var(--color-slate-900);
   font-size: 0.8125rem;
   font-weight: 600;
   transition: background-color 150ms ease;
 }
-.promo-banner__cta:hover { background: #2dd4bf; }
+.promo-banner__cta:hover { background: var(--color-accent-400); }
 
 .promo-banner-fade-enter-active,
 .promo-banner-fade-leave-active {

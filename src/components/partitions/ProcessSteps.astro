@@ -3,7 +3,7 @@ import type { Step } from '../../data/partitions'
 
 interface Props {
   items: Step[]
-  /** Тёмные плитки (#18181a — тот же тон, что у карточек «Гарантия» на
+  /** Тёмные плитки (var(--color-graphite) — тот же тон, что у карточек «Гарантия» на
       /contacts/ и «О компании» на главной) вместо светлых карточек по
       умолчанию. Логика reveal-анимации и разметка общие для обоих видов. */
   dark?: boolean
@@ -78,7 +78,7 @@ const { items, dark = false } = Astro.props
     overflow: hidden;
     padding: clamp(1.5rem, 2.5vw, 2rem);
     border-radius: 1.5rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-slate-200);
     background: #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     display: flex;
@@ -87,8 +87,8 @@ const { items, dark = false } = Astro.props
     transition: box-shadow 300ms ease, transform 300ms ease, border-color 300ms ease;
   }
   .ps-card:hover {
-    border-color: #99f6e4;
-    box-shadow: 0 8px 28px rgba(13, 148, 136, 0.10);
+    border-color: var(--color-accent-200);
+    box-shadow: 0 8px 28px color-mix(in srgb, var(--color-accent-600) 10%, transparent);
     transform: translateY(-3px);
   }
 
@@ -102,7 +102,7 @@ const { items, dark = false } = Astro.props
     font-weight: 500;
     line-height: 1;
     letter-spacing: -0.04em;
-    color: color-mix(in srgb, #14b8a6 7%, transparent);
+    color: color-mix(in srgb, var(--color-accent-500) 7%, transparent);
     user-select: none;
     pointer-events: none;
   }
@@ -120,20 +120,20 @@ const { items, dark = false } = Astro.props
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 0.75rem;
-    background: #f0fdfa;
-    border: 1.5px solid #99f6e4;
+    background: var(--color-accent-50);
+    border: 1.5px solid var(--color-accent-200);
     display: grid;
     place-items: center;
     font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.06em;
-    color: #0d9488;
+    color: var(--color-accent-600);
     font-variant-numeric: tabular-nums;
     transition: background 250ms ease, border-color 250ms ease;
   }
   .ps-card:hover .ps-badge {
-    background: #14b8a6;
-    border-color: #14b8a6;
+    background: var(--color-accent-500);
+    border-color: var(--color-accent-500);
     color: #fff;
   }
 
@@ -142,7 +142,7 @@ const { items, dark = false } = Astro.props
     padding-top: 0.3rem;
     font-size: clamp(1rem, 1.5vw, 1.125rem);
     font-weight: 500;
-    color: #0f172a;
+    color: var(--color-slate-900);
     line-height: 1.25;
   }
 
@@ -151,7 +151,7 @@ const { items, dark = false } = Astro.props
     z-index: 1;
     margin: 0;
     font-size: clamp(0.875rem, 1.15vw, 0.9375rem);
-    color: #475569;
+    color: var(--color-slate-600);
     line-height: 1.7;
   }
 
@@ -164,7 +164,7 @@ const { items, dark = false } = Astro.props
     gap: 0.5rem;
     margin-top: auto;
     padding-top: 0.875rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-slate-100);
     position: relative;
     z-index: 1;
   }
@@ -195,7 +195,7 @@ const { items, dark = false } = Astro.props
     align-items: flex-start;
     gap: 0.5rem;
     font-size: 0.8125rem;
-    color: #334155;
+    color: var(--color-slate-700);
     line-height: 1.5;
   }
 
@@ -204,7 +204,7 @@ const { items, dark = false } = Astro.props
     width: 1rem;
     height: 1rem;
     margin-top: 0.15rem;
-    color: #0d9488;
+    color: var(--color-accent-600);
   }
 
   .ps-cta {
@@ -216,11 +216,11 @@ const { items, dark = false } = Astro.props
     width: fit-content;
     font-size: 0.8125rem;
     font-weight: 600;
-    color: #0d9488;
+    color: var(--color-accent-600);
     text-decoration: none;
     transition: color 200ms ease;
   }
-  .ps-cta:hover { color: #0f766e; }
+  .ps-cta:hover { color: var(--color-accent-700); }
   .ps-cta-arrow {
     width: 0.875rem;
     height: 0.875rem;
@@ -262,7 +262,7 @@ const { items, dark = false } = Astro.props
     position: absolute;
     z-index: 0;
     inset: 0;
-    background: linear-gradient(155deg, transparent 40%, rgba(20, 184, 166, 0.16) 100%);
+    background: linear-gradient(155deg, transparent 40%, color-mix(in srgb, var(--color-accent-500) 16%, transparent) 100%);
     opacity: 0;
     transition: opacity 400ms ease;
     pointer-events: none;
@@ -271,29 +271,29 @@ const { items, dark = false } = Astro.props
     opacity: 1;
   }
   .ps--dark .ps-card:hover {
-    border-color: rgba(45, 212, 191, 0.4);
+    border-color: color-mix(in srgb, var(--color-accent-400) 40%, transparent);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
   }
   .ps--dark .ps-bg-num {
     color: rgba(255, 255, 255, 0.1);
   }
   .ps--dark .ps-badge {
-    background: rgba(45, 212, 191, 0.12);
-    border-color: rgba(45, 212, 191, 0.3);
-    color: #2dd4bf;
+    background: color-mix(in srgb, var(--color-accent-400) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent-400) 30%, transparent);
+    color: var(--color-accent-400);
   }
   .ps--dark .ps-card:hover .ps-badge {
-    background: #14b8a6;
-    border-color: #14b8a6;
-    color: #0b0b0c;
+    background: var(--color-accent-500);
+    border-color: var(--color-accent-500);
+    color: var(--color-slate-950);
   }
   .ps--dark .ps-title { color: #fff; }
   .ps--dark .ps-text  { color: rgba(255, 255, 255, 0.6); }
   .ps--dark .ps-list  { border-top-color: rgba(255, 255, 255, 0.1); }
   .ps--dark .ps-item  { color: rgba(255, 255, 255, 0.7); }
-  .ps--dark .ps-check { color: #2dd4bf; }
-  .ps--dark .ps-cta { color: #2dd4bf; }
-  .ps--dark .ps-cta:hover { color: #5eead4; }
+  .ps--dark .ps-check { color: var(--color-accent-400); }
+  .ps--dark .ps-cta { color: var(--color-accent-400); }
+  .ps--dark .ps-cta:hover { color: var(--color-accent-300); }
 
   /* ── Scroll-reveal ── */
   .ps.js-reveal .ps-card {

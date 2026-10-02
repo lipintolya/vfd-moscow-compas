@@ -312,7 +312,7 @@ onUnmounted(() => {
               <li v-for="p in CONTACTS.phones" :key="p.raw">
                 <a
                   :href="`tel:${p.raw}`"
-                  class="text-white hover:text-teal-400 transition-colors duration-200 font-medium"
+                  class="text-white hover:text-accent-400 transition-colors duration-200 font-medium"
                 >
                   {{ p.label }}
                 </a>
@@ -345,7 +345,7 @@ onUnmounted(() => {
               :href="MAP_LINK"
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-teal-400 hover:text-teal-300 transition-colors duration-200"
+              class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent-400 hover:text-accent-300 transition-colors duration-200"
             >
               Построить маршрут
               <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -454,7 +454,7 @@ onUnmounted(() => {
           <button
             type="button"
             class="absolute top-4 right-4 w-8 h-8 rounded-full
-                   bg-gray-100 hover:bg-gray-200 flex items-center justify-center
+                   bg-slate-100 hover:bg-slate-200 flex items-center justify-center
                    transition-colors duration-200"
             aria-label="Закрыть окно правовой информации"
             @click="closeModal"
@@ -466,34 +466,34 @@ onUnmounted(() => {
 
           <div class="space-y-6 text-sm">
 
-            <h3 id="legal-title" class="text-base font-medium text-gray-900">Правовая информация</h3>
+            <h3 id="legal-title" class="text-base font-medium text-slate-900">Правовая информация</h3>
 
             <div>
-              <h4 class="text-sm font-medium text-gray-900 mb-2">Авторские права</h4>
-              <p class="text-gray-600 leading-relaxed">
+              <h4 class="text-sm font-medium text-slate-900 mb-2">Авторские права</h4>
+              <p class="text-slate-600 leading-relaxed">
                 Все изображения, тексты и дизайн сайта являются объектами авторского права правообладателя.
                 Любое использование материалов возможно только с письменного разрешения правообладателя
                 и обязательным указанием источника:
-                <a :href="SITE.url" class="text-teal-600 hover:underline">{{ SITE.host }}</a>
+                <a :href="SITE.url" class="text-accent-600 hover:underline">{{ SITE.host }}</a>
               </p>
             </div>
 
-            <div class="border-t border-gray-100 pt-5">
-              <h4 class="text-sm font-medium text-gray-900 mb-2">Публичная оферта</h4>
-              <p class="text-gray-600 leading-relaxed">
+            <div class="border-t border-slate-100 pt-5">
+              <h4 class="text-sm font-medium text-slate-900 mb-2">Публичная оферта</h4>
+              <p class="text-slate-600 leading-relaxed">
                 Сайт не является публичной офертой в соответствии со ст. 437 ГК РФ.
                 Цены указаны для ознакомления. Актуальную стоимость уточняйте в салоне
                 или у менеджеров компании.
               </p>
             </div>
 
-            <div class="border-t border-gray-100 pt-5">
-              <h4 class="text-sm font-medium text-gray-900 mb-2">Контакты</h4>
-              <p class="text-gray-600 leading-relaxed">
+            <div class="border-t border-slate-100 pt-5">
+              <h4 class="text-sm font-medium text-slate-900 mb-2">Контакты</h4>
+              <p class="text-slate-600 leading-relaxed">
                 г. Москва, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж<br />
-                Телефон: <a :href="`tel:${PHONE.raw}`" class="text-teal-600 hover:underline">{{ PHONE.label }}</a><br />
-                Email: <a :href="`mailto:${SITE.email}`" class="text-teal-600 hover:underline">{{ SITE.email }}</a><br />
-                Сайт: <a :href="SITE.url" class="text-teal-600 hover:underline">{{ SITE.host }}</a>
+                Телефон: <a :href="`tel:${PHONE.raw}`" class="text-accent-600 hover:underline">{{ PHONE.label }}</a><br />
+                Email: <a :href="`mailto:${SITE.email}`" class="text-accent-600 hover:underline">{{ SITE.email }}</a><br />
+                Сайт: <a :href="SITE.url" class="text-accent-600 hover:underline">{{ SITE.host }}</a>
               </p>
             </div>
 
@@ -577,7 +577,7 @@ onUnmounted(() => {
                   </dt>
                   <dd class="m-0 mt-1 flex items-baseline gap-2">
                     <span class="font-mono text-xl font-medium tabular-nums text-white">{{ v.value }}</span>
-                    <span v-if="v.good" class="text-xs font-medium text-teal-400">хорошо</span>
+                    <span v-if="v.good" class="text-xs font-medium text-accent-400">хорошо</span>
                   </dd>
                 </div>
               </dl>
@@ -615,7 +615,7 @@ onUnmounted(() => {
                 :key="item"
                 class="flex items-start gap-3 border-b border-white/8 py-2 text-sm text-white/80 last:border-b-0"
               >
-                <span class="mt-[0.6em] h-px w-3 shrink-0 bg-teal-400" aria-hidden="true" />
+                <span class="mt-[0.6em] h-px w-3 shrink-0 bg-accent-400" aria-hidden="true" />
                 <span>{{ item }}</span>
               </li>
             </ul>
@@ -626,7 +626,7 @@ onUnmounted(() => {
                 :href="DEV_CONTACTS.telegram"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group flex items-center justify-between gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-ink transition-colors duration-200 hover:bg-teal-400"
+                class="group flex items-center justify-between gap-3 rounded-full bg-white py-1.5 pl-5 pr-1.5 text-sm font-semibold text-ink transition-colors duration-200 hover:bg-accent-400"
               >
                 Написать в Telegram
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink text-white transition-transform duration-200 group-hover:translate-x-0.5">

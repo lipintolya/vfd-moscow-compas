@@ -110,7 +110,7 @@ onBeforeUnmount(() => {
   aspect-ratio: auto;
   object-fit: contain;
   background: #fff;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-slate-200);
 }
 .fig-zoom-hint {
   position: absolute;
@@ -137,7 +137,7 @@ onBeforeUnmount(() => {
   transform: translateY(0);
 }
 .fig-zoom-btn:focus-visible {
-  outline: 2px solid var(--color-accent, #14b8a6);
+  outline: 2px solid var(--color-accent, var(--color-accent-500));
   outline-offset: 3px;
   border-radius: 0.75rem;
 }
@@ -182,7 +182,7 @@ onBeforeUnmount(() => {
   max-height: 85vh;
   object-fit: contain;
   border-radius: 0.5rem;
-  background: #111;
+  background: var(--color-slate-900);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
 }
 

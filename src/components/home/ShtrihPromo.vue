@@ -66,7 +66,7 @@ const { sectionRef, visible } = useScrollReveal(0.15)
           ]" />
 
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="inline-flex w-fit items-center rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+            <div class="inline-flex w-fit items-center rounded-full bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">
               Эмалекс бежевый — в наличии на складе
             </div>
             <div v-if="bladePrice" class="flex flex-wrap items-baseline gap-x-5 gap-y-1">
@@ -83,7 +83,7 @@ const { sectionRef, visible } = useScrollReveal(0.15)
 
           <a :href="modelHref" class="group/link mt-1 inline-flex w-full items-center justify-between gap-3 rounded-full bg-fg py-1.5 pl-5 pr-1.5 text-sm font-semibold text-white transition-colors hover:bg-accent">
             Смотреть модель
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-teal-500">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 transition-[transform,background-color] duration-200 ease-out group-hover/link:translate-x-0.5 group-hover/link:bg-accent-500">
               <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>

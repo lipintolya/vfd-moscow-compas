@@ -330,7 +330,7 @@ const structuredData = canonicalUrl ? [
         {crossLinks.map(link => (
           <a
             href={link.href}
-            class="group relative flex min-h-70 flex-col justify-end overflow-hidden rounded-3xl no-underline focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-3"
+            class="group relative flex min-h-70 flex-col justify-end overflow-hidden rounded-3xl no-underline focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-3"
           >
             <img
               src={link.image}
@@ -374,7 +374,7 @@ const structuredData = canonicalUrl ? [
             <ul class="flex flex-col gap-2 list-none p-0 m-0">
               {group.items.map(item => (
                 <li class="flex gap-2.5 text-sm leading-relaxed text-slate-600">
-                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-teal-500" aria-hidden="true"></span>
+                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent-500" aria-hidden="true"></span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -404,7 +404,7 @@ const structuredData = canonicalUrl ? [
                 </div>
               )}
               <div class="flex flex-1 flex-col p-4">
-                <span class="mb-2 block text-xs font-medium tabular-nums text-teal-600">{String(i + 1).padStart(2, '0')}</span>
+                <span class="mb-2 block text-xs font-medium tabular-nums text-accent-600">{String(i + 1).padStart(2, '0')}</span>
                 <h4 class="mb-1.5 text-base font-medium leading-tight text-ink">{step.title}</h4>
                 <p class="m-0 text-sm leading-relaxed text-slate-600">{step.text}</p>
               </div>
@@ -441,16 +441,16 @@ const structuredData = canonicalUrl ? [
       />
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 lg:gap-5">
         {materials.map(m => (
-          <a href={m.href} target="_blank" rel="noopener" class="group flex items-center gap-4 rounded-2xl bg-slate-50 p-[clamp(1rem,2vw,1.375rem)] no-underline transition hover:bg-teal-50/60 hover:-translate-y-0.5">
-            <span class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-teal-200 bg-teal-50 text-teal-600">
+          <a href={m.href} target="_blank" rel="noopener" class="group flex items-center gap-4 rounded-2xl bg-slate-50 p-[clamp(1rem,2vw,1.375rem)] no-underline transition hover:bg-accent-50/60 hover:-translate-y-0.5">
+            <span class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-accent-200 bg-accent-50 text-accent-600">
               <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <b class="absolute -bottom-1 -right-1 rounded bg-teal-600 px-1 py-0.5 text-[0.5rem] font-medium leading-none tracking-wide text-white">{m.badge}</b>
+              <b class="absolute -bottom-1 -right-1 rounded bg-accent-600 px-1 py-0.5 text-[0.5rem] font-medium leading-none tracking-wide text-white">{m.badge}</b>
             </span>
             <span class="flex min-w-0 flex-1 flex-col gap-0.5">
               <span class="text-step-1 font-medium leading-tight text-ink">{m.title}</span>
               <span class="text-step-0 leading-snug text-slate-500">{m.desc}</span>
             </span>
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors group-hover:bg-teal-500 group-hover:text-white">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors group-hover:bg-accent-500 group-hover:text-white">
               <svg viewBox="0 0 24 24" fill="none" class="h-[1.05rem] w-[1.05rem]"><path d="M7 17L17 7M7 7h10v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </span>
           </a>

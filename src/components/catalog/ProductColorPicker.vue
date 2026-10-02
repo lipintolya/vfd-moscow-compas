@@ -58,7 +58,7 @@ const formatPrice = (price: number | null) =>
 
 const normalizeHex = (hex: string) => {
   const v = (hex ?? '').trim().replaceAll('С', 'C').replaceAll('с', 'c')
-  return /^#[0-9a-fA-F]{3,6}$/.test(v) ? v : '#cccccc'
+  return /^#[0-9a-fA-F]{3,6}$/.test(v) ? v : 'var(--color-slate-300)'
 }
 
 /* ── mounted-гейт для обоих Teleport ниже (зум-фото и калькулятор). Раньше
@@ -156,7 +156,7 @@ const shareModel = async () => {
         </svg>
       </div>
 
-      <span v-if="inStock" class="color-picker__order-badge bg-teal-600 text-white">В наличии</span>
+      <span v-if="inStock" class="color-picker__order-badge bg-accent-600 text-white">В наличии</span>
       <span v-else-if="madeToOrder" class="color-picker__order-badge bg-fg text-white">Под заказ</span>
     </div>
 
@@ -310,7 +310,7 @@ const shareModel = async () => {
 .color-picker__photo-wrap {
   border-radius: 1.5rem;
   overflow: hidden;
-  background: #f8fafc;
+  background: var(--color-slate-50);
   width: 100%;
   display: flex;
   align-items: center;
@@ -364,10 +364,10 @@ const shareModel = async () => {
   padding: 0.375rem 0.75rem;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   font-size: 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-slate-600);
   opacity: 0;
   transform: translateY(4px);
   transition: opacity 150ms ease, transform 150ms ease;
@@ -385,7 +385,7 @@ const shareModel = async () => {
 }
 
 .color-picker__placeholder {
-  color: #d1d5db;
+  color: var(--color-slate-300);
 }
 
 /* Цвет — utility-классы Tailwind (bg-fg) в шаблоне, тут только форма/
@@ -416,13 +416,13 @@ const shareModel = async () => {
 .color-picker__price {
   font-size: 1.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   line-height: 1;
 }
 
 .color-picker__price-note {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 .color-picker__kit-row {
@@ -434,24 +434,24 @@ const shareModel = async () => {
 .color-picker__kit-price {
   font-size: 1.875rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   line-height: 1;
   white-space: nowrap;
 }
 
 .color-picker__kit-note {
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin: 0;
 }
 
 .color-picker__color-name {
   font-size: 0.875rem;
-  color: #475569;
+  color: var(--color-slate-600);
   margin: 0;
 }
 .color-picker__color-note {
-  color: #94a3b8;
+  color: var(--color-slate-400);
   font-weight: 400;
 }
 
@@ -478,14 +478,14 @@ const shareModel = async () => {
 }
 
 .color-picker__swatch.is-active {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #14b8a6;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-accent-500);
 }
 .color-picker__swatch.is-unavailable {
   border: 2px dashed rgba(0, 0, 0, 0.32);
 }
 
 .color-picker__swatch:focus-visible {
-  outline: 2px solid #14b8a6;
+  outline: 2px solid var(--color-accent-500);
   outline-offset: 3px;
 }
 
@@ -496,7 +496,7 @@ const shareModel = async () => {
   margin: 0 0 0.625rem;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 .color-picker__extra-colors-list {
   display: flex;
@@ -508,7 +508,7 @@ const shareModel = async () => {
   align-items: center;
   gap: 0.4rem;
   font-size: 0.8125rem;
-  color: #334155;
+  color: var(--color-slate-700);
 }
 .color-picker__extra-dot {
   display: inline-block;
@@ -518,8 +518,8 @@ const shareModel = async () => {
   /* Тот же приём глубины, что у крупных выкрасок на странице серии
      (.sr-colors__dot) — единый язык формы/тени по сайту. */
   box-shadow:
-    inset 0 0 0 1px rgba(15, 23, 42, 0.1),
-    0 2px 6px -2px rgba(15, 23, 42, 0.22);
+    inset 0 0 0 1px color-mix(in srgb, var(--color-slate-900) 10%, transparent),
+    0 2px 6px -2px color-mix(in srgb, var(--color-slate-900) 22%, transparent);
   flex-shrink: 0;
 }
 
@@ -529,16 +529,16 @@ const shareModel = async () => {
   gap: 0.875rem;
   width: 100%;
   padding: 0.875rem 1rem;
-  background: #f0fdfa;
-  border: 1px solid #99f6e4;
+  background: var(--color-accent-50);
+  border: 1px solid var(--color-accent-200);
   border-radius: 1rem;
   cursor: pointer;
   text-align: left;
   transition: background 150ms ease, border-color 150ms ease;
 }
 .color-picker__calc-promo:hover {
-  background: #ccfbf1;
-  border-color: #5eead4;
+  background: var(--color-accent-100);
+  border-color: var(--color-accent-300);
 }
 .color-picker__calc-promo-icon {
   display: flex;
@@ -549,7 +549,7 @@ const shareModel = async () => {
   flex-shrink: 0;
   background: #fff;
   border-radius: 0.75rem;
-  color: #0d9488;
+  color: var(--color-accent-600);
 }
 .color-picker__calc-promo-icon svg { width: 1.375rem; height: 1.375rem; }
 .color-picker__calc-promo-text {
@@ -562,11 +562,11 @@ const shareModel = async () => {
 .color-picker__calc-promo-title {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
 }
 .color-picker__calc-promo-subtitle {
   font-size: 0.8125rem;
-  color: #0f766e;
+  color: var(--color-accent-700);
   line-height: 1.4;
 }
 /* Чуть крупнее на десктопе (иконка/паддинги, шрифт не трогаем — крупный
@@ -593,7 +593,7 @@ const shareModel = async () => {
   width: 1.125rem;
   height: 1.125rem;
   flex-shrink: 0;
-  color: #0d9488;
+  color: var(--color-accent-600);
 }
 
 .color-picker__cta {
@@ -628,7 +628,7 @@ const shareModel = async () => {
   transform: translateX(-50%) translateY(4px);
   padding: 0.375rem 0.75rem;
   border-radius: 0.5rem;
-  background: #0f172a;
+  background: var(--color-slate-900);
   color: #fff;
   font-size: 0.75rem;
   font-weight: 600;

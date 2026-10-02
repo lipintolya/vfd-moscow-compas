@@ -163,7 +163,7 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
           <h2 class="m-0 mb-4 text-lg font-medium text-ink">Способы оплаты</h2>
           <ul class="m-0 flex list-none flex-col gap-3 p-0">
             <li v-for="m in paymentMethods" :key="m.id" class="flex gap-3">
-              <svg class="mt-0.5 h-5 w-5 shrink-0 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+              <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m5 12 5 5 9-10"/>
               </svg>
               <span>
@@ -269,8 +269,8 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
   min-height: 20rem;
   box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.35);
 }
-.wtg-card--1 { background: #3a3a3d; }
-.wtg-card--2 { background: #29292b; }
+.wtg-card--1 { background: var(--color-slate-700); }
+.wtg-card--2 { background: var(--color-slate-800); }
 .wtg-card--3 { background: var(--color-graphite); }
 
 .wtg-card__body {

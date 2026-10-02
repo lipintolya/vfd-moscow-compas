@@ -29,7 +29,7 @@ const CATEGORIES = [
   { href: '/vhodnye-dveri/',         title: 'Входные двери',           text: 'Для квартиры и частного дома, в том числе с терморазрывом' },
   { href: '/partitions/',            title: 'Алюминиевые перегородки', text: 'Раздвижные и распашные системы в профиле GRAFIA, 13 цветов' },
   { href: '/catalog/decor/',         title: 'Погонаж и декор',         text: 'Коробки, наличники, доборы, плинтус, фальшфрамуги, рейки' },
-  { href: '/portfolio/',             title: 'Наши работы',             text: 'Фотоотчёты монтажей в квартирах, домах и офисах Москвы' },
+  ...(SITE.features.portfolio ? [{ href: '/portfolio/',             title: 'Наши работы',             text: 'Фотоотчёты монтажей в квартирах, домах и офисах Москвы' }] : []),
 ]
 
 /* ============================================================
@@ -93,12 +93,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
             <p class="t-eyebrow mb-3">Официальный дилер Владимирской фабрики дверей</p>
 
             <h1 class="t-h1 mb-5">
-              Салон дверей ВФД в Москве — <span class="text-teal-600">всё начинается с дверей</span>
+              Салон дверей ВФД в Москве — <span class="text-accent-600">всё начинается с дверей</span>
             </h1>
 
             <p class="m-0 mb-4 t-lead text-slate-600">
               Мы работаем напрямую с
-              <a href="/o-fabrike/" class="text-teal-700 underline decoration-teal-700/30 underline-offset-4 hover:decoration-teal-700">Владимирской фабрикой дверей</a>
+              <a href="/o-fabrike/" class="text-accent-700 underline decoration-accent-700/30 underline-offset-4 hover:decoration-accent-700">Владимирской фабрикой дверей</a>
               и собираем в одном салоне всё для интерьера: межкомнатные, скрытые и входные двери,
               алюминиевые перегородки, погонаж и фурнитуру.
             </p>
@@ -251,7 +251,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
           <button
             type="button"
-            class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 text-left shadow-[0_1px_2px_rgba(15,23,42,0.06),0_12px_32px_-8px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_20px_44px_-10px_rgba(15,23,42,0.24)] lg:col-span-1 lg:row-span-2"
+            class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 text-left shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_6%,transparent),0_12px_32px_-8px_color-mix(in_srgb,var(--color-slate-900)_16%,transparent)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_8%,transparent),0_20px_44px_-10px_color-mix(in_srgb,var(--color-slate-900)_24%,transparent)] lg:col-span-1 lg:row-span-2"
             @click="openLightbox(1)"
           >
             <div class="relative aspect-4/5 w-full overflow-hidden rounded-[1.375rem] bg-slate-100 lg:h-full lg:aspect-auto">
@@ -275,7 +275,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 
           <button
             type="button"
-            class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 text-left shadow-[0_1px_2px_rgba(15,23,42,0.06),0_12px_32px_-8px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_20px_44px_-10px_rgba(15,23,42,0.24)]"
+            class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 text-left shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_6%,transparent),0_12px_32px_-8px_color-mix(in_srgb,var(--color-slate-900)_16%,transparent)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_8%,transparent),0_20px_44px_-10px_color-mix(in_srgb,var(--color-slate-900)_24%,transparent)]"
             @click="openLightbox(2)"
           >
             <div class="relative aspect-4/3 w-full overflow-hidden rounded-[1.375rem] bg-slate-100">
@@ -298,7 +298,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 
           <button
             type="button"
-            class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 text-left shadow-[0_1px_2px_rgba(15,23,42,0.06),0_12px_32px_-8px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_20px_44px_-10px_rgba(15,23,42,0.24)]"
+            class="group relative overflow-hidden rounded-[1.75rem] bg-white p-1.5 text-left shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_6%,transparent),0_12px_32px_-8px_color-mix(in_srgb,var(--color-slate-900)_16%,transparent)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_8%,transparent),0_20px_44px_-10px_color-mix(in_srgb,var(--color-slate-900)_24%,transparent)]"
             @click="openLightbox(3)"
           >
             <div class="relative aspect-4/3 w-full overflow-hidden rounded-[1.375rem] bg-slate-100">

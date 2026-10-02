@@ -66,7 +66,7 @@ const resetAll = () => {
   <aside class="@container rounded-2xl bg-slate-50 p-5" aria-label="Фильтры каталога">
     <div class="flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
       <h2 class="m-0 text-lg font-medium text-ink">Фильтры</h2>
-      <button v-if="hasActiveFilters" type="button" class="text-xs font-semibold text-teal-600 hover:text-teal-700" @click="resetAll">Сбросить</button>
+      <button v-if="hasActiveFilters" type="button" class="text-xs font-semibold text-accent-600 hover:text-accent-700" @click="resetAll">Сбросить</button>
     </div>
 
     <label class="mt-4 mb-2.5 block">
@@ -77,7 +77,7 @@ const resetAll = () => {
         inputmode="search"
         autocomplete="off"
         placeholder="Поиск"
-        class="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-step-0 text-ink placeholder:text-slate-400 focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/15"
+        class="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-step-0 text-ink placeholder:text-slate-400 focus:border-accent-500 focus:outline-none focus:ring-4 focus:ring-accent-500/15"
       />
     </label>
 
@@ -92,7 +92,7 @@ const resetAll = () => {
         <button
           type="button"
           class="rounded-lg px-2.5 py-3 text-left text-step-0 text-slate-600 transition hover:bg-slate-100"
-          :class="activeSeries === '' ? 'bg-teal-50 text-teal-700' : ''"
+          :class="activeSeries === '' ? 'bg-accent-50 text-accent-700' : ''"
           @click="activeSeries = ''"
         >
           Все серии
@@ -102,7 +102,7 @@ const resetAll = () => {
           :key="item.value"
           type="button"
           class="rounded-lg px-2.5 py-3 text-left text-step-0 text-slate-600 transition hover:bg-slate-100"
-          :class="activeSeries === item.value ? 'bg-teal-50 text-teal-700' : ''"
+          :class="activeSeries === item.value ? 'bg-accent-50 text-accent-700' : ''"
           @click="activeSeries = activeSeries === item.value ? '' : item.value"
         >
           {{ item.label }}
@@ -123,7 +123,7 @@ const resetAll = () => {
           :key="item.value"
           type="button"
           class="rounded-lg px-2.5 py-3 text-left text-step-0 text-slate-600 transition hover:bg-slate-100"
-          :class="activeCoating === item.value ? 'bg-teal-50 text-teal-700' : ''"
+          :class="activeCoating === item.value ? 'bg-accent-50 text-accent-700' : ''"
           @click="activeCoating = activeCoating === item.value ? '' : item.value"
         >
           {{ item.label }}
@@ -144,7 +144,7 @@ const resetAll = () => {
           :key="item.value"
           type="button"
           class="flex items-center gap-2 rounded-lg px-2.5 py-3 text-left text-step-0 text-slate-600 transition hover:bg-slate-100"
-          :class="activeColor === item.value ? 'bg-teal-50 text-teal-700' : ''"
+          :class="activeColor === item.value ? 'bg-accent-50 text-accent-700' : ''"
           @click="activeColor = activeColor === item.value ? '' : item.value"
         >
           <span class="h-3.5 w-3.5 shrink-0 rounded-full border border-black/10" :style="{ backgroundColor: item.color }"></span>
@@ -162,7 +162,7 @@ const resetAll = () => {
       </button>
       <div v-if="openSections.tags" class="mb-3.5">
         <label class="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-slate-600">
-          <input v-model="glassOnly" type="checkbox" class="h-4 w-4 accent-teal-600" />
+          <input v-model="glassOnly" type="checkbox" class="h-4 w-4 accent-accent-600" />
           <span>Со стеклом</span>
         </label>
       </div>

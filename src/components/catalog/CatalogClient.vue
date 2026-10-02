@@ -206,7 +206,7 @@ watch(
         <span class="relative inline-flex min-w-62">
           <select
             v-model="sortBy"
-            class="min-h-11.5 w-full appearance-none rounded-full border-2 border-slate-200 bg-white py-0 pl-4 pr-10 text-step-1 font-semibold text-ink focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/15"
+            class="min-h-11.5 w-full appearance-none rounded-full border-2 border-slate-200 bg-white py-0 pl-4 pr-10 text-step-1 font-semibold text-ink focus:border-accent-500 focus:outline-none focus:ring-4 focus:ring-accent-500/15"
           >
             <option value="popular">Популярные</option>
             <option value="price_asc">Цена: по возрастанию</option>
@@ -226,14 +226,14 @@ watch(
       <button
         type="button"
         class="flex w-full items-center justify-center gap-2 rounded-full border-2 border-slate-200 px-4.5 py-2.5 text-sm font-semibold text-slate-600 transition lg:hidden"
-        :class="hasActiveFilters ? 'border-teal-300 text-teal-700' : ''"
+        :class="hasActiveFilters ? 'border-accent-300 text-accent-700' : ''"
         @click="mobileFiltersOpen = true"
       >
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true" class="w-4 h-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M7 10h10M11 16h2" />
         </svg>
         <span>Фильтры</span>
-        <span v-if="hasActiveFilters" class="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-xs font-medium text-white">
+        <span v-if="hasActiveFilters" class="ml-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent-600 text-xs font-medium text-white">
           {{ [activeSeries, activeCoating, activeColor, glassOnly, searchQuery].filter(Boolean).length }}
         </span>
       </button>

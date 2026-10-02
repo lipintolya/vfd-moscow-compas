@@ -82,9 +82,9 @@ const breadcrumbSchema = {
       <!-- Breadcrumb -->
       <nav aria-label="Хлебные крошки" class="mb-6">
         <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
-          <li><a href="/" class="hover:text-teal-600 transition-colors">Главная</a></li>
+          <li><a href="/" class="hover:text-accent-600 transition-colors">Главная</a></li>
           <li aria-hidden="true" class="text-slate-300">/</li>
-          <li><a href="/portfolio/" class="hover:text-teal-600 transition-colors">Наши работы</a></li>
+          <li><a href="/portfolio/" class="hover:text-accent-600 transition-colors">Наши работы</a></li>
           <li aria-hidden="true" class="text-slate-300">/</li>
           <li class="text-slate-700 font-medium truncate max-w-64">{work.title}</li>
         </ol>
@@ -146,7 +146,7 @@ const breadcrumbSchema = {
           {work.relatedLink && (
             <a
               href={work.relatedLink.href}
-              class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 hover:text-teal-800"
+              class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800"
             >
               {work.relatedLink.label}
               <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -157,10 +157,10 @@ const breadcrumbSchema = {
         </div>
       </div>
 
-        <!-- CTA — сплошная тёмная плашка #212124, тот же тон, что у всех
+        <!-- CTA — сплошная тёмная плашка var(--color-fg), тот же тон, что у всех
              остальных CTA-панелей сайта (HeroSlider «О компании», ContactsSection,
              CTA на /catalog/skrytye-dveri/, /catalog/decor/, /catalog/series/[slug]/).
-             Раньше здесь была bg-ink (#0f172a, синеватый slate) и кнопки на голых
+             Раньше здесь была bg-ink (var(--color-slate-900), синеватый slate) и кнопки на голых
              Tailwind-цветах — выбивались из фирменной палитры. Кнопки — общие
              .btn/.btn-ghost/.btn-icon, как в той же CTA-плашке на skrytye-dveri.astro. -->
         <div class="pw-cta mt-12 overflow-hidden rounded-2xl p-6 sm:p-8">
@@ -188,15 +188,15 @@ const breadcrumbSchema = {
           </div>
           <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/10 pt-5 text-xs font-semibold text-white/70">
             <span class="inline-flex items-center gap-1.5">
-              <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-teal-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-accent-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               {work.category === 'entrance' ? 'Замер входной двери — 500 ₽' : 'Бесплатный замер при заказе'}
             </span>
             <span class="inline-flex items-center gap-1.5">
-              <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-teal-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-accent-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Гарантия на монтаж
             </span>
             <span class="inline-flex items-center gap-1.5">
-              <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-teal-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-accent-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Работаем по Москве и области
             </span>
           </div>
@@ -204,7 +204,7 @@ const breadcrumbSchema = {
 
         <!-- Back link -->
         <div class="mt-8">
-          <a href="/portfolio/" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors">
+          <a href="/portfolio/" class="inline-flex items-center gap-2 text-sm font-semibold text-accent-600 hover:text-accent-700 transition-colors">
             <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">
               <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -218,10 +218,10 @@ const breadcrumbSchema = {
 
 <style>
   .pw-cta {
-    background: #212124;
+    background: var(--color-fg);
   }
   /* Телефон — единственная сплошная кнопка в блоке (акцент на главном
-     действии), берёт токен --color-accent, а не голый Tailwind teal-500 —
+     действии), берёт токен --color-accent, а не голый Tailwind accent-500 —
      тот же цвет, что и везде в фирменной палитре, hover темнее, а не светлее. */
   .pw-cta__phone {
     background: var(--color-accent);

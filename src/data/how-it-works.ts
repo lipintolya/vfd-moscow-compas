@@ -1,3 +1,4 @@
+import { SITE } from '../config/site'
 import type { Step } from './partitions'
 import { companyLegalInfo } from '../lib/contacts-data'
 
@@ -41,7 +42,9 @@ export const howItWorksSteps: Step[] = [
       'Аккуратный монтаж без грязи и мусора',
       'Проверка фурнитуры при сдаче',
     ],
-    cta: { label: 'Смотреть работы', href: '/portfolio/' },
+    cta: SITE.features.portfolio
+      ? { label: 'Смотреть работы', href: '/portfolio/' }
+      : { label: 'Связаться с нами', href: '/contacts/' },
   },
   {
     num:   '04',

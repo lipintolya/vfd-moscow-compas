@@ -342,17 +342,17 @@ const structuredData = [{
   align-items: center;
   padding: 0.3rem 0.875rem;
   border-radius: 9999px;
-  background: #f0fdfa;
-  border: 1px solid #ccfbf1;
-  color: #0f766e;
+  background: var(--color-accent-50);
+  border: 1px solid var(--color-accent-100);
+  color: var(--color-accent-700);
   font-size: 0.8rem;
   font-weight: 600;
 }
 
 .product-badge--muted {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  color: #475569;
+  background: var(--color-slate-50);
+  border-color: var(--color-slate-200);
+  color: var(--color-slate-600);
 }
 
 .product-badge--new {
@@ -366,7 +366,7 @@ const structuredData = [{
   font-weight: 500;
   line-height: 1.08;
   letter-spacing: -0.03em;
-  color: #0f172a;
+  color: var(--color-slate-900);
   margin: 0 0 1rem;
 }
 /* Тип товара — часть H1 (по нему ищут: «межкомнатная дверь иннова 02»),
@@ -378,14 +378,14 @@ const structuredData = [{
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 /* Покрытие в самом H1, не только в бейдже сверху — модели с коротким кодом
    (Р1, Е1, НР2) сами по себе не различимы в поиске без бренда покрытия,
    а именно так их и ищут («эмалекс р1»). Визуально второстепенно —
    приглушённым цветом, вес остаётся на названии модели. */
 .product-title__coating {
-  color: #64748b;
+  color: var(--color-slate-500);
   font-weight: 400;
 }
 
@@ -399,12 +399,12 @@ const structuredData = [{
   gap: 0.375rem;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #0d9488;
+  color: var(--color-accent-600);
   cursor: pointer;
   user-select: none;
   list-style: none;
 }
-.product-description__toggle:hover { color: #0f766e; }
+.product-description__toggle:hover { color: var(--color-accent-700); }
 
 .product-description__toggle::-webkit-details-marker {
   display: none;
@@ -428,7 +428,7 @@ const structuredData = [{
 .product-description__text {
   margin: 0.75rem 0 0;
   font-size: 1rem;
-  color: #475569;
+  color: var(--color-slate-600);
   line-height: 1.65;
 }
 
@@ -453,14 +453,14 @@ const structuredData = [{
   padding: 0.75rem 1rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #64748b;
-  background: #f8fafc;
+  color: var(--color-slate-500);
+  background: var(--color-slate-50);
 }
 
 .product-specs__row dd {
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  color: #0f172a;
+  color: var(--color-slate-900);
   margin: 0;
   line-height: 1.55;
 }
@@ -477,12 +477,12 @@ const structuredData = [{
 /* ── Price hint + contacts ── */
 .product-price-hint {
   font-size: 0.9375rem;
-  color: #475569;
+  color: var(--color-slate-600);
   margin: 0 0 1.25rem;
 }
 
 .product-price-hint strong {
-  color: #0f172a;
+  color: var(--color-slate-900);
   font-weight: 600;
 }
 
@@ -492,11 +492,11 @@ const structuredData = [{
   gap: 0.375rem;
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #0d9488;
+  color: var(--color-accent-600);
   text-decoration: none;
   transition: color 200ms ease;
 }
-.product-coating-link:hover { color: #0f766e; }
+.product-coating-link:hover { color: var(--color-accent-700); }
 .product-coating-link svg {
   width: 0.875rem;
   height: 0.875rem;
@@ -515,13 +515,13 @@ const structuredData = [{
 .accessories-title {
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   margin: 0 0 0.375rem;
 }
 
 .accessories-note {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   margin: 0;
 }
 
@@ -530,7 +530,7 @@ const structuredData = [{
   line-height: 1.5;
   padding: 1rem 1.5rem 1.375rem;
   margin: 0;
-  border-top: 1px dashed #e2e8f0;
+  border-top: 1px dashed var(--color-slate-200);
 }
 
 .accessories-groups {
@@ -541,7 +541,7 @@ const structuredData = [{
 
 .accessories-group {
   background: #fff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 1.5rem;
   overflow: hidden;
 }
@@ -553,7 +553,7 @@ const structuredData = [{
   gap: 1rem;
   font-size: 1.0625rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   padding: 1.25rem 1.5rem;
   cursor: pointer;
   user-select: none;
@@ -569,8 +569,8 @@ const structuredData = [{
   flex-shrink: 0;
   width: 0.5625rem;
   height: 0.5625rem;
-  border-right: 2px solid #94a3b8;
-  border-bottom: 2px solid #94a3b8;
+  border-right: 2px solid var(--color-slate-400);
+  border-bottom: 2px solid var(--color-slate-400);
   transform: rotate(45deg);
   transition: transform 200ms ease;
 }
@@ -583,7 +583,7 @@ const structuredData = [{
   list-style: none;
   padding: 0 1.5rem 1.25rem;
   margin: 0;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-slate-200);
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -600,7 +600,7 @@ const structuredData = [{
   font-size: 0.875rem;
   line-height: 1.4;
   padding: 0.6rem 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-slate-200);
 }
 
 .accessories-item:last-child {
@@ -609,12 +609,12 @@ const structuredData = [{
 }
 
 .accessories-item__name {
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 .accessories-item__price {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
 }
 
 .accessories-item__media {
@@ -623,12 +623,12 @@ const structuredData = [{
 }
 
 .accessories-group--kit {
-  background: #f0fdfa;
-  border-color: #99f6e4;
+  background: var(--color-accent-50);
+  border-color: var(--color-accent-200);
 }
 
 .accessories-group--kit .accessories-group__label {
-  color: #0f766e;
+  color: var(--color-accent-700);
 }
 
 /* ── Related article ── */
@@ -640,26 +640,26 @@ const structuredData = [{
   gap: 1rem;
   padding: 1.25rem 1.5rem;
   border-radius: 1rem;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border: 1px solid var(--color-slate-200);
+  background: var(--color-slate-50);
   text-decoration: none;
   transition: border-color 200ms ease, background-color 200ms ease;
 }
 .related-article-card:hover {
-  border-color: #99f6e4;
-  background: #f0fdfa;
+  border-color: var(--color-accent-200);
+  background: var(--color-accent-50);
 }
 .related-article-card__eyebrow {
   flex-basis: 100%;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 .related-article-card__title {
   font-size: 1rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
 }
 .related-article-card__cta {
   display: inline-flex;
@@ -668,7 +668,7 @@ const structuredData = [{
   flex-shrink: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #0d9488;
+  color: var(--color-accent-600);
 }
 .related-article-card__cta svg {
   width: 0.875rem;

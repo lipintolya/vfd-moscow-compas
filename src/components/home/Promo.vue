@@ -72,7 +72,7 @@ function toggleExpanded(id: string) {
         <h2 id="promo-heading" class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">
           Акции и специальные предложения
         </h2>
-        <p class="mt-3 text-sm font-semibold uppercase tracking-wide text-teal-600">
+        <p class="mt-3 text-sm font-semibold uppercase tracking-wide text-accent-600">
           Только в салоне ВФД в ТЦ «Компас»
         </p>
         <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">
@@ -82,8 +82,8 @@ function toggleExpanded(id: string) {
       </header>
 
       <!-- ── Empty state ── -->
-      <div v-if="activePromos.length === 0" class="py-20 text-center bg-gray-50 rounded-3xl">
-        <p class="text-lg text-gray-500">Нет активных акций. Следите за обновлениями 👀</p>
+      <div v-if="activePromos.length === 0" class="py-20 text-center bg-slate-50 rounded-3xl">
+        <p class="text-lg text-slate-500">Нет активных акций. Следите за обновлениями 👀</p>
       </div>
 
       <!-- ── Promos grid — картинка крупная (h-96), описание свёрнуто за
@@ -101,14 +101,14 @@ function toggleExpanded(id: string) {
           :key="promo.id"
         >
           <div
-            class="group flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white transition-[opacity,transform,border-color,box-shadow] duration-600 ease-out hover:border-teal-400 hover:shadow-lg motion-reduce:transition-none"
+            class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-[opacity,transform,border-color,box-shadow] duration-600 ease-out hover:border-accent-400 hover:shadow-lg motion-reduce:transition-none"
             :class="visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'"
             :style="{ transitionDelay: visible ? `${index * 100}ms` : '0ms' }"
           >
             <!-- Image — аспект вместо фикс. высоты: карточка одной ширины
                  на каждом брейкпоинте (grid-cols-1/2/3), но h-96 давал бы
                  разное соотношение сторон на разной ширине карточки. -->
-            <div class="relative aspect-4/3 w-full overflow-hidden bg-gray-100">
+            <div class="relative aspect-4/3 w-full overflow-hidden bg-slate-100">
               <img
                 :src="promo.image"
                 :srcset="promo.imageSrcset"
@@ -124,7 +124,7 @@ function toggleExpanded(id: string) {
               <!-- Discount badge -->
               <span
                 v-if="promo.discount"
-                class="absolute top-3 right-3 bg-teal-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm"
+                class="absolute top-3 right-3 bg-accent-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm"
                 :aria-label="`Скидка: ${promo.discount}`"
               >
                 {{ promo.discount }}
@@ -133,7 +133,7 @@ function toggleExpanded(id: string) {
               <!-- Days left badge — считается от new Date(), см. clientReady выше -->
               <span
                 v-if="clientReady"
-                class="absolute bottom-3 left-3 bg-white/95 text-gray-900 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
+                class="absolute bottom-3 left-3 bg-white/95 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm"
                 :aria-label="`Осталось ${getDaysLeft(promo.validUntil)} дней`"
               >
                 {{ getDaysLeft(promo.validUntil) }} дн.
@@ -142,12 +142,12 @@ function toggleExpanded(id: string) {
 
             <!-- Content -->
             <div class="p-5 sm:p-6 flex flex-col flex-1">
-              <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">{{ promo.title }}</h3>
-              <p class="text-sm text-teal-600 font-medium mt-1 mb-3">{{ promo.subtitle }}</p>
+              <h3 class="text-lg font-semibold text-slate-900 line-clamp-2">{{ promo.title }}</h3>
+              <p class="text-sm text-accent-600 font-medium mt-1 mb-3">{{ promo.subtitle }}</p>
 
               <button
                 type="button"
-                class="inline-flex w-fit items-center gap-1 text-sm font-semibold text-gray-500 transition-colors hover:text-gray-700 focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2"
+                class="inline-flex w-fit items-center gap-1 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-2"
                 :aria-expanded="expandedIds.has(promo.id)"
                 @click="toggleExpanded(promo.id)"
               >
@@ -161,13 +161,13 @@ function toggleExpanded(id: string) {
                 </svg>
               </button>
 
-              <p v-if="expandedIds.has(promo.id)" class="mt-3 text-sm text-gray-600 leading-relaxed">{{ promo.description }}</p>
+              <p v-if="expandedIds.has(promo.id)" class="mt-3 text-sm text-slate-600 leading-relaxed">{{ promo.description }}</p>
 
               <!-- Footer -->
-              <div class="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
+              <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-100">
                 <time
                   :datetime="promo.validUntil"
-                  class="text-xs text-gray-500"
+                  class="text-xs text-slate-500"
                 >
                   До {{ formatDate(promo.validUntil) }}
                 </time>
@@ -175,7 +175,7 @@ function toggleExpanded(id: string) {
                 <a
                   v-if="promo.ctaText"
                   :href="promo.ctaLink || '#'"
-                  class="inline-flex items-center gap-1 text-sm font-semibold text-teal-600 transition-transform hover:translate-x-0.5 focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2"
+                  class="inline-flex items-center gap-1 text-sm font-semibold text-accent-600 transition-transform hover:translate-x-0.5 focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-2"
                 >
                   {{ promo.ctaText }}
                   <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -193,7 +193,7 @@ function toggleExpanded(id: string) {
       <div v-if="activePromos.length > 3" class="mt-8 text-center">
         <a
           href="/akcii/"
-          class="inline-flex items-center gap-1 text-sm font-semibold text-teal-600 hover:text-teal-700"
+          class="inline-flex items-center gap-1 text-sm font-semibold text-accent-600 hover:text-accent-700"
         >
           Все акции
           <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">

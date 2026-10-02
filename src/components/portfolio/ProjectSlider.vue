@@ -122,7 +122,7 @@ onBeforeUnmount(() => {
         :aria-label="`Фото ${i + 1}`"
         :class="[
           'flex-none w-16 h-16 overflow-hidden rounded-lg border-2 transition-colors',
-          i === current ? 'border-teal-500' : 'border-transparent hover:border-slate-300'
+          i === current ? 'border-accent-500' : 'border-transparent hover:border-slate-300'
         ]"
       >
         <img
@@ -257,7 +257,7 @@ onBeforeUnmount(() => {
   max-height: 85vh;
   object-fit: contain;
   border-radius: 0.5rem;
-  background: #111;
+  background: var(--color-slate-900);
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
 }
 

@@ -30,7 +30,7 @@ const dateStr = publishDate.toLocaleDateString('ru-RU', {
 
 <a
   href={href}
-  class="group flex flex-col h-full rounded-2xl border border-slate-200 bg-white overflow-hidden hover:border-teal-400 hover:shadow-lg transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2"
+  class="group flex flex-col h-full rounded-2xl border border-slate-200 bg-white overflow-hidden hover:border-accent-400 hover:shadow-lg transition-[border-color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-2"
 >
   <!-- Cover image — 16:9 (1920×1080) -->
   <div class="relative aspect-video overflow-hidden bg-slate-100 shrink-0">
@@ -66,7 +66,7 @@ const dateStr = publishDate.toLocaleDateString('ru-RU', {
       {dateStr}
     </time>
 
-    <h2 class="text-base font-medium leading-snug text-slate-900 mb-2 group-hover:text-teal-600 transition-colors duration-200 line-clamp-3">
+    <h2 class="text-base font-medium leading-snug text-slate-900 mb-2 group-hover:text-accent-600 transition-colors duration-200 line-clamp-3">
       {title}
     </h2>
 
@@ -74,7 +74,7 @@ const dateStr = publishDate.toLocaleDateString('ru-RU', {
       {description}
     </p>
 
-    <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-teal-600 group-hover:gap-2 transition-[gap] duration-200" aria-hidden="true">
+    <span class="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-accent-600 group-hover:gap-2 transition-[gap] duration-200" aria-hidden="true">
       Читать
       <svg viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0" aria-hidden="true">
         <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>

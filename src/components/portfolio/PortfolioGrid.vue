@@ -189,7 +189,7 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   height: 2.75rem;
   border-radius: 0.5rem;
   overflow: hidden;
-  background: #f1f0ec;
+  background: var(--color-slate-100);
 }
 .pf-cat__thumb img { width: 100%; height: 100%; object-fit: cover; }
 .pf-cat__label {
@@ -237,7 +237,7 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   aspect-ratio: 3 / 4;
   overflow: hidden;
   border-radius: 0.5rem;
-  background: #f1f0ec;
+  background: var(--color-slate-100);
 }
 .pf-card__img {
   width: 100%;

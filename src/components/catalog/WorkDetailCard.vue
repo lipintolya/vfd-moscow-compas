@@ -178,7 +178,7 @@ onUnmounted(() => {
             :key="img"
             type="button"
             class="relative h-16 w-16 shrink-0 snap-start overflow-hidden rounded-xl border-2 transition-colors duration-200 motion-reduce:transition-none sm:h-20 sm:w-20"
-            :class="i === activeIndex ? 'border-teal-600' : 'border-transparent hover:border-slate-300'"
+            :class="i === activeIndex ? 'border-accent-600' : 'border-transparent hover:border-slate-300'"
             :aria-current="i === activeIndex"
             :aria-label="`Показать фото ${i + 1} из ${work.images.length}`"
             @click="setActive(i)"

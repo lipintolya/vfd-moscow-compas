@@ -20,7 +20,7 @@ export const CATEGORY_LABELS: Record<WorkCategory, string> = {
     глаз различают категории в сетке (сейчас все были одинаковым teal). */
 export const CATEGORY_BADGE_COLORS: Record<WorkCategory, string> = {
   interior:   'bg-[oklch(50.5%_0.213_27.518)]', // красный
-  hidden:     'bg-teal-600',                    // фирменный teal — флагманский продукт
+  hidden:     'bg-accent-600',                  // фирменный акцент — флагманский продукт
   partitions: 'bg-indigo-600',                  // холодный синий — алюминий/стекло
   entrance:   'bg-amber-600',                   // тёплый янтарный — входная группа
 }
@@ -29,7 +29,7 @@ export const CATEGORY_BADGE_COLORS: Record<WorkCategory, string> = {
     отдельной точки-маркера перед словом (убрали как AI-slop-паттерн). */
 export const CATEGORY_TEXT_COLORS: Record<WorkCategory, string> = {
   interior:   'text-[oklch(50.5%_0.213_27.518)]',
-  hidden:     'text-teal-600',
+  hidden:     'text-accent-600',
   partitions: 'text-indigo-600',
   entrance:   'text-amber-600',
 }

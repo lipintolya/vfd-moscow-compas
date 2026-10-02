@@ -46,21 +46,21 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
 .dcard {
   display: flex;
   flex-direction: column;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-slate-200);
   border-radius: 1rem;
   overflow: hidden;
   background: #fff;
   transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
 }
 .dcard:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border-color: var(--color-slate-300);
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--color-slate-900) 8%, transparent);
   transform: translateY(-3px);
 }
 
 .dcard__media {
   aspect-ratio: 3 / 4;
-  background: #f4f6f9;
+  background: var(--color-slate-50);
   overflow: hidden;
 }
 .dcard__media img {
@@ -78,7 +78,7 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
 .dcard__media--contain {
   aspect-ratio: 4 / 3;
   background: #fff;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-slate-100);
 }
 .dcard__media--contain img {
   object-fit: contain;
@@ -93,8 +93,8 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: #cbd5e1;
-  background: linear-gradient(135deg, #f8fafc, #eef2f7);
+  color: var(--color-slate-300);
+  background: linear-gradient(135deg, var(--color-slate-50), var(--color-slate-100));
 }
 .dcard__ph svg { width: 2.25rem; height: 2.25rem; }
 .dcard__ph span {
@@ -102,7 +102,7 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--color-slate-400);
 }
 
 .dcard__body {
@@ -116,7 +116,7 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
   font-size: 1.0625rem;
   font-weight: 500;
   letter-spacing: -0.01em;
-  color: var(--color-ink, #0f172a);
+  color: var(--color-ink, var(--color-slate-900));
 }
 .dcard__tags {
   list-style: none !important;
@@ -132,9 +132,9 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
   margin: 0 !important;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #0d9488;
-  background: #f0fdfa;
-  border: 1px solid #99f6e4;
+  color: var(--color-accent-600);
+  background: var(--color-accent-50);
+  border: 1px solid var(--color-accent-200);
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
   white-space: nowrap;
@@ -142,7 +142,7 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
 .dcard__text {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 .dcard__text :global(p) { margin: 0; }
 .dcard__text :global(p + p) { margin-top: 0.5rem; }

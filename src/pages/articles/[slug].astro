@@ -95,9 +95,9 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
         <!-- Breadcrumb -->
         <nav aria-label="Хлебные крошки" class="mb-6">
           <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
-            <li><a href="/" class="hover:text-teal-600 transition-colors">Главная</a></li>
+            <li><a href="/" class="hover:text-accent-600 transition-colors">Главная</a></li>
             <li aria-hidden="true" class="text-slate-300">/</li>
-            <li><a href="/articles/" class="hover:text-teal-600 transition-colors">Статьи</a></li>
+            <li><a href="/articles/" class="hover:text-accent-600 transition-colors">Статьи</a></li>
             <li aria-hidden="true" class="text-slate-300">/</li>
             <li class="font-medium text-slate-700 truncate max-w-52">{article.data.title}</li>
           </ol>
@@ -181,7 +181,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
           <div class="mt-10 pt-2">
             <a
               href="/articles/"
-              class="inline-flex items-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+              class="inline-flex items-center gap-2 text-sm font-semibold text-accent-600 hover:text-accent-700 transition-colors"
             >
               <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">
                 <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -269,12 +269,12 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
     border-spacing: 0;
     margin: 2rem 0;
     font-size: 0.9375rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--color-slate-200);
     border-radius: 1rem;
     overflow: hidden;
   }
   .article-body :global(thead th) {
-    background: #0f172a;
+    background: var(--color-slate-900);
     color: #fff;
     font-weight: 600;
     padding: 0.9rem 1.15rem;
@@ -286,15 +286,15 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
     padding: 0.85rem 1.15rem;
     text-align: left;
     vertical-align: top;
-    border-top: 1px solid #eef2f7;
+    border-top: 1px solid var(--color-slate-100);
     color: var(--color-body);
   }
-  .article-body :global(tbody tr:nth-child(even)) { background: #f8fafc; }
+  .article-body :global(tbody tr:nth-child(even)) { background: var(--color-slate-50); }
   .article-body :global(tbody td:first-child) {
     font-weight: 600;
     color: var(--color-ink);
   }
-  .article-body :global(tbody tr:hover) { background: #f0fdfa; }
+  .article-body :global(tbody tr:hover) { background: var(--color-accent-50); }
   @media (max-width: 640px) {
     .article-body :global(table) {
       display: block;

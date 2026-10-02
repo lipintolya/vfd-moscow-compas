@@ -27,7 +27,7 @@ defineEmits<{
       type="button"
       class="min-h-11 min-w-11 rounded-lg border-2 text-sm font-medium transition disabled:cursor-default"
       :class="page === currentPage
-        ? 'border-teal-600 bg-teal-600 text-white'
+        ? 'border-accent-600 bg-accent-600 text-white'
         : page === '...'
           ? 'border-transparent text-slate-400 opacity-45'
           : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'"

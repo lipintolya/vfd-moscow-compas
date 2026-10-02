@@ -260,8 +260,8 @@ onUnmounted(() => {
       <div
         class="flex items-center justify-between rounded-full border px-5 py-3 transition-all duration-300"
         :class="scrolled
-          ? 'bg-white/95 backdrop-blur-md border-gray-200 shadow-[0_4px_20px_rgba(0,0,0,0.10)]'
-          : 'bg-white/88 backdrop-blur-sm border-gray-200'"
+          ? 'bg-white/95 backdrop-blur-md border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.10)]'
+          : 'bg-white/88 backdrop-blur-sm border-slate-200'"
       >
 
         <!-- Logo -->
@@ -269,7 +269,7 @@ onUnmounted(() => {
           <div class="relative w-9 h-9 flex items-center justify-center">
             <div
               v-if="!logoLoaded && !logoError"
-              class="absolute inset-0 bg-gray-200 rounded-lg animate-pulse"
+              class="absolute inset-0 bg-slate-200 rounded-lg animate-pulse"
               aria-hidden="true"
             />
             <img
@@ -288,7 +288,7 @@ onUnmounted(() => {
             <!-- Fallback если картинка не загрузилась -->
             <div
               v-if="logoError"
-              class="w-9 h-9 rounded-lg bg-linear-to-br from-gray-700 to-gray-900
+              class="w-9 h-9 rounded-lg bg-linear-to-br from-slate-700 to-slate-900
                      text-white flex items-center justify-center text-xs font-semibold"
               aria-hidden="true"
             >
@@ -298,9 +298,9 @@ onUnmounted(() => {
           <span
             class="hidden sm:block overflow-hidden whitespace-nowrap text-sm font-semibold tracking-wide
                    transition-colors duration-300 ease-in-out
-                   group-hover:text-teal-600"
+                   group-hover:text-accent-600"
           >
-            ДВЕРИ НА КАШИРИНЫХ
+            ДВЕРИ В ТЦ «КОМПАС»
           </span>
         </a>
 
@@ -317,8 +317,8 @@ onUnmounted(() => {
               :href="link.href"
               class="-mx-2.5 -my-1.5 rounded-lg px-2.5 py-1.5 transition-colors duration-200"
               :class="isActive(link.href)
-                ? 'text-gray-900 font-semibold'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
+                ? 'text-slate-900 font-semibold'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'"
               :aria-current="isActive(link.href) ? 'page' : undefined"
             >{{ link.label }}</a>
 
@@ -335,8 +335,8 @@ onUnmounted(() => {
                 :href="link.href"
                 class="group/nav flex items-center gap-0.5 -mx-2.5 -my-1.5 rounded-lg px-2.5 py-1.5 transition-colors duration-200"
                 :class="currentPath.startsWith('/catalog')
-                  ? 'text-gray-900 font-semibold'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
+                  ? 'text-slate-900 font-semibold'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'"
                 :aria-current="isActive(link.href) ? 'page' : undefined"
                 :aria-haspopup="true"
                 :aria-expanded="catalogOpen"
@@ -356,7 +356,7 @@ onUnmounted(() => {
                 <div
                   v-if="catalogOpen"
                   class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-52 rounded-2xl
-                         bg-white border border-gray-100 shadow-lg shadow-black/5 p-1.5 z-50"
+                         bg-white border border-slate-100 shadow-lg shadow-black/5 p-1.5 z-50"
                   role="menu"
                   aria-label="Категории каталога"
                 >
@@ -364,13 +364,13 @@ onUnmounted(() => {
                     v-for="item in CATALOG_DROPDOWN"
                     :key="item.href"
                     :href="item.href"
-                    class="flex flex-col px-3.5 py-2.5 rounded-xl hover:bg-gray-50
+                    class="flex flex-col px-3.5 py-2.5 rounded-xl hover:bg-slate-50
                            transition-colors duration-150 text-left"
                     role="menuitem"
                     @click="catalogOpen = false"
                   >
-                    <span class="text-sm font-semibold text-gray-900">{{ item.label }}</span>
-                    <span class="text-xs text-gray-400 mt-0.5">{{ item.desc }}</span>
+                    <span class="text-sm font-semibold text-slate-900">{{ item.label }}</span>
+                    <span class="text-xs text-slate-400 mt-0.5">{{ item.desc }}</span>
                   </a>
                 </div>
               </Transition>
@@ -389,8 +389,8 @@ onUnmounted(() => {
                 :href="link.href"
                 class="group/nav flex items-center gap-0.5 -mx-2.5 -my-1.5 rounded-lg px-2.5 py-1.5 transition-colors duration-200"
                 :class="currentPath.startsWith('/about') || currentPath.startsWith('/o-fabrike')
-                  ? 'text-gray-900 font-semibold'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'"
+                  ? 'text-slate-900 font-semibold'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'"
                 :aria-current="isActive(link.href) ? 'page' : undefined"
                 :aria-haspopup="true"
                 :aria-expanded="aboutOpen"
@@ -410,7 +410,7 @@ onUnmounted(() => {
                 <div
                   v-if="aboutOpen"
                   class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 rounded-2xl
-                         bg-white border border-gray-100 shadow-lg shadow-black/5 p-1.5 z-50"
+                         bg-white border border-slate-100 shadow-lg shadow-black/5 p-1.5 z-50"
                   role="menu"
                   aria-label="О компании"
                 >
@@ -418,13 +418,13 @@ onUnmounted(() => {
                     v-for="item in ABOUT_DROPDOWN"
                     :key="item.href"
                     :href="item.href"
-                    class="flex flex-col px-3.5 py-2.5 rounded-xl hover:bg-gray-50
+                    class="flex flex-col px-3.5 py-2.5 rounded-xl hover:bg-slate-50
                            transition-colors duration-150 text-left"
                     role="menuitem"
                     @click="aboutOpen = false"
                   >
-                    <span class="text-sm font-semibold text-gray-900">{{ item.label }}</span>
-                    <span class="text-xs text-gray-400 mt-0.5">{{ item.desc }}</span>
+                    <span class="text-sm font-semibold text-slate-900">{{ item.label }}</span>
+                    <span class="text-xs text-slate-400 mt-0.5">{{ item.desc }}</span>
                   </a>
                 </div>
               </Transition>
@@ -445,7 +445,7 @@ onUnmounted(() => {
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="`${s.label} (открывается в новой вкладке)`"
-              class="flex h-9 w-9 items-center justify-center rounded-full transition-[background-color,transform] duration-200 hover:scale-105 hover:bg-gray-50"
+              class="flex h-9 w-9 items-center justify-center rounded-full transition-[background-color,transform] duration-200 hover:scale-105 hover:bg-slate-50"
             >
               <img :src="s.icon" :alt="s.label" class="w-7 h-7" width="28" height="28" loading="eager" fetchpriority="high" />
             </a>
@@ -477,19 +477,19 @@ onUnmounted(() => {
                   aria-modal="false"
                   class="absolute top-full right-0 mt-2.5 w-80 rounded-3xl
                          bg-white/95 backdrop-blur-xl ring-1 ring-black/5
-                         shadow-[0_24px_60px_-16px_rgba(15,23,42,0.22)] p-1.5 z-50"
+                         shadow-[0_24px_60px_-16px_color-mix(in_srgb,var(--color-slate-900)_22%,transparent)] p-1.5 z-50"
                 >
                   <div class="rounded-[1.25rem] bg-white p-5 space-y-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
 
                     <div>
-                      <p class="text-[0.6875rem] font-semibold text-gray-400 uppercase tracking-[0.14em] mb-2">Телефоны</p>
+                      <p class="text-[0.6875rem] font-semibold text-slate-400 uppercase tracking-[0.14em] mb-2">Телефоны</p>
                       <div class="flex flex-col gap-1">
                         <a
                           v-for="p in CONTACTS.phones"
                           :key="p.raw"
                           :href="`tel:${p.raw}`"
                           class="group flex items-center gap-3 rounded-xl px-2 py-2 -mx-2
-                                 font-semibold text-gray-800 hover:bg-teal-50/70 hover:text-teal-700
+                                 font-semibold text-slate-800 hover:bg-accent-50/70 hover:text-accent-700
                                  transition-colors duration-200"
                         >
                           <img src="/icons/phone-call.webp" alt="" class="w-8 h-8 shrink-0" loading="eager" fetchpriority="high" />
@@ -503,31 +503,31 @@ onUnmounted(() => {
                          в одну склеенную через «·» строку рвались неровно на
                          такой ширине. Вертикальный стек читается спокойнее. -->
                     <div class="flex flex-col gap-2.5">
-                      <div class="rounded-xl bg-gray-50 p-3.5">
-                        <p class="text-[0.6875rem] font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Адрес</p>
-                        <p class="text-gray-800 leading-snug text-step-0">{{ CONTACTS.address }}</p>
-                        <p class="text-gray-500 leading-snug text-xs mt-0.5">{{ CONTACTS.entrance }}</p>
+                      <div class="rounded-xl bg-slate-50 p-3.5">
+                        <p class="text-[0.6875rem] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Адрес</p>
+                        <p class="text-slate-800 leading-snug text-step-0">{{ CONTACTS.address }}</p>
+                        <p class="text-slate-500 leading-snug text-xs mt-0.5">{{ CONTACTS.entrance }}</p>
                       </div>
-                      <div class="rounded-xl bg-gray-50 p-3.5">
-                        <p class="text-[0.6875rem] font-semibold text-gray-400 uppercase tracking-widest mb-1.5">Часы работы</p>
-                        <p class="text-gray-800 leading-snug text-step-0">{{ CONTACTS.worktimeWeekdays }}</p>
-                        <p class="text-gray-500 leading-snug text-xs mt-0.5">{{ CONTACTS.worktimeWeekend }}</p>
+                      <div class="rounded-xl bg-slate-50 p-3.5">
+                        <p class="text-[0.6875rem] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Часы работы</p>
+                        <p class="text-slate-800 leading-snug text-step-0">{{ CONTACTS.worktimeWeekdays }}</p>
+                        <p class="text-slate-500 leading-snug text-xs mt-0.5">{{ CONTACTS.worktimeWeekend }}</p>
                         <p
-                          class="mt-3 border-t border-gray-200/80 pt-2.5 text-sm leading-snug"
+                          class="mt-3 border-t border-slate-200/80 pt-2.5 text-sm leading-snug"
                           aria-live="polite"
                           aria-atomic="true"
                         >
-                          <span class="font-semibold" :class="isOpen ? 'text-teal-700' : 'text-gray-900'">{{ statusTitle }}</span>
-                          <span class="block text-gray-500">{{ statusDetail }}</span>
+                          <span class="font-semibold" :class="isOpen ? 'text-accent-700' : 'text-slate-900'">{{ statusTitle }}</span>
+                          <span class="block text-slate-500">{{ statusDetail }}</span>
                         </p>
                       </div>
                     </div>
 
                     <div>
-                      <p class="text-[0.6875rem] font-semibold text-gray-400 uppercase tracking-[0.14em] mb-1.5">Email</p>
+                      <p class="text-[0.6875rem] font-semibold text-slate-400 uppercase tracking-[0.14em] mb-1.5">Email</p>
                       <a
                         :href="`mailto:${CONTACTS.email}`"
-                        class="font-medium text-gray-700 underline decoration-gray-300 underline-offset-4 hover:text-teal-600 hover:decoration-teal-400 transition-colors duration-200"
+                        class="font-medium text-slate-700 underline decoration-slate-300 underline-offset-4 hover:text-accent-600 hover:decoration-accent-400 transition-colors duration-200"
                       >
                         {{ CONTACTS.email }}
                       </a>
@@ -536,7 +536,7 @@ onUnmounted(() => {
                     <a
                       href="/contacts/"
                       class="group flex items-center justify-between gap-3 rounded-full bg-ink pl-5 pr-1.5 py-1.5
-                             font-semibold text-white transition-colors duration-200 hover:bg-gray-800"
+                             font-semibold text-white transition-colors duration-200 hover:bg-slate-800"
                       @click="closeContacts(false)"
                     >
                       Перейти к контактам
@@ -574,7 +574,7 @@ onUnmounted(() => {
               ref="burgerBtnRef"
               type="button"
               class="burger-btn w-10 h-10 flex items-center justify-center rounded-xl
-                     hover:bg-gray-100 transition-colors shrink-0"
+                     hover:bg-slate-100 transition-colors shrink-0"
               :class="{ 'is-open': mobileOpen }"
               :aria-expanded="mobileOpen"
               :aria-label="mobileOpen ? 'Закрыть меню' : 'Открыть меню'"
@@ -736,7 +736,7 @@ onUnmounted(() => {
             <div class="flex items-center gap-3">
               <span
                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-                :class="isOpen ? 'bg-teal-400/15 text-teal-300' : 'bg-white/10 text-white'"
+                :class="isOpen ? 'bg-accent-400/15 text-accent-300' : 'bg-white/10 text-white'"
                 aria-hidden="true"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -745,7 +745,7 @@ onUnmounted(() => {
                 </svg>
               </span>
               <div class="min-w-0">
-                <p class="font-semibold" :class="isOpen ? 'text-teal-300' : 'text-white'">{{ statusTitle }}</p>
+                <p class="font-semibold" :class="isOpen ? 'text-accent-300' : 'text-white'">{{ statusTitle }}</p>
                 <p class="text-white/55">{{ statusDetail }}</p>
               </div>
             </div>
@@ -841,6 +841,6 @@ onUnmounted(() => {
   bottom: 0.875rem;
   width: 3px;
   border-radius: 2px;
-  background: var(--color-accent, #14b8a6);
+  background: var(--color-accent, var(--color-accent-500));
 }
 </style>

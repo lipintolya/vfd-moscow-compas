@@ -33,7 +33,7 @@ const twoCols = computed(() => props.cols === 2 && props.items.length % 2 === 0)
       :key="item"
       class="flex items-start gap-3 border-b border-slate-200 py-2.5 text-[0.9375rem] leading-snug text-slate-800"
     >
-      <span class="mt-[0.68em] h-px w-3 shrink-0 bg-teal-600" aria-hidden="true" />
+      <span class="mt-[0.68em] h-px w-3 shrink-0 bg-accent-600" aria-hidden="true" />
       <span>{{ item }}</span>
     </li>
   </ul>

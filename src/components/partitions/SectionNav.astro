@@ -95,9 +95,9 @@ const {
     border: 1px solid rgba(255,255,255,0.6);
     box-shadow:
       0 1px 1px rgba(255,255,255,0.8) inset,
-      0 -1px 1px rgba(15,23,42,0.04) inset,
-      0 10px 30px -8px rgba(15,23,42,0.22),
-      0 2px 8px rgba(15,23,42,0.08);
+      0 -1px 1px color-mix(in srgb, var(--color-slate-900) 4%, transparent) inset,
+      0 10px 30px -8px color-mix(in srgb, var(--color-slate-900) 22%, transparent),
+      0 2px 8px color-mix(in srgb, var(--color-slate-900) 8%, transparent);
   }
   /* Верхняя световая кромка — тонкая дуга света вдоль верхнего края,
      как на настоящей выпуклой стеклянной поверхности. */
@@ -129,7 +129,7 @@ const {
   .pt-snav__link.pt-snav--active {
     background: var(--color-graphite);
     color: #fff;
-    box-shadow: 0 2px 8px -2px rgba(24,24,26,0.5);
+    box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--color-graphite) 50%, transparent);
   }
 </style>
 

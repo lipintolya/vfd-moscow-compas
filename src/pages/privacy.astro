@@ -191,44 +191,44 @@ const { fullName, requisites, address } = companyLegalInfo
 .prv-wrap {
   max-width: 820px;
   margin: 0 auto;
-  color: #1e293b;
+  color: var(--color-slate-800);
   line-height: 1.75;
   font-size: 0.9375rem;
 }
 .prv-title {
   font-size: clamp(1.5rem, 3.5vw, 2.125rem);
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   margin-bottom: 2.5rem;
   padding-bottom: 1.25rem;
-  border-bottom: 2px solid #0d9488;
+  border-bottom: 2px solid var(--color-accent-600);
 }
 .prv-section { margin-bottom: 0.25rem; }
 h2 {
   font-size: 1rem;
   font-weight: 600;
-  color: #0f172a;
+  color: var(--color-slate-900);
   margin: 2rem 0 0.875rem;
   padding: 0.625rem 1rem;
-  background: #f0fdf9;
-  border-left: 3px solid #0d9488;
+  background: var(--color-accent-50);
+  border-left: 3px solid var(--color-accent-600);
   border-radius: 0 0.5rem 0.5rem 0;
 }
-p { margin-bottom: 0.75rem; color: #334155; }
+p { margin-bottom: 0.75rem; color: var(--color-slate-700); }
 ul { padding-left: 1.5rem; margin-bottom: 0.875rem; }
-li { margin-bottom: 0.5rem; color: #334155; }
-a { color: #0d9488; text-decoration: underline; }
-a:hover { color: #0f766e; }
-strong { color: #0f172a; font-weight: 600; }
+li { margin-bottom: 0.5rem; color: var(--color-slate-700); }
+a { color: var(--color-accent-600); text-decoration: underline; }
+a:hover { color: var(--color-accent-700); }
+strong { color: var(--color-slate-900); font-weight: 600; }
 .prv-table-wrap {
   overflow-x: auto;
   margin: 1rem 0;
   border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
 }
 .prv-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
 .prv-table th {
-  background: #0d9488;
+  background: var(--color-accent-600);
   color: white;
   padding: 0.75rem 1rem;
   text-align: left;
@@ -236,17 +236,17 @@ strong { color: #0f172a; font-weight: 600; }
 }
 .prv-table td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-slate-200);
   vertical-align: top;
-  color: #334155;
+  color: var(--color-slate-700);
 }
 .prv-table tr:last-child td { border-bottom: none; }
-.prv-table tr:nth-child(even) td { background: #f8fafc; }
+.prv-table tr:nth-child(even) td { background: var(--color-slate-50); }
 .prv-requisites {
   margin-top: 2rem;
   padding: 1.25rem 1.5rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--color-slate-50);
+  border: 1px solid var(--color-slate-200);
   border-radius: 0.875rem;
   display: flex;
   flex-direction: column;

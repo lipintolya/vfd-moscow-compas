@@ -190,12 +190,12 @@ function openDecorLightbox() {
   min-height: 0;
   border-radius: 1.25rem;
   overflow: hidden;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   cursor: zoom-in;
   transition: border-color 200ms ease;
 }
 .dlv__stage:hover {
-  border-color: #94a3b8;
+  border-color: var(--color-slate-400);
 }
 
 .dlv__photo {
@@ -225,7 +225,7 @@ function openDecorLightbox() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #475569;
+  color: var(--color-slate-600);
   opacity: 0;
   transform: scale(0.85);
   transition: opacity 180ms ease, transform 180ms ease;
@@ -248,7 +248,7 @@ function openDecorLightbox() {
   border-radius: 9999px;
   border: none;
   background: rgba(255, 255, 255, 0.92);
-  color: #0f172a;
+  color: var(--color-slate-900);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -274,13 +274,13 @@ function openDecorLightbox() {
   left: 0.75rem;
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
-  background: rgba(15, 23, 42, 0.72);
+  background: color-mix(in srgb, var(--color-slate-900) 72%, transparent);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.1em;
-  color: #e2e8f0;
+  color: var(--color-slate-200);
   pointer-events: none;
   z-index: 2;
 }
@@ -292,7 +292,7 @@ function openDecorLightbox() {
   display: flex;
   flex-direction: column;
   border-radius: 1.25rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
@@ -332,19 +332,19 @@ function openDecorLightbox() {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #0d9488;
+  color: var(--color-accent-600);
 }
 .dlv__decor-title {
   margin: 0;
   font-size: clamp(1rem, 1.6vw, 1.1875rem);
   font-weight: 500;
-  color: #0f172a;
+  color: var(--color-slate-900);
   line-height: 1.22;
 }
 .dlv__decor-desc {
   margin: 0;
   font-size: clamp(0.875rem, 1.2vw, 0.9375rem);
-  color: #475569;
+  color: var(--color-slate-600);
   line-height: 1.65;
 }
 
@@ -364,8 +364,8 @@ function openDecorLightbox() {
 }
 .dlv__thumbs::-webkit-scrollbar { height: 5px; }
 .dlv__thumbs::-webkit-scrollbar-track { background: transparent; }
-.dlv__thumbs::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
-.dlv__thumbs::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+.dlv__thumbs::-webkit-scrollbar-thumb { background: var(--color-slate-200); border-radius: 3px; }
+.dlv__thumbs::-webkit-scrollbar-thumb:hover { background: var(--color-slate-300); }
 
 .dlv__thumb {
   width: 96px;
@@ -377,19 +377,19 @@ function openDecorLightbox() {
   gap: 0.375rem;
   padding: 0.5rem 0.375rem 0.4rem;
   border-radius: 0.75rem;
-  border: 1.5px solid #e2e8f0;
+  border: 1.5px solid var(--color-slate-200);
   background: #fff;
   cursor: pointer;
   transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
 }
 .dlv__thumb:hover {
-  border-color: #2dd4bf;
-  background: #f0fdfa;
+  border-color: var(--color-accent-400);
+  background: var(--color-accent-50);
 }
 .dlv__thumb--active {
-  border-color: #14b8a6;
-  background: #f0fdfa;
-  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.18);
+  border-color: var(--color-accent-500);
+  background: var(--color-accent-50);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-500) 18%, transparent);
 }
 
 .dlv__thumb-svg {
@@ -403,10 +403,10 @@ function openDecorLightbox() {
   font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-variant-numeric: tabular-nums;
 }
-.dlv__thumb--active .dlv__thumb-label { color: #0d9488; }
+.dlv__thumb--active .dlv__thumb-label { color: var(--color-accent-600); }
 
 /* ── Responsive ── */
 @media (max-width: 700px) {

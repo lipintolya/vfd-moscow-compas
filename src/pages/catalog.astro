@@ -44,9 +44,9 @@ const COATING_ACCENT: Record<string, { stripe: string; label: string; price: str
   protach: { stripe: 'border-l-violet-500', label: 'text-violet-700', price: 'text-violet-700' },
   emal:    { stripe: 'border-l-slate-600',  label: 'text-slate-700',  price: 'text-slate-700' },
 }
-const DEFAULT_ACCENT = { stripe: 'border-l-teal-500', label: 'text-teal-700', price: 'text-teal-700' }
+const DEFAULT_ACCENT = { stripe: 'border-l-accent-500', label: 'text-accent-700', price: 'text-accent-700' }
 const PANEL = 'border-slate-200 bg-white'
-const PILL_ACCENT = 'bg-graphite shadow-black/20 hover:bg-teal-600'
+const PILL_ACCENT = 'bg-graphite shadow-black/20 hover:bg-accent-600'
 
 /* Краткая выжимка покрытия для свёрнутого summary панели — раньше там
    был только счётчик «N серий», непонятно чем покрытия отличаются друг
@@ -208,7 +208,7 @@ const structuredData = canonicalUrl ? [
             {/* Полные карточки серий (фото+цена каждой) переехали на
                /catalog/series/ — здесь превью группы компактнее (см. ниже),
                но кому нужен весь список серий сразу — один клик отсюда. */}
-            <a href="/catalog/series/" class="mt-1 inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-teal-700 hover:text-teal-800">
+            <a href="/catalog/series/" class="mt-1 inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800">
               Все серии
               <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
@@ -448,7 +448,7 @@ const structuredData = canonicalUrl ? [
                 <li>
                   <a
                     href={`/catalog/${c.slug}/`}
-                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
                   >
                     {c.label}
                   </a>
@@ -464,7 +464,7 @@ const structuredData = canonicalUrl ? [
                 <li>
                   <a
                     href={`/catalog/${c.slug}/`}
-                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
                   >
                     {c.h1.replace(' в Москве', '')}
                   </a>
@@ -480,7 +480,7 @@ const structuredData = canonicalUrl ? [
                 <li>
                   <a
                     href={`/catalog/${c.slug}/`}
-                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+                    class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
                   >
                     {c.h1.replace(' в Москве', '')}
                   </a>

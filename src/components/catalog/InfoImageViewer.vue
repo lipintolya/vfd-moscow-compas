@@ -123,7 +123,7 @@ onUnmounted(() => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-slate-200);
   border-radius: 1rem;
   overflow: hidden;
   background: #fff;
@@ -136,31 +136,31 @@ onUnmounted(() => {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.875rem 1.125rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-slate-100);
 }
 .iiv-caption {
   font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #334155;
+  color: var(--color-slate-700);
 }
 .iiv-zoom {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   padding: 0.3rem 0.7rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-slate-200);
   border-radius: 9999px;
   background: #fff;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--color-slate-600);
   cursor: pointer;
   white-space: nowrap;
   transition: border-color 150ms ease, color 150ms ease;
 }
-.iiv-zoom:hover { border-color: #94a3b8; color: #0f172a; }
+.iiv-zoom:hover { border-color: var(--color-slate-400); color: var(--color-slate-900); }
 .iiv-zoom svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
 
 /* Image area */
@@ -170,7 +170,7 @@ onUnmounted(() => {
   flex: 1;
   padding: 1.25rem;
   border: none;
-  background: #f8fafc;
+  background: var(--color-slate-50);
   cursor: zoom-in;
 }
 .iiv-imgbtn img {
@@ -202,7 +202,7 @@ onUnmounted(() => {
    реальной, летербоксинг не будет выглядеть как баг. ── */
 .iiv--wide .iiv-imgbtn {
   padding: 0;
-  background: #f8fafc;
+  background: var(--color-slate-50);
 }
 .iiv--wide .iiv-imgbtn img {
   height: auto;

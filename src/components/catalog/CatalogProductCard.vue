@@ -112,7 +112,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
 
 <template>
   <article
-    class="group @container relative flex min-h-full flex-col rounded-2xl border border-slate-200 bg-white transition hover:border-teal-200 hover:shadow-lg hover:-translate-y-0.5"
+    class="group @container relative flex min-h-full flex-col rounded-2xl border border-slate-200 bg-white transition hover:border-accent-200 hover:shadow-lg hover:-translate-y-0.5"
     :class="isKitOpen ? 'z-30' : isDimmed ? 'pointer-events-none opacity-40 blur-[1px]' : ''"
     :data-kit-card="card.id"
     @touchstart.passive="onPhotoTouchStart"
@@ -157,7 +157,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
         </span>
         <span
           v-else-if="card.isPopular"
-          class="max-w-full truncate rounded-r-full bg-teal-600 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
+          class="max-w-full truncate rounded-r-full bg-accent-600 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
         >
           Выбор клиентов
         </span>
@@ -165,7 +165,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
 
       <span
         v-if="inStock"
-        class="absolute right-0 bottom-3 max-w-[85%] truncate rounded-l-full bg-teal-600 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white shadow-sm"
+        class="absolute right-0 bottom-3 max-w-[85%] truncate rounded-l-full bg-accent-600 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white shadow-sm"
       >
         В наличии
       </span>
@@ -192,7 +192,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
           type="button"
           class="h-6 w-6 shrink-0 rounded-full transition-transform active:scale-90 lg:h-5.5 lg:w-5.5"
           :class="[
-            idx === activeSwatchIdx ? 'ring-2 ring-offset-1 ring-teal-600' : '',
+            idx === activeSwatchIdx ? 'ring-2 ring-offset-1 ring-accent-600' : '',
             swatch.available === false
               ? 'border-2 border-dashed border-black/30'
               : 'border border-black/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.55)]',
@@ -238,7 +238,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
         <div v-if="kitPrice" class="relative z-10">
           <button
             type="button"
-            class="flex w-fit cursor-pointer items-start gap-1 text-left text-[0.6875rem] font-semibold text-teal-700 transition hover:text-teal-800"
+            class="flex w-fit cursor-pointer items-start gap-1 text-left text-[0.6875rem] font-semibold text-accent-700 transition hover:text-accent-800"
             :aria-expanded="isKitOpen"
             @click="emit('kit-toggle')"
           >

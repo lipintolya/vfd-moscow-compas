@@ -26,7 +26,7 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
            мобильном кнопка уходит под текст на всю ширину. -->
       <header class="mb-10 flex flex-col gap-6 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
         <div class="max-w-2xl">
-          <p class="mb-3 inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-xs font-medium uppercase tracking-widest text-teal-400">
+          <p class="mb-3 inline-flex items-center rounded-full border border-white/15 px-3 py-1 text-xs font-medium uppercase tracking-widest text-accent-400">
             Блог
           </p>
           <h2 id="articles-heading" class="text-3xl font-medium leading-tight tracking-tight text-white md:text-5xl">
@@ -39,7 +39,7 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
 
         <a
           href="/articles/"
-          class="inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-teal-400"
+          class="inline-flex w-fit shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors hover:bg-accent-400"
         >
           Все статьи
           <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5" aria-hidden="true">
@@ -58,17 +58,17 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
             <li>
               <a
                 href={`/articles/${slug}/`}
-                class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-graphite-card shadow-[0_1px_0_rgba(255,255,255,0.04)_inset] transition-colors duration-200 hover:border-white/20 hover:bg-[#28272C] focus-visible:outline-2 focus-visible:outline-teal-400 focus-visible:outline-offset-2 sm:flex-row sm:items-center sm:gap-8 sm:p-6 lg:gap-12 lg:p-10"
+                class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-graphite-card shadow-[0_1px_0_rgba(255,255,255,0.04)_inset] transition-colors duration-200 hover:border-white/20 hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-accent-400 focus-visible:outline-offset-2 sm:flex-row sm:items-center sm:gap-8 sm:p-6 lg:gap-12 lg:p-10"
               >
                 <div class="flex flex-1 flex-col p-6 sm:p-0">
                   <time
                     datetime={article.data.publishDate.toISOString()}
-                    class="mb-4 inline-flex w-fit items-center rounded-full border border-white/15 px-3 py-1 text-xs font-medium uppercase tracking-widest tabular-nums text-teal-400"
+                    class="mb-4 inline-flex w-fit items-center rounded-full border border-white/15 px-3 py-1 text-xs font-medium uppercase tracking-widest tabular-nums text-accent-400"
                   >
                     {dateStr(article.data.publishDate)}
                   </time>
 
-                  <h3 class="mb-3 text-2xl font-medium leading-tight tracking-tight text-white transition-colors duration-200 line-clamp-2 sm:text-3xl group-hover:text-teal-400">
+                  <h3 class="mb-3 text-2xl font-medium leading-tight tracking-tight text-white transition-colors duration-200 line-clamp-2 sm:text-3xl group-hover:text-accent-400">
                     {article.data.title}
                   </h3>
 
@@ -76,7 +76,7 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
                     {article.data.description}
                   </p>
 
-                  <span class="inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors group-hover:bg-teal-400" aria-hidden="true">
+                  <span class="inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition-colors group-hover:bg-accent-400" aria-hidden="true">
                     Читать статью
                     <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
                       <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>

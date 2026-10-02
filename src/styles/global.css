@@ -1,30 +1,69 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Design tokens → Tailwind utilities (text-ink, bg-ink, …)
-   Семантические алиасы для часто используемых значений,
-   чтобы не плодить «магические» hex в разметке.
+   ПАЛИТРА БРЕНДА — единственное место, где живут цвета сайта.
+   Сменить цветовую гамму = поменять две шкалы ниже.
+
+   accent-*  — фирменный акцент (кнопки, ссылки, бейджи, активные
+               состояния). Исходный сайт vfd74 — бирюза (teal); здесь
+               тёплая бронза. Утилиты: text-accent-600, bg-accent-50 …
+   slate-*   — нейтральная шкала (текст, фоны, границы, тени).
+               Переопределяет встроенную Tailwind slate: все slate-*
+               (и бывшие gray-*) утилиты сайта берут цвета отсюда.
+               Тёплый «stone»-подтон вместо холодного сине-серого.
+
+   В компонентах/scoped CSS — только var(--color-accent-500),
+   var(--color-slate-200) и т.п., никаких hex.
+   static — переменные выводятся всегда, даже если на них ссылаются
+   только из scoped-стилей Vue/Astro (сканер Tailwind их не видит).
+   Контраст (WCAG, на белом): accent-600 = 5.4, accent-700 = 7.5,
+   slate-500 = 4.8 — текст не светлее этих ступеней.
+   ============================================================ */
+@theme static {
+  --color-accent-50:  #faf6f0;
+  --color-accent-100: #f3e9da;
+  --color-accent-200: #e6d0b0;
+  --color-accent-300: #d5b182;
+  --color-accent-400: #c19259;
+  --color-accent-500: #a8773f;
+  --color-accent-600: #8d6132;
+  --color-accent-700: #714d2b;
+  --color-accent-800: #5c4027;
+  --color-accent-900: #4c3624;
+  --color-accent-950: #2a1c11;
+
+  --color-slate-50:  #fafaf9;
+  --color-slate-100: #f4f3f1;
+  --color-slate-200: #e7e5e2;
+  --color-slate-300: #d6d3cf;
+  --color-slate-400: #a8a29d;
+  --color-slate-500: #78716b;
+  --color-slate-600: #57524d;
+  --color-slate-700: #433e3a;
+  --color-slate-800: #2a2623;
+  --color-slate-900: #1c1917;
+  --color-slate-950: #0f0d0c;
+}
+
+/* ============================================================
+   Семантические токены → Tailwind-утилиты (text-ink, bg-accent, …).
+   Ссылаются на палитру выше — сами цветов не задают.
    ============================================================ */
 @theme {
-  /* Semantic color tokens → Tailwind utilities (text-accent, bg-accent, …) */
-  --color-ink:          #0f172a;  /* = slate-900 — заголовки, тёмные плашки */
-  --color-body:         #374151;  /* = gray-700 — основной текст */
-  --color-accent:       #14b8a6;  /* = teal-500 — акцент */
-  --color-accent-hover: #0d9488;  /* = teal-600 — hover акцента */
-  --color-accent-light: #ccfbf1;  /* = teal-100 — лёгкий фон акцента */
-  --color-fg:           #212124;  /* почти чёрный — иконки */
-  --color-graphite:      #18181a; /* тёмные плашки/карточки на светлом фоне —
-     единый тон для всех "тёмных бенто"-карточек по сайту (hero, Features,
-     Reviews, ContactsSection, ProcessSteps, PromoStripBanner) и фона тёмных
-     секций (LatestArticles), было 3 близких хардкод-значения
-     (#18181a/#1A191C/#0B0B0C) в разных компонентах */
-  --color-graphite-card: #232227; /* карточка НА тёмной секции (на тон
-     светлее --color-graphite) — LatestArticles, hover #28272C задан рядом
-     в компоненте (одноразовый, не токенизируем) */
-  --color-fg-muted:     #6b7280;  /* = gray-500 — приглушённый текст */
-  --color-fg-subtle:    #9ca3af;  /* = gray-400 — очень приглушённый */
-  --color-surface:      #ffffff;  /* белый фон карточек */
-  --color-border:       #e5e7eb;  /* = gray-200 — границы */
+  --color-ink:           var(--color-slate-900);  /* заголовки, тёмные плашки */
+  --color-body:          var(--color-slate-700);  /* основной текст */
+  --color-accent:        var(--color-accent-500); /* акцент */
+  --color-accent-hover:  var(--color-accent-600); /* hover акцента */
+  --color-accent-light:  var(--color-accent-100); /* лёгкий фон акцента */
+  --color-fg:            var(--color-slate-900);  /* почти чёрный — иконки, тёмные кнопки */
+  --color-graphite:      var(--color-slate-900);  /* тёмные «бенто»-карточки и тёмные
+     секции (hero, Features, Reviews, ContactsSection, ProcessSteps,
+     PromoStripBanner, LatestArticles) */
+  --color-graphite-card: var(--color-slate-800);  /* карточка НА тёмной секции */
+  --color-fg-muted:      var(--color-slate-500);  /* приглушённый текст */
+  --color-fg-subtle:     var(--color-slate-400);  /* очень приглушённый */
+  --color-surface:       #ffffff;                 /* фон карточек */
+  --color-border:        var(--color-slate-200);  /* границы */
 
   /* Брейкпоинт под широкие/ультраширокие мониторы (1920px+) — Tailwind из
      коробки останавливается на 2xl (1536px), выше контент просто центрируется
@@ -108,19 +147,11 @@
 }
 
 /* ============================================================
-   VFD DESIGN SYSTEM — CSS Custom Properties
+   DESIGN SYSTEM — не-цветовые CSS Custom Properties
+   (цвета — в @theme выше)
    ============================================================ */
 :root {
-  /* Brand colours */
-  --color-accent:       #14b8a6;
-  --color-accent-hover: #0d9488;
-  --color-accent-light: #ccfbf1;
-  --color-fg:           #212124;
-  --color-fg-muted:     #6b7280;
-  --color-fg-subtle:    #9ca3af;
   --color-bg:           #ffffff;
-  --color-surface:      #ffffff;
-  --color-border:       #e5e7eb;
 
   /* Typography */
   --font-sans:    'Manrope Variable', 'Manrope', 'Segoe UI', system-ui, sans-serif;
@@ -151,7 +182,7 @@
 html {
   font-family: var(--font-sans);
   color: var(--color-fg);
-  background-color: #030712; /* цвет футера — виден при overscroll вниз */
+  background-color: var(--color-slate-950); /* цвет футера — виден при overscroll вниз */
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
   overflow-x: hidden;
@@ -227,19 +258,19 @@ h4.font-medium, h5.font-medium, h6.font-medium {
   font-size: var(--text-step-2);
   font-weight: 400;
   line-height: 1.65;
-  color: #64748b;                                    /* slate-500 */
+  color: var(--color-slate-500);                                    /* slate-500 */
 }
 .t-body {
   font-size: var(--text-step-1);
   font-weight: 400;
   line-height: 1.6;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 .t-meta {
   font-size: var(--text-step-0);
   font-weight: 400;
   line-height: 1.45;
-  color: #94a3b8;                                    /* slate-400 */
+  color: var(--color-slate-400);                                    /* slate-400 */
 }
 
 /* Надзаголовок секции. Был teal + uppercase + tracking-widest — троп
@@ -248,14 +279,14 @@ h4.font-medium, h5.font-medium, h6.font-medium {
   font-size: var(--text-step-0);
   font-weight: 600;
   letter-spacing: 0.01em;
-  color: #475569;                                    /* slate-600 */
+  color: var(--color-slate-600);                                    /* slate-600 */
 }
 /* Подпись над группой контролов */
 .t-label {
   font-size: var(--text-step-0);
   font-weight: 500;
   letter-spacing: 0.01em;
-  color: #64748b;
+  color: var(--color-slate-500);
 }
 
 /* tabular-nums: цена пересчитывается при выборе опции — без моноширинных
@@ -650,7 +681,7 @@ astro-island:has(> .section) + .section,
 .breadcrumbs__current {
   padding: 0.375rem 0.5rem;
   border-radius: 0.375rem;
-  color: #64748b;
+  color: var(--color-slate-500);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -660,16 +691,16 @@ astro-island:has(> .section) + .section,
 }
 .breadcrumbs__link:hover {
   color: var(--color-accent-hover);
-  background: rgba(20, 184, 166, 0.08);
+  background: color-mix(in srgb, var(--color-accent-500) 8%, transparent);
 }
 .breadcrumbs__current {
-  color: #4b5563;
+  color: var(--color-slate-600);
 }
 .breadcrumbs__icon {
   width: auto;
   height: auto;
   margin: 0 1rem;
-  color: #d1d5db;
+  color: var(--color-slate-300);
   font-size: 1rem;
   font-weight: 300;
 }

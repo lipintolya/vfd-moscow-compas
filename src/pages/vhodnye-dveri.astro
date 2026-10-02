@@ -260,7 +260,7 @@ const structuredData = [faqSchema, serviceSchema, ...productSchemas]
         ].map(group => group.models.length > 0 && (
           <a
             href={`#${group.models[0]!.id}`}
-            class="group relative flex aspect-16/10 flex-col justify-end overflow-hidden rounded-2xl bg-slate-100 no-underline focus-visible:outline-2 focus-visible:outline-teal-500 focus-visible:outline-offset-2"
+            class="group relative flex aspect-16/10 flex-col justify-end overflow-hidden rounded-2xl bg-slate-100 no-underline focus-visible:outline-2 focus-visible:outline-accent-500 focus-visible:outline-offset-2"
             aria-label={`${group.label} — от ${Math.min(...group.models.map(minPriceOf)).toLocaleString('ru-RU')} ₽`}
           >
             <img
@@ -337,7 +337,7 @@ const structuredData = [faqSchema, serviceSchema, ...productSchemas]
   ══════════════════════════════════════════════ -->
   <section class="section">
     <div class="container">
-      <div class="flex flex-col gap-6 rounded-2xl p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8" style="background: #212124">
+      <div class="flex flex-col gap-6 rounded-2xl p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8" style="background: var(--color-fg)">
         <div>
           <h2 class="text-2xl font-medium text-white sm:text-3xl">Рассчитаем бесплатно</h2>
           <p class="mt-2 max-w-md text-sm text-white/60 sm:text-base">

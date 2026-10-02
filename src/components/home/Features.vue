@@ -63,7 +63,9 @@ const FEATURES: (Feature & { eyebrow: string })[] = [
       `${IMG}t2.webp`,
       `${IMG}t3.webp`,
     ],
-    cta: { label: 'Посмотреть монтажи', href: '/portfolio/' },
+    cta: SITE.features.portfolio
+      ? { label: 'Посмотреть монтажи', href: '/portfolio/' }
+      : { label: 'Связаться с нами', href: '/contacts/' },
     stat: 'Под ключ',
     caption: 'замер и монтаж',
   },
@@ -195,7 +197,7 @@ onBeforeUnmount(stopCycle)
             Вы нашли
             <span class="sr-only">официальный салон ВФД</span>
             <span
-              class="inline-block text-teal-600 transition-all duration-300 ease-out"
+              class="inline-block text-accent-600 transition-all duration-300 ease-out"
               :class="wordVisible ? 'translate-y-0 opacity-100' : 'translate-y-1.5 opacity-0'"
               aria-hidden="true"
             >{{ currentWord }}</span>
@@ -217,7 +219,7 @@ onBeforeUnmount(stopCycle)
         <li
           v-for="(feature, idx) in FEATURES"
           :key="feature.id"
-          class="group rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.06),0_12px_32px_-8px_rgba(15,23,42,0.16)] ring-1 ring-slate-900/5 transition-[opacity,transform,box-shadow] duration-700 ease-out hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_20px_44px_-10px_rgba(15,23,42,0.24)] motion-reduce:transition-none"
+          class="group rounded-[1.75rem] bg-white p-1.5 shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_6%,transparent),0_12px_32px_-8px_color-mix(in_srgb,var(--color-slate-900)_16%,transparent)] ring-1 ring-slate-900/5 transition-[opacity,transform,box-shadow] duration-700 ease-out hover:shadow-[0_1px_2px_color-mix(in_srgb,var(--color-slate-900)_8%,transparent),0_20px_44px_-10px_color-mix(in_srgb,var(--color-slate-900)_24%,transparent)] motion-reduce:transition-none"
           :class="visible ? 'translate-y-0 opacity-100 blur-none' : 'translate-y-6 opacity-0 blur-sm'"
           :style="{ transitionDelay: visible ? `${idx * 130}ms` : '0ms' }"
           itemprop="item"
@@ -294,7 +296,7 @@ onBeforeUnmount(stopCycle)
 
           <!-- Контент под фото — свой паддинг, фото само в отступы не заворачиваем -->
           <div class="relative flex flex-1 flex-col p-6 sm:p-7">
-            <p class="relative mb-3 text-xs font-medium uppercase tracking-widest text-teal-400" aria-hidden="true">
+            <p class="relative mb-3 text-xs font-medium uppercase tracking-widest text-accent-400" aria-hidden="true">
               {{ feature.eyebrow }}
             </p>
 
@@ -312,7 +314,7 @@ onBeforeUnmount(stopCycle)
                  простая текстовая ссылка со стрелкой, как в референсе. -->
             <div class="relative mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-4">
               <div class="flex min-w-0 items-center gap-2.5">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-teal-400">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-500/15 text-accent-400">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="h-4.5 w-4.5" aria-hidden="true">
                     <path :d="FOOTER_ICONS[idx]" />
                   </svg>
@@ -325,7 +327,7 @@ onBeforeUnmount(stopCycle)
 
               <a
                 :href="feature.cta.href"
-                class="group/link inline-flex shrink-0 items-center gap-1 text-sm font-medium text-teal-400 transition-colors hover:text-teal-300"
+                class="group/link inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-400 transition-colors hover:text-accent-300"
                 :target="feature.cta.external ? '_blank' : undefined"
                 :rel="feature.cta.external ? 'noopener noreferrer' : undefined"
                 :aria-label="feature.cta.external
