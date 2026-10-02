@@ -13,7 +13,7 @@ export const companyLegalInfo = {
   // Адреса
   address: {
     legal: 'LEGAL_ADDRESS_PLACEHOLDER',
-    postal: SITE.address.full,
+    postal: `г. ${SITE.city.name}, ${SITE.address.street}`,
     entrance: `${SITE.address.mall}, ${SITE.address.floor}`,
     coordinates: SITE.address.coordinates,
   },
@@ -109,7 +109,7 @@ export const merchantPolicy = {
     returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
   },
   /** Доставка по городу — фиксированная цена (PLACEHOLDER: тариф
-      перенесён из челябинского салона, уточнить московский). В schema
+      перенесён из московского салона, уточнить московский). В schema
       указан только городской тариф; условия за город — текстом на
       странице/у менеджера. */
   shipping: {

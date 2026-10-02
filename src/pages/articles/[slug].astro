@@ -41,12 +41,12 @@ const blogPostingSchema = {
   dateModified: (article.data.updatedDate ?? article.data.publishDate).toISOString(),
   author: {
     '@type': 'Organization',
-    name: 'ВФД — Салон дверей в Челябинске',
+    name: 'ВФД — Салон дверей в Москве',
     url: SITE.url,
   },
   publisher: {
     '@type': 'Organization',
-    name: 'ВФД — Салон дверей в Челябинске',
+    name: 'ВФД — Салон дверей в Москве',
     /* PNG, не SVG — Google Rich Results Test помечает SVG в publisher.logo
        как невалидный формат, только растр. */
     logo: { '@type': 'ImageObject', url: `${SITE.url}/logo-schema.png`, width: 512, height: 512 },
@@ -79,7 +79,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
 ---
 
 <BaseLayout
-  title={`${article.data.title} — ВФД Челябинск`}
+  title={`${article.data.title} — ВФД Москва`}
   description={article.data.description}
   structuredData={structuredData}
   ogType="article"

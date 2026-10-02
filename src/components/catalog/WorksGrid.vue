@@ -40,7 +40,7 @@ onUnmounted(() => {
         <div class="relative aspect-4/3 overflow-hidden bg-slate-100">
           <img
             :src="work.images[0]"
-            :alt="`Скрытые двери «${work.series ?? work.title}», ${work.location ?? 'Челябинск'}`"
+            :alt="`Скрытые двери «${work.series ?? work.title}», ${work.location ?? 'Москва'}`"
             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
             decoding="async"

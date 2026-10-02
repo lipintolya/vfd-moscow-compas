@@ -73,7 +73,7 @@ function toggleExpanded(id: string) {
           Акции и специальные предложения
         </h2>
         <p class="mt-3 text-sm font-semibold uppercase tracking-wide text-teal-600">
-          Только в салоне ВФД на Кашириных
+          Только в салоне ВФД в ТЦ «Компас»
         </p>
         <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">
           Получите лучшие условия для вашего заказа — следите за нашими акциями

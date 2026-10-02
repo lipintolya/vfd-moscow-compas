@@ -33,7 +33,7 @@ const structuredData = canonicalUrl ? [
   {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Наши работы — монтаж скрытых дверей в Челябинске и Челябинской области',
+    name: 'Наши работы — монтаж скрытых дверей в Москве и Московской области',
     itemListElement: INVISIBLE_WORKS.map((w, i) => ({
       '@type': 'ListItem',
       position: i + 1,
@@ -51,8 +51,8 @@ const structuredData = canonicalUrl ? [
 ---
 
 <BaseLayout
-  title="Наши работы — скрытые двери в Челябинске, фото объектов | ВФД"
-  description={`Реальные объекты монтажа скрытых дверей «Секрет» и «Секрет Реверс» в Челябинске и Челябинской области — ${INVISIBLE_WORKS.length} ${pluralWorks(INVISIBLE_WORKS.length)} с фото и спецификацией. Бесплатный замер по Челябинску при заказе.`}
+  title="Наши работы — скрытые двери в Москве, фото объектов | ВФД"
+  description={`Реальные объекты монтажа скрытых дверей «Секрет» и «Секрет Реверс» в Москве и Московской области — ${INVISIBLE_WORKS.length} ${pluralWorks(INVISIBLE_WORKS.length)} с фото и спецификацией. Бесплатный замер по Москве при заказе.`}
   ogImage={IMAGES.invisible}
   canonical={canonicalUrl}
   structuredData={structuredData}
@@ -68,7 +68,7 @@ const structuredData = canonicalUrl ? [
     <div class="container">
       <h1 class="sd-h2">Наши работы</h1>
       <p class="sd-p" style="margin-top: -0.75rem; margin-bottom: 1.75rem">
-        Все объекты нашей бригады в Челябинске и Челябинской области — {INVISIBLE_WORKS.length} {pluralWorks(INVISIBLE_WORKS.length)} с фото монтажа. Нажмите на фото, чтобы посмотреть полную спецификацию.
+        Все объекты нашей бригады в Москве и Московской области — {INVISIBLE_WORKS.length} {pluralWorks(INVISIBLE_WORKS.length)} с фото монтажа. Нажмите на фото, чтобы посмотреть полную спецификацию.
       </p>
       <WorksGrid client:load works={INVISIBLE_WORKS} tgHref={TG} />
     </div>

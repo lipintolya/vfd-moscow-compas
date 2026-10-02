@@ -27,8 +27,8 @@ import {
 import '../styles/partitions.css'
 import { PHONE, SITE } from '../config/site'
 
-const title       = 'Алюминиевые перегородки в Челябинске — цены, изготовление на заказ | ВФД'
-const description = 'Раздвижные и распашные алюминиевые перегородки из профилей GRAFIA. Бесплатный замер при заказе, монтаж по Челябинску. Срок изготовления 45 рабочих дней.'
+const title       = 'Алюминиевые перегородки в Москве — цены, изготовление на заказ | ВФД'
+const description = 'Раздвижные и распашные алюминиевые перегородки из профилей GRAFIA. Бесплатный замер при заказе, монтаж по Москве. Срок изготовления 45 рабочих дней.'
 const canonicalUrl = Astro.site ? new URL('/partitions/', Astro.site).href : undefined
 
 const breadcrumbItems = [
@@ -59,7 +59,7 @@ const partitionsFaq = [
   },
   {
     q: 'Кто устанавливает перегородку?',
-    a: 'Монтаж по Челябинску выполняет наша бригада — те же специалисты ведут заказ от замера до установки, с гарантией на работы.',
+    a: 'Монтаж по Москве выполняет наша бригада — те же специалисты ведут заказ от замера до установки, с гарантией на работы.',
   },
 ]
 
@@ -76,8 +76,8 @@ const structuredData = {
     telephone:  PHONE.raw,
     address: {
       '@type':         'PostalAddress',
-      streetAddress:   'ул. Братьев Кашириных, 131Б',
-      addressLocality: 'Челябинск',
+      streetAddress:   'ул. Красная Сосна, 2А',
+      addressLocality: 'Москва',
       addressCountry:  'RU',
     },
   },
@@ -489,7 +489,7 @@ const renderLightbox = renderGallery
       <SectionHeading
         eyebrow="Процесс"
         title="Как мы работаем"
-        subtitle="От первого обращения в фирменный салон ВФД на Кашириных до готовой перегородки в Челябинске — чётко и прозрачно"
+        subtitle="От первого обращения в фирменный салон ВФД в ТЦ «Компас» до готовой перегородки в Москве — чётко и прозрачно"
       />
       <ProcessSteps items={steps} />
 

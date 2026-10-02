@@ -19,7 +19,7 @@ const CATEGORIES: Category[] = [
   },
   {
     title:    'Входные двери',
-    subtitle: 'Стальные двери с накладкой изнутри под интерьер — с монтажом в Челябинске',
+    subtitle: 'Стальные двери с накладкой изнутри под интерьер — с монтажом в Москве',
     image:    'https://storage.yandexcloud.net/vfd74ru/metal_doors/Optima/render_optima.webp',
     href:     '/vhodnye-dveri/',
     cta:      'Смотреть входные',

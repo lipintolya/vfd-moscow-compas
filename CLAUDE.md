@@ -4,7 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Marketing/e-commerce site for ВФД (Владимирская фабрика дверей) — a door & aluminum-partition showroom in Chelyabinsk (`vfd74.ru`). Astro 6 + Vue 3 islands + Tailwind v4, content and product data primarily in Russian. Statically built and rsync-deployed to a bare-metal VPS.
+Site for the ВФД (Владимирская фабрика дверей) door & aluminum-partition showroom in **ТЦ «Компас», Moscow** (ул. Красная Сосна, 2А, 3 этаж). Forked from the Chelyabinsk site `vfd74.ru` (`~/Projects/vfd-door`, github.com/lipintolya/vfd74) — same architecture, separate brand layer, content and design. Astro 6 + Vue 3 islands + Tailwind v4, content and product data primarily in Russian. Statically built; deploy target not set up yet.
+
+**Brand layer — never hardcode these in components:** domain, name, city (with case forms), address/coordinates, phones, email, socials, Metrika ID and section feature flags live in `src/config/site.ts` (`SITE`, `PHONE`). Legal entity/requisites/hours live in `src/lib/contacts-data.ts` (built from `SITE`). LocalBusiness JSON-LD comes from `src/lib/local-business-schema.ts` — don't hand-write it per page. `astro.config.mjs` duplicates the domain as `SITE_URL` (the config can't import TS) — change both plus `public/robots.txt`. Values containing `PLACEHOLDER` / `placeholder.example` are unfilled real data — never invent real-looking replacements, ask the user.
+
+**Reviews / portfolio / hidden-door works** are empty for this salon. `SITE.features.{reviews,portfolio}` gates nav links, home sections, aggregateRating and noindex; `SITEMAP_EXCLUDE` in `astro.config.mjs` must be kept in sync. Never reuse Chelyabinsk objects/reviews as this salon's.
 
 ## Commands
 
@@ -13,14 +17,14 @@ npm run dev       # astro dev — local dev server
 npm run build     # astro build — static build into dist/
 npm run preview   # preview the production build locally
 npm run gen:renders  # regenerate public/renders/alum-covers/*.webp from cloud originals (see scripts/gen-render-gallery.mjs)
-npm run deploy    # git push production main — DO NOT run unless the user explicitly asks
+npm run deploy    # git push production main — no production remote yet; DO NOT run unless the user explicitly asks
 ```
 
 There is no test runner or linter configured in this repo. `tsconfig.json` extends `astro/tsconfigs/strict`; rely on `astro check` / editor TS diagnostics for type issues, and `npm run build` as the main correctness gate (it runs `getStaticPaths` against the live Supabase project, so a broken query fails the build).
 
 ## Deployment — never run automatically
 
-Deploys go out via `git push production main` to a `post-receive` hook on a Beget VPS (see `deploy/post-receive`, `deploy/setup-server.sh`): it checks out `main`, runs `npm ci && npm run build`, then `rsync`'s `dist/` to the nginx web root. **Do not push to the `production` remote or run `npm run deploy` unless the user explicitly asks in that turn.** Default to local build/preview only.
+Deploy scripts in `deploy/` are templates carried over from vfd74 (domain = placeholder): a `post-receive` hook on a VPS checks out `main`, runs `npm ci && npm run build`, then `rsync`'s `dist/` to the nginx web root. There is no `production` remote yet. The GitHub remote is `origin` (github.com/lipintolya/vfd-moscow-compas). **Do not push to the `production` remote or run `npm run deploy` unless the user explicitly asks in that turn.** Default to local build/preview only.
 
 ## Architecture
 
@@ -40,4 +44,4 @@ Deploys go out via `git push production main` to a `post-receive` hook on a Bege
 
 **Styling**: Tailwind v4 is loaded via `@tailwindcss/vite` (no `tailwind.config.*`); design tokens are declared with `@theme` in `src/styles/global.css` (e.g. `--color-ink`, `--color-body`) and consumed as Tailwind utilities (`text-ink`, `bg-ink`). Page-specific CSS (e.g. `src/styles/partitions.css`) is imported directly by the page that needs it.
 
-**Legal/company data**: `src/lib/contacts-data.ts` holds the legally-required business info (ИП reqisites, address, hours, phones) used across contacts, footer, and structured data — update once, not per-component.
+**Legal/company data**: `src/lib/contacts-data.ts` holds the legally-required business info (requisites, address, hours, phones — derived from `src/config/site.ts`) used across contacts, footer, and structured data — update once, not per-component. For display use `address.postal` + `address.entrance` (two lines) or `SITE.address.full` (one line); `address.legal` is the legal-entity address for requisites only.

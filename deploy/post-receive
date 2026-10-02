@@ -2,9 +2,9 @@
 set -euo pipefail
 
 BRANCH="main"
-GIT_DIR="/var/repo/vfd74.git"
-BUILD_DIR="/var/www/vfd74.ru/build"
-WEB_ROOT="/var/www/vfd74.ru/html"
+GIT_DIR="/var/repo/vfd-moscow-compas.git"
+BUILD_DIR="/var/www/domain-placeholder.example/build"
+WEB_ROOT="/var/www/domain-placeholder.example/html"
 ENV_FILE="$BUILD_DIR/.env.production"
 
 export GIT_DIR
@@ -49,6 +49,6 @@ while read -r _ _ ref; do
     rsync -a --delete dist/ "$WEB_ROOT/"
 
     chown -R www-data:www-data "$WEB_ROOT"
-    echo "==> Deploy complete: https://vfd74.ru"
+    echo "==> Deploy complete: https://domain-placeholder.example"
   fi
 done

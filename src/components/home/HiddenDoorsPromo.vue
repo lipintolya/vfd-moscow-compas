@@ -58,7 +58,7 @@ const { sectionRef, visible } = useScrollReveal(0.15)
               id="hidden-doors-heading"
               class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-4xl"
             >
-              Скрытые двери из наличия в Челябинске
+              Скрытые двери из наличия в Москве
             </h2>
             <p class="mt-3 text-base leading-relaxed text-slate-600 sm:text-lg">
               Полотно заподлицо со стеной. Алюминиевый короб без наличников и видимых петель — под покраску, штукатурку или обои в цвет стены.

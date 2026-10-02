@@ -1,32 +1,41 @@
 // src/components/about/about-data.ts
 
+import { companyLegalInfo } from '../../lib/contacts-data'
+
 /* Контакты, адрес и реквизиты — только в src/lib/contacts-data.ts, здесь не дублируем. */
 export const companyInfo = {
-  founded: 2014,
+  /** Год открытия салона; 0 → плашка «год основания» не выводится */
+  founded: companyLegalInfo.activity.founded,
 }
 
-export const director = {
-  name: 'Липина Надежда Анатольевна',
-  position: 'Руководитель салона ВФД на Кашириных',
-  experience: 'Более 20 лет в дверной отрасли',
-  quote:
-    '«Дверь выбирают не на сезон, а на годы. Поэтому мы не просто показываем каталог, а помогаем найти модель, которая точно подойдёт вашему интерьеру, бюджету и условиям эксплуатации. А наш монтаж — это гарантия качества и надёжности.»',
-  photo: '/renders/about/director-500.webp',
+export interface Director {
+  name: string
+  position: string
+  experience: string
+  quote: string
+  photo: string
 }
+
+/** Руководитель салона — блок на /about/ скрыт, пока null.
+    Пример заполнения: { name: 'Фамилия Имя Отчество', position: 'Руководитель салона',
+    experience: 'Более N лет в дверной отрасли', quote: '«…»', photo: '/renders/about/director-500.webp' } */
+export const director: Director | null = null
 
 /* Каждая картинка рендерится в двух местах: маленькое превью (hero/
    feature-link/нижняя галерея — src, srcThumb) и полноразмерный лайтбокс
    по клику (srcFull, настоящий оригинал с Yandex Cloud). Оригиналы там
    лежат в 1920×2560 (300-750КБ) — для превью это в разы больше реального
    экранного размера, поэтому src/srcThumb — локальные sharp-ресайзы
-   (см. scripts/gen-about-images.mjs). */
+   (см. scripts/gen-about-images.mjs).
+   ⚠ PLACEHOLDER: сейчас это фото московского салона — временно, для
+   вёрстки. Заменить на фото салона в ТЦ «Компас» и перегенерировать. */
 export const galleryImages = [
   {
     id: 1,
     src: '/renders/about/vfd-out-900.webp',
     srcThumb: '/renders/about/vfd-out-480.webp',
     srcFull: 'https://storage.yandexcloud.net/catalog-vfd/about_page/vfd_out.webp',
-    alt: 'Вывеска салона ВФД на Кашириных, Челябинск',
+    alt: 'Салон дверей ВФД',
   },
   // Для блока IMAGE LINKS GRID — разные ракурсы
   {
@@ -68,10 +77,10 @@ export const galleryImages = [
 ]
 
 export const requisites = {
-  legalName:    'ИП Липина Надежда Анатольевна',
-  inn:          '452402308842',
-  ogrnip:       '323745600047178',
-  legalAddress: 'г. Челябинск, ул. Братьев Кашириных, 131Б',
+  legalName:    companyLegalInfo.fullName,
+  inn:          companyLegalInfo.requisites.inn,
+  ogrnip:       companyLegalInfo.requisites.ogrnip,
+  legalAddress: companyLegalInfo.address.legal,
 }
 
 export const paymentMethods = [

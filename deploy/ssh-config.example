@@ -1,4 +1,4 @@
-Host beget-vfd74
+Host compas-vps
   HostName xxx.xxx.xxx.xxx
   User root
   IdentityFile ~/.ssh/id_ed25519

@@ -14,8 +14,8 @@ import { getCatalogCards, getSeriesCardsData } from '../../../lib/catalog-data'
 const { cards } = await getCatalogCards()
 const seriesCardsData = getSeriesCardsData(cards)
 
-const title       = 'Все серии межкомнатных дверей — каталог | ВФД Челябинск'
-const description = `Все серии межкомнатных дверей ВФД в Челябинске: ${seriesCardsData.length} серий, покрытия эмаль, ПЭТ, Эмалекс, Протач. Цены, фото, модели каждой серии.`
+const title       = 'Все серии межкомнатных дверей — каталог | ВФД Москва'
+const description = `Все серии межкомнатных дверей ВФД в Москве: ${seriesCardsData.length} серий, покрытия эмаль, ПЭТ, Эмалекс, Протач. Цены, фото, модели каждой серии.`
 const canonicalUrl = Astro.site ? new URL('/catalog/series/', Astro.site).href : undefined
 
 const breadcrumbItems = [

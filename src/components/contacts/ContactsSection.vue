@@ -16,7 +16,7 @@ const req      = companyLegalInfo.requisites
 const TG  = SITE.social.telegram
 const VK  = SITE.social.vk
 const MAX = SITE.social.max
-const ROUTE = 'https://yandex.ru/maps/-/CPTwZPi-'
+const ROUTE = SITE.address.mapUrl
 
 /* Сб и Вс сейчас по одному графику — одна строка «Сб–Вс», без дубля времени. */
 const [weekdays, saturday, sunday] = getFormattedHours()
@@ -37,11 +37,11 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
 
       <!-- ── Шапка + быстрые действия ── -->
       <header class="mb-10 max-w-3xl lg:mb-14">
-        <p class="t-eyebrow mb-3">Салон на Братьев Кашириных</p>
-        <h1 class="t-h1 mb-4">Контакты салона дверей ВФД в Челябинске</h1>
+        <p class="t-eyebrow mb-3">Салон в ТЦ «Компас»</p>
+        <h1 class="t-h1 mb-4">Контакты салона дверей ВФД в Москве</h1>
         <p class="m-0 mb-6 t-lead text-slate-600">
           Позвоните, напишите в мессенджер или приезжайте в салон — покажем двери и перегородки
-          вживую и выедем на замер — по Челябинску бесплатно при оформлении заказа.
+          вживую и выедем на замер — по Москве бесплатно при оформлении заказа.
         </p>
 
         <div class="flex flex-wrap items-center gap-2.5">
@@ -121,8 +121,8 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
         <div class="flex flex-col overflow-hidden rounded-2xl border border-slate-200">
           <div class="p-6">
             <p class="m-0 mb-1 text-sm text-slate-500">Адрес салона</p>
-            <p class="m-0 mb-1 text-lg font-medium text-ink">{{ address.legal }}</p>
-            <p class="m-0 mb-5 text-sm text-slate-600">{{ address.entrance }} · парковка у здания</p>
+            <p class="m-0 mb-1 text-lg font-medium text-ink">{{ address.postal }}</p>
+            <p class="m-0 mb-5 text-sm text-slate-600">{{ address.entrance }}</p>
             <a :href="ROUTE" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Построить маршрут</a>
           </div>
 
@@ -223,7 +223,7 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
             <div class="wtg-card__body">
               <h3 class="wtg-card__title">Бесплатный выезд на замер</h3>
               <div class="wtg-card__tags">
-                <span>Челябинск и область</span>
+                <span>Москва и область</span>
                 <span>Точные размеры</span>
                 <span>Без обязательств</span>
               </div>

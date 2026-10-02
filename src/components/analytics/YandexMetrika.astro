@@ -1,7 +1,7 @@
 ---
 /**
- * Яндекс Метрика — загружается только в production.
- * Счётчик: 106993554
+ * Яндекс Метрика — загружается только в production и только если задан
+ * ID счётчика (SITE.analytics.yandexMetrikaId в src/config/site.ts).
  *
  * Почему такая установка:
  * - is:inline — Astro/Vite не трогает и не бандлит скрипт
@@ -16,11 +16,14 @@
  *   contains mismatches" в проде. К моменту window.load гидратация уже
  *   гарантированно завершена.
  */
-const isProd = import.meta.env.PROD
+import { SITE } from '../../config/site'
+
+const counterId = SITE.analytics.yandexMetrikaId
+const enabled = import.meta.env.PROD && Boolean(counterId)
 ---
 
-{isProd && (
-  <script is:inline>
+{enabled && (
+  <script is:inline define:vars={{ counterId: Number(counterId) }}>
     window.addEventListener('load', function () {
       window.dataLayer = window.dataLayer || [];
 
@@ -32,7 +35,7 @@ const isProd = import.meta.env.PROD
         k.async=1;k.src=r;a.parentNode.insertBefore(k,a)
       })(window,document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
 
-      ym(106993554,'init',{
+      ym(counterId,'init',{
         clickmap:            true,
         trackLinks:          true,
         accurateTrackBounce: true,
@@ -42,10 +45,10 @@ const isProd = import.meta.env.PROD
     });
   </script>
 )}
-{isProd && (
+{enabled && (
   <noscript>
     <div>
-      <img src="https://mc.yandex.ru/watch/106993554" style="position:absolute;left:-9999px;" alt="" />
+      <img src={`https://mc.yandex.ru/watch/${counterId}`} style="position:absolute;left:-9999px;" alt="" />
     </div>
   </noscript>
 )}

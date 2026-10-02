@@ -80,13 +80,13 @@ const modelsPhrase   = `${series.modelCount} ${pluralRu(series.modelCount, ['м�
 
 /* Тип товара первым — по нему ищут («межкомнатные двери скинель»),
    а само название серии тип не называет. */
-const pageTitle = `Межкомнатные двери ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — купить в Челябинске, цены | ВФД`
+const pageTitle = `Межкомнатные двери ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — купить в Москве, цены | ВФД`
 /* Короткая генерация всегда в meta — та же причина, что на models/[id].astro:
    spec.description (маркетинговый текст серии) длиннее ~155 символов нормы
    SERP-сниппета и не упоминает город/цену — Google обрежет её на середине
    фразы. spec.description остаётся на странице как есть (блок "О коллекции"). */
 const pageDesc  =
-  `Межкомнатные двери серии ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — ${modelsPhrase}${series.minPrice ? `, цены от ${fmt(series.minPrice)} за полотно` : ''}. Купить в Челябинске в салоне ВФД на Братьев Кашириных: замер, доставка и установка.`
+  `Межкомнатные двери серии ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — ${modelsPhrase}${series.minPrice ? `, цены от ${fmt(series.minPrice)} за полотно` : ''}. Купить в Москве в салоне ВФД в ТЦ «Компас»: замер, доставка и установка.`
 
 /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
 const structuredData = canonicalUrl ? [
@@ -111,7 +111,7 @@ const structuredData = canonicalUrl ? [
       item: {
         '@type': 'Product',
         name: card.name,
-        description: `Дверь ${card.name} серии ${series.name}. Купить в салоне ВФД в Челябинске.`,
+        description: `Дверь ${card.name} серии ${series.name}. Купить в салоне ВФД в Москве.`,
         url: new URL(`/models/${card.slug}/`, canonicalUrl).href,
         image: card.photo || undefined,
         brand: { '@type': 'Brand', name: 'ВФД' },
@@ -403,7 +403,7 @@ const structuredData = canonicalUrl ? [
       <div class="sr-cta">
         <div class="sr-cta__text">
           <h2 class="sr-cta__h2">Подберём дверь серии {series.name} под ваш интерьер</h2>
-          <p class="sr-cta__lead">Замер, расчёт стоимости и монтаж — в шоуруме на Кашириных.</p>
+          <p class="sr-cta__lead">Замер, расчёт стоимости и монтаж — в шоуруме в ТЦ «Компас».</p>
         </div>
         <div class="sr-cta__actions">
           <a href={TG} target="_blank" rel="noopener" class="btn btn-ghost">Написать в Telegram</a>

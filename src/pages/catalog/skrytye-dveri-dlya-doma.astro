@@ -32,8 +32,8 @@ const canonicalUrl = Astro.site
   ? new URL('/catalog/skrytye-dveri-dlya-doma/', Astro.site).href
   : undefined
 
-const title       = 'Скрытые двери для частного дома в Челябинске — под нестандартную высоту | ВФД'
-const description = `Скрытые двери для частных домов и коттеджей в Челябинской области: нестандартные высоты потолков до 2700 мм, зеркальная дверь «Рефлекс». Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}.`
+const title       = 'Скрытые двери для частного дома в Москве — под нестандартную высоту | ВФД'
+const description = `Скрытые двери для частных домов и коттеджей в Московской области: нестандартные высоты потолков до 2700 мм, зеркальная дверь «Рефлекс». Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}.`
 
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
@@ -63,8 +63,8 @@ const faq = [
     a: 'Скрытые петли рассчитаны на нагрузку до 70 кг — этого достаточно для стандартного полотна из массива или МДФ с шумоизоляционным наполнением. Для более тяжёлых конструкций обсуждайте усиленный вариант короба с менеджером на замере.',
   },
   {
-    q: 'Работаете ли в Челябинской области, не только в городе?',
-    a: 'Да, выезжаем на замер и монтаж по Челябинской области. Один из последних объектов «Секрет» был установлен именно в частном доме — фото ниже.',
+    q: 'Работаете ли в Московской области, не только в городе?',
+    a: 'Да, выезжаем на замер и монтаж по Московской области. Один из последних объектов «Секрет» был установлен именно в частном доме — фото ниже.',
   },
 ]
 
@@ -93,8 +93,8 @@ const structuredData = canonicalUrl ? [
       availability: 'https://schema.org/InStock',
       seller: { '@type': 'Organization', name: 'Салон дверей ВФД' },
       areaServed: [
-        { '@type': 'City', name: 'Челябинск' },
-        { '@type': 'AdministrativeArea', name: 'Челябинская область' },
+        { '@type': 'City', name: 'Москва' },
+        { '@type': 'AdministrativeArea', name: 'Московская область' },
       ],
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
       shippingDetails:         merchantPolicy.shipping,
@@ -130,7 +130,7 @@ const structuredData = canonicalUrl ? [
             нестандартной высоты до 2700 мм и минимальное требование к толщине стены — 90 мм.
           </p>
           <p class="m-0 mb-6 t-lead text-slate-600">
-            Работаем не только в Челябинске, но и по области — выезд на замер и монтаж бригадой
+            Работаем не только в Москве, но и по области — выезд на замер и монтаж бригадой
             в частные дома и коттеджные посёлки.
           </p>
           <div class="flex gap-2.5 flex-wrap">
@@ -269,7 +269,7 @@ const structuredData = canonicalUrl ? [
       <div class="rounded-3xl bg-graphite p-[clamp(2rem,5vw,3rem)] text-white">
         <div class="flex flex-wrap items-center justify-between gap-6">
           <div>
-            <h2 class="m-0 mb-2 text-2xl font-medium">Замерим двери для дома в Челябинске и области</h2>
+            <h2 class="m-0 mb-2 text-2xl font-medium">Замерим двери для дома в Москве и области</h2>
             <p class="m-0 max-w-xl text-sm leading-relaxed text-white/70">
               Укажите высоту потолков и толщину стен — сразу скажем, нужна ли надбавка
               за нестандарт и сколько займёт изготовление.

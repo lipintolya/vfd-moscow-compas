@@ -50,6 +50,9 @@ export const SITE = {
     /** Координаты ТЦ (OpenStreetMap, «Торговый центр "Компас"», 2А) —
         для карты и schema.org GeoCoordinates. Уточнить по входу. */
     coordinates: { lat: 55.8509296, lng: 37.6792174 },
+    /** «Построить маршрут» — Яндекс Карты с меткой по координатам.
+        Когда у салона появится карточка организации — заменить на её ссылку. */
+    mapUrl: 'https://yandex.ru/maps/?pt=37.6792174,55.8509296&z=17&l=map',
   },
 
   phones: [
@@ -70,6 +73,13 @@ export const SITE = {
   features: {
     reviews:   false,
     portfolio: false,
+  },
+
+  /** Где читать/оставлять отзывы. Пока у салона нет карточек на картах —
+      поиск по адресу; потом заменить на прямые ссылки на карточки. */
+  reviewLinks: {
+    twoGis: `https://2gis.ru/moscow/search/${encodeURIComponent('ВФД Красная Сосна 2А')}`,
+    yandex: `https://yandex.ru/maps/?text=${encodeURIComponent('ВФД Москва Красная Сосна 2А')}`,
   },
 
   analytics: {

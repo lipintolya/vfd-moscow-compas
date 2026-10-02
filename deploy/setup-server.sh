@@ -1,13 +1,13 @@
 #!/bin/bash
-# One-time server setup for vfd74.ru on Beget VPS.
+# One-time server setup for domain-placeholder.example on Beget VPS.
 # Run on the server as root:
 #   bash setup-server.sh
 set -euo pipefail
 
-DOMAIN="vfd74.ru"
-REPO_DIR="/var/repo/vfd74.git"
-WORK_TREE="/var/www/vfd74.ru/build"
-WEB_ROOT="/var/www/vfd74.ru/public"
+DOMAIN="domain-placeholder.example"
+REPO_DIR="/var/repo/vfd-moscow-compas.git"
+WORK_TREE="/var/www/domain-placeholder.example/build"
+WEB_ROOT="/var/www/domain-placeholder.example/public"
 NODE_VERSION="22"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

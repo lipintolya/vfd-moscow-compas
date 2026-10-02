@@ -29,7 +29,7 @@ const CATEGORIES = [
   { href: '/vhodnye-dveri/',         title: 'Входные двери',           text: 'Для квартиры и частного дома, в том числе с терморазрывом' },
   { href: '/partitions/',            title: 'Алюминиевые перегородки', text: 'Раздвижные и распашные системы в профиле GRAFIA, 13 цветов' },
   { href: '/catalog/decor/',         title: 'Погонаж и декор',         text: 'Коробки, наличники, доборы, плинтус, фальшфрамуги, рейки' },
-  { href: '/portfolio/',             title: 'Наши работы',             text: 'Фотоотчёты монтажей в квартирах, домах и офисах Челябинска' },
+  { href: '/portfolio/',             title: 'Наши работы',             text: 'Фотоотчёты монтажей в квартирах, домах и офисах Москвы' },
 ]
 
 /* ============================================================
@@ -93,11 +93,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
             <p class="t-eyebrow mb-3">Официальный дилер Владимирской фабрики дверей</p>
 
             <h1 class="t-h1 mb-5">
-              Салон дверей ВФД в Челябинске — <span class="text-teal-600">всё начинается с дверей</span>
+              Салон дверей ВФД в Москве — <span class="text-teal-600">всё начинается с дверей</span>
             </h1>
 
             <p class="m-0 mb-4 t-lead text-slate-600">
-              С {{ companyInfo.founded }} года мы работаем напрямую с
+              Мы работаем напрямую с
               <a href="/o-fabrike/" class="text-teal-700 underline decoration-teal-700/30 underline-offset-4 hover:decoration-teal-700">Владимирской фабрикой дверей</a>
               и собираем в одном салоне всё для интерьера: межкомнатные, скрытые и входные двери,
               алюминиевые перегородки, погонаж и фурнитуру.
@@ -145,7 +145,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
               </a>
 
               <a
-                href="https://yandex.ru/maps/-/CPTwZPi-"
+                :href="SITE.address.mapUrl"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="btn btn-outline"
@@ -156,7 +156,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
 
             <!-- Stats -->
             <div class="grid grid-cols-3 gap-3.5">
-              <div class="rounded-2xl border border-slate-200 p-4">
+              <div v-if="companyInfo.founded" class="rounded-2xl border border-slate-200 p-4">
                 <span class="block text-2xl font-medium leading-none text-ink sm:text-3xl">{{ companyInfo.founded }}</span>
                 <span class="mt-1.5 block text-xs leading-snug text-slate-500">год основания</span>
               </div>
@@ -196,7 +196,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
             <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div class="rounded-xl bg-slate-50 p-3.5">
                 <p class="m-0 mb-1 text-[0.6875rem] font-semibold uppercase tracking-widest text-slate-400">Адрес</p>
-                <p class="m-0 text-sm font-medium leading-snug text-ink">{{ companyLegalInfo.address.legal }}</p>
+                <p class="m-0 text-sm font-medium leading-snug text-ink">{{ SITE.address.full }}</p>
               </div>
               <div class="rounded-xl bg-slate-50 p-3.5">
                 <p class="m-0 mb-1 text-[0.6875rem] font-semibold uppercase tracking-widest text-slate-400">Режим работы</p>
@@ -245,7 +245,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
         <h2 class="t-h2 mb-3 text-center">Большой выбор</h2>
         <p class="mx-auto mb-10 max-w-2xl text-center t-lead text-slate-600 md:mb-14">
           Обширная экспозиция дверей и перегородок в одном из самых крупных салонов Владимирской
-          фабрики дверей в Челябинске.
+          фабрики дверей в Москве.
         </p>
 
         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
@@ -325,7 +325,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown))
     <!-- ======================================================
          DIRECTOR
     ======================================================= -->
-    <section class="section bg-slate-50">
+    <section v-if="director" class="section bg-slate-50">
       <div class="container">
         <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-[380px_1fr] lg:gap-12">
 

@@ -33,7 +33,7 @@ const SOCIAL_NETWORKS = [
 
 const CONTACTS = {
   phones:  companyLegalInfo.contacts.phone,
-  address: companyLegalInfo.address.legal,
+  address: companyLegalInfo.address.postal,
   entrance: companyLegalInfo.address.entrance,
   /** Будни/выходные — отдельные строки, а не одна склеенная через «·»:
       на узкой карточке попапа она переносилась посередине слова, неровно. */
@@ -265,7 +265,7 @@ onUnmounted(() => {
       >
 
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-3 shrink-0 group" aria-label="ВФД на Кашириных — главная">
+        <a href="/" class="flex items-center gap-3 shrink-0 group" aria-label="ВФД в ТЦ «Компас» — главная">
           <div class="relative w-9 h-9 flex items-center justify-center">
             <div
               v-if="!logoLoaded && !logoError"
@@ -639,9 +639,9 @@ onUnmounted(() => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z"/>
                 <circle cx="12" cy="9.5" r="2.25" stroke-linecap="round"/>
               </svg>
-              Челябинск
+              Москва
             </span>
-            <span class="pl-5.5 text-xs text-white/40">ул. Братьев Кашириных, 131Б</span>
+            <span class="pl-5.5 text-xs text-white/40">ул. Красная Сосна, 2А</span>
           </span>
           <button
             type="button"

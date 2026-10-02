@@ -8,7 +8,7 @@
  * Название — по правилам Яндекс Товаров для <name>: тип товара + [бренд] +
  * модель + отличительные признаки, без «купить», города и цены:
  * «Межкомнатная дверь Скинель Барселона 1, эмаль, кромка серебро».
- * «Купить в Челябинске» добавляется только в <title> страницы.
+ * «Купить в Москве» добавляется только в <title> страницы.
  */
 import type { ModelEntry } from './model-entries'
 import { describeTrim, lowerFirst } from './trim-labels'
@@ -108,12 +108,12 @@ export function priceLabel(m: Pick<ModelEntry, 'minPrice' | 'maxPrice'>): string
 }
 
 export const productTitle = (m: NamingInput) =>
-  `${productName(m)} — купить в Челябинске | ВФД`
+  `${productName(m)} — купить в Москве | ВФД`
 
 /** <meta description>: здесь как раз место цене и городу (в отличие от фида). */
 export function productMetaDescription(m: ModelEntry): string {
   const price = m.minPrice ? `цена ${priceLabel(m)} за полотно` : 'цена по запросу'
-  return `${productName(m)} — ${price}. Купить в Челябинске в салоне ВФД на Братьев Кашириных: замер, доставка и установка.`
+  return `${productName(m)} — ${price}. Купить в Москве в салоне ВФД в ТЦ «Компас»: замер, доставка и установка.`
 }
 
 const stripDot = (s: string) => s.trim().replace(/\.+$/, '')

@@ -55,7 +55,7 @@ const xml = (s: string | number) =>
 /** UUID модели без дефисов, первые 20 символов — постоянный и уникальный. */
 const offerId = (modelId: string) => modelId.replaceAll('-', '').slice(0, 20)
 
-/** RFC 3339 с часовым поясом Челябинска (UTC+5, без перехода на летнее время). */
+/** RFC 3339 с часовым поясом Москвы (UTC+5, без перехода на летнее время). */
 function feedDate(): string {
   const local = new Date(Date.now() + 5 * 60 * 60 * 1000)
   return `${local.toISOString().slice(0, 19)}+05:00`

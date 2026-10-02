@@ -2,22 +2,23 @@
 /**
  * src/pages/o-fabrike.astro
  * Имиджевый SEO-лендинг про завод-производителя (Владимирская фабрика
- * дверей) — не путать с /about/ (про салон ВФД в Челябинске: адрес,
+ * дверей) — не путать с /about/ (про салон ВФД в Москве: адрес,
  * реквизиты, руководство). Факты о заводе — с официального сайта
- * vfd.ru/about. Абзацы про сам салон/Челябинск — от первого лица («мы»),
+ * vfd.ru/about. Абзацы про сам салон/Москва — от первого лица («мы»),
  * про фабрику как производителя — от третьего («фабрика»)
  * официальный дилер, не сам завод.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import { SITE } from '../config/site'
 import SectionHeading from '../components/partitions/SectionHeading.astro'
 import { companyLegalInfo } from '../lib/contacts-data'
 
 const HERO_IMAGE = 'https://storage.yandexcloud.net/vfd74ru/factory/factory_main.webp'
 const FACTORY_CDN = 'https://storage.yandexcloud.net/vfd74ru/factory/'
 
-const title       = 'Владимирская фабрика дверей (ВФД) — о производителе | Официальный дилер в Челябинске'
-const description = 'Кто производит двери ВФД: производство с 2002 года, собственные цеха и обработка стекла, 1200+ моделей. Официальный дилер в Челябинске — салон на Братьев Кашириных: замер, доставка, монтаж.'
+const title       = 'Владимирская фабрика дверей (ВФД) — о производителе | Официальный дилер в Москве'
+const description = 'Кто производит двери ВФД: производство с 2002 года, собственные цеха и обработка стекла, 1200+ моделей. Официальный дилер в Москве — салон в ТЦ «Компас»: замер, доставка, монтаж.'
 const canonicalUrl = Astro.site ? new URL('/o-fabrike/', Astro.site).href : undefined
 
 const phones = companyLegalInfo.contacts.phone
@@ -104,8 +105,8 @@ const structuredData = canonicalUrl ? [
             предприятий отрасли в России и СНГ.
           </p>
           <p class="m-0 mb-6 t-lead text-slate-600">
-            Эта страница — о самом производителе. Мы — официальный дилер фабрики в Челябинске:
-            салон на Братьев Кашириных с живой экспозицией, замером и монтажом
+            Эта страница — о самом производителе. Мы — официальный дилер фабрики в Москве:
+            салон в ТЦ «Компас» с живой экспозицией, замером и монтажом
             собственной бригадой.
           </p>
           <a href="/catalog/" class="btn btn-primary">Смотреть каталог дверей ВФД</a>
@@ -172,8 +173,8 @@ const structuredData = canonicalUrl ? [
     <div class="container">
       <SectionHeading
         eyebrow="Логистика"
-        title="Почему двери ВФД доступны в Челябинске быстро"
-        subtitle="Фабрика работает через дилерскую сеть, а склады распределены по регионам — популярные модели не нужно ждать с завода неделями. Наш салон в Челябинске обслуживается с ближайшего склада, а редкие артикулы и нестандарт мы заказываем под конкретный проект."
+        title="Почему двери ВФД доступны в Москве быстро"
+        subtitle="Фабрика работает через дилерскую сеть, а склады распределены по регионам — популярные модели не нужно ждать с завода неделями. Наш салон в Москве обслуживается с ближайшего склада, а редкие артикулы и нестандарт мы заказываем под конкретный проект."
       />
       <div class="grid grid-cols-1 gap-3.5 sm:grid-cols-3 lg:gap-5">
         {scaleStats.map(s => (
@@ -187,19 +188,19 @@ const structuredData = canonicalUrl ? [
     </div>
   </section>
 
-  <!-- ДИЛЕР В ЧЕЛЯБИНСКЕ -->
+  <!-- ДИЛЕР В МОСКВЕ -->
   <section class="section bg-slate-50">
     <div class="container">
       <div class="rounded-3xl border border-slate-200 bg-white p-[clamp(1.5rem,4vw,3rem)]">
-        <p class="t-eyebrow block mb-3">В Челябинске</p>
-        <h2 class="t-h2 mb-3">Официальный дилер ВФД в Челябинске — салон на Братьев Кашириных</h2>
+        <p class="t-eyebrow block mb-3">В Москве</p>
+        <h2 class="t-h2 mb-3">Официальный дилер ВФД в Москве — салон в ТЦ «Компас»</h2>
         <p class="m-0 mb-6 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
           Мы не завод и не посредник с наценкой поверх наценки: мы фирменный салон, который
           работает с фабрикой напрямую.
         </p>
 
         <div class="mb-6 flex flex-col gap-2 text-sm text-slate-600 sm:text-base">
-          <p class="m-0"><strong class="font-medium text-ink">Адрес:</strong> {companyLegalInfo.address.legal}</p>
+          <p class="m-0"><strong class="font-medium text-ink">Адрес:</strong> {SITE.address.full}</p>
           <p class="m-0">
             <strong class="font-medium text-ink">Телефон:</strong>{' '}
             {phones.map((p, i) => (
@@ -213,7 +214,7 @@ const structuredData = canonicalUrl ? [
         </div>
 
         <div class="flex gap-2.5 flex-wrap">
-          <a href="https://yandex.ru/maps/-/CPTwZPi-" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Построить маршрут</a>
+          <a href={SITE.address.mapUrl} target="_blank" rel="noopener noreferrer" class="btn btn-outline">Построить маршрут</a>
           <a href="/contacts/" class="btn btn-primary">Записаться на бесплатный замер</a>
         </div>
       </div>

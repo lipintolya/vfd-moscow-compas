@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount } from 'vue'
 import { useScrollReveal } from '../../composables/useScrollReveal'
+import { SITE } from '../../config/site'
 
 /* ============================================================
    Types
@@ -23,7 +24,7 @@ interface Feature {
    Data — вынесено за пределы setup, не пересоздаётся
    ============================================================ */
 const WORDS: string[] = [
-  'салон дверей VFD в Челябинске',
+  'салон дверей VFD в Москве',
   'дилера, где двери в наличии',
   'салон с крупнейшей выставкой',
   'установку дверей «под ключ»',
@@ -48,14 +49,14 @@ const FEATURES: (Feature & { eyebrow: string })[] = [
       `${IMG}f4.webp`,
     ],
     cta: { label: 'Выбрать двери', href: '/catalog/' },
-    stat: 'С 2014 года',
+    stat: 'Дилер ВФД',
     caption: 'напрямую с фабрики',
   },
   {
     id: 2,
     eyebrow: 'Сервис',
     title: 'Всё — от выбора до монтажа',
-    text: 'Консультация, замер, доставка и установка под ключ. Одна команда с 2014 года.',
+    text: 'Консультация, замер, доставка и установка под ключ. Одна команда на всех этапах.',
     images: [
       `${IMG}card-2.webp`,
       `${IMG}t1.webp`,
@@ -70,7 +71,7 @@ const FEATURES: (Feature & { eyebrow: string })[] = [
     id: 3,
     eyebrow: 'Шоурум',
     title: 'Большая выставка ВФД',
-    text: '60+ моделей вживую на Кашириных, 131Б — сравните, не по фото.',
+    text: '60+ моделей вживую в ТЦ «Компас» — сравните, не по фото.',
     images: [
       `${IMG}card-3.webp`,
       `${IMG}foto1.webp`,
@@ -79,9 +80,9 @@ const FEATURES: (Feature & { eyebrow: string })[] = [
       `${IMG}foto4.webp`,
       `${IMG}foto6.webp`,
     ],
-    cta: { label: 'Построить маршрут', href: 'https://yandex.ru/maps/-/CPTwZPi-', external: true },
+    cta: { label: 'Построить маршрут', href: SITE.address.mapUrl, external: true },
     stat: '60+ моделей',
-    caption: 'Кашириных, 131Б',
+    caption: 'ТЦ «Компас»',
   },
 ]
 

@@ -33,7 +33,7 @@ const CATEGORY_LINKS = [
 const CONTACTS = {
   phones:  companyLegalInfo.contacts.phone,
   email:   companyLegalInfo.contacts.email,
-  address: companyLegalInfo.address.legal,
+  address: companyLegalInfo.address.postal,
 }
 
 /* Раньше здесь был живой iframe Yandex Maps (свой JS + тайлы) — карта
@@ -42,7 +42,7 @@ const CONTACTS = {
    iframe грузился на каждой. Заменён на статичный скриншот Static Maps API
    (см. scripts/gen-footer-map.mjs) — то же визуально, без JS-рантайма. */
 const MAP_PREVIEW_IMAGE = '/renders/footer-map.webp'
-const MAP_LINK = 'https://yandex.ru/maps/-/CPTwZPi-'
+const MAP_LINK = SITE.address.mapUrl
 
 /* ============================================================
    Legal modal
@@ -223,13 +223,13 @@ onUnmounted(() => {
 
           <!-- Brand -->
           <div>
-            <a href="/" class="flex items-center gap-2 mb-4 w-fit" aria-label="ВФД на Кашириных — главная">
+            <a href="/" class="flex items-center gap-2 mb-4 w-fit" aria-label="ВФД в ТЦ «Компас» — главная">
               <span class="text-lg font-semibold text-white tracking-wide">VFD</span>
-              <span class="text-xs text-white/40 uppercase tracking-widest">Кашириных</span>
+              <span class="text-xs text-white/40 uppercase tracking-widest">Компас</span>
             </a>
             <p class="text-sm leading-relaxed text-white/60 max-w-xs">
-              Фирменный салон дверей и интерьерных решений в Челябинске.
-              Работаем с 2014 года.
+              Салон дверей и интерьерных решений в Москве —
+              ТЦ «Компас», 3 этаж.
             </p>
             <!-- Socials -->
             <div class="flex gap-4 mt-5" role="list" aria-label="Социальные сети">
@@ -471,7 +471,7 @@ onUnmounted(() => {
             <div>
               <h4 class="text-sm font-medium text-gray-900 mb-2">Авторские права</h4>
               <p class="text-gray-600 leading-relaxed">
-                Все изображения, тексты и дизайн сайта являются объектами авторского права VFD Кашириных.
+                Все изображения, тексты и дизайн сайта являются объектами авторского права правообладателя.
                 Любое использование материалов возможно только с письменного разрешения правообладателя
                 и обязательным указанием источника:
                 <a :href="SITE.url" class="text-teal-600 hover:underline">{{ SITE.host }}</a>
@@ -490,7 +490,7 @@ onUnmounted(() => {
             <div class="border-t border-gray-100 pt-5">
               <h4 class="text-sm font-medium text-gray-900 mb-2">Контакты</h4>
               <p class="text-gray-600 leading-relaxed">
-                г. Челябинск, ул. Братьев Кашириных, 131Б<br />
+                г. Москва, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж<br />
                 Телефон: <a :href="`tel:${PHONE.raw}`" class="text-teal-600 hover:underline">{{ PHONE.label }}</a><br />
                 Email: <a :href="`mailto:${SITE.email}`" class="text-teal-600 hover:underline">{{ SITE.email }}</a><br />
                 Сайт: <a :href="SITE.url" class="text-teal-600 hover:underline">{{ SITE.host }}</a>

@@ -20,7 +20,7 @@ const apartmentModels = ENTRANCE_DOOR_MODELS.filter(m => m.purpose === 'apartmen
 const houseModels     = ENTRANCE_DOOR_MODELS.filter(m => m.purpose === 'house')
 
 const heroStats = [
-  { val: '2014',                       lbl: 'год основания салона',      desc: 'Официальный дилер в Челябинске' },
+  { val: 'ВФД',                        lbl: 'официальный дилер',         desc: 'Салон в ТЦ «Компас», Москва' },
   { val: '12 месяцев',                 lbl: 'гарантия качества',         desc: 'На монтажные работы нашей бригады' },
   { val: `${ENTRANCE_SKINS.length}+`,  lbl: 'вариантов накладок изнутри', desc: 'Под интерьер и под другие двери в доме' },
 ]
@@ -38,7 +38,7 @@ const steps: Step[] = [
     num: '02',
     title: 'Замер проёма',
     text: 'Замерщик выезжает на объект, уточняет размер проёма и особенности монтажа.',
-    details: ['Выезд по Челябинску — 500 ₽', 'Согласование размера короба'],
+    details: ['Выезд по Москве — 500 ₽', 'Согласование размера короба'],
   },
   {
     num: '03',
@@ -69,7 +69,7 @@ const faq = [
   },
   {
     q: 'Есть ли выезд замерщика?',
-    a: 'Да, выезд замерщика по Челябинску — 500 ₽. Стоимость выезда за пределы города уточнит менеджер.',
+    a: 'Да, выезд замерщика по Москве — 500 ₽. Стоимость выезда за пределы города уточнит менеджер.',
   },
   {
     q: 'Можно ли купить дверь без монтажа?',
@@ -77,8 +77,8 @@ const faq = [
   },
 ]
 
-const title       = 'Входные двери в Челябинске — цены, каталог, монтаж | ВФД'
-const description = `Входные двери для квартиры с монтажом в Челябинске. ${ENTRANCE_SKINS.length}+ вариантов накладок изнутри, цены от ${minPrice.toLocaleString('ru-RU')} ₽. Замер от 300 ₽, гарантия на монтаж.`
+const title       = 'Входные двери в Москве — цены, каталог, монтаж | ВФД'
+const description = `Входные двери для квартиры с монтажом в Москве. ${ENTRANCE_SKINS.length}+ вариантов накладок изнутри, цены от ${minPrice.toLocaleString('ru-RU')} ₽. Замер от 300 ₽, гарантия на монтаж.`
 const canonicalUrl = Astro.site ? new URL('/vhodnye-dveri/', Astro.site).href : undefined
 const heroOgImage  = Astro.site ? new URL(heroModel.coverImage, Astro.site).href : heroModel.coverImage
 
@@ -119,7 +119,7 @@ const faqSchema = {
 }
 
 /* Service + LocalBusiness — геосигнал для локальной выдачи ("входные двери
-   Челябинск"), тот же паттерн, что на /partitions и /contacts. Product-схемы
+   Москва"), тот же паттерн, что на /partitions и /contacts. Product-схемы
    выше уже покрывают цены/варианты по каждой модели — этот блок покрывает
    "кто и где оказывает услугу". */
 const serviceSchema = {
@@ -131,8 +131,8 @@ const serviceSchema = {
   url: canonicalUrl,
   areaServed: {
     '@type': 'City',
-    name: 'Челябинск',
-    containedInPlace: { '@type': 'AdministrativeArea', name: 'Челябинская область' },
+    name: 'Москва',
+    containedInPlace: { '@type': 'AdministrativeArea', name: 'Московская область' },
   },
   provider: {
     '@type': 'LocalBusiness',
@@ -140,8 +140,8 @@ const serviceSchema = {
     telephone: PHONE,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'ул. Братьев Кашириных, 131Б',
-      addressLocality: 'Челябинск',
+      streetAddress: 'ул. Красная Сосна, 2А',
+      addressLocality: 'Москва',
       addressCountry: 'RU',
     },
   },
@@ -172,7 +172,7 @@ const structuredData = [faqSchema, serviceSchema, ...productSchemas]
     <div class="container">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
         <div>
-          <p class="t-eyebrow mb-3">Входные двери · Челябинск и область</p>
+          <p class="t-eyebrow mb-3">Входные двери · Москва и область</p>
           <h1 class="t-h1 mb-4">Входные двери для квартиры и дома: от бюджетных до уличных с терморазрывом</h1>
           <p class="t-lead mb-6 max-w-125">
             Надёжные стальные двери с монтажом для квартиры и частного дома. Тёплый короб,
@@ -341,7 +341,7 @@ const structuredData = [faqSchema, serviceSchema, ...productSchemas]
         <div>
           <h2 class="text-2xl font-medium text-white sm:text-3xl">Рассчитаем бесплатно</h2>
           <p class="mt-2 max-w-md text-sm text-white/60 sm:text-base">
-            Замер по Челябинску, точная стоимость, подбор накладки и цвета.
+            Замер по Москве, точная стоимость, подбор накладки и цвета.
           </p>
         </div>
         <div class="flex flex-wrap gap-2.5">

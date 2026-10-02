@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SITE } from '../../config/site'
 import { computed, reactive, ref, onMounted, onUnmounted } from 'vue'
 import { useScrollReveal } from '../../composables/useScrollReveal'
 import { reviews, type ReviewPlatform, type Review } from '../../data/reviews'
@@ -291,7 +292,7 @@ onUnmounted(() => {
       >
         <span class="text-sm font-medium text-slate-500">Читайте больше отзывов и оставляйте свои:</span>
         <a
-          href="https://2gis.ru/chelyabinsk/search/ВФД%20Владимирская%20фабрика%20дверей%20Братьев%20Кашириных%20131Б"
+          :href="SITE.reviewLinks.twoGis"
           target="_blank"
           rel="noopener"
           class="btn btn-outline"
@@ -308,7 +309,7 @@ onUnmounted(() => {
           2ГИС
         </a>
         <a
-          href="https://yandex.ru/maps/?text=ВФД%20Владимирская%20фабрика%20дверей%20Челябинск%20Братьев%20Кашириных%20131Б"
+          :href="SITE.reviewLinks.yandex"
           target="_blank"
           rel="noopener"
           class="btn btn-outline"

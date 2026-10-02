@@ -88,11 +88,11 @@ const faq = [
   { q: 'Какой цвет алюминиевой кромки выбрать?',
     a: 'Три варианта: чёрная (анодированный алюминий) — под тёмную фурнитуру и контрастный интерьер; серебро (натуральный алюминий) — нейтральный, для светлых стен; золото (золотистый анод) — под бронзу, латунь и арт-деко. Цена одинакова для всех трёх.' },
   { q: 'Какой нужен проём?',
-    a: 'Проём должен быть ровным, откосы — вровень с плоскостью стены. Минимальная толщина стены — 90 мм. Замерщик даёт конкретные рекомендации на месте; по Челябинску замер бесплатный при оформлении заказа.' },
+    a: 'Проём должен быть ровным, откосы — вровень с плоскостью стены. Минимальная толщина стены — 90 мм. Замерщик даёт конкретные рекомендации на месте; по Москве замер бесплатный при оформлении заказа.' },
   { q: 'Есть нестандартные размеры?',
     a: `Стандарт в наличии: ширины ${SECRET_SIZES.join(', ')} мм, высота 2000 мм. Нестандартные высоты под заказ — от 2050 до 2700 мм, надбавка к цене полотна от +20% до +50%. Срок изготовления: ${CUSTOM_LEAD_TIME}.` },
   { q: 'Сколько стоит установка?',
-    a: 'Стоимость монтажа рассчитывается отдельно. Мы работаем по Челябинску, даём гарантию на работы. Уточняйте у менеджера при заказе.' },
+    a: 'Стоимость монтажа рассчитывается отдельно. Мы работаем по Москве, даём гарантию на работы. Уточняйте у менеджера при заказе.' },
   { q: 'Чем «Рефлекс» отличается от «Секрета»?',
     a: 'Тем же скрытым монтажом вровень со стеной, но вместо глухого полотна — зеркало во всю высоту двери. Изготавливается индивидуально, высотой до 2,5 м, доступны прямое и обратное открывание.' },
 ]
@@ -111,7 +111,7 @@ const structuredData = canonicalUrl ? [
   ...(featuredWorks.length > 0 ? [{
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Наши работы — монтаж скрытых дверей в Челябинске и Челябинской области',
+    name: 'Наши работы — монтаж скрытых дверей в Москве и Московской области',
     itemListElement: featuredWorks.map((w, i) => ({
       '@type': 'ListItem',
       position: i + 1,
@@ -139,8 +139,8 @@ const structuredData = canonicalUrl ? [
       highPrice: Math.max(...SECRET_PRICES_DISPLAY.map(r => r.kitStandardPrice)),
       availability: 'https://schema.org/InStock',
       areaServed: [
-        { '@type': 'City', name: 'Челябинск' },
-        { '@type': 'AdministrativeArea', name: 'Челябинская область' },
+        { '@type': 'City', name: 'Москва' },
+        { '@type': 'AdministrativeArea', name: 'Московская область' },
       ],
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
       shippingDetails:         merchantPolicy.shipping,
@@ -160,8 +160,8 @@ const structuredData = canonicalUrl ? [
       highPrice: Math.max(...REFLEX_PRICES.map(r => r.kitStandardPrice)),
       availability: 'https://schema.org/InStock',
       areaServed: [
-        { '@type': 'City', name: 'Челябинск' },
-        { '@type': 'AdministrativeArea', name: 'Челябинская область' },
+        { '@type': 'City', name: 'Москва' },
+        { '@type': 'AdministrativeArea', name: 'Московская область' },
       ],
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
       shippingDetails:         merchantPolicy.shipping,
@@ -171,8 +171,8 @@ const structuredData = canonicalUrl ? [
 ---
 
 <BaseLayout
-  title="Скрытые двери в Челябинске — цены и монтаж | ВФД"
-  description={`Скрытые двери «Секрет» и «Секрет Реверс» в Челябинске — полотно вровень со стеной, без наличников и видимых петель. Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}. Бесплатный замер по Челябинску при заказе, монтаж под ключ.`}
+  title="Скрытые двери в Москве — цены и монтаж | ВФД"
+  description={`Скрытые двери «Секрет» и «Секрет Реверс» в Москве — полотно вровень со стеной, без наличников и видимых петель. Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}. Бесплатный замер по Москве при заказе, монтаж под ключ.`}
   ogImage={IMAGES.invisible}
   preloadImage={IMAGES.heroCover}
   canonical={canonicalUrl}
@@ -208,8 +208,8 @@ const structuredData = canonicalUrl ? [
       <div class="sd-hero__grad" aria-hidden="true" />
 
       <div class="sd-hero__body">
-        <p class="sd-eyebrow">Скрытый монтаж · Челябинск</p>
-        <h1 class="sd-hero__h1">Скрытые двери <br/>в Челябинске</h1>
+        <p class="sd-eyebrow">Скрытый монтаж · Москва</p>
+        <h1 class="sd-hero__h1">Скрытые двери <br/>в Москве</h1>
         <p class="sd-hero__lead">
           Полотно вровень со стеной. Без наличников,
           без видимых петель. Алюминиевый короб прячется
@@ -780,7 +780,7 @@ const structuredData = canonicalUrl ? [
           </p>
           <p class="sd-p">
             В ВФД скрытые двери поставляются напрямую с фабрики: замер
-            по Челябинску, проект, доставка и монтаж бригадой с гарантией.
+            по Москве, проект, доставка и монтаж бригадой с гарантией.
           </p>
           <div class="sd-about__actions">
             <a href={TG} target="_blank" rel="noopener" class="btn btn-primary">Написать в Telegram</a>
@@ -815,7 +815,7 @@ const structuredData = canonicalUrl ? [
       <div class="container">
         <h2 class="sd-h2" id="works-heading">Наши работы</h2>
         <p class="sd-p" style="margin-top: -0.75rem; margin-bottom: 1.75rem">
-          Реальные объекты нашей бригады в Челябинске и Челябинской области — с фото монтажа и полной спецификацией каждой двери.
+          Реальные объекты нашей бригады в Москве и Московской области — с фото монтажа и полной спецификацией каждой двери.
         </p>
         {/* client:only="vue" — WorksGallery рендерит WorkDetailCard через v-for,
             и КАЖДАЯ карточка несёт свой <Teleport to="body"> для лайтбокса фото.
@@ -846,7 +846,7 @@ const structuredData = canonicalUrl ? [
         <div class="sd-cta__text">
           <h2 class="sd-cta__h2">Рассчитаем бесплатно</h2>
           <p class="sd-cta__lead">
-            Замер по Челябинску, точная стоимость, подбор фурнитуры.
+            Замер по Москве, точная стоимость, подбор фурнитуры.
             Двери напрямую с фабрики.
           </p>
         </div>

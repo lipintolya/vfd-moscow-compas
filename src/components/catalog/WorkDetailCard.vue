@@ -18,7 +18,7 @@ const specsFor = (work: InvisibleWork): Spec[] => {
 }
 
 const altFor = (i: number) =>
-  `Скрытые двери «${props.work.series ?? props.work.title}» — фото ${i + 1} из ${props.work.images.length}, ${props.work.location ?? 'Челябинск'}`
+  `Скрытые двери «${props.work.series ?? props.work.title}» — фото ${i + 1} из ${props.work.images.length}, ${props.work.location ?? 'Москва'}`
 
 /* ── Активная фотография в герое карточки ── */
 const activeIndex = ref(0)

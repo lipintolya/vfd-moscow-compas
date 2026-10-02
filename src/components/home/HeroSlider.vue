@@ -21,10 +21,10 @@ interface Slide {
 const slides: Slide[] = [
   {
     /* Первый слайд — единственный <h1> на главной (см. шаблон ниже), поэтому
-       именно он должен нести ключевые запросы. "ВФД Челябинск" — самый частый
+       именно он должен нести ключевые запросы. "ВФД Москва" — самый частый
        брендовый запрос (по нему в органике выше нас страница самой фабрики,
        не салона — см. обсуждение), поэтому фраза идёт слитно в начале H1,
-       а не разбита "ВФД на Кашириных ... в Челябинске" как раньше. Штрих-промо
+       а не разбита "ВФД в ТЦ «Компас» ... в Москве" как раньше. Штрих-промо
        ушёл на 2-й слайд (крутится через 9с и доступен по точкам навигации),
        сам по себе он никуда не делся. */
     id: 1,
@@ -33,7 +33,7 @@ const slides: Slide[] = [
        экране (телефон, DPR 3 берёт полный оригинал из srcset) она
        уходила из кадра — прижимаем кадр влево. */
     imagePosition: 'left center',
-    title: 'ВФД Челябинск — двери на Братьев Кашириных',
+    title: 'ВФД Москва — двери в ТЦ «Компас»',
     subtitle: 'Официальный дилер',
     description: 'Подберём дверь для дома или квартиры: каталог моделей, цены и установка',
     cta: 'Смотреть каталог',
@@ -341,7 +341,7 @@ onUnmounted(stop)
                 <div class="min-h-18 sm:min-h-21">
                   <p class="text-xs uppercase tracking-widest text-white/60 mb-1">Салон ВФД</p>
                   <h4 class="font-medium text-sm sm:text-base mb-1 leading-snug line-clamp-2">Полный цикл: от замера до монтажа</h4>
-                  <p class="text-sm text-white/75 line-clamp-2">Работаем в Челябинске с 2014 года</p>
+                  <p class="text-sm text-white/75 line-clamp-2">ТЦ «Компас», 3 этаж</p>
                 </div>
                 <a href="/about/" class="group/link mt-4 inline-flex w-fit shrink-0 items-center gap-2 whitespace-nowrap rounded-full bg-white py-1.5 pl-4 pr-1.5 text-sm font-semibold text-ink shadow-[0_2px_8px_rgba(15,23,42,0.2)] transition-transform duration-200 ease-out hover:-translate-y-px">
                   Подробнее

@@ -1,13 +1,13 @@
 {
-  "name": "vfd-astro",
-  "description": "ВФД на Кашириных — маркетинговый сайт и каталог дверей/перегородок. Astro 6 + Vue 3 + Tailwind v4 + Supabase.",
+  "name": "vfd-moscow-compas",
+  "description": "ВФД в ТЦ «Компас» (Москва) — сайт и каталог дверей/перегородок. Astro 6 + Vue 3 + Tailwind v4 + Supabase.",
   "type": "module",
   "version": "0.0.1",
   "private": true,
-  "homepage": "https://vfd74.ru",
+  "homepage": "https://domain-placeholder.example",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lipintolya/vfd74.git"
+    "url": "https://github.com/lipintolya/vfd-moscow-compas.git"
   },
   "engines": {
     "node": ">=22.12.0"

@@ -32,8 +32,8 @@ const canonicalUrl = Astro.site
   ? new URL('/catalog/skrytye-dveri-dlya-ofisa/', Astro.site).href
   : undefined
 
-const title       = 'Скрытые двери для офиса и коммерческих объектов в Челябинске | ВФД'
-const description = `Скрытые двери для офисов, шоу-румов и переговорных в Челябинске — монтаж без выступающих коробов и наличников, устойчивость к интенсивному трафику. Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}.`
+const title       = 'Скрытые двери для офиса и коммерческих объектов в Москве | ВФД'
+const description = `Скрытые двери для офисов, шоу-румов и переговорных в Москве — монтаж без выступающих коробов и наличников, устойчивость к интенсивному трафику. Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}.`
 
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
@@ -127,7 +127,7 @@ const structuredData = canonicalUrl ? [
             перестаёт быть отдельным элементом интерьера и становится частью стены.
           </p>
           <p class="m-0 mb-6 t-lead text-slate-600">
-            Собственную дверь такого типа мы установили в своём салоне на Братьев Кашириных —
+            Собственную дверь такого типа мы установили в своём салоне в ТЦ «Компас» —
             можно приехать и посмотреть, как она выглядит и работает вживую, прежде чем заказывать
             для своего объекта.
           </p>
@@ -214,7 +214,7 @@ const structuredData = canonicalUrl ? [
   {officeWork && (
     <section class="section bg-white">
       <div class="container">
-        <SectionHeading eyebrow="Наш пример" title="Скрытая дверь в нашем салоне на Кашириных" />
+        <SectionHeading eyebrow="Наш пример" title="Скрытая дверь в нашем салоне в ТЦ «Компас»" />
         <div class="grid grid-cols-1 gap-4 overflow-hidden rounded-2xl border border-slate-200 sm:grid-cols-2">
           <div class="aspect-4/3 overflow-hidden bg-slate-100 sm:aspect-auto">
             <img

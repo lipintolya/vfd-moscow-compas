@@ -7,8 +7,8 @@ import { companyLegalInfo } from '../lib/contacts-data'
 import { localBusinessSchema as buildLocalBusiness, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
 import { SITE } from '../config/site'
 
-const title       = 'О салоне дверей ВФД в Челябинске — официальный дилер с 2014 года'
-const description = 'Салон дверей ВФД на Братьев Кашириных, 131Б — официальный дилер Владимирской фабрики дверей в Челябинске с 2014 года. 60+ моделей в выставочном зале, замер и монтаж.'
+const title       = 'О салоне дверей ВФД в Москве — ТЦ «Компас»'
+const description = 'Салон дверей ВФД в ТЦ «Компас» — официальный дилер Владимирской фабрики дверей в Москве. 60+ моделей в выставочном зале, замер и монтаж.'
 const canonicalUrl = Astro.site ? new URL('/about/', Astro.site).href : undefined
 
 const breadcrumbItems = [
@@ -19,15 +19,15 @@ const breadcrumbItems = [
 const faq = [
   {
     q: 'Вы официальный дилер Владимирской фабрики дверей?',
-    a: 'Да. Салон ВФД на Братьев Кашириных — фирменный салон, который работает с фабрикой напрямую, без посредников. Подробнее о самом производителе — на странице «О фабрике».',
+    a: 'Да. Салон ВФД в ТЦ «Компас» — фирменный салон, который работает с фабрикой напрямую, без посредников. Подробнее о самом производителе — на странице «О фабрике».',
   },
-  {
+  ...(companyLegalInfo.activity.founded ? [{
     q: 'С какого года работает салон?',
-    a: `Салон работает в Челябинске с ${companyLegalInfo.activity.founded} года.`,
-  },
+    a: `Салон работает в Москве с ${companyLegalInfo.activity.founded} года.`,
+  }] : []),
   {
     q: 'Можно ли посмотреть двери вживую?',
-    a: `Да, в выставочном зале представлено более 60 моделей дверей, образцы покрытий и профилей перегородок. Адрес: ${companyLegalInfo.address.legal}, ${companyLegalInfo.address.entrance.charAt(0).toLowerCase() + companyLegalInfo.address.entrance.slice(1)}. Работаем без выходных: ${companyLegalInfo.workingHours.shortDisplay}.`,
+    a: `Да, в выставочном зале представлено более 60 моделей дверей, образцы покрытий и профилей перегородок. Адрес: ${SITE.address.full}. Работаем без выходных: ${companyLegalInfo.workingHours.shortDisplay}.`,
   },
   {
     q: 'Какая гарантия на двери и монтаж?',
