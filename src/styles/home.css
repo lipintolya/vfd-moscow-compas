@@ -10,8 +10,11 @@
       ней: там затемнение только под текстом, ради контраста, а не декора.
    3. Линейки — только для данных. 1px slate-200 разделяет адрес/часы,
       шаги, строки списка; рамок и теней у блоков нет.
-   4. Красный — одно целевое действие на экран (кнопка). Ссылки —
-      графитовые, подчёркивание на hover; голубой — только фокус.
+   4. Красный #FF0020 — фирменный сигнал, а не фон: главное действие
+      экрана (кнопка), одна плитка-предложение у первого экрана, номера
+      шагов и отклик на наведение (стрелки, подчёркивания, контуры).
+      Больших красных плоскостей — не больше одной на экран. Текст на
+      красном — только белый и крупный. Голубой — только фокус.
    5. Цифры — табличные: цены и часы не «прыгают» в колонках.
 
    Шрифт — одна гарнитура Manrope (уже грузится сайтом): иерархия
@@ -22,7 +25,8 @@
    Сетка — 12 колонок контейнера сайта, межколонник 24px (между плитками
    16px); вертикальный ритм — шаг 8px, секции 64–104px.
    Форма — скругления по уровню вложенности: сцена 28px, плитка 20px,
-   поле/кнопка в плитке 12px, пилюли и иконки — полностью круглые.
+   фото в подписанной карточке 16px, поле/кнопка в плитке 12px, пилюли
+   и иконки — полностью круглые.
    ============================================================ */
 
 .home {
@@ -35,8 +39,9 @@
   --h-signal: var(--color-accent-500);
 
   --h-gutter: 1.5rem;
+  --h-pad:    clamp(1rem, 4vw, 2rem);         /* поле .container — для лент во всю ширину */
   --h-sec:    clamp(4rem, 7vw, 6.5rem);
-  --h-radius: 6px;
+  --h-radius: 1rem;
   --h-tile-radius: 1.25rem;
   --h-tile-gap: 1rem;
   /* Затемнение под текстом на фото — только снизу, где лежит подпись */
@@ -138,7 +143,7 @@
 .h-btn--ink { background: var(--h-ink); color: #fff; }
 .h-btn--ink:hover { background: var(--color-slate-700); }
 .h-btn--quiet { border-color: var(--color-slate-300); color: var(--h-ink); }
-.h-btn--quiet:hover { border-color: var(--h-ink); }
+.h-btn--quiet:hover { border-color: var(--h-signal); color: var(--h-signal); }
 
 .h-link {
   color: var(--h-ink);
@@ -149,7 +154,7 @@
   text-underline-offset: 0.3em;
   transition: text-decoration-color 180ms var(--ease-out);
 }
-.h-link:hover { text-decoration-color: currentColor; }
+.h-link:hover { text-decoration-color: var(--h-signal); }
 
 .home :is(a, button):focus-visible {
   outline: 2px solid var(--color-secondary-500);
@@ -188,7 +193,7 @@
 .h-pill--white { background: #fff; color: var(--h-ink); }
 .h-pill--white:hover { background: var(--color-slate-100); }
 .h-pill--line { border-color: var(--color-slate-300); color: var(--h-ink); }
-.h-pill--line:hover { border-color: var(--h-ink); }
+.h-pill--line:hover { border-color: var(--h-signal); color: var(--h-signal); }
 .h-pill svg { flex: none; }
 
 /* Стрелка поворачивается на hover родителя-ссылки (.h-tile) */
@@ -201,7 +206,7 @@
   border-radius: 50%;
   background: var(--h-ink);
   color: #fff;
-  transition: transform 220ms var(--ease-out);
+  transition: transform 220ms var(--ease-out), background-color 220ms var(--ease-out), color 220ms var(--ease-out);
 }
 .h-arrow--white { background: #fff; color: var(--h-ink); }
 
@@ -246,9 +251,13 @@
 }
 .h-tile__corner--left { right: auto; left: clamp(0.875rem, 1.4vw, 1.25rem); }
 .h-tile:hover .h-arrow { transform: rotate(45deg); }
+/* На наведение стрелка становится красной — кроме красной плитки */
+.h-tile:not(.h-tile--signal):hover .h-arrow { background: var(--h-signal); color: #fff; }
 
 .h-tile--light { background: var(--h-wall); color: var(--h-ink); }
 .h-tile--dark  { background: var(--color-slate-900); color: #fff; }
+.h-tile--signal { background: var(--h-signal); color: #fff; transition: background-color 180ms var(--ease-out); }
+.h-tile--signal:hover { background: var(--color-accent-600); }
 .h-tile--photo { background: var(--color-slate-700); color: #fff; }
 .h-tile--photo > img {
   position: absolute;
@@ -301,9 +310,10 @@
 }
 .h-tile--photo .h-cap { color: rgb(255 255 255 / 0.82); }
 .h-tile--dark .h-cap  { color: var(--color-slate-400); }
+.h-tile--signal .h-cap { color: rgb(255 255 255 / 0.88); }
 
 @media (prefers-reduced-motion: reduce) {
-  .h-arrow, .h-tile--photo > img { transition: none; }
+  .h-arrow, .h-tile--photo > img, .h-tile--signal { transition: none; }
   .h-tile:hover .h-arrow { transform: none; }
   .h-tile--photo:hover > img { transform: none; }
 }

@@ -21,7 +21,6 @@
     "sitemap": "echo 'Sitemap generation handled by astro-sitemap integration'",
     "gen:renders": "node scripts/gen-render-gallery.mjs",
     "gen:portfolio-thumbs": "node scripts/gen-portfolio-thumbs.mjs",
-    "gen:hero-mobile": "node scripts/gen-hero-mobile.mjs",
     "gen:hero-bento": "node scripts/gen-hero-bento.mjs",
     "gen:about": "node scripts/gen-about-images.mjs",
     "gen:footer-map": "node scripts/gen-footer-map.mjs",

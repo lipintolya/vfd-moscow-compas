@@ -164,4 +164,24 @@ function toggleExpanded(id: string) {
 .offer__actions { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 1rem; font-size: 0.9375rem; }
 .offer__toggle { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; cursor: pointer; }
 .offers__all { margin: 2.5rem 0 0; }
+/* Телефон: лента с прокруткой вбок вместо столбика карточек — край
+   следующей карточки подсказывает, что ряд листается. */
+@media (max-width: 699px) {
+  .offers {
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    gap: 0.75rem;
+    margin-inline: calc(-1 * var(--h-pad));
+    padding-inline: var(--h-pad);
+    scroll-padding-inline: var(--h-pad);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .offers::-webkit-scrollbar { display: none; }
+  .offers > li { scroll-snap-align: start; }
+}
+@media (max-width: 699px) { .offers--single { grid-auto-columns: 100%; } }
+
 </style>

@@ -2,118 +2,117 @@
 /**
  * Первый экран главной.
  *
- * Сцена — интерьер на скруглённой подложке, поверх неё H1 и плавающая
- * панель «Подбор двери»; под сценой три плитки с фактами о салоне.
+ * Сцена — интерьеры на скруглённой подложке, плавно сменяются (слайдер);
+ * поверх — H1 и белая панель с тремя направлениями салона. Наведение
+ * (или фокус) на направление показывает его фон и останавливает слайдер,
+ * уход — возвращает слайдер. Каждое направление — ссылка на свой раздел:
+ * посетитель выбирает тип двери, а не незнакомые ему серии.
+ * Под сценой три плитки: работы, видео руководителя, где мы.
  *
- * Панель — обычная GET-форма на /catalog/ с теми же параметрами, что
- * каталог читает из URL (series / coating / color), поэтому работает и без
- * JS. Скрипт ниже лишь отключает варианты, для которых нет моделей при уже
- * выбранных фильтрах, и пишет число найденных моделей на кнопке.
- *
- * H1 — единственный на странице и несёт ключевой запрос («ВФД Москва»).
+ * H1 — единственный на странице и несёт ключевой запрос.
  */
 import { SITE } from '../../config/site'
-import type { FinderData } from '../../data/home-finder'
+import { HERO_SLIDES } from '../../data/hero-image'
 
-interface Props {
-  finder: FinderData
-  modelCount: number
-  minPrice: number | null
-}
-const { finder, modelCount, minPrice } = Astro.props
-
-const fmt = (n: number) => n.toLocaleString('ru-RU')
-const plural = (n: number) => {
-  const m10 = n % 10, m100 = n % 100
-  if (m10 === 1 && m100 !== 11) return 'модель'
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'модели'
-  return 'моделей'
-}
-
-const fields = [
-  { name: 'series',  label: 'Серия',    any: 'Любая',  options: finder.series },
-  { name: 'coating', label: 'Покрытие', any: 'Любое',  options: finder.coatings },
-  { name: 'color',   label: 'Цвет',     any: 'Любой',  options: finder.colors },
+/* Слои фона: слайды + кадр перегородок — он показывается только при
+   наведении на «Перегородки». */
+const layers = [
+  ...HERO_SLIDES,
+  { src: 'https://storage.yandexcloud.net/catalog-vfd/catalog_preview/catalog-preview3.webp', position: '50% 55%', alt: 'Алюминиевая перегородка со стеклом' },
 ]
+const SLIDE_COUNT = HERO_SLIDES.length
+
+const directions = [
+  { title: 'Межкомнатные двери',      text: 'Эмалекс, эмаль, ПЭТ и экошпон',      cta: 'Каталог дверей',       href: '/catalog/',               layer: 2 },
+  { title: 'Скрытые двери',           text: 'Заподлицо со стеной, без наличников', cta: 'Смотреть скрытые',     href: '/catalog/skrytye-dveri/', layer: 1 },
+  { title: 'Алюминиевые перегородки', text: 'Стекло в профиле, монтаж под ключ',   cta: 'Смотреть перегородки', href: '/partitions/',            layer: 3 },
+]
+
+const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 ---
 
 <section class="hero" aria-labelledby="hero-heading">
   <div class="container">
-    <div class="stage">
-      <img
-        class="stage__img"
-        src="/renders/hero/designers-hero.webp"
-        srcset="/renders/hero/designers-hero-960.webp 960w, /renders/hero/designers-hero.webp 1672w"
-        sizes="(min-width: 1280px) 1216px, 100vw"
-        alt="Интерьер со скрытой дверью ВФД заподлицо со стеной"
-        width="1672"
-        height="941"
-        fetchpriority="high"
-        decoding="async"
-      />
+    <div class="stage" data-stage data-slides={SLIDE_COUNT}>
+      <div class="stage__media">
+        {layers.map((l, i) => (
+          <img
+            class:list={['stage__img', { 'is-on': i === 0 }]}
+            data-layer={i}
+            src={l.src}
+            alt={i === 0 ? l.alt : ''}
+            width="1672"
+            height="941"
+            style={`object-position: ${l.position}`}
+            fetchpriority={i === 0 ? 'high' : undefined}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+          />
+        ))}
+      </div>
 
       <div class="stage__copy">
         <h1 id="hero-heading" class="stage__title">
-          ВФД Москва&nbsp;— двери в&nbsp;ТЦ&nbsp;«Компас»
+          Шоурум дверей ВФД в&nbsp;Москве, ТЦ&nbsp;«Компас»
         </h1>
+        <p class="stage__since">{SITE.experience}</p>
         <p class="stage__lead">
           Официальный дилер Владимирской фабрики дверей. Межкомнатные и&nbsp;скрытые
           двери, алюминиевые перегородки — с&nbsp;замером и&nbsp;установкой.
         </p>
-        <a href="/catalog/" class="h-pill h-pill--white stage__cta">
-          Смотреть каталог
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
       </div>
 
-      <div class="finder">
-        <nav class="finder__tabs" aria-label="Тип двери">
-          <span class="finder__tab is-active" aria-current="true">Межкомнатные</span>
-          <a href="/catalog/skrytye-dveri/" class="finder__tab">Скрытые</a>
-          <a href="/partitions/" class="finder__tab">Перегородки</a>
-        </nav>
-
-        <form class="finder__form" action="/catalog/" method="get" data-finder data-rows={JSON.stringify(finder.rows)}>
-          {fields.map((f) => (
-            <label class="field">
-              <span class="field__label">{f.label}</span>
-              <select name={f.name} class="field__select">
-                <option value="">{f.any}</option>
-                {f.options.map((o) => <option value={o.value}>{o.label}</option>)}
-              </select>
-            </label>
-          ))}
-          <button type="submit" class="finder__submit" data-finder-submit>
-            Показать {modelCount} {plural(modelCount)}
-          </button>
-        </form>
+      <div class="dots" role="group" aria-label="Фото интерьеров">
+        {Array.from({ length: SLIDE_COUNT }, (_, i) => (
+          <button type="button" class:list={['dots__dot', { 'is-on': i === 0 }]} data-dot={i} aria-label={`Фото ${i + 1} из ${SLIDE_COUNT}`} aria-pressed={i === 0 ? 'true' : 'false'}></button>
+        ))}
       </div>
+
+      <nav class="ways" aria-label="Направления салона">
+        {directions.map((d) => (
+          <a href={d.href} class="way" data-way={d.layer}>
+            <span class="way__title">{d.title}</span>
+            <span class="way__text">{d.text}</span>
+            <span class="way__btn">{d.cta} <Fragment set:html={arrow} /></span>
+            <span class="way__arrow h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
+          </a>
+        ))}
+      </nav>
     </div>
 
     <ul class="tiles" role="list">
       <li>
-        <a href="/catalog/" class="h-tile h-tile--light tile">
-          <span class="h-tile__corner h-arrow" aria-hidden="true">
-            <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </span>
-          <span class="h-num">{modelCount}</span>
-          <span class="h-cap">моделей межкомнатных дверей в&nbsp;каталоге</span>
+        <a href="/portfolio/" class="h-tile h-tile--signal tile">
+          <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
+          <span class="h-tile__title">Наши работы</span>
+          <span class="h-cap">двери и&nbsp;перегородки на&nbsp;объектах клиентов</span>
         </a>
       </li>
-      {minPrice && (
-        <li>
-          <a href="/catalog/" class="h-tile h-tile--photo tile">
-            <img src="/renders/home/tehno-1.webp" alt="" loading="lazy" decoding="async" style="object-position: 50% 40%" />
-            <span class="h-num"><small>от</small>{fmt(minPrice)}&nbsp;₽</span>
-            <span class="h-cap">за полотно межкомнатной двери</span>
-          </a>
-        </li>
-      )}
       <li>
-        <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-tile h-tile--dark tile">
-          <span class="tile__mark" aria-hidden="true">Компас</span>
-          <span class="h-num">{SITE.address.floor}</span>
-          <span class="h-cap">{SITE.address.mall}, {SITE.address.street}</span>
+        <a href="#video" class="h-tile h-tile--dark tile">
+          <span class="h-tile__corner tile__play" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>
+          </span>
+          <span class="h-tile__title">Видео о&nbsp;дверях</span>
+          <span class="h-cap">{SITE.contactPerson}<span class="tile__role">, {SITE.contactRole}</span></span>
+        </a>
+      </li>
+      <li>
+        <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-tile h-tile--photo tile tile--place" aria-label={`${SITE.address.full} — открыть на Яндекс Картах`}>
+          {SITE.address.photos.map((src, i) => (
+            <img src={src} alt="" loading="lazy" decoding="async" class="place__img" style={`--i:${i}`} />
+          ))}
+          <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
+          <span class="h-tile__title">{SITE.address.mall}, {SITE.address.floor}</span>
+          <span class="h-cap place__street">{SITE.address.street}</span>
+          <dl class="metro">
+            {SITE.address.metro.map((m) => (
+              <div class="metro__row">
+                <dt class="metro__station">{m.station}</dt>
+                <dd class="metro__time">{m.time}</dd>
+              </div>
+            ))}
+          </dl>
         </a>
       </li>
     </ul>
@@ -121,52 +120,69 @@ const fields = [
 </section>
 
 <script>
-  const plural = (n: number) => {
-    const m10 = n % 10, m100 = n % 100
-    if (m10 === 1 && m100 !== 11) return 'модель'
-    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'модели'
-    return 'моделей'
-  }
+  /* Слайдер сцены: смена каждые 6 с, пауза при наведении на направление
+     (показывает его фон), при скрытой вкладке и при reduced motion. */
+  document.querySelectorAll<HTMLElement>('[data-stage]').forEach((stage) => {
+    const layers = [...stage.querySelectorAll<HTMLImageElement>('[data-layer]')]
+    const dots = [...stage.querySelectorAll<HTMLButtonElement>('[data-dot]')]
+    const ways = [...stage.querySelectorAll<HTMLAnchorElement>('[data-way]')]
+    const slides = Number(stage.dataset.slides)
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+    let slide = 0
+    let timer: number | undefined
 
-  document.querySelectorAll<HTMLFormElement>('[data-finder]').forEach((form) => {
-    type Row = [string, string, string[]]
-    const rows: Row[] = JSON.parse(form.dataset.rows ?? '[]')
-    const selects = [...form.querySelectorAll('select')]
-    const submit = form.querySelector<HTMLButtonElement>('[data-finder-submit]')!
-
-    const fits = (row: Row, key: string, value: string) => {
-      if (!value) return true
-      if (key === 'series') return row[0] === value
-      if (key === 'coating') return row[1] === value
-      return row[2].includes(value)
+    const show = (i: number) => layers.forEach((l, j) => l.classList.toggle('is-on', j === i))
+    const goTo = (i: number) => {
+      slide = i
+      show(i)
+      dots.forEach((d, j) => {
+        d.classList.toggle('is-on', j === i)
+        d.setAttribute('aria-pressed', String(j === i))
+      })
     }
-    const count = (skip?: string, key?: string, value?: string) =>
-      rows.filter((row) =>
-        selects.every((s) => s.name === skip || fits(row, s.name, s.value)) &&
-        (!key || fits(row, key, value!))
-      ).length
+    const stop = () => { clearInterval(timer); timer = undefined }
+    const play = () => {
+      stop()
+      if (still || document.hidden) return
+      timer = window.setInterval(() => goTo((slide + 1) % slides), 6000)
+    }
 
-    const update = () => {
-      for (const s of selects) {
-        for (const o of s.options) {
-          if (o.value) o.disabled = count(s.name, s.name, o.value) === 0
-        }
+    dots.forEach((d, i) => d.addEventListener('click', () => { goTo(i); play() }))
+
+    // Телефон: свайп по фото листает слайды (вертикальная прокрутка не мешает)
+    let x0 = 0, y0 = 0
+    stage.addEventListener('touchstart', (e) => {
+      x0 = e.touches[0].clientX
+      y0 = e.touches[0].clientY
+    }, { passive: true })
+    stage.addEventListener('touchend', (e) => {
+      if ((e.target as Element).closest('.ways')) return
+      const dx = e.changedTouches[0].clientX - x0
+      const dy = e.changedTouches[0].clientY - y0
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return
+      goTo((slide + (dx < 0 ? 1 : slides - 1)) % slides)
+      play()
+    }, { passive: true })
+
+    for (const w of ways) {
+      const enter = () => {
+        stop()
+        show(Number(w.dataset.way))
+        ways.forEach((x) => x.classList.toggle('is-active', x === w))
       }
-      const n = count()
-      submit.textContent = n ? `Показать ${n} ${plural(n)}` : 'Нет подходящих моделей'
-      submit.disabled = n === 0
+      const leave = () => {
+        ways.forEach((x) => x.classList.remove('is-active'))
+        goTo(slide)
+        play()
+      }
+      w.addEventListener('mouseenter', enter)
+      w.addEventListener('focus', enter)
+      w.addEventListener('mouseleave', leave)
+      w.addEventListener('blur', leave)
     }
 
-    form.addEventListener('change', update)
-    // Пустые поля не попадают в URL: /catalog/?coating=emalex, а не ?series=&coating=emalex&color=
-    form.addEventListener('submit', () => {
-      for (const s of selects) s.disabled = !s.value
-    })
-    // После «назад» из каталога браузер восстанавливает выбор в форме
-    window.addEventListener('pageshow', () => {
-      for (const s of selects) s.disabled = false
-      update()
-    })
+    document.addEventListener('visibilitychange', play)
+    play()
   })
 </script>
 
@@ -185,15 +201,18 @@ const fields = [
     background: var(--color-slate-800);
     isolation: isolate;
   }
+  .stage__media { position: absolute; inset: 0; z-index: -2; }
   .stage__img {
     position: absolute;
     inset: 0;
-    z-index: -2;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 60% 50%;
+    color: transparent; /* alt не проступает текстом, если фото не загрузилось */
+    opacity: 0;
+    transition: opacity 1200ms var(--ease-out);
   }
+  .stage__img.is-on { opacity: 1; }
   /* Затемнение только под текстом (слева сверху) — для контраста белого
      заголовка; правая часть кадра остаётся чистой. */
   .stage::before {
@@ -202,12 +221,12 @@ const fields = [
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(100deg, rgb(19 19 22 / 0.62) 0%, rgb(19 19 22 / 0.34) 38%, rgb(19 19 22 / 0) 66%),
-      linear-gradient(180deg, rgb(19 19 22 / 0.18) 0%, rgb(19 19 22 / 0) 40%);
+      linear-gradient(100deg, rgb(19 19 22 / 0.66) 0%, rgb(19 19 22 / 0.38) 40%, rgb(19 19 22 / 0) 68%),
+      linear-gradient(180deg, rgb(19 19 22 / 0.2) 0%, rgb(19 19 22 / 0) 40%);
   }
 
   .stage__copy {
-    max-width: 40rem;
+    max-width: 42rem;
     padding: clamp(1.75rem, 4vw, 3.5rem);
     color: #fff;
   }
@@ -221,166 +240,234 @@ const fields = [
     color: #fff;
     text-wrap: balance;
   }
+  /* Опыт — отдельной строкой с красной чертой: главный аргумент салона */
+  .stage__since {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.25rem 0 0;
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    font-weight: 600;
+    color: #fff;
+  }
+  .stage__since::before {
+    content: '';
+    flex: none;
+    width: 1.5rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--h-signal);
+  }
   .stage__lead {
-    margin: 1.125rem 0 0;
-    max-width: 26rem;
+    margin: 0.75rem 0 0;
+    max-width: 27rem;
     font-size: 0.9375rem;
     line-height: 1.6;
     color: rgb(255 255 255 / 0.82);
   }
-  .stage__cta { margin-top: 1.75rem; }
 
-  /* ── Панель подбора ──────────────────────────────────── */
-  .finder {
+  /* ── Переключатель фото — справа сверху ── */
+  /* Кнопка выше видимой черты (44px) — чтобы попадать пальцем */
+  .dots {
+    position: absolute;
+    top: calc(clamp(1.25rem, 2.5vw, 2rem) - 0.625rem);
+    right: clamp(1.25rem, 2.5vw, 2rem);
+    display: flex;
+    gap: 0.375rem;
+  }
+  .dots__dot {
+    width: 1.25rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: linear-gradient(rgb(255 255 255 / 0.45), rgb(255 255 255 / 0.45)) center / 100% 3px no-repeat;
+    cursor: pointer;
+    transition: width 300ms var(--ease-out);
+  }
+  .dots__dot.is-on {
+    width: 2.25rem;
+    background-image: linear-gradient(var(--h-signal), var(--h-signal));
+  }
+
+  /* ── Панель направлений ──────────────────────────────── */
+  .ways {
+    display: grid;
     margin: 0 clamp(0.75rem, 2.5vw, 2.5rem) clamp(0.75rem, 2.5vw, 2.5rem);
-    padding: 1.25rem clamp(1.25rem, 2vw, 1.75rem) clamp(1.25rem, 2vw, 1.5rem);
+    padding: 0.25rem clamp(1rem, 2vw, 1.25rem);
     border-radius: 1.25rem;
     background: #fff;
     color: var(--h-ink);
   }
-  .finder__tabs {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .finder__tab {
+  .way {
     position: relative;
-    flex: none;
-    padding-bottom: 0.5rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-slate-400);
-    text-decoration: none;
-    transition: color 180ms var(--ease-out);
-  }
-  .finder__tab:hover { color: var(--h-ink); }
-  .finder__tab.is-active { color: var(--h-ink); }
-  .finder__tab.is-active::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 1rem;
-    height: 2px;
-    border-radius: 2px;
-    background: var(--h-ink);
-  }
-
-  .finder__form {
     display: grid;
-    gap: 0;
-    margin-top: 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.125rem 0.75rem;
+    padding: 0.875rem 0;
+    color: inherit;
+    text-decoration: none;
   }
+  .way + .way { border-top: 1px solid var(--h-rule); }
+  .way__title { grid-column: 1; font-size: clamp(0.9375rem, 4.4vw, 1.0625rem); font-weight: 600; letter-spacing: -0.01em; }
+  .way__text { grid-column: 1; font-size: 0.8125rem; line-height: 1.4; color: var(--h-muted); }
+  .way__arrow { grid-column: 2; grid-row: 1 / span 2; }
+  .way__btn { display: none; }
+  .way:hover .way__arrow, .way.is-active .way__arrow { background: var(--h-signal); }
+
   @media (min-width: 900px) {
-    .finder__form {
-      grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    .ways {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      padding: 1.5rem 0;
+    }
+    .way {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0;
+      padding: 0 clamp(1.25rem, 2vw, 1.75rem);
+    }
+    .way + .way { border-top: 0; border-left: 1px solid var(--h-rule); }
+    /* Красная метка у верхнего края панели над активным направлением —
+       та же, что у активного пункта меню */
+    .way::before {
+      content: '';
+      position: absolute;
+      top: -1.5rem;
+      left: clamp(1.25rem, 2vw, 1.75rem);
+      width: 1.5rem;
+      height: 3px;
+      border-radius: 0 0 3px 3px;
+      background: var(--h-signal);
+      opacity: 0;
+      transition: opacity 180ms var(--ease-out);
+    }
+    .way:hover::before, .way.is-active::before { opacity: 1; }
+    .way__title { font-size: 1.1875rem; }
+    .way__text { margin-top: 0.25rem; font-size: 0.875rem; }
+    .way__arrow { display: none; }
+    .way__btn {
+      display: inline-flex;
       align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.125rem;
+      padding: 0.6875rem 1.125rem;
+      border-radius: 999px;
+      background: var(--h-ink);
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+      transition: background-color 180ms var(--ease-out);
     }
+    .way:hover .way__btn, .way.is-active .way__btn { background: var(--h-signal); }
   }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--h-rule);
-  }
-  @media (min-width: 900px) {
-    .field {
-      padding: 0.25rem 1.5rem;
-      border-bottom: 0;
-      border-left: 1px solid var(--h-rule);
-    }
-    .field:first-child { padding-left: 0; border-left: 0; }
-  }
-  .field__label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--h-muted);
-  }
-  .field__select {
-    width: 100%;
-    padding: 0 1.5rem 0 0;
-    border: 0;
-    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%239c9ca4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right center / 14px;
-    font: inherit;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--h-ink);
-    cursor: pointer;
-    appearance: none;
-    text-overflow: ellipsis;
-  }
-  .field__select:focus-visible { outline: 2px solid var(--color-secondary-500); outline-offset: 4px; border-radius: 4px; }
-
-  .finder__submit {
-    min-height: 3.25rem;
-    margin-top: 1rem;
-    padding: 0 1.5rem;
-    border: 0;
-    border-radius: 0.75rem;
-    background: var(--h-ink);
-    color: #fff;
-    font: inherit;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background-color 180ms var(--ease-out);
-  }
-  .finder__submit:hover { background: var(--color-slate-700); }
-  .finder__submit:disabled { background: var(--color-slate-300); cursor: default; }
-  @media (min-width: 900px) {
-    .finder__submit { margin: 0 0 0 1.5rem; min-width: 13.5rem; }
-  }
+  .way:focus-visible { outline: 2px solid var(--color-secondary-500); outline-offset: 2px; border-radius: 0.5rem; }
 
   /* ── Плитки ──────────────────────────────────────────── */
   .tiles {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
     margin: 0.75rem 0 0;
     padding: 0;
     list-style: none;
   }
   /* Телефон: две плитки в ряд, «где мы» — на всю ширину */
-  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tiles > li:last-child { grid-column: 1 / -1; }
   @media (min-width: 760px) {
     .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--h-tile-gap); margin-top: var(--h-tile-gap); }
     .tiles > li:last-child { grid-column: auto; }
   }
   .tile { min-height: 10.5rem; }
+  @media (min-width: 760px) { .tile { min-height: 14rem; } }
 
-  /* Крупное «Компас» еле заметным контуром — опознавательный знак ТЦ,
-     как вывеска; несёт смысл (где мы), а не просто декор. */
-  .tile__mark {
-    position: absolute;
-    top: 50%;
-    right: -0.5rem;
-    z-index: -1;
-    transform: translateY(-62%);
-    font-size: clamp(3.5rem, 6vw, 5.5rem);
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    line-height: 1;
-    color: rgb(255 255 255 / 0.06);
-    white-space: nowrap;
-    pointer-events: none;
+  /* Красный круг с «плей» — плитка ведёт к блоку видео */
+  .tile__play {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding-left: 2px;
+    border-radius: 50%;
+    background: var(--h-signal);
+    color: #fff;
+    transition: transform 220ms var(--ease-out);
   }
+  .tile:hover .tile__play { transform: scale(1.08); }
 
-  /* ── Мобильная сцена: кадр выше, панель под текстом ── */
+  /* ── Плитка «Где мы»: фото здания ТЦ сменяются по кругу (фасад,
+     парковка, вход) — чтобы узнать его с улицы; ниже — метро. ── */
+  .tile--place::before {
+    background: linear-gradient(0deg, rgb(19 19 22 / 0.86) 0%, rgb(19 19 22 / 0.6) 55%, rgb(19 19 22 / 0.1) 100%);
+  }
+  .tile--place .place__img { opacity: 0; animation: place-fade 18s infinite; animation-delay: calc(var(--i) * 6s - 1s); }
+  .tile--place .place__img:first-of-type { opacity: 1; }
+  @keyframes place-fade {
+    0%     { opacity: 0; }
+    5.5%   { opacity: 1; }
+    33.3%  { opacity: 1; }
+    38.8%  { opacity: 0; }
+    100%   { opacity: 0; }
+  }
+  .place__street { margin-top: 0.25rem; }
+
+  /* Метро — две колонки: станция и время, как табличка с направлениями */
+  .metro { margin: 0.875rem 0 0; border-top: 1px solid rgb(255 255 255 / 0.18); }
+  .metro__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+  .metro__station {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #fff;
+  }
+  /* Значок метро — красная «М», как на московских указателях */
+  .metro__station::before {
+    content: 'М';
+    display: grid;
+    place-items: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    background: var(--h-signal);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .metro__time { margin: 0; color: rgb(255 255 255 / 0.78); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ── Телефон ── */
   @media (max-width: 759px) {
-    .tile { min-height: 8.5rem; }
-    .tile :global(.h-cap) { margin-top: 0.5rem; font-size: 0.8125rem; }
+    /* Две плитки в ряд: заголовок и подпись короткие, прижаты к низу,
+       угловая кнопка над ними не перекрывает текст */
+    .tile { min-height: 9.5rem; padding: 1rem; }
+    .tile :global(.h-tile__corner) { top: 0.75rem; right: 0.75rem; }
+    .tile :global(.h-tile__title) { font-size: 1.1875rem; }
+    .tile :global(.h-cap) { margin-top: 0.375rem; font-size: 0.8125rem; }
+    .tile__role { display: none; }
+    .tiles > li:last-child .tile { min-height: 15rem; }
   }
   @media (max-width: 899px) {
     .stage { min-height: 0; border-radius: 1.25rem; }
-    .stage__copy { padding-bottom: 11rem; }
+    /* Переключатель — над заголовком слева, чтобы не наезжать на него */
+    .stage__copy { padding-top: 3.5rem; padding-bottom: 6rem; }
+    .dots { right: auto; left: clamp(1.75rem, 4vw, 3.5rem); }
     .stage::before {
-      background: linear-gradient(180deg, rgb(19 19 22 / 0.6) 0%, rgb(19 19 22 / 0.3) 45%, rgb(19 19 22 / 0.05) 70%);
+      background: linear-gradient(180deg, rgb(19 19 22 / 0.62) 0%, rgb(19 19 22 / 0.32) 50%, rgb(19 19 22 / 0.05) 75%);
     }
-    .stage__img { object-position: 50% 50%; }
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .stage__img, .dots__dot, .way::before, .way__btn, .tile__play { transition: none; }
+    .tile--place .place__img { animation: none; }
+  }
 </style>

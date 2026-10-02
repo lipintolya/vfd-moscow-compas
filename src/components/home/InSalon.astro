@@ -2,23 +2,14 @@
 /**
  * «Новинки и наличие» — заменяет четыре отдельных промо-блока (Техно, Штрих,
  * «Секрет», «Рефлекс»). Композиция журнальная: главный материал слева,
- * остальные — списком справа. Цены Техно/Штрих — пропы из index.astro
- * (живой каталог), скрытых — из skrytye-dveri-products.
+ * остальные — списком справа. Цены на главной не показываем — они
+ * на страницах моделей. Ссылка на Штрих 2А — проп из index.astro
+ * (живой каталог).
  */
-import {
-  SECRET_MIN_BLADE_PRICE, SECRET_MIN_BLADE_PRICE_ORIGINAL, SECRET_PROMO_ACTIVE,
-  REFLEX_MIN_BLADE_PRICE,
-} from '../../data/skrytye-dveri-products'
-
 interface Props {
-  tehnoBlade: number | null
-  tehnoKit: number | null
   shtrihHref: string | null
-  shtrihBlade: number | null
 }
-const { tehnoBlade, tehnoKit, shtrihHref, shtrihBlade } = Astro.props
-
-const fmt = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
+const { shtrihHref } = Astro.props
 
 type Status = 'new' | 'stock'
 interface Row {
@@ -29,8 +20,6 @@ interface Row {
   image: string
   alt: string
   href: string
-  price: number | null
-  priceWas?: number
 }
 
 const rows: Row[] = [
@@ -42,7 +31,6 @@ const rows: Row[] = [
     image: '/renders/home/shtrih-2a-1.webp',
     alt: 'Дверь Урбан Штрих 2А, Эмалекс бежевый с чёрным молдингом',
     href: shtrihHref,
-    price: shtrihBlade,
   }] : []),
   {
     status: 'stock',
@@ -52,18 +40,15 @@ const rows: Row[] = [
     image: '/renders/home/secret-2.webp',
     alt: 'Скрытая дверь «Секрет»',
     href: '/catalog/skrytye-dveri/',
-    price: SECRET_MIN_BLADE_PRICE,
-    priceWas: SECRET_PROMO_ACTIVE ? SECRET_MIN_BLADE_PRICE_ORIGINAL : undefined,
   },
   {
     status: 'new',
     statusText: 'Новинка',
     title: 'Скрытая дверь «Рефлекс»',
-    text: 'Зеркало во всю высоту полотна, до 2,5 м',
+    text: 'Зеркало во всю высоту полотна, до\u00a02,5\u00a0м',
     image: '/renders/home/reflex-1.webp',
     alt: 'Скрытая дверь с зеркалом «Рефлекс»',
     href: '/catalog/skrytye-dveri/#reflex',
-    price: REFLEX_MIN_BLADE_PRICE,
   },
 ]
 ---
@@ -84,12 +69,6 @@ const rows: Row[] = [
           <span class="status h-meta" data-status="new">Новинка, Техно 1 белый на складе</span>
           <span class="lead__title">Серия Техно</span>
           <span class="h-body lead__text">Покрытие Эмалекс устойчиво к царапинам и сколам, не боится влажности и ультрафиолета. Сдержанный технологичный характер для современного интерьера.</span>
-          {tehnoBlade && (
-            <span class="lead__prices">
-              <span class="h-meta">Полотно <span class="h-price">{fmt(tehnoBlade)}</span></span>
-              {tehnoKit && <span class="h-meta">Комплект <span class="h-price">{fmt(tehnoKit)}</span></span>}
-            </span>
-          )}
         </span>
       </a>
 
@@ -104,12 +83,6 @@ const rows: Row[] = [
                 <span class="status h-meta" data-status={r.status}>{r.statusText}</span>
                 <span class="h-h3 row__title">{r.title}</span>
                 <span class="h-meta row__text">{r.text}</span>
-                {r.price && (
-                  <span class="row__price">
-                    {r.priceWas && <s class="h-meta">{fmt(r.priceWas)}</s>}
-                    <span class="h-price">от {fmt(r.price)}</span>
-                  </span>
-                )}
               </span>
             </a>
           </li>
@@ -160,8 +133,6 @@ const rows: Row[] = [
   }
   .lead:hover .lead__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
   .lead__text { margin-top: 0.75rem; }
-  .lead__prices { display: flex; flex-wrap: wrap; gap: 0.25rem 1.5rem; margin-top: 1rem; }
-  .lead__prices .h-price { margin-left: 0.25rem; font-size: 1rem; }
 
   /* ── Список справа ── */
   .list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--color-slate-300); }
@@ -179,7 +150,6 @@ const rows: Row[] = [
   .row__title { margin-top: 0.375rem; }
   .row:hover .row__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
   .row__text { margin-top: 0.25rem; }
-  .row__price { display: flex; gap: 0.5rem; align-items: baseline; margin-top: auto; padding-top: 0.75rem; }
 
   @media (prefers-reduced-motion: reduce) {
     .lead__media img, .row__media img { transition: none; }

@@ -6,9 +6,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import '../styles/home.css'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
-import { buildFinder } from '../data/home-finder'
 import ShowroomHero from '../components/home/ShowroomHero.astro'
 import Directions from '../components/home/Directions.astro'
+import Videos from '../components/home/Videos.astro'
 import InSalon from '../components/home/InSalon.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
@@ -18,41 +18,18 @@ import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import { faqs } from '../components/home/faq-data'
 import { howToSchema } from '../data/how-it-works'
 import { getCatalogCards } from '../lib/catalog-data'
-import { calcKitPrice } from '../data/accessories'
 import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
 import { PHONE, SITE } from '../config/site'
 
 const faqItems = faqs.map(f => ({ q: f.question, a: f.answer }))
 
-/* Цена промо-плитки «Техно» — живой запрос к тому же Supabase-каталогу,
-   что и /catalog/ (getCatalogCards), а не число в коде: обложка карточки
-   у "Техно 1" уже переставлена на цвет из наличия (см. withInStockFirst
-   в catalog-data.ts), так что card.price/card.colorName здесь — это именно
-   белый. Комплект считаем той же формулой, что везде (calcKitPrice). */
+/* Ссылка на «Урбан Штрих 2А» (бежевый, чёрный молдинг — в наличии) —
+   из того же Supabase-каталога, что /catalog/. Записей «Штрих 2А» две
+   (чёрный и золотой молдинг), поэтому ищем по id модели. */
 const { cards: catalogCards } = await getCatalogCards()
-const tehnoCard = catalogCards.find(c => c.seriesSlug === 'tehno' && c.name === 'Техно 1')
-const tehnoBladePrice = tehnoCard?.price ?? null
-const tehnoKitPrice = tehnoCard?.price
-  ? tehnoCard.price + calcKitPrice(tehnoCard.coatingSlug, tehnoCard.colorName)
-  : null
-
-/* Промо «Урбан Штрих 2А» (бежевый, чёрный молдинг — в наличии) — та же схема.
-   Ищем по id модели: записей «Штрих 2А» две (чёрный и золотой молдинг).
-   Обложка карточки уже переставлена на бежевый из наличия (IN_STOCK_OVERRIDE
-   в made-to-order.ts), поэтому card.price/colorName — именно он. */
 const SHTRIH_2A_ID = '7434f55c-b2a8-4f12-b0c6-56c7c57888eb'
 const shtrihCard = catalogCards.find(c => c.id === SHTRIH_2A_ID)
-const shtrihBladePrice = shtrihCard?.price ?? null
-const shtrihKitPrice = shtrihCard?.price
-  ? shtrihCard.price + calcKitPrice(shtrihCard.coatingSlug, shtrihCard.colorName)
-  : null
 const shtrihHref = shtrihCard ? `/models/${shtrihCard.slug}/` : null
-
-/* Первый экран: панель подбора (см. home-finder.ts), число моделей и
-   минимальная цена межкомнатных — из того же запроса каталога. */
-const finder = buildFinder(catalogCards)
-const interiorPrices = catalogCards.map(c => c.price).filter((p): p is number => p != null)
-const interiorMinPrice = interiorPrices.length ? Math.min(...interiorPrices) : null
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -71,23 +48,17 @@ const localBusinessSchema = buildLocalBusiness()
 ---
 
 <BaseLayout
-  title="ВФД Москва — салон дверей в ТЦ «Компас»"
-  description="ВФД Москва — фирменный салон в ТЦ «Компас» (ул. Красная Сосна, 2А): межкомнатные и скрытые двери, алюминиевые перегородки. Каталог и цены, бесплатный замер межкомнатных дверей при заказе, установка."
+  title="Шоурум дверей ВФД в Москве — ТЦ «Компас»"
+  description="Шоурум дверей ВФД в ТЦ «Компас» (ул. Красная Сосна, 2А): межкомнатные и скрытые двери, алюминиевые перегородки. Каталог и цены, бесплатный замер межкомнатных дверей при заказе, установка."
   structuredData={[faqSchema, localBusinessSchema, howToSchema]}
-  preloadImage="/renders/hero/designers-hero.webp"
-  preloadImageSrcset="/renders/hero/designers-hero-960.webp 960w, /renders/hero/designers-hero.webp 1672w"
-  preloadImageSizes="(min-width: 1280px) 1216px, 100vw"
+  preloadImage={HERO_COVER_IMAGE}
   ogImage={HERO_COVER_IMAGE}
 >
   <div class="home">
-    <ShowroomHero finder={finder} modelCount={catalogCards.length} minPrice={interiorMinPrice} />
-    <Directions interiorMinPrice={interiorMinPrice} modelCount={catalogCards.length} />
-    <InSalon
-      tehnoBlade={tehnoBladePrice}
-      tehnoKit={tehnoKitPrice}
-      shtrihHref={shtrihHref}
-      shtrihBlade={shtrihBladePrice}
-    />
+    <ShowroomHero />
+    <Directions />
+    <Videos />
+    <InSalon shtrihHref={shtrihHref} />
     <StepsRow />
     <VisitBand />
     <Promo client:idle />
@@ -105,7 +76,7 @@ const localBusinessSchema = buildLocalBusiness()
             <p class="h-body ask__text">Позвоните — {SITE.contactPerson} подскажет по моделям, размерам и срокам.</p>
           </div>
           <div class="ask__actions">
-            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--ink">Позвонить {PHONE.label}</a>
+            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Позвонить {PHONE.label}</a>
             <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-btn h-btn--quiet">Telegram-канал</a>
           </div>
         </div>
@@ -154,4 +125,8 @@ const localBusinessSchema = buildLocalBusiness()
   }
   .ask__text { margin-top: 0.375rem; }
   .ask__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  @media (max-width: 479px) {
+    .ask__actions { width: 100%; }
+    .ask__actions > a { flex: 1 1 100%; }
+  }
 </style>

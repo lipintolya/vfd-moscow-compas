@@ -204,6 +204,8 @@ html {
   background-color: var(--color-slate-950); /* цвет футера — виден при overscroll вниз */
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
+  /* Якоря (#video и т.п.) не уезжают под фиксированную шапку */
+  scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 5.5rem);
   overflow-x: hidden;
 }
 body {

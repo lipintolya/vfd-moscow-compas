@@ -23,6 +23,16 @@ const hours = companyLegalInfo.workingHours
           <dd>{SITE.address.street}<br />{SITE.address.mall}, {SITE.address.floor}</dd>
         </div>
         <div>
+          <dt class="h-meta">Метро</dt>
+          <dd>
+            <ul class="visit__metro" role="list">
+              {SITE.address.metro.map((m) => (
+                <li>{m.station} <span class="visit__metro-time">{m.time}</span></li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+        <div>
           <dt class="h-meta">Часы работы</dt>
           <dd>{hours.shortDisplay}</dd>
         </div>
@@ -32,7 +42,7 @@ const hours = companyLegalInfo.workingHours
         </div>
       </dl>
 
-      <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-btn h-btn--ink visit__btn">Построить маршрут</a>
+      <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-btn h-btn--signal visit__btn">Построить маршрут</a>
     </div>
 
     <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-media visit__map" aria-label="Открыть салон на Яндекс Картах">
@@ -77,10 +87,13 @@ const hours = companyLegalInfo.workingHours
     line-height: 1.45;
     font-variant-numeric: tabular-nums;
   }
+  .visit__metro { margin: 0; padding: 0; list-style: none; }
+  .visit__metro-time { margin-left: 0.375rem; font-size: 0.9375rem; font-weight: 500; color: var(--h-muted); }
   .visit__btn { margin-top: 2rem; }
   .visit__map { aspect-ratio: 650 / 450; }
 
   @media (max-width: 479px) {
     .visit__data > div { grid-template-columns: 1fr; gap: 0.25rem; }
+    .visit__btn { width: 100%; }
   }
 </style>

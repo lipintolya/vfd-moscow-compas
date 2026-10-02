@@ -4,25 +4,16 @@
  * из src/styles/home.css, та же, что у плиток первого экрана).
  *
  * Межкомнатные — главная плитка на две строки слева; скрытые двери и
- * перегородки — друг под другом справа. Цена «от» в плашке — из живых
- * данных: каталог (проп из index.astro), скрытые — skrytye-dveri-products.
+ * перегородки — друг под другом справа. Плашка — короткий факт о
+ * направлении (цены и число моделей на главной не показываем).
  */
-import { SECRET_MIN_BLADE_PRICE } from '../../data/skrytye-dveri-products'
-
-interface Props {
-  interiorMinPrice: number | null
-  modelCount: number
-}
-const { interiorMinPrice, modelCount } = Astro.props
-
-const fmt = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 
 const items = [
   {
     key: 'interior',
     title: 'Межкомнатные двери',
-    text: `${modelCount} моделей: Эмалекс, эмаль, ПЭТ и экошпон — цвета и фурнитура под любой интерьер`,
-    chip: interiorMinPrice ? `от ${fmt(interiorMinPrice)}` : null,
+    text: 'Эмалекс, эмаль, ПЭТ и экошпон — цвета и фурнитура под любой интерьер',
+    chip: 'с замером и установкой',
     image: 'https://storage.yandexcloud.net/vfd74ru/Main_page/left_bento/cover_doors.webp',
     position: '50% 35%',
     href: '/catalog/',
@@ -31,7 +22,7 @@ const items = [
     key: 'hidden',
     title: 'Скрытые двери',
     text: 'Полотно заподлицо со стеной, алюминиевый короб без наличников',
-    chip: `от ${fmt(SECRET_MIN_BLADE_PRICE)}`,
+    chip: 'под покраску или обои',
     image: '/renders/home/secret-cover.webp',
     position: '50% 50%',
     href: '/catalog/skrytye-dveri/',
@@ -103,8 +94,8 @@ const items = [
     padding: 0;
     list-style: none;
   }
-  .bento__cell { display: grid; min-height: 15rem; }
-  .bento__cell--interior { min-height: 22rem; }
+  .bento__cell { display: grid; min-height: 13.5rem; }
+  .bento__cell--interior { min-height: 20rem; }
 
   @media (min-width: 640px) {
     .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -124,4 +115,24 @@ const items = [
   /* Главная плитка — заголовок крупнее, на ступень заголовка секции */
   .bento__cell--interior .h-tile__title { font-size: clamp(1.625rem, 2.8vw, 2.25rem); }
   .bento__cell--interior .h-cap { max-width: 24rem; }
+
+  /* Телефон: три направления — лентой с прокруткой вбок, а не столбиком
+     в три экрана */
+  @media (max-width: 639px) {
+    .bento {
+      grid-auto-flow: column;
+      grid-auto-columns: 82%;
+      gap: 0.75rem;
+      margin-inline: calc(-1 * var(--h-pad));
+      padding-inline: var(--h-pad);
+      scroll-padding-inline: var(--h-pad);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .bento::-webkit-scrollbar { display: none; }
+    .bento__cell, .bento__cell--interior { min-height: 21rem; scroll-snap-align: start; }
+    .bento__cell--interior .h-tile__title { font-size: clamp(1.375rem, 2.2vw, 1.75rem); }
+  }
 </style>
