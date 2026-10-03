@@ -27,7 +27,7 @@ const hours = companyLegalInfo.workingHours
           <dd>
             <ul class="visit__metro" role="list">
               {SITE.address.metro.map((m) => (
-                <li>{m.station} <span class="visit__metro-time">{m.time}</span></li>
+                <li>{m.station}{m.line && ` (${m.line})`} <span class="visit__metro-time">{m.time}</span></li>
               ))}
             </ul>
           </dd>

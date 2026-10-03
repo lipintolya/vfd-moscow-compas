@@ -7,6 +7,7 @@
 import { SITE } from '../config/site'
 import { companyLegalInfo } from './contacts-data'
 import { reviews } from '../data/reviews'
+import { HERO_COVER_IMAGE } from '../data/hero-image'
 
 export const LOCAL_BUSINESS_ID = `${SITE.url}/#localbusiness`
 
@@ -28,7 +29,7 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
     telephone: SITE.phones.map(p => p.raw),
     email: SITE.email,
     logo: `${SITE.url}/logo-schema.png`,
-    image: 'https://storage.yandexcloud.net/vfd74ru/promo_main/main_render_innova.webp',
+    image: [HERO_COVER_IMAGE, SITE.address.photo],
     address: {
       '@type': 'PostalAddress',
       streetAddress: `${SITE.address.street}, ${SITE.address.mall}, ${SITE.address.floor}`,
@@ -37,6 +38,7 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
       ...(SITE.address.postalCode ? { postalCode: SITE.address.postalCode } : {}),
       addressCountry: 'RU',
     },
+    areaServed: { '@type': 'City', name: SITE.city.name },
     ...(coordinates ? {
       geo: { '@type': 'GeoCoordinates', latitude: coordinates.lat, longitude: coordinates.lng },
     } : {}),

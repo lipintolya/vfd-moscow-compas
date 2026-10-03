@@ -30,7 +30,22 @@ const CONTACTS = {
   email:   companyLegalInfo.contacts.email,
 }
 
-const BRAND_SUB = `Салон ВФД в ${SITE.address.mall}`
+/* Подпись — статус, а не география: город и район называет заголовок
+   страницы, а «официальный дилер» работает как довод на любой странице */
+const BRAND_SUB = 'Официальный дилер ВФД'
+
+/* Появление названия — один раз за визит: при каждом переходе между
+   страницами оно бы раздражало. Считается до первого рендера (шапка —
+   client:only), поэтому текст не мелькает перед анимацией. */
+const brandIntro = (() => {
+  try {
+    if (sessionStorage.getItem('hdr-intro')) return false
+    sessionStorage.setItem('hdr-intro', '1')
+    return true
+  } catch {
+    return false
+  }
+})()
 
 const NAV_LINKS = [
   { href: '/',            label: 'Главная' },
@@ -285,7 +300,7 @@ onUnmounted(() => {
             />
             <span v-else class="hdr-mark__fallback">ВФД</span>
           </span>
-          <span class="hdr-brand__text">
+          <span class="hdr-brand__text" :class="{ 'is-intro': brandIntro }">
             <span class="hdr-brand__name">{{ SITE.studioName }}</span>
             <span class="hdr-brand__sub">{{ BRAND_SUB }}</span>
           </span>
@@ -660,6 +675,7 @@ onUnmounted(() => {
   --hdr-tap:           2.75rem;
   --hdr-h:             var(--header-bar);       /* global.css — общая с отступом страницы */
   --hdr-ease:          var(--ease-out);
+  --hdr-ease-soft:     cubic-bezier(0.16, 1, 0.3, 1);  /* мягкое торможение в конце */
 }
 
 .site-header {
@@ -754,6 +770,13 @@ onUnmounted(() => {
   color: var(--hdr-fg-muted);
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+/* Появление: название, затем подпись — только прозрачность и сдвиг
+   (считаются на видеокарте, без пересчёта вёрстки) */
+.hdr-brand__text.is-intro > * { animation: hdr-brand-in 700ms var(--hdr-ease-soft) both; }
+.hdr-brand__text.is-intro > :nth-child(2) { animation-delay: 250ms; }
+@keyframes hdr-brand-in {
+  from { opacity: 0; transform: translateY(0.375rem); }
 }
 
 /* ── Навигация (десктоп) ── */
@@ -1179,5 +1202,6 @@ onUnmounted(() => {
   .hdr-mark img, .burger-icon__line, .mnav__link, .mnav__sublink, .mnav__call, .mnav__phone {
     transition: none;
   }
+  .hdr-brand__text.is-intro > * { animation: none; }
 }
 </style>
