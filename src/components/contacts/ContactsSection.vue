@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { companyLegalInfo, getFormattedHours } from '../../lib/contacts-data'
 import { paymentMethods } from '../about/about-data'
 import { SITE } from '../../config/site'
+import { MEASURE_TERMS } from '../../data/services'
 
 /* Все контакты — из contacts-data.ts (единый источник для футера, шапки,
    /about/ и структурированных данных), а не хардкодом: раньше номера, часы
@@ -42,7 +43,7 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
         <h1 class="t-h1 mb-4">Контакты салона дверей ВФД в Москве</h1>
         <p class="m-0 mb-6 t-lead text-slate-600">
           Позвоните или приезжайте в салон — покажем двери и перегородки вживую
-          и выедем на замер — по Москве бесплатно при оформлении заказа.
+          и выедем на замер.
         </p>
 
         <div class="flex flex-wrap items-center gap-2.5">
@@ -223,7 +224,7 @@ const MAP_SRC = `https://yandex.ru/map-widget/v1/?ll=${lng}%2C${lat}&z=17&pt=${l
                 <span>Расчёт сметы</span>
               </div>
               <p class="wtg-card__text">
-                Мастер выезжает на объект, снимает точные размеры проёма и учитывает особенности стен — от этого зависят итоговая смета и корректность монтажа. По Москве замер бесплатный при оформлении заказа, выезд за город — стоимость уточнит менеджер.
+                Мастер выезжает на объект, снимает точные размеры проёма и учитывает особенности стен — от этого зависят итоговая смета и корректность монтажа. {{ MEASURE_TERMS }}, стоимость выезда за город уточнит менеджер.
               </p>
             </div>
           </article>

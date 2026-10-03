@@ -1,93 +1,74 @@
 ---
 /**
- * «Новинки и наличие» — заменяет четыре отдельных промо-блока (Техно, Штрих,
- * «Секрет», «Рефлекс»). Композиция журнальная: главный материал слева,
- * остальные — списком справа. Цены на главной не показываем — они
- * на страницах моделей. Ссылка на Штрих 2А — проп из index.astro
- * (живой каталог).
+ * «Новинки и двери в наличии». Композиция журнальная: главный материал
+ * слева, остальные — списком справа; внизу списка — напоминание уточнить
+ * наличие по телефону. Данные — src/data/in-salon.ts.
  */
+import { PHONE } from '../../config/site'
+import { IN_SALON_LEAD, IN_SALON_ROWS, STATUS_LABEL, type InSalonItem } from '../../data/in-salon'
+import { typograph } from '../../lib/typograph'
+
 interface Props {
-  shtrihHref: string | null
+  /** Адрес страницы модели по id из каталога (index.astro) */
+  modelHref: (id: string) => string | null
 }
-const { shtrihHref } = Astro.props
+const { modelHref } = Astro.props
 
-type Status = 'new' | 'stock'
-interface Row {
-  status: Status
-  statusText: string
-  title: string
-  text: string
-  image: string
-  alt: string
-  href: string
-}
+const resolve = (item: InSalonItem) => ({
+  ...item,
+  title: typograph(item.title),
+  text: typograph(item.text),
+  href: item.modelId ? modelHref(item.modelId) : item.href ?? null,
+})
 
-const rows: Row[] = [
-  ...(shtrihHref ? [{
-    status: 'stock' as const,
-    statusText: 'В наличии',
-    title: 'Урбан Штрих 2А',
-    text: 'Эмалекс бежевый с чёрным молдингом, алюминиевая кромка',
-    image: '/renders/home/shtrih-2a-1.webp',
-    alt: 'Дверь Урбан Штрих 2А, Эмалекс бежевый с чёрным молдингом',
-    href: shtrihHref,
-  }] : []),
-  {
-    status: 'stock',
-    statusText: 'В наличии',
-    title: 'Скрытые двери «Секрет»',
-    text: 'Заподлицо со стеной, под покраску или обои',
-    image: '/renders/home/secret-2.webp',
-    alt: 'Скрытая дверь «Секрет»',
-    href: '/catalog/skrytye-dveri/',
-  },
-  {
-    status: 'new',
-    statusText: 'Новинка',
-    title: 'Скрытая дверь «Рефлекс»',
-    text: 'Зеркало во всю высоту полотна, до\u00a02,5\u00a0м',
-    image: '/renders/home/reflex-1.webp',
-    alt: 'Скрытая дверь с зеркалом «Рефлекс»',
-    href: '/catalog/skrytye-dveri/#reflex',
-  },
-]
+const lead = resolve(IN_SALON_LEAD)
+// Модель пропала из каталога — строку не показываем, а не ведём в никуда
+const rows = IN_SALON_ROWS.map(resolve).filter((r) => r.href)
 ---
 
 <section class="h-sec h-sec--wall" aria-labelledby="insalon-heading">
   <div class="container">
     <header class="h-head">
       <h2 id="insalon-heading" class="h-h2">Новинки и&nbsp;двери в&nbsp;наличии</h2>
-      <p class="h-lead">Модели, которые можно забрать со&nbsp;склада без ожидания изготовления, и&nbsp;новые двери фабрики.</p>
+      <p class="h-lead">Новые модели фабрики и&nbsp;двери в&nbsp;наличии&nbsp;— их&nbsp;не&nbsp;нужно ждать с&nbsp;производства, привезём за&nbsp;несколько дней.</p>
     </header>
 
     <div class="spread">
-      <a href="/catalog/series/tehno/" class="lead">
-        <span class="h-media lead__media">
-          <img src="/renders/home/tehno-1.webp" alt="Межкомнатная дверь серии «Техно», Эмалекс белый" width="1254" height="1254" loading="lazy" decoding="async" />
-        </span>
-        <div class="lead__body">
-          <span class="status h-meta" data-status="new">Новинка</span>
-          <h3 class="lead__title">Серия Техно</h3>
-          <span class="h-body lead__text">Покрытие Эмалекс устойчиво к&nbsp;царапинам и&nbsp;сколам, не&nbsp;боится влажности и&nbsp;ультрафиолета. Строгий лаконичный дизайн подойдёт для современного интерьера. Модель Техно&nbsp;1 в&nbsp;белом цвете есть на&nbsp;складе.</span>
-        </div>
-      </a>
+      {lead.href && (
+        <a href={lead.href} class="lead">
+          <span class="h-media lead__media">
+            <img src={lead.image.src} alt={lead.image.alt} width={lead.image.width} height={lead.image.height} loading="lazy" decoding="async" />
+          </span>
+          <div class="lead__body">
+            <span class="h-status h-meta" data-status={lead.status}>{STATUS_LABEL[lead.status]}</span>
+            <h3 class="lead__title">{lead.title}</h3>
+            <p class="h-body lead__text">{lead.text}</p>
+          </div>
+        </a>
+      )}
 
-      <ul class="list" role="list">
-        {rows.map((r) => (
-          <li>
-            <a href={r.href} class="row">
-              <span class="h-media row__media">
-                <img src={r.image} alt={r.alt} loading="lazy" decoding="async" />
-              </span>
-              <div class="row__body">
-                <span class="status h-meta" data-status={r.status}>{r.statusText}</span>
-                <h3 class="h-h3 row__title">{r.title}</h3>
-                <span class="h-meta row__text">{r.text}</span>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
+      <div class="side">
+        <ul class="list" role="list">
+          {rows.map((r) => (
+            <li>
+              <a href={r.href} class="row">
+                <span class="h-media row__media">
+                  <img src={r.image.src} alt={r.image.alt} width={r.image.width} height={r.image.height} loading="lazy" decoding="async" />
+                </span>
+                <div class="row__body">
+                  <span class="h-status h-meta" data-status={r.status}>{STATUS_LABEL[r.status]}</span>
+                  <h3 class="h-h3 row__title">{r.title}</h3>
+                  <p class="h-meta row__text">{r.text}</p>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="h-body side__note">
+          Наличие на&nbsp;складе меняется — перед визитом уточните по&nbsp;телефону{' '}
+          <a href={`tel:${PHONE.raw}`} class="h-link side__phone">{PHONE.label}</a>
+        </p>
+      </div>
     </div>
   </div>
 </section>
@@ -100,44 +81,40 @@ const rows: Row[] = [
   @media (min-width: 62.5rem) {
     .spread { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
     .lead { grid-column: 1 / span 7; }
-    .list { grid-column: 8 / span 5; }
+    .side { grid-column: 8 / span 5; }
   }
   @media (min-width: 75rem) {
-    .list { grid-column: 9 / span 4; }
+    .side { grid-column: 9 / span 4; }
   }
 
-  /* Статус — цветная точка перед текстом: красная «новинка», голубая
-     «в наличии» (те же значения цветов, что у бейджей каталога). */
-  .status { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--h-ink); }
-  .status::before {
-    content: '';
-    width: 0.4375rem;
-    height: 0.4375rem;
-    border-radius: 50%;
-    background: var(--color-secondary-500);
+  /* Наведение — красное подчёркивание названия (принцип 4 home.css) */
+  .lead:hover .lead__title,
+  .row:hover .row__title {
+    text-decoration: underline;
+    text-decoration-color: var(--h-signal);
+    text-decoration-thickness: 0.0625rem;
+    text-underline-offset: 0.2em;
   }
-  .status[data-status='new']::before { background: var(--h-signal); }
+  .lead__media img, .row__media img { transition: transform 700ms var(--ease-out); }
+  .lead:hover .lead__media img, .row:hover .row__media img { transform: scale(1.025); }
 
   /* ── Главный материал ── */
   .lead { display: block; color: inherit; text-decoration: none; }
   .lead__media { aspect-ratio: 5 / 4; }
-  .lead__media img, .row__media img { transition: transform 700ms var(--ease-out); }
-  .lead:hover .lead__media img, .row:hover .row__media img { transform: scale(1.025); }
   .lead__body { display: flex; flex-direction: column; margin-top: 1.5rem; max-width: 36rem; }
   .lead__title {
     margin: 0.625rem 0 0;
     font-family: var(--h-font);
     font-size: clamp(1.75rem, 2.6vw, 2.25rem);
-    font-weight: 600;
+    font-weight: var(--h-weight-display);
     line-height: 1.1;
     letter-spacing: -0.03em;
   }
-  .lead:hover .lead__title { text-decoration: underline; text-decoration-thickness: 0.0625rem; text-underline-offset: 0.2em; }
   .lead__text { margin-top: 0.75rem; }
 
-  /* ── Список справа ── */
-  .list { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--color-slate-300); }
-  .list li { border-bottom: 0.0625rem solid var(--color-slate-300); }
+  /* ── Список справа: строки разделены линейками ── */
+  .list { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .list li { border-bottom: 0.0625rem solid var(--h-rule); }
   .row {
     display: grid;
     grid-template-columns: 6.5rem minmax(0, 1fr);
@@ -146,11 +123,13 @@ const rows: Row[] = [
     color: inherit;
     text-decoration: none;
   }
-  .row__media { aspect-ratio: 4 / 5; background: var(--color-slate-200); }
+  .row__media { aspect-ratio: 4 / 5; }
   .row__body { display: flex; flex-direction: column; min-width: 0; }
-  .row__title { margin-top: 0.375rem; }
-  .row:hover .row__title { text-decoration: underline; text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
-  .row__text { margin-top: 0.25rem; }
+  .row__title { margin-top: 0.375rem; text-wrap: balance; }
+  .row__text { margin: 0.25rem 0 0; }
+
+  .side__note { margin-top: 1.5rem; font-size: 0.9375rem; }
+  .side__phone { white-space: nowrap; }
 
   @media (prefers-reduced-motion: reduce) {
     .lead__media img, .row__media img { transition: none; }

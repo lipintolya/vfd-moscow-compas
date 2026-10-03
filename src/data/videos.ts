@@ -56,6 +56,33 @@ export const HOME_VIDEOS = 5
 
 export const VIDEOS: Video[] = [
   {
+    id:       'hidden-handles',
+    title:    'Скрытые ручки\nдля межкомнатных дверей',
+    text:     'Такой стиль набирает популярность: его выбирают не только для квартир, но и для коммерческих помещений.',
+    src:      `${CDN}/IMG_7597.mp4`,
+    cover:    '/renders/home/videos/hidden-handles.webp',
+    duration: '0:24',
+    vertical: true,
+  },
+  {
+    id:       'hidden-door-secrets',
+    title:    'Секреты дверей\nскрытого монтажа',
+    text:     'С виду — просто ровная стена. Но за этой гладью стоят точный монтаж и тщательный подбор деталей.',
+    src:      `${CDN}/IMG_7520.mp4`,
+    cover:    '/renders/home/videos/hidden-door-secrets.webp',
+    duration: '0:46',
+    vertical: true,
+  },
+  {
+    id:       'mirror-wardrobe-door',
+    title:    'Зеркальная дверь\nв гардеробную',
+    text:     'Заказчики хотели раздвижную дверь, но в гардеробной не предусмотрели вытяжку, и мы поставили распашную.',
+    src:      `${CDN}/IMG_7514.mp4`,
+    cover:    '/renders/home/videos/mirror-wardrobe-door.webp',
+    duration: '1:09',
+    vertical: true,
+  },
+  {
     id:       'slope-casings',
     title:    'Наличники\nпод откосы стен',
     text:     'Откосы в частном доме изменили планы: мы аккуратно подрезали наличники, чтобы вписать двери в углы.',
@@ -117,6 +144,15 @@ export const VIDEOS: Video[] = [
     src:      `${CDN}/2026-10-03_12.54.36.mp4`,
     cover:    '/renders/home/videos/door-installation.webp',
     duration: '0:48',
+    vertical: true,
+  },
+  {
+    id:       'artdom-fabric-partitions',
+    title:    'Тканевые перегородки\nна выставке ARTDOM',
+    text:     'VFD Design представила алюминиевые перегородки с тканевым заполнением — и они произвели настоящий фурор.',
+    src:      `${CDN}/IMG_6795.mp4`,
+    cover:    '/renders/home/videos/artdom-fabric-partitions.webp',
+    duration: '0:22',
     vertical: true,
   },
 ]

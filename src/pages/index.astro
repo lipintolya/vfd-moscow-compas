@@ -23,13 +23,13 @@ import { PHONE, SITE } from '../config/site'
 
 const faqItems = faqs.map(f => ({ q: f.question, a: f.answer }))
 
-/* Ссылка на «Урбан Штрих 2А» (бежевый, чёрный молдинг — в наличии) —
-   из того же Supabase-каталога, что /catalog/. Записей «Штрих 2А» две
-   (чёрный и золотой молдинг), поэтому ищем по id модели. */
+/* Адрес страницы модели по её id — из того же Supabase-каталога, что
+   /catalog/. Нужен блоку «Новинки и двери в наличии» (src/data/in-salon.ts) */
 const { cards: catalogCards } = await getCatalogCards()
-const SHTRIH_2A_ID = '7434f55c-b2a8-4f12-b0c6-56c7c57888eb'
-const shtrihCard = catalogCards.find(c => c.id === SHTRIH_2A_ID)
-const shtrihHref = shtrihCard ? `/models/${shtrihCard.slug}/` : null
+const modelHref = (id: string) => {
+  const card = catalogCards.find(c => c.id === id)
+  return card ? `/models/${card.slug}/` : null
+}
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -58,7 +58,7 @@ const localBusinessSchema = buildLocalBusiness()
     <ShowroomHero />
     <Directions />
     <Videos />
-    <InSalon shtrihHref={shtrihHref} />
+    <InSalon modelHref={modelHref} />
     <StepsRow />
     <VisitBand />
     <Promo client:idle />

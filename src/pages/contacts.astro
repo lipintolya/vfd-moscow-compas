@@ -7,6 +7,7 @@ import ContactsSection from '../components/contacts/ContactsSection.vue'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
 import { SITE } from '../config/site'
+import { MEASURE_TERMS } from '../data/services'
 
 const title = 'Контакты салона дверей ВФД в Москве — адрес, телефон, часы работы'
 const description =
@@ -34,7 +35,7 @@ const faq = [
   },
   {
     q: 'Выезжаете ли вы на замер за пределы Москвы?',
-    a: 'Да, выезжаем и в Московскую область — стоимость выезда зависит от адреса, её уточнит менеджер. По Москве замер бесплатный при оформлении заказа.',
+    a: `Да, выезжаем и в Московскую область — стоимость выезда зависит от адреса, её уточнит менеджер. ${MEASURE_TERMS}.`,
   },
   {
     q: 'Как быстрее всего получить консультацию?',

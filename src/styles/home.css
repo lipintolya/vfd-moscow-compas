@@ -14,7 +14,8 @@
       экрана (кнопка), одна плитка-предложение у первого экрана, номера
       шагов и отклик на наведение (стрелки, подчёркивания, контуры).
       Больших красных плоскостей — не больше одной на экран. Текст на
-      красном — только белый и крупный. Голубой — только фокус.
+      красном — только белый и крупный. Голубой — фокус и статус
+      «в наличии» (как в каталоге); статусы — токены --h-status-*.
    5. Цифры — табличные: цены и часы не «прыгают» в колонках.
 
    Шрифт — одна гарнитура Manrope (уже грузится сайтом): иерархия
@@ -38,6 +39,11 @@
   --h-muted:  var(--color-slate-500);
   --h-soft:   var(--color-slate-600);
   --h-rule:   var(--color-slate-200);
+  --h-media-bg: var(--h-wall);              /* подложка под картинкой, пока она грузится */
+
+  /* Статус товара — точка перед подписью (.h-status) */
+  --h-status-new:   var(--h-signal);
+  --h-status-stock: var(--color-secondary-500);
   --h-signal: var(--color-accent-500);
 
   --h-gutter: 1.5rem;
@@ -62,7 +68,13 @@
 
 /* ── Секция и шапка секции ─────────────────────────────── */
 .h-sec { padding-block: var(--h-sec); }
-.h-sec--wall { background: var(--h-wall); }
+.h-sec--wall {
+  /* На сером фоне линейка и подложка картинок — на ступень темнее,
+     иначе сливаются с фоном */
+  --h-rule: var(--color-slate-300);
+  --h-media-bg: var(--color-slate-200);
+  background: var(--h-wall);
+}
 .h-sec--tight-top { padding-top: 0; }
 
 /* Шапка секции: заголовок слева (7 колонок), пояснение справа
@@ -121,6 +133,22 @@
   color: var(--h-muted);
   font-variant-numeric: tabular-nums;
 }
+/* Статус товара: «Новинка» — красная точка, «В наличии» — голубая */
+.h-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--h-ink);
+}
+.h-status::before {
+  content: '';
+  flex-shrink: 0;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--h-status-stock);
+}
+.h-status[data-status='new']::before { background: var(--h-status-new); }
 .h-price {
   font-weight: 600;
   color: var(--h-ink);
@@ -172,7 +200,7 @@
   display: block;
   overflow: hidden;
   border-radius: var(--h-radius);
-  background: var(--h-wall);
+  background: var(--h-media-bg);
 }
 .h-media > img {
   display: block;

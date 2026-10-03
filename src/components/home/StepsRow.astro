@@ -2,33 +2,67 @@
 /**
  * «Как мы работаем» — четыре шага (нумерация оправдана: это реальная
  * последовательность). Текст тот же, что в HowTo-разметке (howItWorksSteps).
- * Единственный тёмный блок главной.
+ * Единственный тёмный блок главной. Цены услуг — src/data/services.ts.
+ *
+ * Анимация — одна: когда список доходит до экрана, красные отрезки шагов
+ * прорисовываются по очереди слева направо, текст проявляется следом.
+ * Без JS и при prefers-reduced-motion всё видно сразу.
  */
 import { howItWorksSteps } from '../../data/how-it-works'
+import { PRICES_DATE_LABEL } from '../../data/services'
+import { typograph } from '../../lib/typograph'
 ---
 
 <section class="h-sec steps" aria-labelledby="steps-heading">
   <div class="container">
     <header class="h-head">
       <h2 id="steps-heading" class="h-h2 steps__h2">Как мы работаем</h2>
-      <p class="h-lead steps__lead">От выбора модели до установки — без посредников и субподрядчиков.</p>
+      <p class="h-lead steps__lead">От выбора модели до&nbsp;установки — без посредников и&nbsp;субподрядчиков.</p>
     </header>
 
-    <ol class="steps__list" role="list">
-      {howItWorksSteps.map((s) => (
-        <li class="step">
+    <ol class="steps__list" role="list" data-steps>
+      {howItWorksSteps.map((s, i) => (
+        <li class="step" style={`--i: ${i}`}>
           <span class="step__num" aria-hidden="true">{s.num}</span>
           <h3 class="h-h3 step__title">{s.title}</h3>
-          <p class="h-body step__text">{s.text}</p>
+          <p class="h-body step__text">{typograph(s.text)}</p>
+          {s.price && (
+            <p class="step__price">
+              <span class="step__value">{s.price.value}<a href="#steps-note" class="step__mark" aria-label="Примечание о ценах">*</a></span>
+              <span class="h-meta step__note">{typograph(s.price.note)}</span>
+            </p>
+          )}
         </li>
       ))}
     </ol>
+
+    <p id="steps-note" class="h-meta steps__note">
+      * Цены на&nbsp;доставку и&nbsp;услуги актуальны на&nbsp;{typograph(PRICES_DATE_LABEL)} Точную стоимость
+      рассчитаем на&nbsp;консультации в&nbsp;салоне.
+    </p>
   </div>
 </section>
 
+<script>
+  const list = document.querySelector<HTMLElement>('[data-steps]')
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (list && !still && 'IntersectionObserver' in window) {
+    // Уже на экране (якорь, возврат назад) — не прячем
+    if (list.getBoundingClientRect().top > innerHeight) {
+      list.dataset.steps = 'hidden'
+      const io = new IntersectionObserver(([e]) => {
+        if (!e?.isIntersecting) return
+        list.dataset.steps = 'shown'
+        io.disconnect()
+      }, { rootMargin: '0px 0px -15% 0px' })
+      io.observe(list)
+    }
+  }
+</script>
+
 <style>
   .steps { background: var(--color-slate-900); }
-  .steps__h2 { color: #fff; }
+  .steps__h2 { color: var(--color-white); }
   .steps__lead { color: var(--color-slate-400); }
 
   .steps__list {
@@ -42,8 +76,15 @@ import { howItWorksSteps } from '../../data/how-it-works'
   @media (min-width: 68.75rem) { .steps__list { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
   /* Красный отрезок поверх линейки — начало шага; номер того же цвета:
-     нумерация здесь — реальная последовательность. */
-  .step { position: relative; padding-top: 1.25rem; border-top: 0.0625rem solid var(--color-slate-700); }
+     нумерация здесь — реальная последовательность. Шаг — колонка, цена
+     прижата к низу, чтобы цены соседних шагов стояли на одной линии. */
+  .step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-top: 1.25rem;
+    border-top: 0.0625rem solid var(--color-slate-700);
+  }
   .step::before {
     content: '';
     position: absolute;
@@ -52,6 +93,7 @@ import { howItWorksSteps } from '../../data/how-it-works'
     width: 2rem;
     height: 0.125rem;
     background: var(--h-signal);
+    transform-origin: left;
   }
   .step__num {
     font-size: 0.8125rem;
@@ -59,8 +101,36 @@ import { howItWorksSteps } from '../../data/how-it-works'
     font-variant-numeric: tabular-nums;
     color: var(--h-signal);
   }
-  .step__title { margin-top: 2.5rem; color: #fff; }
-  /* Телефон: номер — узкой колонкой слева, заголовок и текст справа */
+  .step__title { margin-top: 2.5rem; color: var(--color-white); }
+  .step__text { margin-top: 0.75rem; max-width: 24rem; font-size: 0.9375rem; color: var(--color-slate-300); }
+
+  .step__price {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: auto 0 0;
+    padding-top: 1.5rem;
+  }
+  .step__value {
+    font-family: var(--h-font);
+    font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+    font-weight: var(--h-weight-display);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--color-white);
+    white-space: nowrap;
+  }
+  .step__mark { margin-left: 0.125em; color: var(--h-signal); text-decoration: none; }
+  .step__note { color: var(--color-slate-400); }
+
+  .steps__note {
+    margin: clamp(2.5rem, 4vw, 3.5rem) 0 0;
+    max-width: 40rem;
+    color: var(--color-slate-400);
+  }
+
+  /* Телефон: номер — узкой колонкой слева, всё остальное справа */
   @media (max-width: 43.6875rem) {
     .steps__list { gap: 1.75rem; }
     .step {
@@ -70,7 +140,17 @@ import { howItWorksSteps } from '../../data/how-it-works'
     }
     .step__num { grid-row: 1; padding-top: 0.125rem; }
     .step__title { grid-column: 2; margin-top: 0; }
-    .step__text { grid-column: 2; }
+    .step__text, .step__price { grid-column: 2; }
+    .step__price { padding-top: 1rem; }
   }
-  .step__text { margin-top: 0.75rem; max-width: 24rem; font-size: 0.9375rem; color: var(--color-slate-300); }
+
+  /* ── Появление: отрезки по очереди, текст следом ── */
+  .step::before { transition: transform 600ms var(--ease-out) calc(var(--i) * 180ms); }
+  .step > * { transition: opacity 600ms var(--ease-out) calc(var(--i) * 180ms + 150ms), translate 600ms var(--ease-out) calc(var(--i) * 180ms + 150ms); }
+  [data-steps='hidden'] .step::before { transform: scaleX(0); }
+  [data-steps='hidden'] .step > * { opacity: 0; translate: 0 0.75rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .step::before, .step > * { transition: none; }
+  }
 </style>
