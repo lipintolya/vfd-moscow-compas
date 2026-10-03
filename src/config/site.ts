@@ -77,7 +77,7 @@ export const SITE = {
   contactRole: 'руководитель шоурума',
 
   /** Фото контактного лица — вырезанный силуэт (PNG/WebP с прозрачностью),
-      640×640; в плитке «Видео о дверях» на главной */
+      640×640; в плитке «Видео о дверях и фурнитуре» на главной */
   contactPhoto: 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/hero.block.main/director_main.webp',
 
   /** Опыт салона — выносится на первый экран главной */

@@ -1,0 +1,66 @@
+---
+/**
+ * Сетка карточек роликов (VideoCard.astro).
+ *
+ * rail — на телефоне лента с прокруткой вбок (главная: блок не растягивает
+ * страницу на несколько экранов). Без rail — сетка в две колонки
+ * (страница /video/: видно сразу много роликов, смотреть — в плеере
+ * свайпами).
+ */
+import type { Video } from '../../data/videos'
+import VideoCard from './VideoCard.astro'
+
+interface Props {
+  videos: Video[]
+  rail?: boolean
+}
+
+const { videos, rail = false } = Astro.props
+---
+
+<ul class:list={['vids', { 'vids--rail': rail }]} role="list">
+  {videos.map((v) => (
+    <li><VideoCard video={v} /></li>
+  ))}
+</ul>
+
+<style>
+  .vids {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Колонки — под пять роликов в ряд на широком экране; ноутбук — по три */
+  @media (min-width: 43.75rem) { .vids { gap: 2rem var(--h-tile-gap); } }
+  @media (min-width: 62.5rem) { .vids { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 80rem) { .vids { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+  /* Телефон, вариант rail: лента с прокруткой вбок */
+  @media (max-width: 43.6875rem) {
+    .vids--rail {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: 68%;
+      margin-inline: calc(-1 * var(--h-pad));
+      padding-inline: var(--h-pad);
+      scroll-padding-inline: var(--h-pad);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .vids--rail::-webkit-scrollbar { display: none; }
+    .vids--rail > li { scroll-snap-align: start; }
+  }
+
+  /* Узкая карточка в две колонки — кнопка «плей» и подписи компактнее */
+  @media (max-width: 43.6875rem) {
+    .vids:not(.vids--rail) :global(.vid__play) { width: 2.75rem; height: 2.75rem; box-shadow: 0 0 0 0.375rem color-mix(in srgb, var(--color-white) 12%, transparent); }
+    .vids:not(.vids--rail) :global(.vid__time) { top: 0.5rem; left: 0.5rem; }
+    .vids:not(.vids--rail) :global(.vid__title) { margin-top: 0.75rem; font-size: 0.9375rem; }
+    .vids:not(.vids--rail) :global(.vid__text) { font-size: 0.8125rem; }
+  }
+</style>

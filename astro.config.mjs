@@ -117,7 +117,12 @@ export default defineConfig({
   site: SITE_URL,
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    /* Раздельный кэш зависимостей для сборки и dev-сервера: `astro build`
+       пересобирает кэш в продакшен-режиме, и запущенный в это время
+       `astro dev` начинает отдавать Vue без HMR — в браузере
+       «__VUE_HMR_RUNTIME__ is not defined» и ошибки гидрации островов. */
+    cacheDir: process.argv.includes('build') ? 'node_modules/.vite-build' : 'node_modules/.vite',
   },
 
   integrations: [
@@ -150,7 +155,7 @@ export default defineConfig({
         if (u === `${SITE_URL}/` || u === SITE_URL) {
           return { ...item, changefreq: 'weekly', priority: 1.0 }
         }
-        if (/\/(catalog|about|contacts|partitions|designers)\/?$/.test(u)) {
+        if (/\/(catalog|about|contacts|partitions|designers|video)\/?$/.test(u)) {
           return { ...item, changefreq: 'weekly', priority: 0.8 }
         }
         if (/\/catalog\/series(\/.+)?\/?$/.test(u)) {

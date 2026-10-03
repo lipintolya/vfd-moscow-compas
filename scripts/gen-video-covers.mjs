@@ -1,5 +1,5 @@
 /**
- * Генерирует обложки карточек «Видео о дверях» (src/components/home/Videos.astro)
+ * Генерирует обложки карточек «Видео о дверях и фурнитуре» (src/components/video/VideoCard.astro)
  * из кадра самого ролика: public/renders/home/videos/<id>.webp, 2:3.
  *
  * Список роликов — src/data/videos.ts: берутся записи с `src` и `cover`.
@@ -20,7 +20,7 @@ import { VIDEOS } from '../src/data/videos.ts'
 
 const PUBLIC = fileURLToPath(new URL('../public', import.meta.url))
 const WIDTH = 640       // карточка ≤ 17rem в ширину (~540px с retina) → 640px с запасом
-const RATIO = 3 / 2     // высота к ширине — как aspect-ratio .vid__cover в Videos.astro
+const RATIO = 3 / 2     // высота к ширине — как aspect-ratio .vid__cover в VideoCard.astro
 
 /** Один кадр ролика в PNG — без перекодирования всего файла */
 function grabFrame(src, at) {

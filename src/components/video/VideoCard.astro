@@ -1,0 +1,134 @@
+---
+/**
+ * Карточка ролика — обложка, длительность, название, описание.
+ * Сама карточка — кнопка с data-video: её находит VideoPlayer.astro,
+ * открывает ролик в окне и листает соседние карточки страницы по порядку.
+ * Заглушка (placeholder или нет источника) — не кнопка, плеер не открывает.
+ *
+ * Стили опираются на токены главной (--h-*, классы .h-*) — страница
+ * подключает src/styles/home.css и оборачивает контент в .home.
+ */
+import type { Video } from '../../data/videos'
+import { typograph } from '../../lib/typograph'
+
+interface Props {
+  video: Video
+}
+
+const { video: v } = Astro.props
+const title = typograph(v.title)
+const text = v.text && typograph(v.text)
+const playable = !v.placeholder && Boolean(v.src || v.embed)
+const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>'
+---
+
+{playable ? (
+  <>
+    <button
+      type="button"
+      class="vid"
+      data-video
+      data-title={title}
+      data-src={v.src}
+      data-embed={v.embed}
+      data-vertical={v.vertical ? 'true' : undefined}
+      aria-describedby={text ? `vid-text-${v.id}` : undefined}
+    >
+      <span class="h-media vid__cover">
+        {v.cover && <img src={v.cover} alt="" width="640" height="960" loading="lazy" decoding="async" />}
+        <span class="vid__play"><Fragment set:html={play} /></span>
+        {v.duration && <span class="vid__time h-chip">{v.duration}</span>}
+      </span>
+      <span class="h-h3 vid__title">{title}</span>
+    </button>
+    {text && <p id={`vid-text-${v.id}`} class="h-cap vid__text">{text}</p>}
+  </>
+) : (
+  <div class="vid vid--empty">
+    <span class="h-media vid__cover">
+      <span class="vid__play vid__play--muted"><Fragment set:html={play} /></span>
+      <span class="vid__soon">Видео появится позже</span>
+    </span>
+    <span class="h-h3 vid__title">{title}</span>
+  </div>
+)}
+
+<style>
+  .vid {
+    /* Обложка — первый кадр ролика, слегка затемнённый: красная кнопка
+       читается на любом кадре. При наведении кадр светлеет. */
+    --vid-shade: 0.8;
+    --vid-shade-hover: 0.92;
+
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .vid--empty { cursor: default; }
+  .vid__cover {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 2 / 3;   /* = пропорция обложек в scripts/gen-video-covers.mjs */
+    border-radius: var(--h-tile-radius);
+    background: var(--color-slate-900);
+  }
+  .vid__cover > img {
+    position: absolute;
+    inset: 0;
+    filter: brightness(var(--vid-shade));
+    transition: transform 700ms var(--ease-out), filter 300ms var(--ease-out);
+  }
+  .vid:not(.vid--empty):hover .vid__cover > img { transform: scale(1.03); filter: brightness(var(--vid-shade-hover)); }
+
+  /* Красная кнопка «плей» — фирменный сигнал блока */
+  .vid__play {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding-left: 0.1875rem;
+    border-radius: 50%;
+    background: var(--h-signal);
+    color: var(--color-white);
+    box-shadow: 0 0 0 0.5rem color-mix(in srgb, var(--color-white) 12%, transparent);
+    transition: transform 220ms var(--ease-out), background-color 180ms var(--ease-out);
+  }
+  .vid:not(.vid--empty):hover .vid__play { transform: scale(1.08); background: var(--color-accent-600); }
+  .vid__play--muted { background: var(--color-slate-700); color: var(--color-slate-400); box-shadow: none; }
+  .vid__soon {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 0;
+    right: 0;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--color-slate-400);
+  }
+  .vid__time { position: absolute; top: 0.875rem; left: 0.875rem; }
+
+  /* Название — в две строки, перенос задан в данных (\n в title,
+     src/data/videos.ts): описания в ряду начинаются на одной высоте */
+  .vid__title {
+    margin-top: 1rem;
+    font-size: 1.0625rem;
+    white-space: pre-line;
+  }
+  .vid__text { margin-top: 0.25rem; text-wrap: pretty; }
+  .vid:not(.vid--empty):hover .vid__title { text-decoration: underline; text-decoration-color: var(--h-signal); text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
+  .vid:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.25rem; border-radius: var(--h-tile-radius); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vid__cover > img, .vid__play { transition: none; }
+    .vid:hover .vid__cover > img, .vid:hover .vid__play { transform: none; }
+  }
+</style>

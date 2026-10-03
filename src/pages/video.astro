@@ -1,0 +1,83 @@
+---
+/**
+ * /video/ — все ролики руководителя шоурума (src/data/videos.ts).
+ * На главной — только первые HOME_VIDEOS со ссылкой сюда.
+ * Карточки и плеер — те же компоненты, что на главной; на телефоне
+ * ролики смотрят в плеере и листают свайпом.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import QuoteCta from '../components/ui/QuoteCta.astro'
+import VideoList from '../components/video/VideoList.astro'
+import VideoPlayer from '../components/video/VideoPlayer.astro'
+import '../styles/home.css'
+import { VIDEOS } from '../data/videos'
+import { HERO_COVER_IMAGE } from '../data/hero-image'
+import { PHONE, SITE } from '../config/site'
+
+const title = 'Видео о дверях и фурнитуре — шоурум ВФД в Москве'
+const description =
+  `Короткие видео от руководителя шоурума ВФД в ТЦ «Компас»: скрытые двери, фурнитура, стеновые панели, новинки фабрики и монтаж. ${SITE.contactPerson} показывает двери вживую.`
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Видео' },
+]
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <div class="home">
+    <section class="vpage" aria-labelledby="vpage-title">
+      <div class="container">
+        <header class="h-head vpage__head">
+          <h1 id="vpage-title" class="vpage__title">Видео о&nbsp;дверях и&nbsp;фурнитуре</h1>
+          <p class="h-lead">
+            {SITE.contactPerson}, {SITE.contactRole}, показывает двери, перегородки
+            и&nbsp;фурнитуру ВФД вживую и&nbsp;рассказывает, на&nbsp;что обратить
+            внимание при выборе.
+          </p>
+        </header>
+
+        <VideoList videos={VIDEOS} />
+      </div>
+
+      <VideoPlayer />
+    </section>
+
+    <section class="vpage__cta">
+      <div class="container">
+        <QuoteCta
+          image={HERO_COVER_IMAGE}
+          title="Посмотрите двери вживую"
+          description="Приходите в шоурум в ТЦ «Компас»: покажем образцы, покрытия и фурнитуру и поможем с выбором."
+          primaryHref={`tel:${PHONE.raw}`}
+          primaryLabel="Позвонить"
+          primaryExternal={false}
+          secondaryHref="/contacts/"
+          secondaryLabel="Как добраться"
+        />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .vpage { padding-block: clamp(1rem, 2vw, 1.5rem) var(--h-sec); }
+  .vpage__head { margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .vpage__title {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(2.25rem, 4.5vw, 3rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    color: var(--h-ink);
+  }
+  .vpage__cta { padding-bottom: var(--h-sec); }
+</style>

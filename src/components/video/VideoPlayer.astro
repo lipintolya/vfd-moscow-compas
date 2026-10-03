@@ -1,0 +1,309 @@
+---
+/**
+ * Окно-плеер роликов — подключается один раз на страницу.
+ *
+ * Список роликов — все карточки страницы с data-video (VideoCard.astro)
+ * по порядку. Нажатие на карточку открывает нативный <dialog>; ролики
+ * листаются кнопками под видео и свайпом вверх/вниз на телефоне.
+ *
+ * Нагрузка: страница грузит только обложки. Плеер создаётся при открытии
+ * ролика и удаляется при переходе к другому и при закрытии (Esc, фон,
+ * крестик) — звук не остаётся, недокачанный ролик перестаёт скачиваться.
+ */
+const arrow = (d: string) =>
+  `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="${d}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+---
+
+<dialog class="player" data-player aria-labelledby="player-title">
+  <div class="player__box">
+    <div class="player__screen" data-player-screen></div>
+    <div class="player__bar">
+      <p id="player-title" class="player__title" data-player-title></p>
+      <div class="player__nav" data-player-nav>
+        <span class="player__count" data-player-count></span>
+        <button type="button" class="player__step" data-player-prev aria-label="Предыдущее видео">
+          <Fragment set:html={arrow('M4 10l4-4 4 4')} />
+        </button>
+        <button type="button" class="player__step" data-player-next aria-label="Следующее видео">
+          <Fragment set:html={arrow('M4 6l4 4 4-4')} />
+        </button>
+      </div>
+    </div>
+    <button type="button" class="player__close" data-player-close aria-label="Закрыть видео">
+      <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-player]')
+  const screen = dialog?.querySelector<HTMLElement>('[data-player-screen]')
+  const title = dialog?.querySelector<HTMLElement>('[data-player-title]')
+  const nav = dialog?.querySelector<HTMLElement>('[data-player-nav]')
+  const count = dialog?.querySelector<HTMLElement>('[data-player-count]')
+  const prev = dialog?.querySelector<HTMLButtonElement>('[data-player-prev]')
+  const next = dialog?.querySelector<HTMLButtonElement>('[data-player-next]')
+  const cards = [...document.querySelectorAll<HTMLButtonElement>('[data-video]')]
+
+  if (dialog && screen && title && nav && count && prev && next && cards.length) {
+    let current = 0
+    nav.hidden = cards.length < 2
+
+    /** Останавливает и удаляет текущий ролик. У <video> сначала снимаем
+     *  источник: иначе браузер может докачивать его и после удаления. */
+    const stop = () => {
+      const video = screen.querySelector('video')
+      if (video) {
+        video.pause()
+        video.removeAttribute('src')
+        video.load()
+      }
+      screen.replaceChildren()
+    }
+
+    /** Показывает ролик i; dir — направление листания (для анимации) */
+    const show = (i: number, dir = 0) => {
+      const card = cards[i]
+      const { src, embed, vertical } = card.dataset
+      const name = card.dataset.title ?? ''
+      stop()
+      current = i
+      dialog.classList.toggle('is-vertical', vertical === 'true')
+
+      if (src) {
+        const video = document.createElement('video')
+        video.src = src
+        video.controls = true
+        video.autoplay = true
+        video.playsInline = true
+        // Ролик не загрузился. При быстром листании браузер иногда шлёт
+        // запрос в только что оборванное соединение с облаком, и он сразу
+        // падает — поэтому сначала тихо повторяем (через 0.5 и 1.5 с).
+        // Не вышло и так (нет сети, файл удалён) — вместо чёрного окна
+        // сообщение. После закрытия и перехода к другому ролику — молчим.
+        const RETRY_MS = [500, 1500]
+        let attempt = 0
+        video.addEventListener('error', () => {
+          if (!dialog.open || cards[current] !== card) return
+          if (attempt < RETRY_MS.length) {
+            setTimeout(() => {
+              if (!dialog.open || cards[current] !== card) return
+              video.src = src
+              video.play().catch(() => {})
+            }, RETRY_MS[attempt++])
+            return
+          }
+          const msg = document.createElement('p')
+          msg.className = 'player__error'
+          msg.textContent = 'Видео не загрузилось. Проверьте интернет и откройте ролик ещё раз.'
+          screen.replaceChildren(msg)
+        })
+        screen.append(video)
+      } else if (embed) {
+        const frame = document.createElement('iframe')
+        frame.src = embed + (embed.includes('?') ? '&' : '?') + 'autoplay=1'
+        frame.title = name
+        frame.allow = 'autoplay; fullscreen; picture-in-picture; encrypted-media'
+        frame.allowFullscreen = true
+        screen.append(frame)
+      }
+
+      title.textContent = name
+      count.textContent = `${i + 1} из ${cards.length}`
+      prev.disabled = i === 0
+      next.disabled = i === cards.length - 1
+
+      screen.classList.remove('is-from-below', 'is-from-above')
+      if (dir) {
+        void screen.offsetWidth   // перезапуск анимации
+        screen.classList.add(dir > 0 ? 'is-from-below' : 'is-from-above')
+      }
+
+      if (!dialog.open) dialog.showModal()
+      // Запуск прямо в обработчике нажатия или свайпа: iOS разрешает
+      // видео со звуком только так — одного autoplay ему мало
+      screen.querySelector('video')?.play().catch(() => {})
+    }
+
+    const step = (dir: number) => {
+      const i = current + dir
+      if (i >= 0 && i < cards.length) show(i, dir)
+    }
+
+    cards.forEach((card, i) => card.addEventListener('click', () => show(i)))
+    // Кнопка, по которой листали, стала неактивной (дошли до края) —
+    // фокус на соседнюю, а не на окно: с клавиатуры можно листать дальше
+    prev.addEventListener('click', () => { step(-1); if (prev.disabled) next.focus() })
+    next.addEventListener('click', () => { step(1); if (next.disabled) prev.focus() })
+
+    // Свайп вверх — следующий ролик, вниз — предыдущий (как в коротких
+    // видео в соцсетях). Жест, начатый на панели управления видео внизу
+    // кадра, не считается: там перематывают и меняют громкость.
+    const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize)
+    let sx = 0, sy = 0, st = 0, tracking = false
+    dialog.addEventListener('touchstart', (e) => {
+      const t = e.touches[0]
+      const r = screen.getBoundingClientRect()
+      const onControls = t.clientX > r.left && t.clientX < r.right
+        && t.clientY > r.bottom - 4.5 * rem() && t.clientY < r.bottom
+      tracking = e.touches.length === 1 && !onControls
+      sx = t.clientX
+      sy = t.clientY
+      st = e.timeStamp
+    }, { passive: true })
+    dialog.addEventListener('touchend', (e) => {
+      if (!tracking) return
+      tracking = false
+      const t = e.changedTouches[0]
+      const dx = t.clientX - sx
+      const dy = t.clientY - sy
+      const quick = e.timeStamp - st < 700
+      if (quick && Math.abs(dy) > 3.5 * rem() && Math.abs(dy) > Math.abs(dx) * 1.5) step(dy < 0 ? 1 : -1)
+    }, { passive: true })
+
+    // Закрытие (Esc, фон, крестик): ролик удаляется, фокус — на карточку
+    // последнего просмотренного ролика
+    dialog.addEventListener('close', () => {
+      stop()
+      cards[current]?.focus()
+    })
+    // Клик по фону закрывает окно, только если нажатие и началось на фоне:
+    // иначе перемотка, отпущенная за краем видео, закрывала бы ролик
+    let downOnBackdrop = false
+    dialog.addEventListener('pointerdown', (e) => { downOnBackdrop = e.target === dialog })
+    dialog.addEventListener('click', (e) => { if (e.target === dialog && downOnBackdrop) dialog.close() })
+    dialog.querySelector('[data-player-close]')?.addEventListener('click', () => dialog.close())
+  }
+</script>
+
+<style>
+  /* margin: auto — центрирование <dialog> браузером; сброс Tailwind
+     (* { margin: 0 }) иначе прижимает окно к левому верхнему углу.
+     touch-action: none — свайп листает ролики, а не страницу под окном
+     и не запускает «потяни, чтобы обновить» */
+  .player {
+    /* --pw — ширина окна (= ширина видео); от неё считается место крестика */
+    --pw: min(92vw, 64rem);
+    width: var(--pw);
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+    touch-action: none;
+  }
+  /* Вертикальный ролик — по высоте экрана. 8rem по вертикали — строка
+     под видео (название, листание) и поля сверху и снизу */
+  .player.is-vertical { --pw: min(92vw, calc((100dvh - 8rem) * 9 / 16)); }
+  .player::backdrop { background: color-mix(in srgb, var(--color-slate-950) 88%, transparent); backdrop-filter: blur(0.25rem); }
+  :global(html:has(.player[open])) { overflow: hidden; }
+
+  .player__box { position: relative; }
+  .player__screen {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 1rem;
+    background: var(--color-slate-950);
+  }
+  .player.is-vertical .player__screen { aspect-ratio: 9 / 16; }
+  .player__screen :global(video),
+  .player__screen :global(iframe) { display: block; width: 100%; height: 100%; border: 0; }
+  /* Сообщение создаётся скриптом — отсюда :global */
+  .player__screen :global(.player__error) {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    text-align: center;
+    text-wrap: balance;
+    color: var(--color-slate-300);
+  }
+
+  /* Листание: новый ролик въезжает с той стороны, куда листали */
+  .player__screen.is-from-below { animation: player-in-below 260ms var(--ease-out) both; }
+  .player__screen.is-from-above { animation: player-in-above 260ms var(--ease-out) both; }
+  @keyframes player-in-below { from { opacity: 0; transform: translateY(1.5rem); } }
+  @keyframes player-in-above { from { opacity: 0; transform: translateY(-1.5rem); } }
+
+  /* Строка под видео: название слева, счётчик и листание справа */
+  .player__bar {
+    container-type: inline-size;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  .player__title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-white);
+    text-wrap: balance;
+  }
+  .player__nav {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .player__nav[hidden] { display: none; }
+  .player__count {
+    margin-right: 0.25rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-slate-400);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .player__step,
+  .player__close {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  .player__step {
+    background: color-mix(in srgb, var(--color-white) 14%, transparent);
+    color: var(--color-white);
+    transition: background-color 180ms var(--ease-out), opacity 180ms var(--ease-out);
+  }
+  .player__step:hover:not(:disabled) { background: color-mix(in srgb, var(--color-white) 24%, transparent); }
+  .player__step:disabled { opacity: 0.35; cursor: default; }
+  /* Крестик — справа от видео, по его верхнему краю. Если поля сбоку
+     не хватает (узкий экран, видео почти во всю ширину), крестик целиком
+     переходит в правый верхний угол кадра — без промежуточных положений.
+     --side — поле между видео и краем экрана; clamp(… * 1000 …) работает
+     как переключатель: хватает поля под крестик (4.25rem) — снаружи,
+     нет — внутри кадра с отступом 0.75rem. */
+  .player__close {
+    --side: calc(50vw - var(--pw) / 2);
+    position: absolute;
+    top: clamp(0rem, calc((4.25rem - var(--side)) * 1000), 0.75rem);
+    left: calc(var(--pw) - 3.5rem + clamp(0rem, calc((var(--side) - 4.25rem) * 1000), 4.25rem));
+    background: var(--color-white);
+    color: var(--color-slate-900);
+  }
+  .player__close:hover { background: var(--color-slate-100); }
+  /* Узкое окно: счётчик уступает место названию */
+  @container (max-width: 20rem) {
+    .player__count { display: none; }
+  }
+  .player__step:focus-visible,
+  .player__close:focus-visible { outline: 0.125rem solid var(--color-secondary-400); outline-offset: 0.1875rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .player__screen.is-from-below,
+    .player__screen.is-from-above { animation: none; }
+  }
+</style>

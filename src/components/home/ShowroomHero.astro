@@ -94,7 +94,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           <span class="h-tile__corner h-tile__corner--left tile__play" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="14" height="14"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>
           </span>
-          <span class="h-tile__title">Видео о&nbsp;дверях</span>
+          <span class="h-tile__title">Видео о&nbsp;дверях<br />и&nbsp;фурнитуре</span>
           <span class="h-cap">{SITE.contactPerson}<span class="tile__more">, {SITE.contactRole}</span></span>
         </a>
       </li>
@@ -376,10 +376,16 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     padding: 0;
     list-style: none;
   }
-  /* Телефон: две плитки в ряд, «где мы» — на всю ширину */
+  /* Телефон, планшет и небольшой ноутбук: две плитки в ряд, «где мы» —
+     на всю ширину. Три в ряд — только с 80rem, когда расширяется
+     контейнер: на плитке уже ~22rem название, метро и текст рядом
+     с картинкой не помещаются */
   .tiles > li:last-child { grid-column: 1 / -1; }
   @media (min-width: 47.5rem) {
-    .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--h-tile-gap); margin-top: var(--h-tile-gap); }
+    .tiles { gap: var(--h-tile-gap); margin-top: var(--h-tile-gap); }
+  }
+  @media (min-width: 80rem) {
+    .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .tiles > li:last-child { grid-column: auto; }
   }
   .tile { min-height: 10.5rem; }
@@ -446,7 +452,10 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     transition: transform 700ms var(--ease-out);
   }
   .tile--video:hover .tile__person { transform: scale(1.03); }
-  .tile--video :global(.h-tile__title),
+  /* Текст — слева от фигуры. Название — ровно в две строки: перенос
+     задан в разметке, внутри строк переносов нет (на узкой плитке
+     строка может зайти на плечо фигуры — под ней затемнение) */
+  .tile--video :global(.h-tile__title) { white-space: nowrap; }
   .tile--video :global(.h-cap) { max-width: 55%; }
 
   /* ── Плитка «Где мы»: фото здания ТЦ — чтобы узнать его с улицы;
