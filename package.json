@@ -28,6 +28,7 @@
     "gen:how-it-works": "node scripts/gen-how-it-works-images.mjs",
     "gen:promo": "node scripts/gen-promo-images.mjs",
     "gen:home-tiles": "node scripts/gen-home-tiles.mjs",
+    "gen:video-covers": "node scripts/gen-video-covers.mjs",
     "deploy": "git push production main"
   },
   "dependencies": {

@@ -8,14 +8,17 @@
  * направлении (цены и число моделей на главной не показываем).
  */
 
+/* Обложки направлений — рендеры салона в облаке */
+const CDN = 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/catalog.preview.main'
+
 const items = [
   {
     key: 'interior',
     title: 'Межкомнатные двери',
     text: 'Покрытия Эмалекс, эмаль, ПЭТ и экошпон, цвета и фурнитура под любой интерьер',
     chip: 'в наличии и под заказ',
-    image: 'https://storage.yandexcloud.net/vfd74ru/Main_page/left_bento/cover_doors.webp',
-    position: '50% 35%',
+    image: `${CDN}/catalog_preview_left.webp`,
+    position: '72% 50%',   // открытая белая дверь — в правой части кадра
     href: '/catalog/',
   },
   {
@@ -23,8 +26,8 @@ const items = [
     title: 'Скрытые двери',
     text: 'Полотно заподлицо со стеной, алюминиевый короб без наличников',
     chip: 'под покраску или обои',
-    image: '/renders/home/secret-cover.webp',
-    position: '50% 50%',
+    image: `${CDN}/catalog_preview_top_right.webp`,
+    position: '56% 50%',   // скрытая дверь — чуть правее центра
     href: '/catalog/skrytye-dveri/',
   },
   {
@@ -32,8 +35,8 @@ const items = [
     title: 'Алюминиевые перегородки',
     text: 'Стекло в алюминиевом профиле — проект, изготовление и монтаж под ключ',
     chip: 'изготовление 45 дней',
-    image: 'https://storage.yandexcloud.net/catalog-vfd/catalog_preview/catalog-preview3.webp',
-    position: '50% 55%',
+    image: `${CDN}/catalog_preview_down_right.webp`,
+    position: '50% 50%',
     href: '/partitions/',
   },
 ]

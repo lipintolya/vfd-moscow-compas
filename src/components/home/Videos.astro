@@ -3,9 +3,10 @@
  * «Видео о дверях» — ролики руководителя шоурума (src/data/videos.ts).
  *
  * Карточка — кнопка: открывает нативный <dialog> с плеером (mp4 или
- * встраивание VK Видео / Rutube / YouTube). Плеер создаётся при открытии
- * и уничтожается при закрытии — звук не продолжает играть после Esc,
- * клика по фону или крестика. Заглушки — не кнопки и плеер не открывают.
+ * встраивание VK Видео / Rutube). Страница грузит только обложку: плеер
+ * создаётся при открытии и уничтожается при закрытии — звук не играет
+ * после Esc, клика по фону или крестика, а недокачанный ролик перестаёт
+ * скачиваться. Заглушки — не кнопки и плеер не открывают.
  */
 import { SITE } from '../../config/site'
 import { VIDEOS } from '../../data/videos'
@@ -32,22 +33,26 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
               <span class="h-h3 vid__title">{v.title}</span>
             </div>
           ) : (
-            <button
-              type="button"
-              class="vid"
-              data-video
-              data-title={v.title}
-              data-src={v.src}
-              data-embed={v.embed}
-              data-vertical={v.vertical ? 'true' : undefined}
-            >
-              <span class="h-media vid__cover">
-                {v.cover && <img src={v.cover} alt="" loading="lazy" decoding="async" />}
-                <span class="vid__play"><Fragment set:html={play} /></span>
-                {v.duration && <span class="vid__time h-chip">{v.duration}</span>}
-              </span>
-              <span class="h-h3 vid__title">{v.title}</span>
-            </button>
+            <>
+              <button
+                type="button"
+                class="vid"
+                data-video
+                data-title={v.title}
+                data-src={v.src}
+                data-embed={v.embed}
+                data-vertical={v.vertical ? 'true' : undefined}
+                aria-describedby={v.text ? `vid-text-${v.id}` : undefined}
+              >
+                <span class="h-media vid__cover">
+                  {v.cover && <img src={v.cover} alt="" width="640" height="960" loading="lazy" decoding="async" />}
+                  <span class="vid__play"><Fragment set:html={play} /></span>
+                  {v.duration && <span class="vid__time h-chip">{v.duration}</span>}
+                </span>
+                <span class="h-h3 vid__title">{v.title}</span>
+              </button>
+              {v.text && <p id={`vid-text-${v.id}`} class="h-cap vid__text">{v.text}</p>}
+            </>
           )}
         </li>
       ))}
@@ -84,6 +89,15 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
           video.controls = true
           video.autoplay = true
           video.playsInline = true
+          // Ролик не загрузился (нет сети, файл удалён) — вместо чёрного окна
+          // понятное сообщение. После закрытия окна ошибки не показываем.
+          video.addEventListener('error', () => {
+            if (!dialog.open) return
+            const msg = document.createElement('p')
+            msg.className = 'player__error'
+            msg.textContent = 'Видео не загрузилось. Проверьте интернет и откройте ролик ещё раз.'
+            screen.replaceChildren(msg)
+          })
           screen.append(video)
         } else if (embed) {
           const frame = document.createElement('iframe')
@@ -95,12 +109,29 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
         }
         title.textContent = name
         dialog.showModal()
+        // Запуск прямо в обработчике нажатия: iOS разрешает видео со звуком
+        // только так — одного autoplay ему мало
+        screen.querySelector('video')?.play().catch(() => {})
       })
     })
 
-    // Плеер удаляется при любом закрытии (Esc, фон, крестик) — звук не остаётся
-    dialog.addEventListener('close', () => screen.replaceChildren())
-    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close() })
+    // Плеер удаляется при любом закрытии (Esc, фон, крестик) — звук не остаётся.
+    // У <video> сначала снимаем источник: иначе браузер может докачивать
+    // ролик и после удаления из страницы.
+    dialog.addEventListener('close', () => {
+      const video = screen.querySelector('video')
+      if (video) {
+        video.pause()
+        video.removeAttribute('src')
+        video.load()
+      }
+      screen.replaceChildren()
+    })
+    // Клик по фону закрывает окно, только если нажатие и началось на фоне:
+    // иначе перемотка, отпущенная за краем видео, закрывала бы ролик
+    let downOnBackdrop = false
+    dialog.addEventListener('pointerdown', (e) => { downOnBackdrop = e.target === dialog })
+    dialog.addEventListener('click', (e) => { if (e.target === dialog && downOnBackdrop) dialog.close() })
     dialog.querySelector('[data-player-close]')?.addEventListener('click', () => dialog.close())
   }
 </script>
@@ -113,8 +144,11 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     padding: 0;
     list-style: none;
   }
+  /* Колонки — под пять роликов: широкий экран — одним рядом,
+     ноутбук и планшет — 3 + 2 */
   @media (min-width: 43.75rem) { .vids { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 62.5rem) { .vids { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .vids { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 80rem) { .vids { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 
   /* Телефон: лента с прокруткой вбок */
   @media (max-width: 43.6875rem) {
@@ -151,12 +185,20 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     position: relative;
     display: grid;
     place-items: center;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 2 / 3;   /* = пропорция обложек в scripts/gen-video-covers.mjs */
     border-radius: var(--h-tile-radius);
     background: var(--color-slate-900);
   }
-  .vid__cover > img { position: absolute; inset: 0; transition: transform 700ms var(--ease-out); }
-  .vid:not(.vid--empty):hover .vid__cover > img { transform: scale(1.03); }
+  /* Обложка — первый кадр ролика, слегка затемнённый: красная кнопка
+     читается на любом кадре. При наведении кадр светлеет. */
+  .vid { --vid-shade: 0.8; --vid-shade-hover: 0.92; }
+  .vid__cover > img {
+    position: absolute;
+    inset: 0;
+    filter: brightness(var(--vid-shade));
+    transition: transform 700ms var(--ease-out), filter 300ms var(--ease-out);
+  }
+  .vid:not(.vid--empty):hover .vid__cover > img { transform: scale(1.03); filter: brightness(var(--vid-shade-hover)); }
 
   /* Красная кнопка «плей» — фирменный сигнал блока */
   .vid__play {
@@ -168,8 +210,8 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     padding-left: 0.1875rem;
     border-radius: 50%;
     background: var(--h-signal);
-    color: #fff;
-    box-shadow: 0 0 0 0.5rem rgb(255 255 255 / 0.12);
+    color: var(--color-white);
+    box-shadow: 0 0 0 0.5rem color-mix(in srgb, var(--color-white) 12%, transparent);
     transition: transform 220ms var(--ease-out), background-color 180ms var(--ease-out);
   }
   .vid:not(.vid--empty):hover .vid__play { transform: scale(1.08); background: var(--color-accent-600); }
@@ -186,38 +228,58 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
   }
   .vid__time { position: absolute; top: 0.875rem; left: 0.875rem; }
   .vid__title { margin-top: 1rem; font-size: 1.0625rem; }
+  .vid__text { margin-top: 0.375rem; text-wrap: pretty; }
   .vid:not(.vid--empty):hover .vid__title { text-decoration: underline; text-decoration-color: var(--h-signal); text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
   .vid:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.25rem; border-radius: var(--h-tile-radius); }
 
   /* ── Окно-плеер ── */
+  /* margin: auto — центрирование <dialog> браузером; сброс Tailwind
+     (* { margin: 0 }) иначе прижимает окно к левому верхнему углу */
   .player {
     width: min(92vw, 64rem);
     max-width: none;
     max-height: none;
+    margin: auto;
     padding: 0;
     border: 0;
     background: transparent;
     overflow: visible;
   }
-  .player.is-vertical { width: min(92vw, calc((100dvh - 9rem) * 9 / 16)); }
-  .player::backdrop { background: rgb(19 19 22 / 0.88); backdrop-filter: blur(0.25rem); }
+  /* Вертикальный ролик — по высоте экрана. 12rem по вертикали — место
+     под крестик над окном (3.5rem) и подпись под ним, с запасом с обеих
+     сторон: окно центрировано, крестик не уходит за верх экрана */
+  .player.is-vertical { width: min(92vw, calc((100dvh - 12rem) * 9 / 16)); }
+  .player::backdrop { background: color-mix(in srgb, var(--color-slate-950) 88%, transparent); backdrop-filter: blur(0.25rem); }
   :global(html:has(.player[open])) { overflow: hidden; }
 
   .player__box { position: relative; }
   .player__screen {
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    border-radius: 1rem;
-    background: #000;
+    border-radius: var(--h-radius);
+    background: var(--color-slate-950);
   }
   .player.is-vertical .player__screen { aspect-ratio: 9 / 16; }
   .player__screen :global(video),
   .player__screen :global(iframe) { display: block; width: 100%; height: 100%; border: 0; }
+  /* Сообщение создаётся скриптом — отсюда :global */
+  .player__screen :global(.player__error) {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    text-align: center;
+    text-wrap: balance;
+    color: var(--color-slate-300);
+  }
   .player__title {
     margin: 0.875rem 0 0;
     font-size: 1rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--color-white);
   }
   .player__close {
     position: absolute;
@@ -229,7 +291,7 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     height: 2.75rem;
     border: 0;
     border-radius: 50%;
-    background: #fff;
+    background: var(--color-white);
     color: var(--h-ink);
     cursor: pointer;
   }
