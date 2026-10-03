@@ -113,11 +113,11 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     padding: 0;
     list-style: none;
   }
-  @media (min-width: 700px) { .vids { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 1000px) { .vids { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 43.75rem) { .vids { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .vids { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
   /* Телефон: лента с прокруткой вбок */
-  @media (max-width: 699px) {
+  @media (max-width: 43.6875rem) {
     .vids {
       grid-auto-flow: column;
       grid-auto-columns: 68%;
@@ -165,7 +165,7 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     place-items: center;
     width: 3.5rem;
     height: 3.5rem;
-    padding-left: 3px;
+    padding-left: 0.1875rem;
     border-radius: 50%;
     background: var(--h-signal);
     color: #fff;
@@ -186,8 +186,8 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
   }
   .vid__time { position: absolute; top: 0.875rem; left: 0.875rem; }
   .vid__title { margin-top: 1rem; font-size: 1.0625rem; }
-  .vid:not(.vid--empty):hover .vid__title { text-decoration: underline; text-decoration-color: var(--h-signal); text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
-  .vid:focus-visible { outline: 2px solid var(--color-secondary-500); outline-offset: 4px; border-radius: var(--h-tile-radius); }
+  .vid:not(.vid--empty):hover .vid__title { text-decoration: underline; text-decoration-color: var(--h-signal); text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
+  .vid:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.25rem; border-radius: var(--h-tile-radius); }
 
   /* ── Окно-плеер ── */
   .player {
@@ -200,7 +200,7 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     overflow: visible;
   }
   .player.is-vertical { width: min(92vw, calc((100dvh - 9rem) * 9 / 16)); }
-  .player::backdrop { background: rgb(19 19 22 / 0.88); backdrop-filter: blur(4px); }
+  .player::backdrop { background: rgb(19 19 22 / 0.88); backdrop-filter: blur(0.25rem); }
   :global(html:has(.player[open])) { overflow: hidden; }
 
   .player__box { position: relative; }
@@ -234,7 +234,7 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     cursor: pointer;
   }
   .player__close:hover { background: var(--color-slate-100); }
-  .player__close:focus-visible { outline: 2px solid var(--color-secondary-400); outline-offset: 3px; }
+  .player__close:focus-visible { outline: 0.125rem solid var(--color-secondary-400); outline-offset: 0.1875rem; }
 
   @media (prefers-reduced-motion: reduce) {
     .vid__cover > img, .vid__play { transition: none; }

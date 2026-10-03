@@ -59,13 +59,8 @@ export const SITE = {
       { station: 'Свиблово',  time: '6 мин на транспорте' },
       { station: 'ВДНХ',      time: '6 мин на транспорте' },
     ],
-    /** Фото здания ТЦ — чтобы узнать его с улицы: фасад с вывеской,
-        вид с парковки, вход с табличкой «Красная Сосна, 2А» */
-    photos: [
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/about.compas.hall/bb8213f34c367ca0693f976966820d60.webp',
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/about.compas.hall/1138447691-6.webp',
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/about.compas.hall/1138447660-6.webp',
-    ],
+    /** Фото здания ТЦ с парковки — чтобы узнать его с улицы */
+    photo: 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/about.compas.hall/1138447691-6.webp',
   },
 
   /** Название в шапке сайта рядом с логотипом ВФД */

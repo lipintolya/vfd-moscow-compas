@@ -97,12 +97,12 @@ const rows: Row[] = [
     display: grid;
     gap: 3rem var(--h-gutter);
   }
-  @media (min-width: 1000px) {
+  @media (min-width: 62.5rem) {
     .spread { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
     .lead { grid-column: 1 / span 7; }
     .list { grid-column: 8 / span 5; }
   }
-  @media (min-width: 1200px) {
+  @media (min-width: 75rem) {
     .list { grid-column: 9 / span 4; }
   }
 
@@ -132,12 +132,12 @@ const rows: Row[] = [
     line-height: 1.1;
     letter-spacing: -0.03em;
   }
-  .lead:hover .lead__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+  .lead:hover .lead__title { text-decoration: underline; text-decoration-thickness: 0.0625rem; text-underline-offset: 0.2em; }
   .lead__text { margin-top: 0.75rem; }
 
   /* ── Список справа ── */
-  .list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--color-slate-300); }
-  .list li { border-bottom: 1px solid var(--color-slate-300); }
+  .list { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--color-slate-300); }
+  .list li { border-bottom: 0.0625rem solid var(--color-slate-300); }
   .row {
     display: grid;
     grid-template-columns: 6.5rem minmax(0, 1fr);
@@ -149,7 +149,7 @@ const rows: Row[] = [
   .row__media { aspect-ratio: 4 / 5; background: var(--color-slate-200); }
   .row__body { display: flex; flex-direction: column; min-width: 0; }
   .row__title { margin-top: 0.375rem; }
-  .row:hover .row__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+  .row:hover .row__title { text-decoration: underline; text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
   .row__text { margin-top: 0.25rem; }
 
   @media (prefers-reduced-motion: reduce) {

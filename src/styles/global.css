@@ -190,8 +190,13 @@
   --shadow-card:  0 2px 12px rgba(0,0,0,.07);
   --shadow-hover: 0 8px 28px rgba(0,0,0,.12);
 
-  /* Layout */
-  --header-height: 88px;
+  /* Layout — высота фиксированной шапки. Единственный источник: шапка
+     (Header.vue) берёт отсюда высоту полосы, страница — отступ под ней,
+     якоря — scroll-padding. Задано в CSS, а не замером в JS: нет пересчёта
+     на resize и скачка вёрстки при загрузке; safe-area (чёлка iOS)
+     учтена через env(). */
+  --header-bar:    4rem;
+  --header-height: calc(env(safe-area-inset-top, 0rem) + var(--header-bar));
 
   /* Motion */
   --ease-out:      cubic-bezier(0.4,0,0.2,1);
@@ -210,7 +215,7 @@ html {
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
   /* Якоря (#video и т.п.) не уезжают под фиксированную шапку */
-  scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 5.5rem);
+  scroll-padding-top: calc(var(--header-height) + 1rem);
   overflow-x: hidden;
 }
 body {

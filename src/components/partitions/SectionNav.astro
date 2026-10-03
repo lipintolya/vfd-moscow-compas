@@ -27,8 +27,7 @@ const {
 
 <nav
   id="pt-snav"
-  class="pt-snav fixed inset-x-0 z-45 -translate-y-2 px-4 opacity-0 transition-[opacity,transform] duration-200 ease-out pointer-events-none"
-  style={`top: calc(var(--header-height, 88px) + 0.75rem)`}
+  class="pt-snav fixed inset-x-0 top-[calc(var(--header-height)+0.75rem)] z-45 -translate-y-2 px-4 opacity-0 transition-[opacity,transform] duration-200 ease-out pointer-events-none"
   aria-label="Разделы страницы"
   aria-hidden="true"
 >
@@ -71,6 +70,9 @@ const {
 </nav>
 
 <style>
+  /* На странице с пилюлей-навигацией якоря останавливаются ниже неё:
+     шапка + пилюля (≈3rem). Работает и для ссылок пилюли, и для #якорей. */
+  :global(html:has(#pt-snav)) { scroll-padding-top: calc(var(--header-height) + 3.5rem); }
   /* Видимость двигаем через JS-класс, а не инлайн-стиль, — переключается
      чаще, чем рендерится компонент. */
   .pt-snav.pt-snav--visible {
@@ -185,9 +187,8 @@ const {
         e.preventDefault()
         const target = document.getElementById(link.dataset.snav ?? '')
         if (!target) return
-        const offset =
-          (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 88) + 48
-        window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' })
+        // Отступ сверху (шапка + пилюля) — scroll-padding в CSS ниже
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
     })
   })()

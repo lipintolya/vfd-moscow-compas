@@ -97,11 +97,11 @@ const items = [
   .bento__cell { display: grid; min-height: 13.5rem; }
   .bento__cell--interior { min-height: 20rem; }
 
-  @media (min-width: 640px) {
+  @media (min-width: 40rem) {
     .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .bento__cell--interior { grid-column: 1 / -1; min-height: 26rem; }
   }
-  @media (min-width: 1000px) {
+  @media (min-width: 62.5rem) {
     .bento {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       grid-template-rows: repeat(2, clamp(16rem, 22vw, 19rem));
@@ -118,7 +118,7 @@ const items = [
 
   /* Телефон: три направления — лентой с прокруткой вбок, а не столбиком
      в три экрана */
-  @media (max-width: 639px) {
+  @media (max-width: 39.9375rem) {
     .bento {
       grid-auto-flow: column;
       grid-auto-columns: 82%;

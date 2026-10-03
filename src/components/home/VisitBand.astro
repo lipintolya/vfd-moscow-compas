@@ -64,20 +64,20 @@ const hours = companyLegalInfo.workingHours
     gap: 3rem var(--h-gutter);
     align-items: center;
   }
-  @media (min-width: 1000px) {
+  @media (min-width: 62.5rem) {
     .visit { grid-template-columns: repeat(12, minmax(0, 1fr)); }
     .visit__info { grid-column: 1 / span 5; }
     .visit__map { grid-column: 7 / span 6; }
   }
   .visit__lead { margin-top: 1.25rem; }
 
-  .visit__data { margin: 2.5rem 0 0; border-top: 1px solid var(--h-rule); }
+  .visit__data { margin: 2.5rem 0 0; border-top: 0.0625rem solid var(--h-rule); }
   .visit__data > div {
     display: grid;
     grid-template-columns: 8.5rem minmax(0, 1fr);
     gap: var(--h-gutter);
     padding-block: 1rem;
-    border-bottom: 1px solid var(--h-rule);
+    border-bottom: 0.0625rem solid var(--h-rule);
   }
   .visit__data dt { padding-top: 0.125rem; }
   .visit__data dd {
@@ -92,7 +92,7 @@ const hours = companyLegalInfo.workingHours
   .visit__btn { margin-top: 2rem; }
   .visit__map { aspect-ratio: 650 / 450; }
 
-  @media (max-width: 479px) {
+  @media (max-width: 29.9375rem) {
     .visit__data > div { grid-template-columns: 1fr; gap: 0.25rem; }
     .visit__btn { width: 100%; }
   }

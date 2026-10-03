@@ -6,8 +6,6 @@ import { SITE } from '../../config/site'
 /* ============================================================
    Constants
    ============================================================ */
-const headerEl = ref<HTMLElement | null>(null)
-
 const LOGO_URL = '/svg/logo.svg'
 
 /* Брейкпоинт полной шапки — тот же, что в стилях ниже (80rem = xl). */
@@ -149,15 +147,6 @@ const statusDetail = computed(() => {
 /* ============================================================
    Handlers
    ============================================================ */
-/* Реальный низ шапки (с учётом safe-area на iOS) — в --header-height:
-   по нему встают плавающие навигации страниц (SectionNav). Это замер
-   DOM, а не заданное число. */
-const setHeaderVar = () => {
-  if (!headerEl.value) return
-  const rect = headerEl.value.getBoundingClientRect()
-  document.documentElement.style.setProperty('--header-height', `${Math.ceil(rect.bottom)}px`)
-}
-
 const onScroll = () => { scrolled.value = window.scrollY > 0 }
 
 /* Переход на широкий экран с открытым мобильным меню (поворот планшета) —
@@ -252,12 +241,9 @@ const toggleContacts = () => contactsOpen.value ? closeContacts() : openContacts
 onMounted(() => {
   currentPath.value = window.location.pathname
   onScroll()
-  setHeaderVar()
-  nextTick(setHeaderVar)
   desktopMql = window.matchMedia(DESKTOP_MQ)
   desktopMql.addEventListener('change', onDesktopChange)
   window.addEventListener('scroll',  onScroll,     { passive: true })
-  window.addEventListener('resize',  setHeaderVar, { passive: true })
   window.addEventListener('keydown', onKeydown)
   document.addEventListener('click', onClickOutside, { capture: true })
   timerId = setInterval(() => { now.value = new Date() }, 30_000)
@@ -266,7 +252,6 @@ onMounted(() => {
 onUnmounted(() => {
   desktopMql?.removeEventListener('change', onDesktopChange)
   window.removeEventListener('scroll',  onScroll)
-  window.removeEventListener('resize',  setHeaderVar)
   window.removeEventListener('keydown', onKeydown)
   document.removeEventListener('click', onClickOutside, { capture: true })
   document.body.style.overflow = ''
@@ -277,13 +262,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header ref="headerEl" class="site-header">
+  <header class="site-header" :class="{ 'is-scrolled': scrolled }">
     <div class="container">
 
-      <!-- ── Графитовая панель. Ширина = контейнер, как у сцены hero под ней:
-           шапка и первый экран читаются одним блоком. Сетка 1fr / auto / 1fr
-           держит навигацию строго по центру независимо от ширины краёв. ── -->
-      <div class="hdr" :class="{ 'hdr--scrolled': scrolled }">
+      <!-- ── Белая шапка во всю ширину, содержимое — по контейнеру (как сцена
+           hero под ней). Сетка 1fr / auto / 1fr держит навигацию строго
+           по центру независимо от ширины краёв. ── -->
+      <div class="hdr">
 
         <!-- Бренд: знак + две строки -->
         <a href="/" class="hdr-brand" :aria-label="`${SITE.studioName}. ${BRAND_SUB} — на главную`">
@@ -459,7 +444,7 @@ onUnmounted(() => {
           <button
             ref="burgerBtnRef"
             type="button"
-            class="hdr-round hdr-round--light hdr-round--mobile burger-btn"
+            class="hdr-round hdr-round--primary hdr-round--mobile burger-btn"
             :class="{ 'is-open': mobileOpen }"
             :aria-expanded="mobileOpen"
             aria-label="Меню"
@@ -477,7 +462,7 @@ onUnmounted(() => {
 
     </div><!-- /container -->
 
-    <!-- ── Мобильное меню — полноэкранная графитовая панель, модальное окно.
+    <!-- ── Мобильное меню — полноэкранная белая панель, модальное окно.
          Teleport на body: внутри <header> собственный z-index панели
          сравнивался бы только с другими детьми header, и cookie-баннер
          в корне документа перекрыл бы её. -->
@@ -496,7 +481,7 @@ onUnmounted(() => {
              контейнер, отступ сверху, высота) — при открытии меню бренд
              остаётся на месте, а бургер превращается в «закрыть». -->
         <div class="container mnav__top">
-          <div class="hdr hdr--flat">
+          <div class="hdr">
             <a href="/" class="hdr-brand" @click="closeMobileMenu(false)">
               <span class="hdr-mark" aria-hidden="true">
                 <img :src="LOGO_URL" alt="" class="is-loaded" />
@@ -510,7 +495,7 @@ onUnmounted(() => {
               <button
                 ref="menuCloseRef"
                 type="button"
-                class="hdr-round hdr-round--light burger-btn is-open"
+                class="hdr-round hdr-round--primary burger-btn is-open"
                 aria-label="Закрыть меню"
                 @click="closeMobileMenu()"
               >
@@ -547,7 +532,7 @@ onUnmounted(() => {
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="`${s.label} (откроется в новой вкладке)`"
-              class="hdr-round hdr-round--light mnav__social"
+              class="hdr-round mnav__social"
             >
               <img :src="s.icon" alt="" class="hdr-ico hdr-ico--lg" />
             </a>
@@ -638,41 +623,60 @@ onUnmounted(() => {
 
 <style scoped>
 /* ============================================================
-   Шапка — графитовая панель в ширину контейнера (как сцена hero).
+   Шапка — белая полоса во всю ширину, содержимое по контейнеру.
    Телефон: бренд + звонок + меню; ≥80rem: бренд | навигация | действия.
 
-   Токены шапки — производные палитры (global.css), без своих цветов.
-   Белый с прозрачностью задаёт иерархию; минимум для текста — 60%
-   (контраст ≥ 6:1 на графите, WCAG AA для мелкого текста — 4.5:1).
-   Зона нажатия на телефоне — не меньше 2.75rem (44px, WCAG 2.5.5 /
-   Apple HIG). Все размеры — в rem: шапка растёт вместе с системным
-   размером шрифта.
+   Принципы
+   1. Шапка — служебный слой, не акцент: белый фон, серые ссылки, одна
+      тёмная кнопка (на десктопе «Связаться», на телефоне — меню).
+      Красный — только точка текущего раздела.
+   2. Наверху страницы шапка сливается с белым фоном; после прокрутки —
+      тонкая линия снизу, лёгкая полупрозрачность с размытием и мягкая
+      тень: отделяется от контента, не перетягивая внимание.
+   3. Все цвета — токены ниже, они ссылаются на палитру global.css.
+      Контраст текста на белом: ссылки slate-600 (7.4:1), подписи
+      slate-500 (5.0:1) — не ниже WCAG AA.
+   4. Зона нажатия — не меньше 2.75rem (WCAG 2.5.5 / Apple HIG).
+      Все размеры — в rem: шапка растёт с системным размером шрифта.
    ============================================================ */
 .site-header,
 .mnav {
-  --hdr-bg:         var(--color-slate-900);
-  --hdr-fg:         var(--color-white);
-  --hdr-fg-soft:    color-mix(in srgb, var(--color-white) 72%, transparent);
-  --hdr-fg-muted:   color-mix(in srgb, var(--color-white) 60%, transparent);
-  --hdr-fg-faint:   color-mix(in srgb, var(--color-white) 35%, transparent); /* только иконки-стрелки */
-  --hdr-fill:       color-mix(in srgb, var(--color-white) 8%, transparent);
-  --hdr-fill-hover: color-mix(in srgb, var(--color-white) 14%, transparent);
-  --hdr-line:       color-mix(in srgb, var(--color-white) 10%, transparent);
-  --hdr-shadow:     color-mix(in srgb, var(--color-slate-950) 60%, transparent);
-  --hdr-focus:      var(--color-secondary-400);
-  --hdr-hair:       0.0625rem;
-  --hdr-tap:        2.75rem;
-  --hdr-inset:      0.75rem;   /* отступ панели от края экрана сверху */
-  --hdr-h:          3.5rem;
-  --hdr-ease:       var(--ease-out);
+  --hdr-bg:            var(--color-white);
+  --hdr-fg:            var(--color-slate-900);
+  --hdr-fg-soft:       var(--color-slate-600);   /* пункты меню */
+  --hdr-fg-muted:      var(--color-slate-500);   /* подписи */
+  --hdr-fg-faint:      var(--color-slate-300);   /* только иконки-стрелки */
+  --hdr-fill:          var(--color-slate-100);   /* серые кнопки, плашки */
+  --hdr-fill-hover:    var(--color-slate-200);
+  --hdr-line:          var(--color-slate-200);
+  --hdr-primary:       var(--color-slate-900);   /* единственная тёмная кнопка */
+  --hdr-primary-hover: var(--color-slate-700);
+  --hdr-on-primary:    var(--color-white);
+  --hdr-signal:        var(--color-accent-500);  /* текущий раздел */
+  --hdr-open:          var(--color-secondary-700); /* «Сейчас открыто» */
+  --hdr-shadow:        color-mix(in srgb, var(--color-slate-950) 10%, transparent);
+  --hdr-focus:         var(--color-secondary-600);
+  --hdr-hair:          0.0625rem;
+  --hdr-tap:           2.75rem;
+  --hdr-h:             var(--header-bar);       /* global.css — общая с отступом страницы */
+  --hdr-ease:          var(--ease-out);
 }
 
 .site-header {
   position: fixed;
-  inset-inline: 0;
-  top: calc(env(safe-area-inset-top, 0rem) + var(--hdr-inset));
+  inset: 0 0 auto;
   z-index: 50;
+  padding-top: env(safe-area-inset-top, 0rem);
   padding-inline: env(safe-area-inset-left, 0rem) env(safe-area-inset-right, 0rem);
+  background: var(--hdr-bg);
+  border-bottom: var(--hdr-hair) solid transparent;
+  transition: background-color 250ms var(--hdr-ease), border-color 250ms var(--hdr-ease), box-shadow 250ms var(--hdr-ease);
+}
+.site-header.is-scrolled {
+  background: color-mix(in srgb, var(--hdr-bg) 94%, transparent);
+  backdrop-filter: blur(0.875rem) saturate(1.4);
+  border-bottom-color: var(--hdr-line);
+  box-shadow: 0 0.5rem 1.5rem -1rem var(--hdr-shadow);
 }
 
 .hdr {
@@ -681,31 +685,11 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   height: var(--hdr-h);
-  /* Справа отступ = (высота панели − кнопка) / 2: круглые кнопки стоят
-     на равном расстоянии от верхнего, нижнего и правого края */
-  padding-inline: 0.625rem calc((var(--hdr-h) - var(--hdr-tap)) / 2);
-  border-radius: 1rem;
-  background: var(--hdr-bg);
   color: var(--hdr-fg);
-  box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line);
-  transition: background-color 250ms var(--hdr-ease), box-shadow 250ms var(--hdr-ease);
 }
 @media (min-width: 80rem) {
-  .site-header, .mnav { --hdr-h: 4rem; }
-  .hdr {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    padding-left: 0.875rem;
-    border-radius: 1.25rem;
-  }
+  .hdr { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
 }
-/* После прокрутки — лёгкая прозрачность с размытием и тень: панель
-   отделяется от светлого контента под ней. */
-.hdr--scrolled {
-  background: color-mix(in srgb, var(--hdr-bg) 90%, transparent);
-  backdrop-filter: blur(0.875rem) saturate(1.2);
-  box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line), 0 1.125rem 2.5rem -1.125rem var(--hdr-shadow);
-}
-.hdr--flat { box-shadow: none; }
 
 .site-header :is(a, button):focus-visible,
 .mnav :is(a, button):focus-visible {
@@ -729,20 +713,19 @@ onUnmounted(() => {
   text-decoration: none;
   border-radius: 0.75rem;
 }
+/* Знак ВФД (тёмный круг) — того же размера, что круглые кнопки справа */
 .hdr-mark {
   display: block;
   flex: none;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: var(--hdr-tap);
+  height: var(--hdr-tap);
   border-radius: 50%;
-  background: var(--hdr-fill);
+  background: var(--hdr-primary);
 }
-/* Знак ВФД — тёмный круг; на графите инвертируем в светлый */
 .hdr-mark img {
   display: block;
   width: 100%;
   height: 100%;
-  filter: invert(1);
   opacity: 0;
   transition: opacity 300ms var(--hdr-ease);
 }
@@ -753,11 +736,12 @@ onUnmounted(() => {
   height: 100%;
   font-size: 0.6875rem;
   font-weight: 700;
+  color: var(--hdr-on-primary);
 }
 .hdr-brand__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
 .hdr-brand__name {
   overflow: hidden;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -805,7 +789,7 @@ onUnmounted(() => {
   height: 0.25rem;
   margin-left: -0.125rem;
   border-radius: 50%;
-  background: var(--color-accent-500);
+  background: var(--hdr-signal);
 }
 .hdr-link__chev {
   width: 0.875rem;
@@ -890,8 +874,8 @@ onUnmounted(() => {
   padding: 0 1.25rem;
   border: 0;
   border-radius: 999rem;
-  background: var(--hdr-fg);
-  color: var(--hdr-bg);
+  background: var(--hdr-primary);
+  color: var(--hdr-on-primary);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
@@ -900,9 +884,9 @@ onUnmounted(() => {
   transition: background-color 180ms var(--hdr-ease);
 }
 .hdr-cta:hover,
-.hdr-cta[aria-expanded='true'] { background: var(--color-slate-200); }
+.hdr-cta[aria-expanded='true'] { background: var(--hdr-primary-hover); }
 
-/* Круглые кнопки: звонок (на графите), меню и Telegram (белые) */
+/* Круглые кнопки: звонок и Telegram — серые, меню — тёмная */
 .hdr-round {
   display: grid;
   place-items: center;
@@ -918,8 +902,8 @@ onUnmounted(() => {
   transition: background-color 180ms var(--hdr-ease);
 }
 .hdr-round:hover { background: var(--hdr-fill-hover); }
-.hdr-round--light { background: var(--hdr-fg); color: var(--hdr-bg); }
-.hdr-round--light:hover { background: var(--color-slate-200); }
+.hdr-round--primary { background: var(--hdr-primary); color: var(--hdr-on-primary); }
+.hdr-round--primary:hover { background: var(--hdr-primary-hover); }
 @media (min-width: 80rem) {
   .hdr-round--mobile { display: none; }
 }
@@ -933,43 +917,41 @@ onUnmounted(() => {
   width: 20rem;
   padding: 1rem;
   border-radius: 1.25rem;
-  background: var(--color-white);
-  color: var(--color-slate-900);
+  background: var(--hdr-bg);
+  color: var(--hdr-fg);
   text-align: left;
-  box-shadow:
-    0 0 0 var(--hdr-hair) color-mix(in srgb, var(--color-slate-950) 6%, transparent),
-    0 1.5rem 3.75rem -1rem color-mix(in srgb, var(--color-slate-950) 35%, transparent);
+  box-shadow: 0 0 0 var(--hdr-hair) var(--hdr-line), 0 1.5rem 3.5rem -1rem var(--hdr-shadow);
 }
 .hdr-pop__phone {
   display: flex;
   flex-direction: column;
   padding: 0.75rem 0.875rem;
   border-radius: 0.875rem;
-  background: var(--color-slate-100);
+  background: var(--hdr-fill);
   color: inherit;
   text-decoration: none;
   transition: background-color 150ms var(--hdr-ease);
 }
-.hdr-pop__phone:hover { background: var(--color-slate-200); }
+.hdr-pop__phone:hover { background: var(--hdr-fill-hover); }
 .hdr-pop__phone-num { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
-.hdr-pop__muted { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--color-slate-500); }
+.hdr-pop__muted { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--hdr-fg-muted); }
 .hdr-pop__list { margin: 0.75rem 0 0; }
 .hdr-pop__list > div {
   display: grid;
   grid-template-columns: 4.5rem minmax(0, 1fr);
   gap: 0.75rem;
   padding: 0.625rem 0.125rem;
-  border-top: var(--hdr-hair) solid var(--color-slate-200);
+  border-top: var(--hdr-hair) solid var(--hdr-line);
 }
-.hdr-pop__list dt { font-size: 0.8125rem; color: var(--color-slate-500); }
+.hdr-pop__list dt { font-size: 0.8125rem; color: var(--hdr-fg-muted); }
 .hdr-pop__list dd { margin: 0; font-size: 0.875rem; font-weight: 500; line-height: 1.4; }
-.hdr-pop__status { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--color-slate-500); }
-.hdr-pop__status.is-open { color: var(--color-secondary-700); }
+.hdr-pop__status { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--hdr-fg-muted); }
+.hdr-pop__status.is-open { color: var(--hdr-open); }
 .hdr-pop__link {
   color: inherit;
   overflow-wrap: anywhere;
   text-decoration: underline;
-  text-decoration-color: var(--color-slate-300);
+  text-decoration-color: var(--hdr-fg-faint);
   text-underline-offset: 0.2em;
 }
 .hdr-pop__link:hover { text-decoration-color: currentColor; }
@@ -980,15 +962,14 @@ onUnmounted(() => {
   min-height: var(--hdr-tap);
   margin-top: 0.5rem;
   border-radius: 0.75rem;
-  background: var(--color-slate-900);
-  color: var(--color-white);
+  background: var(--hdr-primary);
+  color: var(--hdr-on-primary);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
   transition: background-color 150ms var(--hdr-ease);
 }
-.hdr-pop__cta:hover { background: var(--color-slate-700); }
-.hdr-pop :is(a, button):focus-visible { outline-color: var(--color-secondary-600); }
+.hdr-pop__cta:hover { background: var(--hdr-primary-hover); }
 
 /* ── Бургер → крестик: 3 линии transform'ятся вместо переключения svg ── */
 .burger-icon {
@@ -1046,7 +1027,7 @@ onUnmounted(() => {
   .mnav { display: none; }
 }
 
-.mnav__top { flex: none; margin-top: var(--hdr-inset); }
+.mnav__top { flex: none; border-bottom: var(--hdr-hair) solid var(--hdr-line); }
 
 /* Середина прокручивается, телефон внизу закреплён */
 .mnav__body {
@@ -1072,14 +1053,14 @@ onUnmounted(() => {
   gap: 0.5rem;
   min-height: var(--hdr-tap);
   border-radius: 999rem;
-  background: var(--hdr-fg);
-  color: var(--hdr-bg);
+  background: var(--hdr-primary);
+  color: var(--hdr-on-primary);
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
   transition: background-color 180ms var(--hdr-ease);
 }
-.mnav__call:active { background: var(--color-slate-200); }
+.mnav__call:active { background: var(--hdr-primary-hover); }
 .mnav__social img { display: block; }
 
 .mnav__list {
@@ -1101,7 +1082,7 @@ onUnmounted(() => {
   height: 1.5rem;
   width: 0.1875rem;
   border-radius: 0.125rem;
-  background: var(--color-accent-500);
+  background: var(--hdr-signal);
 }
 .mnav__link {
   display: flex;
@@ -1163,10 +1144,10 @@ onUnmounted(() => {
   background: var(--hdr-fill);
   color: var(--hdr-fg);
 }
-.mnav__status-ico.is-open { color: var(--color-secondary-300); }
+.mnav__status-ico.is-open { color: var(--hdr-open); }
 .mnav__status-text { display: flex; flex-direction: column; min-width: 0; }
 .mnav__status-title { font-weight: 600; }
-.mnav__status-title.is-open { color: var(--color-secondary-300); }
+.mnav__status-title.is-open { color: var(--hdr-open); }
 .mnav__muted { font-size: 0.8125rem; color: var(--hdr-fg-muted); }
 
 .mnav__foot {

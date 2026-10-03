@@ -27,6 +27,7 @@
     "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",
     "gen:how-it-works": "node scripts/gen-how-it-works-images.mjs",
     "gen:promo": "node scripts/gen-promo-images.mjs",
+    "gen:home-tiles": "node scripts/gen-home-tiles.mjs",
     "deploy": "git push production main"
   },
   "dependencies": {

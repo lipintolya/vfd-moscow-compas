@@ -239,7 +239,7 @@ watch(
       </button>
 
       <!-- Desktop sidebar — sticky, всегда видим -->
-      <div class="hidden lg:block lg:sticky lg:top-[calc(var(--header-height,88px)+1.25rem)]">
+      <div class="hidden lg:block lg:sticky lg:top-[calc(var(--header-height)+1.25rem)]">
         <CatalogFilters
           v-model:active-series="activeSeries"
           v-model:active-coating="activeCoating"

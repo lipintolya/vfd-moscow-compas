@@ -93,9 +93,9 @@ const localBusinessSchema = buildLocalBusiness()
     display: grid;
     gap: 1.5rem var(--h-gutter);
     padding-top: var(--h-sec);
-    border-top: 1px solid var(--h-rule);
+    border-top: 0.0625rem solid var(--h-rule);
   }
-  @media (min-width: 1000px) {
+  @media (min-width: 62.5rem) {
     .faq { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
     .faq > :global(.faq-h2) { grid-column: 1 / span 4; }
     .faq > :global(.faq-list) { grid-column: 5 / span 8; }
@@ -118,14 +118,14 @@ const localBusinessSchema = buildLocalBusiness()
     gap: 1.5rem 2rem;
     margin-top: clamp(3rem, 6vw, 5rem);
     padding-top: 2rem;
-    border-top: 1px solid var(--h-rule);
+    border-top: 0.0625rem solid var(--h-rule);
   }
-  @media (min-width: 1000px) {
+  @media (min-width: 62.5rem) {
     .ask { margin-left: calc((100% + var(--h-gutter)) / 3); }
   }
   .ask__text { margin-top: 0.375rem; }
   .ask__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-  @media (max-width: 479px) {
+  @media (max-width: 29.9375rem) {
     .ask__actions { width: 100%; }
     .ask__actions > a { flex: 1 1 100%; }
   }

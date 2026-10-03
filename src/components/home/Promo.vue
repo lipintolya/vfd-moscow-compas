@@ -76,7 +76,7 @@ function toggleExpanded(id: string) {
               v-else
               :src="promo.image"
               :srcset="promo.imageSrcset"
-              sizes="(max-width: 699px) 100vw, (max-width: 1099px) 50vw, 33vw"
+              sizes="(max-width: 43.6875rem) 100vw, (max-width: 68.6875rem) 50vw, 33vw"
               :alt="promo.title"
               loading="lazy"
               decoding="async"
@@ -130,13 +130,13 @@ function toggleExpanded(id: string) {
   padding: 0;
   list-style: none;
 }
-@media (min-width: 700px) { .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 1100px) { .offers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 43.75rem) { .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 68.75rem) { .offers { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 .offer { display: flex; flex-direction: column; }
 /* Одна акция — не одинокая карточка в трети ширины, а разворот:
    фото на 7 колонок, текст — справа по нижнему краю. */
-@media (min-width: 900px) {
+@media (min-width: 56.25rem) {
   .offers--single { grid-template-columns: 1fr; }
   .offers--single .offer {
     display: grid;
@@ -152,7 +152,7 @@ function toggleExpanded(id: string) {
 .offer__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin: 1.25rem 0 0; }
 .offer__discount {
   padding: 0.125rem 0.5rem;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   background: var(--color-slate-900);
   color: #fff;
   font-weight: 600;
@@ -168,7 +168,7 @@ function toggleExpanded(id: string) {
 .offers__all { margin: 2.5rem 0 0; }
 /* Телефон: лента с прокруткой вбок вместо столбика карточек — край
    следующей карточки подсказывает, что ряд листается. */
-@media (max-width: 699px) {
+@media (max-width: 43.6875rem) {
   .offers {
     grid-auto-flow: column;
     grid-auto-columns: 82%;
@@ -184,6 +184,6 @@ function toggleExpanded(id: string) {
   .offers::-webkit-scrollbar { display: none; }
   .offers > li { scroll-snap-align: start; }
 }
-@media (max-width: 699px) { .offers--single { grid-auto-columns: 100%; } }
+@media (max-width: 43.6875rem) { .offers--single { grid-auto-columns: 100%; } }
 
 </style>

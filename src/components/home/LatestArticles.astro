@@ -29,7 +29,7 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
                 {article.data.coverImage && (
                   <img
                     {...articleCoverImg(article.data.coverImage, 'card')}
-                    sizes="(min-width: 900px) 33vw, 100vw"
+                    sizes="(min-width: 56.25rem) 33vw, 100vw"
                     width="800"
                     height="450"
                     alt={article.data.coverImageAlt ?? ''}
@@ -63,11 +63,11 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
     padding: 0;
     list-style: none;
   }
-  @media (min-width: 900px) { .posts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 56.25rem) { .posts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
   /* Телефон: лента с прокруткой вбок вместо столбика карточек — край
      следующей карточки подсказывает, что ряд листается. */
-  @media (max-width: 699px) {
+  @media (max-width: 43.6875rem) {
     .posts {
       grid-auto-flow: column;
       grid-auto-columns: 82%;
@@ -91,7 +91,7 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
   .post__title--first { margin-top: 1.25rem; }
   .post__media--empty { display: grid; place-items: center; background: var(--color-slate-200); }
   .post__noimg { font-size: 0.875rem; font-weight: 500; color: var(--color-slate-500); }
-  .post:hover .post__title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.25em; }
+  .post:hover .post__title { text-decoration: underline; text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
   .post__desc {
     margin-top: 0.5rem;
     font-size: 0.9375rem;

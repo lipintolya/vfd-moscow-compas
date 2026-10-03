@@ -38,7 +38,7 @@ const {
   structuredData,
   preloadImage,
   preloadImageSrcset,
-  preloadImageSizes = '(max-width: 1023px) 100vw, 55vw',
+  preloadImageSizes = '(max-width: 63.9375rem) 100vw, 55vw',
   publishedTime,
 } = Astro.props
 
@@ -139,8 +139,7 @@ const structuredDataJson = structuredData
 
     <main
       id="main-content"
-      class="flex-1 relative overflow-x-hidden"
-      style="padding-top: var(--header-height, 88px)"
+      class="flex-1 relative overflow-x-hidden pt-(--header-height)"
     >
       <slot />
     </main>
@@ -168,13 +167,13 @@ const structuredDataJson = structuredData
         style="
           position:relative;
           background:#ffffff;
-          border:1px solid var(--color-slate-200);
+          border:0.0625rem solid var(--color-slate-200);
           border-radius:0.75rem;
           padding:0.875rem 2.25rem 0.875rem 1rem;
           display:flex;
           align-items:center;
           gap:0.75rem;
-          box-shadow:0 8px 24px color-mix(in srgb, var(--color-slate-900) 10%, transparent),0 2px 6px color-mix(in srgb, var(--color-slate-900) 5%, transparent);
+          box-shadow:0 0.5rem 1.5rem color-mix(in srgb, var(--color-slate-900) 10%, transparent),0 0.125rem 0.375rem color-mix(in srgb, var(--color-slate-900) 5%, transparent);
         "
       >
         <!-- Текст -->
@@ -194,7 +193,7 @@ const structuredDataJson = structuredData
             style="
               color:var(--color-fg);
               text-decoration:underline;
-              text-underline-offset:2px;
+              text-underline-offset:0.125rem;
               font-weight:600;
             "
           >
@@ -238,7 +237,7 @@ const structuredDataJson = structuredData
             padding:0;
             background:transparent;
             border:none;
-            border-radius:9999px;
+            border-radius:999rem;
             color:var(--color-slate-400);
             cursor:pointer;
             transition:background .15s,color .15s;

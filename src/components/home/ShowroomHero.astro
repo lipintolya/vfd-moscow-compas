@@ -3,42 +3,46 @@
  * Первый экран главной.
  *
  * Сцена — интерьеры на скруглённой подложке, плавно сменяются (слайдер);
- * поверх — H1 и белая панель с тремя направлениями салона. Наведение
- * (или фокус) на направление показывает его фон и останавливает слайдер,
- * уход — возвращает слайдер. Каждое направление — ссылка на свой раздел:
- * посетитель выбирает тип двери, а не незнакомые ему серии.
+ * поверх — H1 и белая панель с тремя направлениями салона. Каждый кадр
+ * принадлежит направлению (HERO_SLIDES.way): пока он на обложке, строка
+ * направления подсвечена, а полоска под ней показывает время до смены
+ * кадра — видно и что сейчас на фото, и что это слайдер. Наведение (или
+ * фокус) на направление показывает его кадр и ставит слайдер на паузу;
+ * после ухода показ продолжается с этого направления. Каждое направление —
+ * ссылка на свой раздел: посетитель выбирает тип двери, а не серии.
  * Под сценой три плитки: работы, видео руководителя, где мы.
  *
  * H1 — единственный на странице и несёт ключевой запрос.
  */
 import { SITE } from '../../config/site'
-import { HERO_SLIDES } from '../../data/hero-image'
+import { HERO_SLIDES, type HeroWay } from '../../data/hero-image'
 
-/* Слои фона: слайды + кадр перегородок — он показывается только при
-   наведении на «Перегородки». */
-const layers = [
-  ...HERO_SLIDES,
-  { src: 'https://storage.yandexcloud.net/catalog-vfd/catalog_preview/catalog-preview3.webp', position: '50% 55%', alt: 'Алюминиевая перегородка со стеклом' },
-]
-const SLIDE_COUNT = HERO_SLIDES.length
+/* Время показа одного кадра — и для таймера, и для полоски прогресса */
+const SLIDE_MS = 6000
 
-const directions = [
-  { title: 'Межкомнатные двери',      text: 'Покрытия Эмалекс, эмаль, ПЭТ, экошпон',      cta: 'Каталог дверей',       href: '/catalog/',               layer: 2 },
-  { title: 'Скрытые двери',           text: 'Заподлицо со стеной, без наличников', cta: 'Смотреть скрытые',     href: '/catalog/skrytye-dveri/', layer: 1 },
-  { title: 'Алюминиевые перегородки', text: 'Стекло в алюминиевом профиле',   cta: 'Смотреть перегородки', href: '/partitions/',            layer: 3 },
+const directions: { way: HeroWay; title: string; text: string; cta: string; href: string }[] = [
+  { way: 'interior',   title: 'Межкомнатные двери',      text: 'Покрытия Эмалекс, эмаль, ПЭТ, экошпон', cta: 'Каталог дверей',       href: '/catalog/' },
+  { way: 'hidden',     title: 'Скрытые двери',           text: 'Заподлицо со стеной, без наличников',   cta: 'Смотреть скрытые',     href: '/catalog/skrytye-dveri/' },
+  { way: 'partitions', title: 'Алюминиевые перегородки', text: 'Стекло в алюминиевом профиле',          cta: 'Смотреть перегородки', href: '/partitions/' },
 ]
+
+/* Дверь ВФД «Доррен» ДГ, цвет Polar — вырезанный кадр (WebP с прозрачностью)
+   для плитки «Наши работы». Локальная копия: облачный оригинал Chrome не
+   декодирует, см. scripts/gen-home-tiles.mjs */
+const WORKS_DOOR = '/renders/home/door-dorren-polar.webp'
 
 const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 ---
 
 <section class="hero" aria-labelledby="hero-heading">
   <div class="container">
-    <div class="stage" data-stage data-slides={SLIDE_COUNT}>
+    <div class="stage" data-stage data-interval={SLIDE_MS}>
       <div class="stage__media">
-        {layers.map((l, i) => (
+        {HERO_SLIDES.map((l, i) => (
           <img
             class:list={['stage__img', { 'is-on': i === 0 }]}
             data-layer={i}
+            data-way={l.way}
             src={l.src}
             alt={i === 0 ? l.alt : ''}
             width="1672"
@@ -62,15 +66,10 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         </p>
       </div>
 
-      <div class="dots" role="group" aria-label="Фото интерьеров">
-        {Array.from({ length: SLIDE_COUNT }, (_, i) => (
-          <button type="button" class:list={['dots__dot', { 'is-on': i === 0 }]} data-dot={i} aria-label={`Фото ${i + 1} из ${SLIDE_COUNT}`} aria-pressed={i === 0 ? 'true' : 'false'}></button>
-        ))}
-      </div>
-
       <nav class="ways" aria-label="Направления салона">
         {directions.map((d) => (
-          <a href={d.href} class="way" data-way={d.layer}>
+          <a href={d.href} class:list={['way', { 'is-current': d.way === HERO_SLIDES[0].way }]} data-way={d.way}>
+            <span class="way__progress" aria-hidden="true"></span>
             <span class="way__title">{d.title}</span>
             <span class="way__text">{d.text}</span>
             <span class="way__btn">{d.cta} <Fragment set:html={arrow} /></span>
@@ -82,10 +81,11 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 
     <ul class="tiles" role="list">
       <li>
-        <a href="/portfolio/" class="h-tile h-tile--signal tile">
-          <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
+        <a href="/portfolio/" class="h-tile h-tile--signal tile tile--works">
+          <img class="tile__door" src={WORKS_DOOR} alt="" width="323" height="720" loading="lazy" decoding="async" onerror="this.hidden=true" />
+          <span class="h-tile__corner h-tile__corner--left h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
           <span class="h-tile__title">Наши работы</span>
-          <span class="h-cap">двери и&nbsp;перегородки на&nbsp;объектах клиентов</span>
+          <span class="h-cap"><span class="tile__more">двери и&nbsp;перегородки </span>на&nbsp;объектах клиентов</span>
         </a>
       </li>
       <li>
@@ -95,14 +95,12 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
             <svg viewBox="0 0 16 16" width="14" height="14"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>
           </span>
           <span class="h-tile__title">Видео о&nbsp;дверях</span>
-          <span class="h-cap">{SITE.contactPerson}<span class="tile__role">, {SITE.contactRole}</span></span>
+          <span class="h-cap">{SITE.contactPerson}<span class="tile__more">, {SITE.contactRole}</span></span>
         </a>
       </li>
       <li>
         <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-tile h-tile--photo tile tile--place" aria-label={`${SITE.address.full} — открыть на Яндекс Картах`}>
-          {SITE.address.photos.map((src, i) => (
-            <img src={src} alt="" loading="lazy" decoding="async" class="place__img" style={`--i:${i}`} />
-          ))}
+          <img src={SITE.address.photo} alt="" loading="lazy" decoding="async" />
           <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
           <span class="h-tile__title">{SITE.address.mall}, {SITE.address.floor}</span>
           <span class="h-cap place__street">{SITE.address.street}</span>
@@ -121,36 +119,60 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 </section>
 
 <script>
-  /* Слайдер сцены: смена каждые 6 с, пауза при наведении на направление
-     (показывает его фон), при скрытой вкладке и при reduced motion. */
+  /* Слайдер сцены. Таймер — цепочка setTimeout (после ручной смены кадр
+     показывается полный интервал). Пауза: наведение или фокус на
+     направлении, сцена вне экрана, скрытая вкладка, reduced motion. */
   document.querySelectorAll<HTMLElement>('[data-stage]').forEach((stage) => {
     const layers = [...stage.querySelectorAll<HTMLImageElement>('[data-layer]')]
-    const dots = [...stage.querySelectorAll<HTMLButtonElement>('[data-dot]')]
-    const ways = [...stage.querySelectorAll<HTMLAnchorElement>('[data-way]')]
-    const slides = Number(stage.dataset.slides)
+    const ways = [...stage.querySelectorAll<HTMLAnchorElement>('.way[data-way]')]
+    const interval = Number(stage.dataset.interval)
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+    stage.style.setProperty('--slide-ms', `${interval}ms`)
+
     let slide = 0
     let timer: number | undefined
+    let holding = false
+    let onScreen = true
 
-    const show = (i: number) => layers.forEach((l, j) => l.classList.toggle('is-on', j === i))
+    // Подсветка направления текущего кадра; повторная — перезапускает полоску
+    const mark = (way: string) => {
+      for (const w of ways) {
+        const on = w.dataset.way === way
+        if (on && w.classList.contains('is-current')) {
+          w.classList.remove('is-current')
+          void w.offsetWidth
+        }
+        w.classList.toggle('is-current', on)
+      }
+    }
     const goTo = (i: number) => {
       slide = i
-      show(i)
-      dots.forEach((d, j) => {
-        d.classList.toggle('is-on', j === i)
-        d.setAttribute('aria-pressed', String(j === i))
-      })
+      layers.forEach((l, j) => l.classList.toggle('is-on', j === i))
+      mark(layers[i].dataset.way ?? '')
     }
-    const stop = () => { clearInterval(timer); timer = undefined }
     const play = () => {
-      stop()
-      if (still || document.hidden) return
-      timer = window.setInterval(() => goTo((slide + 1) % slides), 6000)
+      clearTimeout(timer)
+      const paused = still || holding || !onScreen || document.hidden
+      stage.classList.toggle('is-paused', paused)
+      if (paused) return
+      timer = window.setTimeout(() => { goTo((slide + 1) % layers.length); play() }, interval)
     }
 
-    dots.forEach((d, i) => d.addEventListener('click', () => { goTo(i); play() }))
+    for (const w of ways) {
+      const hold = () => {
+        holding = true
+        const first = layers.findIndex((l) => l.dataset.way === w.dataset.way)
+        if (layers[slide].dataset.way !== w.dataset.way && first >= 0) goTo(first)
+        play()
+      }
+      const release = () => { holding = false; play() }
+      w.addEventListener('mouseenter', hold)
+      w.addEventListener('focus', hold)
+      w.addEventListener('mouseleave', release)
+      w.addEventListener('blur', release)
+    }
 
-    // Телефон: свайп по фото листает слайды (вертикальная прокрутка не мешает)
+    // Телефон: свайп по фото листает кадры (вертикальная прокрутка не мешает)
     let x0 = 0, y0 = 0
     stage.addEventListener('touchstart', (e) => {
       x0 = e.touches[0].clientX
@@ -161,27 +183,11 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       const dx = e.changedTouches[0].clientX - x0
       const dy = e.changedTouches[0].clientY - y0
       if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return
-      goTo((slide + (dx < 0 ? 1 : slides - 1)) % slides)
+      goTo((slide + (dx < 0 ? 1 : layers.length - 1)) % layers.length)
       play()
     }, { passive: true })
 
-    for (const w of ways) {
-      const enter = () => {
-        stop()
-        show(Number(w.dataset.way))
-        ways.forEach((x) => x.classList.toggle('is-active', x === w))
-      }
-      const leave = () => {
-        ways.forEach((x) => x.classList.remove('is-active'))
-        goTo(slide)
-        play()
-      }
-      w.addEventListener('mouseenter', enter)
-      w.addEventListener('focus', enter)
-      w.addEventListener('mouseleave', leave)
-      w.addEventListener('blur', leave)
-    }
-
+    new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; play() }).observe(stage)
     document.addEventListener('visibilitychange', play)
     play()
   })
@@ -222,14 +228,14 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(100deg, rgb(19 19 22 / 0.66) 0%, rgb(19 19 22 / 0.38) 40%, rgb(19 19 22 / 0) 68%),
-      linear-gradient(180deg, rgb(19 19 22 / 0.2) 0%, rgb(19 19 22 / 0) 40%);
+      linear-gradient(100deg, color-mix(in srgb, var(--color-slate-950) 66%, transparent) 0%, color-mix(in srgb, var(--color-slate-950) 38%, transparent) 40%, transparent 68%),
+      linear-gradient(180deg, color-mix(in srgb, var(--color-slate-950) 20%, transparent) 0%, transparent 40%);
   }
 
   .stage__copy {
     max-width: 42rem;
     padding: clamp(1.75rem, 4vw, 3.5rem);
-    color: #fff;
+    color: var(--color-white);
   }
   .stage__title {
     margin: 0;
@@ -238,7 +244,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     font-weight: 500;
     line-height: 1.08;
     letter-spacing: -0.03em;
-    color: #fff;
+    color: var(--color-white);
     text-wrap: balance;
   }
   /* Опыт — отдельной строкой с красной чертой: главный аргумент салона */
@@ -249,14 +255,14 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     margin: 1.25rem 0 0;
     font-size: clamp(1rem, 1.3vw, 1.125rem);
     font-weight: 600;
-    color: #fff;
+    color: var(--color-white);
   }
   .stage__since::before {
     content: '';
     flex: none;
     width: 1.5rem;
-    height: 2px;
-    border-radius: 2px;
+    height: 0.125rem;
+    border-radius: 0.125rem;
     background: var(--h-signal);
   }
   .stage__lead {
@@ -264,30 +270,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     max-width: 27rem;
     font-size: 0.9375rem;
     line-height: 1.6;
-    color: rgb(255 255 255 / 0.82);
-  }
-
-  /* ── Переключатель фото — справа сверху ── */
-  /* Кнопка выше видимой черты (44px) — чтобы попадать пальцем */
-  .dots {
-    position: absolute;
-    top: calc(clamp(1.25rem, 2.5vw, 2rem) - 0.625rem);
-    right: clamp(1.25rem, 2.5vw, 2rem);
-    display: flex;
-    gap: 0.375rem;
-  }
-  .dots__dot {
-    width: 1.25rem;
-    height: 2.75rem;
-    padding: 0;
-    border: 0;
-    background: linear-gradient(rgb(255 255 255 / 0.45), rgb(255 255 255 / 0.45)) center / 100% 3px no-repeat;
-    cursor: pointer;
-    transition: width 300ms var(--ease-out);
-  }
-  .dots__dot.is-on {
-    width: 2.25rem;
-    background-image: linear-gradient(var(--h-signal), var(--h-signal));
+    color: color-mix(in srgb, var(--color-white) 82%, transparent);
   }
 
   /* ── Панель направлений ──────────────────────────────── */
@@ -296,7 +279,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     margin: 0 clamp(0.75rem, 2.5vw, 2.5rem) clamp(0.75rem, 2.5vw, 2.5rem);
     padding: 0.25rem clamp(1rem, 2vw, 1.25rem);
     border-radius: 1.25rem;
-    background: #fff;
+    background: var(--color-white);
     color: var(--h-ink);
   }
   .way {
@@ -309,14 +292,39 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     color: inherit;
     text-decoration: none;
   }
-  .way + .way { border-top: 1px solid var(--h-rule); }
+  .way + .way { border-top: 0.0625rem solid var(--h-rule); }
   .way__title { grid-column: 1; font-size: clamp(0.9375rem, 4.4vw, 1.0625rem); font-weight: 600; letter-spacing: -0.01em; }
   .way__text { grid-column: 1; font-size: 0.8125rem; line-height: 1.4; color: var(--h-muted); }
   .way__arrow { grid-column: 2; grid-row: 1 / span 2; }
   .way__btn { display: none; }
-  .way:hover .way__arrow, .way.is-active .way__arrow { background: var(--h-signal); }
+  .way:hover .way__arrow, .way.is-current .way__arrow { background: var(--h-signal); }
 
-  @media (min-width: 900px) {
+  /* Полоска прогресса текущего кадра — по нижней линии строки (на
+     десктопе — по верхнему краю панели над колонкой). Заполняется за
+     время показа кадра; на паузе — стоит заполненной. */
+  .way__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.0625rem;
+    height: 0.125rem;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .way__progress::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--h-signal);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  .way.is-current .way__progress::after { animation: way-fill var(--slide-ms, 6s) linear forwards; }
+  .stage.is-paused .way.is-current .way__progress::after { animation: none; transform: scaleX(1); }
+  @keyframes way-fill { to { transform: scaleX(1); } }
+
+  @media (min-width: 56.25rem) {
     .ways {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       padding: 1.5rem 0;
@@ -328,22 +336,15 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       gap: 0;
       padding: 0 clamp(1.25rem, 2vw, 1.75rem);
     }
-    .way + .way { border-top: 0; border-left: 1px solid var(--h-rule); }
-    /* Красная метка у верхнего края панели над активным направлением —
-       та же, что у активного пункта меню */
-    .way::before {
-      content: '';
-      position: absolute;
+    .way + .way { border-top: 0; border-left: 0.0625rem solid var(--h-rule); }
+    .way__progress {
       top: -1.5rem;
+      bottom: auto;
       left: clamp(1.25rem, 2vw, 1.75rem);
-      width: 1.5rem;
-      height: 3px;
-      border-radius: 0 0 3px 3px;
-      background: var(--h-signal);
-      opacity: 0;
-      transition: opacity 180ms var(--ease-out);
+      right: clamp(1.25rem, 2vw, 1.75rem);
+      height: 0.1875rem;
+      border-radius: 0 0 0.1875rem 0.1875rem;
     }
-    .way:hover::before, .way.is-active::before { opacity: 1; }
     .way__title { font-size: 1.1875rem; }
     .way__text { margin-top: 0.25rem; font-size: 0.875rem; }
     .way__arrow { display: none; }
@@ -353,18 +354,18 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       gap: 0.5rem;
       margin-top: 1.125rem;
       padding: 0.6875rem 1.125rem;
-      border-radius: 999px;
+      border-radius: 999rem;
       background: var(--h-ink);
-      color: #fff;
+      color: var(--color-white);
       font-size: 0.875rem;
       font-weight: 600;
       line-height: 1;
       white-space: nowrap;
       transition: background-color 180ms var(--ease-out);
     }
-    .way:hover .way__btn, .way.is-active .way__btn { background: var(--h-signal); }
+    .way:hover .way__btn, .way:focus-visible .way__btn { background: var(--h-signal); }
   }
-  .way:focus-visible { outline: 2px solid var(--color-secondary-500); outline-offset: 2px; border-radius: 0.5rem; }
+  .way:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.125rem; border-radius: 0.5rem; }
 
   /* ── Плитки ──────────────────────────────────────────── */
   .tiles {
@@ -377,12 +378,12 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   }
   /* Телефон: две плитки в ряд, «где мы» — на всю ширину */
   .tiles > li:last-child { grid-column: 1 / -1; }
-  @media (min-width: 760px) {
+  @media (min-width: 47.5rem) {
     .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--h-tile-gap); margin-top: var(--h-tile-gap); }
     .tiles > li:last-child { grid-column: auto; }
   }
   .tile { min-height: 10.5rem; }
-  @media (min-width: 760px) { .tile { min-height: 14rem; } }
+  @media (min-width: 47.5rem) { .tile { min-height: 14rem; } }
 
   /* Красный круг с «плей» — плитка ведёт к блоку видео. Слева: правую
      половину плитки занимает фигура руководителя, лицо не перекрывается. */
@@ -391,13 +392,34 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     place-items: center;
     width: 2.25rem;
     height: 2.25rem;
-    padding-left: 2px;
+    padding-left: 0.125rem;
     border-radius: 50%;
     background: var(--h-signal);
-    color: #fff;
+    color: var(--color-white);
     transition: transform 220ms var(--ease-out);
   }
   .tile:hover .tile__play { transform: scale(1.08); }
+
+  /* ── Плитка «Наши работы»: белая дверь ВФД стоит в правой части и
+     уходит за нижний край — видна верхняя половина с ручкой. Тень —
+     тёмно-красная, в тон плитки, а не серая. На наведение дверь
+     приоткрывается на петлях (петли справа — ось вращения там же). ── */
+  .tile__door {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.75rem;
+    z-index: -1;
+    width: auto;
+    height: 118%;
+    max-width: none;
+    filter: drop-shadow(-0.75rem 1rem 1.25rem color-mix(in srgb, var(--color-accent-900) 45%, transparent));
+    transform: perspective(60rem) rotateY(0deg);
+    transform-origin: 91% 50%;
+    transition: transform 600ms var(--ease-out);
+  }
+  .tile--works:hover .tile__door { transform: perspective(60rem) rotateY(14deg); }
+  .tile--works :global(.h-tile__title),
+  .tile--works :global(.h-cap) { max-width: 52%; }
 
   /* ── Плитка «Видео»: руководитель — вырезанный силуэт, стоит справа и
      выходит из нижнего края плитки, как из-за рамки кадра. Дверь на его
@@ -427,24 +449,15 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   .tile--video :global(.h-tile__title),
   .tile--video :global(.h-cap) { max-width: 55%; }
 
-  /* ── Плитка «Где мы»: фото здания ТЦ сменяются по кругу (фасад,
-     парковка, вход) — чтобы узнать его с улицы; ниже — метро. ── */
+  /* ── Плитка «Где мы»: фото здания ТЦ — чтобы узнать его с улицы;
+     ниже — метро. Затемнение плотнее обычного: текста на фото больше. ── */
   .tile--place::before {
-    background: linear-gradient(0deg, rgb(19 19 22 / 0.86) 0%, rgb(19 19 22 / 0.6) 55%, rgb(19 19 22 / 0.1) 100%);
-  }
-  .tile--place .place__img { opacity: 0; animation: place-fade 18s infinite; animation-delay: calc(var(--i) * 6s - 1s); }
-  .tile--place .place__img:first-of-type { opacity: 1; }
-  @keyframes place-fade {
-    0%     { opacity: 0; }
-    5.5%   { opacity: 1; }
-    33.3%  { opacity: 1; }
-    38.8%  { opacity: 0; }
-    100%   { opacity: 0; }
+    background: linear-gradient(0deg, color-mix(in srgb, var(--color-slate-950) 86%, transparent) 0%, color-mix(in srgb, var(--color-slate-950) 60%, transparent) 55%, color-mix(in srgb, var(--color-slate-950) 10%, transparent) 100%);
   }
   .place__street { margin-top: 0.25rem; }
 
   /* Метро — две колонки: станция и время, как табличка с направлениями */
-  .metro { margin: 0.875rem 0 0; border-top: 1px solid rgb(255 255 255 / 0.18); }
+  .metro { margin: 0.875rem 0 0; border-top: 0.0625rem solid color-mix(in srgb, var(--color-white) 18%, transparent); }
   .metro__row {
     display: flex;
     justify-content: space-between;
@@ -458,7 +471,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     align-items: center;
     gap: 0.5rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--color-white);
   }
   /* Значок метро — красная «М», как на московских указателях */
   .metro__station::before {
@@ -473,18 +486,39 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     font-weight: 700;
     line-height: 1;
   }
-  .metro__time { margin: 0; color: rgb(255 255 255 / 0.78); text-align: right; font-variant-numeric: tabular-nums; }
+  .metro__time { margin: 0; color: color-mix(in srgb, var(--color-white) 78%, transparent); text-align: right; font-variant-numeric: tabular-nums; }
 
   /* ── Телефон ── */
-  @media (max-width: 759px) {
+  @media (max-width: 47.4375rem) {
     /* Две плитки в ряд: сверху место под угловую кнопку (её отступ +
        размер + зазор) — текст не наезжает на неё при любой длине */
     .tile { min-height: 9.5rem; padding: calc(0.75rem + 2.25rem + 0.5rem) 1rem 1rem; }
+    /* «Работы» и «Видео» — вытянутые 4:5: картинке есть где развернуться */
+    .tiles > li:not(:last-child) { aspect-ratio: 4 / 5; }
     .tile :global(.h-tile__corner) { top: 0.75rem; right: 0.75rem; }
     .tile :global(.h-tile__corner--left) { right: auto; left: 0.75rem; }
     .tile :global(.h-tile__title) { font-size: 1.1875rem; }
     .tile :global(.h-cap) { margin-top: 0.375rem; font-size: 0.8125rem; }
-    .tile__role { display: none; }
+    /* Длинная часть подписи на узкой плитке не нужна */
+    .tile__more { display: none; }
+    /* Узкая плитка: дверь выходит из-за правого края — видна полоса
+       --door-peek с наличником, филёнкой и ручкой. Высота — от плитки
+       (с запасом за нижний край), ширина постоянная: дверь не «повисает»,
+       даже если плитка выросла от переноса текста. */
+    .tile--works { --door-w: 4rem; --door-peek: 2.75rem; }
+    .tile__door {
+      top: 0.75rem;
+      right: calc(var(--door-peek) - var(--door-w));
+      width: var(--door-w);
+      height: calc(100% + 0.25rem);
+      object-fit: cover;
+      object-position: 0 0;
+      filter: drop-shadow(-0.25rem 0.375rem 0.5rem color-mix(in srgb, var(--color-accent-900) 35%, transparent));
+    }
+    /* Текст не заходит на дверь: полоса двери + зазор 0.5rem
+       (отсчёт от внутреннего края — у плитки поле 1rem) */
+    .tile--works :global(.h-tile__title),
+    .tile--works :global(.h-cap) { max-width: calc(100% - var(--door-peek) + 0.5rem); }
     /* Узкая плитка: фигура — в верхней части, текст внизу на графите */
     .tile--video::before {
       background: linear-gradient(0deg,
@@ -499,20 +533,18 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     .tile--video :global(.h-cap) { max-width: none; }
     .tiles > li:last-child .tile { min-height: 15rem; }
   }
-  @media (max-width: 899px) {
+  @media (max-width: 56.1875rem) {
     .stage { min-height: 0; border-radius: 1.25rem; }
-    /* Переключатель — над заголовком слева, чтобы не наезжать на него */
-    .stage__copy { padding-top: 3.5rem; padding-bottom: 6rem; }
-    .dots { right: auto; left: clamp(1.75rem, 4vw, 3.5rem); }
+    .stage__copy { padding-bottom: 6rem; }
     .stage::before {
-      background: linear-gradient(180deg, rgb(19 19 22 / 0.62) 0%, rgb(19 19 22 / 0.32) 50%, rgb(19 19 22 / 0.05) 75%);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--color-slate-950) 62%, transparent) 0%, color-mix(in srgb, var(--color-slate-950) 32%, transparent) 50%, color-mix(in srgb, var(--color-slate-950) 5%, transparent) 75%);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .stage__img, .dots__dot, .way::before, .way__btn, .tile__play { transition: none; }
-    .tile--place .place__img { animation: none; }
-    .tile__person { transition: none; }
+    .stage__img, .way__btn, .tile__play { transition: none; }
+    .tile__person, .tile__door { transition: none; }
+    .tile--works:hover .tile__door { transform: none; }
     .tile--video:hover .tile__person { transform: none; }
   }
 </style>
