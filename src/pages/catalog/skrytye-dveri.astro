@@ -1,178 +1,196 @@
 ---
-import { MEASURE_TERMS } from '../../data/services'
+/**
+ * /catalog/skrytye-dveri/ — скрытые двери «Секрет», «Секрет Реверс» и
+ * «Рефлекс» в Москве.
+ *
+ * Дизайн-система главной (src/styles/home.css, обёртка .home). Порядок —
+ * от выбора к покупке: серии → что учесть в Москве → цены → короб →
+ * кромка → конструкция → работы → для какого объекта → процесс → вопросы
+ * → салон с картой.
+ *
+ * Цены и размеры — src/data/skrytye-dveri-products.ts, тексты и FAQ —
+ * src/data/hidden-doors-page.ts, данные салона — src/config/site.ts.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
-import ColorSelector      from '../../components/catalog/ColorSelector.vue'
-import InfoImageViewer    from '../../components/catalog/InfoImageViewer.vue'
-import WorksGallery      from '../../components/catalog/WorksGallery.vue'
-import PhotoAutoplaySlider from '../../components/ui/PhotoAutoplaySlider.vue'
-import { INVISIBLE_WORKS } from '../../data/skrytye-dveri-works'
-import { merchantPolicy } from '../../lib/contacts-data'
+import LandingHero from '../../components/ui/LandingHero.astro'
+import SectionNav from '../../components/partitions/SectionNav.astro'
+import PriceTable from '../../components/catalog/PriceTable.astro'
+import ColorSelector from '../../components/catalog/ColorSelector.vue'
+import InfoImageViewer from '../../components/catalog/InfoImageViewer.vue'
+import WorkCard from '../../components/portfolio/WorkCard.astro'
+import StepsRow from '../../components/home/StepsRow.astro'
+import VisitBand from '../../components/home/VisitBand.astro'
+import '../../styles/home.css'
+
 import {
-  IMAGES,
-  INFO_IMAGES,
-  BOX_PRO_IMAGE,
-  BOX_LITE_IMAGE,
-  SECRET_SIZES,
-  SECRET_REVERS_SIZES,
-  DOOR_HEIGHT,
-  SECRET_PRICES_DISPLAY,
-  SECRET_MIN_BLADE_PRICE,
-  SECRET_MIN_KIT_PRICE,
-  SECRET_MIN_BLADE_PRICE_ORIGINAL,
-  SECRET_MIN_KIT_PRICE_ORIGINAL,
-  SECRET_REVERS_MIN_BLADE_PRICE,
-  SECRET_REVERS_MIN_KIT_PRICE,
-  SECRET_REVERS_MIN_BLADE_PRICE_ORIGINAL,
-  SECRET_REVERS_MIN_KIT_PRICE_ORIGINAL,
-  SECRET_PROMO_ACTIVE,
-  SECRET_PROMO_VALID_UNTIL,
-  CUSTOM_HEIGHT_TIERS,
-  CUSTOM_LEAD_TIME,
-  calcCustomPrice,
-  REFLEX_IMAGE,
-  REFLEX_OPENING_DIAGRAM,
-  REFLEX_PRICES,
-  REFLEX_MIN_BLADE_PRICE,
-  REFLEX_MIN_KIT_PRICE,
-  REFLEX_REVERS_MIN_KIT_PRICE,
-  REFLEX_HEIGHT_TIERS,
+  IMAGES, HERO_IMAGES, INFO_IMAGES, BOX_PRO_IMAGE, BOX_LITE_IMAGE, FACTS,
+  SECRET_SIZES, SECRET_REVERS_SIZES, DOOR_HEIGHT,
+  SECRET_PRICES_DISPLAY, SECRET_MIN_BLADE_PRICE, SECRET_MIN_KIT_PRICE,
+  SECRET_MIN_KIT_PRICE_ORIGINAL, SECRET_REVERS_MIN_BLADE_PRICE, SECRET_REVERS_MIN_KIT_PRICE,
+  SECRET_REVERS_MIN_KIT_PRICE_ORIGINAL, SECRET_PROMO_ACTIVE, SECRET_PROMO_VALID_UNTIL,
+  CUSTOM_HEIGHT_TIERS, CUSTOM_LEAD_TIME, CUSTOM_MAX_HEIGHT, calcCustomPrice,
+  REFLEX_IMAGE, REFLEX_OPENING_DIAGRAM, REFLEX_PRICES, REFLEX_MIN_BLADE_PRICE,
+  REFLEX_MIN_KIT_PRICE, REFLEX_REVERS_MIN_KIT_PRICE, REFLEX_HEIGHT_TIERS, REFLEX_MAX_HEIGHT,
   REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
 } from '../../data/skrytye-dveri-products'
-import { PHONE as SITE_PHONE, SITE } from '../../config/site'
+import { HERO_FACTS, MOSCOW_NOTES, SEGMENTS, HIDDEN_DOORS_FAQ } from '../../data/hidden-doors-page'
+import { PORTFOLIO_WORKS } from '../../data/portfolio-works'
+import { STATUS_LABEL, type Status } from '../../data/in-salon'
+import { rub } from '../../data/services'
+import { merchantPolicy } from '../../lib/contacts-data'
+import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../../lib/local-business-schema'
+import { typograph } from '../../lib/typograph'
+import { PHONE, SITE } from '../../config/site'
 
+const CALL = `tel:${PHONE.raw}`
+const opening = (reverse: boolean) => (reverse ? 'от себя' : 'на себя')
+const promoUntil = new Date(SECRET_PROMO_VALID_UNTIL).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', timeZone: 'UTC' })
 
-const REFLEX_CDN = 'https://storage.yandexcloud.net/vfd74ru/invisible/'
-const REFLEX_IMAGES = [
-  `${REFLEX_CDN}2213EA7D-2E12-4D33-9BC3-63E4943E0098.webp`,
-  `${REFLEX_CDN}A158F8FC-901B-4262-BDF6-D68E573300C8.webp`,
-  `${REFLEX_CDN}41CFB5EC-5142-462A-A702-E9AECDE149AD.webp`,
-  REFLEX_IMAGE,
+/* ── Серии: карточки наверху страницы ── */
+const series: {
+  id: string; name: string; type: string; status: Status; text: string
+  image: string; alt: string; specs: [string, string][]
+  kit: number; kitOld?: number; blade: number; href: string
+}[] = [
+  {
+    id: 'sekret', name: '«Секрет»', type: 'Открывается на себя', status: 'stock',
+    text: 'Классический скрытый монтаж. Полотно в грунте — под покраску, штукатурку или обои в цвет стены.',
+    image: IMAGES.invisible, alt: 'Скрытая дверь «Секрет» вровень со стеной',
+    specs: [
+      ['Ширины в наличии', `${SECRET_SIZES.join(', ')} мм`],
+      ['Высота', `${DOOR_HEIGHT} мм, под заказ до ${CUSTOM_MAX_HEIGHT}`],
+      ['Кромка', 'чёрная, серебро, золото'],
+    ],
+    kit: SECRET_MIN_KIT_PRICE, kitOld: SECRET_PROMO_ACTIVE ? SECRET_MIN_KIT_PRICE_ORIGINAL : undefined,
+    blade: SECRET_MIN_BLADE_PRICE, href: '#prices',
+  },
+  {
+    id: 'revers', name: '«Секрет Реверс»', type: 'Открывается от себя', status: 'stock',
+    text: 'Полотно уходит в соседнее помещение — открытая дверь не занимает место в комнате.',
+    image: IMAGES.invisibleRev, alt: 'Скрытая дверь «Секрет Реверс» с обратным открыванием',
+    specs: [
+      ['Ширины в наличии', `${SECRET_REVERS_SIZES.join(', ')} мм`],
+      ['Высота', `${DOOR_HEIGHT} мм, под заказ до ${CUSTOM_MAX_HEIGHT}`],
+      ['Кромка', 'чёрная, серебро, золото'],
+    ],
+    kit: SECRET_REVERS_MIN_KIT_PRICE, kitOld: SECRET_PROMO_ACTIVE ? SECRET_REVERS_MIN_KIT_PRICE_ORIGINAL : undefined,
+    blade: SECRET_REVERS_MIN_BLADE_PRICE, href: '#prices',
+  },
+  {
+    id: 'reflex', name: '«Рефлекс»', type: 'Зеркало во всю высоту', status: 'new',
+    text: 'Тот же монтаж вровень со стеной, но полотно — зеркало: прихожая выглядит больше и светлее.',
+    image: REFLEX_IMAGE, alt: 'Скрытая дверь с зеркалом «Рефлекс»',
+    specs: [
+      ['Открывание', 'на себя или от себя'],
+      ['Высота', `по размеру, до ${REFLEX_MAX_HEIGHT} мм`],
+      ['Опция', `зеркало с двух сторон, +${rub(REFLEX_TWO_SIDED_MIRROR_SURCHARGE)}`],
+    ],
+    kit: REFLEX_MIN_KIT_PRICE, blade: REFLEX_MIN_BLADE_PRICE, href: '#prices-reflex',
+  },
 ]
 
-const PHONE = SITE_PHONE.raw
-const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
+/* ── Таблицы цен ── */
+const lite = (v: number | null) => (v != null ? rub(v) : '—')
+const secretRows = SECRET_PRICES_DISPLAY.map((r) => ({
+  variant: `${r.edgeLabel}, ${opening(r.reverse)}`,
+  blade: rub(r.bladePrice), standard: rub(r.kitStandardPrice), lite: lite(r.kitLitePrice),
+}))
+const reflexRows = REFLEX_PRICES.map((r) => ({
+  variant: `${r.edgeLabel}, ${opening(r.reverse)}`,
+  blade: rub(r.bladePrice), standard: rub(r.kitStandardPrice), lite: lite(r.kitLitePrice),
+  standard2: rub(r.kitStandardPrice + REFLEX_TWO_SIDED_MIRROR_SURCHARGE),
+  lite2: lite(r.kitLitePrice != null ? r.kitLitePrice + REFLEX_TWO_SIDED_MIRROR_SURCHARGE : null),
+}))
+const secretHeightRows = CUSTOM_HEIGHT_TIERS.map((t) => ({
+  range: `${t.range} мм`, pct: t.pct,
+  secret: rub(calcCustomPrice(SECRET_MIN_KIT_PRICE, t.surcharge)),
+  revers: rub(calcCustomPrice(SECRET_REVERS_MIN_KIT_PRICE, t.surcharge)),
+}))
+const reflexHeightRows = REFLEX_HEIGHT_TIERS.map((t) => ({
+  range: `${t.range} мм`, pct: t.pct,
+  direct: rub(calcCustomPrice(REFLEX_MIN_KIT_PRICE, t.surcharge)),
+  reverse: rub(calcCustomPrice(REFLEX_REVERS_MIN_KIT_PRICE, t.surcharge)),
+}))
 
-const WORKS_LIMIT = 4
-const ARCHIVE_HREF = '/catalog/skrytye-dveri/raboty/'
-const featuredWorks = INVISIBLE_WORKS.slice(0, WORKS_LIMIT)
+/* ── Работы: объекты портфолио со скрытыми дверями ── */
+const works = PORTFOLIO_WORKS
+  .filter((w) => w.category === 'hidden')
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, 3)
 
-const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
+const navItems = [
+  { id: 'series',    label: 'Серии' },
+  { id: 'moscow',    label: 'В Москве' },
+  { id: 'prices',    label: 'Цены' },
+  { id: 'box',       label: 'Короб' },
+  { id: 'edge',      label: 'Кромка' },
+  { id: 'hd-faq',    label: 'Вопросы' },
+]
 
-const canonicalUrl = Astro.site
-  ? new URL('/catalog/skrytye-dveri/', Astro.site).href
-  : undefined
+/* ── SEO ── */
+const pageUrl = new URL('/catalog/skrytye-dveri/', SITE.url).href
+const title = `Скрытые двери под покраску ${SITE.city.in} — цены от ${rub(SECRET_MIN_KIT_PRICE)} | ${SITE.name}`
+// ~160 символов — длиннее поисковики обрезают
+const description =
+  `Скрытые двери ${SITE.city.in}: «Секрет», «Секрет Реверс» и зеркальная «Рефлекс». ` +
+  `Комплект с коробом от ${rub(SECRET_MIN_KIT_PRICE)}, высота до ${CUSTOM_MAX_HEIGHT} мм, замер и монтаж по Москве и области.`
+
+const areaServed = [
+  { '@type': 'City', name: SITE.city.name },
+  { '@type': 'AdministrativeArea', name: 'Московская область' },
+]
+const product = (name: string, text: string, image: string, low: number, high: number) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name,
+  description: text,
+  brand: { '@type': 'Brand', name: SITE.name },
+  image: new URL(image, SITE.url).href,
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'RUB',
+    lowPrice: low,
+    highPrice: high,
+    availability: 'https://schema.org/InStock',
+    areaServed,
+    seller: { '@id': LOCAL_BUSINESS_ID },
+    hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
+  },
+})
+const structuredData = [
+  localBusinessSchema({ url: SITE.url }),
+  product(
+    'Скрытые двери «Секрет» и «Секрет Реверс»',
+    'Двери скрытого монтажа: полотно вровень со стеной, алюминиевый короб, скрытые петли. Под покраску, штукатурку, обои. Кромка: чёрная, серебро, золото.',
+    IMAGES.invisible, SECRET_MIN_KIT_PRICE, Math.max(...SECRET_PRICES_DISPLAY.map((r) => r.kitStandardPrice)),
+  ),
+  product(
+    'Скрытая дверь с зеркалом «Рефлекс»',
+    `Скрытая дверь с зеркальным полотном во всю высоту, монтаж вровень со стеной, изготовление по размеру до ${REFLEX_MAX_HEIGHT} мм.`,
+    REFLEX_IMAGE, REFLEX_MIN_KIT_PRICE, Math.max(...REFLEX_PRICES.map((r) => r.kitStandardPrice)) + REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
+  ),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: HIDDEN_DOORS_FAQ.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+]
 
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
   { label: 'Каталог', href: '/catalog/' },
   { label: 'Скрытые двери' },
 ]
-
-const faq = [
-  { q: 'Чем скрытая дверь отличается от обычной?',
-    a: 'Нет видимых наличников и коробки — алюминиевая рама монтируется заподлицо, полотно располагается вровень со стеной. Петли скрытые. Дверь визуально растворяется в интерьере.' },
-  { q: 'Что входит в комплект?',
-    a: 'Полотно серии «Секрет» или «Секрет Реверс» и комплект скрытого короба: профиль 54×43 мм (2,5 пог. м), запил под ответную планку, ответная планка и две скрытые петли. Ручка, стопор, завёртка WC — опционально.' },
-  { q: 'Можно покрасить в цвет стены?',
-    a: 'Да. Полотно поставляется в грунте — красится или штукатурится после монтажа. Главное: красить только после установки, чтобы зазоры совпали по цвету.' },
-  { q: 'В чём разница «Секрет» и «Секрет Реверс»?',
-    a: '«Секрет» открывается «на себя» (прямой монтаж). «Секрет Реверс» — «от себя», в сторону соседнего помещения. Реверс удобен там, где нежелательно, чтобы полотно занимало пространство в комнате.' },
-  { q: 'Как определить сторонность — левая дверь или правая?',
-    a: 'Встаньте лицом к двери снаружи помещения (со стороны, где открываете). Если петли справа — дверь правая, петли слева — левая. Правило одинаково для «Секрет» и «Секрет Реверс». Замерщик ВФД уточнит сторонность при выезде.' },
-  { q: 'Какой цвет алюминиевой кромки выбрать?',
-    a: 'Три варианта: чёрная (анодированный алюминий) — под тёмную фурнитуру и контрастный интерьер; серебро (натуральный алюминий) — нейтральный, для светлых стен; золото (золотистый анод) — под бронзу, латунь и арт-деко. Цена одинакова для всех трёх.' },
-  { q: 'Какой нужен проём?',
-    a: `Проём должен быть ровным, откосы — вровень с плоскостью стены. Минимальная толщина стены — 90 мм. Замерщик даёт конкретные рекомендации на месте. ${MEASURE_TERMS}.` },
-  { q: 'Есть нестандартные размеры?',
-    a: `Стандарт в наличии: ширины ${SECRET_SIZES.join(', ')} мм, высота 2000 мм. Нестандартные высоты под заказ — от 2050 до 2700 мм, надбавка к цене полотна от +20% до +50%. Срок изготовления: ${CUSTOM_LEAD_TIME}.` },
-  { q: 'Сколько стоит установка?',
-    a: 'Стоимость монтажа рассчитывается отдельно. Мы работаем по Москве, даём гарантию на работы. Уточняйте у менеджера при заказе.' },
-  { q: 'Чем «Рефлекс» отличается от «Секрета»?',
-    a: 'Тем же скрытым монтажом вровень со стеной, но вместо глухого полотна — зеркало во всю высоту двери. Изготавливается индивидуально, высотой до 2,5 м, доступны прямое и обратное открывание.' },
-]
-
-const structuredData = canonicalUrl ? [
-  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faq.map(f => ({
-      '@type': 'Question',
-      name: f.q,
-      acceptedAnswer: { '@type': 'Answer', text: f.a },
-    })),
-  },
-  ...(featuredWorks.length > 0 ? [{
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'Наши работы — монтаж скрытых дверей в Москве и Московской области',
-    itemListElement: featuredWorks.map((w, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      item: {
-        '@type': 'CreativeWork',
-        name: w.title,
-        ...(w.story ? { description: w.story } : {}),
-        dateCreated: w.date,
-        image: w.images,
-        ...(w.location ? { locationCreated: { '@type': 'Place', name: w.location } } : {}),
-      },
-    })),
-  }] : []),
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: 'Скрытые двери — серии «Секрет» и «Секрет Реверс»',
-    description: 'Двери скрытого монтажа: полотно заподлицо со стеной, алюминиевый короб, скрытые петли. Под покраску, штукатурку, обои. Кромка: чёрная, серебро, золото.',
-    brand: { '@type': 'Brand', name: 'ВФД' },
-    image: IMAGES.invisible,
-    offers: {
-      '@type': 'AggregateOffer',
-      priceCurrency: 'RUB',
-      lowPrice: SECRET_MIN_KIT_PRICE,
-      highPrice: Math.max(...SECRET_PRICES_DISPLAY.map(r => r.kitStandardPrice)),
-      availability: 'https://schema.org/InStock',
-      areaServed: [
-        { '@type': 'City', name: 'Москва' },
-        { '@type': 'AdministrativeArea', name: 'Московская область' },
-      ],
-      hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-    },
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: 'Скрытая дверь с зеркалом «Рефлекс»',
-    description: 'Скрытая дверь с зеркальным полотном во всю высоту — устанавливается вровень со стеной, изготавливается индивидуально высотой до 2,5 м. Кромка: чёрная, серебро, золото.',
-    brand: { '@type': 'Brand', name: 'ВФД' },
-    image: REFLEX_IMAGE,
-    offers: {
-      '@type': 'AggregateOffer',
-      priceCurrency: 'RUB',
-      lowPrice: REFLEX_MIN_KIT_PRICE,
-      highPrice: Math.max(...REFLEX_PRICES.map(r => r.kitStandardPrice)),
-      availability: 'https://schema.org/InStock',
-      areaServed: [
-        { '@type': 'City', name: 'Москва' },
-        { '@type': 'AdministrativeArea', name: 'Московская область' },
-      ],
-      hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-    },
-  },
-] : undefined
 ---
 
-<BaseLayout
-  title="Скрытые двери в Москве — цены и монтаж | ВФД"
-  description={`Скрытые двери «Секрет» и «Секрет Реверс» в Москве — полотно вровень со стеной, без наличников и видимых петель. Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}. Замер и монтаж под ключ по Москве.`}
-  ogImage={IMAGES.invisible}
-  preloadImage={IMAGES.heroCover}
-  canonical={canonicalUrl}
-  structuredData={structuredData}
->
-
+<BaseLayout title={title} description={description} canonical={pageUrl} ogImage={IMAGES.invisible} structuredData={structuredData}>
+  <SectionNav items={navItems} />
 
   <div class="breadcrumb-bar">
     <div class="container">
@@ -180,1252 +198,520 @@ const structuredData = canonicalUrl ? [
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       HERO
-  ══════════════════════════════════════════════ -->
-  <div class="container sd-hero-wrap">
-    <section class="sd-hero" aria-label="Двери скрытого монтажа">
-      <img
-        class="sd-hero__bg"
-        src={IMAGES.heroCover}
-        alt=""
-        aria-hidden="true"
-        width="1920"
-        height="1080"
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-      />
-      <div class="sd-hero__grad" aria-hidden="true" />
+  <div class="home">
+    <LandingHero
+      title={`Скрытые двери ${SITE.city.in}`}
+      lead="Полотно вровень со стеной — без наличников и видимых петель. Под покраску, штукатурку или обои в цвет стен. Замер и монтаж по Москве и области."
+      image={HERO_IMAGES}
+      facts={HERO_FACTS}
+    >
+      <Fragment slot="actions">
+        <a href={CALL} class="h-btn h-btn--signal">Рассчитать стоимость</a>
+        <a href="#prices" class="h-btn h-btn--quiet">Смотреть цены</a>
+      </Fragment>
+    </LandingHero>
 
-      <div class="sd-hero__body">
-        <p class="sd-eyebrow">Скрытый монтаж · Москва</p>
-        <h1 class="sd-hero__h1">Скрытые двери <br/>в Москве</h1>
-        <p class="sd-hero__lead">
-          Полотно вровень со стеной. Без наличников,
-          без видимых петель. Алюминиевый короб прячется
-          в проём — снаружи только чистая плоскость.
+    <!-- ── Серии ── -->
+    <section id="series" class="h-sec h-sec--wall" aria-labelledby="series-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="series-title" class="h-h2">Три серии скрытых дверей</h2>
+          <p class="h-lead">Все три ставятся вровень со&nbsp;стеной на&nbsp;алюминиевый короб и&nbsp;скрытые петли. Разница&nbsp;— в&nbsp;стороне открывания и&nbsp;полотне.</p>
+        </header>
+
+        <ul class="hd-series h-rail" role="list">
+          {series.map((s) => (
+            <li id={s.id} class="hd-serie">
+              <span class="h-media hd-serie__media">
+                <img src={s.image} alt={s.alt} width="900" height="1125" loading="lazy" decoding="async" />
+              </span>
+              <span class="h-status h-meta hd-serie__status" data-status={s.status}>{STATUS_LABEL[s.status]}</span>
+              <h3 class="hd-serie__name">{s.name}</h3>
+              <p class="h-meta hd-serie__type">{s.type}</p>
+              <p class="h-body hd-serie__text">{typograph(s.text)}</p>
+              <dl class="hd-serie__specs">
+                {s.specs.map(([k, v]) => (
+                  <div><dt class="h-meta">{k}</dt><dd>{typograph(v)}</dd></div>
+                ))}
+              </dl>
+              <div class="hd-serie__price">
+                <span class="h-meta">Комплект с&nbsp;коробом</span>
+                <span class="hd-serie__value">
+                  {s.kitOld && <s class="hd-serie__old">{rub(s.kitOld)}</s>}
+                  от&nbsp;{rub(s.kit)}
+                </span>
+                <span class="h-meta">Полотно от&nbsp;{rub(s.blade)}</span>
+              </div>
+              <a href={s.href} class="h-link hd-serie__link">Все цены</a>
+            </li>
+          ))}
+        </ul>
+        {SECRET_PROMO_ACTIVE && (
+          <p class="h-meta hd-note">Цены «Секрет» и&nbsp;«Секрет Реверс» указаны со&nbsp;скидкой&nbsp;— акция действует до&nbsp;{promoUntil}.</p>
+        )}
+      </div>
+    </section>
+
+    <!-- ── Что учесть в Москве ── -->
+    <section id="moscow" class="h-sec" aria-labelledby="moscow-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="moscow-title" class="h-h2">Скрытые двери в&nbsp;московской квартире</h2>
+          <p class="h-lead">Что важно учесть до&nbsp;заказа: от&nbsp;новостройки без отделки до&nbsp;высоких потолков и&nbsp;перегородок из&nbsp;гипсокартона.</p>
+        </header>
+        <ul class="hd-notes" role="list">
+          {MOSCOW_NOTES.map((n) => (
+            <li class="hd-note-item">
+              <h3 class="h-h3">{typograph(n.title)}</h3>
+              <p class="h-body">{typograph(n.text)}</p>
+              {n.href && <a href={n.href} class="h-link hd-note-item__link">{n.link}</a>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Цены ── -->
+    <section id="prices" class="h-sec h-sec--wall" aria-labelledby="prices-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="prices-title" class="h-h2">Цены на&nbsp;скрытые двери</h2>
+          <p class="h-lead">Цена зависит от&nbsp;кромки, стороны открывания и&nbsp;короба. Комплект&nbsp;— полотно, короб, ответная планка и&nbsp;две скрытые петли.</p>
+        </header>
+
+        <div class="hd-prices">
+          <div class="hd-prices__block">
+            <h3 class="hd-subhead">«Секрет» и&nbsp;«Секрет Реверс»</h3>
+            <PriceTable
+              caption="Цены на скрытые двери «Секрет» и «Секрет Реверс»"
+              rowHeader="variant"
+              columns={[
+                { key: 'variant',  label: 'Кромка и открывание' },
+                { key: 'blade',    label: 'Полотно' },
+                { key: 'standard', label: 'Комплект Стандарт', strong: true },
+                { key: 'lite',     label: 'Комплект Лайт' },
+              ]}
+              rows={secretRows}
+            />
+          </div>
+
+          <details id="prices-reflex" class="hd-prices__block" open data-collapse-mobile>
+            <summary class="hd-subhead">«Рефлекс» с&nbsp;зеркалом</summary>
+            <PriceTable
+              caption="Цены на скрытую дверь с зеркалом «Рефлекс»"
+              rowHeader="variant"
+              columns={[
+                { key: 'variant',   label: 'Кромка и открывание' },
+                { key: 'blade',     label: 'Полотно' },
+                { key: 'standard',  label: 'Комплект Стандарт', strong: true },
+                { key: 'lite',      label: 'Комплект Лайт' },
+                { key: 'standard2', label: 'Стандарт, зеркало с двух сторон' },
+                { key: 'lite2',     label: 'Лайт, зеркало с двух сторон' },
+              ]}
+              rows={reflexRows}
+            />
+          </details>
+
+          <details class="hd-prices__block" open data-collapse-mobile>
+            <summary class="hd-subhead">Нестандартная высота</summary>
+            <p class="h-body hd-prices__lead">
+              Для высоких потолков: надбавка применяется к&nbsp;полотну и&nbsp;коробу,
+              срок изготовления&nbsp;— {CUSTOM_LEAD_TIME}. Цены&nbsp;— за&nbsp;самый доступный комплект.
+            </p>
+            <div class="hd-heights">
+              <PriceTable
+                caption="«Секрет» нестандартной высоты"
+                rowHeader="range"
+                columns={[
+                  { key: 'range',  label: `«Секрет», до ${CUSTOM_MAX_HEIGHT} мм` },
+                  { key: 'pct',    label: 'Надбавка' },
+                  { key: 'secret', label: '«Секрет»', strong: true },
+                  { key: 'revers', label: '«Секрет Реверс»', strong: true },
+                ]}
+                rows={secretHeightRows}
+              />
+              <PriceTable
+                caption="«Рефлекс» нестандартной высоты"
+                rowHeader="range"
+                columns={[
+                  { key: 'range',   label: `«Рефлекс», до ${REFLEX_MAX_HEIGHT} мм` },
+                  { key: 'pct',     label: 'Надбавка' },
+                  { key: 'direct',  label: 'На себя', strong: true },
+                  { key: 'reverse', label: 'От себя', strong: true },
+                ]}
+                rows={reflexHeightRows}
+              />
+            </div>
+          </details>
+        </div>
+
+        <p class="h-meta hd-note">
+          Комплекты Стандарт и&nbsp;Лайт отличаются коробом&nbsp;— разница ниже. Для&nbsp;кромки золото
+          комплект Лайт не&nbsp;делают. Ручка, стопор и&nbsp;завёртка WC&nbsp;— отдельно.
+          {SECRET_PROMO_ACTIVE && ` Цены «Секрет» — со скидкой по акции до ${promoUntil}.`}
         </p>
-        <div class="sd-hero__actions">
-          <a href={CALL} class="btn btn-ghost">Получить расчёт</a>
-          <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
+      </div>
+    </section>
+
+    <!-- ── Короб: Стандарт и Лайт ── -->
+    <section id="box" class="h-sec" aria-labelledby="box-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="box-title" class="h-h2">Короб: Стандарт или Лайт</h2>
+          <p class="h-lead">Короб держит полотно и&nbsp;задаёт плоскость стены. Оба варианта алюминиевые, разница&nbsp;— в&nbsp;сечении и&nbsp;цене.</p>
+        </header>
+        <div class="hd-box">
+          <div class="hd-box__viewer">
+            <InfoImageViewer
+              client:only="vue"
+              variant="wide"
+              aspectRatio="5 / 4"
+              images={[
+                { src: BOX_PRO_IMAGE,  caption: 'Короб «Секрет» — Стандарт', alt: 'Профиль короба «Секрет»: монолитный алюминиевый сплав со штукатурным крылом' },
+                { src: BOX_LITE_IMAGE, caption: 'Короб «Секрет Лайт» — разрез', alt: 'Разрез короба «Секрет Лайт»: алюминиевый профиль с наполнением из массива сосны' },
+              ]}
+            />
+          </div>
+          <div class="hd-box__types">
+            <div>
+              <h3 class="h-h3">Стандарт</h3>
+              <ul class="hd-rules" role="list">
+                <li>Монолитный профиль из&nbsp;экструдированного алюминия: без клеевых швов, не&nbsp;расслаивается и&nbsp;не&nbsp;ведёт</li>
+                <li>Штукатурное крыло с&nbsp;рифлением: переход от&nbsp;короба к&nbsp;стене без&nbsp;шва и&nbsp;трещин при&nbsp;усадке</li>
+                <li>Узел притвора рассчитан под&nbsp;скрытые магнитные и&nbsp;механические замки</li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="h-h3">Лайт</h3>
+              <ul class="hd-rules" role="list">
+                <li>Облегчённый алюминиевый профиль с&nbsp;массивом сосны внутри</li>
+                <li>Алюминий держит геометрию, древесина&nbsp;— крепёж</li>
+                <li>Дешевле Стандарта; для&nbsp;кромки золото не&nbsp;делают</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
-  </div>
 
-  <!-- ══════════════════════════════════════════════
-       СЕРИИ — 2 ПРОДУКТА
-  ══════════════════════════════════════════════ -->
-  <section class="section">
-    <div class="container">
-      <div class="sd-products">
-
-        <!-- Секрет -->
-        <article class="sd-product">
-          <div class="sd-product__photo">
-            <img
-              src={IMAGES.invisible}
-              alt="Скрытая дверь серии «Секрет» — прямой монтаж"
-              loading="lazy"
-              decoding="async"
-              width="800"
-              height="1000"
-            />
-          </div>
-          <div class="sd-product__info">
-            <span class="sd-product__eyebrow">Серия</span>
-            <h2 class="sd-product__name">«Секрет»</h2>
-            <p class="sd-product__type">Скрытый монтаж</p>
-            <p class="sd-product__desc">
-              Классический скрытый монтаж: дверь открывается «на себя».
-              Алюминиевый короб монтируется заподлицо, полотно в грунте —
-              под покраску, штукатурку или оклейку обоями в цвет стен.
-            </p>
-            <div class="sd-product__specs">
-              <div class="sd-spec">
-                <span class="sd-spec__key">Ширины в наличии</span>
-                <span class="sd-spec__val">{SECRET_SIZES.map(w => `${w} мм`).join(' · ')}</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Высота стандарт</span>
-                <span class="sd-spec__val">{DOOR_HEIGHT} мм</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Направление</span>
-                <span class="sd-spec__val">Левая · Правая</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Цвет кромки</span>
-                <span class="sd-spec__val">Чёрная · Серебро · Золото</span>
-              </div>
-            </div>
-            {SECRET_PROMO_ACTIVE && (
-              <span class="sd-promo-chip">🔥 Акция -8% до 31 августа</span>
-            )}
-            <div class="sd-product__price">
-              <div>
-                <span class="sd-price-label">Полотно</span>
-                <span>
-                  {SECRET_PROMO_ACTIVE && <span class="sd-price-old">{fmt(SECRET_MIN_BLADE_PRICE_ORIGINAL)}</span>}
-                  <span class="sd-price-val">от {fmt(SECRET_MIN_BLADE_PRICE)}</span>
-                </span>
-              </div>
-              <div>
-                <span class="sd-price-label">Комплект с коробом</span>
-                <span>
-                  {SECRET_PROMO_ACTIVE && <span class="sd-price-old">{fmt(SECRET_MIN_KIT_PRICE_ORIGINAL)}</span>}
-                  <span class="sd-price-val sd-price-val--accent">от {fmt(SECRET_MIN_KIT_PRICE)}</span>
-                </span>
-              </div>
-            </div>
-            <a href={CALL} class="btn btn-primary sd-product__btn">
-              Рассчитать стоимость
-            </a>
-          </div>
-        </article>
-
-        <!-- Секрет Реверс -->
-        <article class="sd-product sd-product--rev">
-          <div class="sd-product__photo">
-            <img
-              src={IMAGES.invisibleRev}
-              alt="Скрытая дверь серии «Секрет Реверс» — реверсивный монтаж"
-              loading="lazy"
-              decoding="async"
-              width="800"
-              height="1000"
-            />
-          </div>
-          <div class="sd-product__info">
-            <span class="sd-product__eyebrow">Серия</span>
-            <h2 class="sd-product__name">«Секрет Реверс»</h2>
-            <p class="sd-product__type">Реверсивный монтаж</p>
-            <p class="sd-product__desc">
-              Дверь открывается «от себя» — в сторону соседнего помещения.
-              Удобно, когда нежелательно, чтобы полотно занимало пространство
-              в текущей комнате. При заказе указывается сторона петель.
-            </p>
-            <div class="sd-product__specs">
-              <div class="sd-spec">
-                <span class="sd-spec__key">Ширины в наличии</span>
-                <span class="sd-spec__val">{SECRET_REVERS_SIZES.map(w => `${w} мм`).join(' · ')}</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Высота стандарт</span>
-                <span class="sd-spec__val">{DOOR_HEIGHT} мм</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Направление</span>
-                <span class="sd-spec__val">Левая · Правая</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Цвет кромки</span>
-                <span class="sd-spec__val">Чёрная · Серебро · Золото</span>
-              </div>
-            </div>
-            {SECRET_PROMO_ACTIVE && (
-              <span class="sd-promo-chip">🔥 Акция -8% до 31 августа</span>
-            )}
-            <div class="sd-product__price">
-              <div>
-                <span class="sd-price-label">Полотно</span>
-                <span>
-                  {SECRET_PROMO_ACTIVE && <span class="sd-price-old">{fmt(SECRET_REVERS_MIN_BLADE_PRICE_ORIGINAL)}</span>}
-                  <span class="sd-price-val">от {fmt(SECRET_REVERS_MIN_BLADE_PRICE)}</span>
-                </span>
-              </div>
-              <div>
-                <span class="sd-price-label">Комплект с коробом</span>
-                <span>
-                  {SECRET_PROMO_ACTIVE && <span class="sd-price-old">{fmt(SECRET_REVERS_MIN_KIT_PRICE_ORIGINAL)}</span>}
-                  <span class="sd-price-val sd-price-val--accent">от {fmt(SECRET_REVERS_MIN_KIT_PRICE)}</span>
-                </span>
-              </div>
-            </div>
-            <a href={CALL} class="btn btn-primary sd-product__btn">
-              Рассчитать стоимость
-            </a>
-          </div>
-        </article>
-
-      </div>
-
-      <!-- Цены «Секрет» / «Секрет Реверс» по кромке и стороне открывания -->
-      <h3 id="secret-prices" class="sd-h3" style="margin-top: 2.5rem">Цены «Секрет» по кромке и стороне открывания</h3>
-      {SECRET_PROMO_ACTIVE && (
-        <p class="sd-promo-note">
-          🔥 Цены в таблице уже с учётом акции -8% — действует до 31 августа 2026 г.
-        </p>
-      )}
-      <div class="sd-table-wrap sd-stack-table-wrap">
-        <table class="sd-compare sd-stack-table">
-          <thead>
-            <tr>
-              <th scope="col">Кромка</th>
-              <th scope="col">Открывание</th>
-              <th scope="col">Полотно</th>
-              <th scope="col">Комплект Стандарт</th>
-              <th scope="col">Комплект Лайт</th>
-            </tr>
-          </thead>
-          <tbody>
-            {SECRET_PRICES_DISPLAY.map(row => (
-              <tr>
-                <td data-label="Кромка">{row.edgeLabel}</td>
-                <td data-label="Открывание">{row.reverse ? 'Обратное' : 'Прямое'}</td>
-                <td data-label="Полотно">{fmt(row.bladePrice)}</td>
-                <td data-label="Комплект Стандарт"><strong>{fmt(row.kitStandardPrice)}</strong></td>
-                <td data-label="Комплект Лайт">{row.kitLitePrice != null ? fmt(row.kitLitePrice) : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="sd-table-foot">
-        Комплект Стандарт и Комплект Лайт отличаются коробом — разница в конструкции ниже.
-        Для кромки золото комплект Лайт не предлагается.
-      </p>
-
-      <!-- Короб «Секрет» — два варианта конструкции, разрезы кликабельны (модалка) -->
-      <h3 class="sd-h3" style="margin-top: 2.5rem">Короб «Секрет»: Стандарт и Лайт — в чём разница</h3>
-      <InfoImageViewer
-        client:only="vue"
-        variant="wide"
-        aspectRatio="5 / 4"
-        images={[
-          { src: BOX_LITE_IMAGE, caption: 'Короб «Секрет Лайт» — разрез', alt: 'Разрез короба «Секрет Лайт»: алюминиевый профиль с наполнением из массива сосны' },
-          { src: BOX_PRO_IMAGE,  caption: 'Короб «Секрет» — профиль',     alt: 'Профиль короба «Секрет»: монолитный алюминиевый сплав со штукатурным крылом' },
-        ]}
-      />
-      <div class="sd-box-types">
-        <div class="sd-box-type">
-          <h4 class="sd-box-type__name">Короб «Секрет Лайт ВФД»</h4>
-          <p class="sd-p">
-            Облегчённый комплект скрытого алюминиевого короба, разработанный для монтажа
-            межкомнатных дверей-невидимок. Конструкция позволяет установить дверное полотно
-            в одной плоскости со стеной, полностью отказавшись от традиционных наличников
-            и создавая эффект «двери без двери».
-          </p>
-          <div class="sd-box-feature">
-            <h5>Облегчённый профиль с наполнением из массива сосны</h5>
-            <p>
-              Сечение короба оптимизировано для снижения массы без потери жёсткости,
-              необходимой для стандартных межкомнатных полотен. Внешний контур выполнен
-              из тонкостенного алюминиевого профиля, внутри которого расположен массив
-              сосны. Такое сочетание решает сразу несколько задач: алюминий задаёт точную
-              геометрию и защищает конструкцию от внешних воздействий, а древесина
-              обеспечивает плотную фиксацию крепежа.
-            </p>
-          </div>
+    <!-- ── Кромка ── -->
+    <section id="edge" class="h-sec h-sec--wall" aria-labelledby="edge-title">
+      <div class="container hd-edge">
+        <div class="hd-edge__text">
+          <h2 id="edge-title" class="h-h2">Цвет кромки</h2>
+          <p class="h-lead hd-edge__lead">Тонкая алюминиевая кромка по&nbsp;контуру полотна&nbsp;— единственное, что видно на&nbsp;стене. Выбирайте под&nbsp;фурнитуру и&nbsp;отделку.</p>
+          <dl class="hd-edge__list">
+            <div><dt class="h-h3">Чёрная</dt><dd class="h-body">Анодированный алюминий. К&nbsp;тёмной фурнитуре и&nbsp;контрастным интерьерам.</dd></div>
+            <div><dt class="h-h3">Серебро</dt><dd class="h-body">Натуральный алюминий. Нейтральный вариант для&nbsp;светлых стен и&nbsp;минимализма.</dd></div>
+            <div><dt class="h-h3">Золото</dt><dd class="h-body">Золотистый анод. К&nbsp;латунной и&nbsp;бронзовой фурнитуре, стилю ар-деко.</dd></div>
+          </dl>
         </div>
-        <div class="sd-box-type">
-          <h4 class="sd-box-type__name">Короб «Секрет»</h4>
-          <p class="sd-p">
-            Система скрытой установки межкомнатных дверей, выполненная из экструдированного
-            алюминиевого сплава. Конструкция монтируется вровень со стеной и формирует
-            безупречно ровный проём без наличников, создавая эффект «двери-невидимки».
-          </p>
-          <div class="sd-box-feature">
-            <h5>Монолитный профиль</h5>
-            <p>
-              Короб выполнен из единого алюминиевого сплава методом экструзии. Отсутствие
-              составных элементов и клеевых соединений исключает расслоение, деформацию
-              и образование микрощелей на стыках.
-            </p>
-          </div>
-          <div class="sd-box-feature">
-            <h5>Интегрированное штукатурное крыло</h5>
-            <p>
-              Профиль оснащён монтажной полкой с рифлением, которая обеспечивает надёжную
-              адгезию со штукатуркой, шпаклёвкой и армирующей сеткой. Переход от короба
-              к стене получается бесшовным и не даёт трещин при усадке.
-            </p>
-          </div>
-          <div class="sd-box-feature">
-            <h5>Усиленный узел притвора</h5>
-            <p>
-              Внутренняя геометрия профиля рассчитана под установку магнитных и механических
-              замков скрытого типа без дополнительного фрезерования.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       «РЕФЛЕКС» — СКРЫТАЯ ДВЕРЬ С ЗЕРКАЛОМ
-  ══════════════════════════════════════════════ -->
-  <section class="section" id="reflex" style="padding-top: 0">
-    <div class="container">
-      <div class="sd-products">
-
-        <article class="sd-product">
-          <div class="sd-product__photo">
-            <PhotoAutoplaySlider
-              client:visible
-              images={REFLEX_IMAGES}
-              alt="Скрытая дверь с зеркалом «Рефлекс» — полотно заподлицо со стеной"
-            />
-          </div>
-          <div class="sd-product__info">
-            <span class="sd-product__eyebrow">Новинка</span>
-            <h2 class="sd-product__name">«Рефлекс»</h2>
-            <p class="sd-product__type">Скрытый монтаж, зеркальное полотно</p>
-            <p class="sd-product__desc">
-              Дизайнерское решение для интерьера: зеркало во всю высоту полотна визуально
-              увеличивает пространство и добавляет комнате естественного света. Дверь
-              по-прежнему устанавливается вровень со стеной — тот же эффект скрытности,
-              что и у «Секрета». Изготавливается по индивидуальным размерам, высотой до 2,5 м.
-            </p>
-            <div class="sd-product__specs">
-              <div class="sd-spec">
-                <span class="sd-spec__key">Монтаж</span>
-                <span class="sd-spec__val">Прямой · Обратный</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Высота</span>
-                <span class="sd-spec__val">Индивидуально, до 2500 мм</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Полотно</span>
-                <span class="sd-spec__val">Финиш-грунт + зеркало</span>
-              </div>
-              <div class="sd-spec">
-                <span class="sd-spec__key">Цвет кромки</span>
-                <span class="sd-spec__val">Чёрная · Серебро · Золото</span>
-              </div>
-            </div>
-            <div class="sd-product__price">
-              <div>
-                <span class="sd-price-label">Полотно</span>
-                <span class="sd-price-val">от {fmt(REFLEX_MIN_BLADE_PRICE)}</span>
-              </div>
-              <div>
-                <span class="sd-price-label">Комплект с коробом</span>
-                <span class="sd-price-val sd-price-val--accent">от {fmt(REFLEX_MIN_KIT_PRICE)}</span>
-              </div>
-              <div>
-                <span class="sd-price-label">Комплект, зеркало с двух сторон</span>
-                <span class="sd-price-val">от {fmt(REFLEX_MIN_KIT_PRICE + REFLEX_TWO_SIDED_MIRROR_SURCHARGE)}</span>
-              </div>
-            </div>
-            <a href={CALL} class="btn btn-primary sd-product__btn">
-              Рассчитать стоимость
-            </a>
-          </div>
-        </article>
-
-      </div>
-
-      <!-- Цены «Рефлекс» по кромке и стороне открывания -->
-      <h3 class="sd-h3" style="margin-top: 2.5rem">Цены «Рефлекс» по кромке и стороне открывания</h3>
-      <div class="sd-table-wrap sd-stack-table-wrap">
-        <table class="sd-compare sd-stack-table">
-          <thead>
-            <tr>
-              <th scope="col">Кромка</th>
-              <th scope="col">Открывание</th>
-              <th scope="col">Полотно</th>
-              <th scope="col">Комплект Стандарт</th>
-              <th scope="col">Комплект Лайт</th>
-              <th scope="col">Стандарт, зеркало с обеих сторон</th>
-              <th scope="col">Лайт, зеркало с обеих сторон</th>
-            </tr>
-          </thead>
-          <tbody>
-            {REFLEX_PRICES.map(row => (
-              <tr>
-                <td data-label="Кромка">{row.edgeLabel}</td>
-                <td data-label="Открывание">{row.reverse ? 'Обратное' : 'Прямое'}</td>
-                <td data-label="Полотно">{fmt(row.bladePrice)}</td>
-                <td data-label="Комплект Стандарт"><strong>{fmt(row.kitStandardPrice)}</strong></td>
-                <td data-label="Комплект Лайт">{row.kitLitePrice != null ? fmt(row.kitLitePrice) : '—'}</td>
-                <td data-label="Стандарт, зеркало с обеих сторон"><strong>{fmt(row.kitStandardPrice + REFLEX_TWO_SIDED_MIRROR_SURCHARGE)}</strong></td>
-                <td data-label="Лайт, зеркало с обеих сторон">{row.kitLitePrice != null ? fmt(row.kitLitePrice + REFLEX_TWO_SIDED_MIRROR_SURCHARGE) : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="sd-table-foot">
-        Комплект Стандарт и Комплект Лайт отличаются комплектацией короба — уточняйте у менеджера.
-        Для кромки золото комплект Лайт не предлагается.
-      </p>
-
-      <!-- Схема определения стороны открывания — свой экземпляр InfoImageViewer:
-           client:only="vue", тот же безопасный паттерн, что уже используется
-           выше на этой странице (не хайдрейтим Teleport-модалку через SSR). -->
-      <InfoImageViewer
-        client:only="vue"
-        variant="wide"
-        aspectRatio="16 / 9"
-        images={[
-          { src: REFLEX_OPENING_DIAGRAM, caption: 'Определение стороны открывания', alt: 'Схема определения стороны открывания для скрытой двери с зеркалом' },
-        ]}
-      />
-
-      <!-- Нестандартные высоты «Рефлекс» — тот же расчёт, что у «Секрет»,
-           но верхний тир урезан: максимум по «Рефлекс» — 2500 мм, не 2700. -->
-      <div class="sd-custom-section">
-        <h3 class="sd-h3">Нестандартные высоты — под заказ</h3>
-        <p class="sd-p" style="margin-bottom: 1rem">
-          Надбавка применяется к полотну и коробу. Максимальная высота — 2500 мм.
-          Срок изготовления: {CUSTOM_LEAD_TIME}.
-        </p>
-        <div class="sd-table-wrap sd-stack-table-wrap">
-          <table class="sd-compare sd-stack-table">
-            <thead>
-              <tr>
-                <th scope="col">Высота</th>
-                <th scope="col">Надбавка</th>
-                <th scope="col">«Рефлекс», прямое</th>
-                <th scope="col">«Рефлекс», обратное</th>
-              </tr>
-            </thead>
-            <tbody>
-              {REFLEX_HEIGHT_TIERS.map(tier => (
-                <tr>
-                  <th scope="row">{tier.range} мм</th>
-                  <td class="sd-custom__pct" data-label="Надбавка">{tier.pct}</td>
-                  <td data-label="«Рефлекс», прямое">{fmt(calcCustomPrice(REFLEX_MIN_KIT_PRICE, tier.surcharge))}</td>
-                  <td data-label="«Рефлекс», обратное">{fmt(calcCustomPrice(REFLEX_REVERS_MIN_KIT_PRICE, tier.surcharge))}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p class="sd-table-foot" style="margin-top: 0.75rem">
-          Цена включает полотно и короб с той же надбавкой. Расчёт — от минимального
-          комплекта (Лайт, где предлагается) для соответствующего направления.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       ТАБЛИЦА ЦЕН И РАЗМЕРОВ
-  ══════════════════════════════════════════════ -->
-  <section class="section" style="padding-top: 0">
-    <div class="container">
-      <h2 class="sd-h2">Цены и размеры</h2>
-
-      <div class="sd-table-wrap">
-        <table class="sd-compare">
-          <thead>
-            <tr>
-              <th scope="col" class="sd-compare__row-head"></th>
-              <th scope="col">«Секрет»</th>
-              <th scope="col">«Секрет Реверс»</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Монтаж</th>
-              <td>Прямой</td>
-              <td>Реверсивный</td>
-            </tr>
-            <tr>
-              <th scope="row">Ширины в наличии</th>
-              <td>{SECRET_SIZES.map(w => `${w}`).join(', ')} мм</td>
-              <td>{SECRET_REVERS_SIZES.map(w => `${w}`).join(', ')} мм</td>
-            </tr>
-            <tr>
-              <th scope="row">Высота (стандарт)</th>
-              <td colspan="2" class="sd-compare__shared">{DOOR_HEIGHT} мм</td>
-            </tr>
-            <tr>
-              <th scope="row">Направление петель</th>
-              <td>Левая / Правая</td>
-              <td>Левая / Правая</td>
-            </tr>
-            <tr>
-              <th scope="row">Цвет кромки</th>
-              <td colspan="2" class="sd-compare__shared">Чёрная / Серебро / Золото</td>
-            </tr>
-            <tr>
-              <th scope="row">Покрытие полотна</th>
-              <td colspan="2" class="sd-compare__shared">Финиш-грунт с кромкой</td>
-            </tr>
-            <tr class="sd-compare__price-row">
-              <th scope="row">Полотно</th>
-              <td>от {fmt(SECRET_MIN_BLADE_PRICE)}</td>
-              <td>от {fmt(SECRET_REVERS_MIN_BLADE_PRICE)}</td>
-            </tr>
-            <tr class="sd-compare__price-row sd-compare__kit-row">
-              <th scope="row">Комплект с коробом</th>
-              <td><strong>от {fmt(SECRET_MIN_KIT_PRICE)}</strong></td>
-              <td><strong>от {fmt(SECRET_REVERS_MIN_KIT_PRICE)}</strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <p class="sd-table-foot">
-        В комплект входит: короб 54×43×2200 мм, ответная планка, 2 скрытые петли.
-        Ручка, стопор и завёртка WC — опционально. Точная цена зависит от покрытия,
-        цвета кромки и стороны открывания — таблица выше.
-        {SECRET_PROMO_ACTIVE && ' Цены указаны с учётом акции -8% (действует до 31 августа 2026 г.).'}
-      </p>
-
-      <!-- Инфо-изображения: комплектация + сторонность — client:only="vue" (не
-           client:load), см. фикс на /catalog/decor: InfoImageViewer c
-           Teleport-модалкой на SSR даёт hydration mismatch (безобидно тут,
-           один экземпляр, но паттерн лучше не плодить). -->
-      <InfoImageViewer
-        client:only="vue"
-        images={[
-          { src: INFO_IMAGES.kompl, caption: 'Состав комплекта', alt: 'Состав комплекта скрытой двери — профиль, петли, ответная планка' },
-          { src: INFO_IMAGES.lr,    caption: 'Схема сторонности', alt: 'Схема сторонности (левая / правая) открывания скрытой двери' },
-        ]}
-      />
-
-      <!-- Нестандартные высоты -->
-      <div class="sd-custom-section">
-        <h3 class="sd-h3">Нестандартные высоты — под заказ</h3>
-        <p class="sd-p" style="margin-bottom: 1rem">
-          Надбавка применяется к полотну и коробу. Максимальная высота — 2700 мм.
-          Срок изготовления: {CUSTOM_LEAD_TIME}.
-        </p>
-        <div class="sd-table-wrap sd-stack-table-wrap">
-          <table class="sd-compare sd-stack-table">
-            <thead>
-              <tr>
-                <th scope="col">Высота</th>
-                <th scope="col">Надбавка</th>
-                <th scope="col">«Секрет», комплект</th>
-                <th scope="col">«Секрет Реверс», комплект</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CUSTOM_HEIGHT_TIERS.map(tier => (
-                <tr>
-                  <th scope="row">{tier.range} мм</th>
-                  <td class="sd-custom__pct" data-label="Надбавка">{tier.pct}</td>
-                  <td data-label="«Секрет», комплект">{fmt(calcCustomPrice(SECRET_MIN_KIT_PRICE, tier.surcharge))}</td>
-                  <td data-label="«Секрет Реверс», комплект">{fmt(calcCustomPrice(SECRET_REVERS_MIN_KIT_PRICE, tier.surcharge))}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p class="sd-table-foot" style="margin-top: 0.75rem">
-          Цена включает полотно и короб с той же надбавкой. Ручка, стопор, завёртка WC — по стандартной цене.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       ЦВЕТ КРОМКИ
-  ══════════════════════════════════════════════ -->
-  <section class="section sd-color-section">
-    <div class="container">
-      <div class="sd-color-wrap">
-        <div class="sd-color-text">
-          <h2 class="sd-h2">Цвет кромки</h2>
-          <p class="sd-p">
-            Кромка — алюминиевая полоска по краям проёма шириной 13 мм.
-            Её видно только под углом. Цена одинакова — выбирайте
-            под планируемую отделку стен и фурнитуру.
-          </p>
-          <p class="sd-p">
-            <strong>Чёрная кромка</strong> — анодированный алюминий.
-            Подходит к тёмной фурнитуре и контрастным интерьерам.
-          </p>
-          <p class="sd-p">
-            <strong>Серебро</strong> — натуральный алюминий.
-            Нейтральный вариант для светлых стен и минимализма.
-          </p>
-          <p class="sd-p">
-            <strong>Золото</strong> — анодированный алюминий золотистого оттенка.
-            Подходит к интерьерам с бронзовой или латунной фурнитурой, стилю арт-деко.
-          </p>
-        </div>
-        <div class="sd-color-selector">
+        <div class="hd-edge__preview">
           <ColorSelector client:visible />
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ══════════════════════════════════════════════
-       О КОНСТРУКЦИИ
-  ══════════════════════════════════════════════ -->
-  <section class="section">
-    <div class="container">
-      <div class="sd-about">
-        <div class="sd-about__text">
-          <h2 class="sd-h2">О конструкции</h2>
-          <p class="sd-p">
-            Скрытые двери — конструкция, в которой алюминиевая коробка
-            монтируется внутрь стены заподлицо с её поверхностью. Полотно
-            навешивается на скрытые петли и устанавливается вровень со стеной.
-            Снаружи — только тонкая кромка профиля.
-          </p>
-          <p class="sd-p">
-            Алюминиевый профиль 54×43 мм — прочный и лёгкий. Выдерживает
-            нагрузку до 70 кг. Минимальная толщина стены — 90 мм.
-            Зазор между полотном и стеной — 1–2 мм.
-          </p>
-          <p class="sd-p">
-            В ВФД скрытые двери поставляются напрямую с фабрики: замер
-            по Москве, проект, доставка и монтаж бригадой с гарантией.
-          </p>
-          <div class="sd-about__actions">
-            <a href={CALL} class="btn btn-primary">Позвонить</a>
-            <a href="/contacts/" class="btn btn-outline">Контакты</a>
+    <!-- ── Конструкция ── -->
+    <section class="h-sec" aria-labelledby="construct-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="construct-title" class="h-h2">Как устроена скрытая дверь</h2>
+          <p class="h-lead">Алюминиевый короб монтируется в&nbsp;проём заподлицо со&nbsp;стеной, полотно навешивается на&nbsp;скрытые петли. Снаружи&nbsp;— только тонкая кромка.</p>
+        </header>
+        <div class="hd-construct">
+          <dl class="hd-facts">
+            {FACTS.map((f) => (
+              <div><dt>{f.value}</dt><dd class="h-meta">{f.label}</dd></div>
+            ))}
+          </dl>
+          <div class="hd-construct__viewer">
+            <InfoImageViewer
+              client:only="vue"
+              images={[
+                { src: INFO_IMAGES.constr, caption: 'Узлы монтажа', alt: 'Конструкция скрытой двери — схема узлов монтажа' },
+                { src: INFO_IMAGES.kompl,  caption: 'Состав комплекта', alt: 'Состав комплекта скрытой двери — профиль, петли, ответная планка' },
+                { src: INFO_IMAGES.lr,     caption: 'Левая или правая', alt: 'Схема: как определить сторону открывания скрытой двери' },
+                { src: REFLEX_OPENING_DIAGRAM, caption: 'Открывание «Рефлекс»', alt: 'Схема определения стороны открывания для скрытой двери с зеркалом' },
+              ]}
+            />
           </div>
         </div>
-        <div class="sd-about__photo sd-about__photo--info">
-          <img
-            src={INFO_IMAGES.constr}
-            alt="Конструкция скрытой двери — схема узлов монтажа"
-            loading="lazy"
-            decoding="async"
-            width="1200"
-            height="900"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       НАШИ РАБОТЫ
-  ══════════════════════════════════════════════ -->
-  {INVISIBLE_WORKS.length > 0 && (
-    <section class="section" id="nashi-raboty" aria-labelledby="works-heading">
-      <div class="container">
-        <h2 class="sd-h2" id="works-heading">Наши работы</h2>
-        <p class="sd-p" style="margin-top: -0.75rem; margin-bottom: 1.75rem">
-          Реальные объекты нашей бригады в Москве и Московской области — с фото монтажа и полной спецификацией каждой двери.
-        </p>
-        {/* client:only="vue" — WorksGallery рендерит WorkDetailCard через v-for,
-            и КАЖДАЯ карточка несёт свой <Teleport to="body"> для лайтбокса фото.
-            На client:load это SSR-ится, и хайдрейшн ломает Teleport у всех
-            карточек, кроме первой открытой за сессию: клик по фото 2-й/3-й/4-й
-            работы просто ничего не делает (TypeError: insertBefore на null),
-            без видимой ошибки для пользователя — баг был живым на проде. */}
-        <WorksGallery client:only="vue" works={INVISIBLE_WORKS} ctaHref={CALL} limit={WORKS_LIMIT} archiveHref={ARCHIVE_HREF} />
       </div>
     </section>
-  )}
 
-  <!-- ══════════════════════════════════════════════
-       FAQ
-  ══════════════════════════════════════════════ -->
-  <section class="section">
-    <div class="container">
-      <FaqAccordion items={faq} />
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       CTA
-  ══════════════════════════════════════════════ -->
-  <section class="section">
-    <div class="container">
-      <div class="sd-cta">
-        <div class="sd-cta__text">
-          <h2 class="sd-cta__h2">Рассчитаем бесплатно</h2>
-          <p class="sd-cta__lead">
-            Замер по Москве, точная стоимость, подбор фурнитуры.
-            Двери напрямую с фабрики.
-          </p>
+    <!-- ── Работы в Москве ── -->
+    {works.length > 0 && (
+      <section class="h-sec h-sec--wall" aria-labelledby="hd-works-title">
+        <div class="container">
+          <header class="h-head">
+            <h2 id="hd-works-title" class="h-h2">Наши работы в&nbsp;Москве</h2>
+            <div>
+              <p class="h-lead">Скрытые двери на&nbsp;объектах клиентов салона&nbsp;— с&nbsp;фото и&nbsp;описанием монтажа.</p>
+              <a href="/portfolio/" class="h-pill h-pill--line hd-works__all">
+                Все работы
+                <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </header>
+          <ul class="hd-works h-rail" role="list">
+            {works.map((w) => <li><WorkCard work={w} /></li>)}
+          </ul>
         </div>
-        <div class="sd-cta__actions">
-          <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
+      </section>
+    )}
+
+    <!-- ── Для какого объекта ── -->
+    <section class="h-sec" aria-labelledby="segments-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="segments-title" class="h-h2">Для какого объекта</h2>
+          <p class="h-lead">Подробно о&nbsp;скрытых дверях для&nbsp;разных задач&nbsp;— со&nbsp;своими нюансами монтажа.</p>
+        </header>
+        <ul class="hd-segments" role="list">
+          {SEGMENTS.map((s) => (
+            <li>
+              <a href={s.href} class="hd-segment">
+                <span class="hd-segment__title">{s.title}</span>
+                <span class="h-meta">{s.text}</span>
+                <span class="h-arrow hd-segment__arrow" aria-hidden="true">
+                  <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <StepsRow />
+
+    <!-- ── Частые вопросы ── -->
+    <section id="hd-faq" class="h-sec h-sec--wall" aria-labelledby="hd-faq-title">
+      <div class="container hd-faq">
+        <h2 id="hd-faq-title" class="h-h2">Вопросы о&nbsp;скрытых дверях</h2>
+        <div class="hd-faq__list">
+          <FaqAccordion items={HIDDEN_DOORS_FAQ} title={false} />
         </div>
       </div>
+    </section>
 
-      <nav class="sd-related" aria-label="Смежные разделы">
-        <a href="/catalog/">Каталог дверей</a>
-        <a href="/partitions/">Перегородки</a>
-        <a href="/contacts/">Контакты</a>
-      </nav>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       ДЛЯ КАКОГО ОБЪЕКТА
-  ══════════════════════════════════════════════ -->
-  <section class="section" style="padding-top: 0">
-    <div class="container">
-      <h2 class="sd-h2">Для какого объекта нужны скрытые двери</h2>
-      <div class="sd-segments">
-        <a href="/catalog/skrytye-dveri-dlya-ofisa/" class="sd-segment">
-          <span class="sd-segment__title">Офис и коммерция</span>
-          <span class="sd-segment__desc">Переговорные, шоу-румы, ресепшены</span>
-        </a>
-        <a href="/catalog/skrytye-dveri-novostroyka/" class="sd-segment">
-          <span class="sd-segment__title">Новостройка</span>
-          <span class="sd-segment__desc">Монтаж на этапе черновой отделки</span>
-        </a>
-        <a href="/catalog/skrytye-dveri-dlya-doma/" class="sd-segment">
-          <span class="sd-segment__title">Частный дом</span>
-          <span class="sd-segment__desc">Нестандартные высоты потолков</span>
-        </a>
-        <a href="/catalog/skrytye-dveri-dizayn-proekt/" class="sd-segment">
-          <span class="sd-segment__title">Дизайн-проект</span>
-          <span class="sd-segment__desc">Покраска в цвет по ТЗ дизайнера</span>
-        </a>
-      </div>
-    </div>
-  </section>
-
+    <VisitBand lead="Скрытые двери «Секрет» стоят в салоне: посмотрите кромку, короб и скрытые петли вживую и обсудите проект с менеджером." />
+  </div>
 </BaseLayout>
 
+<script>
+  /* Телефон: длинные таблицы цен свёрнуты (без JS — раскрыты) */
+  if (matchMedia('(max-width: 43.6875rem)').matches) {
+    document.querySelectorAll<HTMLDetailsElement>('[data-collapse-mobile]').forEach((d) => { d.open = false })
+  }
+  /* Переход по якорю на свёрнутый блок («Все цены» у «Рефлекс») — раскрываем */
+  const openTarget = () => {
+    const el = location.hash ? document.getElementById(location.hash.slice(1)) : null
+    if (el instanceof HTMLDetailsElement) el.open = true
+  }
+  window.addEventListener('hashchange', openTarget)
+  openTarget()
+</script>
+
 <style>
-/* ── Globals ─────────────────────────────────────────────────── */
-.sd-eyebrow {
-  display: block;
-  margin: 0 0 0.875rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.55);
-}
-.sd-h2 {
-  margin: 0 0 1.5rem;
-  font-size: clamp(1.625rem, 3vw, 2.125rem);
-  font-weight: 500;
-  color: var(--color-slate-900);
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-.sd-p {
-  margin: 0 0 1rem;
-  color: var(--color-slate-500);
-  font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
-  line-height: 1.75;
-}
-
-/* ── Hero ─────────────────────────────────────────────────────── */
-.sd-hero-wrap { padding-top: clamp(0.75rem, 1.5vw, 1.25rem); padding-bottom: clamp(2.5rem, 4vw, 3.5rem); }
-.sd-hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: 1.5rem;
-  min-height: clamp(52vh, 72vw, 80vh);
-  display: flex;
-  align-items: flex-end;
-  background: var(--color-slate-900);
-}
-.sd-hero__bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* На узком мобильном кадре (16:9 в высокий aspect) центр кадра обрезает
-     саму дверь — она в правой части кадра, на десктопе в широком кадре
-     это не заметно. */
-  object-position: 90% center;
-}
-@media (min-width: 641px) {
-  .sd-hero__bg { object-position: center; }
-}
-.sd-hero__grad {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--color-slate-900) 62%, transparent) 0%,
-    color-mix(in srgb, var(--color-slate-900) 28%, transparent) 45%,
-    color-mix(in srgb, var(--color-slate-900) 8%, transparent) 100%
-  );
-}
-.sd-hero__body {
-  position: relative;
-  z-index: 1;
-  padding: clamp(2rem, 5vw, 4rem);
-  color: #fff;
-  max-width: 44rem;
-}
-.sd-hero__h1 {
-  margin: 0 0 1rem;
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 500;
-  line-height: 1.02;
-  letter-spacing: -0.03em;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.35);
-}
-.sd-hero__lead {
-  margin: 0 0 2rem;
-  max-width: 38rem;
-  font-size: clamp(1rem, 1.6vw, 1.125rem);
-  line-height: 1.65;
-  color: rgba(255,255,255,0.88);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
-}
-.sd-hero__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; }
-
-/* ── Products ─────────────────────────────────────────────────── */
-.sd-products { display: flex; flex-direction: column; gap: clamp(1rem, 2.5vw, 1.5rem); }
-.sd-product {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 1.25rem;
-  overflow: hidden;
-}
-/* Реверс: фото справа */
-.sd-product--rev { direction: rtl; }
-.sd-product--rev > * { direction: ltr; }
-
-.sd-product__photo {
-  position: relative;
-  overflow: hidden;
-  background: var(--color-slate-50);
-  min-height: 28rem;
-}
-.sd-product__photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 450ms ease;
-}
-.sd-product:hover .sd-product__photo img { transform: scale(1.03); }
-
-.sd-product__info {
-  padding: clamp(2rem, 4vw, 3.5rem);
-  display: flex;
-  flex-direction: column;
-}
-.sd-product__eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-slate-400);
-  margin-bottom: 0.375rem;
-}
-.sd-product__name {
-  margin: 0 0 0.25rem;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 500;
-  color: var(--color-slate-900);
-  letter-spacing: -0.02em;
-}
-.sd-product__type {
-  margin: 0 0 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-slate-500);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.sd-product__desc {
-  margin: 0 0 1.5rem;
-  color: var(--color-slate-500);
-  font-size: 0.9375rem;
-  line-height: 1.7;
-  flex: 1;
-}
-.sd-product__specs {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1.75rem;
-  padding: 1.25rem;
-  border-radius: 0.75rem;
-  background: var(--color-slate-50);
-  border: 1px solid var(--color-slate-100);
-}
-.sd-spec { display: flex; align-items: baseline; gap: 0.625rem; }
-.sd-spec__key {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-slate-400);
-  white-space: nowrap;
-  flex-shrink: 0;
-  min-width: 9rem;
-}
-.sd-spec__val {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--color-slate-700);
-}
-.sd-product__price {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.75rem;
-  flex-wrap: wrap;
-}
-.sd-product__price > div { display: flex; flex-direction: column; gap: 0.25rem; }
-.sd-price-label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-slate-400);
-}
-.sd-price-val {
-  font-size: 1.375rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-  letter-spacing: -0.01em;
-}
-.sd-price-val--accent { color: var(--color-slate-900); }
-.sd-price-old {
-  margin-right: 0.375rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--color-slate-600);
-  text-decoration: line-through;
-  text-decoration-color: var(--color-slate-300);
-}
-.sd-promo-note {
-  margin: 0.75rem 0 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  background: #fef2f2;
-  color: #b91c1c;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-.sd-promo-chip {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: 0.375rem;
-  margin-bottom: 1rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 9999px;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-.sd-product__btn { align-self: flex-start; }
-
-/* ── H3 ───────────────────────────────────────────────────────── */
-.sd-h3 {
-  margin: 0 0 0.75rem;
-  font-size: clamp(1.125rem, 2vw, 1.375rem);
-  font-weight: 500;
-  color: var(--color-slate-900);
-  letter-spacing: -0.015em;
-  line-height: 1.2;
-}
-
-
-/* ── Custom heights section ───────────────────────────────────── */
-.sd-custom-section {
-  margin-top: 2.5rem;
-  padding-top: 2rem;
-  border-top: 1px solid var(--color-slate-100);
-}
-.sd-custom__pct {
-  font-weight: 500 !important;
-  color: var(--color-slate-900) !important;
-}
-
-/* ── Compare table ────────────────────────────────────────────── */
-.sd-table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 1rem;
-  margin-bottom: 1rem;
-}
-.sd-compare {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9375rem;
-  background: #fff;
-}
-.sd-compare thead tr {
-  border-bottom: 2px solid var(--color-slate-900);
-}
-.sd-compare thead th {
-  padding: 1rem 1.375rem;
-  text-align: left;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-}
-.sd-compare thead .sd-compare__row-head { color: transparent; }
-.sd-compare tbody th {
-  padding: 0.875rem 1.375rem;
-  text-align: left;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-slate-400);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  background: var(--color-slate-50);
-  border-right: 1px solid var(--color-slate-100);
-  width: 40%;
-}
-.sd-compare tbody td {
-  padding: 0.875rem 1.375rem;
-  color: var(--color-slate-700);
-  font-weight: 600;
-  border-bottom: 1px solid var(--color-slate-50);
-}
-.sd-compare tbody tr:last-child td,
-.sd-compare tbody tr:last-child th { border-bottom: none; }
-.sd-compare__shared { font-style: normal; }
-.sd-compare__price-row th,
-.sd-compare__price-row td { padding-top: 1rem; }
-.sd-compare__price-row th { color: var(--color-slate-500); }
-.sd-compare__kit-row { border-top: 1px solid var(--color-slate-200) !important; }
-.sd-compare__kit-row th { font-size: 0.9375rem; font-weight: 600; color: var(--color-slate-900); text-transform: none; letter-spacing: 0; }
-.sd-compare__kit-row td { font-size: 1.125rem; }
-.sd-compare__kit-row strong { color: var(--color-slate-900); font-weight: 500; }
-
-.sd-table-foot {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: var(--color-slate-400);
-  line-height: 1.6;
-}
-
-/* ── Короб «Секрет»: Стандарт / Лайт — мобайл-фёрст (база — 1 колонка,
-   2 колонки только от планшета), т.к. это длинный editorial-контент. ── */
-.sd-box-types {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  margin-top: 1.5rem;
-}
-.sd-box-type__name {
-  margin: 0 0 0.625rem;
-  font-size: 1.0625rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-  letter-spacing: -0.01em;
-}
-.sd-box-feature {
-  margin-top: 1.125rem;
-  padding-top: 1.125rem;
-  border-top: 1px solid var(--color-slate-100);
-}
-.sd-box-feature h5 {
-  margin: 0 0 0.375rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--color-slate-800);
-}
-.sd-box-feature p {
-  margin: 0;
-  color: var(--color-slate-500);
-  font-size: 0.9375rem;
-  line-height: 1.7;
-}
-@media (min-width: 720px) {
-  .sd-box-types { grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 3vw, 2.5rem); }
-}
-
-/* ── Color section ────────────────────────────────────────────── */
-.sd-color-section { border-top: 1px solid var(--color-slate-100); border-bottom: 1px solid var(--color-slate-100); }
-.sd-color-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(2rem, 5vw, 4.5rem);
-  align-items: center;
-}
-.sd-color-selector { display: flex; justify-content: center; }
-
-/* ── About ────────────────────────────────────────────────────── */
-.sd-about {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: clamp(2rem, 5vw, 4.5rem);
-  align-items: center;
-}
-.sd-about__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.5rem; }
-.sd-about__photo {
-  border-radius: 1.25rem;
-  overflow: hidden;
-  border: 1px solid var(--color-slate-200);
-}
-.sd-about__photo > img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4/5;
-  object-fit: cover;
-}
-.sd-about__photo--info > img {
-  aspect-ratio: auto;
-  max-height: 32rem;
-  object-fit: contain;
-  background: var(--color-slate-50);
-  padding: 1.5rem;
-}
-
-/* ── CTA ──────────────────────────────────────────────────────── */
-.sd-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-  padding: clamp(2.5rem, 5vw, 4rem);
-  border-radius: 1.25rem;
-  background: var(--color-fg);
-  color: #fff;
-}
-.sd-cta__h2 {
-  margin: 0 0 0.5rem;
-  font-size: clamp(1.5rem, 3vw, 2.125rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-.sd-cta__lead {
-  margin: 0;
-  font-size: 0.9375rem;
-  color: rgba(255,255,255,0.6);
-  line-height: 1.6;
-}
-.sd-cta__actions { display: flex; gap: 0.625rem; flex-wrap: wrap; flex-shrink: 0; }
-
-/* ── Related ──────────────────────────────────────────────────── */
-.sd-related {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.625rem;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-.sd-related > a {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-slate-500);
-  text-decoration: none;
-  padding: 0.4rem 0.875rem;
-  border-radius: 9999px;
-  border: 1px solid var(--color-slate-200);
-  transition: color 150ms ease, border-color 150ms ease;
-}
-.sd-related > a:hover { color: var(--color-slate-900); border-color: var(--color-slate-400); }
-
-/* ── Segments ─────────────────────────────────────────────────── */
-.sd-segments {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-.sd-segment {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 1.25rem 1.5rem;
-  border-radius: 1rem;
-  border: 1px solid var(--color-slate-200);
-  text-decoration: none;
-  transition: border-color 150ms ease, background 150ms ease;
-}
-.sd-segment:hover { border-color: var(--color-slate-400); background: var(--color-slate-50); }
-.sd-segment__title {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-}
-.sd-segment__desc {
-  font-size: 0.8125rem;
-  color: var(--color-slate-500);
-}
-
-/* ── Responsive (mobile-first уточнения) ─────────────────────── */
-@media (max-width: 900px) {
-  .sd-color-wrap { grid-template-columns: 1fr; }
-  .sd-about       { grid-template-columns: 1fr; }
-  .sd-about__photo { order: -1; }
-  .sd-about__photo--info > img { max-height: 26rem; }
-}
-@media (max-width: 768px) {
-  .sd-product { grid-template-columns: 1fr; direction: ltr; }
-  .sd-product--rev { direction: ltr; }
-  .sd-product__photo { min-height: 16rem; }
-  .sd-product__info { padding: 1.75rem 1.5rem; }
-  .sd-cta { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 1.75rem 1.5rem; }
-  .sd-product__price { gap: 1.25rem; }
-  .sd-segments { grid-template-columns: 1fr; }
-}
-@media (max-width: 560px) {
-  /* Спеки — в столбик */
-  .sd-spec { flex-direction: column; gap: 0.125rem; }
-  .sd-spec__key { min-width: 0; }
-
-  /* Таблицы: компактнее ячейки, мельче шрифт, перенос заголовков строк */
-  .sd-compare { font-size: 0.8125rem; }
-  .sd-compare thead th { padding: 0.7rem 0.75rem; font-size: 0.875rem; }
-  .sd-compare tbody th {
-    padding: 0.7rem 0.75rem;
-    width: auto;
-    min-width: 5.5rem;
-    white-space: normal;
+  /* ── Серии ── */
+  .hd-series { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 56.25rem) { .hd-series { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .hd-serie { display: flex; flex-direction: column; scroll-margin-top: calc(var(--header-height) + 4rem); }
+  .hd-serie__media { aspect-ratio: 4 / 5; }
+  .hd-serie__status { margin-top: 1.25rem; }
+  .hd-serie__name {
+    margin: 0.375rem 0 0;
+    font-family: var(--h-font);
+    font-size: clamp(1.5rem, 2.2vw, 1.75rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--h-ink);
   }
-  .sd-compare tbody td { padding: 0.7rem 0.75rem; }
-  .sd-compare__kit-row td { font-size: 1rem; }
+  .hd-serie__type { margin: 0.25rem 0 0; }
+  .hd-serie__text { margin-top: 0.75rem; font-size: 0.9375rem; }
 
-  /* Заголовок нестандарта — плотнее */
-  .sd-custom-section { margin-top: 1.75rem; padding-top: 1.5rem; }
-
-  /* Hero — плотнее лид, инфо-фото конструкции ниже */
-  .sd-hero__lead { margin-bottom: 1.5rem; }
-  .sd-about__photo--info > img { max-height: 20rem; padding: 1rem; }
-  .sd-h2 { margin-bottom: 1rem; }
-
-  /* Кнопки в карточке товара — на всю ширину для удобного тапа */
-  .sd-product__btn { align-self: stretch; }
-}
-
-/* Таблицы цен «Секрет» и «Рефлекс» по кромке/стороне — 5-6 колонок,
-   горизонтальный скролл технически работает, но незаметен (обрезанная
-   последняя колонка выглядит как баг, а не как «свайпни вправо»).
-   На узких экранах — карточками, по одной строке на комбинацию,
-   тот же приём, что на /catalog/decor. */
-@media (max-width: 640px) {
-  .sd-stack-table-wrap { overflow-x: visible; border: none; border-radius: 0; margin-top: 1.25rem; }
-  .sd-stack-table, .sd-stack-table thead, .sd-stack-table tbody, .sd-stack-table tr, .sd-stack-table th, .sd-stack-table td {
-    display: block;
-    width: 100%;
-  }
-  .sd-stack-table thead { display: none; }
-  .sd-stack-table tbody tr {
-    padding: 1rem 1.125rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid var(--color-slate-200);
-    border-radius: 0.875rem;
-    background: #fff;
-  }
-  .sd-stack-table tbody tr:last-child { margin-bottom: 0; }
-  .sd-stack-table tbody td {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+  /* Характеристики — данные: под линейками, подпись слева */
+  .hd-serie__specs { margin: 1.25rem 0 0; border-top: 0.0625rem solid var(--h-rule); }
+  .hd-serie__specs > div {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
     gap: 1rem;
-    padding: 0.375rem 0;
-    border-bottom: none;
-    white-space: normal;
+    padding-block: 0.625rem;
+    border-bottom: 0.0625rem solid var(--h-rule);
   }
-  .sd-stack-table tbody td::before {
-    content: attr(data-label);
-    color: var(--color-slate-400);
-    font-weight: 500;
-    font-size: 0.8125rem;
-    flex-shrink: 0;
+  .hd-serie__specs dd { margin: 0; font-size: 0.9375rem; font-weight: 500; color: var(--h-ink); }
+
+  /* Цена прижата к низу: у соседних карточек — на одной линии */
+  .hd-serie__price { display: flex; flex-direction: column; gap: 0.25rem; margin-top: auto; padding-top: 1.5rem; }
+  .hd-serie__value {
+    font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--h-ink);
   }
-  /* Строки с th scope="row" (напр. высота в тирах нестандартных размеров) —
-     заголовок карточки, а не пара label:value. */
-  .sd-stack-table tbody th {
-    text-align: left;
-    padding: 0 0 0.5rem;
-    margin-bottom: 0.375rem;
-    border-bottom: 1px solid var(--color-slate-100);
+  .hd-serie__old { margin-right: 0.5rem; font-size: 0.6em; font-weight: 500; color: var(--h-muted); }
+  .hd-serie__link { align-self: flex-start; margin-top: 1rem; }
+
+  .hd-note { margin: 2rem 0 0; max-width: 46rem; }
+
+  /* ── Москва: сетка заметок под линейками ── */
+  .hd-notes { display: grid; gap: 2.5rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .hd-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 68.75rem) { .hd-notes { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .hd-note-item { padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
+  .hd-note-item .h-body { margin-top: 0.75rem; font-size: 0.9375rem; }
+  .hd-note-item__link { display: inline-block; margin-top: 0.875rem; font-size: 0.9375rem; }
+
+  /* ── Цены ── */
+  .hd-prices { display: grid; gap: clamp(3rem, 5vw, 4rem); }
+  .hd-subhead {
+    margin: 0 0 1.25rem;
+    font-family: var(--h-font);
+    font-size: clamp(1.25rem, 1.8vw, 1.5rem);
+    font-weight: var(--h-weight-display);
+    letter-spacing: -0.02em;
+    color: var(--h-ink);
+  }
+  .hd-prices__lead { margin: -0.5rem 0 1.5rem; max-width: 40rem; font-size: 0.9375rem; }
+
+  /* Длинные таблицы («Рефлекс», нестандартная высота) на телефоне свёрнуты
+     под заголовок — скрипт ниже; на компьютере заголовок не кликается */
+  summary.hd-subhead { list-style: none; pointer-events: none; }
+  summary.hd-subhead::-webkit-details-marker { display: none; }
+  @media (max-width: 43.6875rem) {
+    summary.hd-subhead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0;
+      padding-block: 1rem;
+      border-top: 0.0625rem solid var(--h-rule);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    summary.hd-subhead::after {
+      content: '';
+      flex: none;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-right: 0.125rem solid currentColor;
+      border-bottom: 0.125rem solid currentColor;
+      rotate: 45deg;
+      translate: 0 -0.125rem;
+      transition: rotate 200ms var(--ease-out);
+    }
+    details[open] > summary.hd-subhead { margin-bottom: 1rem; }
+    details[open] > summary.hd-subhead::after { rotate: 225deg; translate: 0 0.125rem; }
+    .hd-prices { gap: 0; }
+    .hd-prices__block:first-child { margin-bottom: 2.5rem; }
+  }
+  .hd-heights { display: grid; gap: 2.5rem var(--h-gutter); }
+  @media (min-width: 62.5rem) { .hd-heights { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  /* ── Короб ── */
+  .hd-box { display: grid; gap: 2rem var(--h-gutter); align-items: start; }
+  @media (min-width: 56.25rem) {
+    .hd-box { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .hd-box__viewer { grid-column: 1 / span 6; }
+    .hd-box__types  { grid-column: 8 / span 5; }
+  }
+  .hd-box__types { display: grid; gap: 2.5rem; }
+  .hd-rules { margin: 1rem 0 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .hd-rules li {
+    padding-block: 0.75rem;
+    border-bottom: 0.0625rem solid var(--h-rule);
     font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-slate-900);
+    line-height: 1.5;
+    color: var(--h-ink);
   }
-}
+
+  /* ── Кромка ── */
+  .hd-edge { display: grid; gap: 2.5rem var(--h-gutter); align-items: center; }
+  @media (min-width: 56.25rem) {
+    .hd-edge { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .hd-edge__text    { grid-column: 1 / span 6; }
+    .hd-edge__preview { grid-column: 8 / span 5; }
+  }
+  .hd-edge__lead { margin-top: 1.25rem; }
+  .hd-edge__list { margin: 2rem 0 0; border-top: 0.0625rem solid var(--h-rule); }
+  .hd-edge__list > div { padding-block: 1rem; border-bottom: 0.0625rem solid var(--h-rule); }
+  .hd-edge__list dd { margin: 0.375rem 0 0; font-size: 0.9375rem; }
+  .hd-edge__preview { display: flex; justify-content: center; }
+
+  /* ── Конструкция ── */
+  .hd-construct { display: grid; gap: 2.5rem var(--h-gutter); align-items: start; }
+  @media (min-width: 56.25rem) {
+    .hd-construct { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .hd-facts { grid-column: 1 / span 5; }
+    .hd-construct__viewer { grid-column: 7 / span 6; }
+  }
+  .hd-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem var(--h-gutter);
+    margin: 0;
+  }
+  .hd-facts > div { padding-top: 1rem; border-top: 0.0625rem solid var(--h-rule); }
+  .hd-facts dt {
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--h-ink);
+  }
+  .hd-facts dd { margin: 0.5rem 0 0; }
+
+  /* ── Работы ── */
+  .hd-works__all { margin-top: 1.25rem; }
+  .hd-works { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 56.25rem) { .hd-works { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  /* ── Для какого объекта: строки под линейками со стрелкой ── */
+  .hd-segments {
+    display: grid;
+    column-gap: var(--h-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 56.25rem) { .hd-segments { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .hd-segments li { border-top: 0.0625rem solid var(--h-rule); }
+  .hd-segments li:nth-last-child(-n + 1) { border-bottom: 0.0625rem solid var(--h-rule); }
+  @media (min-width: 56.25rem) {
+    .hd-segments li:nth-last-child(-n + 2) { border-bottom: 0.0625rem solid var(--h-rule); }
+  }
+  .hd-segment {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    column-gap: 1rem;
+    align-items: center;
+    padding-block: 1.25rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .hd-segment__title { font-size: 1.1875rem; font-weight: 600; color: var(--h-ink); }
+  .hd-segment__arrow { grid-column: 2; grid-row: 1 / 3; }
+  .hd-segment:hover .hd-segment__title {
+    text-decoration: underline;
+    text-decoration-color: var(--h-signal);
+    text-decoration-thickness: 0.0625rem;
+    text-underline-offset: 0.2em;
+  }
+  .hd-segment:hover .hd-segment__arrow { background: var(--h-signal); }
+
+  /* ── Вопросы: заголовок слева, список справа ── */
+  .hd-faq { display: grid; gap: 2rem var(--h-gutter); align-items: start; }
+  @media (min-width: 56.25rem) {
+    .hd-faq { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .hd-faq > h2 { grid-column: 1 / span 4; }
+    .hd-faq__list { grid-column: 6 / span 7; }
+  }
 </style>

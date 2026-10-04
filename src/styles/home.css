@@ -195,6 +195,29 @@
   outline-offset: 0.1875rem;
 }
 
+/* ── Лента вбок на телефоне ─────────────────────────────── */
+/* Ряд карточек (сетка) на узком экране становится лентой с прокруткой
+   вбок: край следующей карточки подсказывает, что ряд листается.
+   Ставится на <ul> рядом с классом сетки; селектор усилен (.home
+   .h-rail.h-rail), чтобы перебить scoped-стили сетки компонента. */
+@media (max-width: 43.6875rem) {
+  .home .h-rail.h-rail {
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    grid-template-columns: none;
+    gap: 0.75rem;
+    margin-inline: calc(-1 * var(--h-pad));
+    padding-inline: var(--h-pad);
+    scroll-padding-inline: var(--h-pad);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .home .h-rail::-webkit-scrollbar { display: none; }
+  .home .h-rail > li { scroll-snap-align: start; }
+}
+
 /* ── Медиа ─────────────────────────────────────────────── */
 .h-media {
   display: block;

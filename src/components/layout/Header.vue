@@ -30,13 +30,14 @@ const CONTACTS = {
   email:   companyLegalInfo.contacts.email,
 }
 
-/* Подпись — статус, а не география: город и район называет заголовок
-   страницы, а «официальный дилер» работает как довод на любой странице */
-const BRAND_SUB = 'Официальный дилер ВФД'
+/* Бренд — две строки капсом: что и где («Двери в Москве», город — из
+   site.ts) и чьё («Студия Зизевского»). Капс — через CSS: в разметке
+   обычный регистр, его читают скринридеры и поисковики. */
+const BRAND_TITLE = `Двери ${SITE.city.in}`
 
-/* Появление названия — один раз за визит: при каждом переходе между
-   страницами оно бы раздражало. Считается до первого рендера (шапка —
-   client:only), поэтому текст не мелькает перед анимацией. */
+/* Появление названия — один раз за визит и без повтора: при каждом
+   переходе между страницами оно бы раздражало. Считается до первого
+   рендера (шапка — client:only), поэтому текст не мелькает перед анимацией. */
 const brandIntro = (() => {
   try {
     if (sessionStorage.getItem('hdr-intro')) return false
@@ -279,7 +280,7 @@ onUnmounted(() => {
       <div class="hdr">
 
         <!-- Бренд: знак + две строки -->
-        <a href="/" class="hdr-brand" :aria-label="`${SITE.studioName}. ${BRAND_SUB} — на главную`">
+        <a href="/" class="hdr-brand" :aria-label="`${BRAND_TITLE}, ${SITE.studioName} — на главную`">
           <span class="hdr-mark" aria-hidden="true">
             <img
               v-if="!logoError"
@@ -294,8 +295,8 @@ onUnmounted(() => {
             <span v-else class="hdr-mark__fallback">ВФД</span>
           </span>
           <span class="hdr-brand__text" :class="{ 'is-intro': brandIntro }">
-            <span class="hdr-brand__name">{{ SITE.studioName }}</span>
-            <span class="hdr-brand__sub">{{ BRAND_SUB }}</span>
+            <span class="hdr-brand__line hdr-brand__name"><span>{{ BRAND_TITLE }}</span></span>
+            <span class="hdr-brand__line hdr-brand__sub"><span>{{ SITE.studioName }}</span></span>
           </span>
         </a>
 
@@ -495,8 +496,8 @@ onUnmounted(() => {
                 <img :src="LOGO_URL" alt="" class="is-loaded" />
               </span>
               <span class="hdr-brand__text">
-                <span class="hdr-brand__name">{{ SITE.studioName }}</span>
-                <span class="hdr-brand__sub">{{ BRAND_SUB }}</span>
+                <span class="hdr-brand__line hdr-brand__name"><span>{{ BRAND_TITLE }}</span></span>
+                <span class="hdr-brand__line hdr-brand__sub"><span>{{ SITE.studioName }}</span></span>
               </span>
             </a>
             <div class="hdr-actions">
@@ -747,29 +748,36 @@ onUnmounted(() => {
   font-weight: 700;
   color: var(--hdr-on-primary);
 }
-.hdr-brand__text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
-.hdr-brand__name {
+.hdr-brand__text { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+/* Строка — маска (overflow: hidden), текст внутри выезжает из-под неё */
+.hdr-brand__line { display: block; overflow: hidden; text-transform: uppercase; }
+.hdr-brand__line > span {
+  display: block;
   overflow: hidden;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  line-height: 1.2;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.hdr-brand__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 .hdr-brand__sub {
-  margin-top: 0.1875rem;
-  overflow: hidden;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   color: var(--hdr-fg-muted);
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
-/* Появление: название, затем подпись — только прозрачность и сдвиг
-   (считаются на видеокарте, без пересчёта вёрстки) */
-.hdr-brand__text.is-intro > * { animation: hdr-brand-in 700ms var(--hdr-ease-soft) both; }
-.hdr-brand__text.is-intro > :nth-child(2) { animation-delay: 250ms; }
-@keyframes hdr-brand-in {
-  from { opacity: 0; transform: translateY(0.375rem); }
+/* Появление (один раз за визит): строки по очереди выезжают снизу из-под
+   маски и мягко тормозят. Только transform — считается на видеокарте,
+   без пересчёта вёрстки; после анимации ничего не повторяется. */
+.hdr-brand__text.is-intro .hdr-brand__line > span {
+  animation: hdr-line-in 900ms var(--hdr-ease-soft) 150ms both;
+}
+.hdr-brand__text.is-intro .hdr-brand__sub > span { animation-delay: 270ms; }
+@keyframes hdr-line-in {
+  from { transform: translateY(110%); }
 }
 
 /* ── Навигация (десктоп) ── */
@@ -794,18 +802,15 @@ onUnmounted(() => {
   transition: color 180ms var(--hdr-ease), background-color 180ms var(--hdr-ease);
 }
 .hdr-link:hover { color: var(--hdr-fg); background: var(--hdr-fill); }
-.hdr-link.is-active { color: var(--hdr-fg); }
-/* Текущий раздел — красная точка под пунктом */
-.hdr-link.is-active::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: 0.1875rem;
-  width: 0.25rem;
-  height: 0.25rem;
-  margin-left: -0.125rem;
-  border-radius: 50%;
-  background: var(--hdr-signal);
+/* Текущий раздел — подчёркивание текста пункта (стрелку «Каталога» не
+   задевает: text-decoration рисуется только под буквами). Тот же приём,
+   что у ссылок и наведения на карточки на страницах. */
+.hdr-link.is-active {
+  color: var(--hdr-fg);
+  text-decoration: underline;
+  text-decoration-color: var(--hdr-signal);
+  text-decoration-thickness: 0.125rem;
+  text-underline-offset: 0.5em;
 }
 .hdr-link__chev {
   width: 0.875rem;
@@ -1195,6 +1200,6 @@ onUnmounted(() => {
   .hdr-mark img, .burger-icon__line, .mnav__link, .mnav__sublink, .mnav__call, .mnav__phone {
     transition: none;
   }
-  .hdr-brand__text.is-intro > * { animation: none; }
+  .hdr-brand__text.is-intro .hdr-brand__line > span { animation: none; }
 }
 </style>

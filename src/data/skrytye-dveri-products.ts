@@ -44,17 +44,15 @@ export const IMAGES = {
   invisible:    '/renders/hidden-doors/sekret-900.webp',
   // Серия «Секрет Реверс» (реверсивный монтаж)
   invisibleRev: '/renders/hidden-doors/sekret-revers-900.webp',
-  // Обложка hero на /catalog/skrytye-dveri/
-  heroCover: 'https://storage.yandexcloud.net/vfd74ru/invisible/invisible_cover.webp',
-  // Портфолио — заменить src когда будут готовы
-  portfolio: [
-    { src: '', alt: 'Скрытая дверь в гостиной — Москва',           caption: 'Гостиная, кромка чёрная'     },
-    { src: '', alt: 'Скрытая дверь в спальне — Москва',            caption: 'Спальня, под покраску'       },
-    { src: '', alt: 'Скрытая дверь в коридоре — Москва',           caption: 'Коридор, реверсивный монтаж' },
-    { src: '', alt: 'Скрытые двери в студии — Москва',             caption: 'Студия, кромка серебро'      },
-    { src: '', alt: 'Скрытая дверь в санузел с завёрткой WC',         caption: 'Санузел, завёртка WC'        },
-    { src: '', alt: 'Скрытая дверь под декоративную штукатурку',      caption: 'Прихожая, под штукатурку'    },
-  ],
+} as const
+
+// ── Первый экран /catalog/skrytye-dveri/ — кадровка под экран (<picture>,
+// scripts/gen-hidden-doors-hero.mjs): 16:7 для компьютера, 4:5 для телефона
+const HERO = '/renders/hidden-doors'
+export const HERO_IMAGES = {
+  alt:  'Скрытая дверь вровень со стеной в прихожей — без наличников и видимых петель',
+  wide: { src: `${HERO}/hero-wide-1600.webp`, srcset: `${HERO}/hero-wide-960.webp 960w, ${HERO}/hero-wide-1600.webp 1600w`, width: 1600, height: 700 },
+  tall: { srcset: `${HERO}/hero-tall-640.webp 640w, ${HERO}/hero-tall-1080.webp 1080w`, width: 1080, height: 1350 },
 } as const
 
 // ── Размеры в наличии ────────────────────────────────────────
@@ -142,6 +140,8 @@ export const CUSTOM_HEIGHT_TIERS = [
 ] as const
 
 export const CUSTOM_LEAD_TIME = '6–8 недель'
+/** Максимальная высота под заказ, мм — из таблицы надбавок */
+export const CUSTOM_MAX_HEIGHT = CUSTOM_HEIGHT_TIERS[CUSTOM_HEIGHT_TIERS.length - 1]!.to
 
 // Рассчитать цену комплекта с надбавкой за нестандартную высоту (округление вверх)
 export function calcCustomPrice(basePrice: number, surcharge: number): number {
@@ -221,6 +221,9 @@ export const REFLEX_HEIGHT_TIERS = [
   { range: '2300–2350', from: 2300, to: 2350, surcharge: 0.30, pct: '+30%' },
   { range: '2400–2500', from: 2400, to: 2500, surcharge: 0.40, pct: '+40%' },
 ] as const
+
+/** Максимальная высота «Рефлекс», мм */
+export const REFLEX_MAX_HEIGHT = REFLEX_HEIGHT_TIERS[REFLEX_HEIGHT_TIERS.length - 1]!.to
 
 // ── Цифры и факты ────────────────────────────────────────────
 export const FACTS = [

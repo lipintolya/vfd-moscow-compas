@@ -1,0 +1,130 @@
+---
+/**
+ * Первый экран посадочных страниц (/partitions/, /catalog/skrytye-dveri/):
+ * крупный заголовок слева, пояснение и кнопки справа, под ними фото во всю
+ * ширину без текста поверх, ниже — факты под линейками.
+ *
+ * Фото — <picture> с кадровкой под экран: широкий кадр 16:7 для компьютера,
+ * вертикальный 4:5 для телефона (широкий на узком экране обрезался бы
+ * до середины). Грузится первым (fetchpriority="high") — это LCP страницы.
+ * Кнопки — слот `actions`. Стили — токены дизайн-системы (.home).
+ */
+import { typograph } from '../../lib/typograph'
+
+interface Props {
+  title:  string
+  lead:   string
+  image: {
+    alt:  string
+    wide: { src: string; srcset: string; width: number; height: number }
+    tall: { srcset: string; width: number; height: number }
+  }
+  facts: { value: string; label: string }[]
+}
+const { title, lead, image, facts } = Astro.props
+---
+
+<section class="lhero" aria-labelledby="lhero-title">
+  <div class="container">
+    <header class="lhero__head">
+      <h1 id="lhero-title" class="lhero__title">{typograph(title)}</h1>
+      <div class="lhero__side">
+        <p class="h-lead">{typograph(lead)}</p>
+        <div class="lhero__actions"><slot name="actions" /></div>
+      </div>
+    </header>
+
+    <div class="lhero__stage">
+      <picture>
+        <source media="(max-width: 47.9375rem)" srcset={image.tall.srcset} sizes="100vw" width={image.tall.width} height={image.tall.height} />
+        <img
+          src={image.wide.src}
+          srcset={image.wide.srcset}
+          sizes="(min-width: 80rem) 76rem, 100vw"
+          alt={image.alt}
+          width={image.wide.width}
+          height={image.wide.height}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </picture>
+    </div>
+
+    <dl class="lhero__facts">
+      {facts.map((f) => (
+        <div>
+          <dt class="lhero__value">{f.value}</dt>
+          <dd class="h-meta">{typograph(f.label)}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .lhero { padding-block: clamp(1rem, 2vw, 1.5rem) var(--h-sec); }
+
+  /* Шапка — как .h-head: заголовок слева, пояснение и кнопки справа */
+  .lhero__head {
+    display: grid;
+    gap: 1.25rem var(--h-gutter);
+    align-items: end;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  }
+  @media (min-width: 62.5rem) {
+    .lhero__head { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .lhero__title { grid-column: 1 / span 7; }
+    .lhero__side  { grid-column: 8 / span 5; }
+  }
+  .lhero__title {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: var(--h-ink);
+    text-wrap: balance;
+  }
+  .lhero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+  @media (max-width: 29.9375rem) {
+    .lhero__actions > :global(*) { flex: 1 1 100%; }
+  }
+
+  .lhero__stage {
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+    border-radius: 1.75rem;
+    background: var(--h-media-bg);
+  }
+  @media (max-width: 47.9375rem) {
+    .lhero__stage { aspect-ratio: 4 / 5; border-radius: 1.25rem; }
+  }
+  .lhero__stage img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    color: transparent;
+  }
+
+  /* Факты — данные, поэтому под линейкой; крупная цифра — вес 300 */
+  .lhero__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem var(--h-gutter);
+    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+  }
+  @media (min-width: 56.25rem) { .lhero__facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .lhero__facts > div { padding-top: 1rem; border-top: 0.0625rem solid var(--h-rule); }
+  .lhero__value {
+    font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--h-ink);
+  }
+  .lhero__facts dd { margin: 0.5rem 0 0; max-width: 15rem; }
+</style>

@@ -1,0 +1,88 @@
+---
+/**
+ * Таблица цен в стиле дизайн-системы: линейки вместо рамок, цифры —
+ * табличные. На телефоне (≤ 40rem) каждая строка становится карточкой
+ * «подпись — значение»: в 5–7 колонок узкий экран не помещает, а
+ * горизонтальная прокрутка таблицы незаметна и выглядит как обрезка.
+ *
+ * Значения приходят уже отформатированными (rub() из services.ts);
+ * колонка с `strong` выделена — обычно «комплект».
+ */
+interface Column { key: string; label: string; strong?: boolean }
+interface Props {
+  columns: Column[]
+  rows:    Record<string, string>[]
+  /** Ключ колонки — заголовок строки (на телефоне — заголовок карточки) */
+  rowHeader: string
+  caption?: string
+}
+const { columns, rows, rowHeader, caption } = Astro.props
+const head = columns.find((c) => c.key === rowHeader)!
+const rest = columns.filter((c) => c.key !== rowHeader)
+---
+
+<div class="ptab">
+  <table>
+    {caption && <caption class="sr-only">{caption}</caption>}
+    <thead>
+      <tr>
+        <th scope="col">{head.label}</th>
+        {rest.map((c) => <th scope="col">{c.label}</th>)}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr>
+          <th scope="row">{r[rowHeader]}</th>
+          {rest.map((c) => (
+            <td data-label={c.label} class:list={{ 'is-strong': c.strong }}>{r[c.key]}</td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .ptab table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .ptab th,
+  .ptab td {
+    padding: 0.875rem 1rem 0.875rem 0;
+    border-bottom: 0.0625rem solid var(--h-rule);
+    text-align: left;
+    vertical-align: baseline;
+  }
+  .ptab thead th {
+    padding-top: 0;
+    border-bottom-color: var(--h-ink);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--h-muted);
+  }
+  .ptab tbody th { font-weight: 600; color: var(--h-ink); }
+  .ptab td { color: var(--h-soft); white-space: nowrap; }
+  .ptab td.is-strong { font-weight: 600; color: var(--h-ink); }
+
+  /* Телефон: строка — карточка, ячейка — пара «подпись — значение» */
+  @media (max-width: 40rem) {
+    .ptab table, .ptab tbody, .ptab tr, .ptab th, .ptab td { display: block; }
+    .ptab thead { display: none; }
+    .ptab tbody tr { padding-block: 1rem; border-bottom: 0.0625rem solid var(--h-rule); }
+    .ptab tbody tr:first-child { border-top: 0.0625rem solid var(--h-ink); }
+    .ptab tbody th { padding: 0 0 0.5rem; border: 0; }
+    .ptab td {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.25rem 0;
+      border: 0;
+      white-space: normal;
+    }
+    .ptab td::before { content: attr(data-label); color: var(--h-muted); font-size: 0.875rem; }
+  }
+</style>

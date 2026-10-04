@@ -25,6 +25,7 @@ import Downloads from '../components/partitions/Downloads.astro'
 import ReplayButton from '../components/partitions/ReplayButton.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
+import LandingHero from '../components/ui/LandingHero.astro'
 import '../styles/home.css'
 
 import {
@@ -113,52 +114,17 @@ const moreRenders = renderGallery.length - renderPreviews.length
 
   <div class="home">
 
-    <!-- ── Первый экран: заголовок над сценой, фото без текста поверх ── -->
-    <section class="pt-hero" aria-labelledby="pt-title">
-      <div class="container">
-        <header class="pt-hero__head">
-          <h1 id="pt-title" class="pt-hero__title">Алюминиевые перегородки {SITE.city.in}</h1>
-          <div class="pt-hero__side">
-            <p class="h-lead">
-              Раздвижные, распашные и&nbsp;стационарные системы из&nbsp;профиля GRAFIA:
-              тонкая рама, закалённое стекло, изготовление по&nbsp;вашим размерам.
-              Замер и&nbsp;монтаж по&nbsp;Москве и&nbsp;области.
-            </p>
-            <div class="pt-hero__actions">
-              <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать стоимость</a>
-              <a href="#visit" class="h-btn h-btn--quiet">Приехать в&nbsp;салон</a>
-            </div>
-          </div>
-        </header>
-
-        <div class="pt-stage">
-          <picture>
-            <source media="(max-width: 47.9375rem)" srcset={heroImages.tall.srcset} sizes="100vw" width={heroImages.tall.width} height={heroImages.tall.height} />
-            <img
-              class="pt-stage__img"
-              src={heroImages.wide.src}
-              srcset={heroImages.wide.srcset}
-              sizes="(min-width: 80rem) 76rem, 100vw"
-              alt={heroImages.alt}
-              width={heroImages.wide.width}
-              height={heroImages.wide.height}
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-            />
-          </picture>
-        </div>
-
-        <dl class="pt-facts">
-          {heroFacts.map((f) => (
-            <div>
-              <dt class="pt-facts__value">{f.value}</dt>
-              <dd class="h-meta">{f.label}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </section>
+    <LandingHero
+      title={`Алюминиевые перегородки ${SITE.city.in}`}
+      lead="Раздвижные, распашные и стационарные системы из профиля GRAFIA: тонкая рама, закалённое стекло, изготовление по вашим размерам. Замер и монтаж по Москве и области."
+      image={heroImages}
+      facts={heroFacts}
+    >
+      <Fragment slot="actions">
+        <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать стоимость</a>
+        <a href="#visit" class="h-btn h-btn--quiet">Приехать в&nbsp;салон</a>
+      </Fragment>
+    </LandingHero>
 
     <!-- ── Система Aspen ── -->
     <section class="h-sec h-sec--wall" aria-label="Система Aspen">
@@ -491,74 +457,6 @@ const moreRenders = renderGallery.length - renderPreviews.length
 </script>
 
 <style>
-  /* ── Первый экран ── */
-  .pt-hero { padding-block: clamp(1rem, 2vw, 1.5rem) var(--h-sec); }
-  /* Шапка — как .h-head: заголовок слева, пояснение и кнопки справа */
-  .pt-hero__head {
-    display: grid;
-    gap: 1.25rem var(--h-gutter);
-    align-items: end;
-    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
-  }
-  @media (min-width: 62.5rem) {
-    .pt-hero__head { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .pt-hero__title { grid-column: 1 / span 7; }
-    .pt-hero__side  { grid-column: 8 / span 5; }
-  }
-  .pt-hero__title {
-    margin: 0;
-    font-family: var(--h-font);
-    font-size: clamp(2.25rem, 5vw, 4rem);
-    font-weight: var(--h-weight-display);
-    line-height: 1.02;
-    letter-spacing: -0.04em;
-    color: var(--h-ink);
-    text-wrap: balance;
-  }
-  .pt-hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
-  @media (max-width: 29.9375rem) {
-    .pt-hero__actions .h-btn { flex: 1 1 100%; }
-  }
-
-  /* Сцена: широкий кадр на компьютере, 4:5 на телефоне (<picture>) */
-  .pt-stage {
-    position: relative;
-    aspect-ratio: 16 / 7;
-    overflow: hidden;
-    border-radius: 1.75rem;
-    background: var(--h-media-bg);
-    isolation: isolate;
-  }
-  @media (max-width: 47.9375rem) {
-    .pt-stage { aspect-ratio: 4 / 5; border-radius: 1.25rem; }
-  }
-  .pt-stage__img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    color: transparent;
-  }
-
-  /* Факты — данные, поэтому под линейкой; крупная цифра — вес 300 */
-  .pt-facts {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem var(--h-gutter);
-    margin: clamp(2.5rem, 5vw, 4rem) 0 0;
-  }
-  @media (min-width: 56.25rem) { .pt-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .pt-facts > div { padding-top: 1rem; border-top: 0.0625rem solid var(--h-rule); }
-  .pt-facts__value {
-    font-size: clamp(2rem, 3.5vw, 2.75rem);
-    font-weight: 300;
-    line-height: 1;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
-    color: var(--h-ink);
-  }
-  .pt-facts dd { margin: 0.5rem 0 0; max-width: 14rem; }
-
   /* ── Список-характеристики под линейками ── */
   .pt-rules { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
   .pt-rules li {
