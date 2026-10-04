@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
 import { SITE } from '../../config/site'
+import { ARTICLES_SECTION } from '../../data/article-kinds'
 
 const allArticles = await getCollection('articles')
 const articles = allArticles.sort(
@@ -16,14 +17,14 @@ const breadcrumbSchema = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
-    { '@type': 'ListItem', position: 2, name: 'Статьи', item: `${SITE.url}/articles/` },
+    { '@type': 'ListItem', position: 2, name: ARTICLES_SECTION, item: `${SITE.url}/articles/` },
   ],
 }
 ---
 
 <BaseLayout
-  title="Статьи о дверях и ремонте — ВФД Москва"
-  description="Полезные статьи о выборе дверей, покрытиях, монтаже и интерьере от специалистов салона ВФД в Москве."
+  title="Статьи и публикации о дверях — ВФД Москва"
+  description="Статьи о выборе дверей, покрытиях и монтаже, новости и новинки салона ВФД в ТЦ «Компас», Москва."
   structuredData={[breadcrumbSchema]}
   noIndex={articles.every(a => a.data.placeholder === true)}
 >
@@ -35,20 +36,19 @@ const breadcrumbSchema = {
           <ol class="flex items-center gap-2 text-sm text-slate-500">
             <li><a href="/" class="hover:text-secondary-600 transition-colors">Главная</a></li>
             <li aria-hidden="true" class="text-slate-300">/</li>
-            <li class="font-medium text-slate-700">Статьи</li>
+            <li class="font-medium text-slate-700">{ARTICLES_SECTION}</li>
           </ol>
         </nav>
-        <p class="t-eyebrow mb-3">Блог</p>
         <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">
-          Полезные статьи о дверях, фурнитуре и дизайне
+          Статьи и публикации о дверях
         </h1>
         <p class="mt-4 text-base leading-relaxed text-slate-600 md:text-lg">
-          Советы по выбору, покрытиям и монтажу от специалистов ВФД в ТЦ «Компас».
+          Разбираем выбор дверей, покрытия и монтаж, рассказываем о новинках фабрики и событиях салона.
         </p>
       </header>
 
       {articles.length === 0 ? (
-        <p class="text-base text-slate-500">Статьи появятся совсем скоро.</p>
+        <p class="text-base text-slate-500">Материалы появятся совсем скоро.</p>
       ) : (
         <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
           {articles.map((article, i) => {
@@ -60,6 +60,7 @@ const breadcrumbSchema = {
                   title={article.data.title}
                   description={article.data.description}
                   publishDate={article.data.publishDate}
+                  kind={article.data.kind}
                   coverImage={article.data.coverImage}
                   coverImageAlt={article.data.coverImageAlt}
                   loading={i === 0 ? 'eager' : 'lazy'}

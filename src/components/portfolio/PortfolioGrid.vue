@@ -30,13 +30,22 @@ function selectAndScroll(key: FilterKey) {
   nextTick(() => gridEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
 
-/* Обложки для строки категорий — рендеры реальных работ (интерьер, скрытые
-   двери) и, там где готовых фотоотчётов ещё нет (перегородки),
-   рендер модели из каталога — честнее пустого состояния фильтра. */
-const CATEGORY_COVERS: Record<WorkCategory, string> = {
-  interior:   '/renders/portfolio/2026-03-12-urban-1-beton-antik-loft.webp',
-  hidden:     '/renders/portfolio/2026-01-05-sekret-chernaya-kromka.webp',
+/* Обложка категории — превью самой свежей работы этой категории; пока
+   работ нет — снимок модели из каталога (честнее пустого квадрата). */
+const CATEGORY_FALLBACK: Record<WorkCategory, string> = {
+  interior:   '/renders/home/tehno-1.webp',
+  hidden:     '/renders/home/secret-2.webp',
   partitions: '/renders/alum-covers/3.webp',
+}
+const coverOf = (key: WorkCategory) => {
+  const work = props.works.find((w) => w.category === key)
+  return work ? `/renders/portfolio/${work.id}.webp` : CATEGORY_FALLBACK[key]
+}
+const worksWord = (n: number) => {
+  const d = n % 10, h = n % 100
+  if (d === 1 && h !== 11) return 'работа'
+  if (d >= 2 && d <= 4 && (h < 12 || h > 14)) return 'работы'
+  return 'работ'
 }
 const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   partitions: '/partitions/',
@@ -61,7 +70,7 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
       </button>
     </div>
 
-    <p class="pf-count">Показано {{ filtered.length }} из {{ works.length }} работ</p>
+    <p class="pf-count">Показано {{ filtered.length }} из {{ works.length }} {{ works.length % 10 === 1 && works.length % 100 !== 11 ? 'работы' : 'работ' }}</p>
 
     <!-- Строка категорий — квадратные образцы (снимок + подпись + счётчик),
          не постеры с градиентом: это навигация, а не витрина. -->
@@ -73,10 +82,10 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
           @click="(e) => { if (!CATEGORY_HREF[key]) { e.preventDefault(); selectAndScroll(key) } }"
         >
           <span class="pf-cat__thumb">
-            <img :src="CATEGORY_COVERS[key]" :alt="CATEGORY_LABELS[key]" loading="lazy" decoding="async" />
+            <img :src="coverOf(key)" :alt="CATEGORY_LABELS[key]" loading="lazy" decoding="async" />
           </span>
           <span class="pf-cat__label">{{ CATEGORY_LABELS[key] }}</span>
-          <span class="pf-cat__count">{{ CATEGORY_HREF[key] ? 'В каталоге' : `${countOf(key)} ${countOf(key) === 1 ? 'работа' : 'работ'}` }}</span>
+          <span class="pf-cat__count">{{ CATEGORY_HREF[key] ? 'В каталоге' : `${countOf(key)} ${worksWord(countOf(key))}` }}</span>
         </a>
       </li>
     </ul>

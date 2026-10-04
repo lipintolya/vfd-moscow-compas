@@ -127,11 +127,13 @@ function midpoint(pts) {
 }
 const SHORT = [[/^улица /, 'ул. '], [/ улица$/, ' ул.'], [/^проспект /, 'пр-т '], [/ шоссе$/, ' ш.'], [/ проезд$/, ' пр.'], [/^проезд /, 'пр. ']]
 const labels = [...named.entries()].flatMap(([name, ways]) => {
-  const best = ways
+  const fit = ways
     .filter((w) => length(w.pts) > 90)
     .map((w) => ({ ...w, len: length(w.pts), at: midpoint(w.pts) }))
-    .filter(({ at }) => at.x > 10 && at.x < 90 && at.y > 8 && at.y < 92 && Math.hypot(at.x - 50, at.y - 50) > 12)
-    .sort((a, b) => b.len - a.len)[0]
+    .filter(({ at }) => at.x > 10 && at.x < 90 && at.y > 8 && at.y < 92 && Math.hypot(at.x - 50, at.y - 50) > 8)
+    .sort((a, b) => b.len - a.len)
+  // Сначала — средняя полоса по высоте: в футере карта обрезана сверху и снизу
+  const best = fit.find(({ at }) => at.y > 30 && at.y < 70) ?? fit[0]
   if (!best) return []
   const text = SHORT.reduce((s, [re, r]) => s.replace(re, r), name)
   return [{ text, x: +best.at.x.toFixed(2), y: +best.at.y.toFixed(2), angle: best.at.angle, major: best.major }]

@@ -1,11 +1,13 @@
 ---
 import { articleCoverImg } from '../../lib/article-images'
+import { KIND_LABEL, type ArticleKind } from '../../data/article-kinds'
 
 interface Props {
   href: string
   title: string
   description: string
   publishDate: Date
+  kind: ArticleKind
   coverImage?: string
   coverImageAlt?: string
   loading?: 'lazy' | 'eager'
@@ -16,6 +18,7 @@ const {
   title,
   description,
   publishDate,
+  kind,
   coverImage,
   coverImageAlt,
   loading = 'lazy',
@@ -59,12 +62,10 @@ const dateStr = publishDate.toLocaleDateString('ru-RU', {
 
   <!-- Content -->
   <div class="flex flex-col flex-1 p-5 sm:p-6">
-    <time
-      datetime={publishDate.toISOString()}
-      class="text-xs text-slate-400 mb-3 block tabular-nums"
-    >
-      {dateStr}
-    </time>
+    <p class="mb-3 flex flex-wrap gap-x-3 text-xs tabular-nums">
+      <span class="font-semibold text-slate-700">{KIND_LABEL[kind]}</span>
+      <time datetime={publishDate.toISOString()} class="text-slate-400">{dateStr}</time>
+    </p>
 
     <h2 class="text-base font-medium leading-snug text-slate-900 mb-2 group-hover:text-accent-600 transition-colors duration-200 line-clamp-3">
       {title}

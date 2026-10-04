@@ -1,27 +1,43 @@
 ---
 /**
- * «Как мы работаем» — четыре шага (нумерация оправдана: это реальная
- * последовательность). Текст тот же, что в HowTo-разметке (howItWorksSteps).
- * Единственный тёмный блок главной. Цены услуг — src/data/services.ts.
+ * «Как мы работаем» — шаги (нумерация оправдана: это реальная
+ * последовательность). По умолчанию — общий процесс салона
+ * (howItWorksSteps, тот же текст, что в HowTo-разметке главной);
+ * страница может передать свои шаги — /partitions/ передаёт цикл
+ * перегородок. Единственный тёмный блок страницы.
+ * Цены у шагов — src/data/services.ts; сноска о дате цен выводится,
+ * только если у какого-то шага есть цена.
  *
  * Анимация — одна: когда список доходит до экрана, красные отрезки шагов
  * прорисовываются по очереди слева направо, текст проявляется следом.
  * Без JS и при prefers-reduced-motion всё видно сразу.
  */
-import { howItWorksSteps } from '../../data/how-it-works'
+import { howItWorksSteps, type HowStep } from '../../data/how-it-works'
 import { PRICES_DATE_LABEL } from '../../data/services'
 import { typograph } from '../../lib/typograph'
+
+interface Props {
+  steps?: HowStep[]
+  title?: string
+  lead?:  string
+}
+const {
+  steps = howItWorksSteps,
+  title = 'Как мы работаем',
+  lead  = 'От выбора модели до установки — без посредников и субподрядчиков.',
+} = Astro.props
+const hasPrices = steps.some((s) => s.price)
 ---
 
-<section class="h-sec steps" aria-labelledby="steps-heading">
+<section id="process" class="h-sec steps" aria-labelledby="steps-heading">
   <div class="container">
     <header class="h-head">
-      <h2 id="steps-heading" class="h-h2 steps__h2">Как мы работаем</h2>
-      <p class="h-lead steps__lead">От выбора модели до&nbsp;установки — без посредников и&nbsp;субподрядчиков.</p>
+      <h2 id="steps-heading" class="h-h2 steps__h2">{title}</h2>
+      <p class="h-lead steps__lead">{typograph(lead)}</p>
     </header>
 
     <ol class="steps__list" role="list" data-steps>
-      {howItWorksSteps.map((s, i) => (
+      {steps.map((s, i) => (
         <li class="step" style={`--i: ${i}`}>
           <span class="step__num" aria-hidden="true">{s.num}</span>
           <h3 class="h-h3 step__title">{s.title}</h3>
@@ -36,10 +52,12 @@ import { typograph } from '../../lib/typograph'
       ))}
     </ol>
 
-    <p id="steps-note" class="h-meta steps__note">
-      * Цены на&nbsp;доставку и&nbsp;услуги актуальны на&nbsp;{typograph(PRICES_DATE_LABEL)} Точную стоимость
-      рассчитаем на&nbsp;консультации в&nbsp;салоне.
-    </p>
+    {hasPrices && (
+      <p id="steps-note" class="h-meta steps__note">
+        * Цены на&nbsp;доставку и&nbsp;услуги актуальны на&nbsp;{typograph(PRICES_DATE_LABEL)} Точную стоимость
+        рассчитаем на&nbsp;консультации в&nbsp;салоне.
+      </p>
+    )}
   </div>
 </section>
 

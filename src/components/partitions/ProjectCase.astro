@@ -1,83 +1,157 @@
 ---
+/**
+ * Кейс на /partitions/: слайдер фото и описание рядом (на телефоне —
+ * фото сверху). Сторона слайдера чередуется (data.side). Карточек,
+ * рамок и теней нет — как на главной: фото, подпись, линейки у данных.
+ *
+ * На телефоне видны заголовок и первый абзац, остальное (абзацы,
+ * характеристики, примечание) — под «Подробнее о проекте»: лонгрид
+ * на узком экране не читают. <details> открыт по умолчанию и сворачивается
+ * скриптом страницы только на телефоне — без JS текст виден целиком,
+ * поисковики видят его в любом случае.
+ */
 import PhotoSlider from './PhotoSlider.astro'
-import FeatureList from './FeatureList.astro'
-import IconTelegram from '../ui/icons/IconTelegram.astro'
 import type { ProjectCase } from '../../data/partitions'
 import { PHONE } from '../../config/site'
+import { typograph } from '../../lib/typograph'
 
 interface Props {
   data:   ProjectCase
-  /** true — для спотлайта сразу под hero (виден без скролла), см. PhotoSlider.astro */
+  /** true — кейс виден без прокрутки: первый кадр грузится сразу */
   eager?: boolean
 }
 const { data, eager = false } = Astro.props
-const badgeTone = {
-  amber: 'bg-amber-100 text-amber-700 border-amber-200',
-  teal:  'bg-accent-50 text-accent-700 border-accent-100',
-}
-
-/* «Заказать расчёт» — звонок: у салона только Telegram-канал, написать в него нельзя */
-const callHref = `tel:${PHONE.raw}`
+const [lead, ...rest] = data.paragraphs
+const hasMore = rest.length > 0 || Boolean(data.features?.length) || Boolean(data.noteHtml)
 ---
-<section class="section bg-white">
-  <div class="container">
-    <div class="pt-case-grid" data-side={data.side}>
 
-      <!-- Слайдер -->
-      <PhotoSlider
-        images={data.images}
-        tone={data.sliderTone}
-        indicator={data.social ? 'dots' : 'counter'}
-        class="pt-case-media"
-        eager={eager}
-      />
+<article class="case" data-side={data.side}>
+  {/* Обёртка, а не class на PhotoSlider: scoped-стили этого компонента
+     не доходят до корня дочернего компонента */}
+  <div class="case__media">
+    <PhotoSlider images={data.images} tone={data.sliderTone} eager={eager} />
+  </div>
 
-      <!-- Текстовая карточка -->
-      <div class="pt-case-text rounded-3xl border border-slate-200 bg-white shadow-sm flex flex-col p-[clamp(1.25rem,2.5vw,2rem)]">
-        {data.eyebrow.kind === 'plain' ? (
-          <p class="t-eyebrow block mb-3">{data.eyebrow.text}</p>
-        ) : (
-          <div class="inline-flex items-center gap-1.5 mb-3 self-start">
-            <span class:list={['inline-flex items-center px-2.5 py-1 rounded-lg text-[0.6875rem] font-medium tracking-widest uppercase border', badgeTone[data.eyebrow.tone]]}>
-              {data.eyebrow.text}
-            </span>
-          </div>
+  <div class="case__body">
+    <p class="h-meta case__eyebrow">{data.eyebrow}</p>
+    <h3 class="case__title" set:html={data.titleHtml} />
+
+    {lead && <p class="h-body case__text">{typograph(lead)}</p>}
+
+    {hasMore && (
+      <details class="case__more" open data-case-more>
+        <summary class="case__toggle">
+          <span class="case__toggle-open">Подробнее о&nbsp;проекте</span>
+          <span class="case__toggle-close">Свернуть</span>
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+
+        {rest.map((p) => <p class="h-body case__text">{typograph(p)}</p>)}
+
+        {data.features && (
+          <ul class="case__features" role="list">
+            {data.features.map((f) => <li>{typograph(f)}</li>)}
+          </ul>
         )}
 
-        <h2 class="t-h2 mb-3" set:html={data.titleHtml} />
+        {data.noteHtml && <p class="h-body case__note" set:html={data.noteHtml} />}
+      </details>
+    )}
 
-        {data.paragraphs.map(p => (
-          <p class="mb-5 t-lead text-slate-600 last:mb-0">{p}</p>
-        ))}
-
-        {data.features && <FeatureList items={data.features} size={data.featureSize ?? 'sm'} class="mt-1 mb-4" />}
-
-        {data.noteHtml && <p class="text-[0.875rem] leading-relaxed mb-0 text-slate-600" set:html={data.noteHtml} />}
-
-        {data.social && (
-          <div class="mt-auto pt-5 border-t border-slate-100">
-            <p class="text-[0.6875rem] font-semibold uppercase tracking-widest mb-3 text-slate-400">Заказать расчёт проекта</p>
-            <div class="flex gap-2 flex-wrap">
-              <a href={callHref}
-                 class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl no-underline text-step-0 font-semibold text-white bg-ink hover:opacity-90 transition-opacity duration-200">
-                Позвонить {PHONE.label}
-              </a>
-            </div>
-          </div>
+    {(data.call || data.attribution) && (
+      <div class="case__foot">
+        {data.call && (
+          <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--ink">Рассчитать проект</a>
         )}
-
         {data.attribution && (
-          <div class="mt-auto pt-4 border-t border-slate-100">
-            <a href={data.attribution.href} target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 no-underline group">
-              <IconTelegram class="text-slate-400 group-hover:text-accent-500 transition-colors duration-200 shrink-0" />
-              <span class="text-[0.6875rem] text-slate-400 group-hover:text-accent-500 transition-colors duration-200">
-                Источник: <span class="font-semibold">{data.attribution.label}</span>
-              </span>
-            </a>
-          </div>
+          <a href={data.attribution.href} target="_blank" rel="noopener noreferrer" class="h-meta case__source">
+            Источник: {data.attribution.label}
+          </a>
         )}
       </div>
-
-    </div>
+    )}
   </div>
-</section>
+</article>
+
+<style>
+  .case {
+    display: grid;
+    gap: 2rem var(--h-gutter);
+    align-items: start;
+  }
+  @media (min-width: 56.25rem) {
+    .case { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .case__media { grid-column: 1 / span 5; grid-row: 1; }
+    .case__body  { grid-column: 7 / span 6; grid-row: 1; }
+    .case[data-side='right'] .case__media { grid-column: 8 / span 5; }
+    .case[data-side='right'] .case__body  { grid-column: 1 / span 6; }
+  }
+
+  .case__eyebrow { margin: 0; }
+  .case__title {
+    margin: 0.5rem 0 0;
+    font-family: var(--h-font);
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--h-ink);
+    text-wrap: balance;
+  }
+  .case__text { margin-top: 1rem; }
+  .case__title + .case__text { margin-top: 1.25rem; }
+
+  /* Характеристики — данные, поэтому разделены линейками (принцип 3) */
+  .case__features {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 0.0625rem solid var(--h-rule);
+  }
+  .case__features li {
+    padding-block: 0.75rem;
+    border-bottom: 0.0625rem solid var(--h-rule);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--h-ink);
+  }
+
+  .case__note { margin-top: 1.25rem; font-size: 0.9375rem; }
+
+  /* «Подробнее» — только на телефоне; на компьютере текст виден целиком */
+  .case__toggle { display: none; }
+  @media (max-width: 56.1875rem) {
+    .case__toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-block: 0.375rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--h-ink);
+      list-style: none;
+      cursor: pointer;
+    }
+    .case__toggle::-webkit-details-marker { display: none; }
+    .case__toggle svg { transition: rotate 200ms var(--ease-out); }
+    .case__more[open] .case__toggle svg { rotate: 180deg; }
+    .case__toggle-close,
+    .case__more[open] .case__toggle-open { display: none; }
+    .case__more[open] .case__toggle-close { display: inline; }
+    /* Раскрытый текст — под кнопкой «Свернуть» */
+    .case__more[open] { display: flex; flex-direction: column; }
+    .case__more[open] .case__toggle { order: 1; }
+  }
+  .case__note :global(strong) { color: var(--h-ink); font-weight: 600; }
+
+  .case__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    margin-top: 2rem;
+  }
+  .case__source { text-decoration: underline; text-underline-offset: 0.25em; }
+  .case__source:hover { color: var(--h-signal); }
+</style>

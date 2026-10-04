@@ -1,66 +1,125 @@
 ---
-import IconChevron from '../ui/icons/IconChevron.astro'
-import IconExpand from '../ui/icons/IconExpand.astro'
+/**
+ * Слайдер фото для /partitions/ — кейсы и типы направляющих. Разметка
+ * и стили здесь, поведение (листание, свайп, лайтбокс) — в скрипте
+ * страницы, который находит слайдеры по [data-slider]. Без JS виден
+ * первый кадр.
+ */
 import type { SlideImage } from '../../data/partitions'
 
 interface Props {
-  images:     SlideImage[]
-  tone?:      'dark' | 'light'
-  indicator?: 'dots' | 'counter'
-  class?:     string
-  /** true — первый кадр слайдера уходит с loading="eager"/fetchpriority="high"
-      (слайдер виден сразу при заходе на страницу, напр. спотлайт сразу под hero).
-      По умолчанию false — все кадры lazy, верно для слайдеров ниже по странице. */
-  eager?:     boolean
+  images:  SlideImage[]
+  /** Пропорции кадра: 4/5 — кейсы (вертикальные фото), 4/3 — направляющие */
+  ratio?:  string
+  /** Подложка, пока грузится фото */
+  tone?:   'dark' | 'light'
+  /** true — первый кадр грузится сразу (слайдер виден без прокрутки) */
+  eager?:  boolean
 }
-const { images, tone = 'dark', indicator = 'counter', class: cls = '', eager = false } = Astro.props
+const { images, ratio = '4 / 5', tone = 'light', eager = false } = Astro.props
+const many = images.length > 1
 ---
+
 <div
-  class:list={[
-    'group relative rounded-3xl overflow-hidden h-full pt-stat-slider cursor-zoom-in',
-    tone === 'dark' ? 'bg-slate-900' : 'bg-slate-100',
-    cls,
-  ]}
+  class:list={['slider', `slider--${tone}`]}
+  style={`--ratio: ${ratio}`}
+  data-slider
 >
-  <div class="pt-stat-slides">
+  <div class="slider__track" data-slider-track>
     {images.map((img, i) => (
       <img
         src={img.src}
         alt={img.alt}
-        class="pt-stat-slide"
+        class="slider__img"
         loading={eager && i === 0 ? 'eager' : 'lazy'}
         fetchpriority={eager && i === 0 ? 'high' : undefined}
         decoding="async"
         width="1080"
-        height="1920"
+        height="1350"
       />
     ))}
   </div>
 
-  <div class="absolute top-3 left-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-    <div class="w-8 h-8 rounded-full flex items-center justify-center bg-slate-900/55 backdrop-blur-xs text-white">
-      <IconExpand size={13} />
-    </div>
-  </div>
-
-  <button class="pt-stat-arrow pt-stat-prev" type="button" aria-label="Предыдущее фото">
-    <IconChevron dir="left" />
-  </button>
-  <button class="pt-stat-arrow pt-stat-next" type="button" aria-label="Следующее фото">
-    <IconChevron dir="right" />
-  </button>
-
-  {indicator === 'counter' ? (
-    <div class="pt-hotel-counter" aria-live="polite">
-      <span class="pt-hotel-cur">1</span>
-      <span class="text-white/35">/</span>
-      <span>{images.length}</span>
-    </div>
-  ) : (
-    <div class="pt-stat-dots">
-      {images.map((_, i) => (
-        <button class:list={['pt-stat-dot', i === 0 && 'is-active']} type="button" aria-label={`Перейти к фото ${i + 1}`} />
-      ))}
-    </div>
+  {many && (
+    <>
+      <button class="slider__arrow slider__arrow--prev" type="button" aria-label="Предыдущее фото" data-slider-prev>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="slider__arrow slider__arrow--next" type="button" aria-label="Следующее фото" data-slider-next>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="slider__count" aria-live="polite">
+        <span data-slider-current>1</span> из {images.length}
+      </span>
+    </>
   )}
 </div>
+
+<style>
+  .slider {
+    position: relative;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    border-radius: var(--h-radius);
+    background: var(--h-media-bg);
+    cursor: zoom-in;
+  }
+  .slider--dark { background: var(--color-slate-900); }
+
+  .slider__track {
+    display: flex;
+    height: 100%;
+    transition: transform 420ms var(--ease-out);
+  }
+  .slider__img {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* Кнопки — те же круглые 2.75rem, что у плеера видео; на телефоне —
+     не меньше 2.75rem (минимальная зона касания) */
+  .slider__arrow {
+    position: absolute;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    translate: 0 -50%;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(from var(--color-white) r g b / 0.9);
+    color: var(--h-ink);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 200ms var(--ease-out), background-color 200ms var(--ease-out);
+  }
+  .slider__arrow--prev { left: 0.75rem; }
+  .slider__arrow--next { right: 0.75rem; }
+  .slider:hover .slider__arrow,
+  .slider__arrow:focus-visible { opacity: 1; }
+  .slider__arrow:hover { background: var(--color-white); }
+  @media (hover: none) { .slider__arrow { opacity: 1; } }
+
+  .slider__count {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999rem;
+    background: rgb(from var(--color-slate-900) r g b / 0.6);
+    color: var(--color-white);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slider__track { transition: none; }
+  }
+</style>

@@ -104,7 +104,7 @@ export const SITE = {
       а сами страницы закрыты noindex. */
   features: {
     reviews:   false,
-    portfolio: false,
+    portfolio: true,
   },
 
   /** Где читать/оставлять отзывы. Пока у салона нет карточек на картах —

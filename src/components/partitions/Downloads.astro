@@ -1,144 +1,59 @@
 ---
+/**
+ * «Полезные материалы» — PDF для подготовки к замеру. Строки списка
+ * разделены линейками, как адрес и часы в «Как к нам добраться».
+ */
 const files = [
   {
     href:  '/pdf/blank-zamera-peregorodki.pdf',
     title: 'Бланк замера по перегородкам',
     desc:  'Форма для самостоятельного снятия размеров перед заказом',
-    meta:  'PDF · 1.6 МБ',
+    meta:  'PDF, 1,6 МБ',
   },
   {
     href:  '/pdf/trebovaniya-k-proemu.pdf',
     title: 'Требования к проёму',
-    desc:  'Условия подготовки проёма для корректного монтажа',
-    meta:  'PDF · 2 стр.',
+    desc:  'Как подготовить проём, чтобы монтаж прошёл без переделок',
+    meta:  'PDF, 2 страницы',
   },
 ]
 ---
 
-<div class="pt-dl">
-  {files.map(f => (
-    <a class="pt-dl__card" href={f.href} target="_blank" rel="noopener" download>
-      <span class="pt-dl__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"
-                stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M14 2v6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <b>PDF</b>
-      </span>
-      <span class="pt-dl__body">
-        <span class="pt-dl__title">{f.title}</span>
-        <span class="pt-dl__desc">{f.desc}</span>
-        <span class="pt-dl__meta">{f.meta}</span>
-      </span>
-      <span class="pt-dl__arrow" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M12 4v12M6 11l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </a>
+<ul class="dl" role="list">
+  {files.map((f) => (
+    <li>
+      <a class="dl__row" href={f.href} target="_blank" rel="noopener" download>
+        <span class="dl__body">
+          <span class="dl__title">{f.title}</span>
+          <span class="h-meta">{f.desc}</span>
+        </span>
+        <span class="h-meta dl__meta">{f.meta}</span>
+        <span class="h-arrow dl__arrow" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M8 3v9M4 8.5 8 12.5l4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+    </li>
   ))}
-</div>
+</ul>
 
 <style>
-  .pt-dl {
+  .dl { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .dl li { border-bottom: 0.0625rem solid var(--h-rule); }
+  .dl__row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: clamp(0.875rem, 2vw, 1.25rem);
-    margin-top: clamp(1.5rem, 3vw, 2.25rem);
-  }
-
-  .pt-dl__card {
-    display: flex;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
-    gap: 1rem;
-    padding: clamp(1rem, 2vw, 1.375rem);
-    border-radius: 1.25rem;
-    border: 1px solid var(--color-slate-200);
-    background: #fff;
+    gap: 1.5rem;
+    padding-block: 1.25rem;
+    color: inherit;
     text-decoration: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
   }
-  .pt-dl__card:hover {
-    border-color: var(--color-accent-200);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--color-accent-600) 10%, transparent);
-    transform: translateY(-2px);
-  }
-
-  .pt-dl__icon {
-    position: relative;
-    flex-shrink: 0;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 0.875rem;
-    background: var(--color-accent-50);
-    border: 1px solid var(--color-accent-100);
-    color: var(--color-accent-600);
-    display: grid;
-    place-items: center;
-  }
-  .pt-dl__icon svg { width: 1.5rem; height: 1.5rem; }
-  .pt-dl__icon b {
-    position: absolute;
-    bottom: -0.4rem;
-    right: -0.4rem;
-    font-size: 0.5rem;
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    color: #fff;
-    background: var(--color-accent-600);
-    padding: 0.1rem 0.3rem;
-    border-radius: 0.3rem;
-    line-height: 1;
-  }
-
-  .pt-dl__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    flex: 1;
-    min-width: 0;
-  }
-  .pt-dl__title {
-    font-size: 0.9375rem;
-    font-weight: 500;
-    color: var(--color-slate-900);
-    line-height: 1.25;
-  }
-  .pt-dl__desc {
-    font-size: 0.8125rem;
-    color: var(--color-slate-500);
-    line-height: 1.45;
-  }
-  .pt-dl__meta {
-    margin-top: 0.2rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-slate-400);
-  }
-
-  .pt-dl__arrow {
-    flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 9999px;
-    background: var(--color-slate-50);
-    color: var(--color-slate-600);
-    display: grid;
-    place-items: center;
-    transition: background 200ms ease, color 200ms ease, transform 200ms ease;
-  }
-  .pt-dl__arrow svg { width: 1.05rem; height: 1.05rem; }
-  .pt-dl__card:hover .pt-dl__arrow {
-    background: var(--color-accent-500);
-    color: #fff;
-    transform: translateY(2px);
-  }
-
-  @media (max-width: 640px) {
-    .pt-dl { grid-template-columns: 1fr; }
+  .dl__body { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+  .dl__title { font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
+  .dl__row:hover .dl__title { text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.2em; }
+  .dl__row:hover .dl__arrow { background: var(--h-signal); }
+  @media (max-width: 29.9375rem) {
+    .dl__row { grid-template-columns: minmax(0, 1fr) auto; }
+    .dl__meta { display: none; }
   }
 </style>

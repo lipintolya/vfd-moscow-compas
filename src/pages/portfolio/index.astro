@@ -4,6 +4,7 @@ import PortfolioGrid from '../../components/portfolio/PortfolioGrid.vue'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
 import { PORTFOLIO_WORKS } from '../../data/portfolio-works'
 import { PHONE, SITE } from '../../config/site'
+import { HERO_COVER_IMAGE } from '../../data/hero-image'
 
 const works = [...PORTFOLIO_WORKS].sort(
   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -52,7 +53,7 @@ const breadcrumbSchema = {
 
       <div class="mt-14 md:mt-16">
         <QuoteCta
-          image="https://storage.yandexcloud.net/vfd74ru/works_prod/26.08.26_fenix2/2O_3moxea9jLTgH8uZbsCVECujmF4v2E8dAsl3IohqVkozfek8vkSMU-5ubzeHE-84tIMAWD5FI_0U8-suQqLLWL.webp"
+          image={works[0]?.images[0] ?? HERO_COVER_IMAGE}
           title="Понравился результат?"
           description="Все модели, которые видите на фото, в наличии в шоуруме — выбирайте по каталогу или приезжайте посмотреть вживую"
           primaryHref={`tel:${PHONE.raw}`}

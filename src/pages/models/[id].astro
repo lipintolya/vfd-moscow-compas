@@ -17,6 +17,7 @@ import {
   DOOR_TYPE, BRAND, cleanModelName, priceLabel,
   productName, productTitle, productMetaDescription, productDescription,
 } from '../../lib/product-text'
+import { KIND_LABEL } from '../../data/article-kinds'
 
 export async function getStaticPaths() {
   /* Данные моделей — в lib/model-entries.ts: их же берёт товарный фид
@@ -293,7 +294,7 @@ const structuredData = [{
     <section class="section">
       <div class="container">
         <a href={`/articles/${relatedArticle.id}/`} class="related-article-card">
-          <span class="related-article-card__eyebrow">Статья по теме</span>
+          <span class="related-article-card__eyebrow">{KIND_LABEL[relatedArticle.data.kind]} по&nbsp;теме</span>
           <span class="related-article-card__title">{relatedArticle.data.title}</span>
           <span class="related-article-card__cta">
             Читать

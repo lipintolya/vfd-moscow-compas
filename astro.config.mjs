@@ -103,12 +103,12 @@ async function fetchModelImages() {
    смене домена поправить оба места и public/robots.txt. */
 const SITE_URL = 'https://domain-placeholder.example'
 
-/* Страницы вне сайтмапа: /privacy/ — служебная; /reviews/ и /portfolio/ —
-   пока пустые и закрыты noindex (SITE.features в src/config/site.ts);
+/* Страницы вне сайтмапа: /privacy/ — служебная; /reviews/ —
+   пока пустой и закрыт noindex (SITE.features в src/config/site.ts);
    /catalog/skrytye-dveri/raboty/ — noindex, пока пуст INVISIBLE_WORKS.
    Включили раздел там — уберите его отсюда. */
 // /about/ — пока заглушка (noindex), вернуть в сайтмап вместе с наполнением.
-const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/portfolio/', '/catalog/skrytye-dveri/raboty/', '/about/']
+const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/catalog/skrytye-dveri/raboty/', '/about/']
 
 const modelImages = await fetchModelImages()
 

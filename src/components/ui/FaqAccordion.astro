@@ -6,13 +6,14 @@ export interface FaqItem {
 
 interface Props {
   items: readonly FaqItem[]
-  title?: string
+  /** false — без своего заголовка: страница выводит его сама */
+  title?: string | false
 }
 
 const { items, title = 'Частые вопросы' } = Astro.props
 ---
 
-<h2 class="faq-h2">{title}</h2>
+{title && <h2 class="faq-h2">{title}</h2>}
 <div class="faq-list">
   {items.map(f => (
     <details class="faq-item">

@@ -1,11 +1,14 @@
 import { defineCollection, z } from 'astro:content'
 import { glob } from 'astro/loaders'
+import { ARTICLE_KINDS } from './data/article-kinds'
 
 const articles = defineCollection({
   loader: glob({ pattern: '*.mdoc', base: './src/content/articles' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    /** Статья или публикация — см. src/data/article-kinds.ts */
+    kind: z.enum(ARTICLE_KINDS).default('article'),
     publishDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     coverImage: z.string().optional(),

@@ -4,6 +4,7 @@ import ProjectSlider from '../../components/portfolio/ProjectSlider.vue'
 import { PORTFOLIO_WORKS, CATEGORY_LABELS, CATEGORY_BADGE_COLORS, OBJECT_TYPE_LABELS } from '../../data/portfolio-works'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { SITE } from '../../config/site'
+import { typograph } from '../../lib/typograph'
 
 export async function getStaticPaths() {
   return PORTFOLIO_WORKS.map((work) => ({
@@ -124,7 +125,9 @@ const breadcrumbSchema = {
 
           <!-- Story -->
           {work.story && (
-            <p class="text-base leading-relaxed text-slate-700 mb-7">{work.story}</p>
+            <div class="mb-7 space-y-4 text-base leading-relaxed text-slate-700">
+              {work.story.split(/\n\s*\n/).map((p) => <p>{typograph(p)}</p>)}
+            </div>
           )}
 
           <!-- Спецификация — строки с разделителями, как в паспорте изделия,
@@ -168,7 +171,7 @@ const breadcrumbSchema = {
             <div>
               <p class="text-lg font-semibold text-white">Хотите такой же результат?</p>
               <p class="mt-1 text-sm leading-relaxed text-white/60 max-w-md">
-                Бесплатно приедем на замер, точно рассчитаем стоимость и подберём модель под ваш интерьер.
+                Приедем на замер, точно рассчитаем стоимость и подберём модель под ваш интерьер.
               </p>
             </div>
             <div class="flex flex-col gap-3 sm:flex-none sm:flex-row">
@@ -180,7 +183,7 @@ const breadcrumbSchema = {
           <div class="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/10 pt-5 text-xs font-semibold text-white/70">
             <span class="inline-flex items-center gap-1.5">
               <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-accent-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Бесплатный замер при заказе
+              Собственная монтажная бригада
             </span>
             <span class="inline-flex items-center gap-1.5">
               <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-accent-400" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>

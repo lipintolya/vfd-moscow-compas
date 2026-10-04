@@ -13,7 +13,7 @@ import InSalon from '../components/home/InSalon.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import Promo from '../components/home/Promo.vue'
-import LatestArticles from '../components/home/LatestArticles.astro'
+import OurWorks from '../components/home/OurWorks.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import { faqs } from '../components/home/faq-data'
 import { howToSchema } from '../data/how-it-works'
@@ -62,7 +62,7 @@ const localBusinessSchema = buildLocalBusiness()
     <StepsRow />
     <VisitBand />
     <Promo client:idle />
-    <LatestArticles />
+    <OurWorks />
 
     <section class="h-sec h-sec--tight-top" aria-label="Частые вопросы">
       <div class="container">

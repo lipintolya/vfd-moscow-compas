@@ -18,6 +18,7 @@ import { getSeriesCardsData } from '../../lib/catalog-data'
 import { getSeriesSpec, coatingGroupCopy } from '../../data/series-descriptions'
 import type { DoorCategory } from '../../data/door-categories'
 import type { CatalogCardItem } from './types'
+import { KIND_LABEL } from '../../data/article-kinds'
 
 interface Props {
   category: DoorCategory
@@ -171,7 +172,7 @@ const structuredData = canonicalUrl ? [
     <section class="section">
       <div class="container">
         <a href={`/articles/${relatedArticle.id}/`} class="related-article-card">
-          <span class="related-article-card__eyebrow">Статья по теме</span>
+          <span class="related-article-card__eyebrow">{KIND_LABEL[relatedArticle.data.kind]} по&nbsp;теме</span>
           <span class="related-article-card__title">{relatedArticle.data.title}</span>
           <span class="related-article-card__cta">
             Читать

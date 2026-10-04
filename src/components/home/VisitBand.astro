@@ -7,32 +7,32 @@
  * и JS карт. Подписи улиц и метка салона — HTML поверх SVG, чтобы текст
  * оставался читаемым на телефоне, когда карта уменьшается.
  *
- * Маршрут: одна главная кнопка + выбор способа (машина / транспорт / пешком),
- * который меняет ссылку кнопки. Без JS кнопка ведёт на маршрут на машине.
+ * Действия — две кнопки: маршрут в Яндекс Картах и копирование адреса.
  */
 import { SITE, PHONE } from '../../config/site'
 import { companyLegalInfo } from '../../lib/contacts-data'
-import { routeUrl, type RouteMode } from '../../lib/map-links'
+import { ROUTE_URL } from '../../lib/map-links'
+import { typograph } from '../../lib/typograph'
 import map from '../../data/visit-map.json'
+
+interface Props {
+  /** Пояснение под заголовком — у каждой страницы своё */
+  lead?: string
+}
+const {
+  lead = 'У нас можно рассмотреть покрытия вблизи, сравнить цвета и фурнитуру и рассчитать комплект вместе с менеджером.',
+} = Astro.props
 
 const hours = companyLegalInfo.workingHours
 
-const MODES: { mode: RouteMode; label: string }[] = [
-  { mode: 'auto', label: 'На машине' },
-  { mode: 'mt',   label: 'На транспорте' },
-  { mode: 'pd',   label: 'Пешком' },
-]
 const L = map.layers
 ---
 
-<section class="h-sec" aria-labelledby="visit-heading">
+<section id="visit" class="h-sec" aria-labelledby="visit-heading">
   <div class="container visit">
     <div class="visit__info">
       <h2 id="visit-heading" class="h-h2">Как к&nbsp;нам добраться</h2>
-      <p class="h-lead visit__lead">
-        У&nbsp;нас можно рассмотреть покрытия вблизи, сравнить цвета
-        и&nbsp;фурнитуру и&nbsp;рассчитать комплект вместе с&nbsp;менеджером.
-      </p>
+      <p class="h-lead visit__lead">{typograph(lead)}</p>
 
       <dl class="visit__data">
         <div>
@@ -60,26 +60,12 @@ const L = map.layers
       </dl>
 
       <div class="route" data-route>
-        <div class="route__modes" role="radiogroup" aria-label="Как поедете">
-          {MODES.map(({ mode, label }, i) => (
-            <button
-              type="button"
-              class="route__mode"
-              role="radio"
-              aria-checked={i === 0 ? 'true' : 'false'}
-              data-href={routeUrl(mode)}
-            >{label}</button>
-          ))}
-        </div>
-        <div class="route__actions">
-          <a href={routeUrl('auto')} target="_blank" rel="noopener" class="h-btn h-btn--signal route__go" data-route-go>
-            Построить маршрут
-          </a>
-          <button type="button" class="h-btn h-btn--quiet route__copy" data-copy={SITE.address.full}>
-            <span data-copy-label>Скопировать адрес</span>
-          </button>
-        </div>
-        <p class="h-meta route__hint">Откроется Яндекс Карты, маршрут от&nbsp;того места, где вы сейчас</p>
+        <a href={ROUTE_URL} target="_blank" rel="noopener" class="h-btn h-btn--signal route__go">
+          Построить маршрут
+        </a>
+        <button type="button" class="h-btn h-btn--quiet route__copy" data-copy={SITE.address.full}>
+          <span data-copy-label>Скопировать адрес</span>
+        </button>
       </div>
     </div>
 
@@ -122,25 +108,6 @@ const L = map.layers
 
 <script>
   document.querySelectorAll<HTMLElement>('[data-route]').forEach((root) => {
-    const go = root.querySelector<HTMLAnchorElement>('[data-route-go]')
-    const modes = [...root.querySelectorAll<HTMLButtonElement>('[role="radio"]')]
-    const pick = (btn: HTMLButtonElement) => {
-      modes.forEach((b) => b.setAttribute('aria-checked', String(b === btn)))
-      if (go && btn.dataset.href) go.href = btn.dataset.href
-    }
-    modes.forEach((btn, i) => {
-      btn.addEventListener('click', () => pick(btn))
-      // Стрелки — как в обычной группе радиокнопок
-      btn.addEventListener('keydown', (e) => {
-        const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
-        if (!step) return
-        e.preventDefault()
-        const next = modes[(i + step + modes.length) % modes.length]!
-        pick(next)
-        next.focus()
-      })
-    })
-
     const copy = root.querySelector<HTMLButtonElement>('[data-copy]')
     const label = copy?.querySelector<HTMLElement>('[data-copy-label]')
     copy?.addEventListener('click', async () => {
@@ -190,42 +157,10 @@ const L = map.layers
   .visit__metro-time { margin-left: 0.375rem; font-size: 0.9375rem; font-weight: 500; color: var(--h-muted); }
 
   /* ── Маршрут ── */
-  .route { margin-top: 2rem; }
-  .route__modes {
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    padding: 0.25rem;
-    border-radius: 999rem;
-    background: var(--h-wall);
-  }
-  .route__mode {
-    min-height: 2.5rem;
-    padding: 0 1rem;
-    border: 0;
-    border-radius: 999rem;
-    background: transparent;
-    font: inherit;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--h-soft);
-    cursor: pointer;
-    transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
-  }
-  .route__mode:hover { color: var(--h-ink); }
-  .route__mode[aria-checked='true'] {
-    background: var(--color-white);
-    color: var(--h-ink);
-    box-shadow: 0 0.0625rem 0.1875rem rgb(from var(--color-slate-900) r g b / 0.12);
-  }
-  .route__mode:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
-  .route__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
-  .route__hint { margin: 0.75rem 0 0; }
+  .route { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
 
   @media (max-width: 29.9375rem) {
     .visit__data > div { grid-template-columns: 1fr; gap: 0.25rem; }
-    .route__modes { display: flex; }
-    .route__mode { flex: 1; padding: 0 0.5rem; }
     .route__go, .route__copy { width: 100%; }
   }
 

@@ -64,10 +64,10 @@ function openDecorLightbox() {
 
 <template>
   <!--
-    Сетка: 2 колонки × 2 строки
-    [viewer  ] [decor  ]   ← строка 1 (1fr — тянется)
-    [viewer  ] [thumbs ]   ← строка 2 (auto — по контенту)
-    Viewer растянут через grid-row: 1 / 3
+    Компьютер:  [фото] [декор ]     Телефон:  [фото  ]
+                [фото] [модели]               [модели]  ← выбор сразу под фото
+                                              [декор ]
+    Стили — токены дизайн-системы страницы (.home, src/styles/home.css).
   -->
   <div class="dlv">
 
@@ -167,37 +167,30 @@ function openDecorLightbox() {
 </template>
 
 <style scoped>
-/* ── Layout: 2-col × 2-row grid ── */
 .dlv {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  grid-template-rows: 1fr auto;
-  gap: clamp(0.875rem, 2vw, 1.25rem);
+  grid-template-areas: 'stage' 'thumbs' 'decor';
+  gap: 1rem;
+}
+@media (min-width: 48rem) {
+  .dlv {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-rows: 1fr auto;
+    grid-template-areas: 'stage decor' 'stage thumbs';
+    gap: 1.25rem var(--h-gutter);
+  }
 }
 
-/* ── LEFT: photo viewer — spans both rows ── */
-.dlv__viewer {
-  grid-column: 1;
-  grid-row: 1 / 3;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
+/* ── Фото модели ── */
+.dlv__viewer { grid-area: stage; }
 .dlv__stage {
   position: relative;
-  flex: 1;
-  min-height: 0;
-  border-radius: 1.25rem;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  border: 1px solid var(--color-slate-200);
+  border-radius: var(--h-radius);
+  background: var(--color-white);
   cursor: zoom-in;
-  transition: border-color 200ms ease;
 }
-.dlv__stage:hover {
-  border-color: var(--color-slate-400);
-}
-
 .dlv__photo {
   position: absolute;
   inset: 0;
@@ -205,225 +198,155 @@ function openDecorLightbox() {
   height: 100%;
   object-fit: contain;
   opacity: 0;
-  transition: opacity 320ms ease;
-  will-change: opacity;
+  transition: opacity 320ms var(--ease-out);
   pointer-events: none;
 }
 .dlv__photo--active { opacity: 1; }
 
-/* Zoom hint badge */
+.dlv__badge {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 999rem;
+  background: var(--h-ink);
+  color: var(--color-white);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
 .dlv__zoom-hint {
   position: absolute;
-  bottom: 0.75rem;
   right: 0.75rem;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-slate-600);
+  bottom: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--h-wall);
+  color: var(--h-ink);
   opacity: 0;
-  transform: scale(0.85);
-  transition: opacity 180ms ease, transform 180ms ease;
+  transition: opacity 180ms var(--ease-out);
   pointer-events: none;
-  z-index: 2;
 }
 .dlv__stage:hover .dlv__zoom-hint,
-.dlv__decor-media:hover .dlv__zoom-hint {
-  opacity: 1;
-  transform: scale(1);
-}
+.dlv__decor-media:hover .dlv__zoom-hint { opacity: 1; }
 
-/* Arrows */
 .dlv__arrow {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 9999px;
-  border: none;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--color-slate-900);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  translate: 0 -50%;
+  border: 0;
+  border-radius: 50%;
+  background: var(--h-wall);
+  color: var(--h-ink);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  transition: background 150ms ease, box-shadow 150ms ease, transform 150ms ease;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  z-index: 1;
+  transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
 }
-.dlv__arrow:hover {
-  background: #fff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  transform: translateY(-50%) scale(1.06);
-}
-.dlv__arrow--prev { left:  0.75rem; }
+.dlv__arrow:hover { background: var(--h-ink); color: var(--color-white); }
+.dlv__arrow--prev { left: 0.75rem; }
 .dlv__arrow--next { right: 0.75rem; }
 
-/* Model ID badge — overlaid bottom-left inside the stage */
-.dlv__badge {
-  position: absolute;
-  bottom: 0.625rem;
-  left: 0.75rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--color-slate-900) 72%, transparent);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  color: var(--color-slate-200);
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ── RIGHT row 1: decor card ── */
+/* ── Тип декора ── */
 .dlv__decor {
-  grid-column: 2;
-  grid-row: 1;
-  display: flex;
-  flex-direction: column;
-  border-radius: 1.25rem;
-  border: 1px solid var(--color-slate-200);
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  overflow: hidden;
+  grid-area: decor;
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
 }
-
+@media (min-width: 64rem) {
+  .dlv__decor { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+}
 .dlv__decor-media {
   position: relative;
-  width: 100%;
-  flex-shrink: 0;
-  cursor: zoom-in;
   overflow: hidden;
+  border-radius: var(--h-radius);
+  background: var(--color-white);
+  cursor: zoom-in;
 }
-
 .dlv__decor-img {
   display: block;
   width: 100%;
-  height: 100%;
+  max-height: 15rem;
   object-fit: contain;
-  max-height: 240px;
-  transition: transform 400ms ease;
+  transition: transform 500ms var(--ease-out);
 }
-.dlv__decor-media:hover .dlv__decor-img {
-  transform: scale(1.03);
-}
-
-.dlv__decor-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: clamp(1rem, 2vw, 1.375rem);
-}
+.dlv__decor-media:hover .dlv__decor-img { transform: scale(1.03); }
 
 .dlv__decor-eyebrow {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-accent-600);
+  color: var(--h-muted);
 }
 .dlv__decor-title {
-  margin: 0;
-  font-size: clamp(1rem, 1.6vw, 1.1875rem);
-  font-weight: 500;
-  color: var(--color-slate-900);
-  line-height: 1.22;
+  margin: 0.375rem 0 0;
+  font-family: var(--h-font);
+  font-size: 1.3125rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--h-ink);
 }
 .dlv__decor-desc {
-  margin: 0;
-  font-size: clamp(0.875rem, 1.2vw, 0.9375rem);
-  color: var(--color-slate-600);
-  line-height: 1.65;
+  margin: 0.5rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--h-soft);
 }
 
-/* ── RIGHT row 2: SVG thumbnails — horizontal scroll strip ── */
+/* ── Схемы моделей — лента вбок ── */
 .dlv__thumbs {
-  grid-column: 2;
-  grid-row: 2;
+  grid-area: thumbs;
   display: flex;
   gap: 0.5rem;
-  justify-content: flex-start;
-  min-width: 0;            /* не разносить грид-колонку при большом числе миниатюр */
+  min-width: 0;
+  padding: 0.25rem 0.125rem;
   overflow-x: auto;
   overscroll-behavior-x: contain;
-  scroll-behavior: smooth;
   scroll-snap-type: x proximity;
-  padding-bottom: 0.25rem; /* место под тонкий скроллбар */
+  scrollbar-width: none;
 }
-.dlv__thumbs::-webkit-scrollbar { height: 5px; }
-.dlv__thumbs::-webkit-scrollbar-track { background: transparent; }
-.dlv__thumbs::-webkit-scrollbar-thumb { background: var(--color-slate-200); border-radius: 3px; }
-.dlv__thumbs::-webkit-scrollbar-thumb:hover { background: var(--color-slate-300); }
-
+.dlv__thumbs::-webkit-scrollbar { display: none; }
 .dlv__thumb {
-  width: 96px;
-  flex-shrink: 0;
-  scroll-snap-align: center;
+  flex: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.5rem 0.375rem 0.4rem;
+  width: 4.75rem;
+  padding: 0.625rem 0.375rem 0.5rem;
+  border: 0;
   border-radius: 0.75rem;
-  border: 1.5px solid var(--color-slate-200);
-  background: #fff;
+  background: var(--color-white);
   cursor: pointer;
-  transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+  scroll-snap-align: center;
+  box-shadow: inset 0 0 0 0.0625rem transparent;
+  transition: box-shadow 150ms var(--ease-out);
 }
-.dlv__thumb:hover {
-  border-color: var(--color-accent-400);
-  background: var(--color-accent-50);
-}
-.dlv__thumb--active {
-  border-color: var(--color-accent-500);
-  background: var(--color-accent-50);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-500) 18%, transparent);
-}
-
-.dlv__thumb-svg {
-  width: 44px;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
+.dlv__thumb:hover { box-shadow: inset 0 0 0 0.0625rem var(--h-signal); }
+.dlv__thumb--active { box-shadow: inset 0 0 0 0.125rem var(--h-ink); }
+.dlv__thumb-svg { display: block; width: 2.75rem; height: auto; }
 .dlv__thumb-label {
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  color: var(--color-slate-500);
   font-variant-numeric: tabular-nums;
+  color: var(--h-muted);
 }
-.dlv__thumb--active .dlv__thumb-label { color: var(--color-accent-600); }
+.dlv__thumb--active .dlv__thumb-label { color: var(--h-ink); }
 
-/* ── Responsive ── */
-@media (max-width: 700px) {
-  .dlv {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-  }
-  /* Portrait stage: fills full width, 3:4 aspect — photos display without side bars */
-  .dlv__viewer {
-    grid-column: 1;
-    grid-row: 1;
-    height: auto;
-    aspect-ratio: 3 / 4;
-  }
-  .dlv__decor  { grid-column: 1; grid-row: 2; }
-  .dlv__thumbs { grid-column: 1; grid-row: 3; }
-  /* 44px minimum touch target (iOS HIG) */
-  .dlv__arrow  { width: 2.75rem; height: 2.75rem; }
+.dlv :is(button, [role='button']):focus-visible {
+  outline: 0.125rem solid var(--color-secondary-500);
+  outline-offset: 0.125rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dlv__photo, .dlv__decor-img { transition: none; }
 }
 </style>

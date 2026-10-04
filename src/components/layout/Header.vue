@@ -66,14 +66,8 @@ const CATALOG_DROPDOWN = [
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
 ] as const
 
-const ABOUT_DROPDOWN = [
-  { href: '/about/',     label: 'О салоне',   desc: 'Шоу-рум в ТЦ «Компас»' },
-  { href: '/o-fabrike/', label: 'О фабрике',  desc: 'Производитель дверей ВФД' },
-] as const
-
 const SUBMENU: Record<string, readonly { href: string; label: string; desc: string }[]> = {
   '/catalog/': CATALOG_DROPDOWN,
-  '/about/':   ABOUT_DROPDOWN,
 }
 
 /* Часы — из contacts-data (единственный источник), а не числами здесь:
@@ -114,11 +108,10 @@ let desktopMql: MediaQueryList | null = null
    ============================================================ */
 const isActive = (href: string) => currentPath.value === href
 
-/* Активный раздел для точки под пунктом: каталог и «О нас» подсвечиваются
-   и на вложенных страницах (/catalog/series/…, /o-fabrike/). */
+/* Активный раздел для точки под пунктом: каталог подсвечивается
+   и на вложенных страницах (/catalog/series/…, /models/…). */
 const isSection = (href: string) => {
   if (href === '/catalog/') return currentPath.value.startsWith('/catalog') || currentPath.value.startsWith('/models')
-  if (href === '/about/')   return currentPath.value.startsWith('/about') || currentPath.value.startsWith('/o-fabrike')
   return isActive(href)
 }
 

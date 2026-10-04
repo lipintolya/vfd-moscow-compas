@@ -1,61 +1,81 @@
 ---
+/**
+ * «Статьи и публикации» на главной — три свежих материала раздела /articles/.
+ * Тип материала (статья / публикация) и название раздела —
+ * src/data/article-kinds.ts; у карточки над заголовком — тип и дата.
+ */
 import { getCollection } from 'astro:content'
 import { articleCoverImg } from '../../lib/article-images'
+import { ARTICLES_SECTION, KIND_LABEL } from '../../data/article-kinds'
+import { typograph } from '../../lib/typograph'
 
-const all = await getCollection('articles')
-const articles = all
+const HOME_POSTS = 3
+
+const posts = (await getCollection('articles'))
   .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
-  .slice(0, 3)
-
-const getSlug = (id: string) => id.split('/')[0]!.replace(/\.mdoc$/, '')
+  .slice(0, HOME_POSTS)
 
 const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
 ---
 
-{articles.length > 0 && (
+{posts.length > 0 && (
   <section class="h-sec" aria-labelledby="articles-heading">
     <div class="container">
       <header class="h-head">
-        <h2 id="articles-heading" class="h-h2">Статьи о&nbsp;дверях</h2>
-        <p class="h-lead">Покрытия, фурнитура, монтаж — разбираем то, о чём спрашивают в салоне. <a href="/articles/" class="h-link">Все статьи</a></p>
+        <h2 id="articles-heading" class="h-h2">{typograph(ARTICLES_SECTION)}</h2>
+        <div>
+          <p class="h-lead">
+            Разбираем выбор дверей, покрытия и&nbsp;монтаж, рассказываем о&nbsp;новинках
+            фабрики и&nbsp;событиях салона.
+          </p>
+          <a href="/articles/" class="h-pill h-pill--line posts-head__all">
+            Все материалы
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
       </header>
 
       <ul class="posts" role="list">
-        {articles.map((article) => (
-          <li>
-            <a href={`/articles/${getSlug(article.id)}/`} class="post">
-              <span class:list={['h-media post__media', { 'post__media--empty': !article.data.coverImage }]}>
-                {!article.data.coverImage && <span class="post__noimg">Фото статьи</span>}
-                {article.data.coverImage && (
-                  <img
-                    {...articleCoverImg(article.data.coverImage, 'card')}
-                    sizes="(min-width: 56.25rem) 33vw, 100vw"
-                    width="800"
-                    height="450"
-                    alt={article.data.coverImageAlt ?? ''}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                )}
-              </span>
-              {!article.data.placeholder && (
-                <time datetime={article.data.publishDate.toISOString()} class="h-meta post__date">
-                  {dateStr(article.data.publishDate)}
-                </time>
-              )}
-              {article.data.placeholder
-                ? <p class="h-h3 post__title post__title--first">{article.data.title}</p>
-                : <h3 class="h-h3 post__title">{article.data.title}</h3>}
-              <p class="h-body post__desc">{article.data.description}</p>
-            </a>
-          </li>
-        ))}
+        {posts.map((post) => {
+          const { data } = post
+          return (
+            <li>
+              <a href={`/articles/${post.id}/`} class="post">
+                <span class="h-media post__media">
+                  {data.coverImage
+                    ? <img
+                        {...articleCoverImg(data.coverImage, 'card')}
+                        sizes="(min-width: 56.25rem) 33vw, 82vw"
+                        width="800"
+                        height="450"
+                        alt={data.coverImageAlt ?? ''}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    : <span class="post__noimg">Обложка появится позже</span>}
+                </span>
+                <p class="h-meta post__meta">
+                  <span class="post__kind">{KIND_LABEL[data.kind]}</span>
+                  {!data.placeholder && (
+                    <time datetime={data.publishDate.toISOString()}>{dateStr(data.publishDate)}</time>
+                  )}
+                </p>
+                {data.placeholder
+                  ? <p class="h-h3 post__title">{data.title}</p>
+                  : <h3 class="h-h3 post__title">{typograph(data.title)}</h3>}
+                <p class="h-body post__desc">{typograph(data.description)}</p>
+              </a>
+            </li>
+          )
+        })}
       </ul>
     </div>
   </section>
 )}
 
 <style>
+  .posts-head__all { margin-top: 1.25rem; }
+
   .posts {
     display: grid;
     gap: 3rem var(--h-gutter);
@@ -83,15 +103,16 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
     .posts::-webkit-scrollbar { display: none; }
     .posts > li { scroll-snap-align: start; }
   }
-  
+
   .post { display: flex; flex-direction: column; color: inherit; text-decoration: none; }
-  .post__media { aspect-ratio: 3 / 2; }
-  .post__date { margin-top: 1.25rem; }
+  .post__media { display: grid; place-items: center; aspect-ratio: 3 / 2; }
+  .post__noimg { font-size: 0.875rem; font-weight: 500; color: var(--h-muted); }
+
+  /* Тип — тёмным, дата — приглушённой: тип важнее при беглом просмотре */
+  .post__meta { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; margin: 1.25rem 0 0; }
+  .post__kind { font-weight: 600; color: var(--h-ink); }
+
   .post__title { margin-top: 0.375rem; }
-  .post__title--first { margin-top: 1.25rem; }
-  .post__media--empty { display: grid; place-items: center; background: var(--color-slate-200); }
-  .post__noimg { font-size: 0.875rem; font-weight: 500; color: var(--color-slate-500); }
-  .post:hover .post__title { text-decoration: underline; text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
   .post__desc {
     margin-top: 0.5rem;
     font-size: 0.9375rem;
@@ -99,5 +120,19 @@ const dateStr = (d: Date) => d.toLocaleDateString('ru-RU', { day: 'numeric', mon
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  /* Наведение — красное подчёркивание названия (принцип 4 home.css) */
+  .post__media img { transition: transform 700ms var(--ease-out); }
+  .post:hover .post__media img { transform: scale(1.025); }
+  .post:hover .post__title {
+    text-decoration: underline;
+    text-decoration-color: var(--h-signal);
+    text-decoration-thickness: 0.0625rem;
+    text-underline-offset: 0.2em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .post__media img { transition: none; }
+    .post:hover .post__media img { transform: none; }
   }
 </style>

@@ -5,6 +5,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
 import { SITE } from '../../config/site'
+import { ARTICLES_SECTION, KIND_LABEL } from '../../data/article-kinds'
 
 export async function getStaticPaths() {
   const articles = await getCollection('articles')
@@ -16,7 +17,7 @@ export async function getStaticPaths() {
 
 const { article, allArticles } = Astro.props
 
-/* Читайте также — 3 других статьи, свежие сверху. Со временем статей
+/* Читайте также — 3 других материала, свежие сверху. Со временем статей
    станет больше 4 — тогда есть смысл подбирать по теме, а не просто
    «остальные», но пока их 6, ротации достаточно. */
 const relatedArticles = allArticles
@@ -30,7 +31,8 @@ const canonicalUrl = `${SITE.url}/articles/${slug}/`
 
 const blogPostingSchema = {
   '@context': 'https://schema.org',
-  '@type': 'BlogPosting',
+  // Публикация (новость салона/фабрики) — NewsArticle, статья — BlogPosting
+  '@type': article.data.kind === 'publication' ? 'NewsArticle' : 'BlogPosting',
   headline: article.data.title,
   description: article.data.description,
   ...(article.data.coverImage ? { image: new URL(article.data.coverImage, Astro.site).href } : {}),
@@ -59,7 +61,7 @@ const breadcrumbSchema = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
-    { '@type': 'ListItem', position: 2, name: 'Статьи', item: `${SITE.url}/articles/` },
+    { '@type': 'ListItem', position: 2, name: ARTICLES_SECTION, item: `${SITE.url}/articles/` },
     { '@type': 'ListItem', position: 3, name: article.data.title, item: canonicalUrl },
   ],
 }
@@ -98,7 +100,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
           <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
             <li><a href="/" class="hover:text-secondary-600 transition-colors">Главная</a></li>
             <li aria-hidden="true" class="text-slate-300">/</li>
-            <li><a href="/articles/" class="hover:text-secondary-600 transition-colors">Статьи</a></li>
+            <li><a href="/articles/" class="hover:text-secondary-600 transition-colors">{ARTICLES_SECTION}</a></li>
             <li aria-hidden="true" class="text-slate-300">/</li>
             <li class="font-medium text-slate-700 truncate max-w-52">{article.data.title}</li>
           </ol>
@@ -130,12 +132,12 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
 
           <!-- Header -->
           <header class="mb-10">
-            <time
-              datetime={article.data.publishDate.toISOString()}
-              class="mb-4 block text-sm text-slate-400 tabular-nums"
-            >
-              {article.data.publishDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
-            </time>
+            <p class="mb-4 flex flex-wrap gap-x-3 text-sm tabular-nums">
+              <span class="font-semibold text-slate-700">{KIND_LABEL[article.data.kind]}</span>
+              <time datetime={article.data.publishDate.toISOString()} class="text-slate-400">
+                {article.data.publishDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </time>
+            </p>
             <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
               {article.data.title}
             </h1>
@@ -168,6 +170,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
                       title={related.data.title}
                       description={related.data.description}
                       publishDate={related.data.publishDate}
+                      kind={related.data.kind}
                       coverImage={related.data.coverImage}
                       coverImageAlt={related.data.coverImageAlt}
                       loading="lazy"
@@ -187,7 +190,7 @@ const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [fa
               <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">
                 <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              Все статьи
+              Все материалы
             </a>
           </div>
 

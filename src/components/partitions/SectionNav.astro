@@ -6,7 +6,7 @@
  * снаружи, чтобы тот же паттерн переиспользовать на /catalog/ (Серии/Каталог)
  * без копипасты компонента.
  *
- * Пилюля по ширине равна своему содержимому (w-fit), а не всему .container —
+ * Плашка по ширине равна своему содержимому (fit-content), а не всему .container —
  * с 2 пунктами (/catalog/) полноширинный бар выглядел пустым посередине.
  */
 interface Props {
@@ -25,43 +25,18 @@ const {
 } = Astro.props
 ---
 
-<nav
-  id="pt-snav"
-  class="pt-snav fixed inset-x-0 top-[calc(var(--header-height)+0.75rem)] z-45 -translate-y-2 px-4 opacity-0 transition-[opacity,transform] duration-200 ease-out pointer-events-none"
-  aria-label="Разделы страницы"
-  aria-hidden="true"
->
+<nav id="pt-snav" class="snav" aria-label="Разделы страницы" aria-hidden="true">
   <div class="container">
-    {/* max-w-full один не спасал от переполнения на узких экранах — бар
-       физически вылезал за .container вправо, обрезая крестик/последний
-       пункт без возможности их увидеть. На мобильном при нехватке места
-       список переносится на новую строку внутри той же панели (flex-wrap);
-       rounded-2xl вместо капсульного rounded-full — на 2+ строках капсула
-       смотрелась как вытянутый овал, а не два аккуратных ряда. На desktop
-       (sm:) пункты почти всегда помещаются в одну строку — там оставлена
-       капсула. */}
-    <div class="pt-snav__glass mx-auto flex w-fit max-w-full flex-wrap items-center justify-center gap-0.5 rounded-2xl p-1.5 sm:rounded-full">
-      <ul class="pt-snav__list flex flex-wrap list-none items-center justify-center gap-0.5" role="list">
-        {items.map(it => (
+    <div class="snav__bar">
+      <ul class="snav__list" role="list">
+        {items.map((it) => (
           <li>
-            <a
-              href={`#${it.id}`}
-              class="pt-snav__link inline-block whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-150"
-              data-snav={it.id}
-            >
-              {it.label}
-            </a>
+            <a href={`#${it.id}`} class="snav__link" data-snav={it.id}>{it.label}</a>
           </li>
         ))}
       </ul>
-      <button
-        id="pt-snav-close"
-        class="ml-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full text-fg-subtle transition-colors duration-150 hover:bg-red-50 hover:text-red-500"
-        type="button"
-        aria-label="Скрыть навигационное меню"
-        title="Скрыть навигационное меню"
-      >
-        <svg viewBox="0 0 14 14" fill="none" class="h-3 w-3" aria-hidden="true">
+      <button id="pt-snav-close" class="snav__close" type="button" aria-label="Скрыть меню разделов" title="Скрыть меню разделов">
+        <svg viewBox="0 0 14 14" width="12" height="12" fill="none" aria-hidden="true">
           <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </button>
@@ -70,69 +45,86 @@ const {
 </nav>
 
 <style>
-  /* На странице с пилюлей-навигацией якоря останавливаются ниже неё:
-     шапка + пилюля (≈3rem). Работает и для ссылок пилюли, и для #якорей. */
-  :global(html:has(#pt-snav)) { scroll-padding-top: calc(var(--header-height) + 3.5rem); }
-  /* Видимость двигаем через JS-класс, а не инлайн-стиль, — переключается
-     чаще, чем рендерится компонент. */
-  .pt-snav.pt-snav--visible {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
+  /* Якоря останавливаются ниже шапки и меню (≈3.5rem) */
+  :global(html:has(#pt-snav)) { scroll-padding-top: calc(var(--header-height) + 4rem); }
 
-  /* Liquid-glass — раньше был плоский bg-white/80 + border + один blur,
-     на скролле сливался с фоном страницы и не читался как отдельный
-     плавающий объект. Настоящее стекло — это не просто blur, а три слоя:
-     1) сильный blur+saturate для эффекта préломления фона под собой,
-     2) тонкий градиентный highlight сверху (имитация света, падающего на
-        выпуклую кромку стекла) через ::before,
-     3) многослойная тень — мягкая дальняя (глубина) + резкая близкая
-        (контакт с поверхностью) вместо одной размытой. */
-  .pt-snav__glass {
-    position: relative;
-    background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.55));
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255,255,255,0.6);
-    box-shadow:
-      0 1px 1px rgba(255,255,255,0.8) inset,
-      0 -1px 1px color-mix(in srgb, var(--color-slate-900) 4%, transparent) inset,
-      0 10px 30px -8px color-mix(in srgb, var(--color-slate-900) 22%, transparent),
-      0 2px 8px color-mix(in srgb, var(--color-slate-900) 8%, transparent);
-  }
-  /* Верхняя световая кромка — тонкая дуга света вдоль верхнего края,
-     как на настоящей выпуклой стеклянной поверхности. */
-  .pt-snav__glass::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0) 40%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
+  .snav {
+    position: fixed;
+    inset-inline: 0;
+    top: calc(var(--header-height) + 0.75rem);
+    z-index: 45;
+    opacity: 0;
+    translate: 0 -0.5rem;
     pointer-events: none;
+    transition: opacity 200ms var(--ease-out), translate 200ms var(--ease-out);
   }
+  .snav.snav--visible { opacity: 1; translate: 0; pointer-events: auto; }
 
-  /* Активный/hover-цвет — завязан на токены темы. Composite-селектор
-     .pt-snav__link.pt-snav--active специфичнее, чем :hover на одном
-     классе, поэтому активный пункт не перекрашивается при наведении. */
-  .pt-snav__link {
-    position: relative;
-    z-index: 1;
-    color: var(--color-fg-muted);
+  /* Плашка по ширине содержимого; на узком экране — во всю ширину
+     контейнера, пункты листаются вбок одной строкой */
+  .snav__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    padding: 0.3125rem;
+    border: 0.0625rem solid var(--color-slate-200);
+    border-radius: 999rem;
+    background: rgb(from var(--color-white) r g b / 0.86);
+    -webkit-backdrop-filter: blur(1rem) saturate(1.6);
+    backdrop-filter: blur(1rem) saturate(1.6);
   }
-  .pt-snav__link:hover {
-    background: var(--color-accent-light);
-    color: var(--color-accent-hover);
+  .snav__list {
+    display: flex;
+    gap: 0.125rem;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    /* край ленты гаснет — видно, что пункты листаются */
+    mask-image: linear-gradient(90deg, transparent 0, var(--color-slate-900) 0.75rem, var(--color-slate-900) calc(100% - 0.75rem), transparent 100%);
   }
-  .pt-snav__link.pt-snav--active {
-    background: var(--color-graphite);
-    color: #fff;
-    box-shadow: 0 2px 8px -2px color-mix(in srgb, var(--color-graphite) 50%, transparent);
+  .snav__list::-webkit-scrollbar { display: none; }
+  @media (min-width: 48rem) { .snav__list { mask-image: none; } }
+
+  .snav__link {
+    display: block;
+    padding: 0.625rem 1rem;
+    border-radius: 999rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--color-slate-600);
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
   }
+  .snav__link:hover { color: var(--color-accent-500); }
+  .snav__link.snav--active { background: var(--color-slate-900); color: var(--color-white); }
+
+  .snav__close {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--color-slate-400);
+    cursor: pointer;
+    transition: color 150ms var(--ease-out);
+  }
+  .snav__close:hover { color: var(--color-slate-900); }
+
+  .snav :is(a, button):focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
+
+  @media (prefers-reduced-motion: reduce) { .snav { transition: none; } }
 </style>
 
 <script>
@@ -145,7 +137,7 @@ const {
     const onScroll = () => {
       if (dismissed) return
       const show = window.scrollY > 380
-      nav.classList.toggle('pt-snav--visible', show)
+      nav.classList.toggle('snav--visible', show)
       nav.setAttribute('aria-hidden', show ? 'false' : 'true')
     }
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -155,7 +147,7 @@ const {
       closeBtn.addEventListener('click', () => {
         dismissed = true
         sessionStorage.setItem('pt-snav-dismissed', '1')
-        nav.classList.remove('pt-snav--visible')
+        nav.classList.remove('snav--visible')
         nav.setAttribute('aria-hidden', 'true')
       })
     }
@@ -169,9 +161,12 @@ const {
           entries.forEach((e) => {
             if (!e.isIntersecting) return
             links.forEach((l) => {
-              l.classList.toggle('pt-snav--active', l.dataset.snav === e.target.id)
+              l.classList.toggle('snav--active', l.dataset.snav === e.target.id)
             })
-            nav.querySelector('.pt-snav--active')?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+            // Активный пункт — в видимую часть ленты (на телефоне она листается)
+            const active = nav.querySelector<HTMLElement>('.snav--active')
+            const list = active?.parentElement?.parentElement
+            if (active && list) list.scrollTo({ left: active.offsetLeft - list.clientWidth / 2 + active.clientWidth / 2, behavior: 'smooth' })
           })
         },
         { rootMargin: '-15% 0px -75% 0px' },
@@ -187,7 +182,7 @@ const {
         e.preventDefault()
         const target = document.getElementById(link.dataset.snav ?? '')
         if (!target) return
-        // Отступ сверху (шапка + пилюля) — scroll-padding в CSS ниже
+        // Отступ сверху (шапка + меню) — scroll-padding в стилях выше
         target.scrollIntoView({ behavior: 'smooth', block: 'start' })
       })
     })

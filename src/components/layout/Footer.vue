@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { PHONE, SITE } from '../../config/site'
+import { ROUTE_URL } from '../../lib/map-links'
 
 /* ============================================================
    Data
@@ -36,12 +37,10 @@ const CONTACTS = {
   worktime: companyLegalInfo.workingHours.shortDisplay,
 }
 
-/* Раньше здесь был живой iframe Yandex Maps (свой JS + тайлы) — карта
-   декоративная (pointer-events:none, aria-hidden, клик ведёт по MAP_LINK
-   отдельной ссылкой), но футер общий для всех ~400 страниц сайта, так что
-   iframe грузился на каждой. Заменён на статичный скриншот Static Maps API
-   (см. scripts/gen-footer-map.mjs) — то же визуально, без JS-рантайма. */
-const MAP_PREVIEW_IMAGE = '/renders/footer-map.webp'
+/* Карта — собственная тёмная SVG в цветах дизайн-системы
+   (src/pages/visit-map-dark.svg.ts): одна лёгкая картинка, кешируется
+   на все страницы, без JS и тайлов карт. Клик — на Яндекс Карты. */
+const MAP_PREVIEW_IMAGE = '/visit-map-dark.svg'
 const MAP_LINK = SITE.address.mapUrl
 
 /* ============================================================
@@ -318,7 +317,7 @@ onUnmounted(() => {
             <p class="text-base font-medium text-white">{{ CONTACTS.address }}</p>
             <p class="mt-1 text-sm text-white/50">{{ companyLegalInfo.address.entrance }}</p>
             <a
-              :href="MAP_LINK"
+              :href="ROUTE_URL"
               target="_blank"
               rel="noopener noreferrer"
               class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-accent-400 hover:text-secondary-600 transition-colors duration-200"
@@ -333,13 +332,14 @@ onUnmounted(() => {
             <img
               :src="MAP_PREVIEW_IMAGE"
               alt=""
-              width="650"
-              height="450"
+              width="1000"
+              height="720"
               loading="lazy"
               decoding="async"
               class="absolute inset-0 w-full h-full object-cover"
               aria-hidden="true"
             />
+            <span class="absolute right-2 bottom-1.5 text-[0.625rem] text-white/40 pointer-events-none">© участники OpenStreetMap</span>
             <a
               :href="MAP_LINK"
               target="_blank"
