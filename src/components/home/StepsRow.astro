@@ -8,6 +8,10 @@
  * Цены у шагов — src/data/services.ts; сноска о дате цен выводится,
  * только если у какого-то шага есть цена.
  *
+ * Тот же блок — на /about/ («Семейный бизнес»): там пункты не
+ * последовательность, поэтому без `num` — номера не выводятся, остаются
+ * только красные отрезки.
+ *
  * Анимация — одна: когда список доходит до экрана, красные отрезки шагов
  * прорисовываются по очереди слева направо, текст проявляется следом.
  * Без JS и при prefers-reduced-motion всё видно сразу.
@@ -16,31 +20,36 @@ import { howItWorksSteps, type HowStep } from '../../data/how-it-works'
 import { PRICES_DATE_LABEL } from '../../data/services'
 import { typograph } from '../../lib/typograph'
 
+type RowStep = Pick<HowStep, 'title' | 'text' | 'price'> & { num?: string }
+
 interface Props {
-  steps?: HowStep[]
+  steps?: RowStep[]
   title?: string
   lead?:  string
+  /** id секции — якорь; у каждой страницы свой */
+  id?:    string
 }
 const {
   steps = howItWorksSteps,
+  id    = 'process',
   title = 'Как мы работаем',
   lead  = 'От выбора модели до установки — без посредников и субподрядчиков.',
 } = Astro.props
 const hasPrices = steps.some((s) => s.price)
 ---
 
-<section id="process" class="h-sec steps" aria-labelledby="steps-heading">
+<section id={id} class="h-sec steps" aria-labelledby={`${id}-heading`}>
   <div class="container">
     <header class="h-head">
-      <h2 id="steps-heading" class="h-h2 steps__h2">{title}</h2>
+      <h2 id={`${id}-heading`} class="h-h2 steps__h2">{typograph(title)}</h2>
       <p class="h-lead steps__lead">{typograph(lead)}</p>
     </header>
 
     <ol class="steps__list" role="list" data-steps>
       {steps.map((s, i) => (
-        <li class="step" style={`--i: ${i}`}>
-          <span class="step__num" aria-hidden="true">{s.num}</span>
-          <h3 class="h-h3 step__title">{s.title}</h3>
+        <li class:list={['step', { 'step--plain': !s.num }]} style={`--i: ${i}`}>
+          {s.num && <span class="step__num" aria-hidden="true">{s.num}</span>}
+          <h3 class="h-h3 step__title">{typograph(s.title)}</h3>
           <p class="h-body step__text">{typograph(s.text)}</p>
           {s.price && (
             <p class="step__price">
@@ -120,6 +129,8 @@ const hasPrices = steps.some((s) => s.price)
     color: var(--h-signal);
   }
   .step__title { margin-top: 2.5rem; color: var(--color-white); }
+  /* Без номера заголовок встаёт сразу под отрезок */
+  .step--plain .step__title { margin-top: 0.5rem; }
   .step__text { margin-top: 0.75rem; max-width: 24rem; font-size: 0.9375rem; color: var(--color-slate-300); }
 
   .step__price {
@@ -160,6 +171,9 @@ const hasPrices = steps.some((s) => s.price)
     .step__title { grid-column: 2; margin-top: 0; }
     .step__text, .step__price { grid-column: 2; }
     .step__price { padding-top: 1rem; }
+    /* Без номера колонка под него не нужна — обычная колонка */
+    .step.step--plain { display: flex; }
+    .step--plain .step__title { margin-top: 0; }
   }
 
   /* ── Появление: отрезки по очереди, текст следом ── */

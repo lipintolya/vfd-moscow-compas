@@ -1,150 +1,329 @@
 ---
 /**
- * /about/ — «О салоне».
+ * /about/ — «О нас»: письмо основателя, история, фамильный бренд,
+ * «семейный бизнес» (тот же тёмный блок, что «Как мы работаем»
+ * на главной) и «Как к нам добраться».
  *
- * PLACEHOLDER: прежние тексты и фото были другого салона и удалены (см.
- * историю git). Пока здесь заглушки текста и фото + реальные контакты из
- * конфига. Страница закрыта noindex — снять вместе с наполнением.
+ * Тексты — src/data/about-page.ts, данные салона — src/config/site.ts.
+ * Фото салона (ABOUT_PHOTOS) пришлёт владелец: пока массив пуст,
+ * полоса фотографий не выводится.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
-import { companyLegalInfo } from '../lib/contacts-data'
-import { SITE, PHONE } from '../config/site'
+import StepsRow from '../components/home/StepsRow.astro'
+import VisitBand from '../components/home/VisitBand.astro'
+import {
+  FOUNDER, LETTER, MILESTONES, FAMILY_BRAND, ABOUT_PHOTOS, FAMILY_BUSINESS,
+} from '../data/about-page'
+import { SITE } from '../config/site'
+import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
+import { typograph } from '../lib/typograph'
+import '../styles/home.css'
 
-const title       = `О салоне — ${SITE.studioName}, ВФД в ТЦ «Компас»`
-const description = `${SITE.studioName} — шоу-рум Владимирской фабрики дверей в Москве: ${SITE.address.full}.`
+const title       = `О нас — ${SITE.studioName}, межкомнатные двери ${SITE.city.in}`
+const description =
+  `${SITE.studioName} — семейный бизнес: межкомнатные двери с 2014 года. ` +
+  `Салон ${SITE.name} ${SITE.city.in}, ${SITE.address.mall}. Отвечаем за каждую дверь своей фамилией.`
+const pageUrl = new URL('/about/', SITE.url).href
+
+const structuredData = [
+  localBusinessSchema(),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    url: pageUrl,
+    name: title,
+    description,
+    about: { '@id': LOCAL_BUSINESS_ID },
+    mainEntity: {
+      '@type': 'Person',
+      name: FOUNDER.name,
+      jobTitle: 'Основатель',
+      image: FOUNDER.photo.src,
+      worksFor: { '@id': LOCAL_BUSINESS_ID },
+    },
+  },
+]
 
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
-  { label: 'О салоне' },
+  { label: 'О нас' },
 ]
-
-const photoSlots = [1, 2, 3]
 ---
 
-<BaseLayout title={title} description={description} noIndex>
+<BaseLayout title={title} description={description} canonical={pageUrl} structuredData={structuredData}>
   <div class="breadcrumb-bar">
     <div class="container">
       <Breadcrumbs items={breadcrumbItems} />
     </div>
   </div>
 
-  <section class="section">
-    <div class="container">
-      <header class="max-w-3xl">
-        <h1 class="t-h1 m-0">О салоне</h1>
-        <p class="t-lead mt-4 mb-0">{`${SITE.studioName} — шоу-рум Владимирской фабрики дверей в Москве, ${SITE.address.mall}, ${SITE.address.floor}.`}</p>
-      </header>
+  <div class="home">
+    <!-- Письмо основателя -->
+    <section class="about-intro" aria-labelledby="about-title">
+      <div class="container">
+        <!-- Заголовок — знак коллаборации: «Студия Зизевского × VFD» -->
+        <h1 id="about-title" class="collab">
+          <span>{SITE.studioName}</span>{' '}
+          <span class="collab__x">×</span>{' '}
+          <span>VFD</span>
+        </h1>
 
-      <!-- PLACEHOLDER: текст о салоне -->
-      <div class="about-ph about-ph--text mt-10">
-        <p class="m-0">Текст о салоне появится позже.</p>
+        <div class="letter">
+          <figure class="letter__portrait">
+            <span class="letter__photo">
+              <img
+                src={FOUNDER.photo.src}
+                alt={`${FOUNDER.name}, ${FOUNDER.role}`}
+                width={FOUNDER.photo.width}
+                height={FOUNDER.photo.height}
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+              />
+            </span>
+            <figcaption>
+              <span class="letter__name">{FOUNDER.name}</span>
+              <span class="h-meta">{FOUNDER.role}</span>
+            </figcaption>
+          </figure>
+
+          <div class="letter__body">
+            <p class="letter__greeting">{typograph(LETTER.greeting)}</p>
+            {LETTER.paragraphs.map((p) => <p class="letter__p">{typograph(p)}</p>)}
+          </div>
+        </div>
       </div>
+    </section>
 
-      <!-- PLACEHOLDER: фото салона -->
-      <ul class="about-photos" role="list">
-        {photoSlots.map(() => (
-          <li class="about-ph about-ph--photo">Фото салона</li>
-        ))}
-      </ul>
+    <!-- Таймлайн — годы идут по порядку. Красная линия прорисовывается
+         один раз, когда блок доходит до экрана -->
+    <section class="h-sec h-sec--wall" aria-label="История компании">
+      <div class="container">
+        <ol class="tl" role="list" data-tl>
+          {MILESTONES.map((m, i) => (
+            <li class="tl__item" style={`--i: ${i}`}>
+              <span class="tl__value">{m.value}</span>
+              <span class="tl__label">{typograph(m.label)}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
 
-      <!-- Реальные контакты — из src/config/site.ts и contacts-data.ts -->
-      <dl class="about-facts">
-        <div>
-          <dt>Адрес</dt>
-          <dd>
-            {SITE.address.street}<br />{SITE.address.mall}, {SITE.address.floor}
-            <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="about-link">Построить маршрут</a>
-          </dd>
+    {ABOUT_PHOTOS.length > 0 && (
+      <section class="h-sec h-sec--tight-top about-photos" aria-label="Фото салона">
+        <div class="container">
+          <ul class="about-photos__list h-rail" role="list">
+            {ABOUT_PHOTOS.map((ph) => (
+              <li class="h-media about-photos__item">
+                <img src={ph.src} alt={ph.alt} width={ph.width} height={ph.height} loading="lazy" decoding="async" />
+              </li>
+            ))}
+          </ul>
         </div>
-        <div>
-          <dt>Часы работы</dt>
-          <dd>{companyLegalInfo.workingHours.shortDisplay}</dd>
-        </div>
-        <div>
-          <dt>Телефон</dt>
-          <dd>
-            <a href={`tel:${PHONE.raw}`} class="about-link about-link--strong">{PHONE.label}</a>
-            <span class="about-note">{SITE.contactPerson}</span>
-          </dd>
-        </div>
-        <div>
-          <dt>Telegram-канал</dt>
-          <dd>
-            <a href={SITE.social.telegram} target="_blank" rel="noopener" class="about-link about-link--strong">{SITE.social.telegramHandle}</a>
-          </dd>
-        </div>
-      </dl>
+      </section>
+    )}
 
-      <p class="mt-10 mb-0 text-sm text-slate-600">
-        Ещё по теме: <a href="/contacts/" class="about-link">контакты и схема проезда</a>.
-      </p>
-    </div>
-  </section>
+    <!-- Фамильный бренд — главный текст страницы, набран крупно -->
+    <section class="h-sec" aria-labelledby="brand-title">
+      <div class="container brand">
+        <h2 id="brand-title" class="h-h2 brand__title">{typograph(FAMILY_BRAND.title)}</h2>
+        <div class="brand__text">
+          {FAMILY_BRAND.paragraphs.map((p) => <p>{typograph(p)}</p>)}
+        </div>
+      </div>
+    </section>
+
+    <StepsRow id="family" title={FAMILY_BUSINESS.title} lead={FAMILY_BUSINESS.lead} steps={FAMILY_BUSINESS.points} />
+
+    <VisitBand lead="Приходите в салон: покажем двери вживую, подберём модель и цвет под ваш интерьер." />
+  </div>
 </BaseLayout>
 
-<style>
-  .about-ph {
-    display: grid;
-    place-items: center;
-    border-radius: 1.25rem;
-    background: var(--color-slate-100);
-    color: var(--color-slate-500);
-    font-size: 0.9375rem;
-    font-weight: 500;
+<script>
+  const tl = document.querySelector<HTMLElement>('[data-tl]')
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (tl && !still && 'IntersectionObserver' in window && tl.getBoundingClientRect().top > innerHeight) {
+    tl.dataset.tl = 'hidden'
+    const io = new IntersectionObserver(([e]) => {
+      if (!e?.isIntersecting) return
+      tl.dataset.tl = 'shown'
+      io.disconnect()
+    }, { rootMargin: '0px 0px -20% 0px' })
+    io.observe(tl)
   }
-  .about-ph--text { min-height: 10rem; padding: 2rem; }
-  .about-photos {
+</script>
+
+<style>
+  .about-intro { padding-block: clamp(1rem, 2vw, 1.5rem) var(--h-sec); }
+
+  /* «Студия Зизевского × VFD»: крестик — тонкий и приглушённый,
+     как в подписях коллабораций */
+  .collab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.3em;
+    margin: 0 0 clamp(2.5rem, 5vw, 4.5rem);
+    font-family: var(--h-font);
+    font-size: clamp(2.25rem, 6vw, 5rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: var(--h-ink);
+  }
+  .collab__x { font-weight: 200; color: var(--h-muted); }
+
+  /* Письмо: портрет слева (5 колонок), текст справа (с 7-й) */
+  .letter { display: grid; gap: 2rem var(--h-gutter); }
+  @media (min-width: 56.25rem) {
+    .letter { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+    .letter__portrait { grid-column: 1 / span 5; position: sticky; top: 6rem; }
+    .letter__body { grid-column: 7 / span 6; padding-top: 1rem; }
+  }
+
+  .letter__portrait { margin: 0; }
+  /* Портрет вырезан и упирается в левый и нижний края кадра — ставим его
+     в нижний левый угол подложки, сверху остаётся воздух */
+  .letter__photo {
+    display: flex;
+    align-items: flex-end;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
+  }
+  .letter__photo img { display: block; width: 78%; height: auto; margin-top: auto; }
+  .letter__portrait figcaption { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 1rem; }
+  .letter__name { font-weight: 600; color: var(--h-ink); }
+  @media (max-width: 56.1875rem) {
+    .letter__portrait { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr); gap: 1.25rem; align-items: end; }
+    .letter__portrait figcaption { margin-top: 0; }
+  }
+
+  .letter__greeting {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--h-ink);
+  }
+  .letter__p {
+    margin: 0;
+    max-width: 36em;
+    font-size: clamp(1.0625rem, 1.3vw, 1.1875rem);
+    line-height: 1.65;
+    color: var(--h-soft);
+    text-wrap: pretty;
+  }
+  .letter__p + .letter__p { margin-top: 1.125em; }
+
+  /* ── Таймлайн ──
+     Линейка через все вехи; поверх — красная линия, которая один раз
+     прорисовывается слева направо (на телефоне — сверху вниз).
+     Отметка вехи — короткий вертикальный штрих, не точка. */
+  .tl {
+    position: relative;
     display: grid;
-    gap: 1rem;
-    margin: 1.25rem 0 0;
+    gap: 2.5rem var(--h-gutter);
+    margin: 0;
     padding: 0;
     list-style: none;
   }
-  @media (min-width: 768px) {
-    .about-photos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tl::before,
+  .tl::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0.0625rem;
+    background: var(--h-rule);
   }
-  .about-ph--photo { aspect-ratio: 4 / 3; }
+  .tl::after {
+    height: 0.125rem;
+    top: -0.03125rem;
+    background: var(--h-signal);
+    transform-origin: left;
+    transition: transform 1800ms var(--ease-out);
+  }
+  [data-tl='hidden'].tl::after { transform: scaleX(0); }
 
-  .about-facts {
-    display: grid;
-    gap: 0;
-    margin: 3rem 0 0;
-    border-top: 1px solid var(--color-slate-200);
-  }
-  @media (min-width: 900px) {
-    .about-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 0; }
-    .about-facts > div + div { border-left: 1px solid var(--color-slate-200); padding-left: 1.5rem; }
-  }
-  .about-facts > div {
-    padding-block: 1.25rem;
-    border-bottom: 1px solid var(--color-slate-200);
-  }
-  @media (min-width: 900px) {
-    .about-facts > div { padding-block: 0; border-bottom: 0; }
-  }
-  .about-facts dt { font-size: 0.8125rem; color: var(--color-slate-500); }
-  .about-facts dd {
+  .tl__item {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin: 0.375rem 0 0;
-    font-size: 1.0625rem;
-    font-weight: 500;
-    line-height: 1.45;
-    color: var(--color-ink);
+    gap: 0.75rem;
+    padding-top: clamp(1.75rem, 3vw, 2.5rem);
   }
-  .about-note { font-size: 0.875rem; font-weight: 400; color: var(--color-slate-500); }
-  .about-link {
-    width: fit-content;
-    color: var(--color-ink);
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-color: var(--color-slate-300);
-    text-underline-offset: 0.25em;
+  .tl__item::before {
+    content: '';
+    position: absolute;
+    top: -0.5rem;
+    left: 0;
+    width: 0.125rem;
+    height: 1rem;
+    background: var(--h-ink);
   }
-  .about-link:hover { text-decoration-color: currentColor; }
-  .about-link--strong { font-size: 1.0625rem; font-weight: 500; text-decoration: none; }
-  .about-link--strong:hover { text-decoration: underline; }
+  .tl__value {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+    color: var(--h-ink);
+  }
+  .tl__label { max-width: 17rem; font-size: 0.9375rem; line-height: 1.5; color: var(--h-soft); }
+
+  /* Текст вех проявляется вслед за линией */
+  .tl__item > * { transition: opacity 700ms var(--ease-out) calc(var(--i) * 450ms + 200ms), translate 700ms var(--ease-out) calc(var(--i) * 450ms + 200ms); }
+  [data-tl='hidden'] .tl__item > * { opacity: 0; translate: 0 0.75rem; }
+
+  @media (min-width: 43.75rem) {
+    .tl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  /* Телефон: вертикальная линия слева */
+  @media (max-width: 43.6875rem) {
+    .tl { padding-left: 1.5rem; }
+    .tl::before, .tl::after { top: 0; bottom: 0; right: auto; width: 0.0625rem; height: auto; }
+    .tl::after { left: -0.03125rem; width: 0.125rem; transform-origin: top; }
+    [data-tl='hidden'].tl::after { transform: scaleY(0); }
+    .tl__item { padding-top: 0; }
+    .tl__item::before { top: 0.6em; left: -2rem; width: 1rem; height: 0.125rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tl::after, .tl__item > * { transition: none; }
+  }
+
+  .about-photos__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .about-photos__item { aspect-ratio: 4 / 5; }
+  .about-photos__item img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Фамильный бренд: заголовок слева, текст крупно справа */
+  .brand { display: grid; gap: 1.5rem var(--h-gutter); }
+  @media (min-width: 56.25rem) {
+    .brand { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .brand__title { grid-column: 1 / span 5; }
+    .brand__text  { grid-column: 7 / span 6; }
+  }
+  .brand__text p {
+    margin: 0;
+    font-size: clamp(1.375rem, 2.4vw, 2rem);
+    font-weight: 400;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    color: var(--h-ink);
+    text-wrap: pretty;
+  }
+  .brand__text p + p { margin-top: 1em; color: var(--h-soft); }
 </style>
