@@ -15,21 +15,25 @@ import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import {
-  FOUNDER, GREETING, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS,
+  FOUNDER, FOUNDER_QUOTE, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS,
 } from '../data/about-page'
 import { SITE } from '../config/site'
+import { VFD_DEALER, VFD_PHOTOS, VFD_ORG_ID, vfdOrganizationSchema } from '../data/vfd-factory'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
 import { typograph } from '../lib/typograph'
 import '../styles/home.css'
 
-const title       = `О нас — ${SITE.studioName}, межкомнатные двери ${SITE.city.in}`
+const title       = `О нас — ${SITE.studioName}, официальный дилер ${SITE.name} ${SITE.city.in}`
 const description =
-  `${SITE.studioName} — семейный бизнес: межкомнатные двери с 2014 года. ` +
-  `Салон ${SITE.name} ${SITE.city.in}, ${SITE.address.mall}. Отвечаем за каждую дверь своей фамилией.`
+  `${SITE.studioName} — официальный дилер ${SITE.manufacturerOf} ${SITE.city.in}. ` +
+  `Семейный бизнес: межкомнатные двери с 2014 года, салон в ${SITE.address.mall}.`
 const pageUrl = new URL('/about/', SITE.url).href
+/* Превью ссылки в соцсетях и мессенджерах — scripts/gen-og-about.mjs */
+const OG_IMAGE = new URL('/og/about.jpg', SITE.url).href
 
 const structuredData = [
   localBusinessSchema(),
+  vfdOrganizationSchema(),
   {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
@@ -37,11 +41,12 @@ const structuredData = [
     name: title,
     description,
     about: { '@id': LOCAL_BUSINESS_ID },
+    mentions: { '@id': VFD_ORG_ID },
     mainEntity: {
       '@type': 'Person',
       name: FOUNDER.name,
       jobTitle: 'Основатель',
-      image: FOUNDER.photo.src,
+      image: new URL(FOUNDER.photo.src, SITE.url).href,
       worksFor: { '@id': LOCAL_BUSINESS_ID },
     },
   },
@@ -53,7 +58,17 @@ const breadcrumbItems = [
 ]
 ---
 
-<BaseLayout title={title} description={description} canonical={pageUrl} structuredData={structuredData}>
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={pageUrl}
+  ogImage={OG_IMAGE}
+  ogImageMeta={{ width: 1200, height: 630, alt: `${SITE.studioName} × VFD — ${FOUNDER.name}` }}
+  structuredData={structuredData}
+  preloadImage={FOUNDER.photo.src}
+  preloadImageSrcset={FOUNDER.photo.srcset}
+  preloadImageSizes={FOUNDER.photo.sizes}
+>
   <div class="breadcrumb-bar">
     <div class="container">
       <Breadcrumbs items={breadcrumbItems} />
@@ -74,20 +89,85 @@ const breadcrumbItems = [
               <span class="collab__pair"><span class="collab__x">×</span> VFD</span>
             </h1>
 
-            <div class="cover__letter">
-              <p class="cover__greeting">{typograph(GREETING.title)}</p>
-              <p class="cover__p">{typograph(GREETING.text)}</p>
-            </div>
-
-            <p class="cover__sign">
-              <span class="cover__name">{FOUNDER.name}</span>
-              <span>{FOUNDER.role}</span>
-            </p>
+            <!-- Цитата основателя: blockquote + подпись в figcaption -->
+            <figure class="quote">
+              <div class="quote__body">
+                <p class="quote__greeting">{typograph(FOUNDER_QUOTE.greeting)}</p>
+                <blockquote class="quote__quote">
+                  <p class="quote__text">{typograph(FOUNDER_QUOTE.text.join(' '))}</p>
+                </blockquote>
+              </div>
+              <!-- Печать цитаты — один раз. Скрипт стоит сразу за цитатой и
+                   выполняется до первой отрисовки, поэтому полный текст не
+                   мелькает перед анимацией. Весь текст всё время в DOM (ещё
+                   не «напечатанная» часть прозрачная) — вёрстка не прыгает,
+                   поиск и экранные читалки видят цитату целиком. За кадр
+                   меняются два текстовых узла; по окончании разметка
+                   анимации снимается. Без JS и при reduced-motion — текст
+                   сразу. -->
+              <script is:inline>
+                (() => {
+                  const quote = document.currentScript.previousElementSibling
+                  if (!quote || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+                  // Скорость: приветствие медленнее, основной текст быстрее (мс на знак)
+                  const parts = [...quote.querySelectorAll('p')].map((p, i) => {
+                    const full = p.textContent
+                    const on = document.createElement('span')
+                    const off = document.createElement('span')
+                    on.className = 'tw-on'
+                    off.className = 'tw-off'
+                    off.textContent = full
+                    p.replaceChildren(on, off)
+                    return { p, full, on, off, ms: i === 0 ? 45 : 11, pause: i === 0 ? 0 : 280 }
+                  })
+                  let t0 = 0
+                  const plan = []
+                  for (const part of parts) {
+                    t0 += part.pause
+                    plan.push({ ...part, start: t0 })
+                    t0 += part.full.length * part.ms
+                  }
+                  const finish = () => plan.forEach(({ p, full }) => { p.textContent = full })
+                  const run = () => {
+                    const begin = performance.now()
+                    const frame = (now) => {
+                      const el = now - begin
+                      for (const part of plan) {
+                        const n = Math.max(0, Math.min(part.full.length, Math.floor((el - part.start) / part.ms)))
+                        if (part.on.textContent.length !== n) {
+                          part.on.textContent = part.full.slice(0, n)
+                          part.off.textContent = part.full.slice(n)
+                        }
+                        part.on.classList.toggle('tw-caret', el >= part.start && n < part.full.length)
+                      }
+                      if (el < t0) requestAnimationFrame(frame)
+                      else finish()
+                    }
+                    requestAnimationFrame(frame)
+                  }
+                  // Старт — когда цитата на экране (и после короткой паузы,
+                  // чтобы не совпасть с появлением шапки)
+                  if (!('IntersectionObserver' in window)) return finish()
+                  const io = new IntersectionObserver(([e]) => {
+                    if (!e?.isIntersecting) return
+                    io.disconnect()
+                    setTimeout(run, 350)
+                  })
+                  io.observe(quote)
+                })()
+              </script>
+              <figcaption class="quote__sign">
+                <span class="quote__name">{FOUNDER.name}</span>
+                <span>{FOUNDER.role}</span>
+              </figcaption>
+            </figure>
           </div>
 
           <div class="cover__photo">
             <img
               src={FOUNDER.photo.src}
+              srcset={FOUNDER.photo.srcset}
+              sizes={FOUNDER.photo.sizes}
               alt={`${FOUNDER.name}, ${FOUNDER.role}`}
               width={FOUNDER.photo.width}
               height={FOUNDER.photo.height}
@@ -139,10 +219,76 @@ const breadcrumbItems = [
       </div>
     </section>
 
+    <!-- Официальный дилер ВФД — о производителе: факты по данным фабрики,
+         фото и как устроено производство -->
+    <section class="h-sec" id="vfd" aria-labelledby="vfd-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="vfd-title" class="h-h2">{typograph(VFD_DEALER.title)}</h2>
+          <p class="h-lead">{typograph(VFD_DEALER.lead)}</p>
+        </header>
+
+        <dl class="vfd-facts">
+          {VFD_DEALER.facts.map((f) => (
+            <div>
+              <dt class="vfd-facts__value">{f.value}</dt>
+              <dd class="h-meta">{typograph(f.label)}</dd>
+            </div>
+          ))}
+        </dl>
+        <p class="h-meta vfd-source">{VFD_DEALER.source}</p>
+
+        <!-- Фото фабрики: ПК — сетка 2×2 слева от пунктов, планшет — ряд из
+             четырёх, телефон — лента со свайпом (.h-rail). Клик — окно
+             просмотра с крупными кадрами -->
+        <div class:list={['vfd', { 'vfd--photos': VFD_PHOTOS.length > 0 }]}>
+          {VFD_PHOTOS.length > 0 && (
+            <div class="vfd__gallery">
+              <ul
+                class="vfd__photos h-rail"
+                role="list"
+                data-lightbox
+                data-lightbox-images={JSON.stringify(VFD_PHOTOS.map((p) => ({ src: p.large, alt: p.alt })))}
+              >
+                {VFD_PHOTOS.map((ph, i) => (
+                  <li class="vfd__photo">
+                    <button type="button" class="h-media vfd__zoom" aria-label={`Открыть фото: ${ph.alt}`} data-lightbox-index={i}>
+                      <img
+                        src={ph.src}
+                        srcset={ph.srcset}
+                        sizes="(min-width: 80rem) 18rem, (min-width: 62.5rem) 24vw, (min-width: 43.75rem) 25vw, 82vw"
+                        alt={ph.alt}
+                        width={ph.width}
+                        height={ph.height}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p class="h-meta vfd__hint" aria-hidden="true">{VFD_PHOTOS.length} фото — листайте</p>
+            </div>
+          )}
+
+          <ul class="vfd__features" role="list">
+            {VFD_DEALER.features.map((f) => (
+              <li>
+                <h3 class="h-h3 vfd__feature-title">{f.title}</h3>
+                <p class="h-body">{typograph(f.text)}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <a href={VFD_DEALER.cta.href} class="h-btn h-btn--ink vfd__cta">{VFD_DEALER.cta.label}</a>
+      </div>
+    </section>
+
     <!-- Собственное производство: на ПК — сетка (широкий кадр на две колонки),
          на телефоне — лента со свайпом (.h-rail). Клик — лайтбокс
          с крупными версиями кадров -->
-    <section class="h-sec" aria-labelledby="factory-title">
+    <section class="h-sec h-sec--wall" aria-labelledby="factory-title">
       <div class="container">
         <header class="h-head">
           <h2 id="factory-title" class="h-h2">{FACTORY.title}</h2>
@@ -275,41 +421,64 @@ const breadcrumbItems = [
   .collab__x { font-weight: 200; color: var(--color-slate-500); }
   .collab__pair { white-space: nowrap; }
 
-  .cover__letter { margin-top: auto; }
-  .cover__greeting {
+  /* ── Цитата основателя ──
+     Приветствие — строкой над цитатой; кавычки — в самом тексте цитаты.
+     Открывающая вынесена за левый край (висячая пунктуация), чтобы буквы
+     цитаты стояли ровно по одной линии с приветствием и заголовком.
+     Подпись — под линейкой, как в письме. */
+  .quote { margin: auto 0 0; }
+  .quote__body { margin: 0; }
+  .quote__quote { margin: 0; }
+
+  /* Печать (скрипт в разметке): ещё не напечатанное — прозрачное, место
+     занимает; курсор — тонкая красная черта без ширины в вёрстке
+     (отрицательный отступ), мигает только пока идёт печать */
+  .quote__body :global(.tw-off) { color: transparent; }
+  .quote__body :global(.tw-caret)::after {
+    content: '';
+    display: inline-block;
+    width: 0.08em;
+    height: 1em;
+    margin-right: -0.08em;
+    vertical-align: -0.12em;
+    background: var(--color-accent-500);
+    animation: tw-blink 900ms steps(1) infinite;
+  }
+  @keyframes tw-blink { 50% { opacity: 0; } }
+  .quote__greeting {
     margin: 0;
     font-size: clamp(1.375rem, 2.2vw, 1.75rem);
     font-weight: var(--h-weight-display);
     line-height: 1.25;
     letter-spacing: -0.02em;
   }
-  .cover__p {
-    margin: 0.75rem 0 0;
-    max-width: 28em;
-    font-size: clamp(1.0625rem, 1.3vw, 1.1875rem);
+  .quote__text {
+    margin: 0.875rem 0 0;
+    text-indent: -0.5em;
+    max-width: 30em;
+    font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
     line-height: 1.6;
     color: var(--color-slate-300);
+    text-wrap: pretty;
   }
-
-  /* Подпись — как в письме: под линейкой */
-  .cover__sign {
+  .quote__sign {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    margin: 0;
+    margin-top: clamp(1.75rem, 3vw, 2.5rem);
     padding-top: 1.25rem;
     border-top: 0.0625rem solid var(--color-slate-700);
     font-size: 0.875rem;
     color: var(--color-slate-400);
   }
-  .cover__name { font-size: 1rem; font-weight: 600; color: var(--color-white); }
+  .quote__name { font-size: 1rem; font-weight: 600; color: var(--color-white); }
 
   /* Телефон и планшет: портрет сверху, его низ растворяется в плитке */
   @media (max-width: 56.1875rem) {
     .cover__photo { order: -1; aspect-ratio: 1; max-height: 28rem; }
     .cover__photo img { mask-image: linear-gradient(180deg, var(--color-white) 62%, transparent 100%); }
     .cover__text { padding-top: 0; }
-    .cover__letter { margin-top: 0; }
+    .quote { margin-top: 0; }
   }
 
   /* Шапка секции слева (5 колонок), содержимое справа (с 7-й) —
@@ -476,6 +645,77 @@ const breadcrumbItems = [
     .factory__zoom img { transition: none; }
     .factory__zoom:hover img { transform: none; }
   }
+
+  /* ── Официальный дилер ВФД ── */
+  /* Факты — как вехи и факты первого экрана: под линейкой, цифра — вес 300 */
+  .vfd-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem var(--h-gutter);
+    margin: 0;
+  }
+  @media (min-width: 56.25rem) { .vfd-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .vfd-facts > div { padding-top: 1rem; border-top: 0.0625rem solid var(--h-rule); }
+  .vfd-facts__value {
+    font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--h-ink);
+  }
+  .vfd-facts dd { margin: 0.5rem 0 0; max-width: 15rem; }
+  .vfd-source { margin: 1.25rem 0 0; }
+
+  /* Производство: с фото — фото слева (6 колонок), пункты справа;
+     без фото — пункты сеткой 2×2 во всю ширину */
+  .vfd { display: grid; gap: 2rem var(--h-gutter); margin-top: clamp(3rem, 6vw, 4.5rem); }
+  @media (min-width: 62.5rem) {
+    .vfd--photos { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+    .vfd--photos .vfd__gallery { grid-column: 1 / span 6; }
+    .vfd--photos .vfd__features { grid-column: 8 / span 5; grid-template-columns: 1fr; }
+  }
+  /* Сетка: телефон — лента (.h-rail перекрывает), планшет — ряд из четырёх,
+     ПК — 2×2. Кадры квадратные — как исходники, без обрезки */
+  .vfd__photos {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 62.5rem) { .vfd__photos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .vfd__photo { aspect-ratio: 1; }
+  .vfd__zoom {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+  }
+  .vfd__zoom img { transition: transform 700ms var(--ease-out); }
+  .vfd__zoom:hover img { transform: scale(1.025); }
+  .vfd__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
+  /* Подсказка про свайп — только на телефоне, где сетка стала лентой */
+  .vfd__hint { display: none; margin: 1rem 0 0; }
+  @media (max-width: 43.6875rem) { .vfd__hint { display: block; } }
+  @media (prefers-reduced-motion: reduce) {
+    .vfd__zoom img { transition: none; }
+    .vfd__zoom:hover img { transform: none; }
+  }
+
+  .vfd__features {
+    display: grid;
+    gap: 0 var(--h-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 43.75rem) { .vfd__features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .vfd__features li { padding-block: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
+  .vfd__feature-title { margin-bottom: 0.5rem; }
+  .vfd__cta { margin-top: clamp(2rem, 4vw, 3rem); }
 
   /* Фамильный бренд — главный текст страницы, набран крупно */
   .brand__text p {

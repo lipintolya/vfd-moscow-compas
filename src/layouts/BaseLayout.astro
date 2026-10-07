@@ -11,6 +11,10 @@ interface Props {
   title?:         string
   description?:   string
   ogImage?:       string
+  /** Размер и описание og:image — с ними мессенджеры сразу рисуют крупное
+      превью, не скачивая картинку для замера. Только для своих картинок
+      с известным размером (например, /og/*.jpg 1200×630). */
+  ogImageMeta?:   { width: number; height: number; alt: string }
   ogType?:        'website' | 'article'
   noIndex?:       boolean
   canonical?:     string
@@ -33,6 +37,7 @@ const {
   title        = 'Двери ВФД в ТЦ «Компас» — Салон дверей в Москве',
   description  = 'Фирменный салон дверей и алюминиевых перегородок в ТЦ «Компас» (ул. Красная Сосна, 2А, 3 этаж): межкомнатные и скрытые двери Владимирской фабрики дверей.',
   ogImage      = HERO_COVER_IMAGE,
+  ogImageMeta,
   ogType       = 'website',
   noIndex      = false,
   canonical,
@@ -60,6 +65,13 @@ const structuredDataJson = structuredData
     <meta property="og:title"        content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image"       content={ogImage} />
+    {ogImageMeta && (
+      <>
+        <meta property="og:image:width"  content={String(ogImageMeta.width)} />
+        <meta property="og:image:height" content={String(ogImageMeta.height)} />
+        <meta property="og:image:alt"    content={ogImageMeta.alt} />
+      </>
+    )}
     <meta property="og:type"        content={ogType} />
 
     {ogType === 'article' && publishedTime && (

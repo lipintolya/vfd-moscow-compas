@@ -324,7 +324,10 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   .stage.is-paused .way.is-current .way__progress::after { animation: none; transform: scaleX(1); }
   @keyframes way-fill { to { transform: scaleX(1); } }
 
-  @media (min-width: 56.25rem) {
+  /* Три колонки — с 64rem: уже (56–64rem, планшет в альбомной ориентации)
+     колонка уже кнопки «Смотреть перегородки» и та вылезала за панель.
+     До 64rem — список строк со стрелками, как на телефоне. */
+  @media (min-width: 64rem) {
     .ways {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       padding: 1.5rem 0;
@@ -360,7 +363,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       font-size: 0.875rem;
       font-weight: 600;
       line-height: 1;
-      white-space: nowrap;
+      /* Страховка: не помещается — перенос в две строки, а не выход за колонку */
+      max-width: 100%;
+      text-align: left;
       transition: background-color 180ms var(--ease-out);
     }
     .way:hover .way__btn, .way:focus-visible .way__btn { background: var(--h-signal); }

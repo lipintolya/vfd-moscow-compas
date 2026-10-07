@@ -244,7 +244,7 @@ onUnmounted(() => {
 
           <!-- Navigation -->
           <nav aria-label="Навигация футера">
-            <h2 class="text-sm font-semibold text-white mb-4 uppercase tracking-widest">
+            <h2 class="ftr-title text-sm font-semibold text-white mb-4 uppercase tracking-widest">
               Навигация
             </h2>
             <ul class="space-y-2.5 text-sm">
@@ -261,7 +261,7 @@ onUnmounted(() => {
 
           <!-- Categories -->
           <nav aria-label="Категории товаров">
-            <h2 class="text-sm font-semibold text-white mb-4 uppercase tracking-widest">
+            <h2 class="ftr-title text-sm font-semibold text-white mb-4 uppercase tracking-widest">
               Категории
             </h2>
             <ul class="space-y-2.5 text-sm">
@@ -278,7 +278,7 @@ onUnmounted(() => {
 
           <!-- Contacts -->
           <address class="not-italic">
-            <h2 class="text-sm font-semibold text-white mb-4 uppercase tracking-widest">
+            <h2 class="ftr-title text-sm font-semibold text-white mb-4 uppercase tracking-widest">
               Контакты
             </h2>
             <ul class="space-y-3 text-sm">
@@ -311,7 +311,7 @@ onUnmounted(() => {
         <!-- ── Как нас найти: адрес + мини-карта ── -->
         <div class="mt-12 pt-10 border-t border-white/10 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.3fr] lg:items-center lg:gap-10">
           <div>
-            <h2 class="text-sm font-semibold text-white mb-4 uppercase tracking-widest">
+            <h2 class="ftr-title text-sm font-semibold text-white mb-4 uppercase tracking-widest">
               Как нас найти
             </h2>
             <p class="text-base font-medium text-white">{{ CONTACTS.address }}</p>
@@ -636,6 +636,11 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* Заголовки колонок — основной шрифт (Manrope), как подписи в шапке.
+   Глобальное правило h1–h6 ставит Rubik вне слоёв Tailwind, утилита
+   его не перебьёт — поэтому класс здесь. Заодно на страницах в стиле
+   главной не грузится Rubik (~50 КБ) ради четырёх подписей. */
+.ftr-title { font-family: var(--font-sans); }
 /* Модалка разработчика: на мобильном выезжает снизу (bottom sheet),
    на ПК — лёгкий подъём с прозрачностью. */
 .dev-modal-enter-active,

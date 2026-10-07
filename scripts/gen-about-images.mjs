@@ -28,6 +28,50 @@ await mkdir(OUT_DIR, { recursive: true })
    в формате { src, out, width, quality } и вывести их на /about/. */
 const jobs = []
 
+/* ── Портрет основателя — обложка /about/ (LCP страницы) ──
+   Локально, а не из облака: без отдельного соединения с хранилищем
+   кадр приходит раньше, его можно заранее загрузить (preload).
+   Исходник — квадрат 640, поэтому 640 — потолок; 400 — для телефонов 1x. */
+{
+  const src = 'https://storage.yandexcloud.net/vfd.moscow.compass/about.block/ceo/ceo_main.webp'
+  const res = await fetch(src)
+  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
+  const buf = Buffer.from(await res.arrayBuffer())
+  for (const w of [400, 640]) {
+    const out = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 80 }).toBuffer()
+    await writeFile(new URL(`founder-${w}.webp`, OUT_DIR), out)
+    console.log(`founder-${w}.webp: ${(buf.length / 1024).toFixed(0)}KB -> ${(out.length / 1024).toFixed(0)}KB`)
+  }
+}
+
+/* ── Фото Владимирской фабрики дверей (блок «Официальный дилер») ──
+   Исходники — квадраты 850; 480 — для сетки 2×2 на обычных экранах,
+   850 — retina и окно просмотра. Размеры — в about-vfd-photos.json. */
+{
+  const SRC = 'https://storage.yandexcloud.net/vfd.moscow.compass/about.block/factory/'
+  const COUNT = 4
+  const WIDTHS = [480, 850]
+  const photos = []
+  for (let n = 1; n <= COUNT; n++) {
+    const src = `${SRC}card_${n}.webp`
+    const res = await fetch(src)
+    if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
+    const buf = Buffer.from(await res.arrayBuffer())
+    const meta = await sharp(buf).metadata()
+    for (const w of WIDTHS) {
+      const out = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 78 }).toBuffer()
+      await writeFile(new URL(`vfd-${n}-${w}.webp`, OUT_DIR), out)
+      console.log(`vfd-${n}-${w}.webp: ${(buf.length / 1024).toFixed(0)}KB -> ${(out.length / 1024).toFixed(0)}KB`)
+    }
+    const big = Math.min(WIDTHS.at(-1), meta.width)
+    photos.push({ n, width: big, height: Math.round(meta.height * big / meta.width) })
+  }
+  await writeFile(
+    new URL('../src/data/about-vfd-photos.json', import.meta.url),
+    JSON.stringify({ widths: WIDTHS, photos }, null, 2) + '\n',
+  )
+}
+
 /* ── Фото производства ── */
 const FACTORY_SRC = 'https://storage.yandexcloud.net/vfd.moscow.compass/about.block/factory/'
 const FACTORY_COUNT = 11

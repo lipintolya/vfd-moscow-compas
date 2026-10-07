@@ -33,6 +33,8 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
     /* Салон и здание ТЦ снаружи — по фото здания карты и поиск
        узнают место */
     image: [HERO_COVER_IMAGE, SITE.address.photo, ...MALL_PHOTOS.map((p) => p.url)],
+    /* Салон — официальный дилер фабрики: её марка продаётся здесь */
+    brand: { '@type': 'Brand', name: SITE.manufacturer },
     address: {
       '@type': 'PostalAddress',
       streetAddress: `${SITE.address.street}, ${SITE.address.mall}, ${SITE.address.floor}`,
