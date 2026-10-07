@@ -9,6 +9,13 @@
  *
  * Действия — две кнопки: маршрут в Яндекс Картах и копирование адреса.
  *
+ * Появление карты — один раз, когда она доходит до экрана: карта мягко
+ * «наезжает», проявляются кварталы, прорисовываются улицы (pathLength=1 +
+ * stroke-dashoffset), подсвечивается здание ТЦ, падает метка и выезжает
+ * её карточка; пульс метки — три раза и затихает. Только opacity,
+ * transform и прорисовка линий. Без JS и при reduced-motion — сразу
+ * готовая карта.
+ *
  * Под картой — фото ТЦ с улицы (src/data/mall-photos.ts), чтобы здание
  * узнавали на месте: на ПК ряд из четырёх, на телефоне — лента со свайпом.
  * Подписи с адресом — для поиска по картинкам; те же фото — в
@@ -78,16 +85,16 @@ const L = map.layers
       </div>
     </div>
 
-    <figure class="h-media visit__map">
+    <figure class="h-media visit__map" data-map>
       <svg class="map" viewBox={`0 0 ${map.width} ${map.height}`} aria-hidden="true" focusable="false">
         <path class="map__green" d={L.green} />
         <path class="map__water" d={L.water} />
         <path class="map__river" d={L.river} />
         <path class="map__building" d={L.building} />
-        <path class="map__minor" d={L.minor} />
+        <path class="map__minor map__road" d={L.minor} pathLength="1" />
         <path class="map__rail" d={L.rail} />
-        <path class="map__major-case" d={L.major} />
-        <path class="map__major" d={L.major} />
+        <path class="map__major-case map__road" d={L.major} pathLength="1" />
+        <path class="map__major map__road" d={L.major} pathLength="1" />
         <path class="map__mall" d={L.mall} />
       </svg>
 
@@ -116,7 +123,7 @@ const L = map.layers
     {mallPhotos && (
       <figure class="mall">
         <figcaption class="mall__head">
-          <h3 class="h-h3">{SITE.address.mallFull}</h3>
+          <h3 class="h-h3">{typograph(`${SITE.address.mallFull} ${SITE.city.in}`)}</h3>
           <p class="h-meta">{typograph(`Как здание выглядит с улицы. Салон — ${SITE.address.floorIn}.`)}</p>
         </figcaption>
         <ul
@@ -149,6 +156,23 @@ const L = map.layers
 
 <script>
   import { initLightboxGroups } from '../../lib/lightbox'
+
+  /* Появление карты: прячем, если на экране не больше краешка карты
+     (верх ниже 70% высоты окна). Если её уже заметно видно — якорь,
+     возврат назад — показываем сразу, без анимации. Дальше один раз по
+     IntersectionObserver. Сам сценарий — CSS-переходы с задержками. */
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    document.querySelectorAll<HTMLElement>('[data-map]').forEach((map) => {
+      if (map.getBoundingClientRect().top < innerHeight * 0.7) return
+      map.dataset.map = 'hidden'
+      const io = new IntersectionObserver(([e]) => {
+        if (!e?.isIntersecting) return
+        map.dataset.map = 'shown'
+        io.disconnect()
+      }, { rootMargin: '0px 0px -20% 0px' })
+      io.observe(map)
+    })
+  }
 
   /* Фото ТЦ — открываются крупно в общем окне просмотра */
   initLightboxGroups()
@@ -295,7 +319,8 @@ const L = map.layers
     inset: 0;
     border-radius: 50%;
     background: var(--h-signal);
-    animation: pin-pulse 2400ms var(--ease-out) infinite;
+    /* Три волны и тишина — без бесконечного мигания */
+    animation: pin-pulse 2400ms var(--ease-out) 1.8s 3 both;
   }
   @keyframes pin-pulse {
     from { opacity: 0.45; scale: 1; }
@@ -345,7 +370,45 @@ const L = map.layers
     .map__label { font-size: 0.625rem; }
     .map__label--minor { display: none; }
   }
+  /* ── Появление карты ([data-map] — скрипт выше) ──
+     Порядок: «камера» и кварталы → улицы → здание ТЦ и подписи → метка →
+     карточка. Скрытое состояние — только у [data-map='hidden']; показ —
+     те же свойства без задержки отката. */
+  .map { transition: scale 1600ms var(--ease-out); transform-origin: 50% 50%; }
+  .map .map__green,
+  .map .map__building,
+  .map .map__river,
+  .map .map__rail { transition: opacity 800ms var(--ease-out); }
+  .map .map__building { transition-delay: 120ms; }
+  .map .map__rail { transition-delay: 300ms; }
+  /* Улица — штрих длиной во весь путь (pathLength=1): сдвиг 1 → 0 прорисовывает её */
+  .map .map__road {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1400ms var(--ease-out) 250ms;
+  }
+  .map .map__minor { transition-delay: 450ms; }
+  .map .map__mall {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+    transition: opacity 500ms var(--ease-out) 1000ms, scale 700ms var(--ease-out) 1000ms;
+  }
+  .map__label { transition: opacity 600ms var(--ease-out) 1000ms; }
+  .map__pin > * { transition: opacity 400ms var(--ease-out) 1300ms, translate 600ms cubic-bezier(0.34, 1.4, 0.64, 1) 1300ms; }
+  .map__card { transition-delay: 1550ms; }
+
+  [data-map='hidden'] .map { scale: 1.08; }
+  [data-map='hidden'] .map :is(.map__green, .map__building, .map__river, .map__rail) { opacity: 0; }
+  [data-map='hidden'] .map .map__road { stroke-dashoffset: 1; }
+  [data-map='hidden'] .map .map__mall { opacity: 0; scale: 0.6; }
+  [data-map='hidden'] .map__label { opacity: 0; }
+  [data-map='hidden'] .map__dot { opacity: 0; translate: -50% -180%; }
+  [data-map='hidden'] .map__card { opacity: 0; translate: -0.5rem 0; }
+  /* Пульс — только после появления метки */
+  [data-map='hidden'] .map__dot::after { animation-play-state: paused; }
+
   @media (prefers-reduced-motion: reduce) {
     .map__dot::after { animation: none; opacity: 0; }
+    .map, .map path, .map__label, .map__pin > * { transition: none; }
   }
 </style>

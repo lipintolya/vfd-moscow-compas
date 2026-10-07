@@ -6,9 +6,14 @@
 import { SITE } from '../config/site'
 import factoryPhotos from './about-factory-photos.json'
 
+/* Вторая часть заголовка-коллаборации «Студия Зизевского × фабрика VFD»
+   (h1 /about/, превью /og/about.jpg — scripts/gen-og-about.mjs читает
+   эту строку) */
+export const COLLAB_PARTNER = 'фабрика VFD'
+
 export const FOUNDER = {
   name: SITE.contactPerson,
-  role: 'основатель студии',
+  role: SITE.contactRole,
   /* Студийный портрет на тёмном фоне, квадрат. Локальные копии —
      scripts/gen-about-images.mjs (исходник — about.block/ceo/ceo_main.webp) */
   photo: {

@@ -1,18 +1,24 @@
 /**
- * Данные компании согласно законодательству РФ.
- * Бренд, адрес, телефоны и соцсети берутся из src/config/site.ts.
- * ⚠ Реквизиты и ФИО — PLACEHOLDER, заменить реальными данными салона.
+ * Данные салона для сайта.
+ * Бренд, адрес салона, телефоны и соцсети берутся из src/config/site.ts.
+ *
+ * Владелец сайта — физическое лицо (решение владельца, 2026-10-07):
+ * реквизиты юрлица (карточка ООО) на сайте не публикуются. Имя владельца
+ * для политики конфиденциальности — ownerName; пока пусто, политика
+ * называет оператором «владельца сайта» без ФИО.
  */
 import { SITE } from '../config/site'
 
+/** Почта задана? Пока в конфиге заглушка — адрес на сайте не выводим */
+export const HAS_EMAIL = !/placeholder/i.test(SITE.email)
+
 export const companyLegalInfo = {
-  // Основные реквизиты
-  fullName: 'FULL_LEGAL_NAME_PLACEHOLDER', // напр. «Индивидуальный предприниматель …» / «ООО …»
+  /** ФИО владельца сайта (оператора персональных данных) — уточнить у владельца */
+  ownerName: '',
   shortName: SITE.fullName,
 
   // Адреса
   address: {
-    legal: 'LEGAL_ADDRESS_PLACEHOLDER',
     postal: `г. ${SITE.city.name}, ${SITE.address.street}`,
     entrance: `${SITE.address.mall}, ${SITE.address.floor}`,
     coordinates: SITE.address.coordinates,
@@ -25,17 +31,6 @@ export const companyLegalInfo = {
     website: SITE.url,
   },
 
-  // Реквизиты
-  requisites: {
-    ogrnip: 'OGRN_PLACEHOLDER',
-    inn: 'INN_PLACEHOLDER',
-    okpo: '',
-    okato: '',
-    oktmo: '',
-    pfr_number: '',
-    fss_number: '',
-  },
-
   // Время работы салона — ежедневно 11:00–20:00
   workingHours: {
     weekdays: { opens: '11:00', closes: '20:00', label: 'Пн–Пт: 11:00–20:00' },
@@ -44,29 +39,11 @@ export const companyLegalInfo = {
     shortDisplay: 'Ежедневно: 11:00–20:00',
   },
 
-  // Сведения о руководителе — PLACEHOLDER
-  director: {
-    firstName: '',
-    lastName: '',
-    middleName: '',
-    fullName: 'DIRECTOR_NAME_PLACEHOLDER',
-    position: '',
-    experience: '',
-  },
-
   // Информация о деятельности
   activity: {
-    founded: 0, // TODO: год открытия салона
-    registered: '',
+    founded: 0, // год открытия салона в «Компасе» — уточнить у владельца
     description: `${SITE.fullName}. Межкомнатные и скрытые двери, алюминиевые перегородки — подбор, замер и монтаж ${SITE.city.in}.`,
     license: 'Торговля допускается без лицензии',
-  },
-
-  // СПД и налоги — PLACEHOLDER
-  taxation: {
-    system: '',
-    regime: '',
-    tax_office: '',
   },
 
   // Рабочее время для поисковых систем (schema.org) — синхронно с workingHours
@@ -74,8 +51,8 @@ export const companyLegalInfo = {
     { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
   ],
 
-  // Способы оплаты
-  paymentMethods: ['Наличные', 'Карты (Visa, MasterCard, Maestro)', 'Переводы через Сбербанк'],
+  // Способы оплаты — только названия, без подробностей
+  paymentMethods: ['Наличные', 'Банковская карта', 'Безналичный расчёт', 'QR-код СБП'],
 
   // Социальные сети — только Telegram-канал (см. SITE.social)
   socialMedia: [

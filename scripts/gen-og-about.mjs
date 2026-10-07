@@ -6,6 +6,7 @@
  * и снимается headless Chrome — так текст набран тем же шрифтом, что на
  * сайте (sharp/SVG шрифт woff2 не подхватит). Тексты и цвета не
  * дублируются: имя студии и адрес читаются из src/config/site.ts,
+ * вторая часть заголовка — COLLAB_PARTNER из src/data/about-page.ts,
  * цвета — из токенов src/styles/global.css.
  *
  * JPEG, а не WebP: WebP в превью понимают не все мессенджеры.
@@ -29,6 +30,7 @@ const CHROME = process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Conte
 
 /* ── Данные — из конфига и токенов ── */
 const site = await readFile(root('src/config/site.ts'), 'utf-8')
+const aboutData = await readFile(root('src/data/about-page.ts'), 'utf-8')
 const css = await readFile(root('src/styles/global.css'), 'utf-8')
 const pick = (src, re, what) => {
   const m = src.match(re)
@@ -38,6 +40,7 @@ const pick = (src, re, what) => {
 const studio = pick(site, /studioName:\s*'([^']+)'/, 'SITE.studioName')
 const mall = pick(site, /mall:\s*'([^']+)'/, 'SITE.address.mall')
 const street = pick(site, /street:\s*'([^']+)'/, 'SITE.address.street')
+const partner = pick(aboutData, /COLLAB_PARTNER = '([^']+)'/, 'COLLAB_PARTNER')
 const cityIn = pick(site, /\bin:\s*'([^']+)'/, 'SITE.city.in')
 const color = (name) => pick(css, new RegExp(`--color-${name}:\\s*(#[0-9a-fA-F]{3,8})`), `--color-${name}`)
 const c = {
@@ -63,7 +66,7 @@ h1 .x { font-weight: 200; color: ${c.x}; }
 <img class="photo" src="file://${file('public/renders/about/founder-640.webp')}">
 <div class="text">
   <p class="kicker">Двери ${cityIn}</p>
-  <h1>${studio}<br><span class="x">×</span> VFD</h1>
+  <h1>${studio}<br><span class="x">×</span> ${partner}</h1>
   <p class="lead">Семейный бизнес с&nbsp;2014 года. Межкомнатные двери ${cityIn.replace(' ', '&nbsp;')}</p>
 </div>
 <p class="foot">${mall}, ${street}</p>

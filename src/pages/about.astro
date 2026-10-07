@@ -15,10 +15,10 @@ import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import {
-  FOUNDER, FOUNDER_QUOTE, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS,
+  COLLAB_PARTNER, FOUNDER, FOUNDER_QUOTE, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS,
 } from '../data/about-page'
 import { SITE } from '../config/site'
-import { VFD_DEALER, VFD_PHOTOS, VFD_ORG_ID, vfdOrganizationSchema } from '../data/vfd-factory'
+import { VFD_DEALER, VFD_CARDS, VFD_ORG_ID, vfdOrganizationSchema } from '../data/vfd-factory'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
 import { typograph } from '../lib/typograph'
 import '../styles/home.css'
@@ -63,7 +63,7 @@ const breadcrumbItems = [
   description={description}
   canonical={pageUrl}
   ogImage={OG_IMAGE}
-  ogImageMeta={{ width: 1200, height: 630, alt: `${SITE.studioName} × VFD — ${FOUNDER.name}` }}
+  ogImageMeta={{ width: 1200, height: 630, alt: `${SITE.studioName} × ${COLLAB_PARTNER} — ${FOUNDER.name}` }}
   structuredData={structuredData}
   preloadImage={FOUNDER.photo.src}
   preloadImageSrcset={FOUNDER.photo.srcset}
@@ -82,11 +82,11 @@ const breadcrumbItems = [
       <div class="container">
         <div class="cover">
           <div class="cover__text">
-            <!-- Знак коллаборации: «Студия Зизевского × VFD» -->
+            <!-- Знак коллаборации: «Студия Зизевского × фабрика VFD» -->
             <h1 id="about-title" class="collab">
               <span>{SITE.studioName}</span>{' '}
-              <!-- «× VFD» не разрывается: крестик не повисает в конце строки -->
-              <span class="collab__pair"><span class="collab__x">×</span> VFD</span>
+              <!-- «× фабрика VFD» не разрывается: крестик не повисает в конце строки -->
+              <span class="collab__pair"><span class="collab__x">×</span> {COLLAB_PARTNER}</span>
             </h1>
 
             <!-- Цитата основателя: blockquote + подпись в figcaption -->
@@ -219,69 +219,61 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Официальный дилер ВФД — о производителе: факты по данным фабрики,
-         фото и как устроено производство -->
+    <!-- Официальный дилер ВФД.
+         ПК: слева закреплённая колонка — заголовок, пояснение, цифры фабрики
+         (по данным vfd.ru), кнопка; справа — четыре карточки «фото + подпись»:
+         каждый пункт о производстве — под своим кадром, как табличка у
+         образца. Телефон: вводная часть, затем лента карточек со свайпом.
+         Клик по фото — окно просмотра. -->
     <section class="h-sec" id="vfd" aria-labelledby="vfd-title">
-      <div class="container">
-        <header class="h-head">
+      <div class="container vfd">
+        <div class="vfd__intro">
           <h2 id="vfd-title" class="h-h2">{typograph(VFD_DEALER.title)}</h2>
-          <p class="h-lead">{typograph(VFD_DEALER.lead)}</p>
-        </header>
+          <p class="h-lead vfd__lead">{typograph(VFD_DEALER.lead)}</p>
 
-        <dl class="vfd-facts">
-          {VFD_DEALER.facts.map((f) => (
-            <div>
-              <dt class="vfd-facts__value">{f.value}</dt>
-              <dd class="h-meta">{typograph(f.label)}</dd>
-            </div>
-          ))}
-        </dl>
-        <p class="h-meta vfd-source">{VFD_DEALER.source}</p>
+          <dl class="vfd__facts">
+            {VFD_DEALER.facts.map((f) => (
+              <div>
+                <dt class="vfd__value">{f.value}</dt>
+                <dd class="h-meta">{typograph(f.label)}</dd>
+              </div>
+            ))}
+          </dl>
+          <p class="h-meta vfd__source">
+            <a href={VFD_DEALER.source.href} target="_blank" rel="noopener" class="h-link">{VFD_DEALER.source.label}</a>
+          </p>
 
-        <!-- Фото фабрики: ПК — сетка 2×2 слева от пунктов, планшет — ряд из
-             четырёх, телефон — лента со свайпом (.h-rail). Клик — окно
-             просмотра с крупными кадрами -->
-        <div class:list={['vfd', { 'vfd--photos': VFD_PHOTOS.length > 0 }]}>
-          {VFD_PHOTOS.length > 0 && (
-            <div class="vfd__gallery">
-              <ul
-                class="vfd__photos h-rail"
-                role="list"
-                data-lightbox
-                data-lightbox-images={JSON.stringify(VFD_PHOTOS.map((p) => ({ src: p.large, alt: p.alt })))}
-              >
-                {VFD_PHOTOS.map((ph, i) => (
-                  <li class="vfd__photo">
-                    <button type="button" class="h-media vfd__zoom" aria-label={`Открыть фото: ${ph.alt}`} data-lightbox-index={i}>
-                      <img
-                        src={ph.src}
-                        srcset={ph.srcset}
-                        sizes="(min-width: 80rem) 18rem, (min-width: 62.5rem) 24vw, (min-width: 43.75rem) 25vw, 82vw"
-                        alt={ph.alt}
-                        width={ph.width}
-                        height={ph.height}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <p class="h-meta vfd__hint" aria-hidden="true">{VFD_PHOTOS.length} фото — листайте</p>
-            </div>
-          )}
+          <a href={VFD_DEALER.cta.href} class="h-btn h-btn--ink vfd__cta">{VFD_DEALER.cta.label}</a>
+        </div>
 
-          <ul class="vfd__features" role="list">
-            {VFD_DEALER.features.map((f) => (
-              <li>
-                <h3 class="h-h3 vfd__feature-title">{f.title}</h3>
-                <p class="h-body">{typograph(f.text)}</p>
+        <div class="vfd__gallery">
+          <ul
+            class="vfd__cards h-rail"
+            role="list"
+            data-lightbox
+            data-lightbox-images={JSON.stringify(VFD_CARDS.map((c) => ({ src: c.photo.large, alt: c.photo.alt })))}
+          >
+            {VFD_CARDS.map((c, i) => (
+              <li class="vfd__card">
+                <button type="button" class="h-media vfd__zoom" aria-label={`Открыть фото: ${c.photo.alt}`} data-lightbox-index={i}>
+                  <img
+                    src={c.photo.src}
+                    srcset={c.photo.srcset}
+                    sizes="(min-width: 80rem) 22rem, (min-width: 62.5rem) 28vw, (min-width: 43.75rem) 46vw, 82vw"
+                    alt={c.photo.alt}
+                    width={c.photo.width}
+                    height={c.photo.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+                <h3 class="h-h3 vfd__card-title">{typograph(c.title)}</h3>
+                <p class="h-body vfd__card-text">{typograph(c.text)}</p>
               </li>
             ))}
           </ul>
+          <p class="h-meta vfd__hint" aria-hidden="true">{VFD_CARDS.length} фото — листайте</p>
         </div>
-
-        <a href={VFD_DEALER.cta.href} class="h-btn h-btn--ink vfd__cta">{VFD_DEALER.cta.label}</a>
       </div>
     </section>
 
@@ -403,7 +395,7 @@ const breadcrumbItems = [
     mask-image: linear-gradient(90deg, transparent 0%, var(--color-white) 38%);
   }
 
-  /* «Студия Зизевского × VFD»: крестик — тонкий и приглушённый,
+  /* «Студия Зизевского × фабрика VFD»: крестик — тонкий и приглушённый,
      как в подписях коллабораций */
   .collab {
     display: flex;
@@ -486,7 +478,13 @@ const breadcrumbItems = [
   .split { display: grid; gap: 1.5rem var(--h-gutter); }
   @media (min-width: 56.25rem) {
     .split { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
-    .split > :first-child { grid-column: 1 / span 5; }
+    /* Шапка закреплена, пока справа прокручивается содержимое: место под
+       ней слева — не дыра, а поле, по которому она едет (как у блока ВФД) */
+    .split > :first-child {
+      grid-column: 1 / span 5;
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+    }
     .split > :last-child  { grid-column: 7 / span 6; }
   }
   .split__lead { margin-top: 1rem; }
@@ -646,50 +644,64 @@ const breadcrumbItems = [
     .factory__zoom:hover img { transform: none; }
   }
 
-  /* ── Официальный дилер ВФД ── */
-  /* Факты — как вехи и факты первого экрана: под линейкой, цифра — вес 300 */
-  .vfd-facts {
+  /* ── Официальный дилер ВФД ──
+     ПК: колонка с вводной частью (5 из 12) закреплена, пока рядом
+     прокручиваются карточки (с 7-й колонки, 2×2). Планшет: вводная часть
+     сверху, карточки 2×2. Телефон: карточки — лента (.h-rail). */
+  /* minmax(0, 1fr): иначе лента карточек (.h-rail на телефоне) растягивает
+     колонку по своей полной ширине и блок вылезает за экран */
+  .vfd {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(2.5rem, 5vw, 3.5rem) var(--h-gutter);
+  }
+  @media (min-width: 62.5rem) {
+    .vfd { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+    .vfd__intro {
+      grid-column: 1 / span 5;
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+    }
+    .vfd__gallery { grid-column: 7 / span 6; }
+  }
+  .vfd__lead { margin-top: 1.25rem; }
+
+  /* Цифры фабрики — 2×2 под линейками, цифра — вес 300, табличная */
+  .vfd__facts {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem var(--h-gutter);
-    margin: 0;
+    gap: 1.75rem var(--h-gutter);
+    margin: clamp(2rem, 4vw, 2.75rem) 0 0;
   }
-  @media (min-width: 56.25rem) { .vfd-facts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .vfd-facts > div { padding-top: 1rem; border-top: 0.0625rem solid var(--h-rule); }
-  .vfd-facts__value {
-    font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+  .vfd__facts > div { padding-top: 1rem; border-top: 0.0625rem solid var(--h-rule); }
+  .vfd__value {
+    font-size: clamp(2rem, 3.4vw, 3rem);
     font-weight: 300;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    line-height: 1;
+    letter-spacing: -0.035em;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
     color: var(--h-ink);
   }
-  .vfd-facts dd { margin: 0.5rem 0 0; max-width: 15rem; }
-  .vfd-source { margin: 1.25rem 0 0; }
+  .vfd__facts dd { margin: 0.625rem 0 0; max-width: 14rem; }
+  .vfd__source { margin: 1.5rem 0 0; }
+  .vfd__cta { margin-top: clamp(1.75rem, 3vw, 2.25rem); }
 
-  /* Производство: с фото — фото слева (6 колонок), пункты справа;
-     без фото — пункты сеткой 2×2 во всю ширину */
-  .vfd { display: grid; gap: 2rem var(--h-gutter); margin-top: clamp(3rem, 6vw, 4.5rem); }
-  @media (min-width: 62.5rem) {
-    .vfd--photos { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
-    .vfd--photos .vfd__gallery { grid-column: 1 / span 6; }
-    .vfd--photos .vfd__features { grid-column: 8 / span 5; grid-template-columns: 1fr; }
-  }
-  /* Сетка: телефон — лента (.h-rail перекрывает), планшет — ряд из четырёх,
-     ПК — 2×2. Кадры квадратные — как исходники, без обрезки */
-  .vfd__photos {
+  /* Карточки «фото + подпись»: фото квадратное (как исходник), скругление
+     1rem — фото в подписанной карточке; подпись — заголовок и текст */
+  .vfd__cards {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--h-tile-gap);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2rem, 3vw, 2.5rem) var(--h-tile-gap);
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  @media (min-width: 62.5rem) { .vfd__photos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .vfd__photo { aspect-ratio: 1; }
+  .vfd__card { display: flex; flex-direction: column; }
   .vfd__zoom {
+    display: block;
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1;
     padding: 0;
     border: 0;
     cursor: zoom-in;
@@ -697,25 +709,17 @@ const breadcrumbItems = [
   .vfd__zoom img { transition: transform 700ms var(--ease-out); }
   .vfd__zoom:hover img { transform: scale(1.025); }
   .vfd__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
-  /* Подсказка про свайп — только на телефоне, где сетка стала лентой */
-  .vfd__hint { display: none; margin: 1rem 0 0; }
+  .vfd__card-title { margin-top: 1.125rem; }
+  .vfd__card-text { margin-top: 0.5rem; font-size: 0.9375rem; max-width: 22rem; }
+
+  /* Подсказка про свайп — только на телефоне, где карточки стали лентой */
+  .vfd__hint { display: none; margin: 1.25rem 0 0; }
   @media (max-width: 43.6875rem) { .vfd__hint { display: block; } }
+
   @media (prefers-reduced-motion: reduce) {
     .vfd__zoom img { transition: none; }
     .vfd__zoom:hover img { transform: none; }
   }
-
-  .vfd__features {
-    display: grid;
-    gap: 0 var(--h-gutter);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  @media (min-width: 43.75rem) { .vfd__features { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .vfd__features li { padding-block: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
-  .vfd__feature-title { margin-bottom: 0.5rem; }
-  .vfd__cta { margin-top: clamp(2rem, 4vw, 3rem); }
 
   /* Фамильный бренд — главный текст страницы, набран крупно */
   .brand__text p {

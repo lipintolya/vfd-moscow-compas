@@ -3,10 +3,9 @@
    дилером которого является салон. Блок на /about/ и Organization
    в JSON-LD.
 
-   Факты — по материалам производителя (официальный сайт фабрики,
-   раздел «О компании»; перенесены со страницы /o-fabrike/, удалённой
-   2026-10-04). Цифры меняются — сверять с сайтом фабрики, не дописывать
-   своих.
+   Факты — только со страницы фабрики https://vfd.ru/about (сверено
+   2026-10-07): формулировки близко к тексту, своих цифр и обещаний
+   не дописывать. Цифры меняются — при обновлении сверять там же.
    ============================================================ */
 import { SITE } from '../config/site'
 import vfdPhotos from './about-vfd-photos.json'
@@ -15,38 +14,47 @@ export const VFD = {
   name:          SITE.manufacturer,          // «Владимирская фабрика дверей»
   alternateName: 'ВФД',
   url:           'https://vfd.ru/',
+  aboutUrl:      'https://vfd.ru/about',
   foundingYear:  2002,
+  region:        'Владимирская область',
 }
 
 export const VFD_DEALER = {
   title: `Официальный дилер ${SITE.manufacturerOf}`,
   lead:
-    `ВФД — российский производитель межкомнатных дверей полного цикла: от обработки материала ` +
-    `до готового полотна. Мы — официальный дилер фабрики ${SITE.city.in}: в салоне ` +
+    `Фабрика начиналась в ${VFD.foundingYear} году с небольшого деревообрабатывающего цеха ` +
+    `во Владимирской области. Сегодня у неё собственные цеха по производству материалов ` +
+    `и обработке стекла. Мы — официальный дилер фабрики ${SITE.city.in}: в салоне ` +
     `в ${SITE.address.mall} — образцы, замер и монтаж собственной бригадой.`,
   facts: [
-    { value: String(VFD.foundingYear), label: 'год основания, Владимирская область' },
-    { value: '38 000 м²',               label: 'собственных производственных площадок' },
-    { value: '850',                     label: 'специалистов на производстве' },
-    { value: '1200+',                   label: 'моделей в ассортименте фабрики' },
+    { value: String(VFD.foundingYear), label: `год основания, ${VFD.region}` },
+    { value: '32 000 м²',               label: 'производственная площадь' },
+    { value: '850',                     label: 'специалистов' },
+    { value: '1200',                    label: 'наименований в каталоге продукции' },
   ],
-  source: 'По данным производителя',
+  source: { label: 'По данным производителя — vfd.ru', href: VFD.aboutUrl },
+  /* Пункт о производстве — подпись под своим фото (photo — номер кадра
+     card_N из about.block/factory): фото и текст — одна карточка */
   features: [
     {
+      photo: 1,
       title: 'Автоматизированные линии',
-      text:  'Основное оборудование — немецкое и итальянское: точная геометрия полотна и одинаковый результат от партии к партии.',
+      text:  'Сотрудники фабрики работают на современных автоматизированных линиях немецкого и итальянского производства.',
     },
     {
+      photo: 2,
       title: 'Собственная обработка стекла',
-      text:  'Стекло для остеклённых моделей фабрика режет и обрабатывает сама — без зависимости от сторонних поставщиков.',
+      text:  'Своё производство по обработке стекла позволяет фабрике экспериментировать с дизайном остеклённых моделей.',
     },
     {
-      title: 'Контроль на входе и на выходе',
-      text:  'Проверяются и сырьё, и готовое полотно перед отгрузкой.',
+      photo: 4,
+      title: 'Контроль на всех этапах',
+      text:  'Отлаженный процесс производства — своевременные отгрузки и бесперебойные поставки продукции.',
     },
     {
-      title: 'Собственные покрытия',
-      text:  'Фабрика разрабатывает свои линейки покрытий — Эмалекс и Протач, помимо ПВХ, полипропилена и эмали.',
+      photo: 3,
+      title: 'Сеть по всей России',
+      text:  '2000 дилерских магазинов по всей России, 10 региональных складов и 10 стран-партнёров.',
     },
   ],
   cta: { label: 'Смотреть каталог дверей ВФД', href: '/catalog/' },
@@ -65,6 +73,7 @@ const VFD_ALTS: Record<number, string> = {
 const vfdFile = (n: number, w: number) => `/renders/about/vfd-${n}-${w}.webp`
 
 export const VFD_PHOTOS = vfdPhotos.photos.map((p) => ({
+  n:      p.n,
   src:    vfdFile(p.n, vfdPhotos.widths[0]!),
   srcset: vfdPhotos.widths.map((w) => `${vfdFile(p.n, w)} ${w}w`).join(', '),
   /** Крупный кадр — для окна просмотра */
@@ -73,6 +82,13 @@ export const VFD_PHOTOS = vfdPhotos.photos.map((p) => ({
   height: p.height,
   alt:    VFD_ALTS[p.n] ?? `Производство ${SITE.manufacturerOf}`,
 }))
+
+/* Карточки блока: пункт + его фото, в порядке пунктов */
+export const VFD_CARDS = VFD_DEALER.features.map((f) => {
+  const photo = VFD_PHOTOS.find((p) => p.n === f.photo)
+  if (!photo) throw new Error(`vfd-factory: нет фото card_${f.photo} для «${f.title}»`)
+  return { ...f, photo }
+})
 
 /* schema.org — производитель; салон ссылается на него как на бренд */
 export const VFD_ORG_ID = `${SITE.url}/#vfd-manufacturer`
@@ -84,5 +100,6 @@ export const vfdOrganizationSchema = () => ({
   alternateName: VFD.alternateName,
   url: VFD.url,
   foundingDate: String(VFD.foundingYear),
-  description: 'Российский производитель межкомнатных дверей полного цикла.',
+  address: { '@type': 'PostalAddress', addressRegion: VFD.region, addressCountry: 'RU' },
+  description: `Производитель межкомнатных дверей, ${VFD.region}. Основана в ${VFD.foundingYear} году.`,
 })

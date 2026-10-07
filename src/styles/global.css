@@ -216,11 +216,17 @@ html {
   scroll-behavior: smooth;
   /* Якоря (#video и т.п.) не уезжают под фиксированную шапку */
   scroll-padding-top: calc(var(--header-height) + 1rem);
+  /* Горизонтальный вылет отрезаем через clip, а не hidden: hidden делает
+     элемент контейнером прокрутки, и position: sticky внутри перестаёт
+     работать (закреплённые колонки, фильтры каталога). hidden — запасной
+     вариант для браузеров без clip (до Safari 16). */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 body {
   background-color: var(--color-bg);
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Шрифтовая пара — заголовки на Rubik (display), весь

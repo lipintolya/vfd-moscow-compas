@@ -1,14 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { PHONE, SITE } from '../config/site'
-import { companyLegalInfo } from '../lib/contacts-data'
+import { SITE } from '../config/site'
+import { companyLegalInfo, HAS_EMAIL } from '../lib/contacts-data'
 
-const { fullName, requisites, address } = companyLegalInfo
+const { ownerName } = companyLegalInfo
+/* Владелец — физлицо; пока ФИО не задано, оператор назван по сайту */
+const operator = ownerName || `владелец сайта ${SITE.host}`
 ---
 
 <BaseLayout
   title="Политика конфиденциальности — ВФД в ТЦ «Компас»"
-  description={`Политика в отношении обработки персональных данных — ${fullName}`}
+  description={`Политика в отношении обработки персональных данных — ${SITE.host}`}
   noIndex={true}
 >
   <div class="prv-page">
@@ -18,7 +20,7 @@ const { fullName, requisites, address } = companyLegalInfo
 
       <section class="prv-section">
         <h2>1. Общие положения</h2>
-        <p>Настоящая политика обработки персональных данных составлена в соответствии с требованиями Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных» (далее — Закон о персональных данных) и определяет порядок обработки персональных данных и меры по обеспечению безопасности персональных данных, предпринимаемые <strong>{fullName}</strong> (далее — Оператор).</p>
+        <p>Настоящая политика обработки персональных данных составлена в соответствии с требованиями Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных» (далее — Закон о персональных данных) и определяет порядок обработки персональных данных и меры по обеспечению безопасности персональных данных, предпринимаемые {ownerName ? <strong>{ownerName}</strong> : <>владельцем сайта <strong>{SITE.host}</strong></>} (далее — Оператор).</p>
         <p>1.1. Оператор ставит своей важнейшей целью и условием осуществления своей деятельности соблюдение прав и свобод человека и гражданина при обработке его персональных данных, в том числе защиты прав на неприкосновенность частной жизни, личную и семейную тайну.</p>
         <p>1.2. Настоящая политика Оператора в отношении обработки персональных данных (далее — Политика) применяется ко всей информации, которую Оператор может получить о посетителях веб-сайта <strong>{SITE.host}</strong>.</p>
       </section>
@@ -171,12 +173,8 @@ const { fullName, requisites, address } = companyLegalInfo
         <p>12.3. Актуальная версия Политики в свободном доступе расположена в сети Интернет по адресу <strong>{SITE.host}/privacy</strong>.</p>
 
         <div class="prv-requisites">
-          <p><strong>Оператор:</strong> {fullName}</p>
-          <p><strong>ОГРНИП:</strong> {requisites.ogrnip}</p>
-          <p><strong>ИНН:</strong> {requisites.inn}</p>
-          <p><strong>Адрес:</strong> {address.legal}</p>
-          <p><strong>E-mail:</strong> <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
-          <p><strong>Тел.:</strong> <a href={`tel:${PHONE.raw}`}>{PHONE.label}</a></p>
+          <p><strong>Оператор:</strong> {operator}</p>
+          {HAS_EMAIL && <p><strong>E-mail:</strong> <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>}
         </div>
       </section>
 

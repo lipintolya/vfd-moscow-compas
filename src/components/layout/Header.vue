@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { companyLegalInfo } from '../../lib/contacts-data'
+import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { SITE } from '../../config/site'
 
 /* ============================================================
@@ -428,7 +428,7 @@ onUnmounted(() => {
                       </a>
                     </dd>
                   </div>
-                  <div>
+                  <div v-if="HAS_EMAIL">
                     <dt>Email</dt>
                     <dd><a :href="`mailto:${CONTACTS.email}`" class="hdr-pop__link">{{ CONTACTS.email }}</a></dd>
                   </div>

@@ -1,87 +1,277 @@
 ---
+/**
+ * /contacts/ — контакты салона в дизайн-системе главной (home.css):
+ * первый экран с тремя плитками (звонок, адрес, Telegram-канал),
+ * «Как к нам добраться» (VisitBand — своя карта и фото ТЦ),
+ * «Что вы получаете», способы оплаты, частые вопросы.
+ * Реквизиты юрлица не публикуются: владелец сайта — физлицо
+ * (src/lib/contacts-data.ts). Тексты — src/data/contacts-page.ts.
+ */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
-import QuoteCta from '../components/ui/QuoteCta.astro'
-import ContactsSection from '../components/contacts/ContactsSection.vue'
+import VisitBand from '../components/home/VisitBand.astro'
 import { companyLegalInfo } from '../lib/contacts-data'
-import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
-import { SITE } from '../config/site'
-import { MEASURE_TERMS } from '../data/services'
+import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
+import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ } from '../data/contacts-page'
+import { PRICES_DATE_LABEL } from '../data/services'
+import { SITE, PHONE } from '../config/site'
+import { typograph } from '../lib/typograph'
+import '../styles/home.css'
 
-const title = 'Контакты салона дверей ВФД в Москве — адрес, телефон, часы работы'
+const title = `Контакты салона дверей ${SITE.name} ${SITE.city.in} — адрес, телефон, часы работы`
 const description =
-  'Контакты фирменного салона дверей ВФД в ТЦ «Компас». Телефон, email, часы работы, реквизиты согласно РФ. Консультации по дверям и перегородкам.'
+  `Салон дверей ${SITE.name} в ${SITE.address.mall}: ${SITE.address.street}, ${SITE.address.floor}. ` +
+  `${companyLegalInfo.workingHours.shortDisplay}. Схема проезда, замер и монтаж по Москве и области.`
+const pageUrl = new URL('/contacts/', SITE.url).href
 
-const localBusinessSchema = buildLocalBusiness({ url: `${SITE.url}/contacts/` })
+const hours = companyLegalInfo.workingHours
+
+const structuredData = [
+  localBusinessSchema({ url: pageUrl }),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    url: pageUrl,
+    name: title,
+    about: { '@id': LOCAL_BUSINESS_ID },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: CONTACTS_FAQ.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+]
+
+/* Фото «Что вы получаете»: пока их нет — на сайте карточки без фото,
+   в режиме разработки на их месте рамки */
+const showPhotoSlots = import.meta.env.DEV
+const hasPrices = BENEFITS.some((b) => b.price)
+
+const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
   { label: 'Контакты' },
 ]
-
-
-const hours = companyLegalInfo.workingHours
-const phone = companyLegalInfo.contacts.phone[0]!
-
-const faq = [
-  {
-    q: 'Нужно ли записываться заранее, чтобы приехать в салон?',
-    a: 'Нет, предварительная запись не обязательна — заходите в рабочие часы. Если хотите, чтобы вам показали образцы под ваш проект, удобнее предупредить заранее по телефону.',
-  },
-  {
-    q: 'Работаете ли вы в выходные?',
-    a: `Да, салон работает без выходных: ежедневно с ${hours.weekdays.opens} до ${hours.weekdays.closes}.`,
-  },
-  {
-    q: 'Выезжаете ли вы на замер за пределы Москвы?',
-    a: `Да, выезжаем и в Московскую область — стоимость выезда зависит от адреса, её уточнит менеджер. ${MEASURE_TERMS}.`,
-  },
-  {
-    q: 'Как быстрее всего получить консультацию?',
-    a: `Позвоните по номеру ${phone.label} — ${SITE.contactPerson} подскажет по моделям, ценам и срокам.`,
-  },
-]
-
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faq.map((f) => ({
-    '@type': 'Question',
-    name: f.q,
-    acceptedAnswer: { '@type': 'Answer', text: f.a },
-  })),
-}
-
-const structuredData = [localBusinessSchema, faqSchema]
 ---
 
-<BaseLayout title={title} description={description} structuredData={structuredData}>
+<BaseLayout title={title} description={description} canonical={pageUrl} structuredData={structuredData}>
   <div class="breadcrumb-bar">
     <div class="container">
       <Breadcrumbs items={breadcrumbItems} />
     </div>
   </div>
 
-  <ContactsSection client:visible />
+  <div class="home">
+    <!-- Первый экран: заголовок и три способа связаться. Красная плитка —
+         главное действие (звонок), она одна на экране -->
+    <section class="ct-intro" aria-labelledby="ct-title">
+      <div class="container">
+        <header class="h-head ct-head">
+          <h1 id="ct-title" class="ct-title">{typograph(CONTACTS_INTRO.title)}</h1>
+          <p class="h-lead">{typograph(CONTACTS_INTRO.lead)}</p>
+        </header>
 
-  <section class="section pt-0">
-    <div class="container">
-      <QuoteCta
-        image="https://storage.yandexcloud.net/vfd74ru/Main_page/left_bento/cover_doors.webp"
-        title="Готовы выбрать двери или перегородки?"
-        description="Приходите в салон или звоните — поможем подобрать модель и рассчитаем стоимость с монтажом"
-        primaryHref={`tel:${phone.raw}`}
-        primaryLabel="Позвонить"
-        secondaryHref="/catalog/"
-        secondaryLabel="Смотреть каталог"
-      />
-    </div>
-  </section>
+        <ul class="ct-tiles" role="list">
+          <li>
+            <a href={`tel:${PHONE.raw}`} class="h-tile h-tile--signal ct-tile">
+              <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
+              <span class="ct-tile__label">Позвонить</span>
+              <span class="ct-tile__phone">{PHONE.label}</span>
+              <span class="h-cap">{SITE.contactPerson}, {SITE.contactRole}</span>
+            </a>
+          </li>
+          <li>
+            <a href="#visit" class="h-tile h-tile--dark ct-tile">
+              <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
+              <span class="ct-tile__label">Салон</span>
+              <span class="h-tile__title">{typograph(`${SITE.address.mall}, ${SITE.address.floor}`)}</span>
+              <span class="h-cap">{SITE.address.street}. {hours.shortDisplay}</span>
+            </a>
+          </li>
+          <li>
+            <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-tile h-tile--light ct-tile">
+              <span class="h-tile__corner h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
+              <span class="ct-tile__label">Telegram-канал</span>
+              <span class="h-tile__title">{SITE.social.telegramHandle}</span>
+              <span class="h-cap">Подписаться на канал салона</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
 
-  <section class="section pt-0">
-    <div class="container">
-      <FaqAccordion items={faq} />
-    </div>
-  </section>
+    <VisitBand lead="Приходите без записи — салон работает без выходных. Если нужны образцы под ваш проект, предупредите заранее по телефону." />
+
+    <!-- Что вы получаете: подпись под фото, как табличка у образца -->
+    <section class="h-sec h-sec--wall" aria-labelledby="ct-benefits-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ct-benefits-title" class="h-h2">Что вы получаете</h2>
+          <p class="h-lead">От первой консультации до гарантии — без посредников и субподрядчиков.</p>
+        </header>
+
+        <ul class="ct-benefits" role="list">
+          {BENEFITS.map((b, i) => (
+            <li class="ct-benefit">
+              {b.photo ? (
+                <span class="h-media ct-benefit__photo">
+                  <img src={b.photo.src} alt={b.photo.alt} width={b.photo.width} height={b.photo.height} loading="lazy" decoding="async" />
+                </span>
+              ) : showPhotoSlots && (
+                <span class="ct-benefit__photo ct-benefit__photo--slot" aria-hidden="true">Фото {i + 1}</span>
+              )}
+              <h3 class="h-h3 ct-benefit__title">{b.title}</h3>
+              <p class="h-body ct-benefit__text">{typograph(b.text)}</p>
+              {b.price && (
+                <p class="ct-benefit__price">
+                  <span class="ct-benefit__value">{b.price.value}<a href="#ct-prices-note" class="ct-benefit__mark" aria-label="Примечание о ценах">*</a></span>
+                  <span class="h-meta">{typograph(b.price.note)}</span>
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        {hasPrices && (
+          <p id="ct-prices-note" class="h-meta ct-note">
+            * Цены на&nbsp;услуги актуальны на&nbsp;{typograph(PRICES_DATE_LABEL)} Точную стоимость
+            рассчитаем на&nbsp;консультации в&nbsp;салоне.
+          </p>
+        )}
+      </div>
+    </section>
+
+    <!-- Способы оплаты — только названия -->
+    <section class="h-sec" aria-labelledby="ct-pay-title">
+      <div class="container ct-payblock">
+        <h2 id="ct-pay-title" class="h-h2">Способы оплаты</h2>
+        <ul class="ct-pay" role="list">
+          {companyLegalInfo.paymentMethods.map((m) => <li>{m}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--wall" aria-labelledby="ct-faq-title">
+      <div class="container">
+        <h2 id="ct-faq-title" class="h-h2 ct-faq__title">Частые вопросы</h2>
+        <FaqAccordion items={CONTACTS_FAQ} title={false} />
+      </div>
+    </section>
+  </div>
 </BaseLayout>
+
+<style>
+  /* Снизу без отступа — его даёт следующая секция (VisitBand) */
+  .ct-intro { padding-top: clamp(1rem, 2vw, 1.5rem); }
+  .ct-head { margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem); }
+  .ct-title {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: var(--h-ink);
+    text-wrap: balance;
+  }
+
+  /* ── Плитки связи: телефон — две колонки, адрес и канал — по одной ── */
+  .ct-tiles {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 47.5rem) { .ct-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ct-tiles > li:first-child { grid-column: 1 / -1; } }
+  @media (min-width: 68.75rem) { .ct-tiles { grid-template-columns: 2fr 1fr 1fr; } .ct-tiles > li:first-child { grid-column: auto; } }
+  .ct-tile { min-height: clamp(11rem, 18vw, 15rem); }
+  .ct-tile__label {
+    margin-bottom: auto;
+    font-size: 0.875rem;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+  /* Номер — крупная цифра: вес 300, табличные цифры (принцип 5) */
+  .ct-tile__phone {
+    font-size: clamp(1.75rem, 4.2vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* ── Что вы получаете ── */
+  .ct-benefits {
+    display: grid;
+    gap: 2.5rem var(--h-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 56.25rem) { .ct-benefits { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .ct-benefit {
+    display: flex;
+    flex-direction: column;
+    padding-top: 1.25rem;
+    border-top: 0.0625rem solid var(--h-rule);
+  }
+  .ct-benefit__photo { display: block; aspect-ratio: 4 / 3; margin-bottom: 1.25rem; }
+  .ct-benefit__photo img { width: 100%; height: 100%; object-fit: cover; }
+  /* Рамка-заглушка — только в режиме разработки */
+  .ct-benefit__photo--slot {
+    display: grid;
+    place-items: center;
+    border: 0.125rem dashed var(--h-rule);
+    border-radius: var(--h-radius);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--h-muted);
+  }
+  .ct-benefit__text { margin-top: 0.75rem; font-size: 0.9375rem; max-width: 26rem; }
+  .ct-benefit__price { display: flex; flex-direction: column; gap: 0.25rem; margin: auto 0 0; padding-top: 1.5rem; }
+  .ct-benefit__value {
+    font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--h-ink);
+  }
+  .ct-benefit__mark { margin-left: 0.125em; color: var(--h-signal); text-decoration: none; }
+  .ct-note { margin: clamp(2rem, 4vw, 3rem) 0 0; max-width: 40rem; }
+  .ct-faq__title { margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+
+  /* ── Способы оплаты: заголовок слева, метки справа ── */
+  .ct-payblock { display: grid; gap: 1.25rem var(--h-gutter); align-items: center; }
+  @media (min-width: 56.25rem) {
+    .ct-payblock { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .ct-payblock > :first-child { grid-column: 1 / span 5; }
+    .ct-payblock > :last-child  { grid-column: 7 / span 6; }
+  }
+  .ct-pay {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Метки, а не кнопки: серая подложка без контура — не выглядят нажимаемыми */
+  .ct-pay li {
+    padding: 0.5rem 1rem;
+    border-radius: 999rem;
+    background: var(--h-wall);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--h-ink);
+  }
+</style>

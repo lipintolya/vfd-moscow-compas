@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
-import { companyLegalInfo } from '../../lib/contacts-data'
+import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { PHONE, SITE } from '../../config/site'
 import { ROUTE_URL } from '../../lib/map-links'
 
@@ -292,7 +292,7 @@ onUnmounted(() => {
                 <span class="block text-white/40">{{ p.title }}</span>
               </li>
               <li class="text-white/60">{{ CONTACTS.worktime }}</li>
-              <li>
+              <li v-if="HAS_EMAIL">
                 <a
                   :href="`mailto:${CONTACTS.email}`"
                   class="text-white/60 hover:text-white transition-colors duration-200"
@@ -468,7 +468,7 @@ onUnmounted(() => {
               <p class="text-slate-600 leading-relaxed">
                 г. Москва, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж<br />
                 Телефон: <a :href="`tel:${PHONE.raw}`" class="text-secondary-700 hover:underline">{{ PHONE.label }}</a><br />
-                Email: <a :href="`mailto:${SITE.email}`" class="text-secondary-700 hover:underline">{{ SITE.email }}</a><br />
+                <template v-if="HAS_EMAIL">Email: <a :href="`mailto:${SITE.email}`" class="text-secondary-700 hover:underline">{{ SITE.email }}</a><br /></template>
                 Сайт: <a :href="SITE.url" class="text-secondary-700 hover:underline">{{ SITE.host }}</a>
               </p>
             </div>
