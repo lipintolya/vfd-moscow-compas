@@ -195,7 +195,7 @@
      якоря — scroll-padding. Задано в CSS, а не замером в JS: нет пересчёта
      на resize и скачка вёрстки при загрузке; safe-area (чёлка iOS)
      учтена через env(). */
-  --header-bar:    4rem;
+  --header-bar:    4.5rem;
   --header-height: calc(env(safe-area-inset-top, 0rem) + var(--header-bar));
 
   /* Motion */

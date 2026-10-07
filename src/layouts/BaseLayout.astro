@@ -2,6 +2,7 @@
 import '../styles/global.css'
 import Header from '../components/layout/Header.vue'
 import Footer from '../components/layout/Footer.vue'
+import PhotoLightbox from '../components/ui/PhotoLightbox.vue'
 import YandexMetrika from '../components/analytics/YandexMetrika.astro'
 import BackToTop from '../components/ui/BackToTop.astro'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
@@ -146,6 +147,10 @@ const structuredDataJson = structuredData
 
     <!-- Footer: модальное окно требует Vue -->
     <Footer client:only="vue" />
+
+    <!-- Окно просмотра фото — одно на сайт, открывается событием
+         'open-lightbox' (src/lib/lightbox.ts) -->
+    <PhotoLightbox client:only="vue" />
 
     <BackToTop />
 

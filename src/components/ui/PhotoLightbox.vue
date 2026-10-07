@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+/**
+ * Окно просмотра фото — один экземпляр на весь сайт (BaseLayout,
+ * client:only). Открывается событием 'open-lightbox' с { images, index }:
+ * src/lib/lightbox.ts (группы [data-lightbox]), слайдеры, DoorLeafViewer.
+ *
+ * Модальный диалог: фокус переходит на «Закрыть» и не уходит из окна
+ * (Tab по кругу), после закрытия возвращается на кнопку, которой окно
+ * открыли. Листание — стрелки, клавиши ←/→, свайп; Esc и клик по фону
+ * закрывают. Под фото — подпись (alt кадра) и номер.
+ */
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 defineOptions({ inheritAttrs: false })
 
@@ -10,9 +20,14 @@ interface LightboxImg {
 
 const images   = ref<LightboxImg[]>([])
 const curIndex = ref<number | null>(null)
+const dialog   = ref<HTMLElement | null>(null)
+const closeBtn = ref<HTMLButtonElement | null>(null)
+let returnFocus: HTMLElement | null = null
 
-/* Предзагрузка соседних кадров — листание в галерее ощущается мгновенным,
-   даже если изображение ещё не открывалось (иначе кажется, что «не листается»). */
+const current = computed(() => (curIndex.value === null ? null : images.value[curIndex.value] ?? null))
+const many    = computed(() => images.value.length > 1)
+
+/* Предзагрузка соседних кадров — листание ощущается мгновенным */
 function preloadNeighbors(idx: number) {
   const len = images.value.length
   if (len < 2) return
@@ -22,36 +37,65 @@ function preloadNeighbors(idx: number) {
   }
 }
 
-function open(imgs: LightboxImg[], idx: number) {
+async function open(imgs: LightboxImg[], idx: number) {
+  if (!imgs.length) return
+  returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
   images.value   = imgs
-  curIndex.value = idx
-  document.body.style.overflow = 'hidden'
-  preloadNeighbors(idx)
+  curIndex.value = Math.min(Math.max(idx, 0), imgs.length - 1)
+  document.documentElement.style.overflow = 'hidden'
+  preloadNeighbors(curIndex.value)
+  await nextTick()
+  closeBtn.value?.focus()
 }
 
 function close() {
+  if (curIndex.value === null) return
   curIndex.value = null
   images.value   = []
-  document.body.style.overflow = ''
+  document.documentElement.style.overflow = ''
+  returnFocus?.focus()
+  returnFocus = null
 }
 
-function prev() {
-  if (curIndex.value === null) return
-  curIndex.value = (curIndex.value - 1 + images.value.length) % images.value.length
+function go(step: number) {
+  if (curIndex.value === null || !many.value) return
+  const len = images.value.length
+  curIndex.value = (curIndex.value + step + len) % len
   preloadNeighbors(curIndex.value)
 }
 
-function next() {
-  if (curIndex.value === null) return
-  curIndex.value = (curIndex.value + 1) % images.value.length
-  preloadNeighbors(curIndex.value)
+/* Tab не уходит из окна: с последней кнопки — на первую и обратно */
+function trapTab(e: KeyboardEvent) {
+  const els = dialog.value?.querySelectorAll<HTMLElement>('button')
+  if (!els?.length) return
+  const first = els[0]!
+  const last  = els[els.length - 1]!
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
 }
 
 function onKey(e: KeyboardEvent) {
   if (curIndex.value === null) return
-  if (e.key === 'Escape')      close()
-  if (e.key === 'ArrowLeft')   prev()
-  if (e.key === 'ArrowRight')  next()
+  if (e.key === 'Escape')     close()
+  if (e.key === 'ArrowLeft')  go(-1)
+  if (e.key === 'ArrowRight') go(1)
+  if (e.key === 'Tab')        trapTab(e)
+}
+
+/* Свайп: горизонтальный жест длиннее 2.5rem — листание */
+let startX = 0
+let startY = 0
+function onTouchStart(e: TouchEvent) {
+  startX = e.touches[0]?.clientX ?? 0
+  startY = e.touches[0]?.clientY ?? 0
+}
+function onTouchEnd(e: TouchEvent) {
+  const t = e.changedTouches[0]
+  if (!t) return
+  const dx = t.clientX - startX
+  const dy = t.clientY - startY
+  const threshold = 2.5 * parseFloat(getComputedStyle(document.documentElement).fontSize)
+  if (Math.abs(dx) > threshold && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1)
 }
 
 function onEvent(e: Event) {
@@ -66,122 +110,141 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
   window.removeEventListener('open-lightbox', onEvent)
+  document.documentElement.style.overflow = ''
 })
 </script>
 
 <template>
   <Teleport to="body">
     <div
-      v-if="curIndex !== null"
-      class="lb-backdrop"
+      v-if="current"
+      ref="dialog"
+      class="lb"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="current.alt || 'Просмотр фото'"
       @click.self="close"
+      @touchstart.passive="onTouchStart"
+      @touchend.passive="onTouchEnd"
     >
-      <button class="lb-close" @click="close" aria-label="Закрыть">✕</button>
+      <button ref="closeBtn" type="button" class="lb__btn lb__close" aria-label="Закрыть" @click="close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
 
-      <button
-        v-if="images.length > 1"
-        class="lb-nav lb-nav--prev"
-        @click="prev"
-        aria-label="Предыдущее фото"
-      >‹</button>
+      <figure class="lb__figure" @click.self="close">
+        <!-- :key — новый кадр проявляется заново при листании -->
+        <img :key="current.src" :src="current.src" :alt="current.alt" class="lb__img" decoding="async" />
+        <figcaption v-if="current.alt || many" class="lb__caption">
+          <span v-if="current.alt" class="lb__alt">{{ current.alt }}</span>
+          <span v-if="many" class="lb__count" aria-live="polite">{{ curIndex! + 1 }} / {{ images.length }}</span>
+        </figcaption>
+      </figure>
 
-      <img
-        :src="images[curIndex!]?.src"
-        :alt="images[curIndex!]?.alt"
-        class="lb-img"
-        decoding="async"
-      />
-
-      <button
-        v-if="images.length > 1"
-        class="lb-nav lb-nav--next"
-        @click="next"
-        aria-label="Следующее фото"
-      >›</button>
-
-      <div v-if="images.length > 1" class="lb-counter">
-        {{ curIndex! + 1 }} / {{ images.length }}
-      </div>
+      <template v-if="many">
+        <button type="button" class="lb__btn lb__nav lb__nav--prev" aria-label="Предыдущее фото" @click="go(-1)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <button type="button" class="lb__btn lb__nav lb__nav--next" aria-label="Следующее фото" @click="go(1)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
+      </template>
     </div>
   </Teleport>
 </template>
 
 <style scoped>
-.lb-backdrop {
+/* Отступы окна учитывают вырезы экрана (safe-area) */
+.lb {
+  --lb-pad: max(1rem, env(safe-area-inset-left, 0rem));
+  --lb-btn: 3rem;
   position: fixed;
   inset: 0;
   z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding:
+    calc(env(safe-area-inset-top, 0rem) + var(--lb-btn) + 1.5rem)
+    var(--lb-pad)
+    calc(env(safe-area-inset-bottom, 0rem) + 1.25rem);
+  background: color-mix(in srgb, var(--color-slate-950) 94%, transparent);
+  color: var(--color-white);
+  animation: lb-fade 180ms var(--ease-out);
+}
+
+.lb__figure {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.92);
-  animation: lb-fade-in 180ms ease;
+  gap: 1rem;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
 }
-
-@keyframes lb-fade-in {
-  from { opacity: 0 }
-  to   { opacity: 1 }
-}
-
-.lb-img {
-  max-width: 92vw;
-  max-height: 88vh;
-  border-radius: 20px;
+.lb__img {
+  display: block;
+  max-width: min(100%, 90rem);
+  max-height: calc(100dvh - 12rem);
+  border-radius: 1.25rem;
   object-fit: contain;
-  animation: lb-zoom-in 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: lb-in 240ms var(--ease-out);
 }
 
-@keyframes lb-zoom-in {
-  from { transform: scale(0.92); opacity: 0 }
-  to   { transform: scale(1);    opacity: 1 }
-}
-
-.lb-close,
-.lb-nav {
-  position: absolute;
-  width: 54px;
-  height: 54px;
-  border: none;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.14);
-  color: white;
-  cursor: pointer;
-  font-size: 1.75rem;
-  line-height: 1;
+/* Подпись и номер — одной строкой под фото */
+.lb__caption {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   justify-content: center;
-  transition: background 180ms ease, transform 180ms ease;
-}
-
-.lb-close:hover,
-.lb-nav:hover {
-  background: rgba(255, 255, 255, 0.28);
-  transform: scale(1.08);
-}
-
-.lb-close {
-  top: 1.5rem;
-  right: 1.5rem;
-}
-
-.lb-nav--prev { left: 1.5rem; }
-.lb-nav--next { right: 1.5rem; }
-
-.lb-counter {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(255, 255, 255, 0.65);
+  gap: 0.25rem 1rem;
+  max-width: 40rem;
   font-size: 0.875rem;
-  font-weight: 600;
-  pointer-events: none;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--color-slate-300);
+}
+.lb__count { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-slate-400); }
+
+.lb__btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--lb-btn);
+  height: var(--lb-btn);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-white) 14%, transparent);
+  color: var(--color-white);
+  cursor: pointer;
+  transition: background-color 180ms var(--ease-out);
+}
+.lb__btn:hover { background: color-mix(in srgb, var(--color-white) 26%, transparent); }
+.lb__btn:focus-visible { outline: 0.125rem solid var(--color-secondary-300); outline-offset: 0.125rem; }
+.lb__btn svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-@media (max-width: 640px) {
-  .lb-nav--prev { left: 0.75rem; }
-  .lb-nav--next { right: 0.75rem; }
-  .lb-close     { top: 0.75rem; right: 0.75rem; }
+.lb__close { top: calc(env(safe-area-inset-top, 0rem) + 1rem); right: var(--lb-pad); }
+.lb__nav { top: 50%; translate: 0 -50%; }
+.lb__nav--prev { left: var(--lb-pad); }
+.lb__nav--next { right: var(--lb-pad); }
+
+/* Телефон: стрелки внизу по краям — не закрывают фото, листать удобнее свайпом */
+@media (max-width: 43.6875rem) {
+  .lb { padding-bottom: calc(env(safe-area-inset-bottom, 0rem) + var(--lb-btn) + 2rem); }
+  .lb__nav { top: auto; bottom: calc(env(safe-area-inset-bottom, 0rem) + 1rem); translate: none; }
+  .lb__img { border-radius: 0.75rem; }
+}
+
+@keyframes lb-fade { from { opacity: 0; } }
+@keyframes lb-in   { from { opacity: 0; scale: 0.97; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lb, .lb__img { animation: none; }
 }
 </style>

@@ -8,6 +8,7 @@ import { SITE } from '../config/site'
 import { companyLegalInfo } from './contacts-data'
 import { reviews } from '../data/reviews'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
+import { MALL_PHOTOS } from '../data/mall-photos'
 
 export const LOCAL_BUSINESS_ID = `${SITE.url}/#localbusiness`
 
@@ -29,7 +30,9 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
     telephone: SITE.phones.map(p => p.raw),
     email: SITE.email,
     logo: `${SITE.url}/logo-schema.png`,
-    image: [HERO_COVER_IMAGE, SITE.address.photo],
+    /* Салон и здание ТЦ снаружи — по фото здания карты и поиск
+       узнают место */
+    image: [HERO_COVER_IMAGE, SITE.address.photo, ...MALL_PHOTOS.map((p) => p.url)],
     address: {
       '@type': 'PostalAddress',
       streetAddress: `${SITE.address.street}, ${SITE.address.mall}, ${SITE.address.floor}`,

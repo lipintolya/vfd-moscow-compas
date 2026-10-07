@@ -8,18 +8,27 @@
  * оставался читаемым на телефоне, когда карта уменьшается.
  *
  * Действия — две кнопки: маршрут в Яндекс Картах и копирование адреса.
+ *
+ * Под картой — фото ТЦ с улицы (src/data/mall-photos.ts), чтобы здание
+ * узнавали на месте: на ПК ряд из четырёх, на телефоне — лента со свайпом.
+ * Подписи с адресом — для поиска по картинкам; те же фото — в
+ * LocalBusiness.image. Грузятся лениво — первый экран не тяжелеют.
  */
 import { SITE, PHONE } from '../../config/site'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { ROUTE_URL } from '../../lib/map-links'
 import { typograph } from '../../lib/typograph'
 import map from '../../data/visit-map.json'
+import { MALL_PHOTOS } from '../../data/mall-photos'
 
 interface Props {
   /** Пояснение под заголовком — у каждой страницы своё */
   lead?: string
+  /** Ряд фото ТЦ под картой */
+  mallPhotos?: boolean
 }
 const {
+  mallPhotos = true,
   lead = 'У нас можно рассмотреть покрытия вблизи, сравнить цвета и фурнитуру и рассчитать комплект вместе с менеджером.',
 } = Astro.props
 
@@ -103,10 +112,47 @@ const L = map.layers
         <span class="map__credit">{map.attribution}</span>
       </figcaption>
     </figure>
+
+    {mallPhotos && (
+      <figure class="mall">
+        <figcaption class="mall__head">
+          <h3 class="h-h3">{SITE.address.mallFull}</h3>
+          <p class="h-meta">{typograph(`Как здание выглядит с улицы. Салон — ${SITE.address.floorIn}.`)}</p>
+        </figcaption>
+        <ul
+          class="mall__list h-rail"
+          role="list"
+          data-lightbox
+          data-lightbox-images={JSON.stringify(MALL_PHOTOS.map((p) => ({ src: p.large, alt: p.alt })))}
+        >
+          {MALL_PHOTOS.map((p, i) => (
+            <li class="mall__item">
+              <button type="button" class="h-media mall__zoom" aria-label={`Открыть фото: ${p.alt}`} data-lightbox-index={i}>
+              <img
+                src={p.src}
+                srcset={p.srcset}
+                sizes="(min-width: 80rem) 18.5rem, (min-width: 62.5rem) 25vw, (min-width: 43.75rem) 50vw, 82vw"
+                alt={p.alt}
+                width={p.width}
+                height={p.height}
+                loading="lazy"
+                decoding="async"
+              />
+              </button>
+            </li>
+          ))}
+        </ul>
+      </figure>
+    )}
   </div>
 </section>
 
 <script>
+  import { initLightboxGroups } from '../../lib/lightbox'
+
+  /* Фото ТЦ — открываются крупно в общем окне просмотра */
+  initLightboxGroups()
+
   document.querySelectorAll<HTMLElement>('[data-route]').forEach((root) => {
     const copy = root.querySelector<HTMLButtonElement>('[data-copy]')
     const label = copy?.querySelector<HTMLElement>('[data-copy-label]')
@@ -136,6 +182,44 @@ const L = map.layers
     .visit__map { grid-column: 7 / span 6; }
   }
   .visit__lead { margin-top: 1.25rem; }
+
+  /* ── Фото ТЦ: ряд во всю ширину под колонками ── */
+  .mall { margin: 0; }
+  @media (min-width: 62.5rem) { .mall { grid-column: 1 / -1; } }
+  .mall__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .mall__head p { margin: 0; }
+  .mall__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 62.5rem) { .mall__list { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  /* Кадры чуть разной высоты — к одной пропорции 3:2, ряд ровный */
+  .mall__item { aspect-ratio: 3 / 2; }
+  .mall__zoom {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+  }
+  .mall__zoom img { transition: transform 700ms var(--ease-out); }
+  .mall__zoom:hover img { transform: scale(1.025); }
+  .mall__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
+  @media (prefers-reduced-motion: reduce) {
+    .mall__zoom img { transition: none; }
+    .mall__zoom:hover img { transform: none; }
+  }
 
   .visit__data { margin: 2.5rem 0 0; border-top: 0.0625rem solid var(--h-rule); }
   .visit__data > div {

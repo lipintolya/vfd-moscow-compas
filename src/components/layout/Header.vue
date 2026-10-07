@@ -274,7 +274,7 @@ onUnmounted(() => {
   <header class="site-header" :class="{ 'is-scrolled': scrolled }">
     <div class="container">
 
-      <!-- ── Белая шапка во всю ширину, содержимое — по контейнеру (как сцена
+      <!-- ── Шапка — плашка по ширине контейнера (как сцена
            hero под ней). Сетка 1fr / auto / 1fr держит навигацию строго
            по центру независимо от ширины краёв. ── -->
       <div class="hdr">
@@ -636,20 +636,25 @@ onUnmounted(() => {
    Телефон: бренд + звонок + меню; ≥80rem: бренд | навигация | действия.
 
    Принципы
-   1. Шапка — служебный слой, не акцент: белый фон, серые ссылки, одна
-      тёмная кнопка (на десктопе «Связаться», на телефоне — меню).
-      Красный — только точка текущего раздела.
-   2. Наверху страницы шапка сливается с белым фоном; после прокрутки —
-      тонкая линия снизу, лёгкая полупрозрачность с размытием и мягкая
-      тень: отделяется от контента, не перетягивая внимание.
+   1. Шапка — плашка по ширине контейнера, в двух состояниях. Наверху
+      страницы — тёмная (знак VFD светлый, «Связаться» белая); после
+      прокрутки — белая, полупрозрачная с размытием, с тонким контуром
+      и мягкой тенью. Меняются только цвета (токены ниже) и фон слоя
+      плашки — геометрия одинакова, при переходе ничего не сдвигается.
+   2. Красный — только подчёркивание текущего раздела.
    3. Все цвета — токены ниже, они ссылаются на палитру global.css.
       Контраст текста на белом: ссылки slate-600 (7.4:1), подписи
       slate-500 (5.0:1) — не ниже WCAG AA.
    4. Зона нажатия — не меньше 2.75rem (WCAG 2.5.5 / Apple HIG).
       Все размеры — в rem: шапка растёт с системным размером шрифта.
    ============================================================ */
+/* Светлая палитра — у шапки, мобильного меню и у выпадающих панелей:
+   панели объявлены здесь отдельно, чтобы над тёмной плашкой они оставались
+   светлыми (переменная, заданная на самом элементе, сильнее унаследованной) */
 .site-header,
-.mnav {
+.mnav,
+.hdr-drop,
+.hdr-pop {
   --hdr-bg:            var(--color-white);
   --hdr-fg:            var(--color-slate-900);
   --hdr-fg-soft:       var(--color-slate-600);   /* пункты меню */
@@ -670,6 +675,25 @@ onUnmounted(() => {
   --hdr-h:             var(--header-bar);       /* global.css — общая с отступом страницы */
   --hdr-ease:          var(--ease-out);
   --hdr-ease-soft:     cubic-bezier(0.16, 1, 0.3, 1);  /* мягкое торможение в конце */
+  --hdr-swap:          200ms var(--ease-out);   /* смена тёмного и белого состояний — коротко, чтобы цвет текста и фон менялись вместе */
+  --hdr-pill:          color-mix(in srgb, var(--color-white) 90%, transparent); /* фон плашки после прокрутки */
+}
+
+/* Тёмная палитра плашки — только для полосы шапки наверху страницы.
+   Выпадающие панели внутри неё переопределяют токены обратно (см. выше). */
+.site-header:not(.is-scrolled) .hdr {
+  --hdr-pill:          var(--color-slate-900);
+  --hdr-fg:            var(--color-white);
+  --hdr-fg-soft:       var(--color-slate-300);
+  --hdr-fg-muted:      var(--color-slate-400);
+  --hdr-fg-faint:      var(--color-slate-600);
+  --hdr-fill:          var(--color-slate-800);
+  --hdr-fill-hover:    var(--color-slate-700);
+  --hdr-line:          var(--color-slate-700);
+  --hdr-primary:       var(--color-white);
+  --hdr-primary-hover: var(--color-slate-200);
+  --hdr-on-primary:    var(--color-slate-900);
+  --hdr-focus:         var(--color-secondary-300);
 }
 
 .site-header {
@@ -678,24 +702,52 @@ onUnmounted(() => {
   z-index: 50;
   padding-top: env(safe-area-inset-top, 0rem);
   padding-inline: env(safe-area-inset-left, 0rem) env(safe-area-inset-right, 0rem);
-  background: var(--hdr-bg);
-  border-bottom: var(--hdr-hair) solid transparent;
-  transition: background-color 250ms var(--hdr-ease), border-color 250ms var(--hdr-ease), box-shadow 250ms var(--hdr-ease);
-}
-.site-header.is-scrolled {
-  background: color-mix(in srgb, var(--hdr-bg) 94%, transparent);
-  backdrop-filter: blur(0.875rem) saturate(1.4);
-  border-bottom-color: var(--hdr-line);
-  box-shadow: 0 0.5rem 1.5rem -1rem var(--hdr-shadow);
+  /* Сама полоса прозрачная — видна только плашка (.hdr::before);
+     по бокам от неё просматривается страница */
+  background: transparent;
 }
 
 .hdr {
+  /* Поле плашки вокруг содержимого: круглые кнопки (--hdr-tap) стоят
+     в ней с равным зазором сверху, снизу и по краям. Края плашки — ровно
+     по контейнеру (как сцена hero под ней), поле — внутрь */
+  --hdr-pill-gap: 0.375rem;
+  position: relative;
+  padding-inline: var(--hdr-pill-gap);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   height: var(--hdr-h);
   color: var(--hdr-fg);
+  transition: color var(--hdr-swap);
+}
+/* Плашка — отдельный слой: по ширине — контейнер, по высоте — ровно
+   вокруг кнопок. z-index: -1 кладёт её под содержимое
+   внутри контекста наложения .site-header (fixed + z-index), то есть
+   всё равно поверх страницы. Переход — только цвет фона и тень слоя,
+   без пересчёта вёрстки.
+   Только у шапки: мобильное меню повторяет разметку .hdr, но плашки там нет. */
+.site-header .hdr::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset-block: calc((var(--hdr-h) - var(--hdr-tap)) / 2 - var(--hdr-pill-gap));
+  inset-inline: 0;
+  /* Скругление — как у сцен первого экрана: 1.25rem (сцена hero на
+     телефоне, панель направлений на главной). Капсула (999rem) на такой
+     низкой полосе выглядела бы другим элементом, не родственным hero */
+  border-radius: 1.25rem;
+  background: var(--hdr-pill);
+  box-shadow: inset 0 0 0 var(--hdr-hair) transparent, 0 0.75rem 2rem -1.25rem transparent;
+  transition: background-color var(--hdr-swap), box-shadow var(--hdr-swap);
+}
+/* Белая плашка: контент под ней размыт, тонкий контур и мягкая тень
+   отделяют её от белой страницы */
+.site-header.is-scrolled .hdr::before {
+  -webkit-backdrop-filter: blur(0.875rem) saturate(1.4);
+  backdrop-filter: blur(0.875rem) saturate(1.4);
+  box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line), 0 0.75rem 2rem -1.25rem var(--hdr-shadow);
 }
 @media (min-width: 80rem) {
   .hdr { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
@@ -737,8 +789,10 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 300ms var(--hdr-ease);
+  transition: opacity 300ms var(--hdr-ease), filter var(--hdr-swap);
 }
+/* На тёмной плашке знак инвертирован: светлый круг, тёмные буквы VFD */
+.site-header:not(.is-scrolled) .hdr-mark img { filter: invert(1); }
 .hdr-mark img.is-loaded { opacity: 1; }
 .hdr-mark__fallback {
   display: grid;

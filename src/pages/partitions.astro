@@ -13,7 +13,6 @@
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
-import PhotoLightbox from '../components/ui/PhotoLightbox.vue'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import DoorLeafViewer from '../components/partitions/DoorLeafViewer.vue'
 import SectionNav from '../components/partitions/SectionNav.astro'
@@ -358,30 +357,19 @@ const moreRenders = renderGallery.length - renderPreviews.length
     <VisitBand lead="Приезжайте обсудить проект: подберём профиль, стекло и систему открывания и рассчитаем перегородку по вашим размерам." />
   </div>
 
-  <PhotoLightbox client:only="vue" />
 </BaseLayout>
 
 <script>
+  import { initLightboxGroups, openLightbox, toImg } from '../lib/lightbox'
+
   /* ── Кейсы: на телефоне длинный текст свёрнут под «Подробнее»
      (без JS остаётся раскрытым) ── */
   if (matchMedia('(max-width: 56.1875rem)').matches) {
     document.querySelectorAll<HTMLDetailsElement>('[data-case-more]').forEach((d) => { d.open = false })
   }
 
-  type Img = { src: string; alt: string }
-  const openLightbox = (images: Img[], index: number) =>
-    window.dispatchEvent(new CustomEvent('open-lightbox', { detail: { images, index } }))
-  const toImg = (img: HTMLImageElement | null): Img => ({ src: img?.currentSrc || img?.src || '', alt: img?.alt ?? '' })
-
-  /* ── Лайтбокс для групп фото: [data-lightbox] с кнопками
-     [data-lightbox-index]. Список — из data-lightbox-images (галерея
-     целиком) или из картинок самих кнопок ── */
-  document.querySelectorAll<HTMLElement>('[data-lightbox]').forEach((group) => {
-    const items = [...group.querySelectorAll<HTMLElement>('[data-lightbox-index]')]
-    const preset = group.dataset.lightboxImages
-    const images: Img[] = preset ? JSON.parse(preset) : items.map((el) => toImg(el.querySelector('img')))
-    items.forEach((el) => el.addEventListener('click', () => openLightbox(images, Number(el.dataset.lightboxIndex))))
-  })
+  /* ── Лайтбокс для групп фото [data-lightbox] (src/lib/lightbox.ts) ── */
+  initLightboxGroups()
 
   /* ── Слайдеры: стрелки, свайп, клик по фото — лайтбокс ── */
   document.querySelectorAll<HTMLElement>('[data-slider]').forEach((root) => {
