@@ -34,7 +34,7 @@
 
 .home {
   --h-wall:   var(--color-slate-100);
-  --h-paper:  #ffffff;
+  --h-paper:  var(--color-white);
   --h-ink:    var(--color-slate-900);
   --h-muted:  var(--color-slate-500);
   --h-soft:   var(--color-slate-600);
@@ -53,7 +53,10 @@
   --h-tile-radius: 1.25rem;
   --h-tile-gap: 1rem;
   /* Затемнение под текстом на фото — только снизу, где лежит подпись */
-  --h-scrim: linear-gradient(0deg, rgb(19 19 22 / 0.72) 0%, rgb(19 19 22 / 0.38) 50%, rgb(19 19 22 / 0.06) 85%);
+  --h-scrim: linear-gradient(0deg,
+    color-mix(in srgb, var(--color-slate-950) 72%, transparent) 0%,
+    color-mix(in srgb, var(--color-slate-950) 38%, transparent) 50%,
+    color-mix(in srgb, var(--color-slate-950) 6%, transparent) 85%);
 
   --h-font: var(--font-sans);
   /* Вес крупных заголовков (H1, H2, заголовок плитки). Manrope —
@@ -172,9 +175,9 @@
   white-space: nowrap;
   transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), border-color 180ms var(--ease-out);
 }
-.h-btn--signal { background: var(--h-signal); color: #fff; }
+.h-btn--signal { background: var(--h-signal); color: var(--color-white); }
 .h-btn--signal:hover { background: var(--color-accent-600); }
-.h-btn--ink { background: var(--h-ink); color: #fff; }
+.h-btn--ink { background: var(--h-ink); color: var(--color-white); }
 .h-btn--ink:hover { background: var(--color-slate-700); }
 .h-btn--quiet { border-color: var(--color-slate-300); color: var(--h-ink); }
 .h-btn--quiet:hover { border-color: var(--h-signal); color: var(--h-signal); }
@@ -247,7 +250,7 @@
   white-space: nowrap;
   transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
 }
-.h-pill--white { background: #fff; color: var(--h-ink); }
+.h-pill--white { background: var(--color-white); color: var(--h-ink); }
 .h-pill--white:hover { background: var(--color-slate-100); }
 .h-pill--line { border-color: var(--color-slate-300); color: var(--h-ink); }
 .h-pill--line:hover { border-color: var(--h-signal); color: var(--h-signal); }
@@ -262,10 +265,10 @@
   height: 2.25rem;
   border-radius: 50%;
   background: var(--h-ink);
-  color: #fff;
+  color: var(--color-white);
   transition: transform 220ms var(--ease-out), background-color 220ms var(--ease-out), color 220ms var(--ease-out);
 }
-.h-arrow--white { background: #fff; color: var(--h-ink); }
+.h-arrow--white { background: var(--color-white); color: var(--h-ink); }
 
 /* Плашка-«стекло» поверх фото: цена, срок. Высота = .h-arrow, чтобы
    плашка и стрелка в верхних углах плитки стояли на одной линии. */
@@ -275,7 +278,7 @@
   height: 2.25rem;
   padding: 0 0.875rem;
   border-radius: 999rem;
-  background: rgb(255 255 255 / 0.9);
+  background: color-mix(in srgb, var(--color-white) 90%, transparent);
   color: var(--h-ink);
   font-size: 0.8125rem;
   font-weight: 600;
@@ -309,13 +312,13 @@
 .h-tile__corner--left { right: auto; left: clamp(0.875rem, 1.4vw, 1.25rem); }
 .h-tile:hover .h-arrow { transform: rotate(45deg); }
 /* На наведение стрелка становится красной — кроме красной плитки */
-.h-tile:not(.h-tile--signal):hover .h-arrow { background: var(--h-signal); color: #fff; }
+.h-tile:not(.h-tile--signal):hover .h-arrow { background: var(--h-signal); color: var(--color-white); }
 
 .h-tile--light { background: var(--h-wall); color: var(--h-ink); }
-.h-tile--dark  { background: var(--color-slate-900); color: #fff; }
-.h-tile--signal { background: var(--h-signal); color: #fff; transition: background-color 180ms var(--ease-out); }
+.h-tile--dark  { background: var(--color-slate-900); color: var(--color-white); }
+.h-tile--signal { background: var(--h-signal); color: var(--color-white); transition: background-color 180ms var(--ease-out); }
 .h-tile--signal:hover { background: var(--color-accent-600); }
-.h-tile--photo { background: var(--color-slate-700); color: #fff; }
+.h-tile--photo { background: var(--color-slate-700); color: var(--color-white); }
 .h-tile--photo > img {
   position: absolute;
   inset: 0;
@@ -365,9 +368,9 @@
   line-height: 1.45;
   color: var(--h-soft);
 }
-.h-tile--photo .h-cap { color: rgb(255 255 255 / 0.82); }
+.h-tile--photo .h-cap { color: color-mix(in srgb, var(--color-white) 82%, transparent); }
 .h-tile--dark .h-cap  { color: var(--color-slate-400); }
-.h-tile--signal .h-cap { color: rgb(255 255 255 / 0.88); }
+.h-tile--signal .h-cap { color: color-mix(in srgb, var(--color-white) 88%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
   .h-arrow, .h-tile--photo > img, .h-tile--signal { transition: none; }

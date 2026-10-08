@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /privacy
-
-Sitemap: https://domain-placeholder.example/sitemap-index.xml

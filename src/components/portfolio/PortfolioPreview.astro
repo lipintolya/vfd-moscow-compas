@@ -39,7 +39,7 @@ const totalWord = total === 1 ? 'фотоотчёт' : total < 5 ? 'фотоот
         </header>
 
         <ul class="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4 sm:gap-x-5 sm:gap-y-8" role="list">
-          {preview.map((work, i) => (
+          {preview.map((work) => (
             <li>
               <a href={`/portfolio/${work.id}/`} class="group block min-w-0">
                 <span class="relative block aspect-3/4 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm transition-shadow duration-200 group-hover:shadow-md">

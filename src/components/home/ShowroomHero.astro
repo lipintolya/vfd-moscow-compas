@@ -37,19 +37,22 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 <section class="hero" aria-labelledby="hero-heading">
   <div class="container">
     <div class="stage" data-stage data-interval={SLIDE_MS}>
+      <!-- Первый кадр — LCP, грузится сразу. Остальные — data-src:
+           скрипт ставит src, когда страница загрузилась (или раньше, если
+           кадр понадобился), чтобы они не делили канал с первым -->
       <div class="stage__media">
         {HERO_SLIDES.map((l, i) => (
           <img
             class:list={['stage__img', { 'is-on': i === 0 }]}
             data-layer={i}
             data-way={l.way}
-            src={l.src}
+            src={i === 0 ? l.src : undefined}
+            data-src={i === 0 ? undefined : l.src}
             alt={i === 0 ? l.alt : ''}
             width="1672"
             height="941"
             style={`object-position: ${l.position}`}
             fetchpriority={i === 0 ? 'high' : undefined}
-            loading={i === 0 ? 'eager' : 'lazy'}
             decoding="async"
           />
         ))}
@@ -57,7 +60,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 
       <div class="stage__copy">
         <h1 id="hero-heading" class="stage__title">
-          Шоурум дверей ВФД в&nbsp;Москве
+          Шоурум дверей {SITE.name} {SITE.city.in.replace(' ', '\u00A0')}
         </h1>
         <p class="stage__since">{SITE.experience}</p>
         <p class="stage__lead">
@@ -82,7 +85,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     <ul class="tiles" role="list">
       <li>
         <a href="#works" class="h-tile h-tile--signal tile tile--works">
-          <img class="tile__door" src={WORKS_DOOR} alt="" width="323" height="720" loading="lazy" decoding="async" onerror="this.hidden=true" />
+          <img class="tile__door" src={WORKS_DOOR} alt="" width="323" height="720" loading="lazy" decoding="async" />
           <span class="h-tile__corner h-tile__corner--left h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
           <span class="h-tile__title">Наши работы</span>
           <span class="h-cap"><span class="tile__more">двери и&nbsp;перегородки </span>на&nbsp;объектах клиентов</span>
@@ -90,7 +93,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </li>
       <li>
         <a href="#video" class="h-tile h-tile--dark tile tile--video">
-          <img class="tile__person" src={SITE.contactPhoto} alt="" width="640" height="640" loading="lazy" decoding="async" onerror="this.hidden=true" />
+          <img class="tile__person" src={SITE.contactPhoto} alt="" width="640" height="640" loading="lazy" decoding="async" />
           <span class="h-tile__corner h-tile__corner--left tile__play" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="14" height="14"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>
           </span>
@@ -107,7 +110,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           <dl class="metro">
             {SITE.address.metro.map((m) => (
               <div class="metro__row">
-                <dt class="metro__station">{m.station}{m.line && <span class="metro__line">{m.line}</span>}</dt>
+                <dt class="metro__station">{m.station}{'line' in m && <span class="metro__line">{m.line}</span>}</dt>
                 <dd class="metro__time">{m.time}</dd>
               </div>
             ))}
@@ -145,7 +148,16 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         w.classList.toggle('is-current', on)
       }
     }
+    // Отложенные кадры: src — по требованию или после загрузки страницы
+    const load = (img: HTMLImageElement) => {
+      if (img.dataset.src && !img.getAttribute('src')) img.src = img.dataset.src
+    }
+    const loadRest = () => layers.forEach(load)
+    if (document.readyState === 'complete') loadRest()
+    else window.addEventListener('load', () => ('requestIdleCallback' in window ? requestIdleCallback(loadRest) : setTimeout(loadRest, 200)), { once: true })
+
     const goTo = (i: number) => {
+      load(layers[i])
       slide = i
       layers.forEach((l, j) => l.classList.toggle('is-on', j === i))
       mark(layers[i].dataset.way ?? '')

@@ -1,7 +1,13 @@
 ---
+/**
+ * Кнопка «Наверх» — появляется, когда прокрутили больше экрана.
+ * Без бесконечной пульсации: постоянное мигание в углу отвлекает от
+ * страницы. Плавная прокрутка — только если не отключена анимация.
+ */
 ---
 <button
   id="btt-btn"
+  type="button"
   aria-label="Наверх — прокрутить страницу в начало"
   title="Наверх"
 >
@@ -12,68 +18,68 @@
 </button>
 
 <style>
-  @keyframes btt-pulse {
-    0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 0 color-mix(in srgb, var(--color-accent-500) 28%, transparent); }
-    50%       { box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 0 0 7px color-mix(in srgb, var(--color-accent-500) 0%, transparent); }
-  }
-
   #btt-btn {
     position: fixed;
-    bottom: 1.5rem;
     right: 1.5rem;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 9999px;
-    background: linear-gradient(135deg, var(--color-accent-50) 0%, #fff 60%);
-    border: 1px solid var(--color-accent-200);
-    color: var(--color-accent-600);
-    cursor: pointer;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0rem));
+    z-index: 48;
     display: grid;
     place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0.0625rem solid var(--color-accent-200);
+    border-radius: 999rem;
+    background: linear-gradient(135deg, var(--color-accent-50) 0%, var(--color-white) 60%);
+    color: var(--color-accent-600);
+    box-shadow: 0 0.25rem 1rem color-mix(in srgb, var(--color-slate-950) 8%, transparent);
+    cursor: pointer;
     opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    translate: 0 0.625rem;
+    scale: 0.9;
     pointer-events: none;
-    transition: opacity 220ms ease, transform 220ms ease,
-                background 150ms ease, border-color 150ms ease;
-    z-index: 48;
+    transition:
+      opacity 220ms var(--ease-out),
+      translate 220ms var(--ease-out),
+      scale 220ms var(--ease-out),
+      background-color 150ms var(--ease-out),
+      border-color 150ms var(--ease-out);
   }
   #btt-btn svg { width: 1.125rem; height: 1.125rem; }
 
   #btt-btn.btt-visible {
     opacity: 1;
-    transform: none;
+    translate: 0 0;
+    scale: 1;
     pointer-events: auto;
-    animation: btt-pulse 2.4s ease-in-out infinite;
   }
   #btt-btn:hover {
-    background: linear-gradient(135deg, var(--color-accent-100) 0%, var(--color-accent-50) 100%);
     border-color: var(--color-accent-400);
-    box-shadow: 0 6px 20px color-mix(in srgb, var(--color-accent-600) 22%, transparent);
-    animation: none;
+    background: linear-gradient(135deg, var(--color-accent-100) 0%, var(--color-accent-50) 100%);
+    box-shadow: 0 0.375rem 1.25rem color-mix(in srgb, var(--color-accent-600) 22%, transparent);
   }
-  #btt-btn:active { transform: scale(0.94); animation: none; }
+  #btt-btn:active { scale: 0.94; }
+  #btt-btn:focus-visible { outline: 0.125rem solid var(--color-secondary-600); outline-offset: 0.125rem; }
 
-  @media (max-width: 640px) {
-    #btt-btn { bottom: 1.25rem; right: 1rem; }
+  @media (max-width: 40rem) {
+    #btt-btn { right: 1rem; bottom: calc(1.25rem + env(safe-area-inset-bottom, 0rem)); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    #btt-btn.btt-visible { animation: none; }
+    #btt-btn { transition: opacity 150ms linear; }
   }
 </style>
 
 <script>
-  ;(function () {
-    var btn = document.getElementById('btt-btn')
-    if (!btn) return
-
-    function onScroll() {
-      btn.classList.toggle('btt-visible', window.scrollY > 400)
-    }
+  const btn = document.getElementById('btt-btn')
+  if (btn) {
+    // Показываем после первого экрана — порог от высоты окна, а не число
+    const onScroll = () => btn.classList.toggle('btt-visible', window.scrollY > window.innerHeight)
     window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
 
-    btn.addEventListener('click', function () {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+    const still = matchMedia('(prefers-reduced-motion: reduce)')
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: still.matches ? 'auto' : 'smooth' })
     })
-  })()
+  }
 </script>

@@ -1,0 +1,80 @@
+[
+  {
+    "wide": [
+      {
+        "file": "/renders/designers/hero-1-wide-960.webp",
+        "width": 960,
+        "height": 420
+      },
+      {
+        "file": "/renders/designers/hero-1-wide-1600.webp",
+        "width": 1600,
+        "height": 700
+      }
+    ],
+    "tall": [
+      {
+        "file": "/renders/designers/hero-1-tall-640.webp",
+        "width": 640,
+        "height": 800
+      },
+      {
+        "file": "/renders/designers/hero-1-tall-750.webp",
+        "width": 750,
+        "height": 937
+      }
+    ]
+  },
+  {
+    "wide": [
+      {
+        "file": "/renders/designers/hero-2-wide-960.webp",
+        "width": 960,
+        "height": 420
+      },
+      {
+        "file": "/renders/designers/hero-2-wide-1600.webp",
+        "width": 1600,
+        "height": 700
+      }
+    ],
+    "tall": [
+      {
+        "file": "/renders/designers/hero-2-tall-640.webp",
+        "width": 640,
+        "height": 800
+      },
+      {
+        "file": "/renders/designers/hero-2-tall-750.webp",
+        "width": 750,
+        "height": 937
+      }
+    ]
+  },
+  {
+    "wide": [
+      {
+        "file": "/renders/designers/hero-3-wide-960.webp",
+        "width": 960,
+        "height": 420
+      },
+      {
+        "file": "/renders/designers/hero-3-wide-1600.webp",
+        "width": 1600,
+        "height": 700
+      }
+    ],
+    "tall": [
+      {
+        "file": "/renders/designers/hero-3-tall-640.webp",
+        "width": 640,
+        "height": 800
+      },
+      {
+        "file": "/renders/designers/hero-3-tall-750.webp",
+        "width": 750,
+        "height": 937
+      }
+    ]
+  }
+]

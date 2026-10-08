@@ -91,13 +91,7 @@ export function productName(m: NamingInput, opts: { withBrand?: boolean } = {}):
   return [head, coating, trim].filter(Boolean).join(', ')
 }
 
-/** Склонение по числу: pluralRu(3, ['модель', 'модели', 'моделей']) → «модели». */
-export function pluralRu(n: number, [one, few, many]: [string, string, string]): string {
-  const mod10 = n % 10, mod100 = n % 100
-  if (mod10 === 1 && mod100 !== 11) return one
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few
-  return many
-}
+export { pluralRu } from './plural'
 
 const formatRub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 

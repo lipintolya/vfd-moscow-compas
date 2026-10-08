@@ -14,7 +14,7 @@
 /** Домен без завершающего слэша. Используется в canonical, OG, sitemap,
     JSON-LD, фиде. Дублируется в astro.config.mjs (SITE_URL) — конфиг
     Astro не импортирует .ts, при смене домена поправить оба места
-    и public/robots.txt. */
+    (robots.txt и /sitemap.xml собираются из SITE_URL сами). */
 export const SITE_URL = 'https://domain-placeholder.example'
 
 export const SITE = {
@@ -43,6 +43,8 @@ export const SITE = {
 
   address: {
     mall: 'ТЦ «Компас»',
+    /** Название ТЦ без кавычек — короткая подпись рядом со знаком в подвале */
+    mallName: 'Компас',
     /** Полное название — в заголовках и подписях к фото здания */
     mallFull: 'Торговый центр «Компас»',
     street: 'ул. Красная Сосна, 2А',

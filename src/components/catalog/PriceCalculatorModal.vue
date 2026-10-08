@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
 import { accessoriesByCoating, type CoatingSlug } from '../../data/accessories'
 import {
   HINGE_PRICE, HINGE_LABEL, HINGE_QTY, HINGE_IMAGES,
@@ -151,15 +152,15 @@ const onKeydown = (e: KeyboardEvent) => {
   if (props.open) close()
 }
 
+const modalLock = useScrollLock()
 watch(() => props.open, (isOpen) => {
-  document.body.style.overflow = isOpen ? 'hidden' : ''
-  if (!isOpen) hardwareView.value = null
-})
+  if (isOpen) modalLock.lock()
+  else { modalLock.unlock(); hardwareView.value = null }
+}, { immediate: true })
 
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
-  document.body.style.overflow = ''
   if (copiedTimer) clearTimeout(copiedTimer)
 })
 </script>

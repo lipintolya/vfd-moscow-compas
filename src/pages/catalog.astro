@@ -15,9 +15,11 @@ import { getSeriesSpec, coatingGroupCopy } from '../data/series-descriptions'
 import { DOOR_CATEGORIES } from '../data/door-categories'
 import { COLOR_CATEGORIES } from '../data/color-categories'
 import { STYLE_CATEGORIES } from '../data/style-categories'
-import { pluralRu } from '../lib/product-text'
+import { pluralRu } from '../lib/plural'
+import { rub } from '../data/services'
+import { SITE } from '../config/site'
 
-const { cards, error } = await getCatalogCards()
+const { cards } = await getCatalogCards()
 const seriesCardsData = getSeriesCardsData(cards)
 
 /* ── Превью серий сверху каталога — группировка по покрытию, как в
@@ -39,15 +41,18 @@ const COATING_LANDING_SLUG = Object.fromEntries(
    тонкая цветная полоска слева (border-l-4, как референс-карточки серий:
    светлый нейтральный фон + одна цветная деталь) и цвет текста ценника/
    лейбла; panel/card — единый нейтральный тон для всех покрытий. */
+/* Только фирменная палитра (global.css): голубой, красный и два тона
+   графита — покрытия различимы, но без чужих цветов (синий/розовый/
+   фиолетовый Tailwind). Те же тона — у бейджей серий в карточках. */
 const COATING_ACCENT: Record<string, { stripe: string; label: string; price: string }> = {
-  emalex:  { stripe: 'border-l-blue-500',   label: 'text-blue-700',   price: 'text-blue-700' },
-  pet:     { stripe: 'border-l-rose-500',   label: 'text-rose-700',   price: 'text-rose-700' },
-  protach: { stripe: 'border-l-violet-500', label: 'text-violet-700', price: 'text-violet-700' },
-  emal:    { stripe: 'border-l-slate-600',  label: 'text-slate-700',  price: 'text-slate-700' },
+  emalex:  { stripe: 'border-l-secondary-500', label: 'text-secondary-700', price: 'text-secondary-700' },
+  pet:     { stripe: 'border-l-accent-500',    label: 'text-accent-700',    price: 'text-accent-700' },
+  protach: { stripe: 'border-l-slate-900',     label: 'text-slate-900',     price: 'text-slate-900' },
+  emal:    { stripe: 'border-l-slate-400',     label: 'text-slate-600',     price: 'text-slate-700' },
 }
-const DEFAULT_ACCENT = { stripe: 'border-l-accent-500', label: 'text-accent-700', price: 'text-accent-700' }
+const DEFAULT_ACCENT = { stripe: 'border-l-slate-300', label: 'text-slate-600', price: 'text-slate-700' }
 const PANEL = 'border-slate-200 bg-white'
-const PILL_ACCENT = 'bg-graphite shadow-black/20 hover:bg-accent-600'
+const PILL_ACCENT = 'bg-graphite shadow-slate-950/20 hover:bg-accent-600'
 
 /* Краткая выжимка покрытия для свёрнутого summary панели — раньше там
    был только счётчик «N серий», непонятно чем покрытия отличаются друг
@@ -87,7 +92,6 @@ const seriesCoatingGroups = [...new Map(
     return { ...coating, series, description, tagline: copy?.tagline ?? '', benefits: copy?.benefits ?? [], closing: copy?.closing ?? '', minPrice }
   })
 
-const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
 /* ── Уникальные опции для фильтров ── */
 const allSeries = [...new Map(
@@ -130,11 +134,11 @@ const catalogFaq = [
   },
   {
     q: 'Какое покрытие выбрать — эмаль, ПЭТ, Эмалекс или Протач?',
-    a: 'Эмаль — гладкая окрашенная поверхность и широкая палитра, классика. ПЭТ — самое стойкое к царапинам и отпечаткам, выбор для семей с детьми и животными. Эмалекс — гладкое полимерное покрытие, устойчивое к влаге и царапинам, по виду близко к эмали, но практичнее по цене. Протач — плотное покрытие с текстурой, стойкое к износу. Образцы всех покрытий можно посмотреть вживую в салоне в ТЦ «Компас».',
+    a: `Эмаль — гладкая окрашенная поверхность и широкая палитра, классика. ПЭТ — самое стойкое к царапинам и отпечаткам, выбор для семей с детьми и животными. Эмалекс — гладкое полимерное покрытие, устойчивое к влаге и царапинам, по виду близко к эмали, но практичнее по цене. Протач — плотное покрытие с текстурой, стойкое к износу. Образцы всех покрытий можно посмотреть вживую в салоне в ${SITE.address.mall}.`,
   },
   {
-    q: 'Есть ли двери в наличии в Москве?',
-    a: 'Да, часть популярных моделей держим на складе в Москве — их можно забрать без ожидания производства. Наличие конкретной модели и цвета уточняйте у менеджера, актуальные складские акции публикуем на главной странице.',
+    q: `Есть ли двери в наличии ${SITE.city.in}?`,
+    a: `Да, часть популярных моделей держим на складе ${SITE.city.in} — их можно забрать без ожидания производства. Наличие конкретной модели и цвета уточняйте у менеджера, актуальные складские акции публикуем на главной странице.`,
   },
   {
     q: 'Вы делаете замер и установку?',
@@ -142,7 +146,7 @@ const catalogFaq = [
   },
   {
     q: 'Можно ли заказать дверь нестандартного размера?',
-    a: 'Да, полотна изготавливаются под заказ по нестандартной высоте и ширине. Доплаты за ширину 900 мм у ВФД нет. Возможные размеры и сроки для конкретной серии подскажет менеджер при расчёте.',
+    a: `Да, полотна изготавливаются под заказ по нестандартной высоте и ширине. Доплаты за ширину 900 мм у ${SITE.name} нет. Возможные размеры и сроки для конкретной серии подскажет менеджер при расчёте.`,
   },
   {
     q: 'Как посчитать полную стоимость комплекта?',
@@ -155,7 +159,7 @@ const structuredData = canonicalUrl ? [
   {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Каталог дверей ВФД в ТЦ «Компас»',
+    name: `Каталог дверей ${SITE.name} в ${SITE.address.mall}`,
     description: 'Каталог межкомнатных дверей с ценами, сериями, покрытиями и цветами.',
     url: canonicalUrl,
     numberOfItems: cards.length,
@@ -173,19 +177,11 @@ const structuredData = canonicalUrl ? [
 ---
 
 <BaseLayout
-  title="Купить межкомнатные двери в Москве — каталог и цены | ВФД"
-  description="Межкомнатные двери в Москве от официального дилера ВФД: каталог с ценами, покрытия эмаль, ПЭТ, Эмалекс, Протач. Замер и монтаж по Москве, салон в ТЦ «Компас»."
+  title={`Купить межкомнатные двери ${SITE.city.in} — каталог и цены | ${SITE.name}`}
+  description={`Межкомнатные двери ${SITE.city.in} от официального дилера ${SITE.name}: каталог с ценами, покрытия эмаль, ПЭТ, Эмалекс, Протач. Замер и монтаж по Москве, салон в ${SITE.address.mall}.`}
   canonical={canonicalUrl}
   structuredData={structuredData}
 >
-  {error && (
-    <div class="container pt-8">
-      <div class="rounded-2xl bg-red-50 border border-red-100 px-5 py-4 text-red-700 text-sm">
-        Ошибка загрузки каталога: {error}
-      </div>
-    </div>
-  )}
-
   <div class="breadcrumb-bar">
     <div class="container">
       <Breadcrumbs items={breadcrumbItems} />
@@ -198,13 +194,13 @@ const structuredData = canonicalUrl ? [
   ]} />
 
   {seriesCoatingGroups.length > 0 && (
-    <div id="series" class="section bg-white" style="padding-bottom: 0; scroll-margin-top: 5.5rem">
+    <div id="series" class="section catalog-series bg-white">
       <div class="container">
-        <header id="series-title" class="max-w-2xl mb-8 md:mb-10" style="scroll-margin-top: 7.5rem">
+        <header id="series-title" class="catalog-series__head max-w-2xl mb-8 md:mb-10">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p class="t-eyebrow mb-3">Каталог дверей ВФД</p>
-              <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">Межкомнатные двери в Москве</h1>
+              <p class="t-eyebrow mb-3">Каталог дверей {SITE.name}</p>
+              <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-5xl">Межкомнатные двери {SITE.city.in}</h1>
             </div>
             {/* Полные карточки серий (фото+цена каждой) переехали на
                /catalog/series/ — здесь превью группы компактнее (см. ниже),
@@ -343,11 +339,11 @@ const structuredData = canonicalUrl ? [
                             )}
                             <span class="min-w-0">
                               <span class="block text-[0.9375rem] font-medium">Серия {s.name}</span>
-                              {s.minPrice && <span class="mt-0.5 block text-sm tabular-nums text-slate-500 sm:hidden">от {fmt(s.minPrice)}</span>}
+                              {s.minPrice && <span class="mt-0.5 block text-sm tabular-nums text-slate-500 sm:hidden">от {rub(s.minPrice)}</span>}
                             </span>
                           </span>
                           <span class="flex shrink-0 items-center gap-2">
-                            {s.minPrice && <span class="hidden text-sm tabular-nums text-slate-500 sm:inline">от {fmt(s.minPrice)}</span>}
+                            {s.minPrice && <span class="hidden text-sm tabular-nums text-slate-500 sm:inline">от {rub(s.minPrice)}</span>}
                             <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-150 group-hover/series-link:translate-x-0.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                               <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
@@ -359,7 +355,7 @@ const structuredData = canonicalUrl ? [
                 </div>
                 <div class="flex flex-col gap-3">
                   <p class={`m-0 text-lg font-medium sm:text-xl ${accent.price}`}>
-                    {group.minPrice ? `от ${fmt(group.minPrice)}` : `${group.series.length} ${pluralRu(group.series.length, ['серия', 'серии', 'серий'])}`}
+                    {group.minPrice ? `от ${rub(group.minPrice)}` : `${group.series.length} ${pluralRu(group.series.length, ['серия', 'серии', 'серий'])}`}
                     {group.minPrice && <span class="ml-1 text-xs font-semibold opacity-70">за полотно</span>}
                   </p>
                   <a
@@ -467,7 +463,7 @@ const structuredData = canonicalUrl ? [
                     href={`/catalog/${c.slug}/`}
                     class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
                   >
-                    {c.h1.replace(' в Москве', '')}
+                    {c.h1.replace(` ${SITE.city.in}`, '')}
                   </a>
                 </li>
               ))}
@@ -483,7 +479,7 @@ const structuredData = canonicalUrl ? [
                     href={`/catalog/${c.slug}/`}
                     class="inline-flex items-center whitespace-nowrap rounded-full bg-graphite px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
                   >
-                    {c.h1.replace(' в Москве', '')}
+                    {c.h1.replace(` ${SITE.city.in}`, '')}
                   </a>
                 </li>
               ))}
@@ -516,6 +512,13 @@ const structuredData = canonicalUrl ? [
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* Якоря «Серии» (SectionNav) — отступ от шапки считается от её высоты,
+     а не числом: шапку уже меняли с 4 на 4.5rem */
+  .catalog-series { padding-bottom: 0; scroll-margin-top: calc(var(--header-height) + 1rem); }
+  .catalog-series__head { scroll-margin-top: calc(var(--header-height) + 3rem); }
+</style>
 
 <script>
   /* Превью серии в карточке покрытия (ПК): наведение мышью или фокус

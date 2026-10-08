@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
+import { useScrollLock } from '../../lib/scroll-lock'
 import { PHONE, SITE } from '../../config/site'
 import { ROUTE_URL } from '../../lib/map-links'
 
@@ -50,9 +51,12 @@ const isModalOpen  = ref(false)
 const legalTrigger = useTemplateRef<HTMLButtonElement>('legalTriggerEl')
 const legalPanel   = useTemplateRef<HTMLDivElement>('legalPanelEl')
 
+const legalLock = useScrollLock()
+const devLock   = useScrollLock()
+
 const openModal = () => {
   isModalOpen.value = true
-  document.body.style.overflow = 'hidden'
+  legalLock.lock()
   // Фокус внутрь модала после рендера
   requestAnimationFrame(() => {
     legalPanel.value
@@ -63,7 +67,7 @@ const openModal = () => {
 
 const closeModal = () => {
   isModalOpen.value = false
-  document.body.style.overflow = ''
+  legalLock.unlock()
   legalTrigger.value?.focus()   // возвращаем фокус на триггер
 }
 
@@ -156,7 +160,7 @@ const DEV_SERVICES = [
 
 const openDevModal = () => {
   isDevModalOpen.value = true
-  document.body.style.overflow = 'hidden'
+  devLock.lock()
   measureVitals()
   requestAnimationFrame(() => {
     devPanel.value
@@ -168,7 +172,7 @@ const openDevModal = () => {
 const closeDevModal = () => {
   isDevModalOpen.value = false
   stopVitals()
-  document.body.style.overflow = ''
+  devLock.unlock()
   devTrigger.value?.focus()
 }
 
@@ -207,7 +211,6 @@ const onKeydown = (e: KeyboardEvent) => {
 onMounted(()  => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
-  document.body.style.overflow = ''
   stopVitals()
 })
 </script>
@@ -222,9 +225,9 @@ onUnmounted(() => {
 
           <!-- Brand -->
           <div>
-            <a href="/" class="flex items-center gap-2 mb-4 w-fit" aria-label="ВФД в ТЦ «Компас» — главная">
+            <a href="/" class="flex items-center gap-2 mb-4 w-fit" :aria-label="`${SITE.name} в ${SITE.address.mall} — главная`">
               <span class="text-lg font-semibold text-white tracking-wide">VFD</span>
-              <span class="text-xs text-white/40 uppercase tracking-widest">Компас</span>
+              <span class="text-xs text-white/40 uppercase tracking-widest">{{ SITE.address.mallName }}</span>
             </a>
             <p class="text-sm leading-relaxed text-white/60 max-w-xs">
               {{ SITE.studioName }} — шоу-рум Владимирской фабрики дверей
@@ -414,7 +417,7 @@ onUnmounted(() => {
     <Transition name="modal">
       <div
         v-if="isModalOpen"
-        class="fixed inset-0 z-100 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+        class="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4"
         role="presentation"
         @click="closeModal"
       >
@@ -466,7 +469,7 @@ onUnmounted(() => {
             <div class="border-t border-slate-100 pt-5">
               <h4 class="text-sm font-medium text-slate-900 mb-2">Контакты</h4>
               <p class="text-slate-600 leading-relaxed">
-                г. Москва, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж<br />
+                {{ SITE.address.full }}<br />
                 Телефон: <a :href="`tel:${PHONE.raw}`" class="text-secondary-700 hover:underline">{{ PHONE.label }}</a><br />
                 <template v-if="HAS_EMAIL">Email: <a :href="`mailto:${SITE.email}`" class="text-secondary-700 hover:underline">{{ SITE.email }}</a><br /></template>
                 Сайт: <a :href="SITE.url" class="text-secondary-700 hover:underline">{{ SITE.host }}</a>
@@ -487,7 +490,7 @@ onUnmounted(() => {
     <Transition name="dev-modal">
       <div
         v-if="isDevModalOpen"
-        class="fixed inset-0 z-100 flex items-end justify-center bg-black/75 backdrop-blur-sm sm:items-center sm:p-4"
+        class="fixed inset-0 z-100 flex items-end justify-center bg-slate-950/75 backdrop-blur-sm sm:items-center sm:p-4"
         role="presentation"
         @click="closeDevModal"
       >
@@ -496,7 +499,7 @@ onUnmounted(() => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="dev-modal-title"
-          class="dev-panel relative w-full max-w-md overflow-hidden rounded-t-3xl bg-graphite text-white ring-1 ring-white/10 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.8)] sm:rounded-3xl"
+          class="dev-panel relative w-full max-w-md overflow-hidden rounded-t-3xl bg-graphite text-white ring-1 ring-white/10 shadow-[0_2rem_5rem_-1.25rem_color-mix(in_srgb,var(--color-slate-950)_80%,transparent)] sm:rounded-3xl"
           @click.stop
         >
           <button
@@ -510,7 +513,7 @@ onUnmounted(() => {
             </svg>
           </button>
 
-          <div class="max-h-[88dvh] overflow-y-auto overscroll-contain px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] pt-6 sm:max-h-[85vh] sm:px-7 sm:pb-7 sm:pt-7">
+          <div class="max-h-[88dvh] overflow-y-auto overscroll-contain px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0rem))] pt-6 sm:max-h-[85vh] sm:px-7 sm:pb-7 sm:pt-7">
 
             <!-- Хват-полоска bottom sheet (только мобильный) -->
             <div class="mx-auto -mt-2 mb-4 h-1 w-10 rounded-full bg-white/15 sm:hidden" aria-hidden="true" />
@@ -659,10 +662,10 @@ onUnmounted(() => {
 .dev-modal-leave-to .dev-panel {
   transform: translateY(100%);
 }
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
   .dev-modal-enter-from .dev-panel,
   .dev-modal-leave-to .dev-panel {
-    transform: translateY(12px);
+    transform: translateY(0.75rem);
   }
 }
 @media (prefers-reduced-motion: reduce) {

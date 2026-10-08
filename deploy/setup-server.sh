@@ -60,8 +60,39 @@ server {
     root $WEB_ROOT;
     index index.html;
 
+    # Версию nginx не показываем в ответах и на страницах ошибок
+    server_tokens off;
+
+    # Заголовки безопасности. CSP проверена на всех типах страниц
+    # (главная, «О нас», контакты, каталог, модель, видео, перегородки):
+    # внешние — только фото/видео из Yandex Cloud, Яндекс Метрика и плееры
+    # VK/Rutube. 'unsafe-inline' для скриптов нужен встроенным скриптам
+    # Astro (запуск островов Vue, печать цитаты, баннер куки).
+    # Добавили новый внешний сервис — допишите его домен сюда.
+    # После выпуска SSL (certbot) добавьте в server { listen 443 … }:
+    #   add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://mc.yandex.ru https://yastatic.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://storage.yandexcloud.net https://mc.yandex.ru https://mc.yandex.com; media-src 'self' https://storage.yandexcloud.net; font-src 'self'; connect-src 'self' https://mc.yandex.ru https://mc.yandex.com; frame-src https://vk.com https://vkvideo.ru https://rutube.ru https://mc.yandex.ru; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'" always;
+
     location / {
         try_files \$uri \$uri/ =404;
+    }
+
+    # Файлы сборки с хешем в имени и шрифты не меняются — кешируем на год.
+    # add_header внутри location отменяет заголовки уровня server, поэтому
+    # nosniff повторён здесь; остальные заголовки JS/CSS/шрифтам не нужны.
+    location ^~ /_astro/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files \$uri =404;
+    }
+    location ^~ /fonts/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files \$uri =404;
     }
 
     error_page 404 /404.html;

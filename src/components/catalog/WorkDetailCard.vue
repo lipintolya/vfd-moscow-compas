@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
 import type { InvisibleWork } from '../../data/skrytye-dveri-works'
+
+/* Окно рисуется только после монтирования: <Teleport> внутри компонента,
+   отрисованного на сервере, ломает гидратацию (на сервере его
+   содержимое уходит в отдельный буфер, в браузере Vue не может
+   сопоставить разметку — «Hydration ... mismatches»). */
+const mounted = ref(false)
+onMounted(() => { mounted.value = true })
 
 const props = defineProps<{ work: InvisibleWork; ctaHref: string }>()
 
@@ -36,13 +44,16 @@ const onHeroTouchEnd = (e: TouchEvent) => {
 /* ── Lightbox (полноэкранный просмотр фото) ── */
 const lightboxIndex = ref<number | null>(null)
 
+/* Прокрутка страницы под открытым окном — src/lib/scroll-lock.ts */
+const pageLock = useScrollLock()
+
 const openLightbox = (i: number) => {
   lightboxIndex.value = i
-  document.body.style.overflow = 'hidden'
+  pageLock.lock()
 }
 const closeLightbox = () => {
   lightboxIndex.value = null
-  document.body.style.overflow = ''
+  pageLock.unlock()
 }
 const go = (dir: -1 | 1) => {
   if (lightboxIndex.value === null) return
@@ -74,7 +85,6 @@ const onKey = (e: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKey))
 onUnmounted(() => {
   window.removeEventListener('keydown', onKey)
-  document.body.style.overflow = ''
 })
 </script>
 
@@ -212,7 +222,7 @@ onUnmounted(() => {
   </article>
 
   <!-- Lightbox -->
-  <Teleport to="body">
+  <Teleport v-if="mounted" to="body">
     <Transition
       enter-active-class="transition-opacity duration-200 ease-out motion-reduce:transition-none"
       leave-active-class="transition-opacity duration-150 ease-in motion-reduce:transition-none"

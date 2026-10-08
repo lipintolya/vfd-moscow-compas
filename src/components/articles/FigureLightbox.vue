@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
 
 /* natural — без кропа 21:9: картинка в своих пропорциях (схемы, чертежи). */
 const props = defineProps<{
@@ -19,13 +20,15 @@ const props = defineProps<{
 const mounted = ref(false)
 const open = ref(false)
 
+const lightboxLock = useScrollLock()
+
 const show = () => {
   open.value = true
-  document.body.style.overflow = 'hidden'
+  lightboxLock.lock()
 }
 const close = () => {
   open.value = false
-  document.body.style.overflow = ''
+  lightboxLock.unlock()
 }
 const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && open.value) close() }
 
@@ -35,7 +38,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
-  document.body.style.overflow = ''
 })
 </script>
 

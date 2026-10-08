@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { SITE } from '../../config/site'
 import { computed, reactive, ref, onMounted, onUnmounted } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
 import { useScrollReveal } from '../../composables/useScrollReveal'
 import { reviews, type ReviewPlatform, type Review } from '../../data/reviews'
 
@@ -81,14 +82,17 @@ const lightbox = ref<{ photos: string[]; name: string; index: number } | null>(n
    вовсе, включая после маунта. */
 const mounted = ref(false)
 
+/* Прокрутка страницы под открытым окном — src/lib/scroll-lock.ts */
+const pageLock = useScrollLock()
+
 const openLightbox = (review: Review) => {
   if (!review.photos?.length) return
   lightbox.value = { photos: review.photos, name: review.name, index: getActiveIdx(review.id) }
-  document.body.style.overflow = 'hidden'
+  pageLock.lock()
 }
 const closeLightbox = () => {
   lightbox.value = null
-  document.body.style.overflow = ''
+  pageLock.unlock()
 }
 const lightboxStep = (dir: 1 | -1) => {
   if (!lightbox.value) return
@@ -115,7 +119,6 @@ onMounted(() => {
 })
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
-  document.body.style.overflow = ''
 })
 </script>
 

@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
+
+/* Окно рисуется только после монтирования: <Teleport> внутри компонента,
+   отрисованного на сервере, ломает гидратацию (на сервере его
+   содержимое уходит в отдельный буфер, в браузере Vue не может
+   сопоставить разметку — «Hydration ... mismatches»). */
+const mounted = ref(false)
+onMounted(() => { mounted.value = true })
 
 interface InfoImage {
   src: string
@@ -28,20 +36,21 @@ const props = withDefaults(defineProps<{
 
 const active = ref<InfoImage | null>(null)
 
+const viewerLock = useScrollLock()
+
 const open = (img: InfoImage) => {
   active.value = img
-  document.body.style.overflow = 'hidden'
+  viewerLock.lock()
 }
 const close = () => {
   active.value = null
-  document.body.style.overflow = ''
+  viewerLock.unlock()
 }
 const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
 
 onMounted(() => window.addEventListener('keydown', onKey))
 onUnmounted(() => {
   window.removeEventListener('keydown', onKey)
-  document.body.style.overflow = ''
 })
 </script>
 
@@ -82,7 +91,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Modal -->
-    <Teleport to="body">
+    <Teleport v-if="mounted" to="body">
       <Transition name="iiv-fade">
         <div
           v-if="active"

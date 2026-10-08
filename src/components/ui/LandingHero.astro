@@ -1,27 +1,52 @@
 ---
 /**
- * Первый экран посадочных страниц (/partitions/, /catalog/skrytye-dveri/):
- * крупный заголовок слева, пояснение и кнопки справа, под ними фото во всю
- * ширину без текста поверх, ниже — факты под линейками.
+ * Первый экран посадочных страниц (/partitions/, /catalog/skrytye-dveri/,
+ * /designers/): крупный заголовок слева, пояснение и кнопки справа, под
+ * ними фото во всю ширину без текста поверх, ниже — факты под линейками.
  *
  * Фото — <picture> с кадровкой под экран: широкий кадр 16:7 для компьютера,
  * вертикальный 4:5 для телефона (широкий на узком экране обрезался бы
- * до середины). Грузится первым (fetchpriority="high") — это LCP страницы.
- * Кнопки — слот `actions`. Стили — токены дизайн-системы (.home).
+ * до середины). Первый кадр грузится сразу (fetchpriority="high") — это
+ * LCP страницы. Кнопки — слот `actions`. Стили — токены дизайн-системы (.home).
+ *
+ * Несколько кадров (`image` — массив) — слайдер. Смена — «сдвижная
+ * панель», как полотно раздвижной двери: новый кадр въезжает поверх
+ * старого (clip-path), с тенью у кромки, сам слегка «доезжает» из
+ * увеличения, а старый уходит в сторону медленнее — параллакс. Только
+ * clip-path / transform / opacity (Web Animations API), без перерисовки
+ * страницы. Остальные кадры грузятся после загрузки страницы, чтобы не
+ * делить канал с первым. Внизу кадра — пауза и сегменты: текущий
+ * заполняется за время показа, по клику — переход к кадру. Показ стоит,
+ * пока курсор или фокус на сцене, сцена вне экрана, вкладка скрыта или
+ * нажата пауза; при reduced-motion — без автопоказа и без анимации смены.
+ * На телефоне кадры листаются свайпом.
+ *
+ * Факт с `count` — счётчик: при загрузке цифра один раз досчитывает от
+ * нуля до count (суффикс вроде «+» сохраняется). В разметке — итоговое
+ * значение: его видят поиск и экранные читалки; без JS и при
+ * reduced-motion счётчик не запускается.
  */
 import { typograph } from '../../lib/typograph'
 
+interface HeroImage {
+  alt:  string
+  wide: { src: string; srcset: string; width: number; height: number }
+  tall: { srcset: string; width: number; height: number }
+}
 interface Props {
   title:  string
   lead:   string
-  image: {
-    alt:  string
-    wide: { src: string; srcset: string; width: number; height: number }
-    tall: { srcset: string; width: number; height: number }
-  }
-  facts: { value: string; label: string }[]
+  /** Один кадр — статичное фото; массив — слайдер (первый кадр — обложка) */
+  image:  HeroImage | HeroImage[]
+  facts: { value: string; label: string; count?: number }[]
+  /** Время показа кадра в слайдере, мс */
+  interval?: number
 }
-const { title, lead, image, facts } = Astro.props
+const { title, lead, image, facts, interval = 6500 } = Astro.props
+const slides = Array.isArray(image) ? image : [image]
+const slider = slides.length > 1
+const TALL_MEDIA = '(max-width: 47.9375rem)'
+const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
 ---
 
 <section class="lhero" aria-labelledby="lhero-title">
@@ -34,33 +59,266 @@ const { title, lead, image, facts } = Astro.props
       </div>
     </header>
 
-    <div class="lhero__stage">
-      <picture>
-        <source media="(max-width: 47.9375rem)" srcset={image.tall.srcset} sizes="100vw" width={image.tall.width} height={image.tall.height} />
-        <img
-          src={image.wide.src}
-          srcset={image.wide.srcset}
-          sizes="(min-width: 80rem) 76rem, 100vw"
-          alt={image.alt}
-          width={image.wide.width}
-          height={image.wide.height}
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-        />
-      </picture>
+    <div
+      class="lhero__stage"
+      data-lhero={slider ? '' : undefined}
+      data-interval={slider ? interval : undefined}
+      role={slider ? 'group' : undefined}
+      aria-roledescription={slider ? 'слайдер' : undefined}
+      aria-label={slider ? 'Интерьеры' : undefined}
+    >
+      {slides.map((s, i) => (
+        <picture
+          class="lhero__slide"
+          data-slide={i}
+          data-state={i === 0 ? 'on' : undefined}
+          aria-hidden={i > 0 ? 'true' : undefined}
+        >
+          <source
+            media={TALL_MEDIA}
+            srcset={i === 0 ? s.tall.srcset : undefined}
+            data-srcset={i > 0 ? s.tall.srcset : undefined}
+            sizes="100vw"
+            width={s.tall.width}
+            height={s.tall.height}
+          />
+          <img
+            src={i === 0 ? s.wide.src : undefined}
+            srcset={i === 0 ? s.wide.srcset : undefined}
+            data-src={i > 0 ? s.wide.src : undefined}
+            data-srcset={i > 0 ? s.wide.srcset : undefined}
+            sizes={WIDE_SIZES}
+            alt={s.alt}
+            width={s.wide.width}
+            height={s.wide.height}
+            loading="eager"
+            fetchpriority={i === 0 ? 'high' : undefined}
+            decoding="async"
+          />
+        </picture>
+      ))}
+
+      {slider && (
+        <>
+          <span class="lhero__edge" aria-hidden="true"></span>
+          <div class="lhero__nav">
+            <button type="button" class="lhero__pause" data-pause aria-label="Остановить показ">
+              <svg class="lhero__icon lhero__icon--pause" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 3.5v9M11 3.5v9" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+              <svg class="lhero__icon lhero__icon--play" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5.5 3.5v9l7-4.5z" fill="currentColor" /></svg>
+            </button>
+            {slides.map((s, i) => (
+              <button
+                type="button"
+                class="lhero__seg"
+                data-go={i}
+                aria-label={`Кадр ${i + 1} из ${slides.length}: ${s.alt}`}
+                aria-current={i === 0 ? 'true' : undefined}
+              >
+                <span class="lhero__fill"></span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
 
     <dl class="lhero__facts">
       {facts.map((f) => (
         <div>
-          <dt class="lhero__value">{f.value}</dt>
+          <dt class="lhero__value" data-count={f.count}>{f.value}</dt>
           <dd class="h-meta">{typograph(f.label)}</dd>
         </div>
       ))}
     </dl>
   </div>
 </section>
+
+<script>
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  /* ── Слайдер ──
+     Таймер учитывает остаток: после паузы кадр досматривается, а не
+     начинается заново; полоска сегмента стоит вместе с таймером
+     (animation-play-state). */
+  document.querySelectorAll<HTMLElement>('[data-lhero]').forEach((stage) => {
+    const slides = [...stage.querySelectorAll<HTMLElement>('.lhero__slide')]
+    const segs = [...stage.querySelectorAll<HTMLButtonElement>('[data-go]')]
+    const pauseBtn = stage.querySelector<HTMLButtonElement>('[data-pause]')!
+    const edge = stage.querySelector<HTMLElement>('.lhero__edge')!
+    const interval = Number(stage.dataset.interval)
+    stage.style.setProperty('--slide-ms', `${interval}ms`)
+
+    // Отложенные кадры: srcset/src — после загрузки страницы или по требованию
+    const load = (slide: HTMLElement) => {
+      slide.querySelectorAll<HTMLElement>('[data-srcset]').forEach((el) => {
+        el.setAttribute('srcset', el.dataset.srcset!)
+        delete el.dataset.srcset
+      })
+      const img = slide.querySelector<HTMLImageElement>('img[data-src]')
+      if (img) { img.src = img.dataset.src!; delete img.dataset.src }
+    }
+    const loadRest = () => slides.forEach(load)
+    if (document.readyState === 'complete') loadRest()
+    else addEventListener('load', () => ('requestIdleCallback' in window ? requestIdleCallback(loadRest) : setTimeout(loadRest, 200)), { once: true })
+
+    let cur = 0
+    let timer: number | undefined
+    let started = 0
+    let remaining = interval
+    let running = false
+    let userPaused = still
+    let hovering = false
+    let onScreen = true
+
+    // Сегменты: пройденные — заполнены, текущий — заполняется заново
+    const mark = () => {
+      segs.forEach((s, i) => {
+        s.classList.remove('is-current')
+        s.classList.toggle('is-done', i < cur)
+        if (i === cur) s.setAttribute('aria-current', 'true')
+        else s.removeAttribute('aria-current')
+      })
+      void stage.offsetWidth
+      segs[cur]?.classList.add('is-current')
+    }
+
+    const EASE = 'cubic-bezier(0.77, 0, 0.175, 1)'
+    const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)'
+    const DUR = 1150
+
+    const go = (next: number, dir: 1 | -1) => {
+      if (next === cur) return
+      // Быстрый повторный клик — прошлая смена досрочно завершается (полоски сегментов — CSS, их не трогаем)
+      stage.getAnimations({ subtree: true }).forEach((a) => { if (!(a instanceof CSSAnimation)) a.finish() })
+      const inc = slides[next]!
+      const out = slides[cur]!
+      load(inc)
+      slides.forEach((s) => { if (s !== inc && s !== out) s.removeAttribute('data-state') })
+      out.dataset.state = 'out'
+      inc.dataset.state = 'on'
+      inc.removeAttribute('aria-hidden')
+      out.setAttribute('aria-hidden', 'true')
+      cur = next
+      mark()
+      remaining = interval
+      if (running) { clearTimeout(timer); started = performance.now(); timer = window.setTimeout(advance, interval) }
+
+      const done = () => { if (out.dataset.state === 'out') out.removeAttribute('data-state') }
+      if (still) { done(); return }
+
+      // Новый кадр въезжает со стороны направления; кромка — вместе с ним
+      const from = dir > 0 ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)'
+      const w = stage.clientWidth
+      const ew = edge.offsetWidth
+      edge.dataset.dir = dir > 0 ? 'next' : 'prev'
+      inc.animate([{ clipPath: from }, { clipPath: 'inset(0 0 0 0)' }], { duration: DUR, easing: EASE })
+        .finished.then(done, done)
+      inc.querySelector('img')?.animate(
+        [{ transform: `translateX(${dir * 6}%) scale(1.08)` }, { transform: 'none' }],
+        { duration: DUR + 500, easing: SETTLE },
+      )
+      out.querySelector('img')?.animate(
+        [{ transform: 'none' }, { transform: `translateX(${-dir * 12}%)` }],
+        { duration: DUR, easing: EASE },
+      )
+      edge.animate(
+        dir > 0
+          ? [{ transform: `translateX(${w - ew}px)`, opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.8 }, { transform: `translateX(${-ew}px)`, opacity: 0 }]
+          : [{ transform: 'translateX(0)', opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.8 }, { transform: `translateX(${w}px)`, opacity: 0 }],
+        { duration: DUR, easing: EASE },
+      )
+    }
+    const advance = () => go((cur + 1) % slides.length, 1)
+
+    // Показ идёт, только если ничто не мешает; при остановке запоминаем остаток
+    const sync = () => {
+      const run = !userPaused && !hovering && onScreen && !document.hidden
+      stage.classList.toggle('is-paused', !run)
+      if (run === running) return
+      running = run
+      if (run) {
+        started = performance.now()
+        timer = window.setTimeout(advance, remaining)
+      } else {
+        clearTimeout(timer)
+        remaining = Math.max(0, remaining - (performance.now() - started))
+      }
+    }
+
+    segs.forEach((s, i) => s.addEventListener('click', () => go(i, i > cur ? 1 : -1)))
+    pauseBtn.addEventListener('click', () => {
+      userPaused = !userPaused
+      stage.classList.toggle('is-stopped', userPaused)
+      pauseBtn.setAttribute('aria-label', userPaused ? 'Продолжить показ' : 'Остановить показ')
+      sync()
+    })
+    stage.classList.toggle('is-stopped', userPaused)
+    if (userPaused) pauseBtn.setAttribute('aria-label', 'Продолжить показ')
+
+    // Мышь над сценой или фокус внутри — пауза (успеть рассмотреть кадр)
+    stage.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hovering = true; sync() } })
+    stage.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { hovering = false; sync() } })
+    stage.addEventListener('focusin', () => { hovering = true; sync() })
+    stage.addEventListener('focusout', (e) => {
+      if (stage.contains(e.relatedTarget as Node)) return
+      hovering = false
+      sync()
+    })
+
+    // Телефон: свайп по кадру (вертикальная прокрутка не мешает)
+    let x0 = 0, y0 = 0
+    stage.addEventListener('touchstart', (e) => { x0 = e.touches[0]!.clientX; y0 = e.touches[0]!.clientY }, { passive: true })
+    stage.addEventListener('touchend', (e) => {
+      if ((e.target as Element).closest('.lhero__nav')) return
+      const dx = e.changedTouches[0]!.clientX - x0
+      const dy = e.changedTouches[0]!.clientY - y0
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return
+      go((cur + (dx < 0 ? 1 : slides.length - 1)) % slides.length, dx < 0 ? 1 : -1)
+    }, { passive: true })
+
+    new IntersectionObserver(([e]) => { onScreen = !!e?.isIntersecting; sync() }).observe(stage)
+    document.addEventListener('visibilitychange', sync)
+    mark()
+    sync()
+  })
+
+  /* ── Счётчик фактов ──
+     Стартует, когда цифра на экране (на телефоне факты бывают ниже
+     первого экрана); формат чисел — как в итоговом значении, чтобы
+     в конце не было скачка «1 000+» → «1000+» */
+  if (!still && 'IntersectionObserver' in window) {
+    const run = (el: HTMLElement, to: number, final: string) => {
+      const digits = final.match(/^[\d\s  ]+/)?.[0] ?? ''
+      const suffix = final.slice(digits.length)
+      const grouped = /[\s  ]/.test(digits.trim())
+      const fmt = (n: number) => (grouped ? n.toLocaleString('ru-RU') : String(n)) + suffix
+      const ms = 1400
+      let t0 = 0
+      const tick = (now: number) => {
+        if (!t0) t0 = now
+        const p = Math.min(1, (now - t0) / ms)
+        el.textContent = p < 1 ? fmt(Math.round(to * (1 - Math.pow(1 - p, 3)))) : final
+        if (p < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue
+        const el = e.target as HTMLElement
+        io.unobserve(el)
+        run(el, Number(el.dataset.count), el.dataset.final ?? '')
+      }
+    }, { rootMargin: '0px 0px -10% 0px' })
+    document.querySelectorAll<HTMLElement>('.lhero__value[data-count]').forEach((el) => {
+      const to = Number(el.dataset.count)
+      if (!Number.isFinite(to) || to <= 0) return
+      el.dataset.final = el.textContent ?? ''
+      el.textContent = (el.dataset.final.match(/^[\d\s  ]+/) ? '0' : '') + el.dataset.final.replace(/^[\d\s  ]+/, '')
+      io.observe(el)
+    })
+  }
+</script>
 
 <style>
   .lhero { padding-block: clamp(1rem, 2vw, 1.5rem) var(--h-sec); }
@@ -92,22 +350,111 @@ const { title, lead, image, facts } = Astro.props
     .lhero__actions > :global(*) { flex: 1 1 100%; }
   }
 
+  /* ── Сцена: кадры стопкой; виден кадр с data-state (on — сверху,
+     out — уходящий под ним), остальные скрыты ── */
   .lhero__stage {
+    position: relative;
     aspect-ratio: 16 / 7;
     overflow: hidden;
     border-radius: 1.75rem;
     background: var(--h-media-bg);
+    isolation: isolate;
   }
   @media (max-width: 47.9375rem) {
     .lhero__stage { aspect-ratio: 4 / 5; border-radius: 1.25rem; }
   }
-  .lhero__stage img {
+  .lhero__slide {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    visibility: hidden;
+  }
+  .lhero__slide[data-state] { visibility: visible; }
+  .lhero__slide[data-state='on']  { z-index: 2; }
+  .lhero__slide[data-state='out'] { z-index: 1; }
+  .lhero__slide img {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
     color: transparent;
   }
+
+  /* Тень у кромки въезжающего кадра — ложится на уходящий */
+  .lhero__edge {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: 3;
+    width: clamp(3rem, 9vw, 8rem);
+    opacity: 0;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, color-mix(in srgb, var(--color-slate-950) 30%, transparent));
+  }
+  .lhero__edge[data-dir='prev'] { background: linear-gradient(to left, transparent, color-mix(in srgb, var(--color-slate-950) 30%, transparent)); }
+
+  /* ── Управление: пауза и сегменты на «стеклянной» плашке ── */
+  .lhero__nav {
+    position: absolute;
+    left: clamp(0.75rem, 2vw, 1.25rem);
+    bottom: clamp(0.75rem, 2vw, 1.25rem);
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.875rem 0.25rem 0.25rem;
+    border-radius: 999rem;
+    background: color-mix(in srgb, var(--color-white) 88%, transparent);
+    backdrop-filter: blur(0.5rem);
+  }
+  .lhero__pause {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--h-ink);
+    color: var(--color-white);
+    cursor: pointer;
+    transition: background-color 180ms var(--ease-out);
+  }
+  .lhero__pause:hover { background: var(--h-signal); }
+  .lhero__icon--play { display: none; }
+  .is-stopped .lhero__icon--play { display: block; }
+  .is-stopped .lhero__icon--pause { display: none; }
+
+  .lhero__seg {
+    position: relative;
+    width: clamp(2rem, 4vw, 3rem);
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .lhero__seg::before,
+  .lhero__fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 0.1875rem;
+    margin-top: -0.09375rem;
+    border-radius: 999rem;
+  }
+  .lhero__seg::before { content: ''; background: color-mix(in srgb, var(--h-ink) 18%, transparent); transition: background-color 180ms var(--ease-out); }
+  .lhero__seg:hover::before { background: color-mix(in srgb, var(--h-ink) 35%, transparent); }
+  .lhero__fill { background: var(--h-ink); transform: scaleX(0); transform-origin: left center; }
+  .lhero__seg.is-done .lhero__fill { transform: scaleX(1); }
+  .lhero__seg.is-current .lhero__fill { background: var(--h-signal); animation: lhero-fill var(--slide-ms, 6.5s) linear forwards; }
+  .is-paused .lhero__seg.is-current .lhero__fill { animation-play-state: paused; }
+  /* Показ остановлен кнопкой — текущий сегмент целиком, без «застывшей» полоски */
+  .is-stopped .lhero__seg.is-current .lhero__fill { animation: none; transform: scaleX(1); }
+  @keyframes lhero-fill { to { transform: scaleX(1); } }
+
+  .lhero__nav button:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
 
   /* Факты — данные, поэтому под линейкой; крупная цифра — вес 300 */
   .lhero__facts {

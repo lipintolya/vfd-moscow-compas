@@ -1,0 +1,21 @@
+{
+  "widths": [
+    480,
+    800,
+    1100
+  ],
+  "photos": {
+    "consultation": {
+      "width": 1100,
+      "height": 825
+    },
+    "zamer": {
+      "width": 1100,
+      "height": 825
+    },
+    "garantee": {
+      "width": 1100,
+      "height": 825
+    }
+  }
+}

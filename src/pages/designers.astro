@@ -1,489 +1,794 @@
 ---
+/**
+ * /designers/ — сотрудничество с дизайнерами и архитекторами. Для салона
+ * в Москве — ключевая аудитория: дизайнер приводит заказчика в шоурум.
+ *
+ * Дизайн-система главной (home.css): первый экран LandingHero со
+ * счётчиком проектов, манифест крупным набором, плиточная сетка выгод
+ * (у каждой плитки своё наполнение: бонусы — красная, схема высоты
+ * двери, высоты на складе, ссылки на каталог, рендер, дорожка этапов),
+ * шаги работы (StepsRow), графитовая сцена шоурума, ассортимент
+ * карточками «фото + подпись», визуализации перегородок и дверей,
+ * материалы фабрики, FAQ, карта.
+ *
+ * Тексты и факты — src/data/designers-page.ts (только от владельца).
+ */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import LandingHero from '../components/ui/LandingHero.astro'
+import StepsRow from '../components/home/StepsRow.astro'
+import VisitBand from '../components/home/VisitBand.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
-import SectionHeading from '../components/partitions/SectionHeading.astro'
-import ProcessSteps from '../components/partitions/ProcessSteps.astro'
-import { PHONE as SITE_PHONE, SITE } from '../config/site'
+import {
+  DESIGNERS_HERO, DESIGNERS_INTRO, DESIGNER_BENEFITS, DESIGNERS_SHOWROOM, DESIGNER_STEPS,
+  DESIGNER_RANGE, DESIGNER_RANGE_MORE, DESIGNER_RESOURCES, DESIGNER_RENDERS, DESIGNER_RENDERS_FEATURED,
+  DESIGNERS_FAQ,
+} from '../data/designers-page'
+import { SITE, PHONE } from '../config/site'
+import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
+import { typograph } from '../lib/typograph'
+import { pluralRu } from '../lib/plural'
+import '../styles/home.css'
 
-const PHONE = SITE_PHONE.raw
-const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
+const CALL = `tel:${PHONE.raw}`
+const pageUrl = new URL('/designers/', SITE.url).href
+const title = `Дизайнерам и архитекторам — сотрудничество и шоурум ${SITE.name} ${SITE.city.in}`
+const description =
+  `Для дизайнеров и архитекторов: двери до 3 м под заказ, скрытые двери в наличии, ` +
+  `образцы и шоурум в ${SITE.address.mall} для встреч с заказчиками. Бонусы партнёрам.`
+const heroCover = DESIGNERS_HERO.images[0]!
+const ogImage = new URL(heroCover.wide.srcset.split(', ').at(-1)!.split(' ')[0]!, SITE.url).href
 
-/* ════════════════════════════════════════════════════════════
-   ИЗОБРАЖЕНИЯ
-   ════════════════════════════════════════════════════════════ */
-const HERO_SLIDER_IMAGES = [
-  // Локальные копии — оба оригинала на CDN весили больше 1МБ (image2.webp
-  // был 1.26МБ), пересжаты sharp'ом (см. gen-designers-images.mjs), итог
-  // ~65-70КБ каждый.
-  '/renders/hero/designers-hero.webp',
-  '/renders/designers/hero-slide-2.webp',
-]
-const CATALOG_HREF = 'https://crm.vfd.ru/~W8Bcr'
+const { bonus, size, stock, range, approach, help } = DESIGNER_BENEFITS
+/* Схема высоты: доля стандартной высоты от предельной */
+const sizeRatio = +(size.standard / size.max).toFixed(4)
 
-/* Перелинковка на товарные разделы — что ещё есть у ВФД для проектов.
-   Локальные ресайзы (см. gen-designers-images.mjs) — те же оригиналы,
-   что переиспользуются на других страницах (contacts.astro,
-   CatalogCategories.vue, decor-products.ts) в другом размере, здесь
-   карточка ~400px CSS-ширины (grid-cols-3). */
-const crossLinks = [
+/* Визуализации: в сетке — превью 900 px (крупная плитка берёт и 1920),
+   окно просмотра — вся галерея в 1920 px. На последней плитке — «+N» */
+const renderCount = DESIGNER_RENDERS.length
+const renderWord = pluralRu(renderCount, ['визуализация', 'визуализации', 'визуализаций'])
+const renderTiles = DESIGNER_RENDERS_FEATURED.map((index) => {
+  const r = DESIGNER_RENDERS[index]!
+  const preview = r.src.replace(/\.webp$/, '-preview.webp')
+  return { index, alt: r.alt, src: preview, srcset: `${preview} 900w, ${r.src} 1920w` }
+})
+const moreRenders = renderCount - renderTiles.length
+
+const structuredData = [
+  localBusinessSchema({ url: SITE.url }),
   {
-    title: 'Межкомнатные двери',
-    desc: '60+ моделей в выставочном зале, эмаль/ПЭТ/полипропилен, замер и монтаж',
-    image: '/renders/designers/cross-doors.webp',
-    href: '/catalog/',
-    cta: 'Смотреть каталог',
-  },
-  {
-    title: 'Алюминиевые перегородки',
-    desc: 'Раздвижные и стационарные системы GRAFIA, 13+ цветов профиля',
-    image: '/renders/designers/cross-partitions.webp',
-    href: '/partitions/',
-    cta: 'Смотреть перегородки',
-  },
-  {
-    title: 'Декор: плинтус, фрамуги, рейки',
-    desc: 'Декоративные элементы в цвет дверей и интерьера',
-    image: '/renders/designers/cross-decor.webp',
-    href: '/catalog/decor/',
-    cta: 'Смотреть декор',
-  },
-]
-
-const heroStats = [
-  { val: '150+',  lbl: 'реализованных проектов', desc: 'с дизайнерами и архитекторами Москвы' },
-  { val: 'Бонус', lbl: 'за реализованный проект', desc: 'размеры бонусов определяются при встрече с основателем студии' },
-  { val: '5 минут', lbl: 'на ответ менеджера', desc: 'Пришлите проект в Telegram или в любом удобном для вас мессенджере' },
-]
-
-const partnerEligibility = [
-  {
-    title: 'Кто может участвовать',
-    items: [
-      'Индивидуальные условия сотрудничества',
-      'Дизайнер интерьера — ИП или самозанятый',
-      'Архитектор — ИП или самозанятый',
-      'Студия дизайна',
-      'Архитектурное бюро',
-      'Ремонтно-снабженческая компания полного цикла',
-      'Компания-застройщик ИЖС и малоэтажного строительства',
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${pageUrl}#service`,
+    name: `Сотрудничество с дизайнерами интерьера и архитекторами ${SITE.city.in}`,
+    serviceType: 'Подбор, расчёт, поставка и монтаж дверей по дизайн-проекту',
+    description,
+    url: pageUrl,
+    provider: { '@id': LOCAL_BUSINESS_ID },
+    image: renderTiles.map((r) => new URL(DESIGNER_RENDERS[r.index]!.src, SITE.url).href),
+    audience: { '@type': 'BusinessAudience', audienceType: 'Дизайнеры интерьера, архитекторы, студии дизайна' },
+    areaServed: [
+      { '@type': 'City', name: SITE.city.name },
+      { '@type': 'AdministrativeArea', name: 'Московская область' },
     ],
   },
-  {
-    title: 'Что получает партнёр',
-    items: [
-      'Информационная и техническая поддержка на всех этапах проекта',
-      'Бесплатный каталог на бумаге по запросу',
-      'Образцы цвета, покрытий и стекла для презентации заказчику',
-      'По желанию — публикация ваших работ с указанием авторства и ссылкой на ваши соцсети',
-    ],
-  },
-]
-
-// Локальные ресайзы (см. gen-designers-images.mjs) — оригиналы 1448-1536px
-// (142-285КБ) отображаются на ~300px CSS-ширины в grid-cols-4 на десктопе.
-const cooperationFormat = [
-  {
-    title: 'Выбор моделей и консультация',
-    text: 'Дизайнер формирует концепцию, а менеджер салона предлагает актуальный ассортимент и технические решения, подходящие под стиль проекта.',
-    image: '/renders/designers/step-consultation.webp',
-  },
-  {
-    title: 'Предоставление ТЗ и замер',
-    text: 'Дизайнер передаёт размеры проёмов и толщину стен, салон организует профессиональный замер для точной спецификации.',
-    image: '/renders/designers/step-tz.webp',
-  },
-  {
-    title: 'Заключение договора',
-    text: 'Оформление заказа, выбор покрытия, систем открывания и фурнитуры. На этом этапе составляется финальная смета.',
-    image: '/renders/designers/step-dogovor.webp',
-  },
-  {
-    title: 'Логистика и монтаж',
-    text: 'Салон осуществляет доставку и профессиональный монтаж.',
-    image: '/renders/designers/step-dostavka.webp',
-  },
-]
-
-const title       = 'Дизайнерам и архитекторам — сотрудничество в Москве | ВФД'
-const description = 'Партнёрская программа для дизайнеров и архитекторов в Москве: подбор дверей и перегородок, дизайн-надзор на объекте, бонус за проект.'
-const canonicalUrl = Astro.site ? new URL('/designers/', Astro.site).href : undefined
-const heroOgImage  = Astro.site ? new URL(HERO_SLIDER_IMAGES[1], Astro.site).href : undefined
-
-const breadcrumbItems = [
-  { label: 'Главная', href: '/' },
-  { label: 'Дизайнерам' },
-]
-
-interface Step { num: string; title: string; text: string; details: string[] }
-
-const steps: Step[] = [
-  {
-    num: '01',
-    title: 'Вы отправляете проект',
-    text: 'Делитесь концепцией, планировкой или техническим заданием в Telegram — без долгих согласований.',
-    details: ['Чертежи, эскизы, референсы — в любом виде', 'Можно прислать просто фото объекта'],
-  },
-  {
-    num: '02',
-    title: 'Мы анализируем задачу',
-    text: 'Изучаем планировку, материалы и концепцию интерьера, чтобы предложить решения, которые впишутся в проект.',
-    details: ['Оцениваем проём и условия монтажа', 'Учитываем стилистику и материалы интерьера'],
-  },
-  {
-    num: '03',
-    title: 'Подбираем решения и материалы',
-    text: 'Предлагаем серии дверей и перегородок, кромку, остекление и покрытие профиля под задачу.',
-    details: ['Скрытые двери «Секрет», «Секрет Реверс», перегородки GRAFIA', '13+ цветов профиля, варианты остекления'],
-  },
-  {
-    num: '04',
-    title: 'Готовим коммерческое предложение',
-    text: 'Формируем понятное КП с расчётом и спецификацией — удобно показать заказчику.',
-    details: ['Расчёт и КП в течение одного рабочего дня', 'Спецификация и чертежи для подрядчиков'],
-  },
-  {
-    num: '05',
-    title: 'Помогаем согласовать решение с заказчиком',
-    text: 'При необходимости подключаемся к диалогу с клиентом и аргументируем технические решения.',
-    details: ['Подключаемся к встрече или переписке', 'Поясняем технические детали клиенту'],
-  },
-  {
-    num: '06',
-    title: 'Сопровождаем реализацию проекта',
-    text: 'Контролируем замер, монтаж и финальный результат — дизайнерский надзор на каждом этапе.',
-    details: ['Замер и монтаж собственной бригадой по Москве и области', 'Дизайнерский надзор на объекте'],
-  },
-]
-
-const materials = [
-  {
-    badge: '3D',
-    title: '3D-модели алюминиевых дверей',
-    desc: 'Готовые 3D-модели для использования в проектах визуализации.',
-    href: 'https://3ddd.ru/3dmodels?query=alumdoor&order=relevance',
-  },
-  {
-    badge: 'CRM',
-    title: 'Каталог алюминиевых дверей',
-    desc: 'Каталог решений и моделей алюминиевых дверных конструкций.',
-    href: 'https://crm.vfd.ru/docs/pub/7c3fe99768a64437fc6c2a0371c7414f/default/?&',
-  },
-  {
-    badge: 'PDF',
-    title: 'Инструкции и технические чертежи',
-    desc: 'Размеры, технические материалы и документация для проектирования.',
-    href: 'https://crm.vfd.ru/docs/pub/1041f6446d1a6eb72c8f75161e08de65/default/?&',
-  },
-  {
-    badge: 'PDF',
-    title: 'Визуализация конструкций и профилей',
-    desc: 'Материалы для создания визуализаций интерьеров.',
-    href: 'https://crm.vfd.ru/docs/pub/ded5bbfb131cea40a5f33f05006e5bd4/default/?path=%2F%D0%BF%D1%80%D0%BE%D1%84%D0%B8%D0%BB%D1%8F%20%D0%BF%D0%BE%D0%BB%D0%BE%D1%82%D0%B5%D0%BD%2F',
-  },
-  {
-    badge: 'PDF',
-    title: 'Изображения стёкол и перегородок',
-    desc: 'Материалы для выбора стеклянных решений в проектах.',
-    href: 'https://crm.vfd.ru/docs/pub/8481c384fc078da3e1cea168258b98e0/default/?&',
-  },
-]
-
-const faq = [
-  {
-    q: 'Какие проекты подходят для сотрудничества?',
-    a: 'Любые — от квартир и частных домов до офисных и коммерческих интерьеров в Москве и области. Работаем как с готовыми проектами, так и с концепциями на стадии эскиза.',
-  },
-  {
-    q: 'Можно ли получить 3D-модели дверей?',
-    a: 'Да, готовые 3D-модели алюминиевых дверей доступны в библиотеке 3ddd.ru — ссылка в разделе «Полезные материалы» выше.',
-  },
-  {
-    q: 'Помогаете ли вы дизайнеру работать с заказчиком?',
-    a: 'Да. Готовим понятные коммерческие предложения и при необходимости подключаемся к диалогу с клиентом, чтобы аргументировать технические решения.',
-  },
-  {
-    q: 'Есть ли партнёрская программа?',
-    a: 'Да, для дизайнеров и архитекторов действует партнёрская программа с денежным бонусом за реализованные проекты. Точный размер и условия уточняйте у менеджера.',
-  },
-  {
-    q: 'Что входит в дизайнерский надзор?',
-    a: 'Контролируем замер, монтаж и финальный результат на объекте, чтобы реализация конструкций точно соответствовала дизайн-проекту.',
-  },
-  {
-    q: 'Как получить консультацию по проекту?',
-    a: 'Напишите в Telegram или позвоните — пришлите проект, чертежи или фото объекта, и мы предложим решения в течение рабочего дня.',
-  },
-]
-
-const structuredData = canonicalUrl ? [
   {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faq.map(f => ({
+    mainEntity: DESIGNERS_FAQ.map((f) => ({
       '@type': 'Question',
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },
     })),
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
-    serviceType: 'Партнёрская программа для дизайнеров интерьера и архитекторов',
-    name: 'Сотрудничество с дизайнерами интерьера и архитекторами в Москве',
-    description,
-    url: canonicalUrl,
-    audience: {
-      '@type': 'Audience',
-      audienceType: 'Дизайнеры интерьера, архитекторы, студии дизайна',
-    },
-    areaServed: [
-      { '@type': 'City', name: 'Москва' },
-      { '@type': 'AdministrativeArea', name: 'Московская область' },
-    ],
-    provider: {
-      '@type': 'LocalBusiness',
-      name: 'Салон дверей ВФД',
-      telephone: PHONE,
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: 'ул. Красная Сосна, 2А',
-        addressLocality: 'Москва',
-        addressCountry: 'RU',
-      },
-    },
-  },
-] : undefined
+]
+
+const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Дизайнерам' },
+]
 ---
 
 <BaseLayout
   title={title}
   description={description}
-  canonical={canonicalUrl}
-  ogImage={heroOgImage}
-  preloadImage={HERO_SLIDER_IMAGES[0]}
+  canonical={pageUrl}
+  ogImage={ogImage}
+  ogImageMeta={{ width: heroCover.wide.width, height: heroCover.wide.height, alt: heroCover.alt }}
   structuredData={structuredData}
 >
-
   <div class="breadcrumb-bar">
     <div class="container">
       <Breadcrumbs items={breadcrumbItems} />
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
-       HERO — текст + фото, статы строкой под ним (по аналогии с sofiadveri.ru)
-  ══════════════════════════════════════════════ -->
-  <section class="section bg-white" id="partner">
-    <div class="container">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-        <div>
-          <p class="t-eyebrow block mb-3">Партнёрская программа · Москва и область</p>
-          <h1 class="t-h1 mb-4">Сотрудничество с дизайнерами и архитекторами в Москве</h1>
-          <p class="mb-6 max-w-125 t-lead text-slate-600">
-            Помогаем реализовывать проекты без проблем с подбором дверей, сроками и монтажом —
-            и платим бонус за каждый реализованный проект.
-          </p>
-          <div class="flex gap-2.5 flex-wrap">
-            <a href={CALL} class="btn btn-primary">Стать партнёром</a>
-            <a href={CATALOG_HREF} target="_blank" rel="noopener" class="btn btn-outline">Получить каталог</a>
-          </div>
-        </div>
+  <div class="home">
+    <LandingHero title={DESIGNERS_HERO.title} lead={DESIGNERS_HERO.lead} image={DESIGNERS_HERO.images} facts={DESIGNERS_HERO.facts}>
+      <a slot="actions" href={CALL} class="h-btn h-btn--signal">Обсудить проект</a>
+      <a slot="actions" href="#showroom" class="h-btn h-btn--quiet">Шоурум для встреч</a>
+    </LandingHero>
 
-        <div class="relative overflow-hidden rounded-3xl shadow-lg min-h-80 lg:min-h-110">
-          <img
-            src={HERO_SLIDER_IMAGES[0]}
-            alt="Интерьер с дверями и перегородками ВФД"
-            class="absolute inset-0 w-full h-full object-cover object-center"
-            width="1672"
-            height="941"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-          />
+    <!-- Манифест — главный текст страницы, набран крупно -->
+    <section class="h-sec h-sec--wall" aria-labelledby="ds-intro-title">
+      <div class="container ds-split">
+        <h2 id="ds-intro-title" class="h-h2 ds-split__head">{typograph(DESIGNERS_INTRO.title)}</h2>
+        <div class="ds-split__body ds-manifest">
+          {DESIGNERS_INTRO.paragraphs.map((p) => <p>{typograph(p)}</p>)}
         </div>
       </div>
+    </section>
 
-      <div class="mt-12 lg:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-6 lg:gap-x-12">
-        {heroStats.map((s, i) => (
-          <div class:list={['flex flex-col', i > 0 && 'border-t sm:border-t-0 sm:border-l border-slate-200 pt-6 sm:pt-0 sm:pl-8 lg:pl-12']}>
-            <span class="t-stat block">{s.val}</span>
-            <span class="block text-sm font-semibold text-ink mt-1.5 leading-snug">{s.lbl}</span>
-            <span class="block text-xs text-slate-500 leading-snug mt-1">{s.desc}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       ЧТО ЕЩЁ ЕСТЬ У ВФД — перелинковка на товарные разделы
-  ══════════════════════════════════════════════ -->
-  <section class="section bg-white">
-    <div class="container">
-      <SectionHeading
-        eyebrow="Каталог ВФД"
-        title="Больше решений для ваших проектов"
-        subtitle="Двери, алюминиевые перегородки и декор — с ценами, фото и техническими параметрами"
-      />
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 lg:gap-5">
-        {crossLinks.map(link => (
-          <a
-            href={link.href}
-            class="group relative flex min-h-70 flex-col justify-end overflow-hidden rounded-3xl no-underline focus-visible:outline-2 focus-visible:outline-secondary-500 focus-visible:outline-offset-3"
-          >
-            <img
-              src={link.image}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              class="absolute inset-0 h-full w-full object-cover transition-transform duration-600 ease-out group-hover:scale-[1.06]"
-              aria-hidden="true"
-            />
-            <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/25 to-transparent" aria-hidden="true"></div>
-            <div class="relative z-10 p-5 lg:p-6">
-              <h3 class="mb-1.5 text-xl font-medium leading-snug text-white">{link.title}</h3>
-              <p class="mb-4 text-sm leading-relaxed text-white/75">{link.desc}</p>
-              <span class="inline-flex items-center gap-1.5 rounded-full border border-white/50 px-4 py-2 text-sm font-semibold text-white transition-[background-color,border-color,transform] duration-200 ease-out group-hover:-translate-y-px group-hover:border-white group-hover:bg-white/15">
-                {link.cta}
-                <svg class="h-3.5 w-3.5 shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
+    <!-- Что получает дизайнер: шесть плиток, у каждой своё наполнение.
+         Порядок в разметке — порядок чтения на телефоне -->
+    <section class="h-sec" aria-labelledby="ds-benefits-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ds-benefits-title" class="h-h2">Что получает дизайнер</h2>
+          <p class="h-lead">Индивидуальные условия, двери любых размеров и&nbsp;помощь на&nbsp;всех этапах проекта.</p>
+        </header>
+        <ul class="ds-bento" role="list">
+          <li class="ds-tile ds-tile--bonus" data-reveal>
+            <h3 class="ds-bonus__title">{typograph(bonus.title)}</h3>
+            <div class="ds-bonus__foot">
+              <p class="ds-bonus__text">{typograph(bonus.text)}</p>
+              <a href={CALL} class="h-btn ds-bonus__cta">{bonus.action}</a>
             </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
+          </li>
 
-  <!-- ══════════════════════════════════════════════
-       КТО МОЖЕТ СТАТЬ ПАРТНЁРОМ
-  ══════════════════════════════════════════════ -->
-  <section class="section bg-white" id="eligibility">
-    <div class="container">
-      <SectionHeading
-        eyebrow="Условия сотрудничества"
-        title="Кто может стать партнёром"
-        subtitle="Программа открыта для специалистов и компаний, которые работают с интерьерными и фасадными решениями — независимо от формы организации."
-      />
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 lg:gap-5">
-        {partnerEligibility.map(group => (
-          <article class="motion-safe:opacity-0 motion-safe:translate-y-4 transition-all duration-700 ease-out rounded-2xl bg-slate-50 p-[clamp(1.25rem,2.5vw,1.75rem)]" data-reveal>
-            <h3 class="mb-3 text-step-2 font-medium text-ink">{group.title}</h3>
-            <ul class="flex flex-col gap-2 list-none p-0 m-0">
-              {group.items.map(item => (
-                <li class="flex gap-2.5 text-sm leading-relaxed text-slate-600">
-                  <span class="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent-500" aria-hidden="true"></span>
-                  <span>{item}</span>
-                </li>
+          <li class="ds-tile ds-tile--size" data-reveal>
+            <h3 class="ds-tile__title">{typograph(size.title)}</h3>
+            <div class="ds-size" aria-hidden="true">
+              <div class="ds-size__scale" style={`--ratio: ${sizeRatio}`}>
+                <span class="ds-size__mark ds-size__mark--max"><span class="ds-size__label"><b>{size.max}</b>&nbsp;мм</span></span>
+                <span class="ds-size__mark ds-size__mark--std"><span class="ds-size__label"><b>{size.standard}</b>&nbsp;мм&nbsp;— стандарт</span></span>
+                <span class="ds-size__door"></span>
+                <span class="ds-size__handle"></span>
+              </div>
+            </div>
+            <p class="ds-tile__text">{typograph(size.text)}</p>
+          </li>
+
+          <li class="ds-tile ds-tile--stock" data-reveal>
+            <h3 class="ds-tile__title">{typograph(stock.title)}</h3>
+            <p class="ds-tile__text ds-tile__text--top">{typograph(stock.text)}</p>
+            <div class="ds-stock">
+              <ul class="ds-stock__list" role="list">
+                {stock.heights.map((h) => <li>{h}</li>)}
+              </ul>
+              <p class="ds-stock__caption">{stock.caption}</p>
+            </div>
+          </li>
+
+          <li class="ds-tile ds-tile--range" data-reveal>
+            <h3 class="ds-tile__title">{typograph(range.title)}</h3>
+            <p class="ds-tile__text ds-tile__text--top">{typograph(range.text)}</p>
+            <ul class="ds-chips" role="list" aria-label="Разделы каталога">
+              {range.links.map((l) => (
+                <li><a href={l.href} class="h-pill h-pill--line">{l.label}</a></li>
               ))}
             </ul>
-          </article>
-        ))}
-      </div>
+          </li>
 
-      <div class="mt-3.5 lg:mt-5">
-        <h3 class="mb-3.5 text-step-2 font-medium text-ink">Формат взаимодействия</h3>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 lg:gap-5">
-          {cooperationFormat.map((step, i) => (
-            <article
-              class="motion-safe:opacity-0 motion-safe:translate-y-4 transition-all duration-700 ease-out group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white"
-              style={`transition-delay:${i * 90}ms`}
-              data-reveal
-            >
-              {step.image && (
-                <div class="relative aspect-4/3 overflow-hidden">
+          <li class="ds-tile ds-tile--photo" data-reveal>
+            <span class="h-media ds-tile__media">
+              <img
+                src={approach.photo.src}
+                srcset={approach.photo.srcset}
+                sizes="(min-width: 62.5rem) 34vw, 100vw"
+                alt={approach.photo.alt}
+                width={approach.photo.width}
+                height={approach.photo.height}
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <div class="ds-tile__body">
+              <h3 class="ds-tile__title">{typograph(approach.title)}</h3>
+              <p class="ds-tile__text">{typograph(approach.text)}</p>
+            </div>
+          </li>
+
+          <li class="ds-tile ds-tile--help" data-reveal>
+            <div class="ds-help__head">
+              <h3 class="ds-tile__title">{typograph(help.title)}</h3>
+              <p class="ds-tile__text">{typograph(help.text)}</p>
+            </div>
+            <ol class="ds-track" role="list">
+              {help.stages.map((st, k) => <li style={`--k: ${k}`}>{st}</li>)}
+            </ol>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <StepsRow
+      id="ds-process"
+      title="Как мы работаем с дизайнером"
+      lead="Подключаемся на любом этапе — от идеи до монтажа."
+      steps={DESIGNER_STEPS}
+    />
+
+    <!-- Шоурум — графитовая сцена: текст слева, фото консультации справа -->
+    <section class="h-sec" id="showroom" aria-labelledby="ds-showroom-title">
+      <div class="container">
+        <div class="ds-room">
+          <div class="ds-room__text">
+            <h2 id="ds-showroom-title" class="h-h2 ds-room__title">{typograph(DESIGNERS_SHOWROOM.title)}</h2>
+            <p class="ds-room__lead">{typograph(DESIGNERS_SHOWROOM.text)}</p>
+            <dl class="ds-room__facts">
+              {DESIGNERS_SHOWROOM.facts.map((f) => (
+                <div>
+                  <dt>{f.label}</dt>
+                  <dd>{typograph(f.value)}</dd>
+                </div>
+              ))}
+            </dl>
+            <div class="ds-room__actions">
+              <a href={CALL} class="h-btn h-btn--signal">Договориться о встрече</a>
+              <a href="#visit" class="h-btn ds-room__ghost">Как добраться</a>
+            </div>
+          </div>
+          <div class="ds-room__photo">
+            <img
+              src={DESIGNERS_SHOWROOM.photo.src}
+              srcset={DESIGNERS_SHOWROOM.photo.srcset}
+              sizes="(min-width: 62.5rem) 45vw, 100vw"
+              alt={DESIGNERS_SHOWROOM.photo.alt}
+              width={DESIGNERS_SHOWROOM.photo.width}
+              height={DESIGNERS_SHOWROOM.photo.height}
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ассортимент — карточки разделов (фото + подпись) и ссылки дальше -->
+    <section class="h-sec h-sec--wall" aria-labelledby="ds-range-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ds-range-title" class="h-h2">Ассортимент для ваших проектов</h2>
+          <p class="h-lead">Всё можно посмотреть в&nbsp;шоуруме и&nbsp;заказать под проект — в&nbsp;том числе нестандартных размеров.</p>
+        </header>
+        <ul class="ds-range h-rail" role="list">
+          {DESIGNER_RANGE.map((r) => (
+            <li>
+              <a href={r.href} class="ds-range__card">
+                <span class="h-media ds-range__media">
+                  <img src={r.image} alt="" loading="lazy" decoding="async" width="1672" height="941" style={`object-position: ${r.position}`} />
+                </span>
+                <span class="ds-range__row">
+                  <span class="h-h3 ds-range__title">{r.title}</span>
+                  <span class="h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
+                </span>
+                <span class="h-body ds-range__text">{typograph(r.text)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <ul class="ds-more" role="list" aria-label="Ещё разделы">
+          {DESIGNER_RANGE_MORE.map((m) => (
+            <li><a href={m.href} class="h-pill h-pill--line">{m.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- Визуализации: крупный кадр и четыре поменьше (на телефоне — лента
+         вбок); окно просмотра листает всю галерею -->
+    <section class="h-sec" id="ds-renders" aria-labelledby="ds-renders-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ds-renders-title" class="h-h2">Перегородки и&nbsp;алюминиевые двери в&nbsp;интерьере</h2>
+          <p class="h-lead">{renderCount}&nbsp;{renderWord} {SITE.manufacturerOf}&nbsp;— идеи для ваших проектов. Профили, стекло и&nbsp;системы открывания подберём в&nbsp;шоуруме.</p>
+        </header>
+        <ul
+          class="ds-renders h-rail"
+          role="list"
+          data-lightbox
+          data-lightbox-images={JSON.stringify(DESIGNER_RENDERS)}
+        >
+          {renderTiles.map((r, i) => {
+            const last = i === renderTiles.length - 1
+            return (
+              <li class:list={['ds-renders__cell', { 'ds-renders__cell--lead': i === 0 }]}>
+                <button
+                  type="button"
+                  class="h-media ds-renders__item"
+                  data-lightbox-index={r.index}
+                  aria-label={last ? `Открыть все визуализации (${renderCount})` : `Открыть крупнее: ${r.alt}`}
+                >
                   <img
-                    src={step.image}
-                    alt=""
-                    class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    src={r.src}
+                    srcset={r.srcset}
+                    sizes={i === 0 ? '(min-width: 62.5rem) 50vw, (min-width: 43.75rem) 100vw, 82vw' : '(min-width: 62.5rem) 25vw, (min-width: 43.75rem) 50vw, 82vw'}
+                    alt={r.alt}
+                    width="900"
+                    height="674"
                     loading="lazy"
                     decoding="async"
                   />
-                </div>
-              )}
-              <div class="flex flex-1 flex-col p-4">
-                <span class="mb-2 block text-xs font-medium tabular-nums text-accent-600">{String(i + 1).padStart(2, '0')}</span>
-                <h4 class="mb-1.5 text-base font-medium leading-tight text-ink">{step.title}</h4>
-                <p class="m-0 text-sm leading-relaxed text-slate-600">{step.text}</p>
-              </div>
-            </article>
+                  {last && moreRenders > 0 && <span class="ds-renders__more" aria-hidden="true">+{moreRenders}</span>}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+        <p class="ds-renders__foot">
+          <a href="/partitions/" class="h-link">Алюминиевые перегородки: системы, профили и&nbsp;стекло</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- Материалы для проектирования — ресурсы фабрики -->
+    <section class="h-sec" aria-labelledby="ds-res-title">
+      <div class="container ds-split">
+        <header class="ds-split__head">
+          <h2 id="ds-res-title" class="h-h2">Материалы для проектирования</h2>
+          <p class="h-lead ds-res__lead">3D-модели, каталоги и&nbsp;чертежи {SITE.manufacturerOf} — откроются на&nbsp;её сайте.</p>
+        </header>
+        <ul class="ds-split__body ds-res" role="list">
+          {DESIGNER_RESOURCES.map((r) => (
+            <li>
+              <a href={r.href} target="_blank" rel="noopener" class="ds-res__link">
+                <span class="ds-res__kind">{r.kind}</span>
+                <span class="ds-res__title">{r.title}</span>
+                <span class="ds-res__ext" aria-hidden="true"><Fragment set:html={arrow} /></span>
+              </a>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ══════════════════════════════════════════════
-       КАК ПРОХОДИТ СОТРУДНИЧЕСТВО
-  ══════════════════════════════════════════════ -->
-  <section class="section bg-white">
-    <div class="container">
-      <SectionHeading
-        eyebrow="Процесс работы"
-        title="Как проходит сотрудничество"
-        subtitle="От первого сообщения до сдачи объекта — прозрачный процесс без лишних созвонов и согласований."
-      />
-      <ProcessSteps items={steps} />
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════════
-       ПОЛЕЗНЫЕ МАТЕРИАЛЫ ДЛЯ ДИЗАЙНЕРОВ
-  ══════════════════════════════════════════════ -->
-  <section class="section bg-white">
-    <div class="container">
-      <SectionHeading
-        eyebrow="Библиотека"
-        title="Полезные материалы для дизайнеров"
-        subtitle="3D-модели, каталоги и техническая документация для проектирования и визуализации."
-      />
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 lg:gap-5">
-        {materials.map(m => (
-          <a href={m.href} target="_blank" rel="noopener" class="group flex items-center gap-4 rounded-2xl bg-slate-50 p-[clamp(1rem,2vw,1.375rem)] no-underline transition hover:bg-accent-50/60 hover:-translate-y-0.5">
-            <span class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-accent-200 bg-accent-50 text-accent-600">
-              <svg viewBox="0 0 24 24" fill="none" class="h-6 w-6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 2v6h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <b class="absolute -bottom-1 -right-1 rounded bg-accent-600 px-1 py-0.5 text-[0.5rem] font-medium leading-none tracking-wide text-white">{m.badge}</b>
-            </span>
-            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span class="text-step-1 font-medium leading-tight text-ink">{m.title}</span>
-              <span class="text-step-0 leading-snug text-slate-500">{m.desc}</span>
-            </span>
-            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-50 text-slate-600 transition-colors group-hover:bg-accent-500 group-hover:text-white">
-              <svg viewBox="0 0 24 24" fill="none" class="h-[1.05rem] w-[1.05rem]"><path d="M7 17L17 7M7 7h10v10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-          </a>
-        ))}
+    <section class="h-sec h-sec--wall" aria-labelledby="ds-faq-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ds-faq-title" class="h-h2">Частые вопросы</h2>
+        </header>
+        <FaqAccordion items={DESIGNERS_FAQ} title={false} />
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ══════════════════════════════════════════════
-       FAQ
-  ══════════════════════════════════════════════ -->
-  <section class="section bg-white">
-    <div class="container">
-      <FaqAccordion items={faq} />
-    </div>
-  </section>
-
+    <VisitBand lead="Приезжайте с заказчиком: покажем двери, покрытия и фурнитуру вживую и сразу посчитаем проект." />
+  </div>
 </BaseLayout>
 
 <script>
-  const revealItems = document.querySelectorAll('#eligibility [data-reveal]')
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.remove('motion-safe:opacity-0', 'motion-safe:translate-y-4')
-            io.unobserve(entry.target)
-          }
-        })
-      },
-      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' },
-    )
-    revealItems.forEach((el) => io.observe(el))
+  import { initLightboxGroups } from '../lib/lightbox'
+  initLightboxGroups()
+
+  /* Плитки выгод — появляются один раз, когда доходят до экрана; ряд —
+     по очереди. Скрываем только то, что ниже экрана: без JS, при
+     reduced-motion и переходе по якорю всё сразу видно. */
+  const tiles = [...document.querySelectorAll<HTMLElement>('[data-reveal]')]
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (!still && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.filter((e) => e.isIntersecting).forEach((e, k) => {
+        const el = e.target as HTMLElement
+        el.style.setProperty('--t', `${k * 110}ms`)
+        el.dataset.reveal = 'shown'
+        io.unobserve(el)
+      })
+    }, { rootMargin: '0px 0px -12% 0px' })
+    for (const el of tiles) {
+      if (el.getBoundingClientRect().top < innerHeight * 0.88) continue
+      el.dataset.reveal = 'hidden'
+      io.observe(el)
+    }
   }
 </script>
+
+<style>
+  /* ── Заголовок слева (5 колонок), содержимое справа (с 7-й) ── */
+  .ds-split { display: grid; gap: 1.5rem var(--h-gutter); }
+  @media (min-width: 56.25rem) {
+    .ds-split { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+    .ds-split__head { grid-column: 1 / span 5; position: sticky; top: calc(var(--header-height) + 1.5rem); }
+    .ds-split__body { grid-column: 7 / span 6; }
+  }
+
+  /* Манифест — крупный текст, как «фамильный бренд» на «О нас» */
+  .ds-manifest p {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    color: var(--h-ink);
+    text-wrap: pretty;
+  }
+  .ds-manifest p + p { margin-top: 1em; color: var(--h-soft); }
+
+  /* ── Выгоды: плитки разной роли ──
+     Телефон — столбик в порядке разметки; планшет — 2 колонки; ПК — 3:
+       бонусы  бонусы  размеры
+       наличие выбор   размеры
+       подход  этапы   этапы
+     Плитка размеров — в две строки, чтобы в высоту поместилась схема. */
+  .ds-bento {
+    display: grid;
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Области — только при раскладке в колонки: без шаблона областей
+     именованные grid-area сложили бы все плитки в одну ячейку */
+  @media (min-width: 43.75rem) {
+    .ds-bento {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas: 'bonus bonus' 'size stock' 'size range' 'photo photo' 'help help';
+    }
+    .ds-tile--bonus { grid-area: bonus; }
+    .ds-tile--size  { grid-area: size; }
+    .ds-tile--stock { grid-area: stock; }
+    .ds-tile--range { grid-area: range; }
+    .ds-tile--photo { grid-area: photo; }
+    .ds-tile--help  { grid-area: help; }
+  }
+  @media (min-width: 62.5rem) {
+    .ds-bento {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-areas: 'bonus bonus size' 'stock range size' 'photo help help';
+    }
+  }
+
+  .ds-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+    padding: clamp(1.25rem, 2vw, 1.75rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
+  }
+  .ds-tile__title {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(1.1875rem, 1.7vw, 1.375rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    color: var(--h-ink);
+  }
+  /* Текст прижат к низу плитки — строки соседних плиток на одной линии */
+  .ds-tile__text { margin: auto 0 0; max-width: 30rem; font-size: 0.9375rem; line-height: 1.55; color: var(--h-soft); text-wrap: pretty; }
+  .ds-tile__text--top { margin-top: 0; }
+
+  /* Бонусы — красная плитка (главная выгода): крупный заголовок сверху,
+     текст и кнопка — снизу */
+  .ds-tile--bonus { justify-content: space-between; gap: 2rem; background: var(--h-signal); color: var(--color-white); }
+  @media (min-width: 43.75rem) { .ds-tile--bonus { min-height: clamp(16rem, 24vw, 19rem); } }
+  .ds-bonus__title {
+    margin: 0;
+    max-width: 12em;
+    font-family: var(--h-font);
+    font-size: clamp(1.875rem, 3.6vw, 3.25rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .ds-bonus__foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1.25rem 2rem; }
+  .ds-bonus__text {
+    flex: 1 1 18rem;
+    margin: 0;
+    max-width: 32rem;
+    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--color-white) 88%, transparent);
+    text-wrap: pretty;
+  }
+  .ds-bonus__cta { flex: none; background: var(--color-white); color: var(--h-ink); }
+  .ds-bonus__cta:hover { background: var(--h-ink); color: var(--color-white); }
+  .home .ds-bonus__cta:focus-visible { outline-color: var(--color-white); }
+
+  /* Размеры — схема: пол, линии стандартной и предельной высоты; дверь
+     вырастает от стандарта до предела. Шкала — контейнер (cqh): ширина
+     двери — от высоты шкалы, пропорция полотна 900 × 3000 мм. Ручка —
+     элемент шкалы на 1/3 высоты (≈1000 мм от пола): пока дверь растёт,
+     ручка остаётся на месте, как у настоящей высокой двери. */
+  .ds-size { position: relative; flex: 1 1 auto; min-height: 13rem; }
+  .ds-size__scale {
+    --door-w: calc(100cqh * 0.3);
+    --door-r: 14%;
+    position: absolute;
+    inset: 1.75rem 0 0;
+    container-type: size;
+    border-bottom: 0.125rem solid var(--h-ink);
+  }
+  .ds-size__mark { position: absolute; left: 0; right: 0; height: 0; border-top: 0.0625rem solid var(--color-slate-300); }
+  .ds-size__mark--max { top: 0; }
+  .ds-size__mark--std { top: calc(100% * (1 - var(--ratio))); border-top: 0.0625rem dashed var(--color-slate-400); }
+  /* Подпись — над своей линией */
+  .ds-size__label {
+    position: absolute;
+    left: 0;
+    bottom: 0.4375rem;
+    font-size: 0.8125rem;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--h-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .ds-size__label b { font-weight: 600; color: var(--h-ink); }
+  .ds-size__door {
+    position: absolute;
+    top: 0;
+    right: var(--door-r);
+    bottom: 0;
+    width: var(--door-w);
+    border: 0.125rem solid var(--h-ink);
+    border-bottom: 0;
+    border-radius: 0.375rem 0.375rem 0 0;
+    background: var(--h-paper);
+  }
+  /* Штриховка — часть полотна выше стандарта, как на чертеже: видна,
+     только когда дверь выросла выше линии стандарта */
+  .ds-size__door::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 calc(100cqh * var(--ratio));
+    background: repeating-linear-gradient(-45deg, var(--color-slate-300) 0 0.0625rem, transparent 0.0625rem 0.4375rem);
+  }
+  .ds-size__handle {
+    position: absolute;
+    right: calc(var(--door-r) + var(--door-w) - 1.375rem);
+    bottom: calc(100% / 3);
+    width: 0.75rem;
+    height: 0.1875rem;
+    border-radius: 999rem;
+    background: var(--h-ink);
+  }
+
+  /* Наличие — текст сверху, высоты крупными цифрами — внизу плитки,
+     на одной линии с пилюлями соседней плитки */
+  .ds-stock { display: grid; gap: 0.625rem; margin-top: auto; }
+  .ds-stock__list { display: flex; margin: 0; padding: 0; list-style: none; }
+  .ds-stock__list li {
+    flex: 1 1 0;
+    padding-inline: 0.75rem;
+    border-left: 0.0625rem solid var(--color-slate-300);
+    font-size: clamp(1.625rem, 2.6vw, 2.375rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--h-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .ds-stock__list li:first-child { padding-left: 0; border-left: 0; }
+  .ds-stock__caption { margin: 0; font-size: 0.8125rem; line-height: 1.4; color: var(--h-muted); }
+
+  /* Выбор — разделы каталога пилюлями, прижаты к низу */
+  .ds-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: auto 0 0; padding: 0; list-style: none; }
+
+  /* Подход — рендер во всю ширину плитки, подпись под ним */
+  .ds-tile--photo { gap: 0; padding: 0; overflow: hidden; }
+  .ds-tile__media { position: relative; flex: 1 1 auto; min-height: 12rem; border-radius: 0; }
+  .ds-tile__media > img { position: absolute; inset: 0; }
+  .ds-tile__body { display: flex; flex-direction: column; gap: 0.75rem; padding: clamp(1.25rem, 2vw, 1.75rem); }
+  /* Планшет: плитка во всю ширину — рендер слева, подпись справа */
+  @media (min-width: 43.75rem) and (max-width: 62.4375rem) {
+    .ds-tile--photo { flex-direction: row; }
+    .ds-tile__media { flex-basis: 55%; min-height: 15rem; }
+    .ds-tile__body { flex: 1 1 45%; }
+  }
+
+  /* Этапы — дорожка: точки на линии, последняя закрашена (результат).
+     В колонках дорожка растянута на высоту плитки, этапы — равномерно;
+     линия идёт от центра первой точки до центра последней */
+  .ds-tile--help { display: grid; gap: 1.5rem; }
+  @media (min-width: 43.75rem) { .ds-tile--help { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .ds-help__head { display: flex; flex-direction: column; gap: 0.75rem; }
+  .ds-track {
+    --row-pad: 0.3125rem;
+    --row-lh:  1.3125rem;
+    --dot:     0.6875rem;
+    --mid:     calc(var(--row-pad) + var(--row-lh) / 2);   /* центр строки */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ds-track::before {
+    content: '';
+    position: absolute;
+    top: var(--mid);
+    bottom: var(--mid);
+    left: calc(var(--dot) / 2 - 0.03125rem);
+    width: 0.0625rem;
+    background: var(--h-ink);
+    transform-origin: top;
+  }
+  .ds-track li {
+    position: relative;
+    padding: var(--row-pad) 0 var(--row-pad) 1.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: var(--row-lh);
+    color: var(--h-ink);
+  }
+  .ds-track li::before {
+    content: '';
+    position: absolute;
+    top: calc(var(--mid) - var(--dot) / 2);
+    left: 0;
+    width: var(--dot);
+    height: var(--dot);
+    box-sizing: border-box;
+    border: 0.125rem solid var(--h-ink);
+    border-radius: 50%;
+    background: var(--h-wall);
+  }
+  .ds-track li:last-child::before { background: var(--h-ink); }
+
+  /* ── Появление: плитки по очереди; внутри — своя короткая сцена
+     (дверь растёт, высоты проявляются, дорожка прорисовывается).
+     Скрытое состояние ставит скрипт и только для плиток ниже экрана ── */
+  [data-reveal] { transition: opacity 600ms var(--ease-out) var(--t, 0ms), translate 600ms var(--ease-out) var(--t, 0ms); }
+  [data-reveal='hidden'] { opacity: 0; translate: 0 1rem; }
+
+  .ds-size__door { transition: top 1200ms cubic-bezier(0.22, 1, 0.36, 1) calc(var(--t, 0ms) + 350ms); }
+  [data-reveal='hidden'] .ds-size__door { top: calc(100% * (1 - var(--ratio))); }
+  .ds-size__mark--max .ds-size__label { transition: opacity 400ms var(--ease-out) calc(var(--t, 0ms) + 1100ms); }
+  [data-reveal='hidden'] .ds-size__mark--max .ds-size__label { opacity: 0; }
+
+  .ds-stock__list li { transition: opacity 500ms var(--ease-out), translate 500ms var(--ease-out); transition-delay: calc(var(--t, 0ms) + 250ms); }
+  .ds-stock__list li:nth-child(2) { transition-delay: calc(var(--t, 0ms) + 370ms); }
+  .ds-stock__list li:nth-child(3) { transition-delay: calc(var(--t, 0ms) + 490ms); }
+  [data-reveal='hidden'] .ds-stock__list li { opacity: 0; translate: 0 0.5rem; }
+
+  .ds-track::before { transition: scale 900ms var(--ease-out) calc(var(--t, 0ms) + 250ms); }
+  [data-reveal='hidden'] .ds-track::before { scale: 1 0; }
+  .ds-track li { transition: opacity 400ms var(--ease-out) calc(var(--t, 0ms) + 250ms + var(--k) * 110ms); }
+  .ds-track li::before { transition: scale 400ms cubic-bezier(0.34, 1.5, 0.64, 1) calc(var(--t, 0ms) + 250ms + var(--k) * 110ms); }
+  [data-reveal='hidden'] .ds-track li { opacity: 0; }
+  [data-reveal='hidden'] .ds-track li::before { scale: 0; }
+
+  /* ── Шоурум: графитовая сцена ── */
+  .ds-room {
+    display: grid;
+    overflow: hidden;
+    border-radius: 1.75rem;
+    background: var(--color-slate-950);
+    color: var(--color-white);
+  }
+  @media (min-width: 62.5rem) { .ds-room { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); } }
+  .ds-room__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+  }
+  .ds-room__title { color: var(--color-white); }
+  .ds-room__lead { margin: 0; max-width: 34em; font-size: clamp(1.0625rem, 1.4vw, 1.1875rem); line-height: 1.6; color: var(--color-slate-300); text-wrap: pretty; }
+  .ds-room__facts { display: grid; gap: 0; margin: 0; border-top: 0.0625rem solid var(--color-slate-700); }
+  .ds-room__facts > div {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--h-gutter);
+    padding-block: 0.875rem;
+    border-bottom: 0.0625rem solid var(--color-slate-700);
+  }
+  .ds-room__facts dt { font-size: 0.8125rem; color: var(--color-slate-400); padding-top: 0.125rem; }
+  .ds-room__facts dd { margin: 0; font-weight: 600; line-height: 1.45; }
+  .ds-room__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: auto; }
+  .ds-room__ghost { border-color: var(--color-slate-600); color: var(--color-white); }
+  .ds-room__ghost:hover { border-color: var(--color-white); }
+  .ds-room__photo { position: relative; min-height: 18rem; }
+  .ds-room__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+  @media (max-width: 62.4375rem) { .ds-room__photo { order: -1; aspect-ratio: 4 / 3; min-height: 0; } }
+  @media (max-width: 29.9375rem) {
+    .ds-room__facts > div { grid-template-columns: 1fr; gap: 0.25rem; }
+    .ds-room__actions > * { flex: 1 1 100%; }
+  }
+
+  /* ── Ассортимент: карточки «фото + подпись» ── */
+  .ds-range {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.5rem, 3vw, 2rem) var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ds-range__card { display: flex; flex-direction: column; color: inherit; text-decoration: none; }
+  .ds-range__media { aspect-ratio: 4 / 3; }
+  .ds-range__media img { transition: transform 700ms var(--ease-out); }
+  .ds-range__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.125rem; }
+  .ds-range__text { margin-top: 0.5rem; font-size: 0.9375rem; }
+  .ds-range__card:hover .ds-range__media img { transform: scale(1.03); }
+  .ds-range__card:hover .h-arrow { transform: rotate(45deg); background: var(--h-signal); }
+  .ds-range__card:hover .ds-range__title {
+    text-decoration: underline;
+    text-decoration-color: var(--h-signal);
+    text-decoration-thickness: 0.0625rem;
+    text-underline-offset: 0.2em;
+  }
+  .ds-more { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: clamp(1.75rem, 3vw, 2.5rem) 0 0; padding: 0; list-style: none; }
+
+  /* ── Визуализации: ПК — крупный кадр 2×2 и четыре поменьше; планшет —
+     крупный во всю ширину и 2×2; телефон — лента вбок (.h-rail) ── */
+  .ds-renders {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 43.75rem) { .ds-renders__cell--lead { grid-column: 1 / -1; } }
+  @media (min-width: 62.5rem) {
+    .ds-renders { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ds-renders__cell--lead { grid-column: span 2; grid-row: span 2; }
+  }
+  .ds-renders__item {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+  }
+  @media (min-width: 43.75rem) { .ds-renders__cell--lead .ds-renders__item { aspect-ratio: 16 / 9; } }
+  @media (min-width: 62.5rem)  { .ds-renders__cell--lead .ds-renders__item { aspect-ratio: auto; } }
+  .ds-renders__item > img { position: absolute; inset: 0; transition: transform 700ms var(--ease-out); }
+  .ds-renders__item:hover > img { transform: scale(1.03); }
+  .ds-renders__more {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--color-slate-950) 50%, transparent);
+    color: var(--color-white);
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+  .ds-renders__foot { margin: clamp(1.25rem, 2vw, 1.75rem) 0 0; }
+
+  /* ── Материалы: строки под линейками, внешние ссылки ── */
+  .ds-res__lead { margin-top: 1rem; }
+  .ds-res { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .ds-res__link {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 1.125rem;
+    border-bottom: 0.0625rem solid var(--h-rule);
+    color: var(--h-ink);
+    text-decoration: none;
+  }
+  .ds-res__kind {
+    justify-self: start;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.5rem;
+    background: var(--h-wall);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--h-soft);
+  }
+  .ds-res__title { font-size: 1.0625rem; font-weight: 600; line-height: 1.35; }
+  .ds-res__ext { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; color: var(--h-muted); transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out); }
+  .ds-res__link:hover .ds-res__title { color: var(--h-signal); }
+  .ds-res__link:hover .ds-res__ext { background: var(--h-signal); color: var(--color-white); }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal], [data-reveal] *, .ds-track::before, .ds-track li::before,
+    .ds-range__media img, .ds-renders__item > img { transition: none; }
+    .ds-range__card:hover .ds-range__media img, .ds-renders__item:hover > img { transform: none; }
+  }
+</style>

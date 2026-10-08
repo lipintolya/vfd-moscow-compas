@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import { PROMOS, type Promo } from '../../data/promos'
+import { SITE } from '../../config/site'
 import { isPromoActive, getDaysLeft, formatDate } from '../../lib/promo-dates'
 
 /* ============================================================
@@ -61,7 +62,7 @@ function toggleExpanded(id: string) {
     <div class="container">
       <header class="h-head">
         <h2 id="promo-heading" class="h-h2">Акции салона</h2>
-        <p class="h-lead">Действуют в салоне ВФД в ТЦ «Компас». Условия и сроки — в описании каждой акции.</p>
+        <p class="h-lead">Действуют в салоне {{ SITE.name }} в {{ SITE.address.mall }}. Условия и сроки — в описании каждой акции.</p>
       </header>
 
       <p v-if="activePromos.length === 0" class="h-lead">
@@ -154,7 +155,7 @@ function toggleExpanded(id: string) {
   padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
   background: var(--color-slate-900);
-  color: #fff;
+  color: var(--color-white);
   font-weight: 600;
 }
 .offer__title { margin-top: 0.5rem; }

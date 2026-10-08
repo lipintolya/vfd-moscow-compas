@@ -57,7 +57,7 @@ export const VFD_DEALER = {
       text:  '2000 дилерских магазинов по всей России, 10 региональных складов и 10 стран-партнёров.',
     },
   ],
-  cta: { label: 'Смотреть каталог дверей ВФД', href: '/catalog/' },
+  cta: { label: `Смотреть каталог дверей ${SITE.name}`, href: '/catalog/' },
 }
 
 /* Фото фабрики — локальные копии (scripts/gen-about-images.mjs →
@@ -67,7 +67,7 @@ const VFD_ALTS: Record<number, string> = {
   1: `Оператор станка с ЧПУ на производстве ${SITE.manufacturerOf}`,
   2: `Обработка стекла для дверей на производстве ${SITE.manufacturerOf}`,
   3: `Склад готовой продукции ${SITE.manufacturerOf}`,
-  4: `Станок для обработки деталей дверей на производстве ВФД`,
+  4: `Станок для обработки деталей дверей на производстве ${SITE.name}`,
 }
 
 const vfdFile = (n: number, w: number) => `/renders/about/vfd-${n}-${w}.webp`

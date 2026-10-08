@@ -13,7 +13,7 @@ import { getSeriesSpec } from '../../../data/series-descriptions'
 import type { CatalogCardItem } from '../../../components/catalog/types'
 import { merchantPolicy } from '../../../lib/contacts-data'
 import { coatingInline, hasWords, pluralRu } from '../../../lib/product-text'
-import { PHONE as SITE_PHONE, SITE } from '../../../config/site'
+import { PHONE as SITE_PHONE } from '../../../config/site'
 
 export async function getStaticPaths() {
   const { cards } = await getCatalogCards()

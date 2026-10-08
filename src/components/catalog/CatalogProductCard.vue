@@ -91,17 +91,18 @@ const kitPrice = computed(() =>
   activePrice.value ? activePrice.value + calcKitPrice(props.card.coatingSlug, activeColorName.value) : null
 )
 
-/* Бейдж серии — цвет группы вместо одного teal на всё:
-   ПЭТ (Иннова, Урбан ПЭТ) — мягкий красный
-   Эмалекс/Эмалекс Модерн + Урбан/Элегант/Бэйсик — мягкий синий
-   остальные эмалевые коллекции — графит */
+/* Бейдж серии — цвет группы, только фирменная палитра (как полоски
+   покрытий на /catalog/):
+   ПЭТ (Иннова, Урбан ПЭТ) — красный
+   Эмалекс/Эмалекс Модерн + Урбан/Элегант/Бэйсик — голубой
+   Протач — тёмный графит, остальные эмалевые коллекции — графит */
 const RED_SERIES  = new Set(['innova', 'urban-pet'])
 const BLUE_SERIES = new Set(['emalex', 'emalex-modern', 'urban', 'elegant', 'basic'])
 
 const seriesBadgeClass = computed(() => {
   const slug = props.card.seriesSlug
-  if (props.card.coatingSlug === 'protach') return 'bg-violet-500 text-white'
-  if (RED_SERIES.has(slug))  return 'bg-rose-500 text-white'
+  if (props.card.coatingSlug === 'protach') return 'bg-slate-900 text-white'
+  if (RED_SERIES.has(slug))  return 'bg-accent-600 text-white'
   if (BLUE_SERIES.has(slug)) return 'bg-secondary-600 text-white'
   return 'bg-slate-700 text-white'
 })
@@ -113,7 +114,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
 <template>
   <article
     class="group @container relative flex min-h-full flex-col rounded-2xl border border-slate-200 bg-white transition hover:border-accent-200 hover:shadow-lg hover:-translate-y-0.5"
-    :class="isKitOpen ? 'z-30' : isDimmed ? 'pointer-events-none opacity-40 blur-[1px]' : ''"
+    :class="isKitOpen ? 'z-30' : isDimmed ? 'pointer-events-none opacity-40 blur-[0.0625rem]' : ''"
     :data-kit-card="card.id"
     @touchstart.passive="onPhotoTouchStart"
     @touchend="onPhotoTouchEnd"
@@ -194,8 +195,8 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
           :class="[
             idx === activeSwatchIdx ? 'ring-2 ring-offset-1 ring-secondary-600' : '',
             swatch.available === false
-              ? 'border-2 border-dashed border-black/30'
-              : 'border border-black/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.55)]',
+              ? 'border-2 border-dashed border-slate-950/30'
+              : 'border border-slate-950/10 shadow-[inset_0_0_0_0.0625rem_color-mix(in_srgb,var(--color-white)_55%,transparent)]',
           ]"
           :style="{ backgroundColor: swatch.hex }"
           :title="swatch.available === false ? `${swatch.name} — фото уточняется` : swatch.name"
@@ -210,7 +211,7 @@ const inStock     = computed(() => isInStock(props.card.id, activeColorName.valu
       </div>
       <div v-else class="flex min-w-0 items-center gap-2">
         <span
-          class="h-4 w-4 shrink-0 rounded-full border border-black/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.55)]"
+          class="h-4 w-4 shrink-0 rounded-full border border-slate-950/10 shadow-[inset_0_0_0_0.0625rem_color-mix(in_srgb,var(--color-white)_55%,transparent)]"
           :style="{ backgroundColor: activeColorHex }"
           :title="`Цвет: ${activeColorName}`"
         />

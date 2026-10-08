@@ -10,6 +10,7 @@
  * закрывают. Под фото — подпись (alt кадра) и номер.
  */
 import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
 
 defineOptions({ inheritAttrs: false })
 
@@ -23,6 +24,7 @@ const curIndex = ref<number | null>(null)
 const dialog   = ref<HTMLElement | null>(null)
 const closeBtn = ref<HTMLButtonElement | null>(null)
 let returnFocus: HTMLElement | null = null
+const pageLock = useScrollLock()
 
 const current = computed(() => (curIndex.value === null ? null : images.value[curIndex.value] ?? null))
 const many    = computed(() => images.value.length > 1)
@@ -42,7 +44,7 @@ async function open(imgs: LightboxImg[], idx: number) {
   returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
   images.value   = imgs
   curIndex.value = Math.min(Math.max(idx, 0), imgs.length - 1)
-  document.documentElement.style.overflow = 'hidden'
+  pageLock.lock()
   preloadNeighbors(curIndex.value)
   await nextTick()
   closeBtn.value?.focus()
@@ -52,7 +54,7 @@ function close() {
   if (curIndex.value === null) return
   curIndex.value = null
   images.value   = []
-  document.documentElement.style.overflow = ''
+  pageLock.unlock()
   returnFocus?.focus()
   returnFocus = null
 }
@@ -110,7 +112,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
   window.removeEventListener('open-lightbox', onEvent)
-  document.documentElement.style.overflow = ''
 })
 </script>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
+import { useScrollLock } from '../../lib/scroll-lock'
 import { SITE } from '../../config/site'
 
 /* ============================================================
@@ -202,9 +203,11 @@ const onClickOutside = (e: MouseEvent) => {
   ) closeContacts(false)
 }
 
+const menuLock = useScrollLock()
+
 const openMobileMenu = async () => {
   mobileOpen.value = true
-  document.body.style.overflow = 'hidden'
+  menuLock.lock()
   await nextTick()
   menuCloseRef.value?.focus({ preventScroll: true })
 }
@@ -213,7 +216,7 @@ const openMobileMenu = async () => {
 const closeMobileMenu = (returnFocus = true) => {
   if (!mobileOpen.value) return
   mobileOpen.value = false
-  document.body.style.overflow = ''
+  menuLock.unlock()
   if (returnFocus) burgerBtnRef.value?.focus({ preventScroll: true })
 }
 const toggleMobileMenu = () => mobileOpen.value ? closeMobileMenu() : openMobileMenu()
@@ -263,7 +266,6 @@ onUnmounted(() => {
   window.removeEventListener('scroll',  onScroll)
   window.removeEventListener('keydown', onKeydown)
   document.removeEventListener('click', onClickOutside, { capture: true })
-  document.body.style.overflow = ''
   if (timerId !== null) clearInterval(timerId)
   if (catalogTimer !== null) clearTimeout(catalogTimer)
   if (aboutTimer !== null) clearTimeout(aboutTimer)
@@ -292,7 +294,7 @@ onUnmounted(() => {
               @load="logoLoaded = true"
               @error="logoError = true"
             />
-            <span v-else class="hdr-mark__fallback">ВФД</span>
+            <span v-else class="hdr-mark__fallback">{{ SITE.name }}</span>
           </span>
           <span class="hdr-brand__text" :class="{ 'is-intro': brandIntro }">
             <span class="hdr-brand__line hdr-brand__name"><span>{{ BRAND_TITLE }}</span></span>

@@ -352,7 +352,11 @@ const L = map.layers
     gap: 0.75rem;
     pointer-events: none;
   }
+  /* Кнопка не сжимается и не переносится — иначе на телефоне наезжала
+     на подпись OpenStreetMap; подпись переносится сама и прижата вправо */
   .map__open {
+    flex: none;
+    white-space: nowrap;
     pointer-events: auto;
     padding: 0.5rem 0.875rem;
     border-radius: 999rem;
@@ -364,7 +368,7 @@ const L = map.layers
     text-decoration: none;
   }
   .map__open:hover { color: var(--h-signal); }
-  .map__credit { font-size: 0.625rem; color: var(--h-muted); }
+  .map__credit { min-width: 0; font-size: 0.625rem; line-height: 1.3; text-align: right; color: var(--h-muted); }
 
   @media (max-width: 29.9375rem) {
     .map__label { font-size: 0.625rem; }

@@ -51,8 +51,14 @@ export const companyLegalInfo = {
     { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
   ],
 
-  // Способы оплаты — только названия, без подробностей
-  paymentMethods: ['Наличные', 'Банковская карта', 'Безналичный расчёт', 'QR-код СБП'],
+  // Способы оплаты — только названия, без подробностей; id — ключ иконки
+  // (src/components/contacts/PaymentMethods.astro)
+  paymentMethods: [
+    { id: 'cash',    label: 'Наличные' },
+    { id: 'card',    label: 'Банковская карта' },
+    { id: 'invoice', label: 'Безналичный расчёт' },
+    { id: 'sbp',     label: 'QR-код СБП' },
+  ] as const,
 
   // Социальные сети — только Telegram-канал (см. SITE.social)
   socialMedia: [

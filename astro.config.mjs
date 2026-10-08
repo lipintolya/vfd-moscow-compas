@@ -1,7 +1,7 @@
 // @ts-check
 import { readFileSync } from 'node:fs'
 import { defineConfig } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
+import sitemap, { ChangeFreqEnum } from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@astrojs/vue';
 import markdoc from '@astrojs/markdoc';
@@ -13,6 +13,7 @@ import { createClient } from '@supabase/supabase-js';
    запрос на старте сборки — если упадёт (сеть/лимиты), просто не будет
    картинок в sitemap: try/catch не должен уронить всю сборку сайта, как
    уже случалось с getStaticPaths при обрыве связи с Supabase. */
+/** @param {string} name */
 function readEnvVar(name) {
   // На проде переменные заданы настоящим process.env (без физического
   // .env-файла в чекауте) — проверяем его первым.
@@ -30,12 +31,14 @@ function readEnvVar(name) {
 /* Дублирует src/lib/slugify.ts — не импортируем .ts в конфиг намеренно,
    чтобы не тянуть неопределённость esbuild-резолвинга в критичный для
    сборки файл. При правке транслитерации — поправить оба места. */
+/** @type {Record<string, string>} */
 const CYRILLIC_TO_LATIN = {
   а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z',
   и: 'i', й: 'i', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r',
   с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch',
   ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya',
 }
+/** @param {string} input */
 function slugify(input) {
   return input
     .trim()
@@ -46,6 +49,7 @@ function slugify(input) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
+/** @param {{ id: string, name: string, seriesSlug: string }[]} models */
 function buildModelSlugMap(models) {
   const baseSlugOf = new Map()
   const baseSlugCounts = new Map()
@@ -63,7 +67,9 @@ function buildModelSlugMap(models) {
 }
 
 /** slug модели → массив URL её фото (все цвета). Пусто при любой ошибке. */
+/** @returns {Promise<Map<string, string[]>>} */
 async function fetchModelImages() {
+  /** @type {Map<string, string[]>} */
   const map = new Map()
   try {
     const url = readEnvVar('PUBLIC_SUPABASE_URL')
@@ -79,7 +85,11 @@ async function fetchModelImages() {
     const byModelId = new Map()
     const modelMeta = new Map()
     for (const row of data) {
-      const model = row.models
+      /* Связь многие-к-одному: Supabase отдаёт объект, а не массив —
+         тип клиента без схемы БД этого не знает */
+      const model = /** @type {{ id: string, name: string, series: { slug?: string } | null } | null} */ (
+        /** @type {unknown} */ (row.models)
+      )
       if (!model || !row.photo_url) continue
       modelMeta.set(model.id, { id: model.id, name: model.name, seriesSlug: model.series?.slug ?? '' })
       const list = byModelId.get(model.id) ?? []
@@ -100,7 +110,8 @@ async function fetchModelImages() {
 
 /* Домен сайта — дублирует SITE_URL из src/config/site.ts (конфиг Astro
    намеренно не импортирует .ts, см. комментарий у slugify выше). При
-   смене домена поправить оба места и public/robots.txt. */
+   смене домена поправить оба места (robots.txt и /sitemap.xml собираются
+   из SITE.url — src/pages/robots.txt.ts, sitemap.xml.ts). */
 const SITE_URL = 'https://domain-placeholder.example'
 
 /* Страницы вне сайтмапа: /privacy/ — служебная; /reviews/ —
@@ -142,6 +153,7 @@ export default defineConfig({
 
         /* Картинки — модели (Supabase, см. fetchModelImages) и портфолио
            (путь детерминирован из слага, без БД). */
+        /** @param {import('@astrojs/sitemap').SitemapItem} extra */
         const withImages = (extra) => {
           const images = modelImages.get(u)
           return images ? { ...extra, img: images.map(url => ({ url })) } : extra
@@ -152,39 +164,39 @@ export default defineConfig({
           : {}
 
         if (u === `${SITE_URL}/` || u === SITE_URL) {
-          return { ...item, changefreq: 'weekly', priority: 1.0 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 1.0 }
         }
         if (/\/(catalog|about|contacts|partitions|designers|video)\/?$/.test(u)) {
-          return { ...item, changefreq: 'weekly', priority: 0.8 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         if (/\/catalog\/series(\/.+)?\/?$/.test(u)) {
-          return { ...item, changefreq: 'weekly', priority: 0.8 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         if (/\/catalog\/dveri-[^/]+\/?$/.test(u)) {
-          return { ...item, changefreq: 'weekly', priority: 0.8 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         // Цветовые SEO-лендинги — см. src/data/color-categories.ts (слаги
         // там не начинаются с dveri-, отдельная проверка).
         if (/\/catalog\/(belye|seryye|bezhevye|shokolad-mokko)-dveri\/?$/.test(u)) {
-          return { ...item, changefreq: 'weekly', priority: 0.8 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         // Стилевые SEO-лендинги — см. src/data/style-categories.ts.
         if (/\/catalog\/(loft-dveri|minimalizm-dveri)\/?$/.test(u)) {
-          return { ...item, changefreq: 'weekly', priority: 0.8 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         if (/\/articles\/?$/.test(u)) {
-          return { ...item, changefreq: 'weekly', priority: 0.7 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.7 }
         }
         if (/\/portfolio\/?$/.test(u)) {
-          return { ...item, changefreq: 'weekly', priority: 0.8 }
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         if (portfolioMatch) {
-          return { ...item, changefreq: 'monthly', priority: 0.65, ...portfolioImg }
+          return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.65, ...portfolioImg }
         }
         if (/\/models\/[a-z0-9-]+\/?$/.test(u)) {
-          return withImages({ ...item, changefreq: 'monthly', priority: 0.6 })
+          return withImages({ ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.6 })
         }
-        return { ...item, changefreq: 'monthly', priority: 0.6 }
+        return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.6 }
       },
     }),
   ]

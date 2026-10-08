@@ -20,12 +20,11 @@ import {
   SECRET_MIN_KIT_PRICE,
   CUSTOM_LEAD_TIME,
 } from '../../data/skrytye-dveri-products'
-import { PHONE as SITE_PHONE, SITE } from '../../config/site'
+import { PHONE as SITE_PHONE } from '../../config/site'
 
 const PHONE = SITE_PHONE.raw
 const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
 
-const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
 const canonicalUrl = Astro.site
   ? new URL('/catalog/skrytye-dveri-dizayn-proekt/', Astro.site).href

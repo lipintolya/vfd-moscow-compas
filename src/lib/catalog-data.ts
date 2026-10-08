@@ -33,10 +33,20 @@ const normalizeHexColor = (value: string | null | undefined) => {
     : '#cccccc'
 }
 
-export async function getCatalogCards(): Promise<{
-  cards: CatalogCardItem[]
-  error: string | null
-}> {
+/* Запрос к Supabase — один на сборку: каталог нужен главной, /catalog/,
+   сериям, посадочным и статьям, а данные за время сборки не меняются.
+   В режиме разработки кеша нет — правки в базе видны сразу.
+
+   Ошибка запроса роняет сборку: иначе на сайт молча уехал бы пустой
+   каталог без страниц серий и моделей (getStaticPaths вернул бы пусто). */
+let catalogCards: Promise<{ cards: CatalogCardItem[] }> | null = null
+
+export function getCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
+  if (import.meta.env.DEV) return loadCatalogCards()
+  return (catalogCards ??= loadCatalogCards())
+}
+
+async function loadCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
   const { data, error } = await supabase
     .from('model_colors')
     .select(`
@@ -65,7 +75,7 @@ export async function getCatalogCards(): Promise<{
     `)
     .order('price_rrp', { ascending: true })
 
-  if (error) console.error('Supabase error:', error.message)
+  if (error) throw new Error(`Каталог не загрузился из Supabase (model_colors): ${error.message}`)
 
   /* ── Полный набор цветов на модель (по всем строкам, не только первой) —
      нужен для корректной фильтрации: модель может подходить под фильтр
@@ -149,7 +159,7 @@ export async function getCatalogCards(): Promise<{
     card.slug = slugMap.get(card.id)!
   }
 
-  return { cards, error: error?.message ?? null }
+  return { cards }
 }
 
 export interface SeriesListItem {
@@ -242,21 +252,31 @@ export function getSeriesCardsData(cards: CatalogCardItem[]): SeriesCardData[] {
     само разрулится для любых будущих эксклюзивов. Цвет без единой
     привязки к модели (ещё не запущен ни в одной серии) не исключается —
     это справочный «скоро будет», а не чей-то эксклюзив. */
+/* Справочник цветов — тоже один запрос на сборку (страниц серий много),
+   ошибка роняет сборку, а не оставляет серии без палитры молча */
+let colorRows: Promise<any[]> | null = null
+function getColorRows(): Promise<any[]> {
+  const load = async () => {
+    const { data, error } = await supabase
+      .from('colors')
+      .select('name, hex_preview, coatings ( slug ), model_colors ( models ( series ( slug ) ) )')
+    if (error) throw new Error(`Цвета не загрузились из Supabase (colors): ${error.message}`)
+    return data ?? []
+  }
+  if (import.meta.env.DEV) return load()
+  return (colorRows ??= load())
+}
+
 export async function getColorsByCoatingSlug(
   coatingSlug: string,
   currentSeriesSlug?: string,
 ): Promise<{ name: string; hex: string }[]> {
   if (!coatingSlug) return []
 
-  const { data, error } = await supabase
-    .from('colors')
-    .select('name, hex_preview, coatings ( slug ), model_colors ( models ( series ( slug ) ) )')
-
-  if (error) console.error('Supabase error:', error.message)
-
+  const data = await getColorRows()
   const seen = new Set<string>()
   const result: { name: string; hex: string }[] = []
-  for (const row of (data ?? [])) {
+  for (const row of data) {
     if ((row.coatings as any)?.slug !== coatingSlug || !row.name) continue
     if (seen.has(row.name)) continue
 

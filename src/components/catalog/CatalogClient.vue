@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import CatalogEmptyState from './CatalogEmptyState.vue'
 import CatalogFilters from './CatalogFilters.vue'
 import CatalogGrid from './CatalogGrid.vue'
 import CatalogPagination from './CatalogPagination.vue'
 import type { CatalogCardItem, CatalogFilterOption, CatalogSort } from './types'
+import { useScrollLock } from '../../lib/scroll-lock'
+import { pluralRu } from '../../lib/plural'
 
 /* Мобильные фильтры — полноэкранный bottom-sheet, а не блок, разворачивающийся
    в общем потоке страницы: тот вариант требовал скроллить мимо всего списка
@@ -12,13 +14,30 @@ import type { CatalogCardItem, CatalogFilterOption, CatalogSort } from './types'
    контента, скролл body блокируется на время открытия, кнопка внизу шита
    сразу показывает актуальное число товаров и закрывает шит. */
 const mobileFiltersOpen = ref(false)
-watch(mobileFiltersOpen, (open) => {
-  if (typeof document === 'undefined') return
-  document.body.style.overflow = open ? 'hidden' : ''
+const filtersLock = useScrollLock()
+
+/* Шит — модальный диалог: при открытии фокус на «Закрыть», Esc закрывает,
+   после закрытия фокус возвращается на кнопку «Фильтры» */
+const filtersToggleRef = ref<HTMLButtonElement | null>(null)
+const filtersCloseRef  = ref<HTMLButtonElement | null>(null)
+watch(mobileFiltersOpen, async (open) => {
+  if (open) {
+    filtersLock.lock()
+    await nextTick()
+    filtersCloseRef.value?.focus()
+  } else {
+    filtersLock.unlock()
+    filtersToggleRef.value?.focus({ preventScroll: true })
+  }
 })
-onUnmounted(() => {
-  if (typeof document !== 'undefined') document.body.style.overflow = ''
-})
+const onFiltersKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && mobileFiltersOpen.value) mobileFiltersOpen.value = false
+}
+onMounted(() => window.addEventListener('keydown', onFiltersKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onFiltersKeydown))
+
+/* «1 товар, 2 товара, 5 товаров» */
+const goodsWord = (n: number) => pluralRu(n, ['товар', 'товара', 'товаров'])
 
 /* CatalogClient рендерится с SSR (client:idle/client:load — сетка товаров
    нужна в исходном HTML для SEO), а <Teleport> внутри SSR-компонента ломает
@@ -197,7 +216,7 @@ watch(
         <h2 id="catalog-title" class="t-h1 text-step-5 m-0 mb-1.5 leading-tight">Каталог межкомнатных дверей</h2>
         <p class="m-0 text-base text-slate-600">
           Найдено: <strong class="font-medium text-ink">{{ filteredCards.length }}</strong>
-          {{ filteredCards.length === 1 ? 'товар' : 'товаров' }}
+          {{ goodsWord(filteredCards.length) }}
         </p>
       </div>
 
@@ -224,6 +243,7 @@ watch(
 
       <!-- Mobile filter toggle -->
       <button
+        ref="filtersToggleRef"
         type="button"
         class="flex w-full items-center justify-center gap-2 rounded-full border-2 border-slate-200 px-4.5 py-2.5 text-sm font-semibold text-slate-600 transition lg:hidden"
         :class="hasActiveFilters ? 'border-accent-300 text-accent-700' : ''"
@@ -262,7 +282,7 @@ watch(
         <Transition name="cf-backdrop">
           <div
             v-if="mobileFiltersOpen"
-            class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            class="fixed inset-0 z-40 bg-slate-950/40 lg:hidden"
             @click="mobileFiltersOpen = false"
           />
         </Transition>
@@ -277,8 +297,9 @@ watch(
             <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4">
               <span class="text-base font-medium text-ink">Фильтры</span>
               <button
+                ref="filtersCloseRef"
                 type="button"
-                class="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
+                class="flex h-11 w-11 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
                 aria-label="Закрыть фильтры"
                 @click="mobileFiltersOpen = false"
               >
@@ -306,7 +327,7 @@ watch(
             </div>
             <div class="border-t border-slate-100 p-4" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
               <button type="button" class="btn btn-primary w-full justify-center" @click="mobileFiltersOpen = false">
-                Показать {{ filteredCards.length }} {{ filteredCards.length === 1 ? 'товар' : 'товаров' }}
+                Показать {{ filteredCards.length }} {{ goodsWord(filteredCards.length) }}
               </button>
             </div>
           </div>

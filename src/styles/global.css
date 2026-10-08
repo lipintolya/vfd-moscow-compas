@@ -86,7 +86,7 @@
   --color-graphite-card: var(--color-slate-800);  /* карточка НА тёмной секции */
   --color-fg-muted:      var(--color-slate-500);  /* приглушённый текст */
   --color-fg-subtle:     var(--color-slate-400);  /* очень приглушённый */
-  --color-surface:       #ffffff;                 /* фон карточек */
+  --color-surface:       var(--color-white);      /* фон карточек */
   --color-border:        var(--color-slate-200);  /* границы */
 
   /* Брейкпоинт под широкие/ультраширокие мониторы (1920px+) — Tailwind из
@@ -222,6 +222,10 @@ html {
      вариант для браузеров без clip (до Safari 16). */
   overflow-x: hidden;
   overflow-x: clip;
+  /* Место под полосу прокрутки зарезервировано: когда модальное окно
+     блокирует прокрутку (src/lib/scroll-lock.ts), полоса исчезает —
+     без этого страница сдвигалась бы вбок на её ширину */
+  scrollbar-gutter: stable;
 }
 body {
   background-color: var(--color-bg);

@@ -48,8 +48,8 @@ const localBusinessSchema = buildLocalBusiness()
 ---
 
 <BaseLayout
-  title="Шоурум дверей ВФД в Москве, СВАО — межкомнатные и скрытые двери"
-  description="Официальный дилер Владимирской фабрики дверей в Москве: шоурум в ТЦ «Компас», ул. Красная Сосна, 2А (Ярославский район, СВАО), 6 минут от метро Свиблово и ВДНХ, 22 минуты пешком от МЦК Ростокино. Межкомнатные и скрытые двери, перегородки, замер и монтаж."
+  title={`Шоурум дверей ${SITE.name} ${SITE.city.in}, ${SITE.address.okrug} — межкомнатные и скрытые двери`}
+  description={`Официальный дилер ${SITE.manufacturerOf} ${SITE.city.in}: шоурум в ${SITE.address.mall}, ${SITE.address.street}. Межкомнатные и скрытые двери, перегородки, замер и монтаж.`}
   structuredData={[faqSchema, localBusinessSchema, howToSchema]}
   preloadImage={HERO_COVER_IMAGE}
   ogImage={HERO_COVER_IMAGE}

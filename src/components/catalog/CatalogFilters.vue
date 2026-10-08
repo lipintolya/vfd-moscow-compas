@@ -147,7 +147,7 @@ const resetAll = () => {
           :class="activeColor === item.value ? 'bg-accent-50 text-accent-700' : ''"
           @click="activeColor = activeColor === item.value ? '' : item.value"
         >
-          <span class="h-3.5 w-3.5 shrink-0 rounded-full border border-black/10" :style="{ backgroundColor: item.color }"></span>
+          <span class="h-3.5 w-3.5 shrink-0 rounded-full border border-slate-950/10" :style="{ backgroundColor: item.color }"></span>
           {{ item.label }}
         </button>
       </div>

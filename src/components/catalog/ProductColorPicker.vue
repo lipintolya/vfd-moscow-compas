@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
 
 export interface ColorVariant {
   id:          string
@@ -75,21 +76,23 @@ const mounted = ref(false)
 onMounted(() => { mounted.value = true })
 
 const zoomOpen = ref(false)
+/* Прокрутка страницы под открытым окном — src/lib/scroll-lock.ts */
+const pageLock = useScrollLock()
+
 const openZoom = () => {
   if (!displayPhoto.value) return
   zoomOpen.value = true
-  document.body.style.overflow = 'hidden'
+  pageLock.lock()
 }
 const closeZoom = () => {
   zoomOpen.value = false
-  document.body.style.overflow = ''
+  pageLock.unlock()
 }
 const onZoomKeydown = (e: KeyboardEvent) => { if (e.key === 'Escape') closeZoom() }
 
 onMounted(() => window.addEventListener('keydown', onZoomKeydown))
 onUnmounted(() => {
   window.removeEventListener('keydown', onZoomKeydown)
-  document.body.style.overflow = ''
   if (shareCopiedTimer) clearTimeout(shareCopiedTimer)
 })
 

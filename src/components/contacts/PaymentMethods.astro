@@ -1,0 +1,218 @@
+---
+/**
+ * Способы оплаты — графитовые плитки с белыми линейными иконками (одна
+ * толщина линии, сетка 24×24); единственный цветной акцент — красная
+ * линия сканирования QR (--h-signal). Подпись — сразу под иконкой, так
+ * строки у всех плиток начинаются на одном уровне, даже если подпись
+ * на узком экране переносится.
+ *
+ * Анимация — одна сцена на иконку, один раз, когда список доходит до
+ * экрана (плитки по очереди):
+ *   наличные — купюра прорисовывается, монета падает на неё;
+ *   карта    — контур и полоса прорисовываются, чип, по карте проходит блик;
+ *   банк     — крыша и основание прорисовываются, колонны вырастают;
+ *   QR       — углы прорисовываются, модули появляются, проходит скан.
+ * Наведение мышью (только на устройствах с мышью) коротко повторяет
+ * «характер» иконки: монета переворачивается, карта качается, колонны
+ * пульсируют, скан проходит снова.
+ *
+ * Только opacity / transform / stroke-dashoffset внутри маленьких SVG.
+ * Скрытое состояние ставит скрипт и только если список ниже экрана —
+ * без JS и при reduced-motion иконки сразу готовы, наведение не анимирует.
+ *
+ * Данные — companyLegalInfo.paymentMethods (src/lib/contacts-data.ts),
+ * иконка — по id.
+ */
+import { companyLegalInfo } from '../../lib/contacts-data'
+
+const methods = companyLegalInfo.paymentMethods
+---
+
+<ul class="pay" role="list" data-pay>
+  {methods.map((m, i) => (
+    <li class:list={['pay__item', `pay__item--${m.id}`]} style={`--i: ${i}`}>
+      <span class="pay__ico" aria-hidden="true">
+        {m.id === 'cash' && (
+          <svg viewBox="0 0 24 24">
+            <rect data-draw x="2.5" y="6" width="19" height="12" rx="2" pathLength="1" />
+            <path data-pop d="M5.75 9.25h1M17.25 14.75h1" />
+            <g class="pay-coin"><circle class="pay-coin__face" cx="12" cy="12" r="2.75" /></g>
+          </svg>
+        )}
+        {m.id === 'card' && (
+          <svg viewBox="0 0 24 24">
+            <defs>
+              <clipPath id="pay-card-clip"><rect x="2.5" y="5" width="19" height="14" rx="2.5" /></clipPath>
+            </defs>
+            <g class="pay-card">
+              <rect data-draw x="2.5" y="5" width="19" height="14" rx="2.5" pathLength="1" />
+              <path data-draw class="pay__late" d="M2.5 9.5h19" pathLength="1" />
+              <rect data-pop x="5.5" y="12.25" width="4" height="3" rx="0.75" />
+              <g clip-path="url(#pay-card-clip)">
+                <path class="pay-sheen" d="M8 3 4 21" />
+              </g>
+            </g>
+          </svg>
+        )}
+        {m.id === 'invoice' && (
+          <svg viewBox="0 0 24 24">
+            <path data-draw d="M3 9.25 12 4l9 5.25H3Z" pathLength="1" />
+            <path data-draw d="M3.5 19.5h17" pathLength="1" />
+            {[6.5, 10.5, 13.5, 17.5].map((x, j) => (
+              <path class="pay-col" d={`M${x} 12v4.5`} style={`--j: ${j}`} />
+            ))}
+          </svg>
+        )}
+        {m.id === 'sbp' && (
+          <svg viewBox="0 0 24 24">
+            <rect data-draw x="3.5" y="3.5" width="6" height="6" rx="1" pathLength="1" />
+            <rect data-draw x="14.5" y="3.5" width="6" height="6" rx="1" pathLength="1" />
+            <rect data-draw x="3.5" y="14.5" width="6" height="6" rx="1" pathLength="1" />
+            {[[14.5, 14.5], [18, 18], [18, 14.5], [14.5, 18]].map(([x, y], j) => (
+              <rect data-pop class="pay__fill" x={x} y={y} width="2.5" height="2.5" rx="0.5" style={`--j: ${j}`} />
+            ))}
+            <path class="pay-scan" d="M2 3h20" />
+          </svg>
+        )}
+      </span>
+      <span class="pay__label">{m.label}</span>
+    </li>
+  ))}
+</ul>
+
+<script>
+  const list = document.querySelector<HTMLElement>('[data-pay]')
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (list && !still && 'IntersectionObserver' in window && list.getBoundingClientRect().top > innerHeight * 0.85) {
+    list.dataset.pay = 'hidden'
+    const io = new IntersectionObserver(([e]) => {
+      if (!e?.isIntersecting) return
+      list.dataset.pay = 'shown'
+      io.disconnect()
+    }, { rootMargin: '0px 0px -15% 0px' })
+    io.observe(list)
+  }
+</script>
+
+<style>
+  /* ── Плитки ── */
+  .pay {
+    --pay-step: 160ms;                  /* шаг между плитками */
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 43.75rem) { .pay { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .pay__item {
+    --t: calc(var(--i) * var(--pay-step));   /* старт сцены этой плитки */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    padding: clamp(1.25rem, 2vw, 1.75rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--color-slate-900);
+    color: var(--color-white);
+  }
+  /* Иконка — по центру одинаковой квадратной подложки: контуры значков
+     разной формы, а подложка даёт общий левый край с подписью и одну
+     высоту у всех плиток */
+  .pay__ico {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: clamp(3.25rem, 4.5vw, 3.75rem);
+    aspect-ratio: 1;
+    border-radius: var(--h-radius);
+    background: var(--color-slate-800);
+    color: var(--color-white);
+  }
+  .pay__ico svg {
+    display: block;
+    width: 55%;
+    height: 55%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    overflow: visible;
+  }
+  .pay__fill { fill: currentColor; stroke: none; }
+  .pay__label { font-size: clamp(0.9375rem, 1.3vw, 1.125rem); font-weight: 600; line-height: 1.3; letter-spacing: -0.01em; color: var(--color-white); text-wrap: balance; }
+
+  /* Детали, которые масштабируются/двигаются — от центра своей фигуры */
+  .pay svg :is([data-pop], .pay-coin, .pay-coin__face, .pay-card, .pay-col) {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .pay-col { transform-origin: center bottom; }
+
+  /* ── Появление (переходы: из скрытого состояния к обычному) ── */
+  .pay [data-draw] {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 750ms var(--ease-out) var(--t);
+  }
+  .pay .pay__late { transition-delay: calc(var(--t) + 300ms); }
+  .pay [data-pop] {
+    transition:
+      opacity 250ms var(--ease-out) calc(var(--t) + 500ms + var(--j, 0) * 90ms),
+      scale 450ms cubic-bezier(0.34, 1.5, 0.64, 1) calc(var(--t) + 500ms + var(--j, 0) * 90ms);
+  }
+  .pay-coin {
+    transition:
+      opacity 200ms var(--ease-out) calc(var(--t) + 550ms),
+      translate 650ms cubic-bezier(0.34, 1.45, 0.64, 1) calc(var(--t) + 550ms);
+  }
+  .pay-col {
+    transition: scale 500ms cubic-bezier(0.34, 1.4, 0.64, 1) calc(var(--t) + 450ms + var(--j) * 90ms);
+  }
+  .pay__label { transition: opacity 500ms var(--ease-out) calc(var(--t) + 200ms), translate 500ms var(--ease-out) calc(var(--t) + 200ms); }
+
+  [data-pay='hidden'] [data-draw] { stroke-dashoffset: 1; }
+  [data-pay='hidden'] [data-pop] { opacity: 0; scale: 0; }
+  [data-pay='hidden'] .pay-coin { opacity: 0; translate: 0 -0.5rem; }
+  [data-pay='hidden'] .pay-col { scale: 1 0; }
+  [data-pay='hidden'] .pay__label { opacity: 0; translate: 0 0.375rem; }
+
+  /* Блик карты и скан QR — однократные проходы после появления
+     (keyframes, состояние до и после — невидимы) */
+  .pay-sheen { stroke: var(--color-white); stroke-width: 2.5; opacity: 0; }
+  .pay-scan  { stroke: var(--h-signal); stroke-width: 1.25; opacity: 0; }
+  [data-pay='shown'] .pay-sheen { animation: pay-sheen 900ms var(--ease-out) calc(var(--t) + 950ms) both; }
+  [data-pay='shown'] .pay-scan  { animation: pay-scan 1000ms var(--ease-out) calc(var(--t) + 1000ms) both; }
+  @keyframes pay-sheen {
+    0%   { opacity: 0; translate: -0.5rem 0; }
+    25%  { opacity: 0.55; }
+    100% { opacity: 0; translate: 1.5rem 0; }
+  }
+  @keyframes pay-scan {
+    0%   { opacity: 0; translate: 0 0; }
+    15%  { opacity: 1; }
+    85%  { opacity: 1; }
+    100% { opacity: 0; translate: 0 1.125rem; }
+  }
+
+  /* ── Наведение (только мышь): короткий повтор «характера» иконки ── */
+  @media (hover: hover) and (pointer: fine) {
+    .pay__item--cash:hover .pay-coin__face { animation: pay-flip 600ms var(--ease-out); }
+    .pay__item--card:hover .pay-card { animation: pay-tilt 650ms var(--ease-out); }
+    .pay__item--card:hover .pay-sheen { animation: pay-sheen 700ms var(--ease-out) 100ms both; }
+    .pay__item--invoice:hover .pay-col { animation: pay-pulse 600ms var(--ease-out) calc(var(--j) * 70ms); }
+    .pay__item--sbp:hover .pay-scan { animation: pay-scan 800ms var(--ease-out) both; }
+  }
+  @keyframes pay-flip  { 50% { scale: 0 1; } }
+  @keyframes pay-tilt  { 30% { rotate: -8deg; translate: 0 -0.125rem; } 65% { rotate: 4deg; } }
+  @keyframes pay-pulse { 45% { scale: 1 0.55; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pay [data-draw], .pay [data-pop], .pay-coin, .pay-col, .pay__label { transition: none; }
+    .pay .pay-sheen, .pay .pay-scan { animation: none; }
+    .pay .pay__item:hover :is(.pay-coin__face, .pay-card, .pay-col, .pay-sheen, .pay-scan) { animation: none; }
+  }
+</style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useScrollLock } from '../../lib/scroll-lock'
 
 const props = defineProps<{ images: string[] }>()
 
@@ -20,14 +21,17 @@ const next = () => {
 const mounted = ref(false)
 const lightboxOpen = ref(false)
 
+/* Прокрутка страницы под открытым окном — src/lib/scroll-lock.ts */
+const pageLock = useScrollLock()
+
 const openLightbox = (i?: number) => {
   if (i != null) current.value = i
   lightboxOpen.value = true
-  document.body.style.overflow = 'hidden'
+  pageLock.lock()
 }
 const closeLightbox = () => {
   lightboxOpen.value = false
-  document.body.style.overflow = ''
+  pageLock.unlock()
 }
 
 const onKey = (e: KeyboardEvent) => {
@@ -53,7 +57,6 @@ onMounted(() => {
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
-  document.body.style.overflow = ''
 })
 </script>
 
@@ -136,7 +139,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Лайтбокс — полноэкранный просмотр -->
-    <Teleport to="body">
+    <Teleport v-if="mounted" to="body">
       <Transition name="pf-lightbox-fade">
         <div
           v-if="mounted && lightboxOpen"

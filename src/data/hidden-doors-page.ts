@@ -8,7 +8,7 @@ import { SITE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { MEASURE_TERMS, INSTALL_TERMS, rub } from './services'
 import {
-  DOOR_HEIGHT, SECRET_SIZES, CUSTOM_LEAD_TIME, CUSTOM_MAX_HEIGHT, REFLEX_MAX_HEIGHT,
+  DOOR_HEIGHT, CUSTOM_LEAD_TIME, CUSTOM_MAX_HEIGHT, REFLEX_MAX_HEIGHT,
   SECRET_MIN_KIT_PRICE, SECRET_REVERS_MIN_KIT_PRICE, REFLEX_MIN_KIT_PRICE,
 } from './skrytye-dveri-products'
 
