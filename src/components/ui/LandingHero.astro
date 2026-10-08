@@ -17,8 +17,9 @@
  * страницы. Остальные кадры грузятся после загрузки страницы, чтобы не
  * делить канал с первым. Внизу кадра — пауза и сегменты: текущий
  * заполняется за время показа, по клику — переход к кадру. Показ стоит,
- * пока курсор или фокус на сцене, сцена вне экрана, вкладка скрыта или
- * нажата пауза; при reduced-motion — без автопоказа и без анимации смены.
+ * пока нажата пауза, фокус с клавиатуры внутри сцены, сцена вне экрана
+ * или вкладка скрыта; при reduced-motion — без автопоказа и без анимации
+ * смены.
  * На телефоне кадры листаются свайпом.
  *
  * Факт с `count` — счётчик: при загрузке цифра один раз досчитывает от
@@ -167,7 +168,7 @@ const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
     let remaining = interval
     let running = false
     let userPaused = still
-    let hovering = false
+    let keyboardFocus = false
     let onScreen = true
 
     // Сегменты: пройденные — заполнены, текущий — заполняется заново
@@ -232,7 +233,7 @@ const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
 
     // Показ идёт, только если ничто не мешает; при остановке запоминаем остаток
     const sync = () => {
-      const run = !userPaused && !hovering && onScreen && !document.hidden
+      const run = !userPaused && !keyboardFocus && onScreen && !document.hidden
       stage.classList.toggle('is-paused', !run)
       if (run === running) return
       running = run
@@ -248,6 +249,9 @@ const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
     segs.forEach((s, i) => s.addEventListener('click', () => go(i, i > cur ? 1 : -1)))
     pauseBtn.addEventListener('click', () => {
       userPaused = !userPaused
+      // После снятия паузы кадр показывается заново целиком — полоска
+      // сегмента тоже начинает с нуля
+      if (!userPaused) remaining = interval
       stage.classList.toggle('is-stopped', userPaused)
       pauseBtn.setAttribute('aria-label', userPaused ? 'Продолжить показ' : 'Остановить показ')
       sync()
@@ -255,13 +259,17 @@ const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
     stage.classList.toggle('is-stopped', userPaused)
     if (userPaused) pauseBtn.setAttribute('aria-label', 'Продолжить показ')
 
-    // Мышь над сценой или фокус внутри — пауза (успеть рассмотреть кадр)
-    stage.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') { hovering = true; sync() } })
-    stage.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') { hovering = false; sync() } })
-    stage.addEventListener('focusin', () => { hovering = true; sync() })
+    // Фокус с клавиатуры внутри сцены — пауза (кадр не уезжает из-под
+    // выбранного сегмента). Клик мышью и наведение показ не останавливают:
+    // курсор подолгу лежит на большом фото, а кнопка после клика остаётся
+    // в фокусе — слайдер бы молча вставал. Остановить показ — кнопкой паузы.
+    stage.addEventListener('focusin', (e) => {
+      keyboardFocus = (e.target as Element).matches(':focus-visible')
+      sync()
+    })
     stage.addEventListener('focusout', (e) => {
       if (stage.contains(e.relatedTarget as Node)) return
-      hovering = false
+      keyboardFocus = false
       sync()
     })
 
