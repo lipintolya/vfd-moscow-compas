@@ -16,7 +16,7 @@ const posts = (await getArticles()).slice(0, HOME_POSTS)
 ---
 
 {posts.length > 0 && (
-  <section class="h-sec" aria-labelledby="articles-heading">
+  <section class="h-sec h-sec--wall" aria-labelledby="articles-heading">
     <div class="container">
       <header class="h-head">
         <h2 id="articles-heading" class="h-h2">{typograph(ARTICLES_SECTION)}</h2>
