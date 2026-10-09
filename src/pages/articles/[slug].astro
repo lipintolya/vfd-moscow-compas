@@ -1,322 +1,461 @@
 ---
+/**
+ * Страница статьи — дизайн-система главной (home.css). Всё собирается из
+ * фронтматтера статьи (src/content.config.ts) и конфига: новая статья —
+ * только файл src/content/articles/<slug>.mdoc.
+ *
+ * Порядок: шапка (тип, дата, время чтения, H1, лид, автор) → обложка →
+ * «Коротко» (summary) → оглавление по H2 (на компьютере — закреплено
+ * слева) → текст → серии каталога по теме с ценами (relatedCoatings) →
+ * частые вопросы → автор → «Читайте также» → как добраться.
+ *
+ * Для поисковиков и ИИ-ассистентов: BlogPosting/NewsArticle с автором-
+ * человеком (основатель студии, E-E-A-T), датами, abstract из «Коротко»,
+ * числом слов и временем чтения; издатель — салон (LocalBusiness);
+ * FAQPage; хлебные крошки — компонентом Breadcrumbs. Заголовки разделов —
+ * вопросами, ответ — в первых строках раздела.
+ */
 import { getCollection, render } from 'astro:content'
-import { articleCoverImg } from '../../lib/article-images'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
+import VisitBand from '../../components/home/VisitBand.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
-import { SITE } from '../../config/site'
+import { articleCoverImg } from '../../lib/article-images'
+import {
+  getArticles, articleHref, formatArticleDate, readingMinutes, articleWordCount, ARTICLE_AUTHOR,
+} from '../../lib/articles'
+import { getCatalogCards, getSeriesList } from '../../lib/catalog-data'
+import { DOOR_CATEGORIES } from '../../data/door-categories'
 import { ARTICLES_SECTION, KIND_LABEL } from '../../data/article-kinds'
+import { SITE } from '../../config/site'
+import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../../lib/local-business-schema'
+import { typograph } from '../../lib/typograph'
+import { pluralRu } from '../../lib/plural'
+import '../../styles/home.css'
 
 export async function getStaticPaths() {
+  // Страницы есть и у заглушек (закрыты noindex) — адреса не пропадают
   const articles = await getCollection('articles')
-  return articles.map((article) => {
-    const slug = article.id
-    return { params: { slug }, props: { article, allArticles: articles } }
-  })
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article } }))
 }
 
-const { article, allArticles } = Astro.props
+const { article } = Astro.props
+const { data } = article
+const { Content, headings } = await render(article)
 
-/* Читайте также — 3 других материала, свежие сверху. Со временем статей
-   станет больше 4 — тогда есть смысл подбирать по теме, а не просто
-   «остальные», но пока их 6, ротации достаточно. */
-const relatedArticles = allArticles
-  .filter(a => a.id !== article.id)
-  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
-  .slice(0, 3)
-const { Content } = await render(article)
+const pageUrl = new URL(articleHref(article.id), SITE.url).href
+const abs = (path: string) => new URL(path, SITE.url).href
+const minutes = readingMinutes(article.body)
+const words = articleWordCount(article.body)
+const toc = headings.filter((h) => h.depth === 2)
+const summary = data.summary ?? []
+const faq = data.faq ?? []
+const cover = data.coverImage ? articleCoverImg(data.coverImage, 'hero') : undefined
+const COVER_SIZES = '(min-width: 80rem) 76rem, 100vw'
 
-const slug = article.id
-const canonicalUrl = `${SITE.url}/articles/${slug}/`
+/* Серии каталога по теме — из живого каталога: цены и состав серий
+   совпадают с /catalog/ и обновляются при каждой сборке */
+const coatings = data.relatedCoatings ?? []
+const catalog = coatings.length
+  ? getSeriesList((await getCatalogCards()).cards)
+      .filter((s) => coatings.includes(s.coatingSlug))
+      .sort((a, b) => (a.minPrice ?? Infinity) - (b.minPrice ?? Infinity))
+  : []
+const catalogLandings = coatings
+  .map((slug) => ({ slug, landing: DOOR_CATEGORIES.find((c) => c.coatingSlug === slug) }))
+  .filter((x) => x.landing)
+  .map(({ slug, landing }) => ({
+    href: `/catalog/${landing!.slug}/`,
+    label: `Все двери с покрытием ${(catalog.find((s) => s.coatingSlug === slug)?.coatingName ?? landing!.eyebrow).toLowerCase()}`,
+  }))
+const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 
-const blogPostingSchema = {
-  '@context': 'https://schema.org',
-  // Публикация (новость салона/фабрики) — NewsArticle, статья — BlogPosting
-  '@type': article.data.kind === 'publication' ? 'NewsArticle' : 'BlogPosting',
-  headline: article.data.title,
-  description: article.data.description,
-  ...(article.data.coverImage ? { image: new URL(article.data.coverImage, Astro.site).href } : {}),
-  datePublished: article.data.publishDate.toISOString(),
-  /* dateModified обязателен для валидного BlogPosting (Google Rich Results) —
-     если updatedDate не задан во фронтматтере статьи, честно берём дату
-     публикации (не выдумываем более свежую). */
-  dateModified: (article.data.updatedDate ?? article.data.publishDate).toISOString(),
-  author: {
-    '@type': 'Organization',
-    name: 'ВФД — Салон дверей в Москве',
-    url: SITE.url,
+/* Читайте также — другие опубликованные, свежие сверху */
+const related = (await getArticles()).filter((a) => a.id !== article.id).slice(0, 3)
+
+const structuredData = [
+  localBusinessSchema({ url: SITE.url }),
+  {
+    '@context': 'https://schema.org',
+    // Публикация (новость салона/фабрики) — NewsArticle, статья — BlogPosting
+    '@type': data.kind === 'publication' ? 'NewsArticle' : 'BlogPosting',
+    '@id': `${pageUrl}#article`,
+    headline: data.title,
+    description: data.description,
+    ...(summary.length ? { abstract: summary.join(' ') } : {}),
+    ...(data.coverImage ? { image: [abs(data.coverImage)] } : {}),
+    datePublished: data.publishDate.toISOString(),
+    dateModified: (data.updatedDate ?? data.publishDate).toISOString(),
+    inLanguage: 'ru-RU',
+    wordCount: words,
+    timeRequired: `PT${minutes}M`,
+    articleSection: ARTICLES_SECTION,
+    ...(data.keywords?.length ? { keywords: data.keywords.join(', ') } : {}),
+    author: {
+      '@type': 'Person',
+      name: ARTICLE_AUTHOR.name,
+      jobTitle: ARTICLE_AUTHOR.role,
+      image: ARTICLE_AUTHOR.photo,
+      url: abs(ARTICLE_AUTHOR.href),
+      worksFor: { '@id': LOCAL_BUSINESS_ID },
+    },
+    publisher: { '@id': LOCAL_BUSINESS_ID },
+    isPartOf: { '@type': 'Blog', name: ARTICLES_SECTION, url: abs('/articles/') },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
+    // Что зачитывать голосовым ассистентам — заголовок и «Коротко»
+    speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.post-head__title', '.post-summary'] },
   },
-  publisher: {
-    '@type': 'Organization',
-    name: 'ВФД — Салон дверей в Москве',
-    /* PNG, не SVG — Google Rich Results Test помечает SVG в publisher.logo
-       как невалидный формат, только растр. */
-    logo: { '@type': 'ImageObject', url: `${SITE.url}/logo-schema.png`, width: 512, height: 512 },
-  },
-  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
-}
+  ...(faq.length ? [{
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  }] : []),
+]
 
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
-    { '@type': 'ListItem', position: 2, name: ARTICLES_SECTION, item: `${SITE.url}/articles/` },
-    { '@type': 'ListItem', position: 3, name: article.data.title, item: canonicalUrl },
-  ],
-}
-
-const faq = article.data.faq ?? []
-const faqSchema = faq.length > 0 ? {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: faq.map((f) => ({
-    '@type': 'Question',
-    name: f.q,
-    acceptedAnswer: { '@type': 'Answer', text: f.a },
-  })),
-} : null
-
-const structuredData = [blogPostingSchema, breadcrumbSchema, ...(faqSchema ? [faqSchema] : [])]
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: ARTICLES_SECTION, href: '/articles/' },
+  { label: data.title },
+]
+const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 ---
 
 <BaseLayout
-  title={`${article.data.title} — ВФД Москва`}
-  description={article.data.description}
+  title={data.metaTitle ?? `${data.title} | ${SITE.name} ${SITE.city.in}`}
+  description={data.description}
+  canonical={pageUrl}
   structuredData={structuredData}
   ogType="article"
-  noIndex={article.data.placeholder === true}
-  publishedTime={article.data.publishDate.toISOString()}
-  ogImage={article.data.coverImage ? new URL(article.data.coverImage, Astro.site).href : undefined}
+  noIndex={data.placeholder === true}
+  publishedTime={data.publishDate.toISOString()}
+  ogImage={data.coverImage ? abs(data.coverImage) : undefined}
+  preloadImage={cover?.src}
+  preloadImageSrcset={cover?.srcset}
+  preloadImageSizes={cover ? COVER_SIZES : undefined}
 >
-  <article>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
 
-    <!-- Контент во всю ширину контейнера -->
-    <div class="section">
-      <div class="container">
+  <div class="home">
+    <article class="post">
+      <header class="container post-head">
+        <p class="h-meta post-head__meta">
+          <span class="post-head__kind">{KIND_LABEL[data.kind]}</span>
+          <time datetime={data.publishDate.toISOString()}>{formatArticleDate(data.publishDate)}</time>
+          {data.updatedDate && (
+            <span>обновлено <time datetime={data.updatedDate.toISOString()}>{formatArticleDate(data.updatedDate)}</time></span>
+          )}
+          <span>{minutes}&nbsp;мин чтения</span>
+        </p>
+        <h1 class="post-head__title">{typograph(data.title)}</h1>
+        <p class="h-lead post-head__lead">{typograph(data.description)}</p>
+        <a href={ARTICLE_AUTHOR.href} class="post-author" rel="author">
+          <img src={ARTICLE_AUTHOR.photo} alt="" width="640" height="640" loading="lazy" decoding="async" />
+          <span><span class="post-author__name">{ARTICLE_AUTHOR.name}</span>, {ARTICLE_AUTHOR.role}</span>
+        </a>
+      </header>
 
-        <!-- Breadcrumb -->
-        <nav aria-label="Хлебные крошки" class="mb-6">
-          <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
-            <li><a href="/" class="hover:text-secondary-600 transition-colors">Главная</a></li>
-            <li aria-hidden="true" class="text-slate-300">/</li>
-            <li><a href="/articles/" class="hover:text-secondary-600 transition-colors">{ARTICLES_SECTION}</a></li>
-            <li aria-hidden="true" class="text-slate-300">/</li>
-            <li class="font-medium text-slate-700 truncate max-w-52">{article.data.title}</li>
-          </ol>
-        </nav>
-
-        <!-- Cover — 16:9, рассчитан на 1920×1080 -->
-        <div class="relative aspect-21/9 w-full overflow-hidden rounded-2xl bg-slate-100 mb-10">
-          {article.data.coverImage ? (
+      {cover && (
+        <div class="container">
+          <figure class="h-media post-cover">
             <img
-              {...articleCoverImg(article.data.coverImage, 'hero')}
-              sizes="(min-width: 1280px) 1216px, 100vw"
-              alt={article.data.coverImageAlt ?? article.data.title}
+              src={cover.src}
+              srcset={cover.srcset}
+              sizes={COVER_SIZES}
+              alt={data.coverImageAlt ?? data.title}
+              width="1600"
+              height="900"
               loading="eager"
               fetchpriority="high"
               decoding="async"
-              class="w-full h-full object-cover"
             />
-          ) : (
-            <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-linear-to-br from-slate-100 to-slate-200">
-              <svg class="w-14 h-14 text-slate-300" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.5"/>
-                <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-                <path d="M21 15l-5-5L5 21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span class="text-sm font-medium text-slate-400">Обложка скоро появится</span>
-            </div>
-          )}
+          </figure>
+        </div>
+      )}
+
+      <div class="container post-layout">
+        {summary.length > 0 && (
+          <section class="post-summary" aria-labelledby="post-summary-title">
+            <h2 id="post-summary-title" class="post-summary__title">Коротко</h2>
+            <ul role="list">
+              {summary.map((s) => <li>{typograph(s)}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {toc.length >= 3 && (
+          <nav class="post-toc" aria-labelledby="post-toc-title">
+            <p id="post-toc-title" class="h-meta post-toc__title">Содержание</p>
+            <ol role="list">
+              {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+            </ol>
+          </nav>
+        )}
+
+        <div class="post-body">
+          <Content />
         </div>
 
-          <!-- Header -->
-          <header class="mb-10">
-            <p class="mb-4 flex flex-wrap gap-x-3 text-sm tabular-nums">
-              <span class="font-semibold text-slate-700">{KIND_LABEL[article.data.kind]}</span>
-              <time datetime={article.data.publishDate.toISOString()} class="text-slate-400">
-                {article.data.publishDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
-              </time>
-            </p>
-            <h1 class="text-3xl font-medium leading-tight tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
-              {article.data.title}
-            </h1>
-            <p class="mt-4 text-base leading-relaxed text-slate-500 sm:text-lg">
-              {article.data.description}
-            </p>
-          </header>
+        {catalog.length > 0 && (
+          <section class="post-block post-catalog" aria-labelledby="post-catalog-title">
+            <h2 id="post-catalog-title" class="post-block__title">В каталоге</h2>
+            <p class="h-body post-block__lead">Цены «от» — за дверное полотно, из каталога: обновляются вместе с ним.</p>
+            <ul class="post-catalog__list" role="list">
+              {catalog.map((s) => (
+                <li>
+                  <a href={`/catalog/series/${s.slug}/`} class="post-catalog__row">
+                    <span class="post-catalog__name">{s.name}</span>
+                    <span class="h-meta post-catalog__count">{s.modelCount}&nbsp;{pluralRu(s.modelCount, ['модель', 'модели', 'моделей'])}</span>
+                    {s.minPrice != null && <span class="h-price post-catalog__price">от&nbsp;{rub(s.minPrice)}</span>}
+                    <span class="post-catalog__go" aria-hidden="true"><Fragment set:html={arrow} /></span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {catalogLandings.map((l) => (
+              <a href={l.href} class="h-btn h-btn--ink post-catalog__all">{l.label}</a>
+            ))}
+          </section>
+        )}
 
-          <!-- Body -->
-          <div class="article-body">
-            <Content />
+        {faq.length > 0 && (
+          <section class="post-block" aria-labelledby="post-faq-title">
+            <h2 id="post-faq-title" class="post-block__title">Частые вопросы</h2>
+            <FaqAccordion items={faq} title={false} />
+          </section>
+        )}
+
+        <aside class="post-block post-byline" aria-label="Автор статьи">
+          <img src={ARTICLE_AUTHOR.photo} alt={ARTICLE_AUTHOR.name} width="640" height="640" loading="lazy" decoding="async" />
+          <div>
+            <p class="post-byline__name">{ARTICLE_AUTHOR.name}</p>
+            <p class="h-meta post-byline__role">{typograph(`${ARTICLE_AUTHOR.role[0]!.toUpperCase()}${ARTICLE_AUTHOR.role.slice(1)}. ${SITE.experience}.`)}</p>
+            <a href={ARTICLE_AUTHOR.href} class="h-link post-byline__more">О студии и основателе</a>
           </div>
-
-          <!-- FAQ (SEO — FAQPage schema + аккордеон) -->
-          {faq.length > 0 && (
-            <section class="article-faq" aria-label="Частые вопросы">
-              <FaqAccordion items={faq} />
-            </section>
-          )}
-
-          <!-- Читайте также — перелинковка между статьями -->
-          {relatedArticles.length > 0 && (
-            <section class="article-related mt-14 border-t border-slate-200 pt-10" aria-label="Читайте также">
-              <h2 class="mb-6 text-xl font-medium tracking-tight text-slate-900">Читайте также</h2>
-              <ul class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" role="list">
-                {relatedArticles.map((related) => (
-                  <li>
-                    <ArticleCard
-                      href={`/articles/${related.id}/`}
-                      title={related.data.title}
-                      description={related.data.description}
-                      publishDate={related.data.publishDate}
-                      kind={related.data.kind}
-                      coverImage={related.data.coverImage}
-                      coverImageAlt={related.data.coverImageAlt}
-                      loading="lazy"
-                    />
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          <!-- Back link -->
-          <div class="mt-10 pt-2">
-            <a
-              href="/articles/"
-              class="inline-flex items-center gap-2 text-sm font-semibold text-secondary-700 hover:text-secondary-600 transition-colors"
-            >
-              <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">
-                <path d="M13 8H3M7 4l-4 4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Все материалы
-            </a>
-          </div>
-
+        </aside>
       </div>
-    </div>
+    </article>
 
-  </article>
+    {related.length > 0 && (
+      <section class="h-sec h-sec--wall" aria-labelledby="post-related-title">
+        <div class="container">
+          <header class="h-head">
+            <h2 id="post-related-title" class="h-h2">Читайте также</h2>
+            <a href="/articles/" class="h-pill h-pill--line">Все материалы</a>
+          </header>
+          <ul class="post-related h-rail" role="list">
+            {related.map((a) => <li><ArticleCard article={a} /></li>)}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    <VisitBand />
+  </div>
 </BaseLayout>
 
 <style>
-  /* Ширина .container растёт на широких мониторах (см. global.css) — для
-     карточек и сеток это благо, а для сплошного текста лишний простор
-     только вредит чтению. Держим колонку на прежней ширине независимо от
-     контейнера. */
-  .article-body {
-    max-width: 80rem;
-    margin-inline: auto;
+  /* ── Шапка ── */
+  .post-head { padding-block: clamp(1rem, 2vw, 1.5rem) clamp(1.75rem, 3vw, 2.5rem); }
+  .post-head__meta { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; color: var(--h-muted); }
+  .post-head__kind { font-weight: 600; color: var(--h-ink); }
+  .post-head__title {
+    margin: 1rem 0 0;
+    max-width: 22ch;
+    font-family: var(--h-font);
+    font-size: clamp(2.125rem, 4.6vw, 3.75rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    color: var(--h-ink);
+    text-wrap: balance;
   }
-  .article-body :global(h2) {
-    font-size: clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
-    font-weight: 500;
-    color: var(--color-ink);
-    margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
-    margin-bottom: 1rem;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
-  .article-body :global(h3) {
-    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
-    font-weight: 600;
-    color: var(--color-ink);
-    margin-top: 2rem;
-    margin-bottom: 0.75rem;
-    line-height: 1.35;
-  }
-  .article-body :global(p) {
-    color: var(--color-body);
-    line-height: 1.8;
-    margin-bottom: 1.25rem;
-    font-size: clamp(1rem, 0.95rem + 0.35vw, 1.1875rem);
-  }
-  .article-body :global(ul),
-  .article-body :global(ol) {
-    padding-left: 1.5rem;
-    margin-bottom: 1.25rem;
-    color: var(--color-body);
-    line-height: 1.8;
-  }
-  .article-body :global(ul) { list-style-type: disc; }
-  .article-body :global(ol) { list-style-type: decimal; }
-  .article-body :global(li) { margin-bottom: 0.35rem; }
-  .article-body :global(strong) {
-    font-weight: 600;
-    color: var(--color-ink);
-  }
-  .article-body :global(a) {
-    color: var(--color-link);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .article-body :global(a:hover) {
-    color: var(--color-link-hover);
-  }
-  .article-body :global(blockquote) {
-    border-left: 3px solid var(--color-accent);
-    padding: 0.75rem 1.25rem;
-    background: var(--color-accent-light);
-    border-radius: 0 0.5rem 0.5rem 0;
-    font-style: normal;
-    color: var(--color-body);
-    margin: 1.5rem 0;
-  }
-  .article-body :global(blockquote p) {
-    margin-bottom: 0;
-  }
-  /* ── Премиум-таблицы во всю ширину ── */
-  .article-body :global(table) {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin: 2rem 0;
+  .post-head__lead { margin-top: 1.25rem; max-width: 40rem; }
+  .post-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
     font-size: 0.9375rem;
-    border: 1px solid var(--color-slate-200);
-    border-radius: 1rem;
-    overflow: hidden;
+    color: var(--h-soft);
+    text-decoration: none;
   }
-  .article-body :global(thead th) {
-    background: var(--color-slate-900);
-    color: #fff;
-    font-weight: 600;
-    padding: 0.9rem 1.15rem;
-    text-align: left;
-    white-space: nowrap;
-    letter-spacing: -0.01em;
-  }
-  .article-body :global(tbody td) {
-    padding: 0.85rem 1.15rem;
-    text-align: left;
-    vertical-align: top;
-    border-top: 1px solid var(--color-slate-100);
-    color: var(--color-body);
-  }
-  .article-body :global(tbody tr:nth-child(even)) { background: var(--color-slate-50); }
-  .article-body :global(tbody td:first-child) {
-    font-weight: 600;
-    color: var(--color-ink);
-  }
-  .article-body :global(tbody tr:hover) { background: var(--color-accent-50); }
-  @media (max-width: 640px) {
-    .article-body :global(table) {
-      display: block;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
+  .post-author img { width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover; background: var(--h-media-bg); }
+  .post-author__name { font-weight: 600; color: var(--h-ink); }
+  .post-author:hover .post-author__name { text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.2em; }
+
+  /* ── Обложка ── */
+  .post-cover { margin: 0; aspect-ratio: 21 / 9; border-radius: 1.75rem; }
+  @media (max-width: 47.9375rem) { .post-cover { aspect-ratio: 4 / 3; border-radius: 1.25rem; } }
+
+  /* ── Раскладка: на компьютере оглавление слева (закреплено), всё
+     остальное — колонкой чтения; на телефоне — по порядку разметки.
+     Расстояния — отступами, не row-gap: оглавление растянуто на
+     несколько строк сетки, и пустые строки не должны добавлять зазоров ── */
+  .post-layout { display: grid; padding-block: clamp(2rem, 4vw, 3.5rem) var(--h-sec); }
+  .post-layout > * + * { margin-top: clamp(2rem, 4vw, 3rem); }
+  @media (min-width: 62.5rem) {
+    .post-layout { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--h-gutter); }
+    .post-layout > * { grid-column: 4 / span 7; }
+    .post-layout > .post-toc {
+      grid-column: 1 / span 2;
+      grid-row: 1 / span 12;
+      align-self: start;
+      position: sticky;
+      top: calc(var(--header-height) + 1.5rem);
+      margin-top: 0;
     }
+    /* Оглавление первым (нет «Коротко») — текст рядом с ним, без отступа */
+    .post-layout > .post-toc:first-child + * { margin-top: 0; }
   }
 
-  /* Изображения внутри статьи */
-  .article-body :global(img) {
-    width: 100%;
-    border-radius: 0.75rem;
-    margin: 1.5rem 0;
+  /* «Коротко» — серая плитка с ответами по пунктам */
+  .post-summary {
+    padding: clamp(1.25rem, 2.4vw, 1.75rem) clamp(1.25rem, 2.6vw, 2rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
+  }
+  .post-summary__title { margin: 0 0 0.75rem; font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; color: var(--h-ink); }
+  .post-summary ul { display: grid; gap: 0.625rem; margin: 0; padding: 0; list-style: none; }
+  .post-summary li { position: relative; padding-left: 1.25rem; font-size: 1rem; line-height: 1.55; color: var(--color-body); }
+  .post-summary li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.5rem;
+    height: 0.125rem;
+    border-radius: 0.125rem;
+    background: var(--h-signal);
   }
 
-  /* ── FAQ ── */
-  .article-faq { max-width: 80rem; margin-inline: auto; margin-top: 3rem; }
+  /* Оглавление — список под линейками */
+  .post-toc__title { margin: 0 0 0.5rem; color: var(--h-muted); }
+  .post-toc ol { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .post-toc li { border-bottom: 0.0625rem solid var(--h-rule); }
+  .post-toc a {
+    display: block;
+    padding-block: 0.625rem;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    color: var(--h-soft);
+    text-decoration: none;
+    transition: color 180ms var(--ease-out);
+  }
+  .post-toc a:hover { color: var(--h-signal); }
 
-  /* ── Читайте также ── */
-  .article-related { max-width: 80rem; margin-inline: auto; }
+  /* ── Текст статьи (Markdoc) ── */
+  .post-body { min-width: 0; }
+  .post-body :global(h2) {
+    margin: clamp(2.5rem, 4vw, 3.25rem) 0 1rem;
+    font-family: var(--h-font);
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--h-ink);
+    text-wrap: balance;
+    scroll-margin-top: calc(var(--header-height) + 1.5rem);
+  }
+  .post-body > :global(:first-child) { margin-top: 0; }
+  .post-body :global(h3) { margin: 2rem 0 0.75rem; font-size: 1.3125rem; font-weight: 600; line-height: 1.3; color: var(--h-ink); }
+  .post-body :global(p) {
+    margin: 0 0 1.125rem;
+    font-size: clamp(1.0625rem, 1.3vw, 1.1875rem);
+    line-height: 1.7;
+    color: var(--color-body);
+    text-wrap: pretty;
+  }
+  .post-body :global(:is(ul, ol)) { margin: 0 0 1.25rem; padding-left: 1.25rem; color: var(--color-body); }
+  .post-body :global(ul) { list-style: disc; }
+  .post-body :global(ol) { list-style: decimal; }
+  .post-body :global(li) { margin-bottom: 0.625rem; padding-left: 0.25rem; font-size: clamp(1.0625rem, 1.3vw, 1.1875rem); line-height: 1.65; }
+  .post-body :global(li::marker) { color: var(--h-muted); }
+  .post-body :global(strong) { font-weight: 600; color: var(--h-ink); }
+  .post-body :global(a:not([class])) {
+    color: var(--h-ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--color-slate-300);
+    text-decoration-thickness: 0.0625rem;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 180ms var(--ease-out);
+  }
+  .post-body :global(a:not([class]):hover) { text-decoration-color: var(--h-signal); }
+  .post-body :global(blockquote) {
+    margin: 2rem 0;
+    padding-left: 1.25rem;
+    border-left: 0.1875rem solid var(--h-ink);
+  }
+  .post-body :global(blockquote p) { font-size: clamp(1.1875rem, 1.6vw, 1.375rem); line-height: 1.5; color: var(--h-ink); }
+  /* Таблицы — данные под линейками, без заливок */
+  .post-body :global(table) { width: 100%; margin: 2rem 0; border-collapse: collapse; font-size: 0.9375rem; }
+  .post-body :global(th) { padding: 0.75rem 1rem 0.75rem 0; border-bottom: 0.0625rem solid var(--h-ink); font-weight: 600; text-align: left; color: var(--h-ink); }
+  .post-body :global(td) { padding: 0.75rem 1rem 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); vertical-align: top; color: var(--color-body); font-variant-numeric: tabular-nums; }
+  @media (max-width: 43.6875rem) { .post-body :global(table) { display: block; overflow-x: auto; } }
+  .post-body :global(p > img) { display: block; width: 100%; margin: 1.5rem 0; border-radius: var(--h-radius); }
+
+  /* ── Блоки после текста ── */
+  .post-block__title {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--h-ink);
+  }
+  .post-block__lead { margin-top: 0.5rem; font-size: 0.9375rem; }
+  .post-block > :global(.faq-list) { margin-top: 1rem; }
+
+  /* В каталоге — серии строками под линейками */
+  .post-catalog__list { margin: 1.25rem 0 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .post-catalog__list li { border-bottom: 0.0625rem solid var(--h-rule); }
+  .post-catalog__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto 2.25rem;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 0.875rem;
+    color: var(--h-ink);
+    text-decoration: none;
+  }
+  .post-catalog__name { font-size: 1.0625rem; font-weight: 600; }
+  .post-catalog__count { color: var(--h-muted); }
+  .post-catalog__go { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; color: var(--h-muted); transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out); }
+  .post-catalog__row:hover .post-catalog__name { color: var(--h-signal); }
+  .post-catalog__row:hover .post-catalog__go { background: var(--h-signal); color: var(--color-white); }
+  @media (max-width: 29.9375rem) {
+    .post-catalog__row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 0.125rem; }
+    .post-catalog__count { grid-row: 2; }
+    .post-catalog__go { display: none; }
+  }
+  .post-catalog__all { margin-top: 1.5rem; }
+
+  /* Автор — под линейкой, как подпись */
+  .post-byline {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding-top: 1.5rem;
+    border-top: 0.0625rem solid var(--h-rule);
+  }
+  .post-byline img { flex: none; width: 4.5rem; height: 4.5rem; border-radius: 50%; object-fit: cover; background: var(--h-media-bg); }
+  .post-byline p { margin: 0; }
+  .post-byline__name { font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
+  .post-byline__role { margin-top: 0.25rem; color: var(--h-soft); }
+  .post-byline__more { display: inline-block; margin-top: 0.5rem; font-size: 0.875rem; }
+
+  /* Читайте также */
+  .post-related { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .post-related { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .post-related { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-toc a, .post-catalog__go, .post-body :global(a) { transition: none; }
+  }
 </style>

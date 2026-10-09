@@ -18,19 +18,15 @@ const { cols = 3 } = Astro.props
 </div>
 
 <style>
+/* Ряд целиком и на телефоне: 2–3 квадрата в строку (по одному во всю
+   ширину — лишний экран прокрутки), зазор — уже */
 .dphotogrid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 0.625rem;
   margin: 1.75rem 0;
 }
-@media (min-width: 480px) {
-  .dphotogrid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (min-width: 640px) {
-  .dphotogrid {
-    grid-template-columns: repeat(var(--cols), 1fr);
-    gap: 1.25rem;
-  }
+@media (min-width: 40rem) {
+  .dphotogrid { gap: var(--h-tile-gap, 1rem); }
 }
 </style>

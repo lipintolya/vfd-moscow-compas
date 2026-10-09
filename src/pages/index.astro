@@ -14,6 +14,7 @@ import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import Promo from '../components/home/Promo.vue'
 import OurWorks from '../components/home/OurWorks.astro'
+import LatestArticles from '../components/home/LatestArticles.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import { faqs } from '../components/home/faq-data'
 import { howToSchema } from '../data/how-it-works'
@@ -63,6 +64,7 @@ const localBusinessSchema = buildLocalBusiness()
     <VisitBand />
     <Promo client:idle />
     <OurWorks />
+    <LatestArticles />
 
     <section class="h-sec h-sec--tight-top" aria-label="Частые вопросы">
       <div class="container">

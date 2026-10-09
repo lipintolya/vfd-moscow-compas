@@ -1,6 +1,21 @@
 import { defineMarkdocConfig, component } from '@astrojs/markdoc/config'
+import { SITE, PHONE } from './src/config/site'
+import { companyLegalInfo } from './src/lib/contacts-data'
 
 export default defineMarkdocConfig({
+  /* Данные салона в тексте статьи — из конфига, а не вписанные руками:
+     {% $salon.address %}, {% $salon.hours %}, {% $salon.phone %} … */
+  variables: {
+    salon: {
+      name:    SITE.studioName,
+      brand:   SITE.name,
+      city:    SITE.city.in,
+      mall:    SITE.address.mall,
+      address: SITE.address.full,
+      hours:   companyLegalInfo.workingHours.shortDisplay,
+      phone:   PHONE.label,
+    },
+  },
   tags: {
     // Фото с подписью
     // Использование: {% figure src="https://..." alt="..." caption="Подпись" /%}
@@ -17,6 +32,8 @@ export default defineMarkdocConfig({
         wide:    { type: Boolean, default: false },
         // Схемы/чертежи: без кропа 21:9, компактно по центру колонки
         narrow:  { type: Boolean, default: false },
+        // Без кропа 21:9 во всю ширину колонки — палитры, таблицы-картинки
+        natural: { type: Boolean, default: false },
       },
     },
 

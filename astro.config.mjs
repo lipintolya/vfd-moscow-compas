@@ -1,5 +1,5 @@
 // @ts-check
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { defineConfig } from 'astro/config';
 import sitemap, { ChangeFreqEnum } from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
@@ -122,6 +122,35 @@ const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/catalog/skrytye-dveri/rabot
 
 const modelImages = await fetchModelImages()
 
+/* Статьи для sitemap — прямо из файлов src/content/articles/*.mdoc
+   (конфиг не видит коллекции Astro): заглушки (placeholder: true) не
+   попадают в карту, у остальных lastmod — updatedDate или publishDate.
+   Раздел /articles/ — в карте, только если есть хоть одна статья. */
+function readArticles() {
+  const dir = new URL('./src/content/articles/', import.meta.url)
+  return readdirSync(dir)
+    .filter((f) => f.endsWith('.mdoc'))
+    .map((f) => {
+      const front = readFileSync(new URL(f, dir), 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? ''
+      /** @param {string} name */
+      const field = (name) => front.match(new RegExp(`^${name}:\\s*['"]?([^'"\\n]+)`, 'm'))?.[1]?.trim()
+      return {
+        slug: f.replace(/\.mdoc$/, ''),
+        placeholder: field('placeholder') === 'true',
+        lastmod: field('updatedDate') ?? field('publishDate'),
+      }
+    })
+}
+const ARTICLES = readArticles()
+const ARTICLE_LASTMOD = new Map(ARTICLES.filter((a) => !a.placeholder).map((a) => [a.slug, a.lastmod]))
+const HAS_ARTICLES = ARTICLE_LASTMOD.size > 0
+/** @param {string} page */
+function isArticleInSitemap(page) {
+  const m = page.match(/\/articles(?:\/([a-z0-9-]+))?\/?$/)
+  if (!m) return true
+  return m[1] ? ARTICLE_LASTMOD.has(m[1]) : HAS_ARTICLES
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: SITE_URL,
@@ -145,9 +174,9 @@ export default defineConfig({
         // проиндексированные ссылки), но в сайтмап должен попадать только
         // канонический слаг-адрес — иначе сайтмап задвоит каждую модель.
         !/\/models\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/.test(page) &&
-        // Блог — пока заглушки (placeholder: true в src/content/articles),
-        // страницы закрыты noindex; вернуть в сайтмап вместе с настоящими статьями.
-        !/\/articles(\/|$)/.test(page),
+        // Статьи: заглушки (закрыты noindex) — не в карте; раздел — только
+        // если есть опубликованные (см. readArticles выше)
+        isArticleInSitemap(page),
       serialize(item) {
         const u = item.url
 
@@ -186,6 +215,11 @@ export default defineConfig({
         }
         if (/\/articles\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.7 }
+        }
+        const articleMatch = u.match(/\/articles\/([a-z0-9-]+)\/?$/)
+        if (articleMatch) {
+          const lastmod = ARTICLE_LASTMOD.get(articleMatch[1])
+          return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.7, ...(lastmod ? { lastmod: new Date(lastmod).toISOString() } : {}) }
         }
         if (/\/portfolio\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }

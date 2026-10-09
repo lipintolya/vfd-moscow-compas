@@ -5,10 +5,20 @@ export interface ImageVariant { src: string; w: number }
 
 /** Обложки: card — 16:9 для карточек, hero — для шапки статьи. */
 export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero: ImageVariant[] }> = {
-
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/winter.webp': {
+    card: [{ src: '/renders/articles/covers/dveri-s-emalyu-plyusy-i-minusy-card-480.webp', w: 480 }, { src: '/renders/articles/covers/dveri-s-emalyu-plyusy-i-minusy-card-800.webp', w: 800 }],
+    hero: [{ src: '/renders/articles/covers/dveri-s-emalyu-plyusy-i-minusy-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/dveri-s-emalyu-plyusy-i-minusy-hero-1600.webp', w: 1600 }],
+  },
 }
 
 /** Фото из текста статей ({% figure %}, {% photo %}, {% card %}). */
 export const ARTICLE_IMAGE_VARIANTS: Record<string, ImageVariant[]> = {
-
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/premium.webp':
+    [{ src: '/renders/articles/images/premium-e5262d-640.webp', w: 640 }, { src: '/renders/articles/images/premium-e5262d-960.webp', w: 960 }],
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/skinel.webp':
+    [{ src: '/renders/articles/images/skinel-9bede6-640.webp', w: 640 }, { src: '/renders/articles/images/skinel-9bede6-960.webp', w: 960 }],
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/stockholm.webp':
+    [{ src: '/renders/articles/images/stockholm-943aa8-640.webp', w: 640 }, { src: '/renders/articles/images/stockholm-943aa8-960.webp', w: 960 }],
+  'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp':
+    [{ src: '/renders/articles/images/emal_covers-8e8cff-640.webp', w: 640 }, { src: '/renders/articles/images/emal_covers-8e8cff-960.webp', w: 960 }, { src: '/renders/articles/images/emal_covers-8e8cff-1280.webp', w: 1280 }, { src: '/renders/articles/images/emal_covers-8e8cff-1600.webp', w: 1600 }],
 }

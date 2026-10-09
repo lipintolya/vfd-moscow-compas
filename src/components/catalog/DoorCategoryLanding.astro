@@ -8,7 +8,7 @@
  * что на /catalog/?coating=...). Описание покрытия (tagline/benefits/closing)
  * берётся напрямую из coatingGroupCopy — единый источник с /catalog.
  */
-import { getCollection } from 'astro:content'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../ui/Breadcrumbs.astro'
 import SeriesCard from './SeriesCard.astro'
@@ -41,11 +41,12 @@ const minPrice = prices.length ? Math.min(...prices) : null
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
 /* Статья по теме — та же перелинковка каталог → блог, что на моделях
-   (models/[id].astro): ищем статью, чей relatedSeriesSlugs пересекается
-   с сериями этого покрытия. */
-const landingSeriesSlugs = new Set(seriesCardsData.map(s => s.slug))
-const allArticles = await getCollection('articles')
-const relatedArticle = allArticles.find(a => a.data.relatedSeriesSlugs?.some(s => landingSeriesSlugs.has(s)))
+   (models/[id].astro): самая свежая опубликованная статья о сериях или
+   покрытии этого лендинга (relatedSeriesSlugs / relatedCoatings). */
+const relatedArticle = await relatedArticleFor({
+  seriesSlugs: seriesCardsData.map(s => s.slug),
+  coatingSlugs: [category.coatingSlug],
+})
 
 /* Фильтры для CatalogClient — те же опции, что на /catalog/, лендинг
    только меняет стартовое состояние (initialCoating) и контент вокруг. */

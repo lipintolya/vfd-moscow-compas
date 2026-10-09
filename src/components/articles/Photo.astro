@@ -18,39 +18,34 @@ const Tag = href ? 'a' : 'div'
 ---
 
 <figure class="dphoto">
-  <Tag class="dphoto__frame" {...(href ? { href } : {})}>
-    <img {...articleImg(src)} sizes="(min-width: 640px) 50vw, 100vw" alt={alt} loading="lazy" decoding="async" />
+  <Tag class:list={['dphoto__link', { 'is-link': href }]} {...(href ? { href } : {})}>
+    <span class="dphoto__frame">
+      <img {...articleImg(src)} sizes="(min-width: 40rem) 33vw, 50vw" alt={alt} loading="lazy" decoding="async" />
+    </span>
+    {caption && <figcaption class="dphoto__caption">{caption}</figcaption>}
   </Tag>
-  {caption && <figcaption class="dphoto__caption">{caption}</figcaption>}
 </figure>
 
 <style>
-.dphoto {
-  margin: 0;
-}
+/* Дизайн-система: подложка как у .h-media, скругление --h-radius; подпись
+   слева. Плитка-ссылка — подпись становится названием, при наведении —
+   красное подчёркивание (как у карточек главной) */
+.dphoto { margin: 0; }
+.dphoto .dphoto__link { display: block; color: inherit; text-decoration: none; }
 .dphoto__frame {
   display: block;
   aspect-ratio: 1 / 1;
-  border-radius: 0.75rem;
+  border-radius: var(--h-radius);
   overflow: hidden;
-  background: var(--color-slate-50);
+  background: var(--h-media-bg);
 }
-a.dphoto__frame {
-  transition: opacity 200ms ease;
-}
-a.dphoto__frame:hover {
-  opacity: 0.88;
-}
-.dphoto__frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.dphoto__caption {
-  margin: 0.5rem 0 0;
-  text-align: center;
-  font-size: 0.8125rem;
-  color: var(--color-slate-400);
+.dphoto__frame img { display: block; width: 100%; height: 100%; margin: 0; border-radius: 0; object-fit: cover; }
+.dphoto .dphoto__caption { margin: 0.75rem 0 0; font-size: 0.875rem; line-height: 1.4; color: var(--h-soft); }
+.dphoto .is-link .dphoto__caption { font-size: 1rem; font-weight: 600; color: var(--h-ink); }
+.dphoto .is-link:hover .dphoto__caption {
+  text-decoration: underline;
+  text-decoration-color: var(--h-signal);
+  text-decoration-thickness: 0.0625rem;
+  text-underline-offset: 0.2em;
 }
 </style>

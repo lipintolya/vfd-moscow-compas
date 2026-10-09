@@ -15,9 +15,12 @@ interface Props {
   /** Компактный вариант для схем/чертежей: без кропа 21:9 (естественные
       пропорции картинки) и с ограниченной шириной по центру колонки. */
   narrow?: boolean
+  /** Естественные пропорции во всю ширину колонки (без кропа 21:9) —
+      палитры, картинки с текстом, которые нельзя резать. */
+  natural?: boolean
 }
 
-const { src, alt = '', caption, narrow = false } = Astro.props
+const { src, alt = '', caption, narrow = false, natural = false } = Astro.props
 
 /* В тексте — облегчённый вариант по ширине экрана (колонка статьи до 80rem,
    narrow — до 26rem); по клику FigureLightbox открывает оригинал. */
@@ -27,7 +30,7 @@ const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-w
 
 <figure class:list={['article-figure', narrow && 'article-figure--narrow']}>
   {src ? (
-    <FigureLightbox src={src} inlineSrc={inline?.src} inlineSrcset={inline?.srcset} sizes={sizes} alt={alt} natural={narrow} client:visible />
+    <FigureLightbox src={src} inlineSrc={inline?.src} inlineSrcset={inline?.srcset} sizes={sizes} alt={alt} natural={narrow || natural} client:visible />
   ) : (
     <div class="article-figure__placeholder" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none">
@@ -39,15 +42,19 @@ const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-w
     </div>
   )}
   {caption && (
-    <figcaption class="mt-2 text-center text-sm text-slate-400">
-      {caption}
-    </figcaption>
+    <figcaption class="article-figure__caption">{caption}</figcaption>
   )}
 </figure>
 
 <style>
 .article-figure {
   margin: 2rem 0;
+}
+.article-figure__caption {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--h-muted, var(--color-slate-500));
 }
 .article-figure--narrow {
   max-width: 26rem;

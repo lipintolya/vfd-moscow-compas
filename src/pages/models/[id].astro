@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import ProductColorPicker from '../../components/catalog/ProductColorPicker.vue'
@@ -39,12 +39,10 @@ const spec        = getSeriesSpec(seriesSlug, coatingSlug)
 const accessories = accessoriesByCoating[coatingSlug as CoatingSlug] ?? []
 const hasPlinth   = accessories.some(item => item.category === 'plinth')
 
-/* Статья по теме — перелинковка каталог → блог (раньше была только в одну
-   сторону: статьи ссылались на каталог, карточки моделей — никогда обратно
-   на блог). Ищем первую статью, у которой seriesSlug модели указан
-   в relatedSeriesSlugs. */
-const allArticles = await getCollection('articles')
-const relatedArticle = allArticles.find(a => a.data.relatedSeriesSlugs?.includes(seriesSlug))
+/* Статья по теме — перелинковка каталог → блог: самая свежая
+   опубликованная статья о серии или покрытии модели
+   (relatedSeriesSlugs / relatedCoatings, src/lib/articles.ts). */
+const relatedArticle = await relatedArticleFor({ seriesSlugs: [seriesSlug], coatingSlugs: [coatingSlug] })
 
 const CATEGORY_ORDER: AccessoryCategory[] = ['kit', 'box', 'nalichnik', 'kapitel', 'dobor', 'plinth', 'decorative']
 
