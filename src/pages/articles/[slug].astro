@@ -288,9 +288,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   .post-author__name { font-weight: 600; color: var(--h-ink); }
   .post-author:hover .post-author__name { text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.2em; }
 
-  /* ── Обложка ── */
-  .post-cover { margin: 0; aspect-ratio: 21 / 9; border-radius: 1.75rem; }
-  @media (max-width: 47.9375rem) { .post-cover { aspect-ratio: 4 / 3; border-radius: 1.25rem; } }
+  /* ── Обложка — 16:9 без обрезки (на ней может быть надпись) ── */
+  .post-cover { margin: 0; aspect-ratio: 16 / 9; border-radius: 1.75rem; }
+  @media (max-width: 47.9375rem) { .post-cover { border-radius: 1.25rem; } }
 
   /* ── Раскладка: на компьютере оглавление слева (закреплено), всё
      остальное — колонкой чтения; на телефоне — по порядку разметки.

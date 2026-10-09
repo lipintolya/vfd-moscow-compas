@@ -5,7 +5,7 @@ export interface ImageVariant { src: string; w: number }
 
 /** Обложки: card — 16:9 для карточек, hero — для шапки статьи. */
 export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero: ImageVariant[] }> = {
-  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/winter.webp': {
+  'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/statya_cover.webp': {
     card: [{ src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-card-480.webp', w: 480 }, { src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-hero-1600.webp', w: 1600 }],
   },
