@@ -6,6 +6,7 @@
    «по теме», sitemap и /llms.txt; сама страница заглушки закрыта noindex. */
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { SITE } from '../config/site'
+import { FOUNDER } from '../data/about-page'
 
 export type Article = CollectionEntry<'articles'>
 
@@ -50,11 +51,13 @@ export async function relatedArticle({ seriesSlugs = [], coatingSlugs = [] }: {
   )
 }
 
-/** Автор статей — основатель студии: имя, роль и фото из SITE; страница
+/** Автор статей — основатель студии: имя и роль из SITE, портрет — тот
+    же, что на «О нас» (лицо по центру — годится для аватара); страница
     «О нас» — его страница (там письмо и фото) */
 export const ARTICLE_AUTHOR = {
-  name:  SITE.contactPerson,
-  role:  SITE.contactRole,
-  photo: SITE.contactPhoto,
-  href:  '/about/',
+  name:        SITE.contactPerson,
+  role:        SITE.contactRole,
+  photo:       FOUNDER.photo.src,
+  photoSrcset: FOUNDER.photo.srcset,
+  href:        '/about/',
 }

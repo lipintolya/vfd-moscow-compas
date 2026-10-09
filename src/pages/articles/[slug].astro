@@ -96,7 +96,7 @@ const structuredData = [
       '@type': 'Person',
       name: ARTICLE_AUTHOR.name,
       jobTitle: ARTICLE_AUTHOR.role,
-      image: ARTICLE_AUTHOR.photo,
+      image: abs(ARTICLE_AUTHOR.photo),
       url: abs(ARTICLE_AUTHOR.href),
       worksFor: { '@id': LOCAL_BUSINESS_ID },
     },
@@ -154,7 +154,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         <h1 class="post-head__title">{typograph(data.title)}</h1>
         <p class="h-lead post-head__lead">{typograph(data.description)}</p>
         <a href={ARTICLE_AUTHOR.href} class="post-author" rel="author">
-          <img src={ARTICLE_AUTHOR.photo} alt="" width="640" height="640" loading="lazy" decoding="async" />
+          <img src={ARTICLE_AUTHOR.photo} srcset={ARTICLE_AUTHOR.photoSrcset} sizes="2.5rem" alt="" width="640" height="640" loading="lazy" decoding="async" />
           <span><span class="post-author__name">{ARTICLE_AUTHOR.name}</span>, {ARTICLE_AUTHOR.role}</span>
         </a>
       </header>
@@ -230,7 +230,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         )}
 
         <aside class="post-block post-byline" aria-label="Автор статьи">
-          <img src={ARTICLE_AUTHOR.photo} alt={ARTICLE_AUTHOR.name} width="640" height="640" loading="lazy" decoding="async" />
+          <img src={ARTICLE_AUTHOR.photo} srcset={ARTICLE_AUTHOR.photoSrcset} sizes="4.5rem" alt={ARTICLE_AUTHOR.name} width="640" height="640" loading="lazy" decoding="async" />
           <div>
             <p class="post-byline__name">{ARTICLE_AUTHOR.name}</p>
             <p class="h-meta post-byline__role">{typograph(`${ARTICLE_AUTHOR.role[0]!.toUpperCase()}${ARTICLE_AUTHOR.role.slice(1)}. ${SITE.experience}.`)}</p>
