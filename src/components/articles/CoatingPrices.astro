@@ -68,68 +68,69 @@ const fmt = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 )}
 
 <style>
-/* Все правила с префиксом .cprices: статья задаёт глобальные стили ul/li/p/a
-   (.article-body :global(...)) — без повышенной специфичности список
-   получал маркеры, отступы и подчёркнутые ссылки. */
-.cprices {
-  margin: 1.75rem 0;
-}
+/* Дизайн-система: покрытия строками под линейками (данные — под
+   линейками), без рамки; название и цена — тёмные, серии — тёмными
+   ссылками с тонким подчёркиванием, наведение — красное (как в тексте
+   статьи). Префикс .cprices повышает специфичность над общими стилями
+   текста статьи (ul/li/p/a в .post-body). */
+.cprices { margin: 1.75rem 0; }
 .cprices .cprices__list {
-  list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 1rem;
-  overflow: hidden;
-  background: #fff;
+  list-style: none;
+  border-top: 0.0625rem solid var(--h-rule);
 }
 .cprices .cprices__row {
   margin: 0;
-  padding: 1rem 1.25rem;
-}
-.cprices .cprices__row + .cprices__row {
-  border-top: 1px solid var(--color-slate-200);
+  padding: 1rem 0;
+  border-bottom: 0.0625rem solid var(--h-rule);
 }
 .cprices .cprices__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
 }
 .cprices .cprices__name {
   font-size: 1.0625rem;
   font-weight: 600;
-  color: var(--color-slate-900);
+  color: var(--h-ink);
   text-decoration: none;
+  transition: color 180ms var(--ease-out);
 }
-.cprices a.cprices__name:hover {
-  color: var(--color-link);
-}
+.cprices a.cprices__name:hover { color: var(--h-signal); }
 .cprices .cprices__price {
   flex-shrink: 0;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--color-slate-900);
+  color: var(--h-ink);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .cprices .cprices__series {
   margin: 0;
   font-size: 0.875rem;
   line-height: 1.6;
-  color: var(--color-slate-500);
+  color: var(--h-muted);
 }
 .cprices .cprices__series a {
-  color: var(--color-link);
-  text-decoration: none;
-}
-.cprices .cprices__series a:hover {
+  color: var(--h-soft);
+  font-weight: 500;
   text-decoration: underline;
+  text-decoration-color: var(--color-slate-300);
+  text-decoration-thickness: 0.0625rem;
+  text-underline-offset: 0.2em;
+  transition: color 180ms var(--ease-out), text-decoration-color 180ms var(--ease-out);
 }
+.cprices .cprices__series a:hover { color: var(--h-ink); text-decoration-color: var(--h-signal); }
 .cprices .cprices__note {
   margin: 0.75rem 0 0;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--color-slate-500);
+  color: var(--h-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cprices .cprices__name, .cprices .cprices__series a { transition: none; }
 }
 </style>

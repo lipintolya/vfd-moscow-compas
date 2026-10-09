@@ -12,7 +12,8 @@
  * Для поисковиков и ИИ-ассистентов: BlogPosting/NewsArticle с автором-
  * человеком (основатель студии, E-E-A-T), датами, abstract из «Коротко»,
  * числом слов и временем чтения; издатель — салон (LocalBusiness);
- * FAQPage; хлебные крошки — компонентом Breadcrumbs. Заголовки разделов —
+ * HowTo для статей-инструкций (steps); FAQPage; хлебные крошки —
+ * компонентом Breadcrumbs. Заголовки разделов —
  * вопросами, ответ — в первых строках раздела.
  */
 import { getCollection, render } from 'astro:content'
@@ -106,6 +107,26 @@ const structuredData = [
     // Что зачитывать голосовым ассистентам — заголовок и «Коротко»
     speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.post-head__title', '.post-summary'] },
   },
+  // Инструкция по шагам (steps) — HowTo; шаг ссылается на свой раздел
+  ...(data.steps?.length ? [{
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    '@id': `${pageUrl}#howto`,
+    name: data.title,
+    description: data.description,
+    ...(data.coverImage ? { image: abs(data.coverImage) } : {}),
+    inLanguage: 'ru-RU',
+    step: data.steps.map((st, i) => {
+      const h = toc.find((t) => t.text.trim() === st.name.trim())
+      return {
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: st.name,
+        text: st.text,
+        ...(h ? { url: `${pageUrl}#${h.slug}` } : {}),
+      }
+    }),
+  }] : []),
   ...(faq.length ? [{
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -245,7 +266,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         <div class="container">
           <header class="h-head">
             <h2 id="post-related-title" class="h-h2">Читайте также</h2>
-            <a href="/articles/" class="h-pill h-pill--line">Все материалы</a>
+            <a href="/articles/" class="h-pill h-pill--line post-related__all">Все материалы</a>
           </header>
           <ul class="post-related h-rail" role="list">
             {related.map((a) => <li><ArticleCard article={a} /></li>)}
@@ -451,6 +472,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   .post-byline__more { display: inline-block; margin-top: 0.5rem; font-size: 0.875rem; }
 
   /* Читайте также */
+  .post-related__all { justify-self: start; }
   .post-related { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .post-related { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 62.5rem) { .post-related { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

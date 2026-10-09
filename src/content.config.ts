@@ -23,6 +23,11 @@ const articles = defineCollection({
     summary: z.array(z.string()).optional(),
     /** Ключевые фразы — keywords в разметке статьи */
     keywords: z.array(z.string()).optional(),
+    /** Статья-инструкция по шагам: разметка HowTo для поисковиков и
+        ИИ-ассистентов. name — ровно текст H2 шага в статье (по нему
+        ставится ссылка на раздел), text — суть шага одним-двумя
+        предложениями. Шаги должны быть видны в тексте статьи. */
+    steps: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
     /** Статья или публикация — см. src/data/article-kinds.ts */
     kind: z.enum(ARTICLE_KINDS).default('article'),
     publishDate: z.coerce.date(),
