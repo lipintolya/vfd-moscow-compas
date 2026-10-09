@@ -65,9 +65,9 @@ const catalog = coatings.length
 const catalogLandings = coatings
   .map((slug) => ({ slug, landing: DOOR_CATEGORIES.find((c) => c.coatingSlug === slug) }))
   .filter((x) => x.landing)
-  .map(({ slug, landing }) => ({
+  .map(({ landing }) => ({
     href: `/catalog/${landing!.slug}/`,
-    label: `Все двери с покрытием ${(catalog.find((s) => s.coatingSlug === slug)?.coatingName ?? landing!.eyebrow).toLowerCase()}`,
+    label: `Все ${landing!.anchor[0]!.toLowerCase()}${landing!.anchor.slice(1)}`,
   }))
 const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 
