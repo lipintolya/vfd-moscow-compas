@@ -9,7 +9,7 @@ export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero
     card: [{ src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-card-480.webp', w: 480 }, { src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/dveri-v-emali-plyusy-i-minusy-hero-1600.webp', w: 1600 }],
   },
-  'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/catalog.preview.main/catalog_preview_left.webp': {
+  'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/statya_cover_Invisible.webp': {
     card: [{ src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-card-480.webp', w: 480 }, { src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-hero-1600.webp', w: 1600 }],
   },
