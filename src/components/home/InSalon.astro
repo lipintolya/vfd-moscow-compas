@@ -2,23 +2,15 @@
 /**
  * «Новинки и двери в наличии» — витрина. Данные — src/data/in-salon.ts.
  *
- * Компьютер: слева сцена с фото, справа список позиций под линейками.
- * Наведение или фокус на позиции открывают её на сцене: кадр въезжает
- * «подъёмно-сдвижной панелью» (тот же язык, что у слайдера LandingHero,
- * только по вертикали) — снизу, если позиция ниже прежней, сверху — если
- * выше; у кромки — тень, старый кадр уходит медленнее (параллакс). У
- * активной позиции по линейке прорисовывается красный отрезок (как в
- * шагах StepsRow), раскрывается описание, появляется стрелка. Клик —
- * переход на страницу модели; сцена ведёт туда же.
+ * Компьютер: слева сцена с фото, справа позиции под линейками (статус,
+ * название, описание — у всех сразу, чтобы строки не сдвигались под
+ * курсором). Наведение или фокус открывают позицию на сцене: фото мягко
+ * сменяется (opacity, CSS), над активной позицией прорисовывается красный
+ * отрезок, название темнеет, появляется стрелка. Клик — страница модели;
+ * сцена ведёт туда же. Скрипт только переключает классы.
  *
- * Появление — один раз, когда блок доходит до экрана: сцена открывается
- * снизу вверх, линейки списка прорисовываются по очереди. Скрытое
- * состояние ставит скрипт и только если блок ниже экрана; без JS и при
- * reduced-motion всё видно сразу, кадры меняются без анимации.
- *
- * Телефон — лента карточек вбок (.h-rail), планшет — сетка 2×2: у каждой
- * позиции своё фото, сцены нет. Только transform / clip-path / opacity
- * и grid-template-rows у раскрытия описания.
+ * Планшет — сетка 2×2, телефон — лента карточек вбок (.h-rail): у каждой
+ * позиции своё фото, сцены нет.
  */
 import { PHONE } from '../../config/site'
 import { IN_SALON, STATUS_LABEL, type InSalonItem } from '../../data/in-salon'
@@ -54,7 +46,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
            с клавиатуры недоступна (те же ссылки есть в списке) -->
       <a class="stage" href={items[0]?.href} tabindex="-1" aria-hidden="true">
         {items.map((it, i) => (
-          <span class="stage__slide" data-state={i === 0 ? 'on' : undefined}>
+          <span class:list={['stage__slide', { 'is-on': i === 0 }]}>
             <img
               src={it.image.src}
               alt=""
@@ -67,13 +59,12 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
             <span class="h-chip stage__chip"><span class="h-status" data-status={it.status}>{STATUS_LABEL[it.status]}</span></span>
           </span>
         ))}
-        <span class="stage__edge"></span>
       </a>
 
       <div class="side">
         <ul class="items h-rail" role="list">
           {items.map((it, i) => (
-            <li class:list={['item', { 'is-active': i === 0 }]} style={`--i: ${i}`}>
+            <li class:list={['item', { 'is-active': i === 0 }]}>
               <a href={it.href} class="item__link" data-item={i}>
                 <span class="h-media item__media">
                   <img
@@ -91,7 +82,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
                   <span class="item__title">{it.title}</span>
                 </span>
                 <span class="h-arrow item__arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
-                <span class="item__more"><span class="item__more-in"><span class="h-body item__text">{it.text}</span></span></span>
+                <span class="h-body item__text">{it.text}</span>
               </a>
             </li>
           ))}
@@ -106,144 +97,79 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 </section>
 
 <script>
+  /* Позиция под курсором или в фокусе — на сцену. Мышь — с короткой
+     задержкой: курсор, пролетающий по списку к сцене, не перелистывает
+     всё подряд. На планшете и телефоне сцены нет — ничего не делаем. */
   const root = document.querySelector<HTMLElement>('[data-vitrine]')
   if (root) {
-    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     const wide = matchMedia('(min-width: 62.5rem)')
     const stage = root.querySelector<HTMLAnchorElement>('.stage')!
     const slides = [...stage.querySelectorAll<HTMLElement>('.stage__slide')]
-    const edge = stage.querySelector<HTMLElement>('.stage__edge')!
     const items = [...root.querySelectorAll<HTMLElement>('.item')]
     const links = items.map((it) => it.querySelector<HTMLAnchorElement>('.item__link')!)
-
-    const EASE = 'cubic-bezier(0.77, 0, 0.175, 1)'
-    const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)'
-    const DUR = 900
     let cur = 0
-    let anims: Animation[] = []
 
-    /* Позиция i — на сцену. dir: 1 — кадр въезжает снизу (позиция ниже
-       прежней), -1 — сверху */
     const activate = (i: number) => {
       if (i === cur || !wide.matches) return
-      const dir = i > cur ? 1 : -1
-      // Быстрый перебор — прошлая смена досрочно завершается
-      anims.forEach((a) => a.finish())
-      const inc = slides[i]!
-      const out = slides[cur]!
-      slides.forEach((s) => { if (s !== inc && s !== out) s.removeAttribute('data-state') })
-      out.dataset.state = 'out'
-      inc.dataset.state = 'on'
+      slides[cur]!.classList.remove('is-on')
       items[cur]!.classList.remove('is-active')
+      slides[i]!.classList.add('is-on')
       items[i]!.classList.add('is-active')
       stage.href = links[i]!.href
       cur = i
-
-      const done = () => { if (out.dataset.state === 'out') out.removeAttribute('data-state') }
-      if (still) { done(); return }
-
-      const h = stage.clientHeight
-      const eh = edge.offsetHeight
-      edge.dataset.dir = dir > 0 ? 'up' : 'down'
-      const wipe = inc.animate([{ clipPath: dir > 0 ? 'inset(100% 0 0 0)' : 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: DUR, easing: EASE })
-      wipe.finished.then(done, done)
-      anims = [
-        wipe,
-        inc.querySelector('img')!.animate(
-          [{ transform: `translateY(${dir * 8}%) scale(1.06)` }, { transform: 'none' }],
-          { duration: DUR + 450, easing: SETTLE },
-        ),
-        out.querySelector('img')!.animate(
-          [{ transform: 'none' }, { transform: `translateY(${-dir * 12}%)` }],
-          { duration: DUR, easing: EASE },
-        ),
-        edge.animate(
-          dir > 0
-            ? [{ transform: `translateY(${h - eh}px)`, opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.8 }, { transform: `translateY(${-eh}px)`, opacity: 0 }]
-            : [{ transform: 'translateY(0)', opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.8 }, { transform: `translateY(${h}px)`, opacity: 0 }],
-          { duration: DUR, easing: EASE },
-        ),
-      ]
     }
 
-    /* Мышь — с короткой задержкой: курсор, пролетающий по списку к сцене,
-       не перелистывает всё подряд. Фокус с клавиатуры — сразу. */
     links.forEach((a, i) => {
       let t: number | undefined
       a.addEventListener('pointerenter', (e) => {
-        if (e.pointerType !== 'mouse') return
-        t = window.setTimeout(() => activate(i), 70)
+        if (e.pointerType === 'mouse') t = window.setTimeout(() => activate(i), 70)
       })
       a.addEventListener('pointerleave', () => clearTimeout(t))
       a.addEventListener('focus', () => activate(i))
     })
-
-    /* Появление: блок ниже экрана — прячем и открываем один раз. Состояние
-       'shown' держит задержки сцены появления и снимается после неё —
-       иначе они достались бы обычным переключениям */
-    if (!still && 'IntersectionObserver' in window && root.getBoundingClientRect().top > innerHeight * 0.9) {
-      root.dataset.vitrine = 'hidden'
-      const io = new IntersectionObserver(([e]) => {
-        if (!e?.isIntersecting) return
-        io.disconnect()
-        root.dataset.vitrine = 'shown'
-        setTimeout(() => { root.dataset.vitrine = '' }, 2200)
-      }, { rootMargin: '0px 0px -20% 0px' })
-      io.observe(root)
-    }
   }
 </script>
 
 <style>
-  /* minmax(0, …) и min-width: 0 — лента на телефоне не должна
-     распирать колонку шире экрана */
+  /* minmax(0, …) и min-width: 0 — лента на телефоне не должна распирать
+     колонку шире экрана */
   .vitrine { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem var(--h-gutter); }
   @media (min-width: 62.5rem) {
     .vitrine { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .stage { grid-column: 1 / span 7; align-self: start; }
+    .stage { grid-column: 1 / span 7; }
     .side  { grid-column: 8 / span 5; }
   }
 
-  /* ── Сцена: кадры стопкой; виден кадр с data-state (on — сверху, out —
-     уходящий под ним) ── */
+  /* ── Сцена: высота — по списку справа (фото режется по object-position);
+     кадры стопкой, виден .is-on — смена мягким перетеканием ── */
   .stage {
     position: relative;
     display: none;
-    aspect-ratio: 5 / 4;
+    min-height: 32rem;
     overflow: hidden;
     border-radius: var(--h-radius);
     background: var(--h-media-bg);
-    isolation: isolate;
   }
   @media (min-width: 62.5rem) { .stage { display: block; } }
-  .stage__slide { position: absolute; inset: 0; overflow: hidden; visibility: hidden; transition: scale 900ms var(--ease-out); }
-  .stage__slide[data-state] { visibility: visible; }
-  .stage__slide[data-state='on']  { z-index: 2; }
-  .stage__slide[data-state='out'] { z-index: 1; }
+  .stage__slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 450ms var(--ease-out), scale 900ms var(--ease-out);
+  }
+  .stage__slide.is-on { opacity: 1; }
   .stage__slide img { display: block; width: 100%; height: 100%; object-fit: cover; }
   /* Наведение на сцену (она — ссылка) — кадр чуть приближается */
-  .stage:hover .stage__slide[data-state='on'] { scale: 1.02; }
+  .stage:hover .stage__slide.is-on { scale: 1.02; }
   .stage__chip { position: absolute; left: clamp(0.875rem, 1.6vw, 1.25rem); bottom: clamp(0.875rem, 1.6vw, 1.25rem); }
 
-  /* Тень у кромки въезжающего кадра — ложится на уходящий */
-  .stage__edge {
-    position: absolute;
-    inset: 0 0 auto;
-    z-index: 3;
-    height: clamp(3rem, 8vw, 6rem);
-    opacity: 0;
-    pointer-events: none;
-    background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--color-slate-950) 28%, transparent));
-  }
-  .stage__edge[data-dir='down'] { background: linear-gradient(to top, transparent, color-mix(in srgb, var(--color-slate-950) 28%, transparent)); }
-
-  /* ── Общее для списка ── */
+  /* ── Список ── */
   .side { display: flex; flex-direction: column; min-width: 0; }
   .items { margin: 0; padding: 0; list-style: none; }
   .side__note { margin: auto 0 0; padding-top: 1.5rem; font-size: 0.9375rem; }
   .side__phone { white-space: nowrap; }
   .item__link { color: inherit; text-decoration: none; }
-  .item__more, .item__more-in, .item__text { display: block; }
+  .item__text { display: block; }
   .item__title {
     font-family: var(--h-font);
     font-weight: 600;
@@ -252,36 +178,22 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     text-wrap: balance;
   }
 
-  /* ── Компьютер: позиции под линейками. Линейка (::after) и красный
-     отрезок активной позиции (::before) — псевдоэлементы, чтобы их можно
-     было прорисовать; нижняя линейка списка — .items::after ── */
+  /* Компьютер: позиции под линейками; красный отрезок поверх линейки —
+     у активной (как у шагов StepsRow) */
   @media (min-width: 62.5rem) {
-    .item { position: relative; }
-    .item::after,
-    .items::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      height: 0.0625rem;
-      background: var(--h-rule);
-      transform-origin: left center;
-    }
-    .items { position: relative; padding-bottom: 0.0625rem; }
-    .items::after { top: auto; bottom: 0; }
+    .item { position: relative; border-top: 0.0625rem solid var(--h-rule); }
+    .item:last-child { border-bottom: 0.0625rem solid var(--h-rule); }
     .item::before {
       content: '';
       position: absolute;
-      top: -0.03125rem;
+      top: -0.0625rem;
       left: 0;
       right: 0;
-      z-index: 1;
       height: 0.125rem;
       background: var(--h-signal);
       transform: scaleX(0);
       transform-origin: left center;
-      transition: transform 650ms var(--ease-out);
+      transition: transform 500ms var(--ease-out);
     }
     .item.is-active::before { transform: scaleX(1); }
 
@@ -289,42 +201,27 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       column-gap: 1rem;
-      padding-block: clamp(1.125rem, 1.6vw, 1.5rem);
+      padding-block: clamp(1rem, 1.4vw, 1.375rem);
     }
     .item__media { display: none; }
-    .item__head { display: flex; flex-direction: column; gap: 0.5rem; }
+    .item__head { display: flex; flex-direction: column; gap: 0.375rem; }
     .item__title {
-      font-size: clamp(1.375rem, 1.9vw, 1.75rem);
-      line-height: 1.15;
+      font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+      line-height: 1.2;
       color: var(--h-soft);
-      transition: color 300ms var(--ease-out);
+      transition: color 250ms var(--ease-out);
     }
     .item.is-active .item__title { color: var(--h-ink); }
     .item__arrow {
       align-self: center;
+      grid-row: 1 / span 2;
+      grid-column: 2;
       opacity: 0;
-      transform: translateX(-0.5rem);
-      transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out), background-color 220ms var(--ease-out);
+      transition: opacity 250ms var(--ease-out), transform 220ms var(--ease-out), background-color 220ms var(--ease-out);
     }
-    .item.is-active .item__arrow { opacity: 1; transform: none; }
+    .item.is-active .item__arrow { opacity: 1; }
     .item__link:hover .item__arrow { background: var(--h-signal); transform: rotate(45deg); }
-
-    /* Описание раскрывается у активной позиции (0fr → 1fr) */
-    .item__more {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 500ms var(--ease-out);
-    }
-    .item.is-active .item__more { grid-template-rows: 1fr; }
-    .item__more-in { min-height: 0; overflow: hidden; }
-    .item__text {
-      padding-top: 0.75rem;
-      max-width: 26rem;
-      opacity: 0;
-      transition: opacity 300ms var(--ease-out);
-    }
-    .item.is-active .item__text { opacity: 1; transition-delay: 150ms; }
+    .item__text { grid-column: 1; margin-top: 0.5rem; max-width: 26rem; font-size: 0.9375rem; line-height: 1.5; }
   }
 
   /* ── Планшет и телефон: карточки с фото (телефон — лента вбок) ── */
@@ -341,33 +238,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     .side__note { margin-top: 0; }
   }
 
-  /* ── Появление (компьютер), один раз: сцена открывается сверху вниз,
-     как опускающаяся штора (верх блока на экране раньше низа), кадр
-     «доезжает» из увеличения; линейки прорисовываются, позиции
-     проявляются по очереди; последними — красный отрезок и стрелка ── */
-  @media (min-width: 62.5rem) {
-    [data-vitrine='hidden'] .stage { clip-path: inset(0 0 100% 0 round var(--h-radius)); }
-    [data-vitrine='hidden'] .stage__slide[data-state='on'] img { transform: scale(1.12); }
-    [data-vitrine='hidden'] :is(.item, .items)::after { transform: scaleX(0); }
-    [data-vitrine='hidden'] .item__head,
-    [data-vitrine='hidden'] .item.is-active .item__text { opacity: 0; translate: 0 0.75rem; }
-    [data-vitrine='hidden'] .item.is-active::before { transform: scaleX(0); }
-    [data-vitrine='hidden'] .item.is-active .item__arrow { opacity: 0; transform: translateX(-0.5rem); }
-
-    [data-vitrine='shown'] .stage { clip-path: inset(0 round var(--h-radius)); transition: clip-path 1100ms cubic-bezier(0.77, 0, 0.175, 1); }
-    [data-vitrine='shown'] .stage__slide[data-state='on'] img { transition: transform 1600ms cubic-bezier(0.22, 1, 0.36, 1); }
-    [data-vitrine='shown'] .item::after { transition: transform 800ms var(--ease-out) calc(150ms + var(--i) * 110ms); }
-    [data-vitrine='shown'] .items::after { transition: transform 800ms var(--ease-out) 590ms; }
-    [data-vitrine='shown'] .item__head { transition: opacity 600ms var(--ease-out) calc(300ms + var(--i) * 110ms), translate 600ms var(--ease-out) calc(300ms + var(--i) * 110ms); }
-    [data-vitrine='shown'] .item.is-active .item__text { transition: opacity 600ms var(--ease-out) 500ms, translate 600ms var(--ease-out) 500ms; }
-    [data-vitrine='shown'] .item.is-active::before { transition: transform 900ms var(--ease-out) 800ms; }
-    [data-vitrine='shown'] .item.is-active .item__arrow { transition: opacity 400ms var(--ease-out) 1100ms, transform 400ms var(--ease-out) 1100ms; }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .stage, .stage__slide, .stage__slide img, .item::before, .item::after, .items::after,
-    .item__title, .item__arrow, .item__more, .item__text, .item__head, .item__media img { transition: none !important; }
-    .stage:hover .stage__slide[data-state='on'] { scale: none; }
+    .stage__slide, .item::before, .item__title, .item__arrow, .item__media img { transition: none; }
+    .stage:hover .stage__slide.is-on { scale: none; }
     .item__link:hover .item__media img { transform: none; }
   }
 </style>
