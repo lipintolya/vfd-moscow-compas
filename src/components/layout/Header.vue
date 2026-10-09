@@ -754,6 +754,12 @@ onUnmounted(() => {
 @media (min-width: 80rem) {
   .hdr { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
 }
+/* Телефон: плашка на ~7 % выше (3.5 → 3.75rem) за счёт поля вокруг
+   кнопок — кнопки и текст прежние; полоса --header-bar (4.5rem) та же,
+   плашка в неё помещается, отступ страницы под шапкой не меняется */
+@media (max-width: 47.9375rem) {
+  .hdr { --hdr-pill-gap: 0.5rem; }
+}
 
 .site-header :is(a, button):focus-visible,
 .mnav :is(a, button):focus-visible {
