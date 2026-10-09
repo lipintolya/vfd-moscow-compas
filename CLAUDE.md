@@ -20,6 +20,8 @@ npm run gen:renders  # regenerate public/renders/alum-covers/*.webp from cloud o
 npm run deploy    # git push production main — no production remote yet; DO NOT run unless the user explicitly asks
 ```
 
+After changing `src/content.config.ts` or `markdoc.config.ts`, restart `astro dev` — it keeps the old content store (a new article 404s and lists stay empty) until restarted.
+
 There is no test runner or linter configured in this repo. `tsconfig.json` extends `astro/tsconfigs/strict`; rely on `astro check` / editor TS diagnostics for type issues, and `npm run build` as the main correctness gate (it runs `getStaticPaths` against the live Supabase project, so a broken query fails the build).
 
 ## Deployment — never run automatically
