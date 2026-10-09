@@ -6,7 +6,8 @@
  *
  * Порядок: шапка (тип, дата, время чтения, H1, лид, автор) → обложка →
  * «Коротко» (summary) → оглавление по H2 (на компьютере — закреплено
- * слева) → текст → серии каталога по теме с ценами (relatedCoatings) →
+ * слева) → текст → серии каталога по теме с ценами (relatedCoatings,
+ * relatedSeriesSlugs) →
  * частые вопросы → автор → «Читайте также» → как добраться.
  *
  * Для поисковиков и ИИ-ассистентов: BlogPosting/NewsArticle с автором-
@@ -55,12 +56,14 @@ const faq = data.faq ?? []
 const cover = data.coverImage ? articleCoverImg(data.coverImage, 'hero') : undefined
 const COVER_SIZES = '(min-width: 80rem) 76rem, 100vw'
 
-/* Серии каталога по теме — из живого каталога: цены и состав серий
-   совпадают с /catalog/ и обновляются при каждой сборке */
+/* Серии каталога по теме — все серии покрытий статьи и отдельно
+   названные серии; из живого каталога: цены и состав серий совпадают
+   с /catalog/ и обновляются при каждой сборке */
 const coatings = data.relatedCoatings ?? []
-const catalog = coatings.length
+const seriesSlugs = data.relatedSeriesSlugs ?? []
+const catalog = coatings.length || seriesSlugs.length
   ? getSeriesList((await getCatalogCards()).cards)
-      .filter((s) => coatings.includes(s.coatingSlug))
+      .filter((s) => coatings.includes(s.coatingSlug) || seriesSlugs.includes(s.slug))
       .sort((a, b) => (a.minPrice ?? Infinity) - (b.minPrice ?? Infinity))
   : []
 const catalogLandings = coatings

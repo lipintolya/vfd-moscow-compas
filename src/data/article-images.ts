@@ -13,12 +13,18 @@ export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero
     card: [{ src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-card-480.webp', w: 480 }, { src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-hero-1600.webp', w: 1600 }],
   },
+  '/renders/home/secret-cover.webp': {
+    card: [{ src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-card-480.webp', w: 480 }, { src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-card-800.webp', w: 800 }],
+    hero: [{ src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-hero-1600.webp', w: 1600 }],
+  },
 }
 
 /** Фото из текста статей ({% figure %}, {% photo %}, {% card %}). */
 export const ARTICLE_IMAGE_VARIANTS: Record<string, ImageVariant[]> = {
   '/renders/alum-covers/14.webp':
     [{ src: '/renders/articles/images/14-093177-640.webp', w: 640 }, { src: '/renders/articles/images/14-093177-960.webp', w: 960 }, { src: '/renders/articles/images/14-093177-1280.webp', w: 1280 }, { src: '/renders/articles/images/14-093177-1600.webp', w: 1600 }],
+  '/renders/home/secret-2.webp':
+    [{ src: '/renders/articles/images/secret-2-7b18c8-640.webp', w: 640 }, { src: '/renders/articles/images/secret-2-7b18c8-960.webp', w: 960 }, { src: '/renders/articles/images/secret-2-7b18c8-1280.webp', w: 1280 }],
   '/renders/home/secret-3.webp':
     [{ src: '/renders/articles/images/secret-3-05789c-640.webp', w: 640 }, { src: '/renders/articles/images/secret-3-05789c-960.webp', w: 960 }, { src: '/renders/articles/images/secret-3-05789c-1280.webp', w: 1280 }],
   '/renders/home/tehno-1.webp':
@@ -29,6 +35,10 @@ export const ARTICLE_IMAGE_VARIANTS: Record<string, ImageVariant[]> = {
     [{ src: '/renders/articles/images/skinel-9bede6-640.webp', w: 640 }, { src: '/renders/articles/images/skinel-9bede6-960.webp', w: 960 }],
   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/stockholm.webp':
     [{ src: '/renders/articles/images/stockholm-943aa8-640.webp', w: 640 }, { src: '/renders/articles/images/stockholm-943aa8-960.webp', w: 960 }],
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/pet/urban_pet.webp':
+    [{ src: '/renders/articles/images/urban_pet-3b95b8-640.webp', w: 640 }, { src: '/renders/articles/images/urban_pet-3b95b8-960.webp', w: 960 }],
+  'https://storage.yandexcloud.net/vfd74ru/cover_first_section/urban.webp':
+    [{ src: '/renders/articles/images/urban-091a83-640.webp', w: 640 }, { src: '/renders/articles/images/urban-091a83-960.webp', w: 960 }],
   'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp':
     [{ src: '/renders/articles/images/emal_covers-8e8cff-640.webp', w: 640 }, { src: '/renders/articles/images/emal_covers-8e8cff-960.webp', w: 960 }, { src: '/renders/articles/images/emal_covers-8e8cff-1280.webp', w: 1280 }, { src: '/renders/articles/images/emal_covers-8e8cff-1600.webp', w: 1600 }],
 }
