@@ -97,65 +97,6 @@ const breadcrumbItems = [
                   <p class="quote__text">{typograph(FOUNDER_QUOTE.text.join(' '))}</p>
                 </blockquote>
               </div>
-              <!-- Печать цитаты — один раз. Скрипт стоит сразу за цитатой и
-                   выполняется до первой отрисовки, поэтому полный текст не
-                   мелькает перед анимацией. Весь текст всё время в DOM (ещё
-                   не «напечатанная» часть прозрачная) — вёрстка не прыгает,
-                   поиск и экранные читалки видят цитату целиком. За кадр
-                   меняются два текстовых узла; по окончании разметка
-                   анимации снимается. Без JS и при reduced-motion — текст
-                   сразу. -->
-              <script is:inline>
-                (() => {
-                  const quote = document.currentScript.previousElementSibling
-                  if (!quote || matchMedia('(prefers-reduced-motion: reduce)').matches) return
-                  // Скорость: приветствие медленнее, основной текст быстрее (мс на знак)
-                  const parts = [...quote.querySelectorAll('p')].map((p, i) => {
-                    const full = p.textContent
-                    const on = document.createElement('span')
-                    const off = document.createElement('span')
-                    on.className = 'tw-on'
-                    off.className = 'tw-off'
-                    off.textContent = full
-                    p.replaceChildren(on, off)
-                    return { p, full, on, off, ms: i === 0 ? 45 : 11, pause: i === 0 ? 0 : 280 }
-                  })
-                  let t0 = 0
-                  const plan = []
-                  for (const part of parts) {
-                    t0 += part.pause
-                    plan.push({ ...part, start: t0 })
-                    t0 += part.full.length * part.ms
-                  }
-                  const finish = () => plan.forEach(({ p, full }) => { p.textContent = full })
-                  const run = () => {
-                    const begin = performance.now()
-                    const frame = (now) => {
-                      const el = now - begin
-                      for (const part of plan) {
-                        const n = Math.max(0, Math.min(part.full.length, Math.floor((el - part.start) / part.ms)))
-                        if (part.on.textContent.length !== n) {
-                          part.on.textContent = part.full.slice(0, n)
-                          part.off.textContent = part.full.slice(n)
-                        }
-                        part.on.classList.toggle('tw-caret', el >= part.start && n < part.full.length)
-                      }
-                      if (el < t0) requestAnimationFrame(frame)
-                      else finish()
-                    }
-                    requestAnimationFrame(frame)
-                  }
-                  // Старт — когда цитата на экране (и после короткой паузы,
-                  // чтобы не совпасть с появлением шапки)
-                  if (!('IntersectionObserver' in window)) return finish()
-                  const io = new IntersectionObserver(([e]) => {
-                    if (!e?.isIntersecting) return
-                    io.disconnect()
-                    setTimeout(run, 350)
-                  })
-                  io.observe(quote)
-                })()
-              </script>
               <figcaption class="quote__sign">
                 <span class="quote__name">{FOUNDER.name}</span>
                 <span>{FOUNDER.role}</span>
@@ -422,21 +363,17 @@ const breadcrumbItems = [
   .quote__body { margin: 0; }
   .quote__quote { margin: 0; }
 
-  /* Печать (скрипт в разметке): ещё не напечатанное — прозрачное, место
-     занимает; курсор — тонкая красная черта без ширины в вёрстке
-     (отрицательный отступ), мигает только пока идёт печать */
-  .quote__body :global(.tw-off) { color: transparent; }
-  .quote__body :global(.tw-caret)::after {
-    content: '';
-    display: inline-block;
-    width: 0.08em;
-    height: 1em;
-    margin-right: -0.08em;
-    vertical-align: -0.12em;
-    background: var(--color-accent-500);
-    animation: tw-blink 900ms steps(1) infinite;
+  /* Мягкое появление — один раз при загрузке: приветствие, цитата и
+     подпись по очереди проявляются с лёгким подъёмом (~1 с на всё).
+     Чистый CSS: первый экран виден сразу, скрипт не нужен; при
+     reduced-motion текст стоит без анимации */
+  .quote__greeting, .quote__quote, .quote__sign { animation: quote-in 700ms var(--ease-out) both; }
+  .quote__quote { animation-delay: 120ms; }
+  .quote__sign  { animation-delay: 240ms; }
+  @keyframes quote-in { from { opacity: 0; translate: 0 0.75rem; } }
+  @media (prefers-reduced-motion: reduce) {
+    .quote__greeting, .quote__quote, .quote__sign { animation: none; }
   }
-  @keyframes tw-blink { 50% { opacity: 0; } }
   .quote__greeting {
     margin: 0;
     font-size: clamp(1.375rem, 2.2vw, 1.75rem);
