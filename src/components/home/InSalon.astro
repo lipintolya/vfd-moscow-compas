@@ -63,7 +63,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
               loading="lazy"
               decoding="async"
             />
-            <span class="h-chip stage__chip"><span class="h-status" data-status={it.status}>{STATUS_LABEL[it.status]}</span></span>
+            <span class="h-status h-meta h-status--photo stage__chip" data-status={it.status}>{STATUS_LABEL[it.status]}</span>
           </span>
         ))}
         <span class="stage__edge"></span>

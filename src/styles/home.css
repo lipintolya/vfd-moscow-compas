@@ -137,14 +137,29 @@
   color: var(--h-muted);
   font-variant-numeric: tabular-nums;
 }
-/* Статус товара — словом, без значков: «Новинка» — красным,
-   «В наличии» — синим; полужирный, строчными, над названием */
+/* Статус товара — словом на мягкой подложке своего цвета: «Новинка» —
+   красным, «В наличии» — синим; полужирный, строчными. Подложка — 10 %
+   цвета статуса: текст держит контраст ≥ 4.5 и на сером фоне. Блочный
+   по ширине текста — в колонке flex не растягивается на всю строку.
+   --photo — поверх фото: подложка на белой основе, непрозрачная */
 .h-status {
+  --tone: var(--h-status-stock);
+  display: block;
+  width: fit-content;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  background: color-mix(in srgb, var(--tone) 10%, transparent);
   font-weight: 600;
+  line-height: 1.2;
   letter-spacing: -0.005em;
-  color: var(--h-status-stock);
+  color: var(--tone);
 }
-.h-status[data-status='new'] { color: var(--h-status-new); }
+.h-status[data-status='new'] { --tone: var(--h-status-new); }
+.h-status--photo {
+  padding: 0.4375rem 0.75rem;
+  background-color: var(--color-white);
+  background-image: linear-gradient(color-mix(in srgb, var(--tone) 10%, transparent), color-mix(in srgb, var(--tone) 10%, transparent));
+}
 .h-price {
   font-weight: 600;
   color: var(--h-ink);
