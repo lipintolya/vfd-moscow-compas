@@ -39,12 +39,24 @@ const posts = (await getArticles()).slice(0, HOME_POSTS)
             {posts.map((post) => <li><ArticleCard article={post} /></li>)}
           </ul>
         )}
+
+      <!-- Телефон: «Все материалы» — кнопкой под карточками, там, где
+           заканчивается просмотр блока (в шапке блока на телефоне её нет) -->
+      <a href="/articles/" class="h-btn h-btn--quiet posts-all-bottom">
+        Все материалы
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
     </div>
   </section>
 )}
 
 <style>
   .posts-all { margin-top: 1.25rem; }
+  .posts-all-bottom { display: none; }
+  @media (max-width: 43.6875rem) {
+    .posts-all { display: none; }
+    .posts-all-bottom { display: flex; gap: 0.5rem; width: 100%; margin-top: 1.5rem; background: var(--h-paper); }
+  }
   .posts { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .posts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 62.5rem) { .posts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }

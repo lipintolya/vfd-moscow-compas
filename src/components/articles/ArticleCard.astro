@@ -147,6 +147,25 @@ const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : '(min-width: 56.25
   .acard__more { display: inline-flex; align-items: center; gap: 0.75rem; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
   .acard__more .h-arrow { transition: transform 220ms var(--ease-out), background-color 220ms var(--ease-out); }
 
+  /* Телефон: «Читать статью» — сплошная тёмная кнопка во всю ширину
+     панели, под автором (вся карточка — ссылка, это её видимая кнопка) */
+  @media (max-width: 43.6875rem) {
+    .acard__foot { flex-direction: column; align-items: stretch; }
+    .acard__more {
+      justify-content: center;
+      gap: 0.5rem;
+      min-height: 3.25rem;
+      padding-inline: 1.5rem;
+      border-radius: 999rem;
+      background: var(--h-ink);
+      color: var(--color-white);
+      transition: background-color 180ms var(--ease-out);
+    }
+    .acard__more .h-arrow { width: auto; height: auto; background: none; color: inherit; }
+    .acard:hover .acard__more .h-arrow { transform: none; background: none; }
+    .acard:active .acard__more { background: var(--color-slate-700); }
+  }
+
   /* Наведение — красное подчёркивание заголовка, стрелка поворачивается */
   .acard:hover .acard__title {
     text-decoration: underline;
