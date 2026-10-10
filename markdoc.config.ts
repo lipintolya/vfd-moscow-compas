@@ -9,6 +9,8 @@ export default defineMarkdocConfig({
     salon: {
       name:    SITE.studioName,
       brand:   SITE.name,
+      /** «официальный дилер Владимирской фабрики дверей» */
+      dealer:  `официальный дилер ${SITE.manufacturerOf}`,
       city:    SITE.city.in,
       mall:    SITE.address.mall,
       address: SITE.address.full,

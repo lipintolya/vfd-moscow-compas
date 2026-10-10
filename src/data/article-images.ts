@@ -25,6 +25,10 @@ export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero
     card: [{ src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-card-480.webp', w: 480 }, { src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-hero-1600.webp', w: 1600 }],
   },
+  '/renders/alum-covers/2.webp': {
+    card: [{ src: '/renders/articles/covers/populyarnye-mezhkomnatnye-dveri-card-480.webp', w: 480 }, { src: '/renders/articles/covers/populyarnye-mezhkomnatnye-dveri-card-800.webp', w: 800 }],
+    hero: [{ src: '/renders/articles/covers/populyarnye-mezhkomnatnye-dveri-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/populyarnye-mezhkomnatnye-dveri-hero-1600.webp', w: 1600 }],
+  },
 }
 
 /** Фото из текста статей ({% figure %}, {% photo %}, {% card %}). */
