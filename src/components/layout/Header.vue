@@ -68,8 +68,14 @@ const CATALOG_DROPDOWN = [
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
 ] as const
 
+const PARTITIONS_DROPDOWN = [
+  { href: '/partitions/',            label: 'Перегородки ВФД',   desc: 'GRAFIA: раздвижные, распашные' },
+  { href: '/partitions/oniks-alum/', label: 'Перегородки ОНИКС', desc: 'ALUM: 10 раскладок' },
+] as const
+
 const SUBMENU: Record<string, readonly { href: string; label: string; desc: string }[]> = {
-  '/catalog/': CATALOG_DROPDOWN,
+  '/catalog/':    CATALOG_DROPDOWN,
+  '/partitions/': PARTITIONS_DROPDOWN,
 }
 
 /* Часы — из contacts-data (единственный источник), а не числами здесь:
@@ -88,8 +94,8 @@ const mobileOpen   = ref(false)
 const contactsOpen = ref(false)
 const catalogOpen  = ref(false)
 let   catalogTimer: ReturnType<typeof setTimeout> | null = null
-const aboutOpen    = ref(false)
-let   aboutTimer: ReturnType<typeof setTimeout> | null = null
+const partitionsOpen = ref(false)
+let   partitionsTimer: ReturnType<typeof setTimeout> | null = null
 const logoLoaded   = ref(false)
 const logoError    = ref(false)
 
@@ -111,9 +117,11 @@ let desktopMql: MediaQueryList | null = null
 const isActive = (href: string) => currentPath.value === href
 
 /* Активный раздел для точки под пунктом: каталог подсвечивается
-   и на вложенных страницах (/catalog/series/…, /models/…). */
+   и на вложенных страницах (/catalog/series/…, /models/…), перегородки —
+   и на /partitions/oniks-alum/. */
 const isSection = (href: string) => {
   if (href === '/catalog/') return currentPath.value.startsWith('/catalog') || currentPath.value.startsWith('/models')
+  if (href === '/partitions/') return currentPath.value.startsWith('/partitions')
   return isActive(href)
 }
 
@@ -224,12 +232,12 @@ const toggleMobileMenu = () => mobileOpen.value ? closeMobileMenu() : openMobile
 const openCatalog  = () => { if (catalogTimer !== null) clearTimeout(catalogTimer); catalogOpen.value = true }
 const closeCatalog = () => { catalogTimer = setTimeout(() => { catalogOpen.value = false }, 150) }
 
-const openAbout  = () => { if (aboutTimer !== null) clearTimeout(aboutTimer); aboutOpen.value = true }
-const closeAbout = () => { aboutTimer = setTimeout(() => { aboutOpen.value = false }, 150) }
+const openPartitions  = () => { if (partitionsTimer !== null) clearTimeout(partitionsTimer); partitionsOpen.value = true }
+const closePartitions = () => { partitionsTimer = setTimeout(() => { partitionsOpen.value = false }, 150) }
 
-const isDropOpen = (href: string) => (href === '/catalog/' ? catalogOpen.value : aboutOpen.value)
-const openDrop   = (href: string) => (href === '/catalog/' ? openCatalog() : openAbout())
-const closeDrop  = (href: string) => (href === '/catalog/' ? closeCatalog() : closeAbout())
+const isDropOpen = (href: string) => (href === '/catalog/' ? catalogOpen.value : partitionsOpen.value)
+const openDrop   = (href: string) => (href === '/catalog/' ? openCatalog() : openPartitions())
+const closeDrop  = (href: string) => (href === '/catalog/' ? closeCatalog() : closePartitions())
 
 const openContacts = async () => {
   contactsOpen.value = true
@@ -268,7 +276,7 @@ onUnmounted(() => {
   document.removeEventListener('click', onClickOutside, { capture: true })
   if (timerId !== null) clearInterval(timerId)
   if (catalogTimer !== null) clearTimeout(catalogTimer)
-  if (aboutTimer !== null) clearTimeout(aboutTimer)
+  if (partitionsTimer !== null) clearTimeout(partitionsTimer)
 })
 </script>
 
@@ -314,7 +322,7 @@ onUnmounted(() => {
               :aria-current="isActive(link.href) ? 'page' : undefined"
             >{{ link.label }}</a>
 
-            <!-- Каталог / О нас — с выпадающим списком ссылок -->
+            <!-- Каталог / Перегородки — с выпадающим списком ссылок -->
             <div
               v-else
               class="hdr-dropwrap"
@@ -348,7 +356,7 @@ onUnmounted(() => {
                       class="hdr-drop__item"
                       :class="{ 'is-active': isActive(item.href) }"
                       :aria-current="isActive(item.href) ? 'page' : undefined"
-                      @click="catalogOpen = false; aboutOpen = false"
+                      @click="catalogOpen = false; partitionsOpen = false"
                     >
                       <span class="hdr-drop__label">{{ item.label }}</span>
                       <span class="hdr-drop__desc">{{ item.desc }}</span>
@@ -551,7 +559,7 @@ onUnmounted(() => {
 
           <!-- Навигация. Активный пункт — красная черта слева (не только
                цвет текста: так его видно и при беглом взгляде). Стрелка —
-               только у пунктов без подразделов: у «Каталог»/«О нас» ниже
+               только у пунктов без подразделов: у «Каталог»/«Перегородки» ниже
                сразу видны вложенные ссылки. -->
           <nav class="mnav__nav" aria-label="Разделы сайта">
             <ul class="mnav__list" role="list">
