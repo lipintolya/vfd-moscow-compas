@@ -44,6 +44,11 @@ export function getArticles(): Promise<Article[]> {
 
 export const articleHref = (id: string) => `/articles/${id}/`
 
+/** Блок-новинка на главной — самая свежая статья с spotlight */
+export async function getSpotlight(): Promise<Article | undefined> {
+  return (await getArticles()).find((a) => a.data.spotlight)
+}
+
 export const formatArticleDate = (d: Date) =>
   d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
 

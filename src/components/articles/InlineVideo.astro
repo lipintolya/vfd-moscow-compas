@@ -1,0 +1,98 @@
+---
+/**
+ * Ролик в тексте статьи ({% video %}) и в блоке-новинке на главной.
+ * Без автозапуска: видна обложка (poster) и кнопка «плей» — ролик начинает
+ * скачиваться только по нажатию (preload="none"), дальше — родные
+ * элементы управления браузера. Одновременно играет один ролик.
+ * Облегчённый ролик и обложку делает scripts/optimize-video.mjs.
+ */
+interface Props {
+  src:      string
+  poster:   string
+  /** Что в ролике — для подписи кнопки и экранных дикторов */
+  title:    string
+  caption?: string
+  /** Пропорция кадра, по умолчанию вертикальный ролик с телефона */
+  ratio?:   string
+  /** Узкий по центру колонки — для вертикального ролика в тексте */
+  narrow?:  boolean
+}
+const { src, poster, title, caption, ratio = '9 / 16', narrow = false } = Astro.props
+---
+
+<figure class:list={['ivideo', { 'ivideo--narrow': narrow }]}>
+  <div class="ivideo__frame" style={`--ivideo-ratio: ${ratio}`}>
+    <video data-ivideo src={src} poster={poster} preload="none" playsinline aria-label={title}></video>
+    <button type="button" class="ivideo__play" data-ivideo-play aria-label={`Смотреть видео: ${title}`}>
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
+    </button>
+  </div>
+  {caption && <figcaption class="ivideo__caption">{caption}</figcaption>}
+</figure>
+
+<script>
+  const videos = [...document.querySelectorAll<HTMLVideoElement>('[data-ivideo]')]
+  for (const video of videos) {
+    const play = video.parentElement!.querySelector<HTMLButtonElement>('[data-ivideo-play]')!
+    play.addEventListener('click', () => {
+      video.controls = true
+      play.hidden = true
+      void video.play()
+    })
+    /* Запустили этот — остальные на паузу */
+    video.addEventListener('play', () => {
+      for (const other of videos) if (other !== video) other.pause()
+    })
+    /* Досмотрели — снова обложка с кнопкой */
+    video.addEventListener('ended', () => {
+      video.controls = false
+      video.load()
+      play.hidden = false
+    })
+  }
+</script>
+
+<style>
+  .ivideo { margin: 2rem 0; }
+  .ivideo--narrow { max-width: 22rem; margin-inline: auto; }
+  .ivideo__frame {
+    position: relative;
+    aspect-ratio: var(--ivideo-ratio);
+    overflow: hidden;
+    border-radius: var(--h-radius, 1rem);
+    background: var(--color-slate-950);
+  }
+  .ivideo__frame video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ivideo__play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--h-ink, var(--color-slate-900));
+    cursor: pointer;
+  }
+  /* Круглая кнопка по центру: белая, на наведение — красная */
+  .ivideo__play svg {
+    box-sizing: content-box;
+    padding: 1.125rem 1.125rem 1.125rem 1.375rem;
+    border-radius: 50%;
+    background: var(--color-white);
+    transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
+  }
+  .ivideo__play:hover svg,
+  .ivideo__play:focus-visible svg { background: var(--h-signal, var(--color-accent-500)); color: var(--color-white); }
+  .ivideo__play:focus-visible { outline: none; }
+  .ivideo__caption { margin-top: 0.75rem; font-size: 0.8125rem; line-height: 1.45; color: var(--h-muted, var(--color-slate-500)); }
+  @media (prefers-reduced-motion: reduce) {
+    .ivideo__play svg { transition: none; }
+  }
+</style>

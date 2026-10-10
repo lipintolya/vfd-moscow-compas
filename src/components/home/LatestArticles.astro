@@ -4,15 +4,17 @@
  * Только опубликованные (src/lib/articles.ts); нет ни одной — блока нет.
  * Одна статья — крупная карточка (фото и текст рядом), две и больше —
  * сетка по числу статей, до трёх колонок (на телефоне — лента вбок). Карточка — ArticleCard,
- * та же, что в разделе.
+ * та же, что в разделе. Статья из блока-новинки над лентой здесь не повторяется.
  */
 import ArticleCard from '../articles/ArticleCard.astro'
-import { getArticles } from '../../lib/articles'
+import { getArticles, getSpotlight } from '../../lib/articles'
 import { ARTICLES_SECTION } from '../../data/article-kinds'
 import { typograph } from '../../lib/typograph'
 
 const HOME_POSTS = 3
-const posts = (await getArticles()).slice(0, HOME_POSTS)
+/* Статья из блока-новинки (Spotlight) стоит прямо над лентой — не повторяем */
+const spotlight = await getSpotlight()
+const posts = (await getArticles()).filter((a) => a.id !== spotlight?.id).slice(0, HOME_POSTS)
 ---
 
 {posts.length > 0 && (

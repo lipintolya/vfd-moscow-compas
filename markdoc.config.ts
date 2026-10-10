@@ -93,6 +93,21 @@ export default defineMarkdocConfig({
       render: component('./src/components/articles/CoatingPrices.astro'),
       selfClosing: true,
     },
+    // Ролик с обложкой и кнопкой «плей», без автозапуска:
+    // {% video src="/renders/…/clip.mp4" poster="/renders/…/clip-poster.webp" title="Что в ролике" narrow=true /%}
+    // Облегчённый ролик и обложку делает scripts/optimize-video.mjs
+    video: {
+      render: component('./src/components/articles/InlineVideo.astro'),
+      selfClosing: true,
+      attributes: {
+        src:     { type: String, required: true },
+        poster:  { type: String, required: true },
+        title:   { type: String, required: true },
+        caption: { type: String },
+        ratio:   { type: String },
+        narrow:  { type: Boolean, default: false },
+      },
+    },
     // Цены скрытых дверей по высоте — из skrytye-dveri-products.ts:
     // {% hiddenHeightPrices /%}
     hiddenHeightPrices: {

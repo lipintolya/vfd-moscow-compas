@@ -5,6 +5,10 @@ export interface ImageVariant { src: string; w: number }
 
 /** Обложки: card — 16:9 для карточек, hero — для шапки статьи. */
 export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero: ImageVariant[] }> = {
+  '/renders/vfd-design/louvre-cover.webp': {
+    card: [{ src: '/renders/articles/covers/dver-s-zhalyuzi-card-480.webp', w: 480 }, { src: '/renders/articles/covers/dver-s-zhalyuzi-card-800.webp', w: 800 }],
+    hero: [{ src: '/renders/articles/covers/dver-s-zhalyuzi-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/dver-s-zhalyuzi-hero-1600.webp', w: 1600 }],
+  },
   '/renders/alum-covers/7.webp': {
     card: [{ src: '/renders/articles/covers/dveri-so-steklom-ili-gluhie-card-480.webp', w: 480 }, { src: '/renders/articles/covers/dveri-so-steklom-ili-gluhie-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/dveri-so-steklom-ili-gluhie-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/dveri-so-steklom-ili-gluhie-hero-1600.webp', w: 1600 }],
@@ -69,6 +73,10 @@ export const ARTICLE_IMAGE_VARIANTS: Record<string, ImageVariant[]> = {
     [{ src: '/renders/articles/images/invisible_kompl-1a1db6-640.webp', w: 640 }, { src: '/renders/articles/images/invisible_kompl-1a1db6-960.webp', w: 960 }, { src: '/renders/articles/images/invisible_kompl-1a1db6-1280.webp', w: 1280 }, { src: '/renders/articles/images/invisible_kompl-1a1db6-1600.webp', w: 1600 }],
   'https://storage.yandexcloud.net/catalog-vfd/invisible/invisible_info/invisible_lr.webp':
     [{ src: '/renders/articles/images/invisible_lr-81b473-640.webp', w: 640 }, { src: '/renders/articles/images/invisible_lr-81b473-960.webp', w: 960 }, { src: '/renders/articles/images/invisible_lr-81b473-1280.webp', w: 1280 }, { src: '/renders/articles/images/invisible_lr-81b473-1600.webp', w: 1600 }],
+  'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/vfd.design.post/2026-10-10%2016.25.03.webp':
+    [{ src: '/renders/articles/images/2026-10-10-2016-25-03-47526e-640.webp', w: 640 }],
+  'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/vfd.design.post/2026-10-10%2016.25.08.webp':
+    [{ src: '/renders/articles/images/2026-10-10-2016-25-08-eeb3c7-640.webp', w: 640 }],
   'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/10.10.26_vfd_design/2026-10-10%2015.46.04.webp':
     [{ src: '/renders/articles/images/2026-10-10-2015-46-04-c88f9f-640.webp', w: 640 }],
   'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/10.10.26_vfd_design/2026-10-10%2015.46.08.webp':

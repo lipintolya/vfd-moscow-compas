@@ -9,6 +9,7 @@ import { HERO_COVER_IMAGE } from '../data/hero-image'
 import ShowroomHero from '../components/home/ShowroomHero.astro'
 import Directions from '../components/home/Directions.astro'
 import Videos from '../components/home/Videos.astro'
+import Spotlight from '../components/home/Spotlight.astro'
 import InSalon from '../components/home/InSalon.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
@@ -61,6 +62,7 @@ const localBusinessSchema = buildLocalBusiness()
     <Videos />
     <InSalon modelHref={modelHref} />
     <StepsRow />
+    <Spotlight />
     <LatestArticles />
     <VisitBand />
     <Promo client:idle />

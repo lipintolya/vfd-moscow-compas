@@ -65,6 +65,23 @@ const articles = defineCollection({
         скрытых дверей и его подстраницы. Путь — как в адресе, со слешем
         на конце. */
     relatedPages: z.array(z.string()).optional(),
+    /** Блок-новинка на главной перед статьями (Spotlight.astro): самая
+        свежая статья с spotlight. label — плашка («Новинка»), lead — лид
+        (по умолчанию description), image —
+        вертикальное фото, video/poster — ролик с кнопкой «плей»
+        (scripts/optimize-video.mjs), points — 2–4 коротких факта. В ленте
+        статей на главной эта статья тогда не повторяется. */
+    spotlight: z.object({
+      label: z.string(),
+      /** Лид блока, если описание статьи для него не подходит (повторяет заголовок) */
+      lead: z.string().optional(),
+      image: z.string(),
+      imageAlt: z.string(),
+      video: z.string().optional(),
+      poster: z.string().optional(),
+      videoTitle: z.string().optional(),
+      points: z.array(z.string()).optional(),
+    }).optional(),
     /** Заглушка (PLACEHOLDER): статьи ещё нет — страница закрыта noindex,
         не попадает в sitemap и в блоки «Статья по теме». */
     placeholder: z.boolean().optional(),
