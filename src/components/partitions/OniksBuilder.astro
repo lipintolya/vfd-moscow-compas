@@ -1,0 +1,532 @@
+---
+/**
+ * Конструктор перегородки ALUM (/partitions/oniks-alum/): раскладка №1–10,
+ * цвет профиля и стекло — схема створки перерисовывается сразу.
+ *
+ * Схема — вектор по размерам фабрики (створка 402 × 1000, как фото
+ * моделей): рама и перекладины цветом профиля, а стекло ведёт себя как
+ * стекло — сквозь прозрачное видна комната, сатинат её размывает, тонировка
+ * добавляет цвет, зеркало отражает, триплекс белый, чёрный и Лакобель
+ * непрозрачны. Цвета материалов — из src/data/oniks-alum.ts (условные,
+ * на странице об этом сказано).
+ *
+ * Без JS видна схема сочетания по умолчанию и все варианты списком.
+ * С JS: выбор — нативные радиокнопки (клавиатура, экранные дикторы),
+ * сочетание пишется в адрес (?layout=7&profile=black&glass=triplex-white) —
+ * ссылкой можно поделиться, «Собрать такую» под фото фабрики подставляет
+ * её отделку. На телефоне схема прилипает под шапкой, пока листаются
+ * варианты.
+ */
+import {
+  ONIKS_MODELS, ONIKS_PROFILES, ONIKS_GLASSES, ONIKS_GLASS_GROUPS, ONIKS_DEFAULT,
+  profileById, glassById, type OniksLayout, type OniksGlass,
+} from '../../data/oniks-alum'
+import { PHONE } from '../../config/site'
+
+/* ── Геометрия створки (единицы viewBox) ── */
+const W = 402
+const H = 1000
+const FRAME = 18
+const BAR = 10
+const IX = FRAME
+const IY = FRAME
+const IW = W - 2 * FRAME
+const IH = H - 2 * FRAME
+
+const bars = (g: OniksLayout) => [
+  ...g.h.map((y) => ({ x: IX, y: IY + y * IH - BAR / 2, w: IW, h: BAR })),
+  ...g.v.map((v) => ({ x: IX + v.x * IW - BAR / 2, y: IY + v.y1 * IH, w: BAR, h: (v.y2 - v.y1) * IH })),
+]
+
+/* Иконка раскладки для кнопок выбора — те же доли, тонкими линиями */
+const icon = (g: OniksLayout) => {
+  const x0 = 4, y0 = 4, w = 32, h = 92
+  const lines = [
+    ...g.h.map((y) => `<line x1="${x0}" x2="${x0 + w}" y1="${y0 + y * h}" y2="${y0 + y * h}"/>`),
+    ...g.v.map((v) => `<line x1="${x0 + v.x * w}" x2="${x0 + v.x * w}" y1="${y0 + v.y1 * h}" y2="${y0 + v.y2 * h}"/>`),
+  ]
+  return `<svg viewBox="0 0 40 100" width="40" height="100" fill="none" stroke="currentColor" aria-hidden="true"><rect x="2" y="2" width="36" height="96" rx="1.5" stroke-width="3"/><g stroke-width="2.25">${lines.join('')}</g></svg>`
+}
+
+/* Образец стекла: «окно» за стеклом и слой стекла поверх */
+const rgba = (hex: string, a: number) => {
+  const n = parseInt(hex.slice(1), 16)
+  return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / ${a})`
+}
+const glassLayer = (g: OniksGlass) =>
+  g.kind === 'mirror' ? `linear-gradient(135deg, ${g.mirror![0]}, ${g.mirror![1]})`
+  : g.kind === 'solid' ? g.color
+  : rgba(g.color, g.opacity ?? 0.2)
+
+const model = ONIKS_MODELS.find((m) => m.num === ONIKS_DEFAULT.layout)!
+const profile = profileById(ONIKS_DEFAULT.profile)
+const glass = glassById(ONIKS_DEFAULT.glass)
+
+/* CSS-переменные схемы — их же меняет скрипт */
+const vars = [
+  `--oa-profile: ${profile.color}`,
+  `--oa-shade: ${profile.shade}`,
+  `--oa-tint: ${glass.color}`,
+  `--oa-tint-o: ${glass.opacity ?? 1}`,
+  `--oa-m1: ${glass.mirror?.[0] ?? glass.color}`,
+  `--oa-m2: ${glass.mirror?.[1] ?? glass.color}`,
+].join('; ')
+
+const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase()}, ${g.group === '8' ? 'триплекс' : 'стекло'} ${g.name.toLowerCase()}`
+---
+
+<div class="oa-build" data-oa-builder>
+  <div class="oa-build__left">
+    <!-- ── Схема: на компьютере — крупно, на телефоне — карточка «створка +
+         подпись», прилипает под шапкой, пока листаются варианты ── -->
+    <div class="oa-visual">
+      <div class="oa-visual__card">
+      <div class="oa-stage">
+        <svg
+          class="oa-pv"
+          viewBox={`0 0 ${W} 1040`}
+          role="img"
+          aria-labelledby="oa-pv-title"
+          data-oa-preview
+          data-kind={glass.kind}
+          style={vars}
+        >
+          <title id="oa-pv-title" data-oa-pv-title>{`${model.name}: ${model.layout.toLowerCase()}. ${finish()}`}</title>
+          <defs>
+            <clipPath id="oa-glass-area"><rect x={IX} y={IY} width={IW} height={IH} /></clipPath>
+            <filter id="oa-frost" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18" /></filter>
+            <filter id="oa-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7" /></filter>
+            <linearGradient id="oa-mirror-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" class="oa-stop-m1" />
+              <stop offset="1" class="oa-stop-m2" />
+            </linearGradient>
+            <linearGradient id="oa-sheen" x1="0" y1="0" x2="1" y2="0.4">
+              <stop offset="0.18" class="oa-stop-sheen" stop-opacity="0" />
+              <stop offset="0.3" class="oa-stop-sheen" stop-opacity="0.32" />
+              <stop offset="0.4" class="oa-stop-sheen" stop-opacity="0" />
+              <stop offset="0.62" class="oa-stop-sheen" stop-opacity="0" />
+              <stop offset="0.68" class="oa-stop-sheen" stop-opacity="0.14" />
+              <stop offset="0.74" class="oa-stop-sheen" stop-opacity="0" />
+            </linearGradient>
+            <radialGradient id="oa-floor-shadow">
+              <stop offset="0" class="oa-stop-shadow" stop-opacity="0.22" />
+              <stop offset="1" class="oa-stop-shadow" stop-opacity="0" />
+            </radialGradient>
+            <!-- Комната за стеклом: стена, окно со светом, диван, светильник, пол -->
+            <g id="oa-room">
+              <rect width={W} height={H} style="fill: var(--color-slate-100)" />
+              <rect y="800" width={W} height="200" style="fill: var(--color-slate-300)" />
+              <rect y="794" width={W} height="8" style="fill: var(--color-slate-200)" />
+              <rect x="44" y="104" width="206" height="480" style="fill: var(--color-white)" />
+              <path d="M44 104h206v480H44zM147 104v480M44 330h206" style="fill: none; stroke: var(--color-slate-300); stroke-width: 8" />
+              <path d="M44 800h206l70 182H0z" style="fill: var(--color-white); opacity: 0.5" />
+              <path d="M330 0v170" style="stroke: var(--color-slate-400); stroke-width: 3" />
+              <circle cx="330" cy="206" r="36" style="fill: var(--color-white); stroke: var(--color-slate-300); stroke-width: 4" />
+              <rect x="166" y="660" width="280" height="140" rx="20" style="fill: var(--color-slate-500)" />
+              <rect x="190" y="604" width="104" height="86" rx="18" style="fill: var(--color-slate-400)" />
+              <rect x="300" y="604" width="120" height="86" rx="18" style="fill: var(--color-slate-400)" />
+            </g>
+          </defs>
+
+          <ellipse cx={W / 2} cy="1016" rx="196" ry="16" fill="url(#oa-floor-shadow)" />
+
+          <g clip-path="url(#oa-glass-area)">
+            <use href="#oa-room" class="oa-pv__room" />
+            <use href="#oa-room" class="oa-pv__frost" filter="url(#oa-frost)" />
+            <rect class="oa-pv__tint" x={IX} y={IY} width={IW} height={IH} />
+            <rect class="oa-pv__mirror" x={IX} y={IY} width={IW} height={IH} fill="url(#oa-mirror-grad)" />
+            <use href="#oa-room" class="oa-pv__reflect" transform={`matrix(-1 0 0 1 ${W} 0)`} filter="url(#oa-soft)" />
+            <rect class="oa-pv__solid" x={IX} y={IY} width={IW} height={IH} />
+            <rect class="oa-pv__sheen" x={IX} y={IY} width={IW} height={IH} fill="url(#oa-sheen)" />
+          </g>
+
+          <g class="oa-pv__bars">
+            {ONIKS_MODELS.map((m) => (
+              <g data-oa-layout={m.num} data-active={m.num === model.num ? '' : undefined}>
+                {bars(m.geometry).map((b) => <rect x={b.x} y={b.y} width={b.w} height={b.h} />)}
+              </g>
+            ))}
+          </g>
+          <path class="oa-pv__frame" fill-rule="evenodd" d={`M0 0H${W}V${H}H0Z M${IX} ${IY}V${IY + IH}H${IX + IW}V${IY}Z`} />
+          <rect class="oa-pv__handle" x="5" y="440" width="8" height="120" rx="4" />
+        </svg>
+      </div>
+      <div class="oa-sum" aria-live="polite">
+        <p class="oa-sum__name" data-oa-name>{model.name}</p>
+        <p class="oa-sum__layout" data-oa-layout-label>{model.layout}</p>
+        <p class="oa-sum__finish" data-oa-finish>{finish()}</p>
+      </div>
+      </div>
+    </div>
+
+    <!-- ── Действия ── -->
+    <div class="oa-actions">
+      <div class="oa-actions__row">
+        <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать стоимость</a>
+        <button type="button" class="h-btn h-btn--quiet" data-oa-photo>Фото раскладки</button>
+      </div>
+      <p class="oa-actions__share">
+        <button type="button" class="h-link oa-actions__copy" data-oa-copy>Скопировать ссылку на это сочетание</button>
+        <span class="oa-actions__status" role="status" data-oa-copied></span>
+      </p>
+      <p class="h-meta oa-actions__note">
+        Схема помогает выбрать сочетание, цвета на&nbsp;экране условные. Возможность конфигурации и&nbsp;стоимость подтвердим при&nbsp;расчёте.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Выбор ── -->
+  <form class="oa-ctrl" data-oa-form aria-label="Конструктор перегородки ALUM">
+    <fieldset class="oa-ctrl__group">
+      <legend class="oa-ctrl__legend">Раскладка <span class="oa-ctrl__value" data-oa-value="layout">№{model.num}</span></legend>
+      <div class="oa-chips oa-chips--layout">
+        {ONIKS_MODELS.map((m) => (
+          <label class="oa-chip oa-chip--layout">
+            <input class="oa-radio" type="radio" name="layout" value={m.num} checked={m.num === model.num} data-name={m.name} data-label={m.layout} />
+            <span class="oa-chip__face" set:html={icon(m.geometry)} />
+            <span class="oa-chip__name">№{m.num}<span class="sr-only">: {m.layout}</span></span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="oa-ctrl__group">
+      <legend class="oa-ctrl__legend">Профиль <span class="oa-ctrl__value" data-oa-value="profile">{profile.name}</span></legend>
+      <div class="oa-chips oa-chips--profile">
+        {ONIKS_PROFILES.map((p) => (
+          <label class="oa-chip oa-chip--profile">
+            <input class="oa-radio" type="radio" name="profile" value={p.id} checked={p.id === profile.id} data-name={p.name} data-color={p.color} data-shade={p.shade} />
+            <span class="oa-chip__face oa-swatch oa-swatch--profile" style={`--sw: linear-gradient(145deg, ${p.color} 35%, ${p.shade})`} />
+            <span class="oa-chip__name">{p.name}{p.note && <span class="oa-chip__note">{p.note}</span>}</span>
+          </label>
+        ))}
+      </div>
+      <p class="h-meta oa-ctrl__hint">А также другие цвета эмали фабрики — подберём при расчёте.</p>
+    </fieldset>
+
+    <fieldset class="oa-ctrl__group">
+      <legend class="oa-ctrl__legend">Стекло <span class="oa-ctrl__value" data-oa-value="glass">{glass.group === '8' ? 'Триплекс' : 'Стекло'} {glass.name.toLowerCase()}</span></legend>
+      {ONIKS_GLASS_GROUPS.map((grp) => (
+        <div class="oa-ctrl__sub">
+          <p class="h-meta oa-ctrl__subtitle">{grp.title}</p>
+          <div class="oa-chips oa-chips--glass">
+            {ONIKS_GLASSES.filter((g) => g.group === grp.id).map((g) => (
+              <label class="oa-chip oa-chip--glass">
+                <input
+                  class="oa-radio"
+                  type="radio"
+                  name="glass"
+                  value={g.id}
+                  checked={g.id === glass.id}
+                  data-name={`${g.group === '8' ? 'Триплекс' : 'Стекло'} ${g.name.toLowerCase()}`}
+                  data-finish={`${g.group === '8' ? 'триплекс' : 'стекло'} ${g.name.toLowerCase()}`}
+                  data-kind={g.kind}
+                  data-color={g.color}
+                  data-opacity={g.opacity ?? 1}
+                  data-m1={g.mirror?.[0] ?? g.color}
+                  data-m2={g.mirror?.[1] ?? g.color}
+                />
+                <span class={`oa-chip__face oa-swatch oa-swatch--glass oa-swatch--${g.kind}`} style={`--sw: ${glassLayer(g)}`} />
+                <span class="oa-chip__name">{g.name}{g.note && <span class="oa-chip__note">{g.note}</span>}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+    </fieldset>
+  </form>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-oa-builder]')
+  const form = root?.querySelector<HTMLFormElement>('[data-oa-form]')
+  const svg = root?.querySelector<SVGSVGElement>('[data-oa-preview]')
+
+  if (root && form && svg) {
+    const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!
+    const checked = (name: string) => form.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)!
+    const radio = (name: string, value: string) => form.querySelector<HTMLInputElement>(`input[name="${name}"][value="${CSS.escape(value)}"]`)
+
+    const title = $<SVGTitleElement>('[data-oa-pv-title]')
+    const nameOut = $<HTMLElement>('[data-oa-name]')
+    const layoutOut = $<HTMLElement>('[data-oa-layout-label]')
+    const finishOut = $<HTMLElement>('[data-oa-finish]')
+    const copied = $<HTMLElement>('[data-oa-copied]')
+    const value = (key: string) => $<HTMLElement>(`[data-oa-value="${key}"]`)
+
+    const apply = () => {
+      const layout = checked('layout')
+      const profile = checked('profile')
+      const glass = checked('glass')
+
+      svg.querySelectorAll<SVGGElement>('[data-oa-layout]').forEach((g) => { g.toggleAttribute('data-active', g.dataset.oaLayout === layout.value) })
+      svg.dataset.kind = glass.dataset.kind
+      const set = (k: string, v?: string) => { if (v) svg.style.setProperty(k, v) }
+      set('--oa-profile', profile.dataset.color)
+      set('--oa-shade', profile.dataset.shade)
+      set('--oa-tint', glass.dataset.color)
+      set('--oa-tint-o', glass.dataset.opacity)
+      set('--oa-m1', glass.dataset.m1)
+      set('--oa-m2', glass.dataset.m2)
+
+      const finish = `Профиль ${profile.dataset.name!.toLowerCase()}, ${glass.dataset.finish}`
+      nameOut.textContent = layout.dataset.name!
+      layoutOut.textContent = layout.dataset.label!
+      finishOut.textContent = finish
+      title.textContent = `${layout.dataset.name}: ${layout.dataset.label!.toLowerCase()}. ${finish}`
+      value('layout').textContent = `№${layout.value}`
+      value('profile').textContent = profile.dataset.name!
+      value('glass').textContent = glass.dataset.name!
+      copied.textContent = ''
+    }
+
+    /* Сочетание — в адрес страницы, чтобы им можно было поделиться */
+    const syncUrl = () => {
+      const url = new URL(location.href)
+      url.searchParams.set('layout', checked('layout').value)
+      url.searchParams.set('profile', checked('profile').value)
+      url.searchParams.set('glass', checked('glass').value)
+      history.replaceState(history.state, '', url)
+      return url
+    }
+
+    const select = (layout?: string | null, profile?: string | null, glass?: string | null) => {
+      const pick = (name: string, v?: string | null) => { const r = v ? radio(name, v) : null; if (r) r.checked = true }
+      pick('layout', layout)
+      pick('profile', profile)
+      pick('glass', glass)
+      apply()
+    }
+
+    const params = new URL(location.href).searchParams
+    if (params.has('layout') || params.has('profile') || params.has('glass')) {
+      select(params.get('layout'), params.get('profile'), params.get('glass'))
+    }
+
+    form.addEventListener('change', () => { apply(); syncUrl() })
+
+    /* «Собрать такую» под фото фабрики — её раскладка и отделка */
+    document.querySelectorAll<HTMLButtonElement>('[data-oa-apply]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const [layout, profile, glass] = btn.dataset.oaApply!.split(',')
+        select(layout, profile, glass)
+        syncUrl()
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+        root.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+        checked('layout').focus({ preventScroll: true })
+      })
+    })
+
+    /* «Фото раскладки» — снимок фабрики в просмотре фото (ArticleLightbox) */
+    $<HTMLButtonElement>('[data-oa-photo]').addEventListener('click', () => {
+      document.querySelector<HTMLElement>(`[data-oa-model-photo="${checked('layout').value}"]`)?.click()
+    })
+
+    $<HTMLButtonElement>('[data-oa-copy]').addEventListener('click', async () => {
+      const url = syncUrl()
+      try {
+        await navigator.clipboard.writeText(url.href)
+        copied.textContent = 'Ссылка скопирована'
+      } catch {
+        copied.textContent = 'Скопируйте ссылку из адресной строки'
+      }
+    })
+  }
+</script>
+
+<style>
+  /* ── Раскладка блока: схема слева, выбор справа; на телефоне — схема
+     сверху и прилипает под шапкой и меню разделов, ниже выбор и действия.
+     Обёртка схемы на телефоне — display: contents: схема становится
+     элементом общего flex-столбца, и sticky держится на всю его высоту ── */
+  .oa-build { display: flex; flex-direction: column; gap: 1.5rem; }
+  .oa-build__left { display: contents; }
+  /* Белая подложка — во всю ширину экрана, вместе с полями: лента
+     раскладок уходит в поля, и под прилипшей карточкой её не видно */
+  .oa-visual {
+    order: 0;
+    position: sticky;
+    top: calc(var(--header-height) + 3.75rem);
+    z-index: 3;
+    margin-inline: calc(-1 * var(--h-pad));
+    padding: 0 var(--h-pad) 0.75rem;
+    background: var(--h-paper);
+  }
+  .oa-ctrl { order: 1; }
+  .oa-actions { order: 2; }
+
+  /* Телефон и планшет: карточка — створка слева, подпись справа */
+  .oa-visual__card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1rem, 4vw, 1.75rem);
+    padding: 0.875rem clamp(1rem, 4vw, 1.75rem) 0.875rem 0.875rem;
+    border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
+  }
+  .oa-stage { display: grid; place-items: center; }
+  .oa-pv {
+    display: block;
+    width: auto;
+    height: min(28vh, 14rem);
+    overflow: visible;
+  }
+
+  @media (min-width: 62.5rem) {
+    .oa-build {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      gap: clamp(2rem, 4vw, 4rem);
+      align-items: start;
+    }
+    .oa-build__left {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      position: sticky;
+      top: calc(var(--header-height) + 4.5rem);
+    }
+    .oa-visual { position: static; margin-inline: 0; padding: 0; }
+    /* Компьютер: крупная створка на серой подложке, подпись — под ней */
+    .oa-visual__card { display: block; padding: 0; background: none; }
+    .oa-stage {
+      padding: clamp(1rem, 3vw, 2.25rem) 1rem 0.5rem;
+      border-radius: var(--h-tile-radius);
+      background: var(--h-wall);
+    }
+    /* Колонка со схемой прилипает под шапкой и меню разделов — схема,
+       подпись и кнопки должны поместиться в экран целиком */
+    .oa-pv { height: clamp(18rem, calc(100vh - var(--header-height) - 25rem), 31rem); }
+    .oa-sum { margin-top: 0.875rem; }
+  }
+
+  .oa-pv :is(.oa-pv__room, .oa-pv__frost, .oa-pv__tint, .oa-pv__mirror, .oa-pv__reflect, .oa-pv__solid) { display: none; }
+  .oa-pv[data-kind='clear'] :is(.oa-pv__room, .oa-pv__tint) { display: inline; }
+  .oa-pv[data-kind='frosted'] :is(.oa-pv__frost, .oa-pv__tint) { display: inline; }
+  .oa-pv[data-kind='mirror'] :is(.oa-pv__mirror, .oa-pv__reflect) { display: inline; }
+  .oa-pv[data-kind='solid'] .oa-pv__solid { display: inline; }
+
+  .oa-pv__tint { fill: var(--oa-tint); fill-opacity: var(--oa-tint-o); }
+  .oa-pv__solid { fill: var(--oa-tint); }
+  .oa-pv__reflect { opacity: 0.2; }
+  .oa-pv__sheen { opacity: 0.55; }
+  .oa-pv[data-kind='mirror'] .oa-pv__sheen { opacity: 0.9; }
+  .oa-pv[data-kind='frosted'] .oa-pv__sheen { opacity: 0.25; }
+  .oa-stop-m1 { stop-color: var(--oa-m1); }
+  .oa-stop-m2 { stop-color: var(--oa-m2); }
+  .oa-stop-sheen { stop-color: var(--color-white); }
+  .oa-stop-shadow { stop-color: var(--color-slate-950); }
+
+  .oa-pv__frame,
+  .oa-pv__bars rect {
+    fill: var(--oa-profile);
+    stroke: var(--oa-shade);
+    stroke-width: 1.25;
+    vector-effect: non-scaling-stroke;
+  }
+  .oa-pv__handle { fill: var(--oa-shade); }
+  /* Видна только выбранная раскладка (data-active) */
+  .oa-pv__bars g:not([data-active]) { display: none; }
+
+  /* ── Название и отделка под схемой ── */
+  .oa-sum p { margin: 0; }
+  .oa-sum__name { font-family: var(--h-font); font-size: clamp(1.25rem, 2vw, 1.625rem); font-weight: 600; letter-spacing: -0.02em; color: var(--h-ink); }
+  .oa-sum__layout { margin-top: 0.25rem; font-size: 0.9375rem; line-height: 1.4; color: var(--h-ink); }
+  .oa-sum__finish { margin-top: 0.125rem; font-size: 0.9375rem; line-height: 1.4; color: var(--h-soft); }
+
+  /* ── Действия ── */
+  .oa-actions__row { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .oa-actions__share { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; margin: 1rem 0 0; }
+  .oa-actions__copy { padding: 0; border: 0; background: none; font: inherit; font-size: 0.9375rem; cursor: pointer; }
+  .oa-actions__status { font-size: 0.875rem; color: var(--h-status-stock); }
+  .oa-actions__note { margin: 0.75rem 0 0; max-width: 34rem; color: var(--h-muted); }
+  @media (max-width: 43.6875rem) {
+    .oa-actions__row > * { flex: 1 1 100%; justify-content: center; }
+  }
+
+  /* ── Выбор ── */
+  .oa-ctrl { display: grid; gap: clamp(1.75rem, 3vw, 2.25rem); }
+  .oa-ctrl__group { min-width: 0; margin: 0; padding: 0; border: 0; }
+  .oa-ctrl__legend {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    width: 100%;
+    margin-bottom: 0.875rem;
+    padding: 0 0 0.625rem;
+    border-bottom: 0.0625rem solid var(--h-rule);
+    font-family: var(--h-font);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--h-ink);
+  }
+  .oa-ctrl__value { margin-left: auto; font-size: 0.9375rem; font-weight: 500; color: var(--h-soft); text-align: right; }
+  .oa-ctrl__sub + .oa-ctrl__sub { margin-top: 1.25rem; }
+  .oa-ctrl__subtitle { margin: 0 0 0.625rem; color: var(--h-muted); }
+  .oa-ctrl__hint { margin: 0.75rem 0 0; color: var(--h-muted); }
+
+  .oa-chips { display: grid; gap: 0.625rem 0.5rem; }
+  .oa-chips--layout { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+  .oa-chips--profile { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .oa-chips--glass { grid-template-columns: repeat(auto-fill, minmax(4.75rem, 1fr)); }
+  /* Раскладки на узком экране — лентой вбок, одной строкой */
+  @media (max-width: 43.6875rem) {
+    .oa-chips--layout {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: 2.875rem;
+      margin-inline: calc(-1 * var(--h-pad));
+      padding: 0.25rem var(--h-pad);
+      overflow-x: auto;
+      scroll-padding-inline: var(--h-pad);
+      scrollbar-width: none;
+    }
+    .oa-chips--layout::-webkit-scrollbar { display: none; }
+  }
+
+  /* align-content: start — подписи в ряду начинаются на одной линии,
+     даже если у соседней две строки */
+  .oa-chip { position: relative; display: grid; justify-items: center; align-content: start; gap: 0.375rem; cursor: pointer; text-align: center; }
+  .oa-radio { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .oa-chip__face {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    border-radius: 0.625rem;
+    outline: 0.0625rem solid var(--h-rule);
+    outline-offset: 0;
+    transition: outline-color 150ms var(--ease-out), outline-width 150ms var(--ease-out);
+  }
+  .oa-chip__name { font-size: 0.8125rem; font-weight: 500; line-height: 1.25; color: var(--h-soft); }
+  .oa-chip__note { display: block; font-weight: 400; color: var(--h-muted); }
+
+  .oa-chip:hover .oa-chip__face { outline-color: var(--color-slate-400); }
+  .oa-radio:checked ~ .oa-chip__face { outline: 0.125rem solid var(--h-ink); outline-offset: 0.125rem; }
+  .oa-radio:checked ~ .oa-chip__name { font-weight: 600; color: var(--h-ink); }
+  .oa-radio:focus-visible ~ .oa-chip__face { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.1875rem; }
+
+  /* Раскладка — линейная иконка створки */
+  .oa-chip--layout .oa-chip__face { aspect-ratio: 2 / 4.2; padding: 0.375rem 0.25rem; color: var(--color-slate-400); background: var(--h-paper); }
+  .oa-chip--layout .oa-chip__face :global(svg) { width: 100%; height: 100%; }
+  .oa-chip--layout .oa-radio:checked ~ .oa-chip__face { color: var(--h-ink); }
+
+  /* Образцы: профиль — круг, стекло — квадрат с «окном» за стеклом */
+  .oa-swatch { aspect-ratio: 1; }
+  .oa-swatch--profile { width: min(100%, 2.75rem); border-radius: 50%; background: var(--sw); outline-offset: 0; }
+  .oa-radio:checked ~ .oa-swatch--profile { outline-offset: 0.1875rem; }
+  .oa-swatch--glass {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(to bottom, transparent 70%, var(--color-slate-300) 70%),
+      linear-gradient(to right, transparent 16%, var(--color-white) 16%, var(--color-white) 52%, transparent 52%) 0 0 / 100% 64% no-repeat,
+      var(--color-slate-100);
+  }
+  .oa-swatch--glass::after { content: ''; position: absolute; inset: 0; background: var(--sw); }
+  .oa-swatch--frosted::after { -webkit-backdrop-filter: blur(0.25rem); backdrop-filter: blur(0.25rem); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .oa-chip__face { transition: none; }
+  }
+</style>

@@ -4,6 +4,12 @@
  * со Студией Зизевского. Отдельно от /partitions/ (системы GRAFIA), но в
  * дизайн-системе главной (home.css).
  *
+ * Порядок: первый экран → кто что делает в коллаборации → конструктор
+ * (раскладка, профиль, стекло — OniksBuilder) → фото фабрики лентой,
+ * «Собрать такую» подставляет отделку в конструктор → характеристики и
+ * материалы фабрики → как заказать → статьи по теме → вопросы → как
+ * добраться.
+ *
  * Данные и тексты — src/data/oniks-alum.ts, фото — assets/oniks-alum/
  * (README там же) → npm run gen:oniks. Салон — из src/config/site.ts.
  *
@@ -15,15 +21,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import SectionNav from '../../components/partitions/SectionNav.astro'
+import OniksBuilder from '../../components/partitions/OniksBuilder.astro'
 import VisitBand from '../../components/home/VisitBand.astro'
+import ArticleCard from '../../components/articles/ArticleCard.astro'
 import ArticleNav from '../../components/articles/ArticleNav.astro'
 import ArticleLightbox from '../../components/articles/ArticleLightbox.astro'
 import '../../styles/home.css'
 import {
   ONIKS, ONIKS_PAGE, ONIKS_HERO, ONIKS_FACTS, ONIKS_MODELS, ONIKS_MODEL_IMAGE, ONIKS_LAYOUTS_IMAGE,
-  ONIKS_PROFILE_COLORS, ONIKS_PROFILE_COLORS_IMAGE, ONIKS_GLASS, ONIKS_OPTI_WHITE_IMAGE,
+  ONIKS_PROFILE_COLORS, ONIKS_PROFILE_COLORS_IMAGE, ONIKS_OPTI_WHITE_IMAGE,
   ONIKS_SPECS, ONIKS_KIT, ONIKS_COMPONENTS, ONIKS_COMPONENTS_IMAGE, ONIKS_FAQ,
 } from '../../data/oniks-alum'
+import { getArticles } from '../../lib/articles'
 import { PHONE, SITE } from '../../config/site'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../../lib/local-business-schema'
 import { typograph } from '../../lib/typograph'
@@ -71,15 +80,30 @@ const breadcrumbItems = [
 ]
 
 const navItems = [
-  { id: 'oa-models',  label: 'Раскладки' },
-  { id: 'oa-profile', label: 'Профиль' },
-  { id: 'oa-glass',   label: 'Стекло' },
-  { id: 'oa-specs',   label: 'Размеры' },
+  { id: 'oa-builder', label: 'Конструктор' },
+  { id: 'oa-photos',  label: 'Фото' },
+  { id: 'oa-specs',   label: 'Характеристики' },
   { id: 'oa-order',   label: 'Заказ' },
   { id: 'oa-faq',     label: 'Вопросы' },
 ]
 
+/* Статьи по теме — о зонировании, стекле и раздвижных системах */
+const RELATED_IDS = ['vfd-dizain-dveri-pod-zadachu', 'dver-s-zhalyuzi', 'dveri-so-steklom-ili-gluhie']
+const articles = await getArticles()
+const related = RELATED_IDS.map((id) => articles.find((a) => a.id === id)).filter((a) => a !== undefined)
+
+/* Материалы фабрики — справочные картинки, открываются во весь экран */
+const references = [
+  { image: ONIKS_LAYOUTS_IMAGE,        caption: 'Схема раскладок №1–10' },
+  { image: ONIKS_COMPONENTS_IMAGE,     caption: 'Комплектующие' },
+  { image: ONIKS_PROFILE_COLORS_IMAGE, caption: 'Цвета профиля вживую' },
+  { image: ONIKS_OPTI_WHITE_IMAGE,     caption: 'Opti White и обычное стекло' },
+]
+
 const zoom = (alt: string) => `Открыть фото на весь экран: ${alt}`
+const cap = (s: string) => `${s[0]!.toUpperCase()}${s.slice(1)}`
+const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="${d}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 ---
 
 <BaseLayout
@@ -90,7 +114,7 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
   structuredData={[localBusinessSchema({ url: SITE.url }), serviceSchema, faqSchema]}
   preloadImage={ONIKS_HERO.image.src}
   preloadImageSrcset={ONIKS_HERO.image.srcset}
-  preloadImageSizes="(min-width: 62.5rem) 46vw, 100vw"
+  preloadImageSizes="(min-width: 62.5rem) 52vw, 100vw"
 >
   <SectionNav items={navItems} />
 
@@ -101,18 +125,24 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
   </div>
 
   <div class="home">
-    <!-- ── Первый экран: коллаборация ── -->
+    <!-- ── Первый экран ── -->
     <section class="oa-hero" aria-labelledby="oa-title">
       <div class="container oa-hero__grid">
         <div class="oa-hero__text">
-          <p class="h-meta oa-hero__collab">{SITE.studioName} × {ONIKS.factory}</p>
+          <p class="oa-lockup">
+            <img src="/svg/logo.svg" width="32" height="32" alt="" />
+            <span>{SITE.studioName}</span>
+            <span class="oa-lockup__x" aria-hidden="true">×</span>
+            <span class="sr-only">и</span>
+            <span>{ONIKS.factory}</span>
+          </p>
           <h1 id="oa-title" class="oa-hero__title">Перегородки {ONIKS.system} фабрики {ONIKS.brand}</h1>
           <p class="h-lead oa-hero__lead">
-            {typograph('Раздвижные перегородки из алюминиевого профиля и стекла: одно движение — и из просторной комнаты получаются две. Подберём раскладку, цвет профиля и стекло и рассчитаем перегородку под ваш проём.')}
+            {typograph('Раздвижные перегородки из алюминиевого профиля и стекла: одно движение — и из просторной комнаты получаются две. Соберите свою в конструкторе — раскладку, профиль и стекло, — а мы рассчитаем её под ваш проём.')}
           </p>
           <div class="oa-hero__actions">
-            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать стоимость</a>
-            <a href="#oa-models" class="h-btn h-btn--quiet">Смотреть раскладки</a>
+            <a href="#oa-builder" class="h-btn h-btn--signal">Собрать перегородку</a>
+            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--quiet">Рассчитать по&nbsp;телефону</a>
           </div>
         </div>
         <figure class="h-media oa-hero__media">
@@ -120,7 +150,7 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
             <img
               src={ONIKS_HERO.image.src}
               srcset={ONIKS_HERO.image.srcset}
-              sizes="(min-width: 62.5rem) 46vw, 100vw"
+              sizes="(min-width: 62.5rem) 52vw, 100vw"
               width={ONIKS_HERO.image.width}
               height={ONIKS_HERO.image.height}
               alt={ONIKS_HERO.image.alt}
@@ -143,160 +173,149 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
       </div>
     </section>
 
-    <!-- ── О коллаборации: кто что делает ── -->
+    <!-- ── Коллаборация: кто что делает ── -->
     <section class="h-sec h-sec--wall" aria-labelledby="oa-collab-title">
       <div class="container">
-        <header class="h-head">
-          <h2 id="oa-collab-title" class="h-h2">{SITE.studioName} и&nbsp;{ONIKS.factory}</h2>
-          <div>
-            <p class="h-lead">{typograph(`Коллаборация салона и фабрики: перегородки ALUM можно подобрать и заказать ${SITE.city.in}, не разбираясь в профилях и стёклах самостоятельно.`)}</p>
+        <h2 id="oa-collab-title" class="sr-only">Коллаборация: {SITE.studioName} и {ONIKS.factory}</h2>
+        <div class="oa-duo">
+          <div class="oa-duo__side">
+            <p class="h-meta oa-duo__role">Фабрика</p>
+            <p class="oa-duo__name">{ONIKS.brand}</p>
+            <p class="h-body oa-duo__text">
+              {typograph(`Производит перегородки ALUM: ${ONIKS_MODELS.length} раскладок, профиль — ${ONIKS_PROFILE_COLORS.join(', ')} или цвета эмали фабрики, стекло и триплекс. Срок изготовления — от 10 рабочих дней.`)}
+            </p>
           </div>
-        </header>
-        <ul class="oa-collab" role="list">
-          <li class="oa-collab__tile">
-            <p class="h-meta oa-collab__who">Фабрика {ONIKS.brand}</p>
-            <p class="oa-collab__what">{typograph(`Производит перегородки ALUM: ${ONIKS_MODELS.length} раскладок, профиль — ${ONIKS_PROFILE_COLORS.join(', ')} или цвета эмали фабрики, стекло и триплекс. Срок изготовления — от 10 рабочих дней.`)}</p>
-          </li>
-          <li class="oa-collab__tile">
-            <p class="h-meta oa-collab__who">{SITE.studioName}</p>
-            <p class="oa-collab__what">{typograph(`Помогает выбрать раскладку, профиль и стекло и рассчитывает перегородку под ваш проём — в салоне в ${SITE.address.mall} и по телефону.`)}</p>
-          </li>
-        </ul>
+          <span class="oa-duo__x" aria-hidden="true">×</span>
+          <div class="oa-duo__side">
+            <p class="h-meta oa-duo__role">Салон в&nbsp;{SITE.address.mall}</p>
+            <p class="oa-duo__name">{SITE.studioName}</p>
+            <p class="h-body oa-duo__text">
+              {typograph('Помогает выбрать раскладку, профиль и стекло и рассчитывает перегородку под ваш проём — в салоне и по телефону.')}
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- ── Раскладки ── -->
-    <section id="oa-models" class="h-sec" aria-labelledby="oa-models-title">
+    <!-- ── Конструктор ── -->
+    <section id="oa-builder" class="h-sec" aria-labelledby="oa-builder-title">
       <div class="container">
         <header class="h-head">
-          <h2 id="oa-models-title" class="h-h2">{ONIKS_MODELS.length} раскладок ALUM</h2>
+          <h2 id="oa-builder-title" class="h-h2">Соберите перегородку</h2>
           <div>
-            <p class="h-lead">{typograph('Модель перегородки — это раскладка: как профиль делит стекло. Цвет профиля и стекло подбираются отдельно — на фото показан один из вариантов.')}</p>
+            <p class="h-lead">{typograph('Выберите раскладку, цвет профиля и стекло — схема покажет, как будет выглядеть створка: сквозь прозрачное стекло видно комнату, матовое её размывает, зеркало отражает.')}</p>
+          </div>
+        </header>
+        <OniksBuilder />
+      </div>
+    </section>
+
+    <!-- ── Фото фабрики ── -->
+    <section id="oa-photos" class="h-sec h-sec--wall" aria-labelledby="oa-photos-title">
+      <div class="container">
+        <header class="h-head oa-photos__head">
+          <h2 id="oa-photos-title" class="h-h2">Раскладки на&nbsp;фото фабрики</h2>
+          <div>
+            <p class="h-lead">{typograph('Каждая раскладка в одной из отделок. Понравилась — нажмите «Собрать такую», и конструктор подставит её раскладку, профиль и стекло.')}</p>
+            <div class="oa-rail__nav">
+              <button type="button" class="oa-rail__btn" data-oa-rail-prev aria-label="Предыдущие раскладки" set:html={chevron('M10 4 6 8l4 4')} />
+              <button type="button" class="oa-rail__btn" data-oa-rail-next aria-label="Следующие раскладки" set:html={chevron('m6 4 4 4-4 4')} />
+            </div>
           </div>
         </header>
 
-        <ul class="oa-models" role="list">
-          {ONIKS_MODELS.map((m, i) => (
-            <li class="oa-model">
-              <figure class="h-media oa-model__media">
-                <button type="button" data-zoom={m.image} data-zoom-caption={`${m.name}: ${m.layout.toLowerCase()}. ${m.shown}`} aria-label={zoom(`${m.name}, ${m.shown.toLowerCase()}`)}>
-                  <img src={m.image} width={ONIKS_MODEL_IMAGE.width} height={ONIKS_MODEL_IMAGE.height} alt={`Перегородка ${m.name}: ${m.layout.toLowerCase()}, ${m.shown.toLowerCase()}`} loading={i < 5 ? 'eager' : 'lazy'} decoding="async" />
+        <ul class="oa-rail" role="list" data-oa-rail>
+          {ONIKS_MODELS.map((m) => (
+            <li class="oa-card">
+              <figure class="h-media oa-card__media">
+                <button
+                  type="button"
+                  data-zoom={m.image}
+                  data-oa-model-photo={m.num}
+                  data-zoom-caption={`${m.name}: ${m.layout.toLowerCase()}. ${m.shown}`}
+                  aria-label={zoom(`${m.name}, ${m.shown.toLowerCase()}`)}
+                >
+                  <img src={m.image} width={ONIKS_MODEL_IMAGE.width} height={ONIKS_MODEL_IMAGE.height} alt={`Перегородка ${m.name}: ${m.layout.toLowerCase()}, ${m.shown.toLowerCase()}`} loading="lazy" decoding="async" />
                 </button>
               </figure>
-              <h3 class="oa-model__name">{m.name}</h3>
-              <p class="oa-model__layout">{typograph(m.layout)}</p>
-              <p class="h-meta oa-model__shown">{typograph(m.shown)}</p>
+              <h3 class="oa-card__name">{m.name}</h3>
+              <p class="oa-card__layout">{typograph(m.layout)}</p>
+              <p class="h-meta oa-card__shown">{typograph(`На фото: ${m.shown.toLowerCase()}`)}</p>
+              <button type="button" class="h-pill h-pill--line oa-card__apply" data-oa-apply={`${m.num},${m.profile},${m.glass}`}>Собрать такую</button>
             </li>
           ))}
         </ul>
-
-        <figure class="oa-scheme">
-          <button type="button" data-zoom={ONIKS_LAYOUTS_IMAGE.src} data-zoom-caption="Схема раскладок ALUM №1–10" aria-label={zoom(ONIKS_LAYOUTS_IMAGE.alt)}>
-            <img src={ONIKS_LAYOUTS_IMAGE.src} srcset={ONIKS_LAYOUTS_IMAGE.srcset} sizes="(min-width: 80rem) 76rem, 100vw" width={ONIKS_LAYOUTS_IMAGE.width} height={ONIKS_LAYOUTS_IMAGE.height} alt={ONIKS_LAYOUTS_IMAGE.alt} loading="lazy" decoding="async" />
-          </button>
-          <figcaption class="h-meta oa-caption">Схема раскладок №1–10</figcaption>
-        </figure>
       </div>
     </section>
 
-    <!-- ── Профиль и комплектующие ── -->
-    <section id="oa-profile" class="h-sec h-sec--wall" aria-labelledby="oa-profile-title">
+    <!-- ── Характеристики ── -->
+    <section id="oa-specs" class="h-sec" aria-labelledby="oa-specs-title">
       <div class="container">
         <header class="h-head">
-          <h2 id="oa-profile-title" class="h-h2">Профиль и&nbsp;комплектующие</h2>
-          <div>
-            <p class="h-lead">{typograph(`Цвета профиля — ${ONIKS_PROFILE_COLORS.join(', ')}, а также цвета эмали фабрики.`)}</p>
-          </div>
-        </header>
-        <div class="oa-split">
-          <figure class="oa-figure">
-            <button type="button" data-zoom={ONIKS_PROFILE_COLORS_IMAGE.src} data-zoom-caption="Цвета профиля ALUM" aria-label={zoom(ONIKS_PROFILE_COLORS_IMAGE.alt)}>
-              <img src={ONIKS_PROFILE_COLORS_IMAGE.src} srcset={ONIKS_PROFILE_COLORS_IMAGE.srcset} sizes="(min-width: 62.5rem) 38vw, 100vw" width={ONIKS_PROFILE_COLORS_IMAGE.width} height={ONIKS_PROFILE_COLORS_IMAGE.height} alt={ONIKS_PROFILE_COLORS_IMAGE.alt} loading="lazy" decoding="async" />
-            </button>
-            <figcaption class="h-meta oa-caption">Цвета профиля</figcaption>
-          </figure>
-          <figure class="oa-figure">
-            <button type="button" data-zoom={ONIKS_COMPONENTS_IMAGE.src} data-zoom-caption="Комплектующие перегородок ALUM" aria-label={zoom(ONIKS_COMPONENTS_IMAGE.alt)}>
-              <img src={ONIKS_COMPONENTS_IMAGE.src} srcset={ONIKS_COMPONENTS_IMAGE.srcset} sizes="(min-width: 62.5rem) 38vw, 100vw" width={ONIKS_COMPONENTS_IMAGE.width} height={ONIKS_COMPONENTS_IMAGE.height} alt={ONIKS_COMPONENTS_IMAGE.alt} loading="lazy" decoding="async" />
-            </button>
-            <figcaption class="h-meta oa-caption">Комплектующие</figcaption>
-          </figure>
-        </div>
-        <ul class="oa-rules" role="list">
-          {ONIKS_COMPONENTS.map((c) => <li class="h-body">{typograph(c)}</li>)}
-        </ul>
-      </div>
-    </section>
-
-    <!-- ── Стекло ── -->
-    <section id="oa-glass" class="h-sec" aria-labelledby="oa-glass-title">
-      <div class="container">
-        <header class="h-head">
-          <h2 id="oa-glass-title" class="h-h2">Стекло</h2>
-          <div>
-            <p class="h-lead">{typograph('Обычное стекло 4 мм или триплекс 8 мм — прозрачное, матовое, тонированное, зеркальное и цветное.')}</p>
-          </div>
-        </header>
-        <div class="oa-glass">
-          {ONIKS_GLASS.map((g) => (
-            <div>
-              <h3 class="oa-glass__title">{g.title}</h3>
-              <ul class="oa-rules" role="list">
-                {g.items.map((it) => <li class="h-body">{typograph(it[0]!.toUpperCase() + it.slice(1))}</li>)}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div class="oa-split oa-split--note">
-          <div>
-            <h3 class="oa-glass__title">Стекло Opti White</h3>
-            <p class="h-body">
-              {typograph('У обычного прозрачного стекла лёгкий зеленоватый оттенок — он становится заметен, когда стекло окрашивают. Для чистого цвета перегородку можно сделать на стекле Opti White: у него такого оттенка нет.')}
-            </p>
-          </div>
-          <figure class="oa-figure">
-            <button type="button" data-zoom={ONIKS_OPTI_WHITE_IMAGE.src} data-zoom-caption="Opti White и обычное стекло" aria-label={zoom(ONIKS_OPTI_WHITE_IMAGE.alt)}>
-              <img src={ONIKS_OPTI_WHITE_IMAGE.src} srcset={ONIKS_OPTI_WHITE_IMAGE.srcset} sizes="(min-width: 62.5rem) 38vw, 100vw" width={ONIKS_OPTI_WHITE_IMAGE.width} height={ONIKS_OPTI_WHITE_IMAGE.height} alt={ONIKS_OPTI_WHITE_IMAGE.alt} loading="lazy" decoding="async" />
-            </button>
-          </figure>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── Размеры и комплектация ── -->
-    <section id="oa-specs" class="h-sec h-sec--wall" aria-labelledby="oa-specs-title">
-      <div class="container">
-        <header class="h-head">
-          <h2 id="oa-specs-title" class="h-h2">Размеры и&nbsp;комплектация</h2>
+          <h2 id="oa-specs-title" class="h-h2">Характеристики</h2>
           <div>
             <p class="h-lead">{typograph('Перегородку делают под ваш проём: размеры нестандартные, с шагом 1 см.')}</p>
           </div>
         </header>
-        <div class="oa-split">
+
+        <div class="oa-specs-grid">
           <dl class="oa-specs">
             {ONIKS_SPECS.map((s) => (
               <div class="oa-specs__row">
                 <dt class="h-meta">{s.label}</dt>
-                <dd class="h-body">{typograph(s.value)}</dd>
+                <dd class="h-body">{typograph(cap(s.value))}</dd>
               </div>
             ))}
           </dl>
           <div class="oa-kit">
-            <h3 class="oa-glass__title">В комплекте</h3>
-            <ul class="oa-rules" role="list">
-              {ONIKS_KIT.included.map((k) => <li class="h-body">{typograph(k[0]!.toUpperCase() + k.slice(1))}</li>)}
-            </ul>
-            <h3 class="oa-glass__title oa-kit__second">Отдельно</h3>
-            <ul class="oa-rules" role="list">
-              {ONIKS_KIT.separate.map((k) => <li class="h-body">{typograph(k[0]!.toUpperCase() + k.slice(1))}</li>)}
-            </ul>
+            <div>
+              <h3 class="oa-subhead">В&nbsp;комплекте</h3>
+              <ul class="oa-rules" role="list">
+                {ONIKS_KIT.included.map((k) => <li class="h-body">{typograph(cap(k))}</li>)}
+              </ul>
+            </div>
+            <div>
+              <h3 class="oa-subhead">Отдельно</h3>
+              <ul class="oa-rules" role="list">
+                {ONIKS_KIT.separate.map((k) => <li class="h-body">{typograph(cap(k))}</li>)}
+              </ul>
+            </div>
           </div>
         </div>
+
+        <div class="oa-specs-grid oa-specs-grid--more">
+          <details class="oa-fold" open data-collapse-mobile>
+            <summary class="oa-subhead">Комплектующие</summary>
+            <ul class="oa-rules" role="list">
+              {ONIKS_COMPONENTS.map((c) => <li class="h-body">{typograph(c)}</li>)}
+            </ul>
+          </details>
+          <details class="oa-fold" open data-collapse-mobile>
+            <summary class="oa-subhead">Стекло Opti White</summary>
+            <p class="h-body oa-opti">
+              {typograph('У обычного прозрачного стекла лёгкий зеленоватый оттенок — он становится заметен, когда стекло окрашивают. Для чистого цвета перегородку можно сделать на стекле Opti White: у него такого оттенка нет.')}
+            </p>
+          </details>
+        </div>
+
+        <h3 class="oa-subhead oa-refs__title">Материалы фабрики</h3>
+        <ul class="oa-refs" role="list">
+          {references.map((r) => (
+            <li>
+              <figure class="oa-ref">
+                <button type="button" class="oa-ref__media" data-zoom={r.image.src} data-zoom-caption={r.caption} aria-label={zoom(r.image.alt)}>
+                  <img src={r.image.src} srcset={r.image.srcset} sizes="(min-width: 62.5rem) 22vw, 46vw" width={r.image.width} height={r.image.height} alt={r.image.alt} loading="lazy" decoding="async" />
+                </button>
+                <figcaption class="h-meta oa-ref__caption">{r.caption}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
 
     <!-- ── Как заказать ── -->
-    <section id="oa-order" class="h-sec" aria-labelledby="oa-order-title">
+    <section id="oa-order" class="h-sec h-sec--wall" aria-labelledby="oa-order-title">
       <div class="container">
         <header class="h-head">
           <h2 id="oa-order-title" class="h-h2">Как заказать перегородку</h2>
@@ -307,18 +326,18 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
         <ol class="oa-steps" role="list">
           <li class="oa-step">
             <span class="oa-step__num" aria-hidden="true">1</span>
-            <h3 class="oa-step__title">Выберите раскладку</h3>
-            <p class="h-body">{typograph('Одна из десяти — от одной перекладины до сетки 3 × 5.')}</p>
+            <h3 class="oa-step__title">Соберите в&nbsp;конструкторе</h3>
+            <p class="h-body">{typograph('Раскладка, цвет профиля и стекло — или выберите вместе с нами в салоне.')}</p>
           </li>
           <li class="oa-step">
             <span class="oa-step__num" aria-hidden="true">2</span>
-            <h3 class="oa-step__title">Подберите отделку</h3>
-            <p class="h-body">{typograph('Цвет профиля и стекло — поможем сочетать с интерьером.')}</p>
+            <h3 class="oa-step__title">Пришлите размеры</h3>
+            <p class="h-body">{typograph('Ширина и высота проёма — по ним рассчитаем перегородку.')}</p>
           </li>
           <li class="oa-step">
             <span class="oa-step__num" aria-hidden="true">3</span>
-            <h3 class="oa-step__title">Расчёт по проёму</h3>
-            <p class="h-body">{typograph('Пришлите размеры проёма или приезжайте в салон — рассчитаем стоимость.')}</p>
+            <h3 class="oa-step__title">Получите расчёт</h3>
+            <p class="h-body">{typograph('Стоимость перегородки под ваш проём и выбранную отделку.')}</p>
           </li>
           <li class="oa-step">
             <span class="oa-step__num" aria-hidden="true">4</span>
@@ -329,26 +348,29 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
       </div>
     </section>
 
-    <!-- ── Ещё по теме: перелинковка ── -->
-    <section class="h-sec h-sec--wall" aria-labelledby="oa-more-title">
+    <!-- ── Статьи по теме + каталог и контакты ── -->
+    <section class="h-sec" aria-labelledby="oa-more-title">
       <div class="container">
         <header class="h-head">
-          <h2 id="oa-more-title" class="h-h2">Ещё о&nbsp;перегородках и&nbsp;зонировании</h2>
+          <h2 id="oa-more-title" class="h-h2">Ещё о&nbsp;зонировании</h2>
           <div>
-            <ul class="oa-links" role="list">
-              <li><a href="/partitions/" class="h-link">Алюминиевые перегородки GRAFIA — раздвижные, распашные, стационарные</a></li>
-              <li><a href="/articles/vfd-dizain-dveri-pod-zadachu/" class="h-link">Как зонировать пространство без стен — решения ВФД Дизайн</a></li>
-              <li><a href="/articles/dveri-so-steklom-ili-gluhie/" class="h-link">Двери со стеклом или глухие: что выбрать для каждой комнаты</a></li>
-              <li><a href="/articles/dver-s-zhalyuzi/" class="h-link">Новинка: дверь с жалюзи для раздвижных систем</a></li>
-            </ul>
+            <p class="h-lead">{typograph('Как разделить пространство без стен, какое стекло выбрать и какие ещё решения есть для раздвижных систем.')}</p>
+            <a href="/partitions/" class="h-pill h-pill--line oa-more__grafia">Перегородки GRAFIA <Fragment set:html={arrow} /></a>
           </div>
         </header>
-        <ArticleNav />
+        {related.length > 0 && (
+          <ul class="oa-posts h-rail" role="list" style={`--cols: ${related.length}`}>
+            {related.map((a) => <li><ArticleCard article={a} /></li>)}
+          </ul>
+        )}
+        <div class="oa-more__nav">
+          <ArticleNav />
+        </div>
       </div>
     </section>
 
     <!-- ── Частые вопросы ── -->
-    <section id="oa-faq" class="h-sec" aria-labelledby="oa-faq-title">
+    <section id="oa-faq" class="h-sec h-sec--wall" aria-labelledby="oa-faq-title">
       <div class="container oa-faq">
         <h2 id="oa-faq-title" class="h-h2">Вопросы о&nbsp;перегородках ALUM</h2>
         <div class="oa-faq__list">
@@ -363,16 +385,55 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
   </div>
 </BaseLayout>
 
+<script>
+  /* Телефон: справочные списки свёрнуты под заголовки (без JS — раскрыты) */
+  if (matchMedia('(max-width: 43.6875rem)').matches) {
+    document.querySelectorAll<HTMLDetailsElement>('[data-collapse-mobile]').forEach((d) => { d.open = false })
+  }
+
+  /* Лента фото: стрелки на компьютере, гаснут у краёв ленты */
+  const rail = document.querySelector<HTMLElement>('[data-oa-rail]')
+  const prev = document.querySelector<HTMLButtonElement>('[data-oa-rail-prev]')
+  const next = document.querySelector<HTMLButtonElement>('[data-oa-rail-next]')
+  if (rail && prev && next) {
+    const step = () => Math.max(rail.clientWidth * 0.8, 200)
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const update = () => {
+      prev.disabled = rail.scrollLeft <= 4
+      next.disabled = rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4
+    }
+    prev.addEventListener('click', () => rail.scrollBy({ left: -step(), behavior: reduce ? 'auto' : 'smooth' }))
+    next.addEventListener('click', () => rail.scrollBy({ left: step(), behavior: reduce ? 'auto' : 'smooth' }))
+    rail.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    update()
+  }
+</script>
+
 <style>
   /* ── Первый экран ── */
   .oa-hero { padding-block: clamp(1.5rem, 3vw, 2.5rem) clamp(2.5rem, 5vw, 4rem); }
   .oa-hero__grid { display: grid; gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
   @media (min-width: 62.5rem) {
-    .oa-hero__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
+    .oa-hero__grid { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.2fr); }
   }
-  .oa-hero__collab { margin: 0; color: var(--h-muted); }
+  .oa-lockup {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.375rem 0.625rem;
+    margin: 0;
+    padding: 0.3125rem 0.875rem 0.3125rem 0.3125rem;
+    border: 0.0625rem solid var(--h-rule);
+    border-radius: 999rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--h-ink);
+  }
+  .oa-lockup img { width: 2rem; height: 2rem; border-radius: 50%; }
+  .oa-lockup__x { font-weight: 400; color: var(--h-muted); }
   .oa-hero__title {
-    margin: 0.75rem 0 0;
+    margin: 1.25rem 0 0;
     font-family: var(--h-font);
     font-size: clamp(2.25rem, 5vw, 4rem);
     font-weight: var(--h-weight-display);
@@ -383,6 +444,9 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
   }
   .oa-hero__lead { margin-top: 1.25rem; max-width: 34rem; }
   .oa-hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+  @media (max-width: 43.6875rem) {
+    .oa-hero__actions > * { flex: 1 1 100%; justify-content: center; }
+  }
   .oa-hero__media { aspect-ratio: 1000 / 743; border-radius: var(--h-tile-radius); }
   .oa-hero__media > button { height: 100%; }
 
@@ -399,69 +463,197 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
   .oa-facts__value { font-family: var(--h-font); font-size: clamp(1.5rem, 2.4vw, 2rem); font-weight: 600; letter-spacing: -0.02em; color: var(--h-ink); }
   .oa-facts__label { margin: 0.25rem 0 0; color: var(--h-muted); }
 
-  /* ── Коллаборация: две плитки ── */
-  .oa-collab { display: grid; gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .oa-collab { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .oa-collab__tile { margin: 0; padding: clamp(1.25rem, 3vw, 2.25rem); border-radius: var(--h-tile-radius); background: var(--h-paper); }
-  .oa-collab__who { margin: 0; color: var(--h-muted); }
-  .oa-collab__what { margin: 0.75rem 0 0; font-family: var(--h-font); font-size: clamp(1.125rem, 1.6vw, 1.3125rem); font-weight: 500; line-height: 1.4; letter-spacing: -0.01em; color: var(--h-ink); }
-  .oa-nowrap { white-space: nowrap; }
-
-  /* ── Раскладки: вертикальные карточки ── */
-  .oa-models {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2rem var(--h-tile-gap);
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  /* ── Коллаборация: два имени через «×» ── */
+  .oa-duo { display: grid; gap: 1.25rem; }
+  @media (min-width: 62.5rem) {
+    .oa-duo { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: clamp(2rem, 4vw, 4rem); align-items: start; }
   }
-  @media (min-width: 43.75rem) { .oa-models { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (min-width: 62.5rem) { .oa-models { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-  .oa-model { margin: 0; }
-  .oa-model__media { aspect-ratio: 402 / 1000; }
-  .oa-model__media > button { height: 100%; }
-  .oa-model__name { margin: 0.875rem 0 0; font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; color: var(--h-ink); }
-  .oa-model__layout { margin: 0.25rem 0 0; font-size: 0.9375rem; line-height: 1.4; color: var(--h-ink); }
-  .oa-model__shown { margin: 0.25rem 0 0; color: var(--h-muted); }
+  .oa-duo__role { margin: 0; color: var(--h-muted); }
+  .oa-duo__name {
+    margin: 0.375rem 0 0;
+    font-family: var(--h-font);
+    font-size: clamp(2rem, 4.4vw, 3.5rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--h-ink);
+  }
+  .oa-duo__text { margin: 1rem 0 0; max-width: 30rem; color: var(--h-soft); }
+  .oa-duo__x {
+    font-family: var(--h-font);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1;
+    color: var(--color-slate-400);
+  }
+  @media (min-width: 62.5rem) { .oa-duo__x { padding-top: 1.75rem; } }
+  /* Телефон и планшет: «×» — разделитель между двумя сторонами */
+  @media (max-width: 62.4375rem) {
+    .oa-duo__x { display: flex; align-items: center; gap: 1rem; font-size: 1.75rem; }
+    .oa-duo__x::before,
+    .oa-duo__x::after { content: ''; flex: 1; height: 0.0625rem; background: var(--color-slate-300); }
+  }
 
-  .oa-scheme { margin: clamp(2.5rem, 5vw, 4rem) 0 0; }
-  .oa-scheme img,
-  .oa-figure img { display: block; width: 100%; height: auto; border-radius: var(--h-radius); background: var(--color-white); }
-  .oa-caption { margin-top: 0.75rem; color: var(--h-muted); }
+  /* ── Лента фото фабрики ── */
+  .oa-photos__head .oa-rail__nav { display: none; gap: 0.5rem; margin-top: 1.25rem; }
+  @media (hover: hover) and (min-width: 62.5rem) {
+    .oa-photos__head .oa-rail__nav { display: flex; }
+  }
+  .oa-rail__btn {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0.0625rem solid var(--color-slate-300);
+    border-radius: 50%;
+    background: var(--h-paper);
+    color: var(--h-ink);
+    cursor: pointer;
+    transition: border-color 150ms var(--ease-out), color 150ms var(--ease-out);
+  }
+  .oa-rail__btn:hover:not(:disabled) { border-color: var(--h-signal); color: var(--h-signal); }
+  .oa-rail__btn:disabled { opacity: 0.35; cursor: default; }
+  .oa-rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.1875rem; }
 
-  /* ── Две колонки: картинки, характеристики ── */
-  .oa-split { display: grid; gap: var(--h-gutter); }
-  @media (min-width: 62.5rem) { .oa-split { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
-  .oa-split--note { margin-top: clamp(2.5rem, 5vw, 4rem); align-items: center; }
-  .oa-figure { margin: 0; }
+  .oa-rail {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: clamp(10.5rem, 17vw, 13.25rem);
+    gap: var(--h-tile-gap);
+    margin: 0 calc(-1 * var(--h-pad));
+    padding: 0.25rem var(--h-pad) 0.5rem;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--h-pad);
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .oa-rail::-webkit-scrollbar { display: none; }
+  .oa-card { display: flex; flex-direction: column; margin: 0; scroll-snap-align: start; }
+  .oa-card__media { aspect-ratio: 402 / 1000; background: var(--h-paper); }
+  .oa-card__media > button { height: 100%; }
+  .oa-card__name { margin: 0.875rem 0 0; font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; color: var(--h-ink); }
+  .oa-card__layout { margin: 0.25rem 0 0; font-size: 0.9375rem; line-height: 1.4; color: var(--h-ink); }
+  .oa-card__shown { margin: 0.25rem 0 0.875rem; color: var(--h-muted); }
+  .oa-card__apply { align-self: flex-start; margin-top: auto; cursor: pointer; font: inherit; font-size: 0.875rem; }
 
-  /* Списки — строками под линейками */
-  .oa-rules { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
-  .oa-rules li { margin: 0; padding: 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); color: var(--h-ink); }
-  #oa-profile .oa-rules { margin-top: clamp(2rem, 4vw, 3rem); }
-  @media (min-width: 62.5rem) { #oa-profile .oa-rules { columns: 2; column-gap: var(--h-gutter); } #oa-profile .oa-rules li { break-inside: avoid; } }
-
-  .oa-glass { display: grid; gap: var(--h-gutter); }
-  @media (min-width: 43.75rem) { .oa-glass { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .oa-glass__title { margin: 0 0 0.75rem; font-family: var(--h-font); font-size: 1.3125rem; font-weight: 600; letter-spacing: -0.015em; color: var(--h-ink); }
-  .oa-kit__second { margin-top: 1.75rem; }
+  /* ── Характеристики ── */
+  .oa-specs-grid { display: grid; gap: clamp(1.75rem, 4vw, 3rem); }
+  @media (min-width: 62.5rem) { .oa-specs-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+  .oa-specs-grid--more { margin-top: clamp(2.5rem, 5vw, 4rem); }
 
   .oa-specs { margin: 0; border-top: 0.0625rem solid var(--h-rule); }
   .oa-specs__row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; padding: 0.875rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
   .oa-specs__row dt { color: var(--h-muted); }
   .oa-specs__row dd { margin: 0; color: var(--h-ink); }
 
-  /* ── Шаги заказа ── */
-  .oa-steps { display: grid; gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .oa-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 62.5rem) { .oa-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .oa-step { margin: 0; padding: clamp(1.25rem, 2vw, 1.75rem); border-radius: var(--h-tile-radius); background: var(--h-wall); }
-  .oa-step__num { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--h-ink); color: var(--color-white); font-weight: 600; font-variant-numeric: tabular-nums; }
-  .oa-step__title { margin: 1.5rem 0 0.375rem; font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; color: var(--h-ink); }
-  .oa-step .h-body { margin: 0; }
+  /* «В комплекте» и «Отдельно» — короткие списки, рядом и на телефоне */
+  .oa-kit { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem var(--h-gutter); }
 
-  .oa-links { display: grid; gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+  /* Комплектующие и Opti White: на компьютере — заголовок и список,
+     на телефоне — свёрнуты под заголовок (скрипт выше) */
+  .oa-fold { margin: 0; }
+  summary.oa-subhead { list-style: none; pointer-events: none; }
+  summary.oa-subhead::-webkit-details-marker { display: none; }
+  @media (max-width: 43.6875rem) {
+    .oa-specs-grid--more { gap: 0; }
+    summary.oa-subhead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin: 0;
+      padding-block: 1rem;
+      border-top: 0.0625rem solid var(--h-rule);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .oa-fold:last-child { border-bottom: 0.0625rem solid var(--h-rule); }
+    summary.oa-subhead::after {
+      content: '';
+      flex: none;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-right: 0.125rem solid currentColor;
+      border-bottom: 0.125rem solid currentColor;
+      rotate: 45deg;
+      translate: 0 -0.125rem;
+      transition: rotate 200ms var(--ease-out);
+    }
+    .oa-fold[open] > summary.oa-subhead { margin-bottom: 0.25rem; }
+    .oa-fold[open] > summary.oa-subhead::after { rotate: 225deg; translate: 0 0.125rem; }
+    .oa-fold[open] { padding-bottom: 1rem; }
+    .oa-fold .oa-rules li:last-child { border-bottom: 0; }
+  }
+
+  .oa-subhead { margin: 0 0 0.75rem; font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; color: var(--h-ink); }
+  .oa-rules { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .oa-rules li { margin: 0; padding: 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); color: var(--h-ink); }
+  .oa-opti { margin: 0; max-width: 34rem; color: var(--h-soft); }
+
+  .oa-refs__title { margin-top: clamp(2.5rem, 5vw, 4rem); }
+  .oa-refs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 62.5rem) { .oa-refs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .oa-refs > li { margin: 0; }
+  .oa-ref { margin: 0; }
+  .oa-ref__media {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--h-radius);
+    outline: 0.0625rem solid var(--h-rule);
+    outline-offset: -0.0625rem;
+    background: var(--color-white);
+  }
+  .oa-ref__media img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .oa-ref__caption { margin-top: 0.625rem; color: var(--h-muted); }
+
+  /* ── Шаги: номера на линии — вертикальной на телефоне, горизонтальной на компьютере ── */
+  .oa-steps { display: grid; margin: 0; padding: 0; list-style: none; }
+  .oa-step { position: relative; margin: 0; padding: 0 0 1.75rem 3.5rem; }
+  .oa-step:last-child { padding-bottom: 0; }
+  .oa-step__num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--h-ink);
+    color: var(--color-white);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .oa-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 1.0938rem;
+    top: 2.25rem;
+    bottom: 0;
+    width: 0.0625rem;
+    background: var(--color-slate-300);
+  }
+  .oa-step__title { margin: 0.375rem 0; font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; color: var(--h-ink); }
+  .oa-step .h-body { margin: 0; color: var(--h-soft); }
+  @media (min-width: 62.5rem) {
+    .oa-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--h-gutter); }
+    .oa-step { padding: 3.5rem 0 0; }
+    .oa-step:not(:last-child)::before { left: 2.25rem; right: calc(-1 * var(--h-gutter)); top: 1.0938rem; bottom: auto; width: auto; height: 0.0625rem; }
+    .oa-step__title { margin-top: 0; }
+  }
+
+  /* ── Статьи по теме ── */
+  .oa-more__grafia { margin-top: 1.25rem; }
+  .oa-posts { display: grid; gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .oa-posts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .oa-posts { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
+  .oa-posts > li { margin: 0; }
+  .oa-more__nav { margin-top: clamp(2.5rem, 5vw, 4rem); }
+
+  .oa-nowrap { white-space: nowrap; }
 
   /* ── Вопросы ── */
   .oa-faq { display: grid; gap: 1.5rem; }
@@ -469,5 +661,10 @@ const zoom = (alt: string) => `Открыть фото на весь экран:
     .oa-faq { grid-template-columns: repeat(12, minmax(0, 1fr)); }
     .oa-faq > h2 { grid-column: 1 / span 4; }
     .oa-faq__list { grid-column: 6 / span 7; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .oa-rail__btn,
+    summary.oa-subhead::after { transition: none; }
   }
 </style>
