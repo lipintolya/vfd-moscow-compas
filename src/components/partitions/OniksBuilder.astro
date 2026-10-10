@@ -18,16 +18,20 @@
  * варианты.
  */
 import {
-  ONIKS_MODELS, ONIKS_PROFILES, ONIKS_GLASSES, ONIKS_GLASS_GROUPS, ONIKS_DEFAULT,
-  profileById, glassById, type OniksLayout, type OniksGlass,
+  ONIKS_MODELS, ONIKS_PROFILES, ONIKS_GLASSES, ONIKS_GLASS_GROUPS, ONIKS_DEFAULT, ONIKS_MODEL_IMAGE,
+  ONIKS_BUILDER_NOTES, ONIKS_ENAMEL_NOTE, profileById, glassById, glassLabel, glassPhrase,
+  profilePhrase, finishLabel, type OniksLayout, type OniksGlass,
 } from '../../data/oniks-alum'
 import { PHONE } from '../../config/site'
+import { typograph, upperFirst } from '../../lib/typograph'
 
-/* ── Геометрия створки (единицы viewBox) ── */
-const W = 402
-const H = 1000
+/* ── Геометрия схемы (единицы viewBox): створка в пропорциях фото
+   моделей фабрики, под ней — полоса под тень на полу ── */
+const { width: W, height: H } = ONIKS_MODEL_IMAGE
+const FLOOR = 40
 const FRAME = 18
 const BAR = 10
+const HANDLE = { w: 8, h: 120 }
 const IX = FRAME
 const IY = FRAME
 const IW = W - 2 * FRAME
@@ -49,18 +53,16 @@ const icon = (g: OniksLayout) => {
 }
 
 /* Образец стекла: «окно» за стеклом и слой стекла поверх */
-const rgba = (hex: string, a: number) => {
-  const n = parseInt(hex.slice(1), 16)
-  return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / ${a})`
-}
 const glassLayer = (g: OniksGlass) =>
-  g.kind === 'mirror' ? `linear-gradient(135deg, ${g.mirror![0]}, ${g.mirror![1]})`
+  g.kind === 'mirror' ? `linear-gradient(135deg, ${g.mirror?.[0] ?? g.color}, ${g.mirror?.[1] ?? g.color})`
   : g.kind === 'solid' ? g.color
-  : rgba(g.color, g.opacity ?? 0.2)
+  : `color-mix(in srgb, ${g.color} ${Math.round((g.opacity ?? 0.2) * 100)}%, transparent)`
 
-const model = ONIKS_MODELS.find((m) => m.num === ONIKS_DEFAULT.layout)!
-const profile = profileById(ONIKS_DEFAULT.profile)
-const glass = glassById(ONIKS_DEFAULT.glass)
+/* Сочетание по умолчанию — раскладка в отделке с её фото */
+const model = ONIKS_DEFAULT
+const profile = profileById(model.profile)
+const glass = glassById(model.glass)
+const finish = finishLabel(profile.id, glass.id)
 
 /* CSS-переменные схемы — их же меняет скрипт */
 const vars = [
@@ -71,27 +73,25 @@ const vars = [
   `--oa-m1: ${glass.mirror?.[0] ?? glass.color}`,
   `--oa-m2: ${glass.mirror?.[1] ?? glass.color}`,
 ].join('; ')
-
-const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase()}, ${g.group === '8' ? 'триплекс' : 'стекло'} ${g.name.toLowerCase()}`
 ---
 
 <div class="oa-build" data-oa-builder>
   <div class="oa-build__left">
     <!-- ── Схема: на компьютере — крупно, на телефоне — карточка «створка +
          подпись», прилипает под шапкой, пока листаются варианты ── -->
-    <div class="oa-visual">
+    <div class="oa-visual" data-oa-visual>
       <div class="oa-visual__card">
       <div class="oa-stage">
         <svg
           class="oa-pv"
-          viewBox={`0 0 ${W} 1040`}
+          viewBox={`0 0 ${W} ${H + FLOOR}`}
           role="img"
           aria-labelledby="oa-pv-title"
           data-oa-preview
           data-kind={glass.kind}
           style={vars}
         >
-          <title id="oa-pv-title" data-oa-pv-title>{`${model.name}: ${model.layout.toLowerCase()}. ${finish()}`}</title>
+          <title id="oa-pv-title" data-oa-pv-title>{`${model.name}: ${model.layout.toLowerCase()}. ${finish}`}</title>
           <defs>
             <clipPath id="oa-glass-area"><rect x={IX} y={IY} width={IW} height={IH} /></clipPath>
             <filter id="oa-frost" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18" /></filter>
@@ -128,7 +128,7 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
             </g>
           </defs>
 
-          <ellipse cx={W / 2} cy="1016" rx="196" ry="16" fill="url(#oa-floor-shadow)" />
+          <ellipse cx={W / 2} cy={H + FLOOR * 0.4} rx={W / 2 - 5} ry={FLOOR * 0.4} fill="url(#oa-floor-shadow)" />
 
           <g clip-path="url(#oa-glass-area)">
             <use href="#oa-room" class="oa-pv__room" />
@@ -148,13 +148,13 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
             ))}
           </g>
           <path class="oa-pv__frame" fill-rule="evenodd" d={`M0 0H${W}V${H}H0Z M${IX} ${IY}V${IY + IH}H${IX + IW}V${IY}Z`} />
-          <rect class="oa-pv__handle" x="5" y="440" width="8" height="120" rx="4" />
+          <rect class="oa-pv__handle" x={(FRAME - HANDLE.w) / 2} y={(H - HANDLE.h) / 2} width={HANDLE.w} height={HANDLE.h} rx={HANDLE.w / 2} />
         </svg>
       </div>
       <div class="oa-sum" aria-live="polite">
         <p class="oa-sum__name" data-oa-name>{model.name}</p>
         <p class="oa-sum__layout" data-oa-layout-label>{model.layout}</p>
-        <p class="oa-sum__finish" data-oa-finish>{finish()}</p>
+        <p class="oa-sum__finish" data-oa-finish>{finish}</p>
       </div>
       </div>
     </div>
@@ -162,16 +162,14 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
     <!-- ── Действия ── -->
     <div class="oa-actions">
       <div class="oa-actions__row">
-        <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать стоимость</a>
+        <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать по&nbsp;телефону</a>
         <button type="button" class="h-btn h-btn--quiet" data-oa-photo>Фото раскладки</button>
       </div>
       <p class="oa-actions__share">
         <button type="button" class="h-link oa-actions__copy" data-oa-copy>Скопировать ссылку на это сочетание</button>
         <span class="oa-actions__status" role="status" data-oa-copied></span>
       </p>
-      <p class="h-meta oa-actions__note">
-        Схема помогает выбрать сочетание, цвета на&nbsp;экране условные. Возможность конфигурации и&nbsp;стоимость подтвердим при&nbsp;расчёте.
-      </p>
+      <p class="h-meta oa-actions__note">{typograph(ONIKS_BUILDER_NOTES.preview)}</p>
     </div>
   </div>
 
@@ -195,17 +193,17 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
       <div class="oa-chips oa-chips--profile">
         {ONIKS_PROFILES.map((p) => (
           <label class="oa-chip oa-chip--profile">
-            <input class="oa-radio" type="radio" name="profile" value={p.id} checked={p.id === profile.id} data-name={p.name} data-color={p.color} data-shade={p.shade} />
+            <input class="oa-radio" type="radio" name="profile" value={p.id} checked={p.id === profile.id} data-name={p.name} data-phrase={profilePhrase(p)} data-color={p.color} data-shade={p.shade} />
             <span class="oa-chip__face oa-swatch oa-swatch--profile" style={`--sw: linear-gradient(145deg, ${p.color} 35%, ${p.shade})`} />
-            <span class="oa-chip__name">{p.name}{p.note && <span class="oa-chip__note">{p.note}</span>}</span>
+            <span class="oa-chip__name">{p.name}{p.enamel && <span class="oa-chip__note">{ONIKS_ENAMEL_NOTE}</span>}</span>
           </label>
         ))}
       </div>
-      <p class="h-meta oa-ctrl__hint">А также другие цвета эмали фабрики — подберём при расчёте.</p>
+      <p class="h-meta oa-ctrl__hint">{typograph(ONIKS_BUILDER_NOTES.profile)}</p>
     </fieldset>
 
     <fieldset class="oa-ctrl__group">
-      <legend class="oa-ctrl__legend">Стекло <span class="oa-ctrl__value" data-oa-value="glass">{glass.group === '8' ? 'Триплекс' : 'Стекло'} {glass.name.toLowerCase()}</span></legend>
+      <legend class="oa-ctrl__legend">Стекло <span class="oa-ctrl__value" data-oa-value="glass">{upperFirst(glassLabel(glass))}</span></legend>
       {ONIKS_GLASS_GROUPS.map((grp) => (
         <div class="oa-ctrl__sub">
           <p class="h-meta oa-ctrl__subtitle">{grp.title}</p>
@@ -218,8 +216,8 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
                   name="glass"
                   value={g.id}
                   checked={g.id === glass.id}
-                  data-name={`${g.group === '8' ? 'Триплекс' : 'Стекло'} ${g.name.toLowerCase()}`}
-                  data-finish={`${g.group === '8' ? 'триплекс' : 'стекло'} ${g.name.toLowerCase()}`}
+                  data-name={upperFirst(glassLabel(g))}
+                  data-phrase={glassPhrase(g)}
                   data-kind={g.kind}
                   data-color={g.color}
                   data-opacity={g.opacity ?? 1}
@@ -238,6 +236,8 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
 </div>
 
 <script>
+  import { upperFirst } from '../../lib/typograph'
+
   const root = document.querySelector<HTMLElement>('[data-oa-builder]')
   const form = root?.querySelector<HTMLFormElement>('[data-oa-form]')
   const svg = root?.querySelector<SVGSVGElement>('[data-oa-preview]')
@@ -269,7 +269,7 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
       set('--oa-m1', glass.dataset.m1)
       set('--oa-m2', glass.dataset.m2)
 
-      const finish = `Профиль ${profile.dataset.name!.toLowerCase()}, ${glass.dataset.finish}`
+      const finish = upperFirst(`${profile.dataset.phrase}, ${glass.dataset.phrase}`)
       nameOut.textContent = layout.dataset.name!
       layoutOut.textContent = layout.dataset.label!
       finishOut.textContent = finish
@@ -305,6 +305,21 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
 
     form.addEventListener('change', () => { apply(); syncUrl() })
 
+    /* Телефон: пока карточка прилипла, подложка закрывает полосу над ней
+       (под шапкой и меню разделов) — варианты не мелькают над карточкой.
+       Только при прилипании: в обычном потоке подложка легла бы на вводку */
+    const visual = $<HTMLElement>('[data-oa-visual]')
+    const visualStyle = getComputedStyle(visual)
+    let ticking = false
+    const markStuck = () => {
+      ticking = false
+      const sticky = visualStyle.position === 'sticky'
+      visual.toggleAttribute('data-stuck', sticky && visual.getBoundingClientRect().top <= parseFloat(visualStyle.top) + 1)
+    }
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(markStuck) } }, { passive: true })
+    addEventListener('resize', markStuck)
+    markStuck()
+
     /* «Собрать такую» под фото фабрики — её раскладка и отделка */
     document.querySelectorAll<HTMLButtonElement>('[data-oa-apply]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -338,19 +353,34 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
   /* ── Раскладка блока: схема слева, выбор справа; на телефоне — схема
      сверху и прилипает под шапкой и меню разделов, ниже выбор и действия.
      Обёртка схемы на телефоне — display: contents: схема становится
-     элементом общего flex-столбца, и sticky держится на всю его высоту ── */
-  .oa-build { display: flex; flex-direction: column; gap: 1.5rem; }
+     элементом общего flex-столбца, и sticky держится на всю его высоту.
+     Отступ сверху — высота шапки и место меню разделов (--snav-space
+     задаёт SectionNav; без меню — 0) ── */
+  .oa-build {
+    --oa-stick: calc(var(--header-height) + var(--snav-space, 0rem));
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
   .oa-build__left { display: contents; }
   /* Белая подложка — во всю ширину экрана, вместе с полями: лента
      раскладок уходит в поля, и под прилипшей карточкой её не видно */
   .oa-visual {
     order: 0;
     position: sticky;
-    top: calc(var(--header-height) + 3.75rem);
+    top: var(--oa-stick);
     z-index: 3;
     margin-inline: calc(-1 * var(--h-pad));
     padding: 0 var(--h-pad) 0.75rem;
     background: var(--h-paper);
+  }
+  .oa-visual[data-stuck]::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: 100%;
+    height: var(--oa-stick);
+    background: inherit;
   }
   .oa-ctrl { order: 1; }
   .oa-actions { order: 2; }
@@ -366,10 +396,13 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
     background: var(--h-wall);
   }
   .oa-stage { display: grid; place-items: center; }
+  /* Высота створки на телефоне — от высоты экрана: на маленьком
+     карточка не закрывает варианты (svh — экран с панелями браузера) */
   .oa-pv {
     display: block;
     width: auto;
     height: min(28vh, 14rem);
+    height: min(26svh, 14rem);
     overflow: visible;
   }
 
@@ -385,7 +418,7 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
       flex-direction: column;
       gap: 1.5rem;
       position: sticky;
-      top: calc(var(--header-height) + 4.5rem);
+      top: calc(var(--oa-stick) + 0.5rem);
     }
     .oa-visual { position: static; margin-inline: 0; padding: 0; }
     /* Компьютер: крупная створка на серой подложке, подпись — под ней */
@@ -396,8 +429,9 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
       background: var(--h-wall);
     }
     /* Колонка со схемой прилипает под шапкой и меню разделов — схема,
-       подпись и кнопки должны поместиться в экран целиком */
-    .oa-pv { height: clamp(18rem, calc(100vh - var(--header-height) - 25rem), 31rem); }
+       подпись и кнопки (--oa-below) должны поместиться в экран целиком */
+    .oa-build { --oa-below: 21rem; }
+    .oa-pv { height: clamp(18rem, calc(100vh - var(--oa-stick) - var(--oa-below)), 31rem); }
     .oa-sum { margin-top: 0.875rem; }
   }
 
@@ -466,9 +500,12 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
   .oa-ctrl__subtitle { margin: 0 0 0.625rem; color: var(--h-muted); }
   .oa-ctrl__hint { margin: 0.75rem 0 0; color: var(--h-muted); }
 
+  /* Раскладки и цвета профиля — одной строкой, колонок столько, сколько
+     вариантов в данных. Колонка цвета не уже своей подписи: на 320 px
+     «Шампань» шире пятой части строки */
   .oa-chips { display: grid; gap: 0.625rem 0.5rem; }
-  .oa-chips--layout { grid-template-columns: repeat(10, minmax(0, 1fr)); }
-  .oa-chips--profile { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .oa-chips--layout { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .oa-chips--profile { grid-auto-flow: column; grid-auto-columns: minmax(min-content, 1fr); }
   .oa-chips--glass { grid-template-columns: repeat(auto-fill, minmax(4.75rem, 1fr)); }
   /* Раскладки на узком экране — лентой вбок, одной строкой */
   @media (max-width: 43.6875rem) {
@@ -493,12 +530,14 @@ const finish = (p = profile, g = glass) => `Профиль ${p.name.toLowerCase(
     display: grid;
     place-items: center;
     width: 100%;
-    border-radius: 0.625rem;
+    border-radius: 0.75rem;
     outline: 0.0625rem solid var(--h-rule);
     outline-offset: 0;
     transition: outline-color 150ms var(--ease-out), outline-width 150ms var(--ease-out);
   }
-  .oa-chip__name { font-size: 0.8125rem; font-weight: 500; line-height: 1.25; color: var(--h-soft); }
+  /* Подпись — 13 px; уже 375 px чуть мельче, чтобы «Прозрачный» помещался
+     под образцом стекла (четыре в ряд на 360 px) */
+  .oa-chip__name { font-size: clamp(0.75rem, 4vw - 0.125rem, 0.8125rem); font-weight: 500; line-height: 1.25; color: var(--h-soft); }
   .oa-chip__note { display: block; font-weight: 400; color: var(--h-muted); }
 
   .oa-chip:hover .oa-chip__face { outline-color: var(--color-slate-400); }

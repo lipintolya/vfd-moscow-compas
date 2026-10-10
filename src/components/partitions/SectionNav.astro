@@ -45,8 +45,12 @@ const {
 </nav>
 
 <style>
-  /* Якоря останавливаются ниже шапки и меню (≈3.5rem) */
-  :global(html:has(#pt-snav)) { scroll-padding-top: calc(var(--header-height) + 4rem); }
+  /* --snav-space — место меню под шапкой: якоря останавливаются ниже
+     него, прилипающие блоки страницы (конструктор ОНИКС) — тоже */
+  :global(html:has(#pt-snav)) {
+    --snav-space: 4rem;
+    scroll-padding-top: calc(var(--header-height) + var(--snav-space));
+  }
 
   .snav {
     position: fixed;

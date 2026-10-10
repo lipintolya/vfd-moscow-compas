@@ -11,8 +11,11 @@
 const NBSP = ' '
 
 /* Слово из 1–2 букв или служебное из трёх (не любое трёхбуквенное:
-   «дом», «шаг» привязывать незачем) */
-const SHORT = /(^|[\s(«])([а-яё]{1,2}|для|без|под|над|при|про|или|как|что) /gi
+   «дом», «шаг» привязывать незачем). Единицы измерения («мм», «м»,
+   «кг») — не служебные слова: они держатся за число перед ними, а не
+   за слово после — иначе «4 мм или триплекс 8 мм» склеивается в одну
+   неразрывную строку и вылезает за край экрана */
+const SHORT = /(^|[\s(«])((?!(?:мм|см|км|кг|м) )[а-яё]{1,2}|для|без|под|над|при|про|или|как|что) /gi
 
 export function typograph(text: string): string {
   return text
@@ -22,4 +25,14 @@ export function typograph(text: string): string {
     .replace(/ — /g, `${NBSP}— `)
     .replace(/(\d) (?=[а-яё])/gi, `$1${NBSP}`)
     .replace(/([а-яё]) (?=\d)/gi, `$1${NBSP}`)
+}
+
+/** Перечисление по-русски: «хром, золото и чёрный» */
+export function listRu(items: string[]): string {
+  return items.length > 1 ? `${items.slice(0, -1).join(', ')} и ${items.at(-1)}` : items.join('')
+}
+
+/** Заглавная первая буква — фраза из середины предложения встаёт в начало строки */
+export function upperFirst(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1)
 }

@@ -60,7 +60,7 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public deploy
 |---|---|---|
 | Статьи и публикации `/articles/` | `src/content/articles/<slug>.mdoc` — одна статья = один файл | ссылки в статье; облегчённые копии — `node scripts/gen-article-images.mjs` |
 | Перегородки GRAFIA `/partitions/` | `src/data/partitions.ts` | облако; рендеры — `npm run gen:renders` |
-| Перегородки ОНИКС ALUM `/partitions/oniks-alum/` | `src/data/oniks-alum.ts` | оригиналы — `assets/oniks-alum/` (инструкция в README там же), облегчённые — `npm run gen:oniks` |
+| Перегородки ОНИКС ALUM `/partitions/oniks-alum/` | `src/data/oniks-alum.ts` — все тексты страницы; цифры фабрики (высота, ширина, срок, стекло) — один раз в `ONIKS_SPEC` | оригиналы — `assets/oniks-alum/` (инструкция в README там же), облегчённые — `npm run gen:oniks` |
 | Скрытые двери `/catalog/skrytye-dveri/` | `src/data/skrytye-dveri-products.ts`, `hidden-doors-page.ts` | облако |
 | Видео | `src/data/videos.ts`; ролик для статьи — `node scripts/optimize-video.mjs` | облако / `public/renders/` |
 

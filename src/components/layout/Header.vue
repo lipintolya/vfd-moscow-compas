@@ -780,11 +780,14 @@ onUnmounted(() => {
 .hdr-num { font-variant-numeric: tabular-nums; }
 
 /* ── Бренд ── */
+/* max-width — не шире своей колонки: иначе на 320–350 px текст бренда
+   (nowrap) уходил под кнопки справа, а не сокращался многоточием */
 .hdr-brand {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
+  max-width: 100%;
   min-height: var(--hdr-tap);
   justify-self: start;
   color: var(--hdr-fg);

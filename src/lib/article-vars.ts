@@ -9,6 +9,7 @@
    (src/lib/articles.ts), Markdoc фронтматтер не обрабатывает. */
 import { SITE, PHONE } from '../config/site'
 import { companyLegalInfo } from './contacts-data'
+import { listRu } from './typograph'
 import { MEASURE_TERMS, INSTALL_TERMS, rub } from '../data/services'
 import {
   DOOR_HEIGHT, SECRET_SIZES, SECRET_REVERS_SIZES, CUSTOM_MAX_HEIGHT, REFLEX_MAX_HEIGHT,
@@ -92,10 +93,6 @@ export const ARTICLE_VARS = {
 /** Пробелы — неразрывные: число не отрывается от единицы («70 кг») */
 function nb(text: string): string {
   return text.replace(/ /g, '\u00a0')
-}
-
-function listRu(items: string[]): string {
-  return items.length > 1 ? `${items.slice(0, -1).join(', ')} и ${items.at(-1)}` : items.join('')
 }
 
 /** Подставляет {% $путь.к.значению %} в строку фронтматтера. Неизвестная
