@@ -18,7 +18,9 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
 <article class="dcard">
   <div class:list={['dcard__media', contain && 'dcard__media--contain']}>
     {image ? (
-      <img {...articleImg(image)} sizes="(min-width: 640px) 50vw, 100vw" alt={imageAlt ?? title} loading="lazy" decoding="async" />
+      <button type="button" class="dcard__zoom" data-zoom={image} data-zoom-caption={title} aria-label={`Открыть фото на весь экран: ${imageAlt ?? title}`}>
+        <img {...articleImg(image)} sizes="(min-width: 640px) 50vw, 100vw" alt={imageAlt ?? title} loading="lazy" decoding="async" />
+      </button>
     ) : (
       <div class="dcard__ph" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none">
@@ -63,6 +65,7 @@ const tagList = tags ? tags.split(/[,•]/).map((t) => t.trim()).filter(Boolean)
   background: var(--color-slate-50);
   overflow: hidden;
 }
+.dcard__media .dcard__zoom { height: 100%; }
 .dcard__media img {
   width: 100%;
   height: 100%;

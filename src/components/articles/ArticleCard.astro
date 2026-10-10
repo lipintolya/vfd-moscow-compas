@@ -16,7 +16,7 @@
  * небольшой подрезке страдал правый край, а не надпись.
  */
 import { articleCoverImg } from '../../lib/article-images'
-import { articleHref, formatArticleDate, readingMinutes, ARTICLE_AUTHOR, type Article } from '../../lib/articles'
+import { articleHref, formatArticleDate, readingMinutes, articleAuthor, type Article } from '../../lib/articles'
 import { KIND_LABEL } from '../../data/article-kinds'
 import { typograph } from '../../lib/typograph'
 
@@ -30,6 +30,7 @@ interface Props {
 const { article, feature = false, loading = 'lazy', heading = 'h3' } = Astro.props
 const { data } = article
 const Heading = heading
+const author = articleAuthor(article)
 const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : '(min-width: 56.25rem) 33vw, (min-width: 43.75rem) 50vw, 82vw'
 ---
 
@@ -58,8 +59,8 @@ const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : '(min-width: 56.25
     <span class="acard__foot">
       {feature && (
         <span class="acard__author">
-          <img src={ARTICLE_AUTHOR.photo} srcset={ARTICLE_AUTHOR.photoSrcset} sizes="2.5rem" alt="" width="640" height="640" loading="lazy" decoding="async" />
-          <span><span class="acard__author-name">{ARTICLE_AUTHOR.name}</span><span class="acard__author-role">{ARTICLE_AUTHOR.role}</span></span>
+          {author.photo && <img src={author.photo} srcset={author.photoSrcset} sizes={author.photoSrcset ? "2.5rem" : undefined} alt="" width="640" height="640" loading="lazy" decoding="async" />}
+          <span><span class="acard__author-name">{author.name}</span><span class="acard__author-role">{author.role}</span></span>
         </span>
       )}
       <span class="acard__more">

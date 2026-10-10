@@ -28,6 +28,20 @@ const articles = defineCollection({
         ставится ссылка на раздел), text — суть шага одним-двумя
         предложениями. Шаги должны быть видны в тексте статьи. */
     steps: z.array(z.object({ name: z.string(), text: z.string() })).optional(),
+    /** Автор, если это не основатель студии (по умолчанию — он, из SITE):
+        например, публикация Telegram-канала. href — страница автора
+        (внешняя ссылка откроется в новой вкладке), photo — аватар,
+        linkLabel — подпись ссылки в блоке автора в конце статьи. type —
+        для разметки поисковиков: person — человек, organization — канал,
+        студия, компания. */
+    author: z.object({
+      name: z.string(),
+      role: z.string(),
+      href: z.string(),
+      photo: z.string().optional(),
+      linkLabel: z.string().optional(),
+      type: z.enum(['person', 'organization']).default('organization'),
+    }).optional(),
     /** Статья или публикация — см. src/data/article-kinds.ts */
     kind: z.enum(ARTICLE_KINDS).default('article'),
     publishDate: z.coerce.date(),

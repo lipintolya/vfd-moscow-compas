@@ -3,14 +3,22 @@
  * «Видео о дверях и фурнитуре» на главной — первые HOME_VIDEOS роликов основателя студии
  * шоурума (src/data/videos.ts) и ссылка на страницу со всеми, /video/.
  * Карточки — VideoList/VideoCard, просмотр и листание — VideoPlayer.
+ * Тот же блок — в статьях и в разделе статей.
  */
 import { SITE } from '../../config/site'
 import { VIDEOS, HOME_VIDEOS } from '../../data/videos'
 import VideoList from '../video/VideoList.astro'
 import VideoPlayer from '../video/VideoPlayer.astro'
+
+interface Props {
+  /** Без верхнего поля — на главной блок продолжает предыдущую белую
+      секцию; в статьях идёт после серой — поле нужно */
+  tightTop?: boolean
+}
+const { tightTop = true } = Astro.props
 ---
 
-<section id="video" class="h-sec h-sec--tight-top" aria-labelledby="video-heading">
+<section id="video" class:list={['h-sec', { 'h-sec--tight-top': tightTop }]} aria-labelledby="video-heading">
   <div class="container">
     <header class="h-head">
       <h2 id="video-heading" class="h-h2">Видео о&nbsp;дверях и&nbsp;фурнитуре</h2>

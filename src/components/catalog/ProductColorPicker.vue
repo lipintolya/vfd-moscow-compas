@@ -69,8 +69,8 @@ const normalizeHex = (hex: string) => {
    свой служебный <style> для astro-island, и Vue при гидратации ловит
    hydration node mismatch — первый клик после этого либо не открывает
    модалку, либо открывает с потерянными обработчиками, помогает только
-   полная перезагрузка. Тот же гейт, что уже применён в Reviews.vue и
-   FigureLightbox.vue: рендерим Teleport только после реального маунта на
+   полная перезагрузка. Тот же гейт, что уже применён в Reviews.vue:
+   рендерим Teleport только после реального маунта на
    клиенте, SSR отдаёт вообще без него. ── */
 const mounted = ref(false)
 onMounted(() => { mounted.value = true })

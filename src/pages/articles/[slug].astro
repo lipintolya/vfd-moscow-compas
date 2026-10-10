@@ -22,10 +22,13 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import VisitBand from '../../components/home/VisitBand.astro'
+import Videos from '../../components/home/Videos.astro'
+import ArticleNav from '../../components/articles/ArticleNav.astro'
+import ArticleLightbox from '../../components/articles/ArticleLightbox.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
 import { articleCoverImg } from '../../lib/article-images'
 import {
-  getArticles, withArticleVars, articleHref, formatArticleDate, readingMinutes, articleWordCount, ARTICLE_AUTHOR,
+  getArticles, withArticleVars, articleHref, formatArticleDate, readingMinutes, articleWordCount, articleAuthor,
 } from '../../lib/articles'
 import { getCatalogCards, getSeriesList } from '../../lib/catalog-data'
 import { DOOR_CATEGORIES } from '../../data/door-categories'
@@ -51,6 +54,11 @@ const abs = (path: string) => new URL(path, SITE.url).href
 const minutes = readingMinutes(article.body)
 const words = articleWordCount(article.body)
 const toc = headings.filter((h) => h.depth === 2)
+const author = articleAuthor(article)
+/* Внешняя страница автора (канал, сайт) — в новой вкладке */
+const authorLink = author.external
+  ? { href: author.href, target: '_blank', rel: 'noopener author' }
+  : { href: author.href, rel: 'author' }
 const summary = data.summary ?? []
 const faq = data.faq ?? []
 const cover = data.coverImage ? articleCoverImg(data.coverImage, 'hero') : undefined
@@ -96,14 +104,22 @@ const structuredData = [
     timeRequired: `PT${minutes}M`,
     articleSection: ARTICLES_SECTION,
     ...(data.keywords?.length ? { keywords: data.keywords.join(', ') } : {}),
-    author: {
-      '@type': 'Person',
-      name: ARTICLE_AUTHOR.name,
-      jobTitle: ARTICLE_AUTHOR.role,
-      image: abs(ARTICLE_AUTHOR.photo),
-      url: abs(ARTICLE_AUTHOR.href),
-      worksFor: { '@id': LOCAL_BUSINESS_ID },
-    },
+    // Основатель студии — Person (E-E-A-T), канал или компания — Organization
+    author: author.type === 'person'
+      ? {
+          '@type': 'Person',
+          name: author.name,
+          jobTitle: author.role,
+          ...(author.photo ? { image: abs(author.photo) } : {}),
+          url: abs(author.href),
+          worksFor: { '@id': LOCAL_BUSINESS_ID },
+        }
+      : {
+          '@type': 'Organization',
+          name: author.name,
+          ...(author.photo ? { logo: abs(author.photo) } : {}),
+          url: abs(author.href),
+        },
     publisher: { '@id': LOCAL_BUSINESS_ID },
     isPartOf: { '@type': 'Blog', name: ARTICLES_SECTION, url: abs('/articles/') },
     mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
@@ -177,26 +193,28 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         </p>
         <h1 class="post-head__title">{typograph(data.title)}</h1>
         <p class="h-lead post-head__lead">{typograph(data.description)}</p>
-        <a href={ARTICLE_AUTHOR.href} class="post-author" rel="author">
-          <img src={ARTICLE_AUTHOR.photo} srcset={ARTICLE_AUTHOR.photoSrcset} sizes="2.5rem" alt="" width="640" height="640" loading="lazy" decoding="async" />
-          <span><span class="post-author__name">{ARTICLE_AUTHOR.name}</span>, {ARTICLE_AUTHOR.role}</span>
+        <a {...authorLink} class="post-author">
+          {author.photo && <img src={author.photo} srcset={author.photoSrcset} sizes={author.photoSrcset ? "2.5rem" : undefined} alt="" width="640" height="640" loading="lazy" decoding="async" />}
+          <span><span class="post-author__name">{author.name}</span>, {author.role}</span>
         </a>
       </header>
 
       {cover && (
         <div class="container">
           <figure class="h-media post-cover">
-            <img
-              src={cover.src}
-              srcset={cover.srcset}
-              sizes={COVER_SIZES}
-              alt={data.coverImageAlt ?? data.title}
-              width="1600"
-              height="900"
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-            />
+            <button type="button" data-zoom={data.coverImage} data-zoom-caption={data.coverImageAlt ?? data.title} aria-label="Открыть обложку на весь экран">
+              <img
+                src={cover.src}
+                srcset={cover.srcset}
+                sizes={COVER_SIZES}
+                alt={data.coverImageAlt ?? data.title}
+                width="1600"
+                height="900"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+              />
+            </button>
           </figure>
         </div>
       )}
@@ -254,13 +272,17 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         )}
 
         <aside class="post-block post-byline" aria-label="Автор статьи">
-          <img src={ARTICLE_AUTHOR.photo} srcset={ARTICLE_AUTHOR.photoSrcset} sizes="4.5rem" alt={ARTICLE_AUTHOR.name} width="640" height="640" loading="lazy" decoding="async" />
+          {author.photo && <img src={author.photo} srcset={author.photoSrcset} sizes={author.photoSrcset ? "4.5rem" : undefined} alt={author.name} width="640" height="640" loading="lazy" decoding="async" />}
           <div>
-            <p class="post-byline__name">{ARTICLE_AUTHOR.name}</p>
-            <p class="h-meta post-byline__role">{typograph(`${ARTICLE_AUTHOR.role[0]!.toUpperCase()}${ARTICLE_AUTHOR.role.slice(1)}. ${SITE.experience}.`)}</p>
-            <a href={ARTICLE_AUTHOR.href} class="h-link post-byline__more">О студии и основателе</a>
+            <p class="post-byline__name">{author.name}</p>
+            <p class="h-meta post-byline__role">{typograph(author.about)}</p>
+            <a {...authorLink} class="h-link post-byline__more">{author.linkLabel}</a>
           </div>
         </aside>
+
+        <div class="post-block post-nav">
+          <ArticleNav />
+        </div>
       </div>
     </article>
 
@@ -278,7 +300,11 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </section>
     )}
 
+    <Videos tightTop={false} />
+
     <VisitBand />
+
+    <ArticleLightbox />
   </div>
 </BaseLayout>
 
@@ -314,6 +340,8 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 
   /* ── Обложка — 16:9 без обрезки (на ней может быть надпись) ── */
   .post-cover { margin: 0; aspect-ratio: 16 / 9; border-radius: 1.75rem; }
+  /* Обложка — кнопка «открыть во весь экран» (ArticleLightbox) */
+  .post-cover > button { height: 100%; }
   @media (max-width: 47.9375rem) { .post-cover { border-radius: 1.25rem; } }
 
   /* ── Раскладка: на компьютере оглавление слева (закреплено), всё

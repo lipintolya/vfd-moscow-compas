@@ -1,0 +1,261 @@
+---
+/**
+ * Просмотр фото статьи на весь экран — один на страницу статьи. Открывает
+ * любое изображение статьи, обёрнутое в кнопку с data-zoom (обложка,
+ * {% figure %}, {% photo %}, {% card %}): по нажатию — оригинал во весь
+ * экран, листание по всем фото статьи стрелками, клавишами и свайпом,
+ * закрытие — крестиком, Esc или нажатием мимо фото.
+ *
+ * Кнопка-обёртка: <button type="button" data-zoom={оригинал}
+ * data-zoom-caption={подпись} aria-label="…">…<img>…</button>.
+ *
+ * Нативный <dialog> (showModal): фокус внутри окна, Esc и доступность —
+ * из коробки. Прокрутку страницы держит useScrollLock (CLAUDE.md:
+ * не body.style.overflow). Без анимаций: сначала показываем уже
+ * загруженное фото из текста, оригинал подменяет его, когда загрузится.
+ */
+---
+
+<dialog class="alb" aria-label="Просмотр фото" data-alb>
+  <div class="alb__top">
+    <p class="alb__count" data-alb-count aria-live="polite"></p>
+    <button type="button" class="alb__btn" data-alb-close aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="alb__stage" data-alb-stage>
+    <img class="alb__img" data-alb-img alt="" decoding="async" />
+  </div>
+  <div class="alb__bottom">
+    <button type="button" class="alb__btn" data-alb-prev aria-label="Предыдущее фото">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="m15 5-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <p class="alb__caption" data-alb-caption></p>
+    <button type="button" class="alb__btn" data-alb-next aria-label="Следующее фото">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</dialog>
+
+<script>
+  import { useScrollLock } from '../../lib/scroll-lock'
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-alb]')
+  if (dialog) {
+    const img = dialog.querySelector<HTMLImageElement>('[data-alb-img]')!
+    const count = dialog.querySelector<HTMLElement>('[data-alb-count]')!
+    const caption = dialog.querySelector<HTMLElement>('[data-alb-caption]')!
+    const prev = dialog.querySelector<HTMLButtonElement>('[data-alb-prev]')!
+    const next = dialog.querySelector<HTMLButtonElement>('[data-alb-next]')!
+    const stage = dialog.querySelector<HTMLElement>('[data-alb-stage]')!
+    const lock = useScrollLock()
+
+    /* Все фото статьи — в порядке на странице */
+    const triggers = [...document.querySelectorAll<HTMLElement>('[data-zoom]')]
+    const items = triggers.map((t) => {
+      const thumb = t.querySelector('img')
+      return {
+        src: t.dataset.zoom!,
+        /* Уже загруженное фото из текста — показываем сразу, пока грузится оригинал */
+        thumb: () => thumb?.currentSrc || '',
+        alt: thumb?.alt ?? '',
+        caption: t.dataset.zoomCaption || thumb?.alt || '',
+      }
+    })
+    let index = 0
+    let opener: HTMLElement | null = null
+
+    const preload = (i: number) => {
+      const item = items[(i + items.length) % items.length]
+      if (item) new Image().src = item.src
+    }
+
+    const show = (i: number) => {
+      index = (i + items.length) % items.length
+      const item = items[index]!
+      const shown = index
+      img.src = item.thumb() || item.src
+      img.alt = item.alt
+      if (img.src !== new URL(item.src, location.href).href) {
+        const full = new Image()
+        full.onload = () => { if (index === shown && dialog.open) img.src = item.src }
+        full.src = item.src
+      }
+      caption.textContent = item.caption
+      count.textContent = items.length > 1 ? `${index + 1} из ${items.length}` : ''
+      prev.hidden = next.hidden = items.length < 2
+      preload(index + 1)
+      preload(index - 1)
+    }
+
+    const open = (i: number, from: HTMLElement) => {
+      opener = from
+      lock.lock()
+      dialog.showModal()
+      show(i)
+    }
+
+    triggers.forEach((t, i) => t.addEventListener('click', () => open(i, t)))
+    prev.addEventListener('click', () => show(index - 1))
+    next.addEventListener('click', () => show(index + 1))
+    dialog.querySelector('[data-alb-close]')!.addEventListener('click', () => dialog.close())
+
+    /* Нажатие мимо фото — закрыть */
+    stage.addEventListener('click', (e) => { if (e.target === stage) dialog.close() })
+
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(index - 1)
+      if (e.key === 'ArrowRight') show(index + 1)
+    })
+
+    /* Свайп влево-вправо — листать (телефон) */
+    let startX = 0
+    let startY = 0
+    stage.addEventListener('touchstart', (e) => {
+      startX = e.touches[0]!.clientX
+      startY = e.touches[0]!.clientY
+    }, { passive: true })
+    stage.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0]!.clientX - startX
+      const dy = e.changedTouches[0]!.clientY - startY
+      if (items.length > 1 && Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1))
+    })
+
+    dialog.addEventListener('close', () => {
+      lock.unlock()
+      img.removeAttribute('src')
+      opener?.focus({ preventScroll: true })
+    })
+  }
+</script>
+
+<style>
+  .alb {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+    border: 0;
+    background: var(--color-slate-950);
+    color: var(--color-white);
+  }
+  .alb[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  .alb::backdrop { background: transparent; }
+
+  .alb__top,
+  .alb__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem clamp(0.75rem, 3vw, 1.5rem);
+  }
+  .alb__count {
+    margin: 0;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--color-white) 70%, transparent);
+  }
+  .alb__caption {
+    flex: 1;
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    text-align: center;
+    color: color-mix(in srgb, var(--color-white) 85%, transparent);
+    text-wrap: balance;
+  }
+  .alb__btn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0.0625rem solid color-mix(in srgb, var(--color-white) 22%, transparent);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-white) 8%, transparent);
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out);
+  }
+  .alb__btn:hover { background: color-mix(in srgb, var(--color-white) 18%, transparent); }
+  .alb__btn:focus-visible { outline: 0.125rem solid var(--color-white); outline-offset: 0.1875rem; }
+  .alb__btn[hidden] { visibility: hidden; display: grid !important; }
+
+  .alb__stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    touch-action: pan-y pinch-zoom;
+  }
+  /* Фото вписано в сцену целиком: и по ширине, и по высоте */
+  .alb__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0 clamp(0.75rem, 3vw, 1.5rem);
+    object-fit: contain;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .alb__btn { transition: none; }
+  }
+
+  /* ── Кнопка-обёртка фото в тексте статьи (data-zoom) ── */
+  :global([data-zoom]) {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: zoom-in;
+  }
+  :global([data-zoom]:focus-visible) { outline: 0.125rem solid var(--color-secondary-700); outline-offset: 0.1875rem; border-radius: var(--h-radius); }
+  /* Значок «увеличить»: на телефоне виден сразу — подсказывает, что фото
+     открывается; на компьютере — при наведении. ::before — подложка,
+     ::after — значок (маска, цвет — токеном) */
+  :global([data-zoom])::before,
+  :global([data-zoom])::after {
+    content: '';
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    opacity: 0;
+    transition: opacity 150ms var(--ease-out);
+    pointer-events: none;
+  }
+  :global([data-zoom])::before {
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-slate-950) 55%, transparent);
+  }
+  :global([data-zoom])::after {
+    background: var(--color-white);
+    -webkit-mask: center / 1rem no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round'%3E%3Cpath d='M12 3h5v5M8 17H3v-5M17 3l-5.5 5.5M3 17l5.5-5.5'/%3E%3C/svg%3E");
+            mask: center / 1rem no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round'%3E%3Cpath d='M12 3h5v5M8 17H3v-5M17 3l-5.5 5.5M3 17l5.5-5.5'/%3E%3C/svg%3E");
+  }
+  :global([data-zoom]:hover)::before,
+  :global([data-zoom]:hover)::after,
+  :global([data-zoom]:focus-visible)::before,
+  :global([data-zoom]:focus-visible)::after { opacity: 1; }
+  @media (hover: none) {
+    :global([data-zoom])::before,
+    :global([data-zoom])::after { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global([data-zoom])::before,
+    :global([data-zoom])::after { transition: none; }
+  }
+</style>

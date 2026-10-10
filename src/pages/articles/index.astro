@@ -10,6 +10,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
+import ArticleNav from '../../components/articles/ArticleNav.astro'
+import Videos from '../../components/home/Videos.astro'
 import { getArticles, articleHref } from '../../lib/articles'
 import { ARTICLES_SECTION } from '../../data/article-kinds'
 import { SITE } from '../../config/site'
@@ -78,12 +80,19 @@ const structuredData = articles.length ? [{
         ) : (
           <p class="h-body">Материалы появятся совсем скоро.</p>
         )}
+
+        <div class="ah__nav">
+          <ArticleNav />
+        </div>
       </div>
     </section>
+
+    <Videos tightTop={false} />
   </div>
 </BaseLayout>
 
 <style>
+  .ah__nav { margin-top: clamp(2.5rem, 5vw, 4rem); }
   .ah { padding-block: clamp(1rem, 2vw, 1.5rem) var(--h-sec); }
   .ah__head {
     display: grid;

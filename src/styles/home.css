@@ -236,7 +236,8 @@
   border-radius: var(--h-radius);
   background: var(--h-media-bg);
 }
-.h-media > img {
+.h-media > img,
+.h-media > [data-zoom] > img {
   display: block;
   width: 100%;
   height: 100%;

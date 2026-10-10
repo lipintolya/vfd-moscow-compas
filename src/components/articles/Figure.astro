@@ -1,5 +1,4 @@
 ---
-import FigureLightbox from './FigureLightbox.vue'
 import { articleImg } from '../../lib/article-images'
 
 interface Props {
@@ -23,14 +22,25 @@ interface Props {
 const { src, alt = '', caption, narrow = false, natural = false } = Astro.props
 
 /* В тексте — облегчённый вариант по ширине экрана (колонка статьи до 80rem,
-   narrow — до 26rem); по клику FigureLightbox открывает оригинал. */
+   narrow — до 26rem); по нажатию оригинал открывается во весь экран
+   (ArticleLightbox на странице статьи — по data-zoom). */
 const inline = src ? articleImg(src) : undefined
 const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-width: 1312px) 1280px, calc(100vw - 32px)'
 ---
 
 <figure class:list={['article-figure', narrow && 'article-figure--narrow']}>
   {src ? (
-    <FigureLightbox src={src} inlineSrc={inline?.src} inlineSrcset={inline?.srcset} sizes={sizes} alt={alt} natural={narrow || natural} client:visible />
+    <button type="button" data-zoom={src} data-zoom-caption={caption} aria-label={`Открыть фото на весь экран${alt ? `: ${alt}` : ''}`}>
+      <img
+        src={inline?.src ?? src}
+        srcset={inline?.srcset}
+        sizes={inline?.srcset ? sizes : undefined}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        class:list={['article-figure__img', (narrow || natural) && 'article-figure__img--natural']}
+      />
+    </button>
   ) : (
     <div class="article-figure__placeholder" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none">
@@ -49,6 +59,20 @@ const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-w
 <style>
 .article-figure {
   margin: 2rem 0;
+}
+.article-figure__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  border-radius: var(--h-radius, 0.75rem);
+  object-fit: cover;
+}
+/* Схемы, палитры, картинки с текстом — целиком, без кропа */
+.article-figure__img--natural {
+  aspect-ratio: auto;
+  object-fit: contain;
+  background: var(--color-white);
+  border: 0.0625rem solid var(--h-rule, var(--color-slate-200));
 }
 .article-figure__caption {
   margin-top: 0.75rem;

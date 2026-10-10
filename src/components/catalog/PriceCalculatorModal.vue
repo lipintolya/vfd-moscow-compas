@@ -18,8 +18,7 @@ import { PHONE, SITE } from '../../config/site'
    конфликтует с местом, куда Astro вставляет свой служебный <style>
    для astro-island — Vue при гидратации ловит hydration node mismatch,
    и первый клик после этого не открывает модалку (помогает только
-   полная перезагрузка страницы). Тот же паттерн, что в Reviews.vue и
-   FigureLightbox.vue.
+   полная перезагрузка страницы). Тот же паттерн, что в Reviews.vue.
    ============================================================ */
 const props = defineProps<{
   open:        boolean

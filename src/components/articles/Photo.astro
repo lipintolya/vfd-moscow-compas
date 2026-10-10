@@ -1,9 +1,10 @@
 ---
 /**
  * src/components/articles/Photo.astro
- * Одна плитка внутри {% photogrid %} — квадратная ячейка, object-fit:cover
- * (без искажений, только обрезка при несовпадении пропорций с квадратом).
- * href — вся плитка становится ссылкой (напр. на страницу модели).
+ * Одна плитка внутри {% photogrid %} — квадратная ячейка (у сетки doors —
+ * вытянутая), object-fit:cover: без искажений, только обрезка.
+ * Нажатие на фото — оригинал во весь экран (ArticleLightbox, data-zoom);
+ * href — подпись становится ссылкой (напр. на страницу модели или серии).
  */
 import { articleImg } from '../../lib/article-images'
 
@@ -14,26 +15,27 @@ interface Props {
   href?:   string
 }
 const { src, alt = '', caption, href } = Astro.props
-const Tag = href ? 'a' : 'div'
 ---
 
 <figure class="dphoto">
-  <Tag class:list={['dphoto__link', { 'is-link': href }]} {...(href ? { href } : {})}>
-    <span class="dphoto__frame">
-      <img {...articleImg(src)} sizes="(min-width: 40rem) 33vw, 50vw" alt={alt} loading="lazy" decoding="async" />
-    </span>
-    {caption && <figcaption class="dphoto__caption">{caption}</figcaption>}
-  </Tag>
+  <button type="button" class="dphoto__frame" data-zoom={src} data-zoom-caption={caption} aria-label={`Открыть фото на весь экран${alt ? `: ${alt}` : ''}`}>
+    <img {...articleImg(src)} sizes="(min-width: 40rem) 33vw, 50vw" alt={alt} loading="lazy" decoding="async" />
+  </button>
+  {caption && (
+    <figcaption class="dphoto__caption">
+      {href
+        ? <a href={href} class="dphoto__link">{caption}</a>
+        : caption}
+    </figcaption>
+  )}
 </figure>
 
 <style>
 /* Дизайн-система: подложка как у .h-media, скругление --h-radius; подпись
-   слева. Плитка-ссылка — подпись становится названием, при наведении —
-   красное подчёркивание (как у карточек главной) */
+   слева. Подпись-ссылка — тёмная, с тонким подчёркиванием, при наведении
+   красным (как ссылки в тексте статьи) */
 .dphoto { margin: 0; }
-.dphoto .dphoto__link { display: block; color: inherit; text-decoration: none; }
-.dphoto__frame {
-  display: block;
+.dphoto .dphoto__frame {
   aspect-ratio: var(--dphoto-ratio, 1 / 1);
   border-radius: var(--h-radius);
   overflow: hidden;
@@ -41,11 +43,17 @@ const Tag = href ? 'a' : 'div'
 }
 .dphoto__frame img { display: block; width: 100%; height: 100%; margin: 0; border-radius: 0; object-fit: cover; }
 .dphoto .dphoto__caption { margin: 0.75rem 0 0; font-size: 0.875rem; line-height: 1.4; color: var(--h-soft); }
-.dphoto .is-link .dphoto__caption { font-size: 1rem; font-weight: 600; color: var(--h-ink); }
-.dphoto .is-link:hover .dphoto__caption {
+.dphoto .dphoto__link {
+  font-weight: 600;
+  color: var(--h-ink);
   text-decoration: underline;
-  text-decoration-color: var(--h-signal);
+  text-decoration-color: var(--color-slate-300);
   text-decoration-thickness: 0.0625rem;
   text-underline-offset: 0.2em;
+  transition: text-decoration-color 180ms var(--ease-out);
+}
+.dphoto .dphoto__link:hover { text-decoration-color: var(--h-signal); }
+@media (prefers-reduced-motion: reduce) {
+  .dphoto .dphoto__link { transition: none; }
 }
 </style>

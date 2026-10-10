@@ -82,13 +82,54 @@ export async function relatedArticle({ pagePath, seriesSlugs = [], coatingSlugs 
   return undefined
 }
 
-/** Автор статей — основатель студии: имя и роль из SITE, портрет — тот
-    же, что на «О нас» (лицо по центру — годится для аватара); страница
-    «О нас» — его страница (там письмо и фото) */
+/** Автор статей по умолчанию — основатель студии: имя и роль из SITE,
+    портрет — тот же, что на «О нас» (лицо по центру — годится для
+    аватара); страница «О нас» — его страница (там письмо и фото) */
 export const ARTICLE_AUTHOR = {
   name:        SITE.contactPerson,
   role:        SITE.contactRole,
   photo:       FOUNDER.photo.src,
   photoSrcset: FOUNDER.photo.srcset,
   href:        '/about/',
+}
+
+export interface ArticleAuthor {
+  name:         string
+  role:         string
+  photo?:       string
+  photoSrcset?: string
+  href:         string
+  /** Ссылка ведёт на другой сайт — открываем в новой вкладке */
+  external:     boolean
+  type:         'person' | 'organization'
+  /** Строка под именем в блоке автора в конце статьи */
+  about:        string
+  /** Подпись ссылки в блоке автора */
+  linkLabel:    string
+}
+
+const capitalize = (s: string) => `${s[0]!.toUpperCase()}${s.slice(1)}`
+
+/** Автор статьи: из фронтматтера (author), иначе — основатель студии */
+export function articleAuthor(article: Article): ArticleAuthor {
+  const a = article.data.author
+  if (!a) {
+    return {
+      ...ARTICLE_AUTHOR,
+      external:  false,
+      type:      'person',
+      about:     `${capitalize(ARTICLE_AUTHOR.role)}. ${SITE.experience}.`,
+      linkLabel: 'О студии и основателе',
+    }
+  }
+  return {
+    name:      a.name,
+    role:      a.role,
+    photo:     a.photo,
+    href:      a.href,
+    external:  /^https?:\/\//.test(a.href),
+    type:      a.type,
+    about:     capitalize(a.role),
+    linkLabel: a.linkLabel ?? 'Подробнее об авторе',
+  }
 }
