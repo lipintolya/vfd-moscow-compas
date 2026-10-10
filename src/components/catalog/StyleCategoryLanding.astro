@@ -13,6 +13,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../ui/Breadcrumbs.astro'
 import FaqAccordion from '../ui/FaqAccordion.astro'
 import CatalogClient from './CatalogClient.vue'
+import RelatedArticleCard from '../articles/RelatedArticleCard.astro'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import type { StyleCategory } from '../../data/style-categories'
 import type { CatalogCardItem } from './types'
 
@@ -22,6 +24,10 @@ interface Props {
 }
 
 const { category, cards } = Astro.props
+
+/* Статья по теме — только статья именно об этом стиле (relatedStyles):
+   по сериям не подбираем — они общие у лофта и минимализма */
+const relatedArticle = await relatedArticleFor({ styleSlugs: [category.slug] })
 
 const colorFilter = category.colorFilter
 const matchesColor = (name: string) =>
@@ -148,6 +154,8 @@ const structuredData = canonicalUrl ? [
       />
     </div>
   </div>
+
+  {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
   <section class="section">
     <div class="container">

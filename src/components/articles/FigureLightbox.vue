@@ -2,6 +2,11 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useScrollLock } from '../../lib/scroll-lock'
 
+/* Корней два (кнопка + Teleport) — служебный атрибут scoped-стилей Astro
+   (data-astro-cid-…) некуда передать, Vue предупреждал об этом в консоли;
+   стилей Figure.astro для кнопки нет, атрибут не нужен */
+defineOptions({ inheritAttrs: false })
+
 /* natural — без кропа 21:9: картинка в своих пропорциях (схемы, чертежи). */
 const props = defineProps<{
   /** Оригинал — открывается в полноэкранном просмотре. */

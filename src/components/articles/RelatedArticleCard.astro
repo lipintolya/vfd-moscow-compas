@@ -1,0 +1,74 @@
+---
+/**
+ * «Статья по теме» — перелинковка каталог → статьи: страницы моделей,
+ * лендинги покрытий и стилей. Какая статья — решает relatedArticle()
+ * из src/lib/articles.ts.
+ */
+import { KIND_LABEL } from '../../data/article-kinds'
+import { articleHref, type Article } from '../../lib/articles'
+
+interface Props {
+  article: Article
+}
+const { article } = Astro.props
+---
+
+<section class="section">
+  <div class="container">
+    <a href={articleHref(article.id)} class="related-article-card">
+      <span class="related-article-card__eyebrow">{KIND_LABEL[article.data.kind]} по&nbsp;теме</span>
+      <span class="related-article-card__title">{article.data.title}</span>
+      <span class="related-article-card__cta">
+        Читать
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </a>
+  </div>
+</section>
+
+<style>
+.related-article-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-slate-200);
+  background: var(--color-slate-50);
+  text-decoration: none;
+  transition: border-color 200ms ease, background-color 200ms ease;
+}
+.related-article-card:hover {
+  border-color: var(--color-accent-200);
+  background: var(--color-accent-50);
+}
+.related-article-card__eyebrow {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-slate-500);
+}
+.related-article-card__title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-slate-900);
+}
+.related-article-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-accent-600);
+}
+.related-article-card__cta svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+</style>

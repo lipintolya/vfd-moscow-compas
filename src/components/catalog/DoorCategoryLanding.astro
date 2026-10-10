@@ -9,6 +9,7 @@
  * берётся напрямую из coatingGroupCopy — единый источник с /catalog.
  */
 import { relatedArticle as relatedArticleFor } from '../../lib/articles'
+import RelatedArticleCard from '../articles/RelatedArticleCard.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../ui/Breadcrumbs.astro'
 import SeriesCard from './SeriesCard.astro'
@@ -18,7 +19,6 @@ import { getSeriesCardsData } from '../../lib/catalog-data'
 import { getSeriesSpec, coatingGroupCopy } from '../../data/series-descriptions'
 import type { DoorCategory } from '../../data/door-categories'
 import type { CatalogCardItem } from './types'
-import { KIND_LABEL } from '../../data/article-kinds'
 
 interface Props {
   category: DoorCategory
@@ -169,22 +169,7 @@ const structuredData = canonicalUrl ? [
     </div>
   </div>
 
-  {relatedArticle && (
-    <section class="section">
-      <div class="container">
-        <a href={`/articles/${relatedArticle.id}/`} class="related-article-card">
-          <span class="related-article-card__eyebrow">{KIND_LABEL[relatedArticle.data.kind]} по&nbsp;теме</span>
-          <span class="related-article-card__title">{relatedArticle.data.title}</span>
-          <span class="related-article-card__cta">
-            Читать
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </span>
-        </a>
-      </div>
-    </section>
-  )}
+  {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
   <section class="section">
     <div class="container">
@@ -193,47 +178,3 @@ const structuredData = canonicalUrl ? [
   </section>
 </BaseLayout>
 
-<style>
-.related-article-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  border-radius: 1rem;
-  border: 1px solid var(--color-slate-200);
-  background: var(--color-slate-50);
-  text-decoration: none;
-  transition: border-color 200ms ease, background-color 200ms ease;
-}
-.related-article-card:hover {
-  border-color: var(--color-accent-200);
-  background: var(--color-accent-50);
-}
-.related-article-card__eyebrow {
-  flex-basis: 100%;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--color-slate-500);
-}
-.related-article-card__title {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-}
-.related-article-card__cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  flex-shrink: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-accent-600);
-}
-.related-article-card__cta svg {
-  width: 0.875rem;
-  height: 0.875rem;
-}
-</style>

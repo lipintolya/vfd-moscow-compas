@@ -46,6 +46,10 @@ const articles = defineCollection({
         каталога, а на лендинге покрытия и страницах моделей — ссылка на
         статью. Новые серии подхватываются сами. */
     relatedCoatings: z.array(z.string()).optional(),
+    /** Стилевые лендинги (slug из src/data/style-categories.ts:
+        loft-dveri, minimalizm-dveri, skandinavskiy-dveri), о стиле которых
+        статья: там появится ссылка «Статья по теме». */
+    relatedStyles: z.array(z.string()).optional(),
     /** Заглушка (PLACEHOLDER): статьи ещё нет — страница закрыта noindex,
         не попадает в sitemap и в блоки «Статья по теме». */
     placeholder: z.boolean().optional(),

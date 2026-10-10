@@ -39,16 +39,26 @@ export function articleWordCount(body = ''): number {
 /** Время чтения, мин — ~180 слов в минуту для русского текста */
 export const readingMinutes = (body?: string) => Math.max(1, Math.round(articleWordCount(body) / 180))
 
-/** Статья по теме для лендинга покрытия или страницы модели: первая
-    (самая свежая), у которой совпала серия или покрытие */
-export async function relatedArticle({ seriesSlugs = [], coatingSlugs = [] }: {
+/** Статья по теме для лендинга покрытия, стиля или страницы модели.
+    Сначала — статья о покрытии (она конкретнее), затем о серии, затем
+    о стиле; среди равных — самая свежая. Иначе новая статья с длинным
+    списком серий перебивала бы на всех лендингах статью о самом покрытии. */
+export async function relatedArticle({ seriesSlugs = [], coatingSlugs = [], styleSlugs = [] }: {
   seriesSlugs?: string[]
   coatingSlugs?: string[]
+  styleSlugs?: string[]
 }): Promise<Article | undefined> {
-  return (await getArticles()).find((a) =>
-    a.data.relatedSeriesSlugs?.some((s) => seriesSlugs.includes(s)) ||
-    a.data.relatedCoatings?.some((c) => coatingSlugs.includes(c)),
-  )
+  const articles = await getArticles()
+  const tiers: ((a: Article) => boolean | undefined)[] = [
+    (a) => a.data.relatedCoatings?.some((c) => coatingSlugs.includes(c)),
+    (a) => a.data.relatedSeriesSlugs?.some((s) => seriesSlugs.includes(s)),
+    (a) => a.data.relatedStyles?.some((s) => styleSlugs.includes(s)),
+  ]
+  for (const matches of tiers) {
+    const found = articles.find(matches)
+    if (found) return found
+  }
+  return undefined
 }
 
 /** Автор статей — основатель студии: имя и роль из SITE, портрет — тот
