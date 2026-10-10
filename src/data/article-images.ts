@@ -37,6 +37,10 @@ export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero
     card: [{ src: '/renders/articles/covers/skrytye-dveri-plyusy-i-minusy-card-480.webp', w: 480 }, { src: '/renders/articles/covers/skrytye-dveri-plyusy-i-minusy-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/skrytye-dveri-plyusy-i-minusy-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/skrytye-dveri-plyusy-i-minusy-hero-1600.webp', w: 1600 }],
   },
+  '/renders/vfd-design/cover.webp': {
+    card: [{ src: '/renders/articles/covers/vfd-dizain-dveri-pod-zadachu-card-480.webp', w: 480 }, { src: '/renders/articles/covers/vfd-dizain-dveri-pod-zadachu-card-800.webp', w: 800 }],
+    hero: [{ src: '/renders/articles/covers/vfd-dizain-dveri-pod-zadachu-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/vfd-dizain-dveri-pod-zadachu-hero-1600.webp', w: 1600 }],
+  },
   'https://storage.yandexcloud.net/vfd74ru/decor/render_framuga.webp': {
     card: [{ src: '/renders/articles/covers/vysokie-mezhkomnatnye-dveri-card-480.webp', w: 480 }, { src: '/renders/articles/covers/vysokie-mezhkomnatnye-dveri-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/vysokie-mezhkomnatnye-dveri-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/vysokie-mezhkomnatnye-dveri-hero-1600.webp', w: 1600 }],
@@ -65,6 +69,16 @@ export const ARTICLE_IMAGE_VARIANTS: Record<string, ImageVariant[]> = {
     [{ src: '/renders/articles/images/invisible_kompl-1a1db6-640.webp', w: 640 }, { src: '/renders/articles/images/invisible_kompl-1a1db6-960.webp', w: 960 }, { src: '/renders/articles/images/invisible_kompl-1a1db6-1280.webp', w: 1280 }, { src: '/renders/articles/images/invisible_kompl-1a1db6-1600.webp', w: 1600 }],
   'https://storage.yandexcloud.net/catalog-vfd/invisible/invisible_info/invisible_lr.webp':
     [{ src: '/renders/articles/images/invisible_lr-81b473-640.webp', w: 640 }, { src: '/renders/articles/images/invisible_lr-81b473-960.webp', w: 960 }, { src: '/renders/articles/images/invisible_lr-81b473-1280.webp', w: 1280 }, { src: '/renders/articles/images/invisible_lr-81b473-1600.webp', w: 1600 }],
+  'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/10.10.26_vfd_design/2026-10-10%2015.46.04.webp':
+    [{ src: '/renders/articles/images/2026-10-10-2015-46-04-c88f9f-640.webp', w: 640 }],
+  'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/10.10.26_vfd_design/2026-10-10%2015.46.08.webp':
+    [{ src: '/renders/articles/images/2026-10-10-2015-46-08-00476d-640.webp', w: 640 }],
+  'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/10.10.26_vfd_design/2026-10-10%2015.46.10.webp':
+    [{ src: '/renders/articles/images/2026-10-10-2015-46-10-fde236-640.webp', w: 640 }],
+  'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/10.10.26_vfd_design/2026-10-10%2015.46.13.webp':
+    [{ src: '/renders/articles/images/2026-10-10-2015-46-13-fe589c-640.webp', w: 640 }],
+  'https://storage.yandexcloud.net/vfd.moscow.compass/statya.block/10.10.26_vfd_design/2026-10-10%2015.46.15.webp':
+    [{ src: '/renders/articles/images/2026-10-10-2015-46-15-8f9137-640.webp', w: 640 }],
   'https://storage.yandexcloud.net/vfd74ru/catalog/urban_wood/urban_z/urban_cover_wood.webp':
     [{ src: '/renders/articles/images/urban_cover_wood-61f459-640.webp', w: 640 }, { src: '/renders/articles/images/urban_cover_wood-61f459-960.webp', w: 960 }],
   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/basic.webp':
