@@ -9,6 +9,8 @@ import { SITE, PHONE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { pluralRu } from '../lib/plural'
 import { renderGallery } from './partitions'
+import { DOOR_SIZES } from './door-sizes'
+import { SECRET_STOCK_HEIGHTS } from './skrytye-dveri-products'
 import hero from './designers-hero.json'
 
 const hours = companyLegalInfo.workingHours.shortDisplay
@@ -17,7 +19,7 @@ const { mall, floor, street } = SITE.address
 
 /* Высоты скрытых дверей, которые держим в наличии (мм), — первый экран,
    плитка «Двери в наличии», ассортимент и вопросы берут их отсюда */
-export const STOCK_HEIGHTS = [2000, 2100, 2300] as const
+export const STOCK_HEIGHTS = SECRET_STOCK_HEIGHTS
 const stockList = `${STOCK_HEIGHTS.slice(0, -1).join(', ')} и ${STOCK_HEIGHTS.at(-1)} мм`
 const stockCount = `${STOCK_HEIGHTS.length} ${pluralRu(STOCK_HEIGHTS.length, ['размер', 'размера', 'размеров'])}`
 
@@ -44,7 +46,7 @@ export const DESIGNERS_HERO = {
   /* count — число для анимации счётчика (значение в разметке — итоговое) */
   facts: [
     { value: '1000+',   count: 1000, label: 'реализованных проектов с дизайнерами и архитекторами' },
-    { value: 'до 3 м',  label: 'высота межкомнатных дверей под заказ' },
+    { value: `до ${DOOR_SIZES.customMaxHeight / 1000} м`, label: 'высота межкомнатных дверей под заказ' },
     { value: stockCount, label: `скрытых дверей в наличии: ${stockList}` },
     { value: 'Шоурум',  label: `в ${mall} — приводите заказчиков` },
   ],
@@ -75,8 +77,8 @@ export const DESIGNER_BENEFITS = {
     title: 'Нестандартные размеры',
     text:  'Изготавливаем двери любых размеров, включая высокие полотна до 3 метров.',
     /* Схема: стандартная высота и предельная под заказ, мм */
-    standard: 2000,
-    max:      3000,
+    standard: DOOR_SIZES.standardHeight,
+    max:      DOOR_SIZES.customMaxHeight,
   },
   stock: {
     title:   'Двери в наличии',

@@ -93,5 +93,11 @@ export default defineMarkdocConfig({
       render: component('./src/components/articles/CoatingPrices.astro'),
       selfClosing: true,
     },
+    // Цены скрытых дверей по высоте — из skrytye-dveri-products.ts:
+    // {% hiddenHeightPrices /%}
+    hiddenHeightPrices: {
+      render: component('./src/components/articles/HiddenHeightPrices.astro'),
+      selfClosing: true,
+    },
   },
 })

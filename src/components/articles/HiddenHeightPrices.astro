@@ -1,0 +1,57 @@
+---
+/**
+ * {% hiddenHeightPrices /%} — цены скрытых дверей по высоте: стандарт и
+ * ступени надбавок до максимальной высоты под заказ. Всё — из
+ * src/data/skrytye-dveri-products.ts (та же таблица, что на странице
+ * «Скрытые двери»): меняются цены или надбавки — меняется и статья.
+ * Таблица наследует стили таблиц текста статьи.
+ */
+import {
+  DOOR_HEIGHT, CUSTOM_HEIGHT_TIERS, CUSTOM_LEAD_TIME, SECRET_STOCK_HEIGHTS, REFLEX_MAX_HEIGHT,
+  SECRET_MIN_KIT_PRICE, SECRET_REVERS_MIN_KIT_PRICE, calcCustomPrice,
+} from '../../data/skrytye-dveri-products'
+import { rub } from '../../data/services'
+
+const rows = [
+  { range: `${DOOR_HEIGHT}`, pct: '—', secret: SECRET_MIN_KIT_PRICE, revers: SECRET_REVERS_MIN_KIT_PRICE },
+  ...CUSTOM_HEIGHT_TIERS.map((t) => ({
+    range:  t.range,
+    pct:    t.pct,
+    secret: calcCustomPrice(SECRET_MIN_KIT_PRICE, t.surcharge),
+    revers: calcCustomPrice(SECRET_REVERS_MIN_KIT_PRICE, t.surcharge),
+  })),
+]
+const stock = SECRET_STOCK_HEIGHTS.join(', ')
+---
+
+<table>
+  <thead>
+    <tr>
+      <th scope="col">Высота, мм</th>
+      <th scope="col">Надбавка</th>
+      <th scope="col">«Секрет», от</th>
+      <th scope="col">«Секрет Реверс», от</th>
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map((r) => (
+      <tr>
+        <th scope="row">{r.range}</th>
+        <td>{r.pct}</td>
+        <td>{rub(r.secret)}</td>
+        <td>{rub(r.revers)}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+<p class="hhp-note">
+  Цены — за самый доступный комплект: полотно, алюминиевый короб и скрытые петли. Надбавка применяется
+  к&nbsp;полотну и&nbsp;коробу. В&nbsp;наличии — высоты {stock}&nbsp;мм, остальные — под заказ,
+  срок&nbsp;— {CUSTOM_LEAD_TIME}. Зеркальная «Рефлекс» — до&nbsp;{REFLEX_MAX_HEIGHT}&nbsp;мм.
+</p>
+
+<style>
+  /* Строка-заголовок таблицы — обычным весом, как ячейки текста статьи */
+  th[scope='row'] { padding: 0.75rem 1rem 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); font-weight: 600; text-align: left; color: var(--h-ink); white-space: nowrap; }
+  .hhp-note { margin: -1.25rem 0 2rem; font-size: 0.8125rem; line-height: 1.5; color: var(--h-muted); }
+</style>

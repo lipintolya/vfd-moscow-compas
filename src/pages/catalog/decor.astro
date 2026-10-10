@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import InfoImageViewer from '../../components/catalog/InfoImageViewer.vue'
@@ -64,6 +66,9 @@ const structuredData = canonicalUrl ? [
 
 // Реальный монтаж плинтуса из портфолио — показывается под блоком «Плинтус».
 const plinthWork = PORTFOLIO_WORKS.find(w => w.id === '2026-09-27-belyy-plintus-universitetskaya-naberezhnaya')
+
+/* Статья по теме — та, что назвала эту страницу в relatedPages */
+const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
 ---
 
 <BaseLayout
@@ -272,6 +277,8 @@ const plinthWork = PORTFOLIO_WORKS.find(w => w.id === '2026-09-27-belyy-plintus-
       )}
     </div>
   </section>
+
+  {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
   <!-- ══════════════════════════════════════════════
        FAQ

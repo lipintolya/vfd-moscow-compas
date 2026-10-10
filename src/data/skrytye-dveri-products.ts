@@ -57,6 +57,8 @@ export const HERO_IMAGES = {
 
 // ── Размеры в наличии ────────────────────────────────────────
 export const DOOR_HEIGHT         = 2000
+/** Высоты, которые держим на складе (мм); остальные — под заказ */
+export const SECRET_STOCK_HEIGHTS = [2000, 2100, 2300] as const
 export const SECRET_SIZES        = [600, 700, 800, 900] as const
 export const SECRET_REVERS_SIZES = [600, 700, 800]      as const
 
@@ -142,6 +144,11 @@ export const CUSTOM_HEIGHT_TIERS = [
 export const CUSTOM_LEAD_TIME = '6–8 недель'
 /** Максимальная высота под заказ, мм — из таблицы надбавок */
 export const CUSTOM_MAX_HEIGHT = CUSTOM_HEIGHT_TIERS[CUSTOM_HEIGHT_TIERS.length - 1]!.to
+
+/** Ступень надбавки для высоты, мм (undefined — стандартная высота) */
+export function heightTier(heightMm: number) {
+  return CUSTOM_HEIGHT_TIERS.find(t => heightMm >= t.from && heightMm <= t.to)
+}
 
 // Рассчитать цену комплекта с надбавкой за нестандартную высоту (округление вверх)
 export function calcCustomPrice(basePrice: number, surcharge: number): number {

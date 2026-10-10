@@ -13,8 +13,14 @@ import { MEASURE_TERMS, INSTALL_TERMS, rub } from '../data/services'
 import {
   DOOR_HEIGHT, SECRET_SIZES, SECRET_REVERS_SIZES, CUSTOM_MAX_HEIGHT, REFLEX_MAX_HEIGHT,
   CUSTOM_LEAD_TIME, SECRET_MIN_KIT_PRICE, SECRET_MIN_BLADE_PRICE, SECRET_REVERS_MIN_KIT_PRICE,
-  REFLEX_MIN_KIT_PRICE, HIDDEN_SPECS,
+  REFLEX_MIN_KIT_PRICE, HIDDEN_SPECS, SECRET_STOCK_HEIGHTS, heightTier, calcCustomPrice,
 } from '../data/skrytye-dveri-products'
+import { FRAMUGA_ROWS, FROM_PRICE_FRAMUGA_KIT } from '../data/decor-products'
+import { DOOR_SIZES } from '../data/door-sizes'
+
+/* Скрытая дверь 2300 мм — самый частый нестандартный запрос: цена и
+   надбавка — по ступени из таблицы надбавок */
+const TIER_2300 = heightTier(2300)!
 
 export const ARTICLE_VARS = {
   salon: {
@@ -54,6 +60,25 @@ export const ARTICLE_VARS = {
     paintCoats:     nb(HIDDEN_SPECS.paintCoats),
     installDays:    nb(HIDDEN_SPECS.installDays),
     boxProfile:     nb(HIDDEN_SPECS.boxProfile),
+    /** Высоты на складе: «2000, 2100 и 2300» */
+    stockHeights:   listRu(SECRET_STOCK_HEIGHTS.map(String)),
+    /** Комплект «Секрет» высотой 2300 мм, «от» */
+    kit2300From:    rub(calcCustomPrice(SECRET_MIN_KIT_PRICE, TIER_2300.surcharge)),
+    /** Надбавка за 2300 мм, «+30%» */
+    surcharge2300:  TIER_2300.pct,
+  },
+  /** Двери каталога — src/data/door-sizes.ts */
+  doors: {
+    height:    String(DOOR_SIZES.standardHeight),
+    /** Высота под заказ — до, мм */
+    maxHeight: String(DOOR_SIZES.customMaxHeight),
+  },
+  /** Декор — src/data/decor-products.ts */
+  decor: {
+    /** Комплект фальшфрамуги (фрамуга, компланарная коробка, наличники), «от» */
+    framugaKitFrom: rub(FROM_PRICE_FRAMUGA_KIT),
+    /** «930×930×10 мм» */
+    framugaSize:    nb(`${FRAMUGA_ROWS[0]!.size} мм`),
   },
   /** Замер и установка — src/data/services.ts */
   services: {
