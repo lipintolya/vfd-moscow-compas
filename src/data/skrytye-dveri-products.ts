@@ -226,11 +226,22 @@ export const REFLEX_HEIGHT_TIERS = [
 export const REFLEX_MAX_HEIGHT = REFLEX_HEIGHT_TIERS[REFLEX_HEIGHT_TIERS.length - 1]!.to
 
 // ── Цифры и факты ────────────────────────────────────────────
+// Отдельно — для подстановки в тексты статей (src/lib/article-vars.ts)
+export const HIDDEN_SPECS = {
+  gap:         '1–2 мм',
+  wallMin:     '90 мм',
+  hingeLoad:   '70 кг',
+  paintCoats:  '3 слоя',
+  installDays: '1–2 дня',
+  /** Сечение профиля короба */
+  boxProfile:  '54×43 мм',
+} as const
+
 export const FACTS = [
-  { value: '1–2 мм',    label: 'зазор между полотном и стеной'     },
-  { value: 'от 90 мм',  label: 'минимальная толщина стены'         },
-  { value: 'до 70 кг',  label: 'нагрузка на скрытые петли'         },
-  { value: '3 слоя',    label: 'краски принимает грунтованная поверхность' },
-  { value: '1–2 дня',   label: 'срок монтажа нашей бригадой'       },
+  { value: HIDDEN_SPECS.gap,                label: 'зазор между полотном и стеной'     },
+  { value: `от ${HIDDEN_SPECS.wallMin}`,    label: 'минимальная толщина стены'         },
+  { value: `до ${HIDDEN_SPECS.hingeLoad}`,  label: 'нагрузка на скрытые петли'         },
+  { value: HIDDEN_SPECS.paintCoats,         label: 'краски принимает грунтованная поверхность' },
+  { value: HIDDEN_SPECS.installDays,        label: 'срок монтажа нашей бригадой'       },
   { value: '2,5 пог. м','label': 'алюминиевого профиля в коробе'   },
 ] as const

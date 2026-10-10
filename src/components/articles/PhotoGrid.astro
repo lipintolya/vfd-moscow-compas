@@ -6,14 +6,18 @@
  * Ячейки — квадрат + object-fit:cover: разные по пропорциям источники (портрет/
  * ландшафт/квадрат) всегда дают одинаковые по ширине и высоте плитки без
  * искажения (обрезка, а не растяжение).
+ *
+ * doors — фото дверей из каталога (полотно в полный рост на фоне, ~1:2,2):
+ * плитки вытянуты под них, дверь видна целиком.
  */
 interface Props {
   cols?: number // сколько колонок на desktop (по умолчанию 3)
+  doors?: boolean
 }
-const { cols = 3 } = Astro.props
+const { cols = 3, doors = false } = Astro.props
 ---
 
-<div class="dphotogrid" style={`--cols:${cols}`}>
+<div class="dphotogrid" style={`--cols:${cols}${doors ? '; --dphoto-ratio: 5 / 11' : ''}`}>
   <slot />
 </div>
 

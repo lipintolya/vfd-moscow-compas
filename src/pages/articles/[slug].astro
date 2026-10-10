@@ -25,7 +25,7 @@ import VisitBand from '../../components/home/VisitBand.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
 import { articleCoverImg } from '../../lib/article-images'
 import {
-  getArticles, articleHref, formatArticleDate, readingMinutes, articleWordCount, ARTICLE_AUTHOR,
+  getArticles, withArticleVars, articleHref, formatArticleDate, readingMinutes, articleWordCount, ARTICLE_AUTHOR,
 } from '../../lib/articles'
 import { getCatalogCards, getSeriesList } from '../../lib/catalog-data'
 import { DOOR_CATEGORIES } from '../../data/door-categories'
@@ -39,7 +39,7 @@ import '../../styles/home.css'
 export async function getStaticPaths() {
   // Страницы есть и у заглушек (закрыты noindex) — адреса не пропадают
   const articles = await getCollection('articles')
-  return articles.map((article) => ({ params: { slug: article.id }, props: { article } }))
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article: withArticleVars(article) } }))
 }
 
 const { article } = Astro.props

@@ -1,23 +1,11 @@
 import { defineMarkdocConfig, component } from '@astrojs/markdoc/config'
-import { SITE, PHONE } from './src/config/site'
-import { companyLegalInfo } from './src/lib/contacts-data'
+import { ARTICLE_VARS } from './src/lib/article-vars'
 
 export default defineMarkdocConfig({
-  /* Данные салона в тексте статьи — из конфига, а не вписанные руками:
-     {% $salon.address %}, {% $salon.hours %}, {% $salon.phone %} … */
-  variables: {
-    salon: {
-      name:    SITE.studioName,
-      brand:   SITE.name,
-      /** «официальный дилер Владимирской фабрики дверей» */
-      dealer:  `официальный дилер ${SITE.manufacturerOf}`,
-      city:    SITE.city.in,
-      mall:    SITE.address.mall,
-      address: SITE.address.full,
-      hours:   companyLegalInfo.workingHours.shortDisplay,
-      phone:   PHONE.label,
-    },
-  },
+  /* Данные салона и каталога в тексте статьи — из конфига и данных,
+     а не вписанные руками: {% $salon.address %}, {% $hidden.kitFrom %} …
+     Полный список — src/lib/article-vars.ts */
+  variables: ARTICLE_VARS,
   tags: {
     // Фото с подписью
     // Использование: {% figure src="https://..." alt="..." caption="Подпись" /%}
@@ -72,10 +60,13 @@ export default defineMarkdocConfig({
     // Сетка равных фото-плиток (2-3 в ряд, квадрат + cover — разные по
     // пропорциям фото всегда одинаковой ширины/высоты, без искажений)
     // {% photogrid cols=3 %}{% photo src="..." alt="..." href="/models/..." /%}{% /photogrid %}
+    // Двери из каталога целиком: {% photogrid cols=4 doors=true %}
     photogrid: {
       render: component('./src/components/articles/PhotoGrid.astro'),
       attributes: {
         cols: { type: Number, default: 3 },
+        /** Фото дверей из каталога — вытянутые плитки, дверь целиком */
+        doors: { type: Boolean, default: false },
       },
     },
     photo: {

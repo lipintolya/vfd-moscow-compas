@@ -25,9 +25,9 @@ interface Props {
 
 const { category, cards } = Astro.props
 
-/* Статья по теме — только статья именно об этом стиле (relatedStyles):
-   по сериям не подбираем — они общие у лофта и минимализма */
-const relatedArticle = await relatedArticleFor({ styleSlugs: [category.slug] })
+/* Статья по теме — только статья, которая сама назвала эту страницу
+   (relatedPages): по сериям не подбираем — они общие у лофта и минимализма */
+const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/${category.slug}/` })
 
 const colorFilter = category.colorFilter
 const matchesColor = (name: string) =>

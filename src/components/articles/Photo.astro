@@ -34,7 +34,7 @@ const Tag = href ? 'a' : 'div'
 .dphoto .dphoto__link { display: block; color: inherit; text-decoration: none; }
 .dphoto__frame {
   display: block;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: var(--dphoto-ratio, 1 / 1);
   border-radius: var(--h-radius);
   overflow: hidden;
   background: var(--h-media-bg);

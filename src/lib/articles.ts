@@ -7,8 +7,26 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { SITE } from '../config/site'
 import { FOUNDER } from '../data/about-page'
+import { fillArticleVars } from './article-vars'
 
 export type Article = CollectionEntry<'articles'>
+
+/** Переменные ({% $salon.phone %}, {% $hidden.kitFrom %} …) в тех полях
+    фронтматтера, что выводятся текстом: лид, «Коротко», вопросы-ответы.
+    Статьи берите только через getArticles / withArticleVars — иначе
+    в разметку уйдёт запись переменной вместо значения. */
+export function withArticleVars(article: Article): Article {
+  const { data } = article
+  return {
+    ...article,
+    data: {
+      ...data,
+      description: fillArticleVars(data.description),
+      summary: data.summary?.map(fillArticleVars),
+      faq: data.faq?.map((f) => ({ q: fillArticleVars(f.q), a: fillArticleVars(f.a) })),
+    },
+  }
+}
 
 let published: Promise<Article[]> | undefined
 
@@ -16,7 +34,9 @@ let published: Promise<Article[]> | undefined
 export function getArticles(): Promise<Article[]> {
   if (!published || import.meta.env.DEV) {
     published = getCollection('articles', (a) => !a.data.placeholder).then((list) =>
-      list.sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()),
+      list
+        .map(withArticleVars)
+        .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()),
     )
   }
   return published
@@ -39,20 +59,21 @@ export function articleWordCount(body = ''): number {
 /** Время чтения, мин — ~180 слов в минуту для русского текста */
 export const readingMinutes = (body?: string) => Math.max(1, Math.round(articleWordCount(body) / 180))
 
-/** Статья по теме для лендинга покрытия, стиля или страницы модели.
-    Сначала — статья о покрытии (она конкретнее), затем о серии, затем
-    о стиле; среди равных — самая свежая. Иначе новая статья с длинным
-    списком серий перебивала бы на всех лендингах статью о самом покрытии. */
-export async function relatedArticle({ seriesSlugs = [], coatingSlugs = [], styleSlugs = [] }: {
+/** Статья по теме для страницы каталога. Сначала — статья, которая сама
+    назвала эту страницу (relatedPages), затем о покрытии (она конкретнее
+    серии), о серии; среди равных — самая свежая. Иначе новая статья с
+    длинным списком серий перебивала бы на лендинге статью о самом покрытии. */
+export async function relatedArticle({ pagePath, seriesSlugs = [], coatingSlugs = [] }: {
+  /** Адрес страницы, со слешем на конце: '/catalog/skrytye-dveri/' */
+  pagePath?: string
   seriesSlugs?: string[]
   coatingSlugs?: string[]
-  styleSlugs?: string[]
 }): Promise<Article | undefined> {
   const articles = await getArticles()
   const tiers: ((a: Article) => boolean | undefined)[] = [
+    (a) => pagePath !== undefined && a.data.relatedPages?.includes(pagePath),
     (a) => a.data.relatedCoatings?.some((c) => coatingSlugs.includes(c)),
     (a) => a.data.relatedSeriesSlugs?.some((s) => seriesSlugs.includes(s)),
-    (a) => a.data.relatedStyles?.some((s) => styleSlugs.includes(s)),
   ]
   for (const matches of tiers) {
     const found = articles.find(matches)

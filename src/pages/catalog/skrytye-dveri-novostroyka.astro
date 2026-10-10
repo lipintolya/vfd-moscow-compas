@@ -7,6 +7,8 @@
  * и на реальных ЖК Москвы, где двери уже установлены.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import SectionHeading from '../../components/partitions/SectionHeading.astro'
@@ -95,6 +97,9 @@ const structuredData = canonicalUrl ? [
     },
   },
 ] : undefined
+
+/* Статья по теме — та, что назвала эту страницу в relatedPages */
+const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dveri-novostroyka/` })
 ---
 
 <BaseLayout
@@ -226,6 +231,8 @@ const structuredData = canonicalUrl ? [
       </div>
     </section>
   )}
+
+  {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
   <!-- FAQ -->
   <section class="section bg-white">

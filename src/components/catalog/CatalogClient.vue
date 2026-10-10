@@ -81,7 +81,9 @@ const activeColor   = ref(props.initialColor)
    на сервере — при статической сборке (output: "static") этот URL всегда
    пустой, так что пропы всегда ''. Ссылки вида /catalog?series=X реально
    фильтруют только благодаря этому: читаем настоящий URL браузера при
-   маунте и досеиваем состояние фильтров. */
+   маунте и досеиваем состояние фильтров. ?glass=1 — только со стеклом
+   (ссылки из статей). */
+const glassOnly     = ref(false)
 onMounted(() => {
   const params = new URLSearchParams(window.location.search)
   const series  = params.get('series')
@@ -90,8 +92,8 @@ onMounted(() => {
   if (series)  activeSeries.value  = series
   if (coating) activeCoating.value = coating
   if (color)   activeColor.value   = color
+  if (params.get('glass') === '1') glassOnly.value = true
 })
-const glassOnly     = ref(false)
 const searchQuery   = ref('')
 const sortBy        = ref<CatalogSort>('popular')
 const currentPage   = ref(1)
@@ -189,14 +191,15 @@ const goToPage = (page: number) => {
 }
 
 watch(
-  [activeSeries, activeCoating, activeColor],
-  ([series, coating, color]) => {
+  [activeSeries, activeCoating, activeColor, glassOnly],
+  ([series, coating, color, glass]) => {
     if (typeof window === 'undefined') return
 
     const url = new URL(window.location.href)
     series ? url.searchParams.set('series', series) : url.searchParams.delete('series')
     coating ? url.searchParams.set('coating', coating) : url.searchParams.delete('coating')
     color ? url.searchParams.set('color', color) : url.searchParams.delete('color')
+    glass ? url.searchParams.set('glass', '1') : url.searchParams.delete('glass')
     window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
   }
 )

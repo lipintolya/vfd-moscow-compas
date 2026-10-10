@@ -12,6 +12,8 @@
  * src/data/hidden-doors-page.ts, данные салона — src/config/site.ts.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import LandingHero from '../../components/ui/LandingHero.astro'
@@ -187,6 +189,9 @@ const breadcrumbItems = [
   { label: 'Каталог', href: '/catalog/' },
   { label: 'Скрытые двери' },
 ]
+
+/* Статья по теме — та, что назвала эту страницу в relatedPages */
+const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dveri/` })
 ---
 
 <BaseLayout title={title} description={description} canonical={pageUrl} ogImage={IMAGES.invisible} structuredData={structuredData}>
@@ -485,6 +490,8 @@ const breadcrumbItems = [
     </section>
 
     <StepsRow />
+
+    {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
     <!-- ── Частые вопросы ── -->
     <section id="hd-faq" class="h-sec h-sec--wall" aria-labelledby="hd-faq-title">
