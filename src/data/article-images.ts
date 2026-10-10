@@ -17,6 +17,10 @@ export const ARTICLE_COVER_PREVIEWS: Record<string, { card: ImageVariant[]; hero
     card: [{ src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-card-480.webp', w: 480 }, { src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/kak-vybrat-mezhkomnatnuyu-dver-hero-1600.webp', w: 1600 }],
   },
+  '/renders/alum-covers/37.webp': {
+    card: [{ src: '/renders/articles/covers/kakuyu-dver-vybrat-v-vannuyu-card-480.webp', w: 480 }, { src: '/renders/articles/covers/kakuyu-dver-vybrat-v-vannuyu-card-800.webp', w: 800 }],
+    hero: [{ src: '/renders/articles/covers/kakuyu-dver-vybrat-v-vannuyu-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/kakuyu-dver-vybrat-v-vannuyu-hero-1600.webp', w: 1600 }],
+  },
   '/renders/home/secret-cover.webp': {
     card: [{ src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-card-480.webp', w: 480 }, { src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-card-800.webp', w: 800 }],
     hero: [{ src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-hero-960.webp', w: 960 }, { src: '/renders/articles/covers/na-kakom-etape-remonta-ustanavlivayut-dveri-hero-1600.webp', w: 1600 }],
