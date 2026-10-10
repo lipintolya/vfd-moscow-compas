@@ -29,6 +29,7 @@
     "gen:promo": "node scripts/gen-promo-images.mjs",
     "gen:home-tiles": "node scripts/gen-home-tiles.mjs",
     "gen:video-covers": "node scripts/gen-video-covers.mjs",
+    "gen:oniks": "node scripts/gen-oniks-images.mjs",
     "deploy": "git push production main"
   },
   "dependencies": {

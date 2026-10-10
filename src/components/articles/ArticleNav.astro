@@ -35,6 +35,8 @@ const { street, mall, floor } = SITE.address
     .anav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
   .anav__tile { min-height: 11rem; gap: 0.5rem; padding-right: 4rem; }
+  /* На серой секции светлая плитка — белая, иначе сливается с фоном */
+  :global(.h-sec--wall) .anav .h-tile--light { background: var(--h-paper); }
   .anav__title {
     font-family: var(--h-font);
     font-size: 1.3125rem;

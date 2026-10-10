@@ -28,6 +28,7 @@ const CATEGORY_LINKS = [
   { href: '/catalog/',                label: 'Межкомнатные' },
   { href: '/catalog/skrytye-dveri/',  label: 'Скрытые двери' },
   { href: '/partitions/',             label: 'Перегородки' },
+  { href: '/partitions/oniks-alum/',  label: 'Перегородки ОНИКС' },
   { href: '/catalog/decor/',          label: 'Декор' },
 ] as const
 

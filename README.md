@@ -54,6 +54,16 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public deploy
 - московские цены (сейчас общие с Supabase-каталогом), тариф доставки — `merchantPolicy` в `contacts-data.ts`
 - маркетинговые факты, перенесённые из Челябинска и требующие сверки: «60+ моделей в выставочном зале», гарантия 12 мес. на монтаж, бесплатный замер, сроки доставки, акции (`src/data/promos.ts`)
 
+## Где менять контент
+
+| Раздел | Тексты и данные | Фото |
+|---|---|---|
+| Статьи и публикации `/articles/` | `src/content/articles/<slug>.mdoc` — одна статья = один файл | ссылки в статье; облегчённые копии — `node scripts/gen-article-images.mjs` |
+| Перегородки GRAFIA `/partitions/` | `src/data/partitions.ts` | облако; рендеры — `npm run gen:renders` |
+| Перегородки ОНИКС ALUM `/partitions/oniks-alum/` | `src/data/oniks-alum.ts` | оригиналы — `assets/oniks-alum/` (инструкция в README там же), облегчённые — `npm run gen:oniks` |
+| Скрытые двери `/catalog/skrytye-dveri/` | `src/data/skrytye-dveri-products.ts`, `hidden-doors-page.ts` | облако |
+| Видео | `src/data/videos.ts`; ролик для статьи — `node scripts/optimize-video.mjs` | облако / `public/renders/` |
+
 ## Запуск локально
 
 ```bash
@@ -71,6 +81,7 @@ npm run dev
 | `npm run preview` | Превью собранного `dist/` |
 | `npm run gen:renders` | Перегенерировать рендеры перегородок из облачных оригиналов |
 | `npm run gen:portfolio-thumbs` | Перегенерировать миниатюры портфолио после добавления новой работы |
+| `npm run gen:oniks` | Облегчённые фото страницы перегородок ОНИКС из `assets/oniks-alum/` |
 
 Нет отдельного линтера/тест-раннера — `astro check` для типов, `npm run build` как основной гейт корректности (он же гоняет `getStaticPaths` против живого Supabase-проекта).
 
