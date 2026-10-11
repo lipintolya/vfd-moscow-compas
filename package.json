@@ -17,6 +17,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "cms": "npm --prefix cms run develop",
+    "cms:install": "npm --prefix cms install",
     "media:pull": "node scripts/media-pull.mjs",
     "gen:about": "node scripts/gen-about-images.mjs",
     "gen:articles": "node scripts/gen-article-images.mjs",
