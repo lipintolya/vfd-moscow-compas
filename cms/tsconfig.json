@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    // Node16, а не Node (node10) из шаблона Strapi: node10 устарел в TypeScript 6
     "module": "Node16",
     "moduleResolution": "Node16",
     "lib": ["ES2020"],
