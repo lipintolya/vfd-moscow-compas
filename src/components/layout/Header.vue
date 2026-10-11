@@ -89,7 +89,6 @@ const WORK_SCHEDULE = {
 /* ============================================================
    State
    ============================================================ */
-const scrolled     = ref(false)
 const mobileOpen   = ref(false)
 const contactsOpen = ref(false)
 const catalogOpen  = ref(false)
@@ -165,8 +164,6 @@ const statusDetail = computed(() => {
 /* ============================================================
    Handlers
    ============================================================ */
-const onScroll = () => { scrolled.value = window.scrollY > 0 }
-
 /* Переход на широкий экран с открытым мобильным меню (поворот планшета) —
    меню и панель контактов закрываются, иначе осталась бы блокировка прокрутки. */
 const onDesktopChange = (e: MediaQueryListEvent) => {
@@ -260,10 +257,8 @@ const toggleContacts = () => contactsOpen.value ? closeContacts() : openContacts
    ============================================================ */
 onMounted(() => {
   currentPath.value = window.location.pathname
-  onScroll()
   desktopMql = window.matchMedia(DESKTOP_MQ)
   desktopMql.addEventListener('change', onDesktopChange)
-  window.addEventListener('scroll',  onScroll,     { passive: true })
   window.addEventListener('keydown', onKeydown)
   document.addEventListener('click', onClickOutside, { capture: true })
   timerId = setInterval(() => { now.value = new Date() }, 30_000)
@@ -271,7 +266,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   desktopMql?.removeEventListener('change', onDesktopChange)
-  window.removeEventListener('scroll',  onScroll)
   window.removeEventListener('keydown', onKeydown)
   document.removeEventListener('click', onClickOutside, { capture: true })
   if (timerId !== null) clearInterval(timerId)
@@ -281,7 +275,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <header class="site-header" :class="{ 'is-scrolled': scrolled }">
+  <header class="site-header">
     <div class="container">
 
       <!-- ── Шапка — плашка по ширине контейнера (как сцена
@@ -646,11 +640,10 @@ onUnmounted(() => {
    Телефон: бренд + звонок + меню; ≥80rem: бренд | навигация | действия.
 
    Принципы
-   1. Шапка — плашка по ширине контейнера, в двух состояниях. Наверху
-      страницы — тёмная (знак VFD светлый, «Связаться» белая); после
-      прокрутки — белая, полупрозрачная с размытием, с тонким контуром
-      и мягкой тенью. Меняются только цвета (токены ниже) и фон слоя
-      плашки — геометрия одинакова, при переходе ничего не сдвигается.
+   1. Шапка — тёмная плашка по ширине контейнера (знак VFD светлый,
+      «Связаться» белая), одна на всю страницу: при прокрутке не
+      меняется. Тонкий контур и мягкая тень отделяют её и от светлых,
+      и от тёмных блоков. Выпадающие панели и мобильное меню — светлые.
    2. Красный — только подчёркивание текущего раздела.
    3. Все цвета — токены ниже, они ссылаются на палитру global.css.
       Контраст текста на белом: ссылки slate-600 (7.4:1), подписи
@@ -685,13 +678,12 @@ onUnmounted(() => {
   --hdr-h:             var(--header-bar);       /* global.css — общая с отступом страницы */
   --hdr-ease:          var(--ease-out);
   --hdr-ease-soft:     cubic-bezier(0.16, 1, 0.3, 1);  /* мягкое торможение в конце */
-  --hdr-swap:          200ms var(--ease-out);   /* смена тёмного и белого состояний — коротко, чтобы цвет текста и фон менялись вместе */
-  --hdr-pill:          color-mix(in srgb, var(--color-white) 90%, transparent); /* фон плашки после прокрутки */
 }
 
-/* Тёмная палитра плашки — только для полосы шапки наверху страницы.
-   Выпадающие панели внутри неё переопределяют токены обратно (см. выше). */
-.site-header:not(.is-scrolled) .hdr {
+/* Плашка шапки — всегда тёмная, при прокрутке не меняется (одно
+   состояние — без мигания цветов и рассинхрона на проде). Выпадающие
+   панели внутри неё переопределяют токены обратно на светлые (см. выше). */
+.site-header .hdr {
   --hdr-pill:          var(--color-slate-900);
   --hdr-fg:            var(--color-white);
   --hdr-fg-soft:       var(--color-slate-300);
@@ -730,7 +722,6 @@ onUnmounted(() => {
   gap: 0.75rem;
   height: var(--hdr-h);
   color: var(--hdr-fg);
-  transition: color var(--hdr-swap);
 }
 /* Плашка — отдельный слой: по ширине — контейнер, по высоте — ровно
    вокруг кнопок. z-index: -1 кладёт её под содержимое
@@ -749,14 +740,8 @@ onUnmounted(() => {
      низкой полосе выглядела бы другим элементом, не родственным hero */
   border-radius: 1.25rem;
   background: var(--hdr-pill);
-  box-shadow: inset 0 0 0 var(--hdr-hair) transparent, 0 0.75rem 2rem -1.25rem transparent;
-  transition: background-color var(--hdr-swap), box-shadow var(--hdr-swap);
-}
-/* Белая плашка: контент под ней размыт, тонкий контур и мягкая тень
-   отделяют её от белой страницы */
-.site-header.is-scrolled .hdr::before {
-  -webkit-backdrop-filter: blur(0.875rem) saturate(1.4);
-  backdrop-filter: blur(0.875rem) saturate(1.4);
+  /* Контур — чтобы плашка не сливалась с тёмными блоками страницы
+     (шаги, подвал), тень — отделяет её от светлых */
   box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line), 0 0.75rem 2rem -1.25rem var(--hdr-shadow);
 }
 @media (min-width: 80rem) {
@@ -808,10 +793,10 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 300ms var(--hdr-ease), filter var(--hdr-swap);
+  transition: opacity 300ms var(--hdr-ease);
 }
 /* На тёмной плашке знак инвертирован: светлый круг, тёмные буквы VFD */
-.site-header:not(.is-scrolled) .hdr-mark img { filter: invert(1); }
+.site-header .hdr-mark img { filter: invert(1); }
 .hdr-mark img.is-loaded { opacity: 1; }
 .hdr-mark__fallback {
   display: grid;
