@@ -10,6 +10,7 @@
  * правке и товары снимут с показа.
  */
 import { supabase } from './supabase'
+import { localMedia } from './media'
 import { buildModelSlugMap } from './slugify'
 import { getColorsByCoatingSlug } from './catalog-data'
 import { adjustPrice } from './price-adjustments'
@@ -58,10 +59,12 @@ async function loadModelEntries(): Promise<ModelEntry[]> {
     `)
     .order('price_rrp', { ascending: true })
 
-  if (error || !data) {
-    console.error('getModelEntries error:', error?.message)
-    return []
-  }
+  /* Ошибка роняет сборку (как в catalog-data.ts): иначе на сайт молча
+     ушли бы пустой фид и сайт без страниц моделей */
+  if (error || !data) throw new Error(`Модели не загрузились из Supabase (model_colors): ${error?.message ?? 'нет данных'}`)
+
+  /* Фото — копии в проекте (public/media), а не облако */
+  for (const row of data) row.photo_url = localMedia(row.photo_url)
 
   const modelMap = new Map<string, ModelEntry>()
 

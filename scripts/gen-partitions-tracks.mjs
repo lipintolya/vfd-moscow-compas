@@ -15,6 +15,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const OUT_DIR = new URL('../public/renders/partitions/', import.meta.url)
 await mkdir(OUT_DIR, { recursive: true })
@@ -26,9 +27,7 @@ const jobs = [
 ]
 
 for (const { src, out, width, quality } of jobs) {
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   const resized = await sharp(buf).resize({ width, withoutEnlargement: true }).webp({ quality }).toBuffer()
   await writeFile(new URL(out, OUT_DIR), resized)
   console.log(`${out}: ${(buf.length / 1024).toFixed(0)}KB -> ${(resized.length / 1024).toFixed(0)}KB`)

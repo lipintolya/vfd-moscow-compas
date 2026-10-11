@@ -13,6 +13,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const SRC = 'https://storage.yandexcloud.net/vfd.moscow.compass/contact.block/'
 const OUT_DIR = new URL('../public/renders/contacts/', import.meta.url)
@@ -29,9 +30,7 @@ const PHOTOS = [
 await mkdir(OUT_DIR, { recursive: true })
 const meta = {}
 for (const p of PHOTOS) {
-  const res = await fetch(SRC + p.file)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${SRC + p.file}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(SRC + p.file)
   const { width: W, height: H } = await sharp(buf).metadata()
 
   // Наибольший кадр 4:3 внутри исходника, центр — в точке focus (с упором в края)

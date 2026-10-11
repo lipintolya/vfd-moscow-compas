@@ -19,6 +19,7 @@
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
+import { loadMedia } from './lib/media.mjs'
 
 const OUT_DIR = new URL('../public/renders/partitions/', import.meta.url)
 await mkdir(OUT_DIR, { recursive: true })
@@ -39,9 +40,7 @@ const jobs = [
 
 const buffers = {}
 for (const [key, url] of Object.entries(sources)) {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${url}`)
-  buffers[key] = Buffer.from(await res.arrayBuffer())
+  buffers[key] = await loadMedia(url)
 }
 
 for (const { from, out, width, height, position } of jobs) {

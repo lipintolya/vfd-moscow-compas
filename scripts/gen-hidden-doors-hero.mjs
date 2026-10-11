@@ -18,6 +18,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const OUT_DIR = new URL('../public/renders/hidden-doors/', import.meta.url)
 await mkdir(OUT_DIR, { recursive: true })
@@ -39,9 +40,7 @@ const jobs = [
 const cache = new Map()
 for (const { src, out, width, height, quality, position } of jobs) {
   if (!cache.has(src)) {
-    const res = await fetch(src)
-    if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-    cache.set(src, Buffer.from(await res.arrayBuffer()))
+    cache.set(src, await loadMedia(src))
   }
   const buf = cache.get(src)
   const resized = await sharp(buf)

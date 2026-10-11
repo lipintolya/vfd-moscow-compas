@@ -73,7 +73,7 @@ export const SITE = {
       { station: 'ВДНХ',      time: '6 мин на транспорте' },
     ],
     /** Фото здания ТЦ с парковки — чтобы узнать его с улицы */
-    photo: 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/about.compas.hall/1138447691-6.webp',
+    photo: '/media/vfd.moscow.compass/hero.block/about.compas.hall/1138447691-6.webp',
   },
 
   /** Название в шапке сайта рядом с логотипом ВФД */
@@ -89,7 +89,7 @@ export const SITE = {
 
   /** Фото контактного лица — вырезанный силуэт (PNG/WebP с прозрачностью),
       640×640; в плитке «Видео о дверях и фурнитуре» на главной */
-  contactPhoto: 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/hero.block.main/director_main.webp',
+  contactPhoto: '/media/vfd.moscow.compass/hero.block/hero.block.main/director_main.webp',
 
   /** Опыт салона — выносится на первый экран главной */
   experience: 'Более 15 лет в мире дверей',

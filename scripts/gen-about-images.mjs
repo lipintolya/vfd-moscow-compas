@@ -19,6 +19,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const OUT_DIR = new URL('../public/renders/about/', import.meta.url)
 await mkdir(OUT_DIR, { recursive: true })
@@ -34,9 +35,7 @@ const jobs = []
    Исходник — квадрат 640, поэтому 640 — потолок; 400 — для телефонов 1x. */
 {
   const src = 'https://storage.yandexcloud.net/vfd.moscow.compass/about.block/ceo/ceo_main.webp'
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   for (const w of [400, 640]) {
     const out = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 80 }).toBuffer()
     await writeFile(new URL(`founder-${w}.webp`, OUT_DIR), out)
@@ -54,9 +53,7 @@ const jobs = []
   const photos = []
   for (let n = 1; n <= COUNT; n++) {
     const src = `${SRC}card_${n}.webp`
-    const res = await fetch(src)
-    if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-    const buf = Buffer.from(await res.arrayBuffer())
+    const buf = await loadMedia(src)
     const meta = await sharp(buf).metadata()
     for (const w of WIDTHS) {
       const out = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 78 }).toBuffer()
@@ -79,9 +76,7 @@ const FACTORY_WIDTHS = [480, 960]
 const factory = []
 for (let n = 1; n <= FACTORY_COUNT; n++) {
   const src = `${FACTORY_SRC}photo_${n}.webp`
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   const meta = await sharp(buf).metadata()
   for (const w of FACTORY_WIDTHS) {
     const out = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 76 }).toBuffer()
@@ -98,9 +93,7 @@ await writeFile(
 )
 
 for (const { src, out, width, quality } of jobs) {
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   const resized = await sharp(buf).resize({ width, withoutEnlargement: true }).webp({ quality }).toBuffer()
   await writeFile(new URL(out, OUT_DIR), resized)
   console.log(`${out}: ${(buf.length / 1024).toFixed(0)}KB -> ${(resized.length / 1024).toFixed(0)}KB`)
@@ -113,9 +106,7 @@ for (const { src, out, width, quality } of jobs) {
    под retina — избыточные байты не грузим. */
 {
   const src = 'https://storage.yandexcloud.net/vfd74ru/Main_page_perfomance-covers/161125105.webp'
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   const resized = await sharp(buf)
     .extract({ left: 118, top: 70, width: 280, height: 280 })
     .resize({ width: 160, height: 160, fit: 'cover' })

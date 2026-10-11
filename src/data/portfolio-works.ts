@@ -83,9 +83,9 @@ export const PORTFOLIO_WORKS: PortfolioWork[] = [
     tags:   ['Москва', 'Квартира', 'Скрытые двери', 'Стеновые панели', 'Натуральный шпон'],
     // Обложка — кадр, где скрытые двери видны лучше всего
     images: [
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/ourworks.main/28.09.26/IMAGE%202026-10-04%2011_19_31.webp',
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/ourworks.main/28.09.26/IMAGE%202026-10-04%2011_19_17.webp',
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/ourworks.main/28.09.26/IMAGE%202026-10-04%2011_19_29.webp',
+      '/media/vfd.moscow.compass/hero.block/ourworks.main/28.09.26/IMAGE%202026-10-04%2011_19_31.webp',
+      '/media/vfd.moscow.compass/hero.block/ourworks.main/28.09.26/IMAGE%202026-10-04%2011_19_17.webp',
+      '/media/vfd.moscow.compass/hero.block/ourworks.main/28.09.26/IMAGE%202026-10-04%2011_19_29.webp',
     ],
     relatedLink: { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери в каталоге' },
   },
@@ -110,7 +110,7 @@ export const PORTFOLIO_WORKS: PortfolioWork[] = [
     ],
     tags:   ['Москва', 'Квартира', 'Межкомнатные двери', 'Графит', 'Золотая фурнитура', 'Дизайн-проект'],
     images: [
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/ourworks.main/18.08.26/IMAGE%202026-10-04%2019_40_17.webp',
+      '/media/vfd.moscow.compass/hero.block/ourworks.main/18.08.26/IMAGE%202026-10-04%2019_40_17.webp',
     ],
     relatedLink: { href: '/catalog/seryye-dveri/', label: 'Серые и графитовые двери в каталоге' },
   },
@@ -134,7 +134,7 @@ export const PORTFOLIO_WORKS: PortfolioWork[] = [
     ],
     tags:   ['Москва', 'Квартира', 'Межкомнатные двери', 'Натуральный шпон'],
     images: [
-      'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/ourworks.main/4.10.26/our_works_2.webp',
+      '/media/vfd.moscow.compass/hero.block/ourworks.main/4.10.26/our_works_2.webp',
     ],
     relatedLink: { href: '/catalog/', label: 'Межкомнатные двери в каталоге' },
   },

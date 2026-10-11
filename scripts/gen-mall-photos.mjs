@@ -12,6 +12,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const SRC = 'https://storage.yandexcloud.net/vfd.moscow.compass/about.block/compass_hall/'
 const COUNT = 4
@@ -22,9 +23,7 @@ await mkdir(OUT_DIR, { recursive: true })
 const photos = []
 for (let n = 1; n <= COUNT; n++) {
   const src = `${SRC}hall_compass_${n}.webp`
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   const meta = await sharp(buf).metadata()
   for (const w of WIDTHS) {
     const out = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 76 }).toBuffer()

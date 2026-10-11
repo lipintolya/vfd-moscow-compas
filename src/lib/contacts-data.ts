@@ -62,7 +62,7 @@ export const companyLegalInfo = {
 
   // Социальные сети — только Telegram-канал (см. SITE.social)
   socialMedia: [
-    { name: 'Telegram', label: 'Telegram-канал', url: SITE.social.telegram, icon: 'https://storage.yandexcloud.net/catalog-vfd/icons/tg_logo.svg' },
+    { name: 'Telegram', label: 'Telegram-канал', url: SITE.social.telegram, icon: '/media/catalog-vfd/icons/tg_logo.svg' },
   ],
 
   // Дополнительная информация

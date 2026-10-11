@@ -16,6 +16,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const BASE = 'https://storage.yandexcloud.net/catalog-vfd/covers/alum_covers'
 const OUT = new URL('../public/renders/alum-covers/', import.meta.url)
@@ -25,9 +26,7 @@ const CONCURRENCY = 6
 await mkdir(OUT, { recursive: true })
 
 async function processOne(i) {
-  const res = await fetch(`${BASE}/${i}.webp`)
-  if (!res.ok) throw new Error(`${i}.webp: HTTP ${res.status}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(`${BASE}/${i}.webp`)
 
   const lightbox = await sharp(buf).resize({ width: 1920, withoutEnlargement: true }).webp({ quality: 78 }).toBuffer()
   await writeFile(new URL(`${i}.webp`, OUT), lightbox)

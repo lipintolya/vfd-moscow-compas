@@ -13,6 +13,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const OUT = new URL('../public/renders/home/', import.meta.url)
 await mkdir(OUT, { recursive: true })
@@ -24,9 +25,7 @@ const jobs = [
 ]
 
 for (const [src, out, { height }] of jobs) {
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   const img = await sharp(buf)
     .resize({ height, withoutEnlargement: true })
     .webp({ quality: 86, alphaQuality: 100, effort: 6 })

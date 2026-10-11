@@ -16,6 +16,7 @@
  */
 import sharp from 'sharp'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const CLOUD = 'https://storage.yandexcloud.net/vfd.moscow.compass/designers.block/'
 const OUT_DIR = new URL('../public/renders/designers/', import.meta.url)
@@ -28,9 +29,7 @@ const SLIDES = [
 
 const load = async (s) => {
   if (s.file) return readFile(s.file)
-  const res = await fetch(s.url)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${s.url}`)
-  return Buffer.from(await res.arrayBuffer())
+  return loadMedia(s.url)
 }
 
 await mkdir(OUT_DIR, { recursive: true })

@@ -50,8 +50,19 @@ const {
 } = Astro.props
 
 const effectiveCanonical = canonical ?? (Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined)
+
+/* Соцсети и поисковики понимают только полные адреса картинок, а фото
+   сайта лежат в проекте (/media/…, /renders/…) — дописываем домен.
+   В JSON-LD так же: любой путь сайта ("/…") становится полным адресом. */
+const absolute = (src: string) => new URL(src, SITE.url).href
+const ogImageUrl = absolute(ogImage)
+const absolutizeLd = (v: unknown): unknown =>
+  typeof v === 'string' ? (v.startsWith('/') && !v.startsWith('//') ? absolute(v) : v)
+  : Array.isArray(v) ? v.map(absolutizeLd)
+  : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, absolutizeLd(x)]))
+  : v
 const structuredDataJson = structuredData
-  ? JSON.stringify(structuredData).replace(/</g, '\\u003c')
+  ? JSON.stringify(absolutizeLd(structuredData)).replace(/</g, '\\u003c')
   : null
 ---
 
@@ -65,7 +76,7 @@ const structuredDataJson = structuredData
 
     <meta property="og:title"        content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image"       content={ogImage} />
+    <meta property="og:image"       content={ogImageUrl} />
     {ogImageMeta && (
       <>
         <meta property="og:image:width"  content={String(ogImageMeta.width)} />
@@ -86,7 +97,7 @@ const structuredDataJson = structuredData
     <meta name="twitter:card"        content="summary_large_image" />
     <meta name="twitter:title"       content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image"       content={ogImage} />
+    <meta name="twitter:image"       content={ogImageUrl} />
 
     {effectiveCanonical && <meta property="og:url" content={effectiveCanonical} />}
     {effectiveCanonical && <link rel="canonical" href={effectiveCanonical} />}
@@ -106,9 +117,6 @@ const structuredDataJson = structuredData
     <meta name="application-name" content={`${SITE.name} в ${SITE.address.mall}`} />
 
     <YandexMetrika />
-
-    <link rel="preconnect" href="https://storage.yandexcloud.net" />
-    <link rel="dns-prefetch" href="https://storage.yandexcloud.net" />
 
     <link
       rel="preload"

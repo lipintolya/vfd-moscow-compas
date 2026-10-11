@@ -24,6 +24,7 @@
 import sharp from 'sharp'
 import { createHash } from 'node:crypto'
 import { readdir, readFile, writeFile, mkdir, rm } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const ARTICLES = new URL('../src/content/articles/', import.meta.url)
 const PUBLIC = new URL('../public/', import.meta.url)
@@ -43,10 +44,8 @@ for (const dir of [COVERS_OUT, IMAGES_OUT]) {
 }
 
 async function load(src) {
-  if (src.startsWith('/')) return readFile(new URL(src.slice(1), PUBLIC))
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  return Buffer.from(await res.arrayBuffer())
+  if (src.startsWith('/media/') || !src.startsWith('/')) return loadMedia(src)
+  return readFile(new URL(src.slice(1), PUBLIC))
 }
 
 const kb = n => `${(n / 1024).toFixed(0)}KB`

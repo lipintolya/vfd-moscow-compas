@@ -1,11 +1,12 @@
 // @ts-check
-import { readFileSync, readdirSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { defineConfig } from 'astro/config';
 import sitemap, { ChangeFreqEnum } from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@astrojs/vue';
 import markdoc from '@astrojs/markdoc';
 import { createClient } from '@supabase/supabase-js';
+import { CLOUD, cloudToMedia, mediaFile } from './scripts/lib/media.mjs';
 
 /* ── Картинки для sitemap (xmlns:image) ────────────────────────────────
    serialize() ниже — чистый Node, import.meta.env тут недоступен (это
@@ -92,8 +93,13 @@ async function fetchModelImages() {
       )
       if (!model || !row.photo_url) continue
       modelMeta.set(model.id, { id: model.id, name: model.name, seriesSlug: model.series?.slug ?? '' })
+      /* Фото — копия в проекте (public/media), как на самих страницах
+         (src/lib/media.ts); нет копии — облачная ссылка */
+      const photo = row.photo_url.startsWith(CLOUD) && existsSync(mediaFile(row.photo_url))
+        ? `${SITE_URL}${cloudToMedia(row.photo_url)}`
+        : row.photo_url
       const list = byModelId.get(model.id) ?? []
-      if (!list.includes(row.photo_url)) list.push(row.photo_url)
+      if (!list.includes(photo)) list.push(photo)
       byModelId.set(model.id, list)
     }
 

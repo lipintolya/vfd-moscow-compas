@@ -3,7 +3,8 @@
  * /akcii/ и /promo-archive/. Облако не ресайзит по query-параметрам, а
  * оригиналы кратно крупнее карточки (~400px CSS) — даём 640w/800w под retina.
  *
- * Фото берутся из src/data/promos.ts: каждый `image: 'https://…'`. Файлы —
+ * Фото берутся из src/data/promos.ts: каждый `image: '/media/…'` (или
+ * облачная ссылка). Файлы —
  * public/renders/promo/<имя-файла-оригинала>-{640,800}.webp; путь для
  * поля imageSrcset скрипт печатает — вставьте его в акцию.
  *
@@ -12,12 +13,13 @@
  */
 import sharp from 'sharp'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const OUT_DIR = new URL('../public/renders/promo/', import.meta.url)
 
 /* promos.ts читаем как текст (без TS-импорта): нужны только адреса фото */
 const data = await readFile(new URL('../src/data/promos.ts', import.meta.url), 'utf8')
-const sources = [...data.matchAll(/^\s*image:\s*'(https?:[^']+)'/gm)].map(([, src]) => ({
+const sources = [...data.matchAll(/^\s*image:\s*'((?:https?:|\/media\/)[^']+)'/gm)].map(([, src]) => ({
   src,
   base: decodeURIComponent(src.split('/').at(-1)).replace(/\.\w+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
 }))
@@ -33,9 +35,7 @@ const widths = [
 ]
 
 for (const { src, base } of sources) {
-  const res = await fetch(src)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${src}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(src)
   for (const { width, quality } of widths) {
     const resized = await sharp(buf).resize({ width, withoutEnlargement: true }).webp({ quality }).toBuffer()
     const out = `${base}-${width}.webp`

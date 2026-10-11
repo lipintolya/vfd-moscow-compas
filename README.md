@@ -25,7 +25,7 @@
 - **Товарные линейки вне Supabase** (`src/data/*.ts`) — скрытые двери с калькулятором цены, алюминиевые перегородки GRAFIA и ОНИКС (конструктор раскладки, профиля и стекла), декор.
 - **SEO как часть архитектуры**, не довесок: `astro-sitemap` с кастомными приоритетами, JSON-LD (`Product`, `BreadcrumbList`, `FAQPage`, `Review`, `LocalBusiness`), единый trailing-slash по всем внутренним ссылкам и canonical-тегам, `robots.txt`/`sitemap.xml` и `/llms.txt` собираются из `site.ts`.
 - **Портфолио работ** — статические данные + скрипт (`scripts/gen-portfolio-thumbs.mjs`) генерирует оптимизированные локальные миниатюры из исходных фото с телефона (обычно 90%+ экономии по весу), полноразмер остаётся только на странице самой работы для лайтбокса.
-- **Изображения** — крупная товарная фотография хранится в Yandex Object Storage и подключается по URL, не бандлится; облегчённые копии для страниц лежат в `public/renders/` (делают скрипты `npm run gen:*`), исходники, которых нет в облаке, — в `assets/`.
+- **Изображения** — все фото сайта лежат в проекте: `public/media/<хранилище>/<путь>` (копии бывших облачных, в коде — `/media/…`), облегчённые версии для страниц — `public/renders/` (скрипты `npm run gen:*`), исходники, которых нет больше нигде, — `assets/`. Фото каталога из Supabase (`photo_url`) сайт при сборке подменяет на копию из `public/media` (`src/lib/media.ts`). В облаке остались только видео.
 
 ## Бренд-слой
 
@@ -59,10 +59,10 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public deploy
 | Раздел | Тексты и данные | Фото |
 |---|---|---|
 | Статьи и публикации `/articles/` | `src/content/articles/<slug>.mdoc` — одна статья = один файл | ссылки в статье; облегчённые копии — `node scripts/gen-article-images.mjs` |
-| Перегородки GRAFIA `/partitions/` | `src/data/partitions.ts` | облако; рендеры — `npm run gen:renders` |
+| Перегородки GRAFIA `/partitions/` | `src/data/partitions.ts` | `public/media/catalog-vfd/…`; рендеры — `npm run gen:renders` |
 | Перегородки ОНИКС ALUM `/partitions/oniks-alum/` | `src/data/oniks-alum.ts` — все тексты страницы; цифры фабрики (высота, ширина, срок, стекло) — один раз в `ONIKS_SPEC` | оригиналы — `assets/oniks-alum/` (инструкция в README там же), облегчённые — `npm run gen:oniks` |
-| Скрытые двери `/catalog/skrytye-dveri/` | `src/data/skrytye-dveri-products.ts`, `hidden-doors-page.ts` | облако |
-| Видео | `src/data/videos.ts`; ролик для статьи — `node scripts/optimize-video.mjs` | облако / `public/renders/` |
+| Скрытые двери `/catalog/skrytye-dveri/` | `src/data/skrytye-dveri-products.ts`, `hidden-doors-page.ts` | `public/media/catalog-vfd/invisible/…` |
+| Видео | `src/data/videos.ts`; ролик для статьи — `npm run video:optimize` | ролики — облако; обложки и ролики статей — `public/renders/` |
 
 ## Запуск локально
 
@@ -80,11 +80,21 @@ npm run dev
 | `npm run build` | Продакшен-сборка в `dist/` |
 | `npm run preview` | Превью собранного `dist/` |
 
+### Фото в проекте
+
+| Что сделать | Как |
+|---|---|
+| Новое фото для страницы или статьи | положить в `public/media/…` и сослаться как `/media/…` |
+| Новая модель или цвет с фото в Supabase | `npm run media:pull` — скачает новые фото каталога в `public/media/`, затем закоммитить |
+| Проверить, всё ли на месте | `npm run media:pull -- --check` |
+
+Без `media:pull` сайт всё равно соберётся: для фото, которого нет в проекте, останется облачная ссылка, а сборка напишет «нет копии в проекте».
+
 ### Облегчённые картинки
 
-Фото лежат в облаке (Yandex Cloud) в полном размере; скрипты делают из них
-лёгкие `.webp` в `public/renders/` (а где нужно — файл с размерами в
-`src/data/`). Запускать после замены или добавления фото.
+Фото из `public/media/` в полном размере; скрипты делают из них лёгкие `.webp`
+в `public/renders/` (а где нужно — файл с размерами в `src/data/`). Запускать
+после замены или добавления фото.
 
 | Команда | Что обновляет |
 |---|---|

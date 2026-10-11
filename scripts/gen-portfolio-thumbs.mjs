@@ -18,6 +18,7 @@
  */
 import sharp from 'sharp'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const DATA_FILE = new URL('../src/data/portfolio-works.ts', import.meta.url)
 const OUT = new URL('../public/renders/portfolio/', import.meta.url)
@@ -40,9 +41,7 @@ console.log(`Найдено работ: ${works.length}`)
 await mkdir(OUT, { recursive: true })
 
 async function processOne({ id, cover }) {
-  const res = await fetch(cover)
-  if (!res.ok) throw new Error(`${id}: HTTP ${res.status} на ${cover}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(cover)
 
   const thumb = await sharp(buf).resize({ width: WIDTH, withoutEnlargement: true }).webp({ quality: QUALITY }).toBuffer()
   await writeFile(new URL(`${id}.webp`, OUT), thumb)

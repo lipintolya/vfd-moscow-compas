@@ -5,6 +5,7 @@
  * дублировать JOIN и нормализацию цветов в каждом месте.
  */
 import { supabase } from './supabase'
+import { localMedia } from './media'
 import { buildModelSlugMap } from './slugify'
 import { getSeriesSpec } from '../data/series-descriptions'
 import { SERIES_COVER_PREVIEWS, SERIES_COVER_THUMBS } from '../data/series-cover-previews'
@@ -76,6 +77,10 @@ async function loadCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
     .order('price_rrp', { ascending: true })
 
   if (error) throw new Error(`Каталог не загрузился из Supabase (model_colors): ${error.message}`)
+
+  /* Фото — копии в проекте (public/media), а не облако: цены и модели
+     правятся в базе, фото сайт отдаёт со своего сервера */
+  for (const row of data ?? []) row.photo_url = localMedia(row.photo_url)
 
   /* ── Полный набор цветов на модель (по всем строкам, не только первой) —
      нужен для корректной фильтрации: модель может подходить под фильтр

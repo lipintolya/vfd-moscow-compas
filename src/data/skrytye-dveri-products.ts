@@ -2,7 +2,7 @@
    Данные скрытых дверей «Секрет» / «Секрет Реверс»
    Только РРЦ — закупочные цены на сайте не публикуются
    ============================================================ */
-const CDN      = 'https://storage.yandexcloud.net/catalog-vfd/invisible/'
+const CDN      = '/media/catalog-vfd/invisible/'
 const INFO_CDN  = `${CDN}invisible_info/`
 
 // ── Информационные изображения ─────────────────────────────────
@@ -13,8 +13,8 @@ export const INFO_IMAGES = {
 } as const
 
 // Разрезы короба «Секрет» — Стандарт (монолитный алюминий) и Лайт (алюминий + сосна)
-export const BOX_PRO_IMAGE  = 'https://storage.yandexcloud.net/vfd74ru/invisible/render_alum_pro.webp'
-export const BOX_LITE_IMAGE = 'https://storage.yandexcloud.net/vfd74ru/invisible/render_alum_lite.webp'
+export const BOX_PRO_IMAGE  = '/media/vfd74ru/invisible/render_alum_pro.webp'
+export const BOX_LITE_IMAGE = '/media/vfd74ru/invisible/render_alum_lite.webp'
 
 // ── Изображения ───────────────────────────────────────────────
 // invisible/invisibleRev — локальные ресайзы (см. scripts/gen-hidden-doors-hero.mjs):
@@ -106,7 +106,7 @@ export function calcCustomPrice(basePrice: number, surcharge: number): number {
 // 1672×941 используется как og:image/hero на 3 сегментных лендингах и
 // в structured data, где полное разрешение не нужно.
 export const REFLEX_IMAGE           = '/renders/hidden-doors/reflex-900.webp'
-export const REFLEX_OPENING_DIAGRAM = 'https://storage.yandexcloud.net/vfd74ru/invisible/opredelenie_storoni_otkrivaniya_dlya_zerkal.webp'
+export const REFLEX_OPENING_DIAGRAM = '/media/vfd74ru/invisible/opredelenie_storoni_otkrivaniya_dlya_zerkal.webp'
 
 export type ReflexEdgeColor = 'black' | 'silver' | 'gold'
 

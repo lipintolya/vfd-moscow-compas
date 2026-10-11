@@ -32,7 +32,7 @@ export const WC_QTY   = 1
 /** Фото + схема с размерами — для наглядности в калькуляторе. */
 export interface HardwareImages { photo: string; schema: string }
 
-const HW_CDN = 'https://storage.yandexcloud.net/vfd74ru/info/petli/'
+const HW_CDN = '/media/vfd74ru/info/petli/'
 
 export const HINGE_IMAGES: Record<HingeType, HardwareImages> = {
   standard: { photo: `${HW_CDN}out_petli.webp`, schema: `${HW_CDN}out.webp` },

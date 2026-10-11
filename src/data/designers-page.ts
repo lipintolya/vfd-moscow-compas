@@ -141,7 +141,7 @@ export const DESIGNER_STEPS = [
 ]
 
 /* Ассортимент для проектов — фото те же, что у направлений на главной */
-const PREVIEW = 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/catalog.preview.main'
+const PREVIEW = '/media/vfd.moscow.compass/hero.block/catalog.preview.main'
 export const DESIGNER_RANGE = [
   { title: 'Межкомнатные двери',      text: 'Эмаль, Эмалекс, ПЭТ, экошпон — серии и цвета каталога',       href: '/catalog/',              image: `${PREVIEW}/catalog_preview_left.webp`,       position: '72% 50%' },
   { title: 'Скрытые двери',           text: `Заподлицо со стеной; в наличии ${stockList}`,                  href: '/catalog/skrytye-dveri/', image: `${PREVIEW}/catalog_preview_top_right.webp`,  position: '56% 50%' },

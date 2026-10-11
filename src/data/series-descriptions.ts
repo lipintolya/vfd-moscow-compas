@@ -95,8 +95,8 @@ stockholm: {
   
   thickness: '37',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/stockholm.webp',
-  infoImage: 'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/emal/stockholm.webp',
+  infoImage: '/media/vfd74ru/info/emal/emal_covers.webp',
   infoImageAspect: '1672 / 941',
   infoImageCaption: 'Цветовые решения — Эмаль',
 },
@@ -123,8 +123,8 @@ skinel: {
   
   thickness: '37',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/skinel.webp',
-  infoImage: 'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/emal/skinel.webp',
+  infoImage: '/media/vfd74ru/info/emal/emal_covers.webp',
   infoImageAspect: '1672 / 941',
   infoImageCaption: 'Цветовые решения — Эмаль',
 },
@@ -150,8 +150,8 @@ skinel: {
   
   thickness: '37',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/winter.webp',
-  infoImage: 'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/emal/winter.webp',
+  infoImage: '/media/vfd74ru/info/emal/emal_covers.webp',
   infoImageAspect: '1672 / 941',
   infoImageCaption: 'Цветовые решения — Эмаль',
 },
@@ -170,7 +170,7 @@ skinel: {
     material:    'Сборная конструкция премиум-класса: каркас из массива сосны и МДФ. Филёнки изготовлены из двух плит МДФ толщиной 10 мм каждая (суммарно 20 мм). Это обеспечивает высокую прочность, позволяет создать объёмный рисунок фрезеровки и гарантирует стабильность геометрии полотна без использования сотового наполнителя.',
     edge:        'Износостойкая кромка в цвет полотна, обеспечивающая полную герметичность торцов, защиту от влаги и ударов. В некоторых моделях серии предусмотрена декоративная багетная обкладка для усиления классического характера.',
     thickness:   '39',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/elegant.webp',
+    heroImage:   '/media/vfd74ru/cover_first_section/elegant.webp',
   },
 
 'antique-luxe': {
@@ -193,8 +193,8 @@ skinel: {
   
   thickness: '37',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/antique_luxe.webp',
-  infoImage: 'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/emal/antique_luxe.webp',
+  infoImage: '/media/vfd74ru/info/emal/emal_covers.webp',
   infoImageAspect: '1672 / 941',
   infoImageCaption: 'Цветовые решения — Эмаль',
 },
@@ -207,8 +207,8 @@ skinel: {
     material:    'Каркасно-щитовая конструкция. Прочный каркас с наполнителем из тамбурата с малым шагом сот и плиты ХДФ для обеспечения жёсткости, стабильности геометрии и базовой звукоизоляции.',
     edge:        'Защитная кромка в цвет полотна, обеспечивающая герметичность и защиту торцов от влаги и сколов',
     thickness:   '38',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/basic.webp',
-    infoImage:   'https://storage.yandexcloud.net/vfd74ru/info/basic/prezentaciya_basic_emalex.webp',
+    heroImage:   '/media/vfd74ru/cover_first_section/basic.webp',
+    infoImage:   '/media/vfd74ru/info/basic/prezentaciya_basic_emalex.webp',
     infoImageAspect: '3508 / 2003',
   },
 
@@ -235,8 +235,8 @@ skinel: {
   
   thickness: '37',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/linea.webp',
-  infoImage: 'https://storage.yandexcloud.net/vfd74ru/info/linea/prezentaciya_linea.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/emal/linea.webp',
+  infoImage: '/media/vfd74ru/info/linea/prezentaciya_linea.webp',
   infoImageAspect: '3509 / 2481',
 },
 
@@ -261,8 +261,8 @@ skinel: {
   
   thickness: '37',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/premium.webp',
-  infoImage: 'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/emal/premium.webp',
+  infoImage: '/media/vfd74ru/info/emal/emal_covers.webp',
   infoImageAspect: '1672 / 941',
   infoImageCaption: 'Цветовые решения — Эмаль',
 },
@@ -285,8 +285,8 @@ skinel: {
     // обратного открывания (reverse) в компланарных и скрытых коробах
     // используется специальное полотно толщиной 54 мм.
     thickness:   '38',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/urban.webp',
-    infoImage:   'https://storage.yandexcloud.net/vfd74ru/info/urban/urban_info.webp',
+    heroImage:   '/media/vfd74ru/cover_first_section/urban.webp',
+    infoImage:   '/media/vfd74ru/info/urban/urban_info.webp',
     infoImageAspect: '3405 / 1122',
   },
 
@@ -311,8 +311,8 @@ skinel: {
   
   thickness: '37',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emal/sector.webp',
-  infoImage: 'https://storage.yandexcloud.net/vfd74ru/info/emal/emal_covers.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/emal/sector.webp',
+  infoImage: '/media/vfd74ru/info/emal/emal_covers.webp',
   infoImageAspect: '1672 / 941',
   infoImageCaption: 'Цветовые решения — Эмаль',
 },
@@ -333,7 +333,7 @@ skinel: {
     material:    'Сборная конструкция повышенной прочности: каркас из массива сосны и плит МДФ. Полное отсутствие сотового наполнителя (тамбурата) обеспечивает высокую жёсткость, отличную звукоизоляцию и стабильность геометрии полотна, исключая деформации со временем.',
     edge:        'Износостойкая кромка в цвет полотна, обеспечивающая полную герметичность торцов, надёжную защиту от влаги и механических повреждений.',
     thickness:   '39',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emalex.webp',
+    heroImage:   '/media/vfd74ru/cover_first_section/emalex.webp',
   },
 
   'emalex-modern': {
@@ -350,7 +350,7 @@ skinel: {
     material:    'Сборная конструкция повышенной прочности: каркас из массива сосны и плит МДФ. Отсутствие сотового наполнителя (тамбурата) обеспечивает высокую жёсткость, отличную звукоизоляцию и стабильность геометрии полотна, исключая деформации со временем.',
     edge:        'Износостойкая кромка в цвет полотна, обеспечивающая полную герметичность торцов, надёжную защиту от влаги и механических повреждений.',
     thickness:   '39',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/emalex_modern.webp',
+    heroImage:   '/media/vfd74ru/cover_first_section/emalex_modern.webp',
   },
 
   tehno: {
@@ -367,9 +367,9 @@ skinel: {
     material:    'Сборная конструкция повышенной прочности: каркас из массива сосны и плит МДФ. Полное отсутствие сотового наполнителя (тамбурата) обеспечивает высокую жёсткость, отличную звукоизоляцию и стабильность геометрии полотна, исключая деформации со временем.',
     edge:        'Износостойкая кромка в цвет полотна, обеспечивающая полную герметичность торцов, надёжную защиту от влаги и механических повреждений.',
     thickness:   '39',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/catalog/tehno/emalex_tehno_cover.webp',
-    previewImage:'https://storage.yandexcloud.net/vfd74ru/doors-main_renders/tehno/tehno_render_1.webp',
-    specsImage:  'https://storage.yandexcloud.net/vfd74ru/catalog/tehno/tehno_banner.webp',
+    heroImage:   '/media/vfd74ru/catalog/tehno/emalex_tehno_cover.webp',
+    previewImage:'/media/vfd74ru/doors-main_renders/tehno/tehno_render_1.webp',
+    specsImage:  '/media/vfd74ru/catalog/tehno/tehno_banner.webp',
   },
 
   // ── ПЭТ ──────────────────────────────────────────────────────────────────
@@ -396,7 +396,7 @@ innova: {
   
   thickness: '39',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/pet/innova.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/pet/innova.webp',
 },
 
   'urban-pet': {
@@ -421,7 +421,7 @@ innova: {
   
   thickness: '39',
   
-  heroImage: 'https://storage.yandexcloud.net/vfd74ru/cover_first_section/pet/urban_pet.webp',
+  heroImage: '/media/vfd74ru/cover_first_section/pet/urban_pet.webp',
 },
 
   // ── ЭКОШПОН ──────────────────────────────────────────────────────────────
@@ -440,7 +440,7 @@ innova: {
     material:    'Тамбурат с особым, малым размером сот. В основе прочная плита ХДФ и инженерный массив.',
     edge:        'Эко-материал в цвет полотна.',
     thickness:   '37',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/catalog/urban_wood/urban_z/urban_cover_wood.webp',
+    heroImage:   '/media/vfd74ru/catalog/urban_wood/urban_z/urban_cover_wood.webp',
   },
 
   // ── ПРОТАЧ ───────────────────────────────────────────────────────────────
@@ -460,12 +460,12 @@ innova: {
     material:    'Полотно толщиной 38 мм на стабильной жёсткой основе — обеспечивает точную геометрию, хорошую шумоизоляцию и надёжное сцепление с покрытием Protouch.',
     edge:        'Кромка из износостойкого материала в тон полотна — герметичность торцов, защита от влаги и механических повреждений.',
     thickness:   '38',
-    heroImage:    'https://storage.yandexcloud.net/catalog-vfd/Smart/next/render/nexr_render_preview.webp',
-    previewImage: 'https://storage.yandexcloud.net/catalog-vfd/Smart/next/render/next_render.webp',
+    heroImage:    '/media/catalog-vfd/Smart/next/render/nexr_render_preview.webp',
+    previewImage: '/media/catalog-vfd/Smart/next/render/next_render.webp',
     posterImages: [
-      'https://storage.yandexcloud.net/catalog-vfd/Smart/next/render/dpp4t9lhuwv_anp8vytjwfjsip1ursaj_wjiqhgj0fuj4gfefsg_cdslzqj5.webp',
-      'https://storage.yandexcloud.net/catalog-vfd/Smart/next/render/izrlqmysjbf7eon_piblw1erjtr18x8jocsdwa3yzfm165lmhvvllqsjquvl.webp',
-      'https://storage.yandexcloud.net/catalog-vfd/Smart/next/render/rm_iidiekzpyr0nldborurvh_pt0dtm9yn53hauughfqrpyrzruhuody_yyi.webp',
+      '/media/catalog-vfd/Smart/next/render/dpp4t9lhuwv_anp8vytjwfjsip1ursaj_wjiqhgj0fuj4gfefsg_cdslzqj5.webp',
+      '/media/catalog-vfd/Smart/next/render/izrlqmysjbf7eon_piblw1erjtr18x8jocsdwa3yzfm165lmhvvllqsjquvl.webp',
+      '/media/catalog-vfd/Smart/next/render/rm_iidiekzpyr0nldborurvh_pt0dtm9yn53hauughfqrpyrzruhuody_yyi.webp',
     ],
   },
 
@@ -485,7 +485,7 @@ innova: {
     material:    'Надёжная конструкция полотна толщиной 38 мм. Стабильная и жёсткая основа, которая обеспечивает идеальную геометрию, высокую звукоизоляцию и служит прочной базой для долговечного сцепления с полипропиленовым покрытием.',
     edge:        'Кромка из износостойкого материала, идеально подобранная в тон полотна. Обеспечивает полную герметичность торцов, надёжную защиту от влаги и механических повреждений, гармонично завершая строгий минималистичный дизайн.',
     thickness:   '38',
-    heroImage:   'https://storage.yandexcloud.net/vfd74ru/cover_first_section/protouch/smart.webp',
+    heroImage:   '/media/vfd74ru/cover_first_section/protouch/smart.webp',
   },
 }
 
@@ -595,7 +595,7 @@ const coatingFallbacks: Record<string, Omit<SeriesSpec, 'tagline' | 'description
     material:  'Тамбурат с особым, малым размером сот. В основе прочная плита ХДФ и инженерный массив',
     edge:      'Эко-материал в цвет полотна',
     thickness: '37',
-    heroImage: 'https://storage.yandexcloud.net/vfd74ru/catalog/urban_wood/urban_z/urban_cover_wood.webp',
+    heroImage: '/media/vfd74ru/catalog/urban_wood/urban_z/urban_cover_wood.webp',
   },
 }
 

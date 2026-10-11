@@ -17,6 +17,7 @@
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
+import { loadMedia } from './lib/media.mjs'
 
 const BASE  = 'https://storage.yandexcloud.net/catalog-vfd/alum_info/colors-profile'
 const OUT   = new URL('../public/renders/partitions/', import.meta.url)
@@ -25,9 +26,7 @@ const COUNT = 13
 await mkdir(OUT, { recursive: true })
 
 for (let i = 1; i <= COUNT; i++) {
-  const res = await fetch(`${BASE}/${i}.jpg`)
-  if (!res.ok) throw new Error(`${i}.jpg: HTTP ${res.status}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(`${BASE}/${i}.jpg`)
 
   const resized = await sharp(buf).resize({ width: 600, height: 600 }).webp({ quality: 82 }).toBuffer()
   const out = `color-swatch-${i}.webp`

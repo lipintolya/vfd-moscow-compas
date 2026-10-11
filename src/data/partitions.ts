@@ -6,7 +6,9 @@ import { SITE } from '../config/site'
    только из src/config/site.ts.
    ============================================================ */
 
-const STORAGE = 'https://storage.yandexcloud.net/catalog-vfd'
+const STORAGE = '/media/catalog-vfd'
+/** Ролики — в облаке (видео в проект не переносили) */
+const VIDEO = 'https://storage.yandexcloud.net/catalog-vfd/video'
 const BASE    = `${STORAGE}/alum`
 const INFO    = `${STORAGE}/alum_info`
 const SEC     = `${STORAGE}/alum_section`
@@ -64,12 +66,12 @@ export const PRODUCTION_DAYS = 45
    (scripts/gen-partitions-hero.mjs), видна, пока видео не загрузилось ── */
 export const pageVideos = {
   animation: {
-    src:    `${STORAGE}/video/alum_animation.mp4`,
+    src:    `${VIDEO}/alum_animation.mp4`,
     poster: `${HERO}/poster-animation.webp`,
     label:  'Анимация: как открываются алюминиевые перегородки GRAFIA',
   },
   pivot: {
-    src:    `${STORAGE}/video/pivot_system.mp4`,
+    src:    `${VIDEO}/pivot_system.mp4`,
     poster: `${HERO}/poster-pivot.webp`,
     label:  'Алюминиевая дверь на системе PIVOT: как она открывается',
   },
@@ -352,8 +354,8 @@ export const cases: ProjectCase[] = [
     noteHtml: 'Изготавливаем перегородки по универсальным чертежам — оперативный расчёт стоимости в течение дня.<br/><br/><strong>Не отдельные элементы. Одна архитектура.</strong>',
     call: true,
     images: [
-      { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/19.08.26(1).webp', alt: 'Дверь и гардеробная Grafia в чёрном матовом профиле — фото 1' },
-      { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/19.08.26(2).webp', alt: 'Дверь и гардеробная Grafia в чёрном матовом профиле — фото 2' },
+      { src: '/media/vfd74ru/promo_main/19.08.26(1).webp', alt: 'Дверь и гардеробная Grafia в чёрном матовом профиле — фото 1' },
+      { src: '/media/vfd74ru/promo_main/19.08.26(2).webp', alt: 'Дверь и гардеробная Grafia в чёрном матовом профиле — фото 2' },
     ],
   },
   {
@@ -369,10 +371,10 @@ export const cases: ProjectCase[] = [
     ],
     call: true,
     images: [
-      { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/cafedral_steklo(1).webp', alt: 'Распашная дверь с фрамугой и стеклом «Кафедрал» — общий вид' },
-      { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/cafedral_steklo(2).webp', alt: 'Фактура стекла «Кафедрал» крупным планом' },
-      { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/cafedral_steklo(3).webp', alt: 'Ручка-скоба на двери со стеклом «Кафедрал»' },
-      { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/cafedral_steklo(4).webp', alt: 'Дверь с фрамугой и стеклом «Кафедрал» в интерьере' },
+      { src: '/media/vfd74ru/promo_main/cafedral_steklo(1).webp', alt: 'Распашная дверь с фрамугой и стеклом «Кафедрал» — общий вид' },
+      { src: '/media/vfd74ru/promo_main/cafedral_steklo(2).webp', alt: 'Фактура стекла «Кафедрал» крупным планом' },
+      { src: '/media/vfd74ru/promo_main/cafedral_steklo(3).webp', alt: 'Ручка-скоба на двери со стеклом «Кафедрал»' },
+      { src: '/media/vfd74ru/promo_main/cafedral_steklo(4).webp', alt: 'Дверь с фрамугой и стеклом «Кафедрал» в интерьере' },
     ],
   },
   {
@@ -389,15 +391,15 @@ export const cases: ProjectCase[] = [
     call: true,
     images: [
       {
-        src: 'https://storage.yandexcloud.net/vfd74ru/alum_cover/alum/2026-09-11%2010.34.50.webp',
+        src: '/media/vfd74ru/alum_cover/alum/2026-09-11%2010.34.50.webp',
         alt: 'Алюминиевая перегородка Gold Matt — три синхронные створки, фото 1',
       },
       {
-        src: 'https://storage.yandexcloud.net/vfd74ru/alum_cover/alum/2026-09-11%2010.34.55.webp',
+        src: '/media/vfd74ru/alum_cover/alum/2026-09-11%2010.34.55.webp',
         alt: 'Алюминиевая перегородка Gold Matt со стеклом триплекс с сеткой — фото 2',
       },
       {
-        src: 'https://storage.yandexcloud.net/vfd74ru/alum_cover/alum/2026-09-11%2010.35.01.webp',
+        src: '/media/vfd74ru/alum_cover/alum/2026-09-11%2010.35.01.webp',
         alt: 'Три створки алюминиевой перегородки со стеклом триплекс — фото 3',
       },
     ],

@@ -84,7 +84,8 @@ function offerXml(e: ModelEntry, site: URL): string {
     `        <price>${Math.round(e.minPrice!)}</price>`,
     `        <currencyId>RUR</currencyId>`,
     `        <categoryId>${COATING_CATEGORY_IDS[e.coatingSlug] ?? ROOT_CATEGORY_ID}</categoryId>`,
-    ...pictures.map(src => `        <picture>${xml(src)}</picture>`),
+    // Фото — в проекте (/media/…): Яндексу нужен полный адрес
+    ...pictures.map(src => `        <picture>${xml(new URL(src, site).href)}</picture>`),
     `        <delivery>true</delivery>`,
     `        <description>${xml(productDescription(e))}</description>`,
     `        <sales_notes>${xml(SALES_NOTES)}</sales_notes>`,

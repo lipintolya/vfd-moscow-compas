@@ -21,6 +21,7 @@
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
 import { seriesDescriptions, getSeriesSpec } from '../src/data/series-descriptions.ts'
+import { loadMedia } from './lib/media.mjs'
 
 const OUT = new URL('../public/renders/series/', import.meta.url)
 const MAP_FILE = new URL('../src/data/series-cover-previews.ts', import.meta.url)
@@ -41,9 +42,7 @@ const map = {}
 const thumbs = {}
 let before = 0, after = 0
 for (const url of urls) {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`HTTP ${res.status} на ${url}`)
-  const buf = Buffer.from(await res.arrayBuffer())
+  const buf = await loadMedia(url)
   const img = await sharp(buf).resize({ width: WIDTH, withoutEnlargement: true }).webp({ quality: QUALITY }).toBuffer()
   // имя из пути, без коллизий: cover_first_section/emal/linea.webp → emal-linea-900.webp
   const name = url.split('/').slice(-2).join('-').replace(/\.webp$/, '') + `-${WIDTH}.webp`
