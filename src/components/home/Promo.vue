@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
-import { PROMOS, type Promo } from '../../data/promos'
+import type { Promo } from '../../data/promos'
 import { SITE } from '../../config/site'
 import { isPromoActive, getDaysLeft, formatDate } from '../../lib/promo-dates'
 
 /* ============================================================
-   Props — можно переопределить список извне, иначе берём общий
-   PROMOS (тот же источник, что и /promo-archive для истёкших)
+   Props — акции из Strapi (коллекция promos; страница передаёт их
+   при сборке). Блок показывает активные; пока их нет, блока нет.
    ============================================================ */
-const props = withDefaults(defineProps<{
-  promos?: Promo[]
-}>(), {
-  promos: () => PROMOS,
-})
+const props = defineProps<{
+  promos: Promo[]
+}>()
 
 /* ============================================================
    Computed & State
@@ -55,6 +53,7 @@ function toggleExpanded(id: string) {
   <!-- Оформление — по дизайн-системе главной (src/styles/home.css):
        подпись под фото, без рамок/теней, ссылки графитовые. -->
   <section
+    v-if="activePromos.length"
     id="promo"
     class="h-sec h-sec--wall"
     aria-labelledby="promo-heading"
@@ -65,16 +64,12 @@ function toggleExpanded(id: string) {
         <p class="h-lead">Действуют в салоне {{ SITE.name }} в {{ SITE.address.mall }}. Условия и сроки — в описании каждой акции.</p>
       </header>
 
-      <p v-if="activePromos.length === 0" class="h-lead">
-        Сейчас акций нет. Актуальные цены — в <a href="/catalog/" class="h-link">каталоге</a>.
-      </p>
-
-      <ul v-else class="offers" :class="{ 'offers--single': visiblePromos.length === 1 }" role="list">
+      <ul class="offers" :class="{ 'offers--single': visiblePromos.length === 1 }" role="list">
         <li v-for="promo in visiblePromos" :key="promo.id" class="offer">
+          <!-- без фото — нейтральная плашка: карточки в ряду одной высоты -->
           <span class="h-media offer__media" :class="{ 'offer__media--empty': !promo.image }">
-            <span v-if="!promo.image" class="offer__noimg">Фото акции</span>
             <img
-              v-else
+              v-if="promo.image"
               :src="promo.image"
               :srcset="promo.imageSrcset"
               sizes="(max-width: 43.6875rem) 100vw, (max-width: 68.6875rem) 50vw, 33vw"
@@ -87,20 +82,18 @@ function toggleExpanded(id: string) {
           </span>
 
           <div class="offer__body">
-          <p v-if="!promo.placeholder" class="offer__meta h-meta">
+          <p class="offer__meta h-meta">
             <span v-if="promo.discount" class="offer__discount">{{ promo.discount }}</span>
             <time :datetime="promo.validUntil">
               до {{ formatDate(promo.validUntil) }}<template v-if="clientReady">, осталось {{ getDaysLeft(promo.validUntil) }} дн.</template>
             </time>
           </p>
-          <!-- Заглушка — не заголовок: «Название акции» не должно попасть
-               в структуру страницы для поисковиков -->
-          <component :is="promo.placeholder ? 'p' : 'h3'" class="h-h3 offer__title" :class="{ 'offer__title--first': promo.placeholder }">{{ promo.title }}</component>
+          <h3 class="h-h3 offer__title">{{ promo.title }}</h3>
           <p class="h-body offer__sub">{{ promo.subtitle }}</p>
 
           <p v-if="expandedIds.has(promo.id)" class="h-body offer__desc">{{ promo.description }}</p>
 
-          <div v-if="!promo.placeholder" class="offer__actions">
+          <div class="offer__actions">
             <button
               type="button"
               class="h-link offer__toggle"
@@ -159,9 +152,7 @@ function toggleExpanded(id: string) {
   font-weight: 600;
 }
 .offer__title { margin-top: 0.5rem; }
-.offer__title--first { margin-top: 1.25rem; }
-.offer__media--empty { display: grid; place-items: center; background: var(--color-slate-200); }
-.offer__noimg { font-size: 0.875rem; font-weight: 500; color: var(--color-slate-500); }
+.offer__media--empty { background: var(--color-slate-200); }
 .offer__sub { margin-top: 0.375rem; font-size: 0.9375rem; }
 .offer__desc { margin-top: 0.75rem; font-size: 0.9375rem; }
 .offer__actions { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 1rem; font-size: 0.9375rem; }

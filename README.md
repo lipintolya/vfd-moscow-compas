@@ -52,7 +52,7 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public deploy
 - фото салона на `/about/` (сейчас временные) — `src/data/about-page.ts` + `npm run gen:about`
 - отзывы и портфолио — наполнить `src/data/reviews.ts` / `portfolio-works.ts`, включить `features` в `site.ts` и убрать путь из `SITEMAP_EXCLUDE` в `astro.config.mjs`
 - московские цены (сейчас общие с Supabase-каталогом), тариф доставки — `merchantPolicy` в `contacts-data.ts`
-- маркетинговые факты, перенесённые из Челябинска и требующие сверки: «60+ моделей в выставочном зале», гарантия 12 мес. на монтаж, бесплатный замер, сроки доставки; акции — сейчас заглушки в `src/data/promos.ts`
+- маркетинговые факты, перенесённые из Челябинска и требующие сверки: «60+ моделей в выставочном зале», гарантия 12 мес. на монтаж, бесплатный замер, сроки доставки
 
 ## Где менять контент
 
@@ -103,7 +103,6 @@ npm run dev
 | `npm run gen:renders` | Галерея рендеров перегородок GRAFIA |
 | `npm run gen:partitions-hero` / `gen:partitions-tracks` / `gen:partitions-swatches` | Первый экран, направляющие и образцы цветов профиля на `/partitions/` |
 | `npm run gen:portfolio-thumbs` | Миниатюры портфолио — после новой работы |
-| `npm run gen:promo` | Фото акций из `src/data/promos.ts` (печатает строку для `imageSrcset`) |
 | `npm run gen:series-covers` | Обложки серий каталога |
 | `npm run gen:video-covers` | Обложки роликов |
 | `npm run video:optimize -- <ссылка> <файл> [секунда]` | Облегчённый ролик для статьи и кадр-обложка |

@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { PROMOS } from '../data/promos'
+import { getCollection } from 'astro:content'
 import { isPromoActive, formatDate } from '../lib/promo-dates'
 
-const archivedPromos = PROMOS
+/* Акции — из Strapi; здесь — завершённые */
+const archivedPromos = (await getCollection('promos')).map((e) => e.data)
   .filter(p => !isPromoActive(p.validUntil))
   .sort((a, b) => b.validUntil.localeCompare(a.validUntil))
 ---
@@ -35,6 +36,7 @@ const archivedPromos = PROMOS
             <li>
               <div class="pa-card">
                 <div class="pa-image-wrap">
+                  {promo.image && (
                   <img
                     src={promo.image}
                     srcset={promo.imageSrcset}
@@ -46,6 +48,7 @@ const archivedPromos = PROMOS
                     height="288"
                     class="pa-image"
                   />
+                  )}
                   <span class="pa-badge">Акция завершена</span>
                 </div>
                 <div class="pa-content">

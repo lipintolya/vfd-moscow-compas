@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content'
 import { z } from 'astro/zod'
 import { glob } from 'astro/loaders'
 import { ARTICLE_KINDS } from './data/article-kinds'
+import { promosLoader } from './lib/strapi-content'
 
 /* Статья = один файл src/content/articles/<slug>.mdoc; всё остальное —
    карточки на главной и в разделе, разметка для поисковиков, sitemap,
@@ -88,4 +89,16 @@ const articles = defineCollection({
   }),
 })
 
-export const collections = { articles }
+/* Акции — из Strapi (раздел «Акции»). Схема — проверка на сборке:
+   запись с ошибкой остановит сборку с её id */
+const promos = defineCollection({
+  loader: promosLoader(),
+  schema: z.object({
+    id: z.string(), title: z.string(), subtitle: z.string(), description: z.string(),
+    image: z.string().optional(), imageSrcset: z.string().optional(),
+    validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    discount: z.string().optional(), ctaText: z.string().optional(), ctaLink: z.string().optional(),
+  }),
+})
+
+export const collections = { articles, promos }

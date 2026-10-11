@@ -7,6 +7,7 @@ import vue from '@astrojs/vue';
 import markdoc from '@astrojs/markdoc';
 import { createClient } from '@supabase/supabase-js';
 import { CLOUD, cloudToMedia, mediaFile } from './scripts/lib/media.mjs';
+import strapiRefresh from './src/integrations/strapi-refresh.mjs';
 
 /* ── Картинки для sitemap (xmlns:image) ────────────────────────────────
    serialize() ниже — чистый Node, import.meta.env тут недоступен (это
@@ -168,11 +169,17 @@ export default defineConfig({
        `astro dev` начинает отдавать Vue без HMR — в браузере
        «__VUE_HMR_RUNTIME__ is not defined» и ошибки гидрации островов. */
     cacheDir: process.argv.includes('build') ? 'node_modules/.vite-build' : 'node_modules/.vite',
+    /* Фото из Strapi в dev — по тому же адресу /uploads/…, что на сервере
+       (там nginx отдаёт папку загрузок Strapi с диска) */
+    server: {
+      proxy: { '/uploads': readEnvVar('STRAPI_URL') || 'http://localhost:1337' },
+    },
   },
 
   integrations: [
     vue(),
     markdoc(),
+    strapiRefresh(['strapi-promos', 'strapi-works']),
     sitemap({
       filter: (page) =>
         !SITEMAP_EXCLUDE.some(path => page === `${SITE_URL}${path}` || page === `${SITE_URL}${path.slice(0, -1)}`) &&

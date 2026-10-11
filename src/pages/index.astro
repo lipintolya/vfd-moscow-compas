@@ -22,8 +22,12 @@ import { howToSchema } from '../data/how-it-works'
 import { getCatalogCards } from '../lib/catalog-data'
 import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
 import { PHONE, SITE } from '../config/site'
+import { getCollection } from 'astro:content'
 
 const faqItems = faqs.map(f => ({ q: f.question, a: f.answer }))
+
+/* Акции — из Strapi; блок сам покажет только активные */
+const promos = (await getCollection('promos')).map((e) => e.data)
 
 /* Адрес страницы модели по её id — из того же Supabase-каталога, что
    /catalog/. Нужен блоку «Новинки и двери в наличии» (src/data/in-salon.ts) */
@@ -65,7 +69,7 @@ const localBusinessSchema = buildLocalBusiness()
     <Spotlight />
     <LatestArticles />
     <VisitBand />
-    <Promo client:idle />
+    <Promo client:idle promos={promos} />
     <OurWorks />
 
     <section class="h-sec h-sec--tight-top" aria-label="Частые вопросы">
