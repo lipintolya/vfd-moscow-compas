@@ -129,6 +129,38 @@ const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/catalog/skrytye-dveri/rabot
 
 const modelImages = await fetchModelImages()
 
+/** Адрес страницы работы → её фото (те же копии, что на странице: как
+    strapiImage(…, 1920) в src/lib/strapi.ts — самая крупная не шире
+    1920 px, оригинал — если сам не шире). Strapi недоступен — пусто: без
+    картинок в карте, а саму сборку остановят страницы портфолио. */
+/** @returns {Promise<Map<string, string[]>>} */
+async function fetchWorkImages() {
+  /** @type {Map<string, string[]>} */
+  const map = new Map()
+  const base = readEnvVar('STRAPI_URL').replace(/\/$/, '')
+  const token = readEnvVar('STRAPI_TOKEN')
+  if (!base || !token) return map
+  /** @param {{ url: string, width?: number, formats?: Record<string, { url: string, width: number }> | null }} img */
+  const pick = (img) => {
+    const all = [...Object.values(img.formats ?? {}), ...(img.width && img.width <= 1920 ? [{ url: img.url, width: img.width }] : [])]
+    return all.filter((v) => v.width <= 1920).sort((a, b) => b.width - a.width)[0]?.url ?? img.url
+  }
+  try {
+    for (let page = 1; ; page++) {
+      const params = new URLSearchParams({ status: 'published', 'fields[0]': 'slug', 'populate[images]': 'true', 'pagination[page]': String(page), 'pagination[pageSize]': '100' })
+      const res = await fetch(`${base}/api/works?${params}`, { headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) return map
+      /** @type {{ data: { slug: string, images: Parameters<typeof pick>[0][] }[], meta: { pagination: { pageCount: number } } }} */
+      const json = await res.json()
+      for (const w of json.data) map.set(`${SITE_URL}/portfolio/${w.slug}/`, w.images.map((img) => `${SITE_URL}${pick(img)}`))
+      if (page >= json.meta.pagination.pageCount) return map
+    }
+  } catch {
+    return new Map()
+  }
+}
+const workImages = await fetchWorkImages()
+
 /* Статьи для sitemap — прямо из файлов src/content/articles/*.mdoc
    (конфиг не видит коллекции Astro): заглушки (placeholder: true) не
    попадают в карту, у остальных lastmod — updatedDate или publishDate.
@@ -194,16 +226,15 @@ export default defineConfig({
         const u = item.url
 
         /* Картинки — модели (Supabase, см. fetchModelImages) и портфолио
-           (путь детерминирован из слага, без БД). */
+           (Strapi, см. fetchWorkImages). */
         /** @param {import('@astrojs/sitemap').SitemapItem} extra */
         const withImages = (extra) => {
           const images = modelImages.get(u)
           return images ? { ...extra, img: images.map(url => ({ url })) } : extra
         }
         const portfolioMatch = u.match(/\/portfolio\/([a-z0-9-]+)\/?$/)
-        const portfolioImg = portfolioMatch
-          ? { img: [{ url: `${SITE_URL}/renders/portfolio/${portfolioMatch[1]}.webp` }] }
-          : {}
+        const workImgs = workImages.get(u)
+        const portfolioImg = workImgs ? { img: workImgs.map((url) => ({ url })) } : {}
 
         if (u === `${SITE_URL}/` || u === SITE_URL) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 1.0 }

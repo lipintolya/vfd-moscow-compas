@@ -60,3 +60,16 @@ test('фото без копий — оригинал', () => {
   assert.equal(img.srcset, undefined)
   assert.equal(img.alt, '')
 })
+
+test('фото меньше лимита — оригинал лучше копий и входит в srcset', () => {
+  const img = strapiImage({
+    url: '/uploads/w.webp', width: 960, height: 1280, alternativeText: 'Скрытая дверь',
+    formats: {
+      small: { url: '/uploads/small_w.webp', width: 480, height: 640 },
+      medium: { url: '/uploads/medium_w.webp', width: 720, height: 960 },
+    },
+  }, 1920)
+  assert.equal(img.src, '/uploads/w.webp')
+  assert.equal(img.width, 960)
+  assert.equal(img.srcset, '/uploads/small_w.webp 480w, /uploads/medium_w.webp 720w, /uploads/w.webp 960w')
+})

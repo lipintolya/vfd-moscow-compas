@@ -30,8 +30,9 @@ function selectAndScroll(key: FilterKey) {
   nextTick(() => gridEl.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
 }
 
-/* Обложка категории — превью самой свежей работы этой категории; пока
-   работ нет — снимок модели из каталога (честнее пустого квадрата). */
+/* Обложка категории — обложка самой свежей работы этой категории (копия
+   из Strapi); пока работ нет — снимок модели из каталога (честнее пустого
+   квадрата). */
 const CATEGORY_FALLBACK: Record<WorkCategory, string> = {
   interior:   '/renders/home/tehno-1.webp',
   hidden:     '/renders/home/secret-2.webp',
@@ -39,7 +40,7 @@ const CATEGORY_FALLBACK: Record<WorkCategory, string> = {
 }
 const coverOf = (key: WorkCategory) => {
   const work = props.works.find((w) => w.category === key)
-  return work ? `/renders/portfolio/${work.id}.webp` : CATEGORY_FALLBACK[key]
+  return work ? work.cover : { src: CATEGORY_FALLBACK[key], srcset: undefined }
 }
 const worksWord = (n: number) => {
   const d = n % 10, h = n % 100
@@ -82,7 +83,7 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
           @click="(e) => { if (!CATEGORY_HREF[key]) { e.preventDefault(); selectAndScroll(key) } }"
         >
           <span class="pf-cat__thumb">
-            <img :src="coverOf(key)" :alt="CATEGORY_LABELS[key]" loading="lazy" decoding="async" />
+            <img :src="coverOf(key).src" :srcset="coverOf(key).srcset" sizes="(min-width: 640px) 25vw, 50vw" :alt="CATEGORY_LABELS[key]" loading="lazy" decoding="async" />
           </span>
           <span class="pf-cat__label">{{ CATEGORY_LABELS[key] }}</span>
           <span class="pf-cat__count">{{ CATEGORY_HREF[key] ? 'В каталоге' : `${countOf(key)} ${worksWord(countOf(key))}` }}</span>
@@ -98,7 +99,9 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
       <a v-for="(work, index) in filtered" :key="work.id" :href="`/portfolio/${work.id}/`" class="pf-card group">
         <span class="pf-card__frame">
           <img
-            :src="`/renders/portfolio/${work.id}.webp`"
+            :src="work.cover.src"
+            :srcset="work.cover.srcset"
+            sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
             :alt="work.title"
             :loading="index < 4 ? 'eager' : 'lazy'"
             :fetchpriority="index < 4 ? 'high' : undefined"

@@ -6,7 +6,7 @@
 
 ## О проекте
 
-Витрина + каталог на Supabase с клиентской фильтрацией, отдельные товарные линейки (скрытые двери, алюминиевые перегородки GRAFIA и ОНИКС, декор) на статических данных, статьи со своими markdoc-тегами, портфолио работ салона, калькулятор стоимости комплекта, ссылка на Telegram-канал.
+Витрина + каталог на Supabase с клиентской фильтрацией, отдельные товарные линейки (скрытые двери, алюминиевые перегородки GRAFIA и ОНИКС, декор) на статических данных, статьи со своими markdoc-тегами, акции и портфолио работ салона из CMS Strapi (директор правит сам), калькулятор стоимости комплекта, ссылка на Telegram-канал.
 
 Сайт статически собирается (Astro `output: static`) и деплоится по `git push` на bare-metal VPS — без CI/CD-провайдеров, без Vercel/Netlify.
 
@@ -16,6 +16,7 @@
 - **[Vue 3](https://vuejs.org)** — интерактивные острова (фильтры каталога, слайдеры, калькулятор, шапка/футер)
 - **[Tailwind CSS v4](https://tailwindcss.com)** — дизайн-токены через `@theme` в CSS, без `tailwind.config.*`
 - **[Supabase](https://supabase.com)** (Postgres) — основной каталог дверей, вложенные джойны `model_colors → colors → coatings`
+- **[Strapi 5](https://strapi.io)** — CMS для директора (`cms/`): акции и портфолио, интерфейс на русском; сайт читает её при сборке
 - **[Markdoc](https://markdoc.dev)** — статьи со своими тегами (`figure`/`photo` с просмотром во весь экран, `callout`, `video`, цены из каталога)
 - **[Sharp](https://sharp.pixelplumbing.com)** — облегчённые копии фото скриптами `npm run gen:*` (см. «Облегчённые картинки»)
 
@@ -24,7 +25,7 @@
 - **Каталог дверей** — данные приходят из Supabase на сервере при сборке, нормализуются в плоский `CardItem`, дальше вся фильтрация/сортировка/URL-синк — на клиенте в Vue-острове, без серверных round-trip'ов на каждый фильтр.
 - **Товарные линейки вне Supabase** (`src/data/*.ts`) — скрытые двери с калькулятором цены, алюминиевые перегородки GRAFIA и ОНИКС (конструктор раскладки, профиля и стекла), декор.
 - **SEO как часть архитектуры**, не довесок: `astro-sitemap` с кастомными приоритетами, JSON-LD (`Product`, `BreadcrumbList`, `FAQPage`, `Review`, `LocalBusiness`), единый trailing-slash по всем внутренним ссылкам и canonical-тегам, `robots.txt`/`sitemap.xml` и `/llms.txt` собираются из `site.ts`.
-- **Портфолио работ** — статические данные + скрипт (`scripts/gen-portfolio-thumbs.mjs`) генерирует оптимизированные локальные миниатюры из исходных фото с телефона (обычно 90%+ экономии по весу), полноразмер остаётся только на странице самой работы для лайтбокса.
+- **Акции и портфолио** — в Strapi (см. «Strapi — контент для директора»): сайт при сборке забирает опубликованные записи в коллекции Astro `promos` и `works` (`src/lib/strapi-content.ts`), фото — уменьшенные копии, которые Strapi нарезает при загрузке. Strapi недоступен — сборка падает с подсказкой, пустой раздел на сайт не уходит.
 - **Изображения** — все фото сайта лежат в проекте: `public/media/<хранилище>/<путь>` (копии бывших облачных, в коде — `/media/…`), облегчённые версии для страниц — `public/renders/` (скрипты `npm run gen:*`), исходники, которых нет больше нигде, — `assets/`. Фото каталога из Supabase (`photo_url`) сайт при сборке подменяет на копию из `public/media` (`src/lib/media.ts`). В облаке остались только видео.
 
 ## Бренд-слой
@@ -50,7 +51,7 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public deploy
 - имя владельца для политики конфиденциальности (`ownerName`), часы работы — `contacts-data.ts`
 - ID счётчика Яндекс Метрики — `site.ts → analytics`
 - фото салона на `/about/` (сейчас временные) — `src/data/about-page.ts` + `npm run gen:about`
-- отзывы и портфолио — наполнить `src/data/reviews.ts` / `portfolio-works.ts`, включить `features` в `site.ts` и убрать путь из `SITEMAP_EXCLUDE` в `astro.config.mjs`
+- отзывы — наполнить `src/data/reviews.ts`, включить `features.reviews` в `site.ts` и убрать путь из `SITEMAP_EXCLUDE` в `astro.config.mjs`
 - московские цены (сейчас общие с Supabase-каталогом), тариф доставки — `merchantPolicy` в `contacts-data.ts`
 - маркетинговые факты, перенесённые из Челябинска и требующие сверки: «60+ моделей в выставочном зале», гарантия 12 мес. на монтаж, бесплатный замер, сроки доставки
 
@@ -63,13 +64,34 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public deploy
 | Перегородки ОНИКС ALUM `/partitions/oniks-alum/` | `src/data/oniks-alum.ts` — все тексты страницы; цифры фабрики (высота, ширина, срок, стекло) — один раз в `ONIKS_SPEC` | оригиналы — `assets/oniks-alum/` (инструкция в README там же), облегчённые — `npm run gen:oniks` |
 | Скрытые двери `/catalog/skrytye-dveri/` | `src/data/skrytye-dveri-products.ts`, `hidden-doors-page.ts` | `public/media/catalog-vfd/invisible/…` |
 | Видео | `src/data/videos.ts`; ролик для статьи — `npm run video:optimize` | ролики — облако; обложки и ролики статей — `public/renders/` |
+| Акции (главная, `/akcii/`, архив) | Strapi: раздел «Акции» | там же, в карточке акции |
+| Портфолио `/portfolio/` | Strapi: раздел «Портфолио» (первое фото — обложка) | там же, в карточке работы |
+
+## Strapi — контент для директора
+
+Strapi 5 живёт в `cms/` со своим `package.json`; локально база — SQLite (`cms/.tmp/data.db`), загруженные фото — `cms/public/uploads/` (обе папки вне Git). Устройство разделов и полей — код (`cms/src/api`, `cms/src/components`), материалы — в базе.
+
+```bash
+npm run cms:install   # первый раз — зависимости Strapi
+npm run cms           # админка: http://localhost:1337/admin
+npm run dev           # сайт — в другом терминале
+```
+
+- Интерфейс на русском по умолчанию; недостающий перевод Strapi — `cms/src/admin/translations/ru.json`, проверка — `npm --prefix cms run check:ru` (после обновления Strapi).
+- Подписи и подсказки полей — `cms/src/bootstrap/labels.ts`; права роли «Редактор» (директор: создаёт, правит, публикует, удаляет; настроек не видит) — `cms/src/bootstrap/access.ts`.
+- Сайт читает Strapi по ключу только для чтения (`STRAPI_URL`, `STRAPI_TOKEN` в `.env`); в разработке ключ создаётся и записывается в `.env` сам при запуске `npm run cms`.
+- В разработке правка в Strapi видна на сайте через секунду: вебхук Strapi → `/__strapi/refresh` дев-сервера; фото `/uploads/…` дев-сервер берёт у Strapi.
+- Директор входит со своей учётной записью: «Настройки → Пользователи → Пригласить», роль «Редактор».
+- Статьи переедут в Strapi следующим этапом; пока — `src/content/articles/`.
 
 ## Запуск локально
 
 ```bash
 npm install
 cp .env.example .env   # заполнить PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_ANON_KEY
-npm run dev
+npm run cms:install    # первый раз — Strapi
+npm run cms            # Strapi: при первом запуске сам допишет STRAPI_URL / STRAPI_TOKEN в .env
+npm run dev            # в другом терминале
 ```
 
 ## Команды
@@ -79,6 +101,10 @@ npm run dev
 | `npm run dev` | Локальный дев-сервер |
 | `npm run build` | Продакшен-сборка в `dist/` |
 | `npm run preview` | Превью собранного `dist/` |
+| `npm run cms` | Strapi (админка для директора) на `localhost:1337` |
+| `npm run cms:install` | Зависимости Strapi — первый раз и после обновления |
+| `npm test` | Тесты чтения Strapi (`tests/*.test.ts`) |
+| `node scripts/compare-builds.mjs <старая dist> <новая dist>` | Какие страницы изменились по видимому тексту — проверка после переноса |
 
 ### Фото в проекте
 
@@ -102,7 +128,6 @@ npm run dev
 | `npm run gen:oniks` | Фото страницы перегородок ОНИКС из `assets/oniks-alum/` |
 | `npm run gen:renders` | Галерея рендеров перегородок GRAFIA |
 | `npm run gen:partitions-hero` / `gen:partitions-tracks` / `gen:partitions-swatches` | Первый экран, направляющие и образцы цветов профиля на `/partitions/` |
-| `npm run gen:portfolio-thumbs` | Миниатюры портфолио — после новой работы |
 | `npm run gen:series-covers` | Обложки серий каталога |
 | `npm run gen:video-covers` | Обложки роликов |
 | `npm run video:optimize -- <ссылка> <файл> [секунда]` | Облегчённый ролик для статьи и кадр-обложка |

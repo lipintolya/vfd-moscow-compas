@@ -21,3 +21,39 @@ test('«действует до» сегодня — акция активна �
   assert.equal(isPromoActive(promo.validUntil, new Date(2026, 9, 11, 23, 30)), true)
   assert.equal(isPromoActive(promo.validUntil, new Date(2026, 9, 12, 0, 5)), false)
 })
+
+import { toWork } from '../src/lib/strapi-content'
+
+const photo = (n: number) => ({ url: `/uploads/w${n}.jpg`, width: 3000, height: 2000, alternativeText: `Фото ${n}`,
+  formats: { medium: { url: `/uploads/medium_w${n}.jpg`, width: 960, height: 640 }, xlarge: { url: `/uploads/xlarge_w${n}.jpg`, width: 1920, height: 1280 } } })
+
+test('работа из Strapi → вид сайта', () => {
+  const w = toWork({
+    documentId: 'd1', slug: '2026-09-28-skrytye-dveri', title: 'Скрытые двери', date: '2026-09-28',
+    category: 'Скрытые двери', objectType: 'Квартира', location: 'Москва', description: 'Описание',
+    story: 'Абзац 1\n\nАбзац 2', model: null, doorCount: null,
+    features: [{ text: 'Заподлицо' }], tags: [], images: [photo(1), photo(2)],
+    catalogLink: { section: 'Скрытые двери', label: null },
+  })
+  assert.equal(w.id, '2026-09-28-skrytye-dveri')
+  assert.equal(w.label, '28.09.2026')
+  assert.equal(w.category, 'hidden')
+  assert.equal(w.objectType, 'apartment')
+  assert.deepEqual(w.features, ['Заподлицо'])
+  assert.deepEqual(w.images, ['/uploads/xlarge_w1.jpg', '/uploads/xlarge_w2.jpg'])
+  assert.equal(w.cover.src, '/uploads/medium_w1.jpg')
+  assert.deepEqual(w.relatedLink, { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери в каталоге' })
+})
+
+test('работа без ссылки на каталог и без особенностей', () => {
+  const w = toWork({ documentId: 'd2', slug: 's', title: 'Т', date: '2026-01-05', category: 'Межкомнатные',
+    objectType: 'Офис', description: 'О', images: [photo(3)] })
+  assert.equal(w.relatedLink, undefined)
+  assert.equal(w.features, undefined)
+  assert.equal(w.location, '')
+})
+
+test('работа без фото — ошибка с названием работы', () => {
+  assert.throws(() => toWork({ documentId: 'd3', slug: 'x', title: 'Кухня в ЖК', date: '2026-01-05', category: 'Межкомнатные',
+    objectType: 'Офис', description: 'О', images: [] }), /«Кухня в ЖК».*фото/)
+})

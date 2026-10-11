@@ -2,13 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import PortfolioGrid from '../../components/portfolio/PortfolioGrid.vue'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
-import { PORTFOLIO_WORKS } from '../../data/portfolio-works'
+import { getWorks } from '../../lib/works'
 import { PHONE, SITE } from '../../config/site'
 import { HERO_COVER_IMAGE } from '../../data/hero-image'
 
-const works = [...PORTFOLIO_WORKS].sort(
-  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-)
+const works = await getWorks()
 
 const breadcrumbSchema = {
   '@context': 'https://schema.org',

@@ -1,9 +1,9 @@
 ---
 /**
- * Карточка объекта портфолио (src/data/portfolio-works.ts) — главная
+ * Карточка объекта портфолио (коллекция works из Strapi) — главная
  * («Наши работы») и страница скрытых дверей. Без `work` — заглушка
  * направления «Фотоотчёт появится позже» (пока объектов этой категории нет).
- * Превью — облегчённая копия обложки (scripts/gen-portfolio-thumbs.mjs).
+ * Превью — копии обложки из Strapi (work.cover: src + srcset).
  * Стили — токены дизайн-системы (.home, src/styles/home.css).
  */
 import { CATEGORY_LABELS, OBJECT_TYPE_LABELS, type PortfolioWork, type WorkCategory } from '../../data/portfolio-works'
@@ -20,7 +20,7 @@ const Heading = headingLevel
 {work ? (
   <a href={`/portfolio/${work.id}/`} class="work">
     <span class="h-media work__media">
-      <img src={`/renders/portfolio/${work.id}.webp`} alt={work.title} loading="lazy" decoding="async" />
+      <img src={work.cover.src} srcset={work.cover.srcset} sizes="(min-width: 56.25rem) 33vw, 85vw" alt={work.title} loading="lazy" decoding="async" />
     </span>
     <p class="h-meta work__meta">
       <span class="work__kind">{CATEGORY_LABELS[work.category]}</span>

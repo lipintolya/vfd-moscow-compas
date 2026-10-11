@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content'
 import { z } from 'astro/zod'
 import { glob } from 'astro/loaders'
 import { ARTICLE_KINDS } from './data/article-kinds'
-import { promosLoader } from './lib/strapi-content'
+import { promosLoader, worksLoader } from './lib/strapi-content'
 
 /* Статья = один файл src/content/articles/<slug>.mdoc; всё остальное —
    карточки на главной и в разделе, разметка для поисковиков, sitemap,
@@ -101,4 +101,22 @@ const promos = defineCollection({
   }),
 })
 
-export const collections = { articles, promos }
+/* Портфолио — из Strapi (раздел «Портфолио»); id записи = адрес страницы
+   (slug). Порядок — по дате, новые сверху */
+const works = defineCollection({
+  loader: worksLoader(),
+  schema: z.object({
+    id: z.string(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string(),
+    title: z.string(), description: z.string(),
+    category: z.enum(['interior', 'hidden', 'partitions']),
+    objectType: z.enum(['apartment', 'house', 'office', 'commercial']),
+    location: z.string(), story: z.string().optional(), model: z.string().optional(),
+    doorCount: z.number().int().positive().optional(),
+    features: z.array(z.string()).optional(), tags: z.array(z.string()).optional(),
+    images: z.array(z.string()).min(1),
+    cover: z.object({ src: z.string(), srcset: z.string().optional(), width: z.number().optional(), height: z.number().optional(), alt: z.string() }),
+    relatedLink: z.object({ href: z.string(), label: z.string() }).optional(),
+  }),
+})
+
+export const collections = { articles, promos, works }

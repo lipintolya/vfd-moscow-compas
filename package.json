@@ -34,7 +34,6 @@
     "gen:partitions-hero": "node scripts/gen-partitions-hero.mjs",
     "gen:partitions-swatches": "node scripts/gen-partitions-color-swatches.mjs",
     "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",
-    "gen:portfolio-thumbs": "node scripts/gen-portfolio-thumbs.mjs",
     "gen:renders": "node scripts/gen-render-gallery.mjs",
     "gen:series-covers": "node scripts/gen-series-covers.mjs",
     "gen:video-covers": "node scripts/gen-video-covers.mjs",

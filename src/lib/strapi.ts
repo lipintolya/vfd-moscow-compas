@@ -49,10 +49,17 @@ export async function strapiFetchAll<T>(collection: string, query: Record<string
   }
 }
 
+/** Фото для страницы: самая крупная копия не шире maxWidth + srcset из всех.
+    Оригинал участвует, только если сам не шире maxWidth — небольшое фото
+    лучше своих копий, а снимок с телефона на 6000 px на страницу не идёт. */
 export function strapiImage(media: StrapiMedia, maxWidth = 1280): SiteImage {
-  const variants = Object.values(media.formats ?? {}).sort((a, b) => a.width - b.width)
+  const formats = Object.values(media.formats ?? {})
   const alt = media.alternativeText ?? ''
-  if (!variants.length) return { src: media.url, width: media.width ?? undefined, height: media.height ?? undefined, alt }
+  if (!formats.length) return { src: media.url, width: media.width ?? undefined, height: media.height ?? undefined, alt }
+  const original = media.width && media.height && media.width <= maxWidth
+    ? [{ url: media.url, width: media.width, height: media.height }]
+    : []
+  const variants = [...formats, ...original].sort((a, b) => a.width - b.width)
   const main = [...variants].reverse().find((v) => v.width <= maxWidth) ?? variants[0]!
   return {
     src: main.url,

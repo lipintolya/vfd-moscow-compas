@@ -37,7 +37,7 @@ import {
   REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
 } from '../../data/skrytye-dveri-products'
 import { HERO_FACTS, MOSCOW_NOTES, SEGMENTS, HIDDEN_DOORS_FAQ } from '../../data/hidden-doors-page'
-import { PORTFOLIO_WORKS } from '../../data/portfolio-works'
+import { getWorks } from '../../lib/works'
 import { STATUS_LABEL, type Status } from '../../data/in-salon'
 import { rub } from '../../data/services'
 import { merchantPolicy } from '../../lib/contacts-data'
@@ -115,9 +115,8 @@ const reflexHeightRows = REFLEX_HEIGHT_TIERS.map((t) => ({
 }))
 
 /* ── Работы: объекты портфолио со скрытыми дверями ── */
-const works = PORTFOLIO_WORKS
+const works = (await getWorks())
   .filter((w) => w.category === 'hidden')
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   .slice(0, 3)
 
 const navItems = [

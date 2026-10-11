@@ -1,22 +1,20 @@
 ---
 /**
- * «Наши работы» на главной — превью свежих объектов (src/data/portfolio-works.ts)
- * и переход на /portfolio/ со всеми работами. Сюда ведёт плитка «Наши работы»
- * первого экрана (якорь #works).
+ * «Наши работы» на главной — превью свежих объектов (коллекция works из
+ * Strapi, раздел «Портфолио») и переход на /portfolio/ со всеми работами.
+ * Сюда ведёт плитка «Наши работы» первого экрана (якорь #works).
  *
- * Превью — облегчённые копии обложек (scripts/gen-portfolio-thumbs.mjs —
- * запускать после добавления работы). Пока работ нет, вместо карточек —
+ * Пока работ нет, вместо карточек —
  * направления с подписью «Фотоотчёт появится позже»: чужие объекты
  * (челябинского салона) сюда не подставлять.
  */
 import WorkCard from '../portfolio/WorkCard.astro'
-import { PORTFOLIO_WORKS, CATEGORY_LABELS, type WorkCategory } from '../../data/portfolio-works'
+import { CATEGORY_LABELS, type WorkCategory } from '../../data/portfolio-works'
+import { getWorks } from '../../lib/works'
 
 const HOME_WORKS = 3
 
-const works = [...PORTFOLIO_WORKS]
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  .slice(0, HOME_WORKS)
+const works = (await getWorks()).slice(0, HOME_WORKS)
 
 // Пока работ меньше HOME_WORKS, ряд добирают направления, по которым
 // фотоотчётов ещё нет, — чтобы сетка не стояла полупустой

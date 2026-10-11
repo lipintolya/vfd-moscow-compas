@@ -1,13 +1,14 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import ProjectSlider from '../../components/portfolio/ProjectSlider.vue'
-import { PORTFOLIO_WORKS, CATEGORY_LABELS, CATEGORY_BADGE_COLORS, OBJECT_TYPE_LABELS } from '../../data/portfolio-works'
+import { CATEGORY_LABELS, CATEGORY_BADGE_COLORS, OBJECT_TYPE_LABELS } from '../../data/portfolio-works'
+import { getWorks } from '../../lib/works'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { SITE } from '../../config/site'
 import { typograph } from '../../lib/typograph'
 
 export async function getStaticPaths() {
-  return PORTFOLIO_WORKS.map((work) => ({
+  return (await getWorks()).map((work) => ({
     params: { slug: work.id },
     props:  { work },
   }))

@@ -6,7 +6,7 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import InfoImageViewer from '../../components/catalog/InfoImageViewer.vue'
 import PlinthSection from '../../components/catalog/PlinthSection.astro'
-import { PORTFOLIO_WORKS } from '../../data/portfolio-works'
+import { getWorks } from '../../lib/works'
 import {
   IMAGES,
   REYKI_IMAGES,
@@ -64,8 +64,9 @@ const structuredData = canonicalUrl ? [
   },
 ] : undefined
 
-// Реальный монтаж плинтуса из портфолио — показывается под блоком «Плинтус».
-const plinthWork = PORTFOLIO_WORKS.find(w => w.id === '2026-09-27-belyy-plintus-universitetskaya-naberezhnaya')
+// Свой монтаж из портфолио — под блоком «Плинтус»: самая свежая работа,
+// у которой в Strapi выбрана ссылка на раздел «Декор и погонаж».
+const plinthWork = (await getWorks()).find(w => w.relatedLink?.href === '/catalog/decor/')
 
 /* Статья по теме — та, что назвала эту страницу в relatedPages */
 const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
@@ -192,7 +193,9 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
         >
           <div class="aspect-4/3 self-center overflow-hidden bg-slate-100">
             <img
-              src={`/renders/portfolio/${plinthWork.id}.webp`}
+              src={plinthWork.cover.src}
+              srcset={plinthWork.cover.srcset}
+              sizes="(min-width: 640px) 40vw, 100vw"
               alt={plinthWork.title}
               loading="lazy"
               decoding="async"
