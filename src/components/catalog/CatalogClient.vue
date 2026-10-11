@@ -45,7 +45,7 @@ const goodsWord = (n: number) => pluralRu(n, ['товар', 'товара', 'т�
    (в основной HTML-поток попадает только anchor-комментарий), при
    клиентской гидратации Vue не может сопоставить эту структуру 1:1 и
    репортит "Hydration completed but contains mismatches" — тот же баг уже
-   был на /catalog/skrytye-dveri с WorksGallery. Рендерим Teleport только
+   был на /catalog/skrytye-dveri с галереей работ. Рендерим Teleport только
    после onMounted (isMounted всегда false на SSR и при первом клиентском
    рендере до хайдрейшна — идентично серверному состоянию, значит самого
    Teleport в дереве на момент хайдрейшна просто нет, сопоставлять нечего). */

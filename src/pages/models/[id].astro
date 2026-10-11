@@ -143,7 +143,7 @@ const structuredData = [{
     <div class="container">
       <div class="product-layout">
 
-        <!-- ── Фото + выбор цвета (Vue island) ── -->
+        {/* ── Фото + выбор цвета (Vue island) ── */}
         <ProductColorPicker
           client:load
           colors={colors}
@@ -153,7 +153,7 @@ const structuredData = [{
           seriesSlug={seriesSlug}
         />
 
-        <!-- ── Характеристики (статический HTML для SEO) ── -->
+        {/* ── Характеристики (статический HTML для SEO) ── */}
         <div class="product-info">
           <div class="product-badges">
             {model.isNew && <span class="product-badge product-badge--new">Новинка</span>}
@@ -213,7 +213,7 @@ const structuredData = [{
             </dl>
           )}
 
-          <!-- Быстрый ориентир по цене (статика, всегда виден до гидратации) -->
+          {/* Быстрый ориентир по цене (статика, всегда виден до гидратации) */}
           {minPrice && (
             <p class="product-price-hint">
               Цена: <strong>{priceLabel(entry)}</strong> за полотно
@@ -235,10 +235,10 @@ const structuredData = [{
     </div>
   </div>
 
-  <!-- ── Плинтус к дверям (только для покрытий, где он есть — Эмаль/Эмалекс) ── -->
+  {/* ── Плинтус к дверям (только для покрытий, где он есть — Эмаль/Эмалекс) ── */}
   {hasPlinth && <PlinthSection title="Плинтус к дверям" />}
 
-  <!-- ── Погонажные изделия ── -->
+  {/* ── Погонажные изделия ── */}
   {accessories.length > 0 && (
     <section class="accessories-section">
       <div class="container">

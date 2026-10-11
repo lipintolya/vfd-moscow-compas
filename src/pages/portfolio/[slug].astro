@@ -80,7 +80,7 @@ const breadcrumbSchema = {
   <article class="section">
     <div class="container">
 
-      <!-- Breadcrumb -->
+      {/* Breadcrumb */}
       <nav aria-label="Хлебные крошки" class="mb-6">
         <ol class="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
           <li><a href="/" class="hover:text-secondary-600 transition-colors">Главная</a></li>
@@ -93,13 +93,13 @@ const breadcrumbSchema = {
 
       <div class="lg:grid lg:grid-cols-[1.5fr_1fr] lg:items-start lg:gap-10 xl:gap-14">
 
-        <!-- Photo slider -->
+        {/* Photo slider */}
         <div class="lg:sticky lg:top-24">
           <ProjectSlider images={work.images} client:load />
         </div>
 
         <div>
-          <!-- Header -->
+          {/* Header */}
           <header class="mt-8 mb-6 lg:mt-0">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
               <span class="inline-flex items-center gap-1.5">
@@ -123,15 +123,15 @@ const breadcrumbSchema = {
             </p>
           </header>
 
-          <!-- Story -->
+          {/* Story */}
           {work.story && (
             <div class="mb-7 space-y-4 text-base leading-relaxed text-slate-700">
               {work.story.split(/\n\s*\n/).map((p) => <p>{typograph(p)}</p>)}
             </div>
           )}
 
-          <!-- Спецификация — строки с разделителями, как в паспорте изделия,
-               не суп из одинаковых серых чипов. -->
+          {/* Спецификация — строки с разделителями, как в паспорте изделия,
+               не суп из одинаковых серых чипов. */}
           {(work.model || (work.features && work.features.length > 0)) && (
             <ul class="pw-specs" role="list">
               {work.model && (
@@ -160,12 +160,12 @@ const breadcrumbSchema = {
         </div>
       </div>
 
-        <!-- CTA — сплошная тёмная плашка var(--color-fg), тот же тон, что у всех
-             остальных CTA-панелей сайта (HeroSlider «О компании», ContactsSection,
-             CTA на /catalog/skrytye-dveri/, /catalog/decor/, /catalog/series/[slug]/).
+        {/* CTA — сплошная тёмная плашка var(--color-fg), тот же тон, что у всех
+             остальных CTA-панелей сайта (CTA на /catalog/skrytye-dveri/,
+             /catalog/decor/, /catalog/series/[slug]/).
              Раньше здесь была bg-ink (var(--color-slate-900), синеватый slate) и кнопки на голых
              Tailwind-цветах — выбивались из фирменной палитры. Кнопки — общие
-             .btn/.btn-ghost/.btn-icon, как в той же CTA-плашке на skrytye-dveri.astro. -->
+             .btn/.btn-ghost/.btn-icon, как в той же CTA-плашке на skrytye-dveri.astro. */}
         <div class="pw-cta mt-12 overflow-hidden rounded-2xl p-6 sm:p-8">
           <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -196,7 +196,7 @@ const breadcrumbSchema = {
           </div>
         </div>
 
-        <!-- Back link -->
+        {/* Back link */}
         <div class="mt-8">
           <a href="/portfolio/" class="inline-flex items-center gap-2 text-sm font-semibold text-secondary-700 hover:text-secondary-600 transition-colors">
             <svg viewBox="0 0 16 16" fill="none" class="w-4 h-4" aria-hidden="true">

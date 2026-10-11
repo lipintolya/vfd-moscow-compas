@@ -320,7 +320,7 @@ onUnmounted(() => {
         <!-- Фото + схема с размерами для петель/замка/WC — тот же Teleport,
              что и калькулятор (второй независимый Teleport-в-body от одного
              клиентского компонента ловит "Cannot read properties of null
-             (reading insertBefore)" — тот же класс бага, что у WorksGallery,
+             (reading insertBefore)" — тот же класс бага, что был у галереи работ,
              только через два РАЗНЫХ Teleport вместо нескольких копий одного).
              z-index выше calc-panel, поэтому просто рисуется поверх. -->
         <Transition name="calc-fade">

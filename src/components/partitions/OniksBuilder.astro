@@ -77,8 +77,8 @@ const vars = [
 
 <div class="oa-build" data-oa-builder>
   <div class="oa-build__left">
-    <!-- ── Схема: на компьютере — крупно, на телефоне — карточка «створка +
-         подпись», прилипает под шапкой, пока листаются варианты ── -->
+    {/* ── Схема: на компьютере — крупно, на телефоне — карточка «створка +
+         подпись», прилипает под шапкой, пока листаются варианты ── */}
     <div class="oa-visual" data-oa-visual>
       <div class="oa-visual__card">
       <div class="oa-stage">
@@ -112,7 +112,7 @@ const vars = [
               <stop offset="0" class="oa-stop-shadow" stop-opacity="0.22" />
               <stop offset="1" class="oa-stop-shadow" stop-opacity="0" />
             </radialGradient>
-            <!-- Комната за стеклом: стена, окно со светом, диван, светильник, пол -->
+            {/* Комната за стеклом: стена, окно со светом, диван, светильник, пол */}
             <g id="oa-room">
               <rect width={W} height={H} style="fill: var(--color-slate-100)" />
               <rect y="800" width={W} height="200" style="fill: var(--color-slate-300)" />
@@ -159,7 +159,7 @@ const vars = [
       </div>
     </div>
 
-    <!-- ── Действия ── -->
+    {/* ── Действия ── */}
     <div class="oa-actions">
       <div class="oa-actions__row">
         <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать по&nbsp;телефону</a>
@@ -173,7 +173,7 @@ const vars = [
     </div>
   </div>
 
-  <!-- ── Выбор ── -->
+  {/* ── Выбор ── */}
   <form class="oa-ctrl" data-oa-form aria-label="Конструктор перегородки ALUM">
     <fieldset class="oa-ctrl__group">
       <legend class="oa-ctrl__legend">Раскладка <span class="oa-ctrl__value" data-oa-value="layout">№{model.num}</span></legend>

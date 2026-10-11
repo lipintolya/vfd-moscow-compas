@@ -17,19 +17,26 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "prerender": "astro build --experimental-rebalance-chunks",
-    "sitemap": "echo 'Sitemap generation handled by astro-sitemap integration'",
-    "gen:renders": "node scripts/gen-render-gallery.mjs",
-    "gen:portfolio-thumbs": "node scripts/gen-portfolio-thumbs.mjs",
-    "gen:hero-bento": "node scripts/gen-hero-bento.mjs",
     "gen:about": "node scripts/gen-about-images.mjs",
-    "gen:footer-map": "node scripts/gen-footer-map.mjs",
-    "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",
-    "gen:how-it-works": "node scripts/gen-how-it-works-images.mjs",
-    "gen:promo": "node scripts/gen-promo-images.mjs",
+    "gen:articles": "node scripts/gen-article-images.mjs",
+    "gen:contacts": "node scripts/gen-contacts-images.mjs",
+    "gen:designers-hero": "node scripts/gen-designers-hero.mjs",
+    "gen:hidden-doors-hero": "node scripts/gen-hidden-doors-hero.mjs",
+    "gen:home": "node scripts/gen-home-images.mjs",
     "gen:home-tiles": "node scripts/gen-home-tiles.mjs",
-    "gen:video-covers": "node scripts/gen-video-covers.mjs",
+    "gen:mall": "node scripts/gen-mall-photos.mjs",
+    "gen:og-about": "node scripts/gen-og-about.mjs",
     "gen:oniks": "node scripts/gen-oniks-images.mjs",
+    "gen:partitions-hero": "node scripts/gen-partitions-hero.mjs",
+    "gen:partitions-swatches": "node scripts/gen-partitions-color-swatches.mjs",
+    "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",
+    "gen:portfolio-thumbs": "node scripts/gen-portfolio-thumbs.mjs",
+    "gen:promo": "node scripts/gen-promo-images.mjs",
+    "gen:renders": "node scripts/gen-render-gallery.mjs",
+    "gen:series-covers": "node scripts/gen-series-covers.mjs",
+    "gen:video-covers": "node scripts/gen-video-covers.mjs",
+    "gen:visit-map": "node scripts/gen-visit-map.mjs",
+    "video:optimize": "node scripts/optimize-video.mjs",
     "deploy": "git push production main"
   },
   "dependencies": {
@@ -41,5 +48,8 @@
     "astro": "^7.3.2",
     "tailwindcss": "^4.3.0",
     "vue": "^3.5.34"
+  },
+  "devDependencies": {
+    "sharp": "0.35.5"
   }
 }

@@ -3,15 +3,14 @@
  * обложек портфолио (первое фото каждой работы из src/data/portfolio-works.ts).
  *
  * Зачем: оригиналы — прямые фото с телефона (works_prod/*, invisible/ourworks/*),
- * обычно ~1920×1920 и 800КБ–1МБ каждое. PortfolioGrid.vue и PortfolioPreview.astro
+ * обычно ~1920×1920 и 800КБ–1МБ каждое. PortfolioGrid.vue и WorkCard.astro
  * показывают их в карточках максимум ~700px CSS-шириной — грузить мегабайтный
  * оригинал под маленькую карточку бессмысленно. Полноразмерные оригиналы
  * остаются как есть — их отдаёт ProjectSlider.vue на странице самой работы
  * (там нужно качество для лайтбокса).
  *
  * Источник данных читается из portfolio-works.ts регэкспом (без TS-импорта):
- * берётся id и первый URL из images[] — как обычная строка, так и
- * `${CDN_OW}...`-шаблон.
+ * берётся id и первый URL из images[] (полная ссылка строкой).
  *
  * Запуск:        node scripts/gen-portfolio-thumbs.mjs
  * Когда запускать снова: после добавления новой работы в PORTFOLIO_WORKS
@@ -22,19 +21,17 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 
 const DATA_FILE = new URL('../src/data/portfolio-works.ts', import.meta.url)
 const OUT = new URL('../public/renders/portfolio/', import.meta.url)
-const CDN_OW = 'https://storage.yandexcloud.net/catalog-vfd/invisible/ourworks/'
 const WIDTH = 1080
 const QUALITY = 76
 const CONCURRENCY = 6
 
 const src = await readFile(DATA_FILE, 'utf-8')
-const re = /id:\s*'([^']+)'[\s\S]*?images:\s*\[\s*\n\s*(?:'([^']+)'|`\$\{CDN_OW\}([^`]+)`)/g
+const re = /id:\s*'([^']+)'[\s\S]*?images:\s*\[\s*\n\s*'([^']+)'/g
 
 const works = []
 let m
 while ((m = re.exec(src))) {
-  const cover = m[2] ?? (CDN_OW + m[3])
-  works.push({ id: m[1], cover })
+  works.push({ id: m[1], cover: m[2] })
 }
 
 if (works.length === 0) throw new Error('Ни одной работы не найдено — проверь регэксп/формат portfolio-works.ts')

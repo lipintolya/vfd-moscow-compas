@@ -4,8 +4,9 @@
  *   public/renders/designers/hero-<N>-tall-{640,750}.webp  — телефон, 4:5
  * и src/data/designers-hero.json — по слайду: { wide: [...], tall: [...] }.
  *
- * Исходники — рендеры интерьеров 1672×941: первый лежит в проекте
- * (облачного оригинала нет), остальные — в облаке. Вертикальный кадр —
+ * Исходники — рендеры интерьеров 1672×941: первый лежит в проекте,
+ * в assets/designers/ (облачного оригинала нет; в public не кладём —
+ * на сайт исходник не нужен), остальные — в облаке. Вертикальный кадр —
  * вокруг focusX (доля ширины), его ширина ограничена высотой исходника:
  * 941 × 4/5 ≈ 753 px, поэтому крупнее 750 не делаем.
  *
@@ -20,7 +21,7 @@ const CLOUD = 'https://storage.yandexcloud.net/vfd.moscow.compass/designers.bloc
 const OUT_DIR = new URL('../public/renders/designers/', import.meta.url)
 
 const SLIDES = [
-  { file: new URL('../public/renders/hero/designers-hero.webp', import.meta.url), focusX: 0.4 },  // скрытая дверь в панелях
+  { file: new URL('../assets/designers/designers-hero.webp', import.meta.url), focusX: 0.4 },  // скрытая дверь в панелях
   { url: CLOUD + 'designer_perfomance.webp',  focusX: 0.32 },  // скрытая дверь в цвет стены — слева
   { url: CLOUD + 'designer_perfomance2.webp', focusX: 0.5 },   // коридор — по центру
 ]

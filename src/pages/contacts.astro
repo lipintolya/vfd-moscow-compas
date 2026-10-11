@@ -69,8 +69,8 @@ const breadcrumbItems = [
   </div>
 
   <div class="home">
-    <!-- Первый экран: заголовок и три способа связаться. Красная плитка —
-         главное действие (звонок), она одна на экране -->
+    {/* Первый экран: заголовок и три способа связаться. Красная плитка —
+         главное действие (звонок), она одна на экране */}
     <section class="ct-intro" aria-labelledby="ct-title">
       <div class="container">
         <header class="h-head ct-head">
@@ -92,7 +92,7 @@ const breadcrumbItems = [
               <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
               <span class="ct-tile__label">Салон</span>
               <span class="h-tile__title">{typograph(`${SITE.address.mall}, ${SITE.address.floor}`)}</span>
-              <!-- Адрес и часы — отдельными строками: время не разрывается -->
+              {/* Адрес и часы — отдельными строками: время не разрывается */}
               <span class="h-cap ct-tile__cap">
                 <span>{SITE.address.street}</span>
                 <span class="ct-tile__hours">{hours.shortDisplay}</span>
@@ -111,7 +111,7 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Что вы получаете: подпись под фото, как табличка у образца -->
+    {/* Что вы получаете: подпись под фото, как табличка у образца */}
     <section class="h-sec h-sec--wall" aria-labelledby="ct-benefits-title">
       <div class="container">
         <header class="h-head">
@@ -159,7 +159,7 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Способы оплаты — только названия, с анимированными иконками -->
+    {/* Способы оплаты — только названия, с анимированными иконками */}
     <section class="h-sec" aria-labelledby="ct-pay-title">
       <div class="container">
         <header class="h-head">
@@ -178,8 +178,8 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Как к нам добраться — в конце страницы, как на остальных страницах;
-         на него ведёт тёмная плитка «Салон» в первом экране (#visit) -->
+    {/* Как к нам добраться — в конце страницы, как на остальных страницах;
+         на него ведёт тёмная плитка «Салон» в первом экране (#visit) */}
     <VisitBand lead="Приходите без записи — салон работает без выходных. Если нужны образцы под ваш проект, предупредите заранее по телефону." />
   </div>
 </BaseLayout>

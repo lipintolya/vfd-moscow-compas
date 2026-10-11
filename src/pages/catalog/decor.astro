@@ -86,9 +86,9 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════
+  {/* ══════════════════════════════════════════════
        HERO
-  ══════════════════════════════════════════════ -->
+  ══════════════════════════════════════════════ */}
   <div class="container dc-hero-wrap">
     <section class="dc-hero" aria-label="Декор для дверей">
       <img
@@ -118,9 +118,9 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
     </section>
   </div>
 
-  <!-- ══════════════════════════════════════════════
+  {/* ══════════════════════════════════════════════
        ФАЛЬШФРАМУГА
-  ══════════════════════════════════════════════ -->
+  ══════════════════════════════════════════════ */}
   <section class="section" style="padding-bottom: 0">
     <div class="container">
       <div class="dc-section">
@@ -178,9 +178,9 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════
+  {/* ══════════════════════════════════════════════
        ПЛИНТУС
-  ══════════════════════════════════════════════ -->
+  ══════════════════════════════════════════════ */}
   <PlinthSection />
 
   {plinthWork && (
@@ -217,9 +217,9 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
     </section>
   )}
 
-  <!-- ══════════════════════════════════════════════
+  {/* ══════════════════════════════════════════════
        ДЕКОРАТИВНЫЕ РЕЙКИ
-  ══════════════════════════════════════════════ -->
+  ══════════════════════════════════════════════ */}
   <section class="section">
     <div class="container">
       <div class="dc-section">
@@ -280,18 +280,18 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
 
   {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
-  <!-- ══════════════════════════════════════════════
+  {/* ══════════════════════════════════════════════
        FAQ
-  ══════════════════════════════════════════════ -->
+  ══════════════════════════════════════════════ */}
   <section class="section">
     <div class="container">
       <FaqAccordion items={faq} />
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════
+  {/* ══════════════════════════════════════════════
        CTA
-  ══════════════════════════════════════════════ -->
+  ══════════════════════════════════════════════ */}
   <section class="section">
     <div class="container">
       <div class="dc-cta">

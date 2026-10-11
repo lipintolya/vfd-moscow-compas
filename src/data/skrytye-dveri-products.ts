@@ -2,25 +2,6 @@
    Данные скрытых дверей «Секрет» / «Секрет Реверс»
    Только РРЦ — закупочные цены на сайте не публикуются
    ============================================================ */
-import { isPromoActive } from '../lib/promo-dates'
-
-// ── Акция «Секрет» -8% (см. data/promos.ts, id: 3) ────────────
-// Дата продублирована здесь намеренно: это временная переоценка цен
-// в данных конкретного товара, а не часть общей витрины акций —
-// удобнее держать рядом с ценами, которые она меняет. Когда истечёт,
-// applySecretPromo сама перестанет применяться, ничего вручную
-// возвращать не нужно.
-export const SECRET_PROMO_DISCOUNT    = 0.08
-export const SECRET_PROMO_VALID_UNTIL = '2026-08-30'
-export const SECRET_PROMO_ACTIVE      = isPromoActive(SECRET_PROMO_VALID_UNTIL)
-
-/** Скидка -8%, округление вверх до 10 ₽ (та же схема, что в calcCustomPrice).
-    Вне акции возвращает цену без изменений. */
-export function applySecretPromo(price: number): number {
-  if (!SECRET_PROMO_ACTIVE) return price
-  return Math.ceil(price * (1 - SECRET_PROMO_DISCOUNT) / 10) * 10
-}
-
 const CDN      = 'https://storage.yandexcloud.net/catalog-vfd/invisible/'
 const INFO_CDN  = `${CDN}invisible_info/`
 
@@ -65,8 +46,6 @@ export const SECRET_REVERS_SIZES = [600, 700, 800]      as const
 // ── Цены РРЦ — зависят от кромки и стороны открывания ──────────
 // Полотно «Финиш-грунт» — единственный доступный вариант покрытия
 // (позиции с простым грунтом убраны из продажи).
-export const FRAME_KIT_PRICE = 19_820   // РРЦ короба «Хром» (2,5 шт) — сверено: kitStandardPrice - bladePrice = 19 820 везде
-
 export type SecretEdgeColor = 'black' | 'silver' | 'gold'
 
 export interface SecretPriceRow {
@@ -91,46 +70,13 @@ export const SECRET_PRICES: SecretPriceRow[] = [
 
 // «От» для превью и карточки «Секрет» — самая доступная комбинация в целом;
 // комплект считаем по самому дешёвому доступному уровню (Лайт, где он есть).
-// *_ORIGINAL — цена без акции, нужна только для зачёркнутой цены в вёрстке;
-// везде, где нужна «текущая» цена, используй версию без суффикса.
-export const SECRET_MIN_BLADE_PRICE_ORIGINAL = Math.min(...SECRET_PRICES.map(r => r.bladePrice))
-export const SECRET_MIN_KIT_PRICE_ORIGINAL   = Math.min(...SECRET_PRICES.map(r => r.kitLitePrice ?? r.kitStandardPrice))
-export const SECRET_MIN_BLADE_PRICE = applySecretPromo(SECRET_MIN_BLADE_PRICE_ORIGINAL)
-export const SECRET_MIN_KIT_PRICE   = applySecretPromo(SECRET_MIN_KIT_PRICE_ORIGINAL)
+export const SECRET_MIN_BLADE_PRICE = Math.min(...SECRET_PRICES.map(r => r.bladePrice))
+export const SECRET_MIN_KIT_PRICE   = Math.min(...SECRET_PRICES.map(r => r.kitLitePrice ?? r.kitStandardPrice))
 
 // «От» для карточки «Секрет Реверс» — минимум среди строк реверсивного открывания
 const SECRET_REVERS_ROWS = SECRET_PRICES.filter(r => r.reverse)
-export const SECRET_REVERS_MIN_BLADE_PRICE_ORIGINAL = Math.min(...SECRET_REVERS_ROWS.map(r => r.bladePrice))
-export const SECRET_REVERS_MIN_KIT_PRICE_ORIGINAL   = Math.min(...SECRET_REVERS_ROWS.map(r => r.kitLitePrice ?? r.kitStandardPrice))
-export const SECRET_REVERS_MIN_BLADE_PRICE = applySecretPromo(SECRET_REVERS_MIN_BLADE_PRICE_ORIGINAL)
-export const SECRET_REVERS_MIN_KIT_PRICE   = applySecretPromo(SECRET_REVERS_MIN_KIT_PRICE_ORIGINAL)
-
-// Полная таблица цен «Секрет» с применённой акцией — используй в таблице на
-// странице вместо SECRET_PRICES (который остаётся исходником/каноном).
-export const SECRET_PRICES_DISPLAY: SecretPriceRow[] = SECRET_PRICES.map(row => ({
-  ...row,
-  bladePrice:       applySecretPromo(row.bladePrice),
-  kitStandardPrice: applySecretPromo(row.kitStandardPrice),
-  kitLitePrice:      row.kitLitePrice != null ? applySecretPromo(row.kitLitePrice) : null,
-}))
-
-// ── Комплект скрытого короба ─────────────────────────────────
-export const FRAME_KIT = {
-  article:  'К-т скрытого короба 54×43×2200',
-  size:     '54×43 мм, длина 2200 мм (2,5 пог. м)',
-  priceRrp: FRAME_KIT_PRICE,
-  includes: [
-    'Алюминиевый профиль 54×43 мм',
-    'Запил под ответную планку',
-    'Ответная планка',
-    'Две скрытые петли №1',
-  ],
-  colors: [
-    { label: 'Чёрный',  inStock: 22 },
-    { label: 'Серебро', inStock: 12 },
-    { label: 'Золото',  inStock: 5  },
-  ],
-} as const
+export const SECRET_REVERS_MIN_BLADE_PRICE = Math.min(...SECRET_REVERS_ROWS.map(r => r.bladePrice))
+export const SECRET_REVERS_MIN_KIT_PRICE   = Math.min(...SECRET_REVERS_ROWS.map(r => r.kitLitePrice ?? r.kitStandardPrice))
 
 // ── Нестандартные высоты (изготовление под заказ) ────────────
 // Надбавка к цене полотна; короб и фурнитура — по стандартной цене
@@ -154,31 +100,6 @@ export function heightTier(heightMm: number) {
 export function calcCustomPrice(basePrice: number, surcharge: number): number {
   return Math.ceil(basePrice * (1 + surcharge) / 10) * 10
 }
-
-// Количество комплектов короба на одну дверь
-// Один к-т: 2,5 шт × 2200 мм = 5500 мм покрытия; +200 мм на запилы
-export function calcFrameKits(heightMm: number, widthMm: number): number {
-  return Math.ceil((2 * heightMm + widthMm + 200) / 5500)
-}
-
-// ── Дополнительная фурнитура (опционально к основному заказу) ─
-export const OPTIONAL_HARDWARE = [
-  {
-    name: 'Ручка скрытого монтажа',
-    desc: 'Утапливается в торец полотна — не выступает за плоскость стены',
-    icon: 'handle',
-  },
-  {
-    name: 'Стопор скрытого монтажа',
-    desc: 'Удерживает дверь в открытом положении без видимых деталей',
-    icon: 'stop',
-  },
-  {
-    name: 'Завёртка WC',
-    desc: 'Для санузлов: блокировка изнутри, индикатор занятости снаружи',
-    icon: 'wc',
-  },
-] as const
 
 // ── Секрет «Рефлекс» — скрытая дверь с зеркалом ──────────────
 // Локальный ресайз (см. scripts/gen-hidden-doors-hero.mjs) — оригинал

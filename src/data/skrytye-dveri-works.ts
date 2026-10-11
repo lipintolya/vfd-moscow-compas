@@ -4,8 +4,6 @@
    Последний объект — сверху (push в начало массива).
    ============================================================ */
 
-const CDN_WORKS = 'https://storage.yandexcloud.net/catalog-vfd/invisible/ourworks/'
-
 export interface InvisibleWork {
   id:        string    // slug: '2026-06-17-01'
   date:      string    // ISO '2026-06-17'  (Schema.org dateCreated)

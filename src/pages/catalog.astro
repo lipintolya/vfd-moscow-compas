@@ -422,7 +422,7 @@ const structuredData = canonicalUrl ? [
           )
         })}
 
-        <!-- Двери по покрытию/цвету/стилю — второстепенная SEO-навигация, не
+        {/* Двери по покрытию/цвету/стилю — второстепенная SEO-навигация, не
              основной путь к товару. Горизонтальный скролл на мобильном убран —
              непонятно было, что список вообще скроллится, ничего не
              намекало на свайп. Простой flex-wrap на всех брейкпоинтах:
@@ -432,7 +432,7 @@ const structuredData = canonicalUrl ? [
              есть полноценные quick-jump пилюли по покрытию вверху страницы,
              дублировать все 5 незачем), только 3 конкретных лендинга с
              формулировкой под пользу, а не название материала —
-             «Не оставляют отпечатков» продаёт лучше, чем «Двери ПЭТ». -->
+             «Не оставляют отпечатков» продаёт лучше, чем «Двери ПЭТ». */}
         <div class="mt-2 mb-8 grid gap-4 sm:grid-cols-3 md:mb-10">
           <div class="min-w-0">
             <p class="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400">Двери по покрытию</p>
@@ -505,7 +505,7 @@ const structuredData = canonicalUrl ? [
     </div>
   </div>
 
-  <!-- FAQ (SEO — FAQPage schema + аккордеон) -->
+  {/* FAQ (SEO — FAQPage schema + аккордеон) */}
   <section class="section">
     <div class="container">
       <FaqAccordion items={catalogFaq} />

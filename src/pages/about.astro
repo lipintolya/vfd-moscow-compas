@@ -76,20 +76,20 @@ const breadcrumbItems = [
   </div>
 
   <div class="home">
-    <!-- Обложка: тёмная плитка, портрет справа — его тёмный студийный фон
-         продолжает плитку, левый край кадра растворяется в ней -->
+    {/* Обложка: тёмная плитка, портрет справа — его тёмный студийный фон
+         продолжает плитку, левый край кадра растворяется в ней */}
     <section class="about-intro" aria-labelledby="about-title">
       <div class="container">
         <div class="cover">
           <div class="cover__text">
-            <!-- Знак коллаборации: «Студия Зизевского × фабрика VFD» -->
+            {/* Знак коллаборации: «Студия Зизевского × фабрика VFD» */}
             <h1 id="about-title" class="collab">
               <span>{SITE.studioName}</span>{' '}
-              <!-- «× фабрика VFD» не разрывается: крестик не повисает в конце строки -->
+              {/* «× фабрика VFD» не разрывается: крестик не повисает в конце строки */}
               <span class="collab__pair"><span class="collab__x">×</span> {COLLAB_PARTNER}</span>
             </h1>
 
-            <!-- Цитата основателя: blockquote + подпись в figcaption -->
+            {/* Цитата основателя: blockquote + подпись в figcaption */}
             <figure class="quote">
               <div class="quote__body">
                 <p class="quote__greeting">{typograph(FOUNDER_QUOTE.greeting)}</p>
@@ -121,8 +121,8 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- История — годы идут по порядку. Красная линия прорисовывается
-         один раз, когда блок доходит до экрана -->
+    {/* История — годы идут по порядку. Красная линия прорисовывается
+         один раз, когда блок доходит до экрана */}
     <section class="h-sec h-sec--wall" aria-labelledby="history-title">
       <div class="container">
         <h2 id="history-title" class="h-h2 history__title">Наша история</h2>
@@ -137,7 +137,7 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Выводы о рынке — пункты под линейками вместо сплошного абзаца -->
+    {/* Выводы о рынке — пункты под линейками вместо сплошного абзаца */}
     <section class="h-sec" aria-labelledby="market-title">
       <div class="container split">
         <header class="split__head">
@@ -150,7 +150,7 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Фамильный бренд — главный текст страницы, набран крупно -->
+    {/* Фамильный бренд — главный текст страницы, набран крупно */}
     <section class="h-sec h-sec--wall" aria-labelledby="brand-title">
       <div class="container split">
         <h2 id="brand-title" class="h-h2 split__head">{typograph(FAMILY_BRAND.title)}</h2>
@@ -160,12 +160,12 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Официальный дилер ВФД.
+    {/* Официальный дилер ВФД.
          ПК: слева закреплённая колонка — заголовок, пояснение, цифры фабрики
          (по данным vfd.ru), кнопка; справа — четыре карточки «фото + подпись»:
          каждый пункт о производстве — под своим кадром, как табличка у
          образца. Телефон: вводная часть, затем лента карточек со свайпом.
-         Клик по фото — окно просмотра. -->
+         Клик по фото — окно просмотра. */}
     <section class="h-sec" id="vfd" aria-labelledby="vfd-title">
       <div class="container vfd">
         <div class="vfd__intro">
@@ -218,9 +218,9 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    <!-- Собственное производство: на ПК — сетка (широкий кадр на две колонки),
+    {/* Собственное производство: на ПК — сетка (широкий кадр на две колонки),
          на телефоне — лента со свайпом (.h-rail). Клик — лайтбокс
-         с крупными версиями кадров -->
+         с крупными версиями кадров */}
     <section class="h-sec h-sec--wall" aria-labelledby="factory-title">
       <div class="container">
         <header class="h-head">
@@ -255,8 +255,8 @@ const breadcrumbItems = [
           ))}
         </ul>
         <p class="h-meta factory__hint" aria-hidden="true">{FACTORY.photos.length} фото — листайте</p>
-        <!-- На ПК видны два ряда, остальное — по кнопке. Кнопку показывает
-             скрипт: без JS сетка просто раскрыта целиком -->
+        {/* На ПК видны два ряда, остальное — по кнопке. Кнопку показывает
+             скрипт: без JS сетка просто раскрыта целиком */}
         <button type="button" class="h-btn h-btn--quiet factory__more" aria-controls="factory-list" data-factory-more hidden>
           Смотреть все {FACTORY.photos.length} фото
         </button>

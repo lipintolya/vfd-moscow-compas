@@ -1,29 +1,31 @@
 /**
- * Локальные ресайзы карточных фото блока «Акции» (Promo.vue, #promo на
- * главной) и /promo-archive — те же данные PROMOS используются в обоих
- * местах. Тот же приём, что и gen-hero-bento.mjs: Yandex Cloud storage не
- * ресайзит по query-параметрам, а оригиналы (1000–1450px, один даже 1.16MB)
- * кратно крупнее реального размера показа — карточка максимум ~400px CSS
- * (grid-cols-3 в container), даём 640w/800w срез под retina.
+ * Локальные ресайзы фото акций — блок «Акции» на главной (Promo.vue),
+ * /akcii/ и /promo-archive/. Облако не ресайзит по query-параметрам, а
+ * оригиналы кратно крупнее карточки (~400px CSS) — даём 640w/800w под retina.
+ *
+ * Фото берутся из src/data/promos.ts: каждый `image: 'https://…'`. Файлы —
+ * public/renders/promo/<имя-файла-оригинала>-{640,800}.webp; путь для
+ * поля imageSrcset скрипт печатает — вставьте его в акцию.
  *
  * Запуск:        node scripts/gen-promo-images.mjs
- * Когда запускать снова: если добавили новую акцию в src/data/promos.ts
- * или сменили image у существующей.
+ * Когда запускать снова: добавили акцию с фото или сменили фото.
  */
 import sharp from 'sharp'
-import { writeFile, mkdir } from 'node:fs/promises'
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
 
 const OUT_DIR = new URL('../public/renders/promo/', import.meta.url)
-await mkdir(OUT_DIR, { recursive: true })
 
-const sources = [
-  { src: 'https://storage.yandexcloud.net/vfd74ru/sale/zamer_render.webp', base: 'zamer-render' },
-  { src: 'https://storage.yandexcloud.net/vfd74ru/outdoors/basic_render.webp', base: 'basic-render' },
-  { src: 'https://storage.yandexcloud.net/catalog-vfd/invisible/invisible.webp', base: 'invisible' },
-  { src: 'https://storage.yandexcloud.net/vfd74ru/sale/basic_z.webp', base: 'basic-z' },
-  { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/emalex_ec2_promo.webp', base: 'emalex-ec2-promo' },
-  { src: 'https://storage.yandexcloud.net/vfd74ru/promo_main/64443281-F5F2-4877-9AEA-304CD417BF8D.webp', base: 'urban-graphite' },
-]
+/* promos.ts читаем как текст (без TS-импорта): нужны только адреса фото */
+const data = await readFile(new URL('../src/data/promos.ts', import.meta.url), 'utf8')
+const sources = [...data.matchAll(/^\s*image:\s*'(https?:[^']+)'/gm)].map(([, src]) => ({
+  src,
+  base: decodeURIComponent(src.split('/').at(-1)).replace(/\.\w+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+}))
+if (!sources.length) {
+  console.log('В src/data/promos.ts нет акций с фото (image) — делать нечего.')
+  process.exit(0)
+}
+await mkdir(OUT_DIR, { recursive: true })
 
 const widths = [
   { width: 640, quality: 76 },
@@ -40,4 +42,5 @@ for (const { src, base } of sources) {
     await writeFile(new URL(out, OUT_DIR), resized)
     console.log(`${out}: ${(buf.length / 1024).toFixed(0)}KB -> ${(resized.length / 1024).toFixed(0)}KB`)
   }
+  console.log(`  imageSrcset: '${widths.map(({ width }) => `/renders/promo/${base}-${width}.webp ${width}w`).join(', ')}'`)
 }

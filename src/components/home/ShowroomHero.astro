@@ -37,9 +37,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 <section class="hero" aria-labelledby="hero-heading">
   <div class="container">
     <div class="stage" data-stage data-interval={SLIDE_MS}>
-      <!-- Первый кадр — LCP, грузится сразу. Остальные — data-src:
+      {/* Первый кадр — LCP, грузится сразу. Остальные — data-src:
            скрипт ставит src, когда страница загрузилась (или раньше, если
-           кадр понадобился), чтобы они не делили канал с первым -->
+           кадр понадобился), чтобы они не делили канал с первым */}
       <div class="stage__media">
         {HERO_SLIDES.map((l, i) => (
           <img

@@ -43,8 +43,8 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     </header>
 
     <div class="vitrine" data-vitrine>
-      <!-- Сцена дублирует фото списка крупно — для экранных читалок скрыта,
-           с клавиатуры недоступна (те же ссылки есть в списке) -->
+      {/* Сцена дублирует фото списка крупно — для экранных читалок скрыта,
+           с клавиатуры недоступна (те же ссылки есть в списке) */}
       <a class="stage" href={items[0]?.href} tabindex="-1" aria-hidden="true">
         {items.map((it, i) => (
           <span class:list={['stage__slide', { 'is-on': i === 0 }]}>

@@ -9,8 +9,6 @@
  * (сортировка внутри массива не важна — компонент сам не переупорядочивает).
  */
 
-const PHOTO_BASE = 'https://storage.yandexcloud.net/vfd74ru/info/reviews'
-
 export type ReviewPlatform = 'yandex' | '2gis'
 
 export interface Review {

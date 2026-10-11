@@ -114,7 +114,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </div>
 
-  <!-- HERO -->
+  {/* HERO */}
   <section class="section bg-white">
     <div class="container">
       <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
@@ -151,7 +151,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </section>
 
-  <!-- ГИБКОСТЬ ПОД ПРОЕКТ -->
+  {/* ГИБКОСТЬ ПОД ПРОЕКТ */}
   <section class="section bg-white">
     <div class="container">
       <SectionHeading eyebrow="Возможности" title="Что можно заложить в проект" />
@@ -181,7 +181,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </section>
 
-  <!-- РЕФЛЕКС КАК АКЦЕНТ -->
+  {/* РЕФЛЕКС КАК АКЦЕНТ */}
   <section class="section bg-white">
     <div class="container">
       <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
@@ -210,7 +210,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </section>
 
-  <!-- РАБОТА ПО ДИЗАЙН-ПРОЕКТУ -->
+  {/* РАБОТА ПО ДИЗАЙН-ПРОЕКТУ */}
   {designWork && (
     <section class="section bg-white">
       <div class="container">
@@ -242,14 +242,14 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
 
   {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
-  <!-- FAQ -->
+  {/* FAQ */}
   <section class="section bg-white">
     <div class="container">
       <FaqAccordion items={faq} />
     </div>
   </section>
 
-  <!-- CTA -->
+  {/* CTA */}
   <section class="section bg-white">
     <div class="container">
       <div class="rounded-3xl bg-graphite p-[clamp(2rem,5vw,3rem)] text-white">

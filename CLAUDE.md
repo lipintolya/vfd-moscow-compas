@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Site for the ВФД (Владимирская фабрика дверей) door & aluminum-partition showroom in **ТЦ «Компас», Moscow** (ул. Красная Сосна, 2А, 3 этаж). Forked from the Chelyabinsk site `vfd74.ru` (`~/Projects/vfd-door`, github.com/lipintolya/vfd74) — same architecture, separate brand layer, content and design. Astro 6 + Vue 3 islands + Tailwind v4, content and product data primarily in Russian. Statically built; deploy target not set up yet.
+Site for the ВФД (Владимирская фабрика дверей) door & aluminum-partition showroom in **ТЦ «Компас», Moscow** (ул. Красная Сосна, 2А, 3 этаж). Forked from the Chelyabinsk site `vfd74.ru` (`~/Projects/vfd-door`, github.com/lipintolya/vfd74) — same architecture, separate brand layer, content and design. Astro 7 + Vue 3 islands + Tailwind v4, content and product data primarily in Russian. Statically built; deploy target not set up yet.
 
 **Brand layer — never hardcode these in components:** domain, name, city (with case forms), address/coordinates, phones, email, socials, Metrika ID and section feature flags live in `src/config/site.ts` (`SITE`, `PHONE`). Legal entity/requisites/hours live in `src/lib/contacts-data.ts` (built from `SITE`). LocalBusiness JSON-LD comes from `src/lib/local-business-schema.ts` — don't hand-write it per page. `astro.config.mjs` duplicates the domain as `SITE_URL` (the config can't import TS) — change both (`robots.txt` and `/sitemap.xml` are generated from `SITE.url` by `src/pages/robots.txt.ts` and `src/pages/sitemap.xml.ts`). Values containing `PLACEHOLDER` / `placeholder.example` are unfilled real data — never invent real-looking replacements, ask the user.
 
@@ -16,9 +16,11 @@ Site for the ВФД (Владимирская фабрика дверей) door 
 npm run dev       # astro dev — local dev server
 npm run build     # astro build — static build into dist/
 npm run preview   # preview the production build locally
-npm run gen:renders  # regenerate public/renders/alum-covers/*.webp from cloud originals (see scripts/gen-render-gallery.mjs)
+npm run gen:*     # image generators (scripts/*.mjs) — one npm alias per script, table in README «Облегчённые картинки»
 npm run deploy    # git push production main — no production remote yet; DO NOT run unless the user explicitly asks
 ```
+
+Every `scripts/*.mjs` has an npm alias; a new generator gets one too (plus a README row). Generated files go to `public/renders/`; source images that exist nowhere else go to `assets/` (never `public/` — it ships to the site). `sharp` is a devDependency for these scripts.
 
 After changing `src/content.config.ts` or `markdoc.config.ts`, restart `astro dev` — it keeps the old content store (a new article 404s and lists stay empty) until restarted.
 

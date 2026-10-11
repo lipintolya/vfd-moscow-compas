@@ -117,7 +117,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </div>
 
-  <!-- HERO -->
+  {/* HERO */}
   <section class="section bg-white">
     <div class="container">
       <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-12">
@@ -168,7 +168,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </section>
 
-  <!-- ПОЧЕМУ ПОДХОДИТ ДЛЯ КОММЕРЧЕСКИХ ОБЪЕКТОВ -->
+  {/* ПОЧЕМУ ПОДХОДИТ ДЛЯ КОММЕРЧЕСКИХ ОБЪЕКТОВ */}
   <section class="section bg-white">
     <div class="container">
       <SectionHeading eyebrow="Почему это работает" title="Три задачи, которые решает скрытый монтаж в офисе" />
@@ -198,7 +198,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </section>
 
-  <!-- ЦЕНЫ -->
+  {/* ЦЕНЫ */}
   <section class="section bg-white">
     <div class="container">
       <SectionHeading
@@ -213,7 +213,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     </div>
   </section>
 
-  <!-- РАБОТА В НАШЕМ САЛОНЕ -->
+  {/* РАБОТА В НАШЕМ САЛОНЕ */}
   {officeWork && (
     <section class="section bg-white">
       <div class="container">
@@ -245,14 +245,14 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
 
   {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
-  <!-- FAQ -->
+  {/* FAQ */}
   <section class="section bg-white">
     <div class="container">
       <FaqAccordion items={faq} />
     </div>
   </section>
 
-  <!-- CTA -->
+  {/* CTA */}
   <section class="section bg-white">
     <div class="container">
       <div class="rounded-3xl bg-graphite p-[clamp(2rem,5vw,3rem)] text-white">

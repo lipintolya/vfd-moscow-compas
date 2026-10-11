@@ -81,7 +81,7 @@ const structuredDataJson = structuredData
 
     <meta property="og:locale"       content="ru_RU" />
     <meta property="og:site_name"    content={`Салон дверей ${SITE.name}`} />
-    <meta name="theme-color"         content="#f7f7f8" /><!-- = slate-50, meta не понимает var() -->
+    <meta name="theme-color"         content="#f7f7f8" />{/* = slate-50, meta не понимает var() */}
 
     <meta name="twitter:card"        content="summary_large_image" />
     <meta name="twitter:title"       content={title} />
@@ -93,15 +93,15 @@ const structuredDataJson = structuredData
 
     <title>{title}</title>
 
-    <!-- Favicons -->
+    {/* Favicons */}
     <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
     <link rel="manifest" href="/favicons/site.webmanifest" />
-    <meta name="theme-color" content="#1f1f23" /><!-- = slate-900 (графит) -->
+    <meta name="theme-color" content="#1f1f23" />{/* = slate-900 (графит) */}
 
-    <!-- Имя сайта для системных поверхностей -->
+    {/* Имя сайта для системных поверхностей */}
     <meta name="apple-mobile-web-app-title" content={`${SITE.name} в ${SITE.address.mall}`} />
     <meta name="application-name" content={`${SITE.name} в ${SITE.address.mall}`} />
 
@@ -148,7 +148,7 @@ const structuredDataJson = structuredData
 
   <body class="min-h-screen flex flex-col">
 
-    <!-- Header: только клиент, без hydration mismatch -->
+    {/* Header: только клиент, без hydration mismatch */}
     <Header client:only="vue" />
 
     <main
@@ -158,18 +158,18 @@ const structuredDataJson = structuredData
       <slot />
     </main>
 
-    <!-- Footer: модальное окно требует Vue -->
+    {/* Footer: модальное окно требует Vue */}
     <Footer client:only="vue" />
 
-    <!-- Окно просмотра фото — одно на сайт, открывается событием
-         'open-lightbox' (src/lib/lightbox.ts) -->
+    {/* Окно просмотра фото — одно на сайт, открывается событием
+         'open-lightbox' (src/lib/lightbox.ts) */}
     <PhotoLightbox client:only="vue" />
 
     <BackToTop />
 
-    <!-- Баннер согласия с обработкой данных (ФЗ-152) -->
-    <!-- Уведомление о куки (152-ФЗ). Показывается скриптом, пока согласие
-         не сохранено; без JS не показывается вовсе. Стили — ниже, токены. -->
+    {/* Баннер согласия с обработкой данных (ФЗ-152) */}
+    {/* Уведомление о куки (152-ФЗ). Показывается скриптом, пока согласие
+         не сохранено; без JS не показывается вовсе. Стили — ниже, токены. */}
     <div id="cookie-banner" class="cookie" role="region" aria-label="Уведомление о файлах cookie" hidden>
       <div class="cookie__box">
         <p class="cookie__text">

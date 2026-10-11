@@ -4,8 +4,6 @@
    в НАЧАЛО массива PORTFOLIO_WORKS.
    ============================================================ */
 
-const CDN_OW = 'https://storage.yandexcloud.net/catalog-vfd/invisible/ourworks/'
-
 export type WorkCategory = 'interior' | 'hidden' | 'partitions'
 export type ObjectType   = 'apartment' | 'house' | 'office' | 'commercial'
 
