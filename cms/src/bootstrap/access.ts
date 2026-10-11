@@ -14,7 +14,9 @@ const ACTIONS = ['create', 'read', 'update', 'delete', 'publish'].map((a) => `pl
 const SITE_TOKEN = 'site-build'
 const SITE_ENV = path.resolve(process.cwd(), '..', '.env')
 const DEV_WEBHOOK = 'http://localhost:4321/__strapi/refresh'
-const isDev = () => process.env.NODE_ENV !== 'production'
+/* Разработка = `strapi develop` (у него autoReload). По NODE_ENV не
+   судим: `strapi start` на сервере его не выставляет сам */
+const isDev = (strapi: Core.Strapi) => strapi.config.get('autoReload') === true
 
 export async function grantEditor(strapi: Core.Strapi) {
   const roles = strapi.service('admin::role')
@@ -35,7 +37,7 @@ const upsertEnv = (env: string, key: string, value: string) => {
 }
 
 export async function ensureSiteToken(strapi: Core.Strapi) {
-  if (!isDev()) return
+  if (!isDev(strapi)) return
   const tokens = strapi.service('admin::api-token-content-api')
   let accessKey: string | undefined = (await tokens.getByName(SITE_TOKEN, { includeDecryptedKey: true }))?.accessKey
   if (!accessKey) {
@@ -52,7 +54,7 @@ export async function ensureSiteToken(strapi: Core.Strapi) {
 }
 
 export async function ensureDevWebhook(strapi: Core.Strapi) {
-  if (!isDev()) return
+  if (!isDev(strapi)) return
   const store = strapi.get('webhookStore')
   const all: { url: string }[] = await store.findWebhooks()
   if (all.some((w) => w.url === DEV_WEBHOOK)) return
