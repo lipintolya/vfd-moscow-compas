@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "works",
+  "info": {
+    "singularName": "work",
+    "pluralName": "works",
+    "displayName": "Портфолио",
+    "description": "Наши работы: /portfolio/, главная, страницы разделов"
+  },
+  "options": { "draftAndPublish": true },
+  "pluginOptions": { "i18n": { "localized": false } },
+  "attributes": {
+    "title": { "type": "string", "required": true, "maxLength": 120 },
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "date": { "type": "date", "required": true },
+    "category": { "type": "enumeration", "required": true, "enum": ["Межкомнатные", "Скрытые двери", "Перегородки"] },
+    "objectType": { "type": "enumeration", "required": true, "enum": ["Квартира", "Частный дом", "Офис", "Коммерческая недвижимость"] },
+    "location": { "type": "string", "maxLength": 120 },
+    "description": { "type": "text", "required": true, "maxLength": 170 },
+    "story": { "type": "text" },
+    "model": { "type": "string", "maxLength": 80 },
+    "doorCount": { "type": "integer", "min": 1 },
+    "features": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "tags": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "images": { "type": "media", "multiple": true, "required": true, "allowedTypes": ["images"] },
+    "catalogLink": { "type": "component", "repeatable": false, "component": "shared.catalog-link" }
+  }
+}

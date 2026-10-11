@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_shared_catalog_links",
+  "info": { "displayName": "Ссылка на каталог", "icon": "link" },
+  "attributes": {
+    "section": {
+      "type": "enumeration",
+      "required": true,
+      "enum": ["Межкомнатные двери", "Скрытые двери", "Серые и графитовые двери", "Белые двери", "Перегородки", "Декор и погонаж"]
+    },
+    "label": { "type": "string", "maxLength": 80 }
+  }
+}

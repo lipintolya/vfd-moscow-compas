@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import { UPLOAD_LIMIT } from './plugins';
 
 const config: Core.Config.Middlewares = [
   'strapi::logger',
@@ -7,7 +8,7 @@ const config: Core.Config.Middlewares = [
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::query',
-  'strapi::body',
+  { name: 'strapi::body', config: { formidable: { maxFileSize: UPLOAD_LIMIT } } },
   'strapi::session',
   'strapi::favicon',
   'strapi::public',

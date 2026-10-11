@@ -1,20 +1,13 @@
-// import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi'
+import { applyLabels } from './bootstrap/labels'
+import { grantEditor, ensureSiteToken, ensureDevWebhook } from './bootstrap/access'
 
 export default {
-  /**
-   * An asynchronous register function that runs before
-   * your application is initialized.
-   *
-   * This gives you an opportunity to extend code.
-   */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
-
-  /**
-   * An asynchronous bootstrap function that runs before
-   * your application gets started.
-   *
-   * This gives you an opportunity to set up your data model,
-   * run jobs, or perform some special logic.
-   */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
-};
+  register() {},
+  async bootstrap({ strapi }: { strapi: Core.Strapi }) {
+    await applyLabels(strapi)
+    await grantEditor(strapi)
+    await ensureSiteToken(strapi)
+    await ensureDevWebhook(strapi)
+  },
+}

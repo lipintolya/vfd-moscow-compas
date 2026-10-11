@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "promos",
+  "info": {
+    "singularName": "promo",
+    "pluralName": "promos",
+    "displayName": "Акции",
+    "description": "Активные — на главной и /akcii/, после даты окончания — в архиве"
+  },
+  "options": { "draftAndPublish": true },
+  "pluginOptions": { "i18n": { "localized": false } },
+  "attributes": {
+    "title": { "type": "string", "required": true, "maxLength": 80 },
+    "subtitle": { "type": "string", "required": true, "maxLength": 140 },
+    "description": { "type": "text", "maxLength": 600 },
+    "image": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "validUntil": { "type": "date", "required": true },
+    "discount": { "type": "string", "maxLength": 20 },
+    "ctaText": { "type": "string", "maxLength": 40 },
+    "ctaLink": { "type": "string", "maxLength": 200 }
+  }
+}
