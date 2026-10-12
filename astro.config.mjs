@@ -4,7 +4,6 @@ import { defineConfig } from 'astro/config';
 import sitemap, { ChangeFreqEnum } from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@astrojs/vue';
-import markdoc from '@astrojs/markdoc';
 import { createClient } from '@supabase/supabase-js';
 import { CLOUD, cloudToMedia, mediaFile } from './scripts/lib/media.mjs';
 import strapiRefresh from './src/integrations/strapi-refresh.mjs';
@@ -205,7 +204,6 @@ export default defineConfig({
 
   integrations: [
     vue(),
-    markdoc(),
     strapiRefresh(['strapi-promos', 'strapi-works', 'strapi-articles']),
     sitemap({
       filter: (page) =>

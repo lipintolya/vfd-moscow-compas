@@ -3,10 +3,9 @@
    замера и монтажа. Меняются здесь (точнее — в своих источниках) и сразу
    во всех статьях.
 
-   В тексте статьи — {% $salon.address %}, {% $hidden.kitFrom %} …
-   (markdoc.config.ts). Во фронтматтере (description, summary, faq) —
-   та же запись: её подставляет fillArticleVars при выводе
-   (src/lib/articles.ts), Markdoc фронтматтер не обрабатывает. */
+   В статьях (Strapi) — подстановки {адрес салона}, {цена комплекта
+   Секрет} …: имена — src/data/article-substitutions.ts, значения — отсюда
+   (articleVar); заполняет src/lib/article-substitutions.ts. */
 import { SITE, PHONE } from '../config/site'
 import { companyLegalInfo } from './contacts-data'
 import { listRu } from './typograph'
@@ -95,15 +94,6 @@ function nb(text: string): string {
   return text.replace(/ /g, '\u00a0')
 }
 
-/** Подставляет {% $путь.к.значению %} в строку фронтматтера. Неизвестная
-    переменная — ошибка сборки: опечатка не должна уйти на сайт. */
-export function fillArticleVars(text: string): string {
-  return text.replace(/\{%\s*\$([\w.]+)\s*%\}/g, (_, path: string) => {
-    const value = articleVar(path)
-    if (value === undefined) throw new Error(`Статья: нет переменной $${path}`)
-    return value
-  })
-}
 
 /** Значение переменной статей по пути 'salon.address'; нет такой — undefined */
 export function articleVar(path: string): string | undefined {

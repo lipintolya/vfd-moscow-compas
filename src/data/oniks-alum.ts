@@ -390,7 +390,7 @@ export const ONIKS_STEPS = [
   { title: 'Изготовление на фабрике', text: `Срок изготовления — ${ONIKS_FACTS.leadTime}.` },
 ].map((s, i) => ({ ...s, num: String(i + 1).padStart(2, '0') }))
 
-/* Статьи по теме — имена файлов из src/content/articles/ без .mdoc.
+/* Статьи по теме — адреса статей в Strapi (поле «Адрес страницы»).
    Статьи с таким именем нет — сборка остановится с ошибкой */
 export const ONIKS_ARTICLES = ['vfd-dizain-dveri-pod-zadachu', 'dveri-v-stile-loft', 'dveri-so-steklom-ili-gluhie']
 

@@ -95,7 +95,7 @@ export interface ArticleAuthor {
 
 const capitalize = (s: string) => `${s[0]!.toUpperCase()}${s.slice(1)}`
 
-/** Автор статьи: из фронтматтера (author), иначе — основатель студии */
+/** Автор статьи: из Strapi (группа «Для поисковиков и каталога» → «Автор»), иначе — основатель студии */
 export function articleAuthor(article: Article): ArticleAuthor {
   const a = article.data.author
   if (!a) {

@@ -1,5 +1,4 @@
 ---
-import { articleImg } from '../../lib/article-images'
 
 interface Props {
   /** Не обязателен — без src рендерится плейсхолдер «Фото скоро» (тот же
@@ -28,7 +27,7 @@ const { src, alt = '', caption, narrow = false, natural = false, srcset, zoom } 
 /* В тексте — облегчённый вариант по ширине экрана (колонка статьи до 80rem,
    narrow — до 26rem); по нажатию оригинал открывается во весь экран
    (ArticleLightbox на странице статьи — по data-zoom). */
-const inline = srcset ? { src: src!, srcset } : src ? articleImg(src) : undefined
+const inline = src ? { src, srcset } : undefined
 const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-width: 1312px) 1280px, calc(100vw - 32px)'
 ---
 

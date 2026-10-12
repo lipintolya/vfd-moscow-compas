@@ -115,7 +115,7 @@ export interface StrapiArticle {
 /** Покрытие в Strapi → coatingSlug каталога (src/data/door-categories.ts) */
 const COATING_SLUG: Record<string, string> = { 'ПЭТ': 'pet', 'Эмаль': 'emal', 'Эмалекс': 'emalex', 'Протач': 'protach', 'Экошпон': 'ekoshpon' }
 
-/** Статья Strapi → данные коллекции articles (прежние поля шапки .mdoc +
+/** Статья Strapi → данные коллекции articles (прежние поля шапки статьи +
     готовые блоки, оглавление) и body — текст для «мин чтения», как раньше */
 export function toArticle(raw: StrapiArticle) {
   const where = `Статья «${raw.title}»`

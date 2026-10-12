@@ -22,7 +22,6 @@
     "cms:install": "npm --prefix cms install",
     "media:pull": "node scripts/media-pull.mjs",
     "gen:about": "node scripts/gen-about-images.mjs",
-    "gen:articles": "node scripts/gen-article-images.mjs",
     "gen:contacts": "node scripts/gen-contacts-images.mjs",
     "gen:designers-hero": "node scripts/gen-designers-hero.mjs",
     "gen:hidden-doors-hero": "node scripts/gen-hidden-doors-hero.mjs",
@@ -39,11 +38,9 @@
     "gen:video-covers": "node scripts/gen-video-covers.mjs",
     "gen:visit-map": "node scripts/gen-visit-map.mjs",
     "video:optimize": "node scripts/optimize-video.mjs",
-    "deploy": "git push production main",
-    "articles:export": "tsx scripts/export-articles.mjs"
+    "deploy": "git push production main"
   },
   "dependencies": {
-    "@astrojs/markdoc": "^2.0.9",
     "@astrojs/sitemap": "^3.7.4",
     "@astrojs/vue": "^7.0.2",
     "@supabase/supabase-js": "^2.106.0",

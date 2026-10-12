@@ -6,7 +6,6 @@
  * Нажатие на фото — оригинал во весь экран (ArticleLightbox, data-zoom);
  * href — подпись становится ссылкой (напр. на страницу модели или серии).
  */
-import { articleImg } from '../../lib/article-images'
 
 interface Props {
   src:     string
@@ -19,7 +18,7 @@ interface Props {
   zoom?:   string
 }
 const { src, alt = '', caption, href, srcset, zoom } = Astro.props
-const img = srcset ? { src, srcset } : articleImg(src)
+const img = { src, srcset }
 ---
 
 <figure class="dphoto">
