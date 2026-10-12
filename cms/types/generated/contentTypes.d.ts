@@ -443,6 +443,89 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
+  collectionName: 'articles';
+  info: {
+    description: '\u0421\u0442\u0430\u0442\u044C\u0438 \u0438 \u043F\u0443\u0431\u043B\u0438\u043A\u0430\u0446\u0438\u0438: /articles/, \u0433\u043B\u0430\u0432\u043D\u0430\u044F, \u00AB\u0441\u0442\u0430\u0442\u044C\u044F \u043F\u043E \u0442\u0435\u043C\u0435\u00BB \u0432 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0435';
+    displayName: '\u0421\u0442\u0430\u0442\u044C\u0438';
+    pluralName: 'articles';
+    singularName: 'article';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  pluginOptions: {
+    i18n: {
+      localized: false;
+    };
+  };
+  attributes: {
+    body: Schema.Attribute.DynamicZone<
+      [
+        'article.text',
+        'article.photo',
+        'article.gallery',
+        'article.callout',
+        'article.video',
+        'article.table',
+        'article.hidden-prices',
+        'article.coating-prices',
+      ]
+    > &
+      Schema.Attribute.Required;
+    cover: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    coverAlt: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 160;
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 170;
+      }>;
+    faq: Schema.Attribute.Component<'article.faq', true>;
+    keywords: Schema.Attribute.Component<'shared.item', true>;
+    kind: Schema.Attribute.Enumeration<
+      [
+        '\u0421\u0442\u0430\u0442\u044C\u044F',
+        '\u041F\u0443\u0431\u043B\u0438\u043A\u0430\u0446\u0438\u044F',
+      ]
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'\u0421\u0442\u0430\u0442\u044C\u044F'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::article.article'
+    > &
+      Schema.Attribute.Private;
+    publishDate: Schema.Attribute.Date & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    seo: Schema.Attribute.Component<'article.seo', false>;
+    slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    summary: Schema.Attribute.Component<'shared.item', true> &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 5;
+        },
+        number
+      >;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedDate: Schema.Attribute.Date;
+  };
+}
+
 export interface ApiPromoPromo extends Struct.CollectionTypeSchema {
   collectionName: 'promos';
   info: {
@@ -1091,6 +1174,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::article.article': ApiArticleArticle;
       'api::promo.promo': ApiPromoPromo;
       'api::work.work': ApiWorkWork;
       'plugin::content-releases.release': PluginContentReleasesRelease;
