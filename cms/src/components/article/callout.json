@@ -1,0 +1,5 @@
+{ "collectionName": "components_article_callouts", "info": { "displayName": "Выноска", "icon": "information" },
+  "attributes": {
+    "kind": { "type": "enumeration", "enum": ["Совет", "Важно", "Обратите внимание"], "default": "Совет" },
+    "title": { "type": "string", "maxLength": 120 },
+    "text": { "type": "blocks", "required": true } } }

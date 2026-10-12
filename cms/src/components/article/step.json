@@ -1,0 +1,2 @@
+{ "collectionName": "components_article_steps", "info": { "displayName": "Шаг", "icon": "arrowRight" },
+  "attributes": { "name": { "type": "string", "required": true, "maxLength": 120 }, "text": { "type": "text", "required": true } } }

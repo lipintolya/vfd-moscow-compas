@@ -2,6 +2,6 @@
   "collectionName": "components_shared_items",
   "info": { "displayName": "Пункт", "icon": "bulletList" },
   "attributes": {
-    "text": { "type": "string", "required": true, "maxLength": 160 }
+    "text": { "type": "string", "required": true, "maxLength": 200 }
   }
 }

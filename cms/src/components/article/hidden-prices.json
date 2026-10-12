@@ -1,0 +1,2 @@
+{ "collectionName": "components_article_hidden_prices", "info": { "displayName": "Цены скрытых дверей", "icon": "priceTag" },
+  "attributes": { "note": { "type": "string", "maxLength": 120 } } }

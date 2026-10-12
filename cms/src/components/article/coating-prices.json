@@ -1,0 +1,2 @@
+{ "collectionName": "components_article_coating_prices", "info": { "displayName": "Цены по покрытиям", "icon": "priceTag" },
+  "attributes": { "note": { "type": "string", "maxLength": 120 } } }

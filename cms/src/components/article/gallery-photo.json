@@ -1,0 +1,6 @@
+{ "collectionName": "components_article_gallery_photos", "info": { "displayName": "Фото галереи", "icon": "picture" },
+  "attributes": {
+    "image": { "type": "media", "multiple": false, "required": true, "allowedTypes": ["images"] },
+    "alt": { "type": "string", "maxLength": 160 },
+    "caption": { "type": "string", "maxLength": 120 },
+    "link": { "type": "string", "maxLength": 200 } } }

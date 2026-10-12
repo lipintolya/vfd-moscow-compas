@@ -1,0 +1,2 @@
+{ "collectionName": "components_article_coatings", "info": { "displayName": "Покрытие", "icon": "brush" },
+  "attributes": { "coating": { "type": "enumeration", "required": true, "enum": ["ПЭТ", "Эмаль", "Эмалекс", "Протач", "Экошпон"] } } }

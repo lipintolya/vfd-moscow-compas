@@ -1,0 +1,8 @@
+{ "collectionName": "components_article_authors", "info": { "displayName": "Автор", "icon": "user" },
+  "attributes": {
+    "name": { "type": "string", "required": true, "maxLength": 80 },
+    "role": { "type": "string", "required": true, "maxLength": 120 },
+    "href": { "type": "string", "required": true, "maxLength": 200 },
+    "photo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "linkLabel": { "type": "string", "maxLength": 80 },
+    "type": { "type": "enumeration", "enum": ["Человек", "Организация"], "default": "Организация" } } }

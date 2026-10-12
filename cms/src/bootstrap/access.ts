@@ -9,7 +9,7 @@ import type { Core } from '@strapi/strapi'
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
-export const MANAGED = ['api::promo.promo', 'api::work.work']
+export const MANAGED = ['api::promo.promo', 'api::work.work', 'api::article.article']
 const ACTIONS = ['create', 'read', 'update', 'delete', 'publish'].map((a) => `plugin::content-manager.explorer.${a}`)
 const SITE_TOKEN = 'site-build'
 const SITE_ENV = path.resolve(process.cwd(), '..', '.env')

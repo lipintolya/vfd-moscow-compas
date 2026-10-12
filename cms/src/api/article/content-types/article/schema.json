@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Статьи",
+    "description": "Статьи и публикации: /articles/, главная, «статья по теме» в каталоге"
+  },
+  "options": { "draftAndPublish": true },
+  "pluginOptions": { "i18n": { "localized": false } },
+  "attributes": {
+    "title": { "type": "string", "required": true, "maxLength": 120 },
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "kind": { "type": "enumeration", "enum": ["Статья", "Публикация"], "default": "Статья", "required": true },
+    "publishDate": { "type": "date", "required": true },
+    "updatedDate": { "type": "date" },
+    "cover": { "type": "media", "multiple": false, "required": true, "allowedTypes": ["images"] },
+    "coverAlt": { "type": "string", "required": true, "maxLength": 160 },
+    "description": { "type": "text", "required": true, "maxLength": 170 },
+    "summary": { "type": "component", "repeatable": true, "component": "shared.item", "max": 5 },
+    "body": {
+      "type": "dynamiczone",
+      "required": true,
+      "components": ["article.text", "article.photo", "article.gallery", "article.callout", "article.video", "article.table", "article.hidden-prices", "article.coating-prices"]
+    },
+    "faq": { "type": "component", "repeatable": true, "component": "article.faq" },
+    "keywords": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "seo": { "type": "component", "repeatable": false, "component": "article.seo" }
+  }
+}

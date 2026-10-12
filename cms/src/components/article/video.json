@@ -1,0 +1,7 @@
+{ "collectionName": "components_article_videos", "info": { "displayName": "Видео", "icon": "play" },
+  "attributes": {
+    "video": { "type": "media", "multiple": false, "required": true, "allowedTypes": ["videos"] },
+    "poster": { "type": "media", "multiple": false, "required": true, "allowedTypes": ["images"] },
+    "title": { "type": "string", "required": true, "maxLength": 120 },
+    "caption": { "type": "string", "maxLength": 200 },
+    "narrow": { "type": "boolean", "default": true } } }

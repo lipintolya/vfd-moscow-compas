@@ -1,0 +1,2 @@
+{ "collectionName": "components_article_texts", "info": { "displayName": "Текст", "icon": "pencil" },
+  "attributes": { "content": { "type": "blocks", "required": true } } }

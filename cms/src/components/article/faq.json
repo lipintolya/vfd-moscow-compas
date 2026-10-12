@@ -1,0 +1,2 @@
+{ "collectionName": "components_article_faqs", "info": { "displayName": "Вопрос-ответ", "icon": "question" },
+  "attributes": { "q": { "type": "string", "required": true, "maxLength": 200 }, "a": { "type": "text", "required": true } } }

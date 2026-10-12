@@ -1,0 +1,5 @@
+{ "collectionName": "components_article_galleries", "info": { "displayName": "Галерея", "icon": "apps" },
+  "attributes": {
+    "photos": { "type": "component", "repeatable": true, "component": "article.gallery-photo", "required": true, "min": 2, "max": 4 },
+    "columns": { "type": "integer", "min": 2, "max": 4 },
+    "doors": { "type": "boolean", "default": false } } }

@@ -1,0 +1,9 @@
+{ "collectionName": "components_article_seos", "info": { "displayName": "Для поисковиков и каталога", "icon": "search" },
+  "attributes": {
+    "metaTitle": { "type": "string", "maxLength": 70 },
+    "steps": { "type": "component", "repeatable": true, "component": "article.step" },
+    "coatings": { "type": "component", "repeatable": true, "component": "article.coating" },
+    "series": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "pages": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "author": { "type": "component", "repeatable": false, "component": "article.author" },
+    "spotlight": { "type": "component", "repeatable": false, "component": "article.spotlight" } } }
