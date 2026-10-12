@@ -110,3 +110,13 @@ test('вложенный список (Tab в редакторе) — внутр
   )], 'Т')
   assert.equal((blocks[0] as { html: string }).html, '<ul><li>Двери<ol><li>Скрытые</li></ol></li><li>Перегородки</li></ul>')
 })
+
+test('ссылка javascript: и подобные — ошибка сборки, а не код на странице', () => {
+  const link = (url: string) => text({ type: 'paragraph', children: [{ type: 'link', url, children: [t('жми')] }] })
+  assert.throws(() => toSiteBlocks([link('javascript:alert(1)')], 'Статья «Х»'), /Статья «Х»: недопустимая ссылка/)
+  assert.throws(() => toSiteBlocks([link(' JavaScript:alert(1)')], 'Статья «Х»'), /недопустимая ссылка/)
+  assert.throws(() => toSiteBlocks([{ __component: 'article.gallery', photos: [{ image: img(1), link: 'data:text/html,x' }, { image: img(2) }] } as StrapiBlock], 'Статья «Х»'), /недопустимая ссылка/)
+  for (const ok of ['/catalog/', 'https://t.me/x', 'tel:+79687748820', 'mailto:a@b.ru', '#раздел']) {
+    assert.doesNotThrow(() => toSiteBlocks([link(ok)], 'Т'), ok)
+  }
+})

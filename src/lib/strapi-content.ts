@@ -5,7 +5,7 @@
 import type { Loader } from 'astro/loaders'
 import { strapiFetchAll, strapiImage, type StrapiMedia } from './strapi'
 import type { Promo } from '../data/promos'
-import { toSiteBlocks, type StrapiBlock } from './article-blocks'
+import { toSiteBlocks, safeUrl, type StrapiBlock } from './article-blocks'
 import { fillSubstitutions } from './article-substitutions'
 import { CATALOG_LINKS, CATEGORY_LABELS, OBJECT_TYPE_LABELS, type PortfolioWork, type WorkCategory, type ObjectType } from '../data/portfolio-works'
 
@@ -29,7 +29,7 @@ export function toPromo(raw: StrapiPromo): Promo {
     validUntil: raw.validUntil,
     discount: opt(raw.discount),
     ctaText: opt(raw.ctaText),
-    ctaLink: opt(raw.ctaLink),
+    ctaLink: raw.ctaLink ? safeUrl(raw.ctaLink, `Акция «${raw.title}»`) : undefined,
   }
 }
 
@@ -137,7 +137,7 @@ export function toArticle(raw: StrapiArticle) {
       keywords: texts(raw.keywords),
       steps: seo.steps?.length ? seo.steps.map((s) => ({ name: s.name, text: s.text })) : undefined,
       author: seo.author ? {
-        name: seo.author.name, role: seo.author.role, href: seo.author.href,
+        name: seo.author.name, role: seo.author.role, href: safeUrl(seo.author.href, where),
         photo: seo.author.photo ? strapiImage(seo.author.photo, 256).src : undefined,
         linkLabel: seo.author.linkLabel ?? undefined,
         type: seo.author.type === 'Человек' ? 'person' as const : 'organization' as const,

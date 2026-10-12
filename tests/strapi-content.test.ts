@@ -89,3 +89,8 @@ test('статья без текста — ошибка с названием', 
   assert.throws(() => toArticle({ documentId: 'd', slug: 's', title: 'Пустая', kind: 'Статья', publishDate: '2026-01-01',
     cover: media('/uploads/c.webp'), coverAlt: 'О', description: 'Л', body: [] }), /«Пустая».*текст/)
 })
+
+test('кнопка акции с javascript: — ошибка сборки', () => {
+  assert.throws(() => toPromo({ documentId: 'p', title: 'Скидка', subtitle: 'С', validUntil: '2026-12-31', ctaText: 'Жми', ctaLink: 'javascript:alert(1)' }),
+    /Акция «Скидка»: недопустимая ссылка/)
+})

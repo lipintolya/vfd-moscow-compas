@@ -51,6 +51,14 @@ export const PHOTO_LAYOUT: Record<string, 'column' | 'narrow' | 'natural'> = { '
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 const opt = (v: Opt) => v || undefined
 
+/** Ссылка из Strapi: только страницы сайта, http(s), почта, телефон, якорь.
+    javascript:, data: и прочее — ошибка сборки (иначе код на странице) */
+export function safeUrl(url: string, where: string): string {
+  const u = url.trim()
+  if (/^(https?:\/\/|mailto:|tel:|\/(?!\/)|#)/i.test(u)) return u
+  throw new Error(`${where}: недопустимая ссылка «${u.slice(0, 60)}» — нужен адрес страницы сайта (/catalog/…) или https://…`)
+}
+
 class TextRenderer {
   words: string[] = []
   headings: Heading[] = []
@@ -69,7 +77,7 @@ class TextRenderer {
   private inline(nodes: Inline[]): string {
     return nodes.map((n) => {
       if (n.type !== 'link') return this.leaf(n)
-      const html = `<a href="${esc(n.url)}">${n.children.map((c) => this.leaf(c)).join('')}</a>`
+      const html = `<a href="${esc(safeUrl(n.url, this.where))}">${n.children.map((c) => this.leaf(c)).join('')}</a>`
       this.words.push(n.url)
       return html
     }).join('')
@@ -144,7 +152,7 @@ export function toSiteBlocks(raw: StrapiBlock[], where: string): { blocks: SiteB
       case 'article.gallery':
         return {
           type: 'gallery',
-          photos: b.photos.map((p) => ({ ...photo(p.image, p.alt || p.caption || ''), caption: opt(p.caption), href: opt(p.link) })),
+          photos: b.photos.map((p) => ({ ...photo(p.image, p.alt || p.caption || ''), caption: opt(p.caption), href: p.link ? safeUrl(p.link, where) : undefined })),
           columns: b.columns ?? undefined,
           doors: Boolean(b.doors),
         }
