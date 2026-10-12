@@ -39,7 +39,8 @@
     "gen:video-covers": "node scripts/gen-video-covers.mjs",
     "gen:visit-map": "node scripts/gen-visit-map.mjs",
     "video:optimize": "node scripts/optimize-video.mjs",
-    "deploy": "git push production main"
+    "deploy": "git push production main",
+    "articles:export": "tsx scripts/export-articles.mjs"
   },
   "dependencies": {
     "@astrojs/markdoc": "^2.0.9",
