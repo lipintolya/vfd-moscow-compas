@@ -5,7 +5,7 @@
  * объект своими полями (url, description).
  */
 import { SITE } from '../config/site'
-import { companyLegalInfo } from './contacts-data'
+import { companyLegalInfo, HAS_EMAIL } from './contacts-data'
 import { reviews } from '../data/reviews'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
 import { MALL_PHOTOS } from '../data/mall-photos'
@@ -28,7 +28,8 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
     description: companyLegalInfo.activity.description,
     url: SITE.url,
     telephone: SITE.phones.map(p => p.raw),
-    email: SITE.email,
+    /* Почта — когда задана настоящая (пока заглушка) */
+    ...(HAS_EMAIL && { email: SITE.email }),
     logo: `${SITE.url}/logo-schema.png`,
     /* Салон и здание ТЦ снаружи — по фото здания карты и поиск
        узнают место */

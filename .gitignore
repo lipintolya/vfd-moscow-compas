@@ -74,3 +74,6 @@ cms/public/uploads/*
 cms/dist/
 cms/.strapi/
 cms/.env
+
+# Vercel CLI (временное демо): привязка проекта и готовые файлы
+.vercel/

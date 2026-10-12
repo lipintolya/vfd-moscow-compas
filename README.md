@@ -107,6 +107,7 @@ npm run dev            # в другом терминале
 | `npm run cms:install` | Зависимости Strapi — первый раз и после обновления |
 | `npm run cms:series` | Список серий для статей в Strapi — из каталога Supabase (после появления/удаления серии) |
 | `npm run check:content` | Проверить всё опубликованное в Strapi правилами публикации |
+| `npm run demo:vercel -- <адрес>` | Временное демо на Vercel из собранного `dist/` + фото Strapi, закрыто от поисковиков; выкладка — `npx vercel deploy --prebuilt --prod` |
 | `npm test` | Тесты чтения Strapi (`tests/*.test.ts`) |
 | `node scripts/compare-builds.mjs <старая dist> <новая dist>` | Какие страницы изменились по видимому тексту — проверка после переноса |
 
