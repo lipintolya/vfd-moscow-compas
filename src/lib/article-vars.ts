@@ -99,11 +99,17 @@ function nb(text: string): string {
     переменная — ошибка сборки: опечатка не должна уйти на сайт. */
 export function fillArticleVars(text: string): string {
   return text.replace(/\{%\s*\$([\w.]+)\s*%\}/g, (_, path: string) => {
-    const value = path.split('.').reduce<unknown>(
-      (obj, key) => (obj && typeof obj === 'object' ? (obj as Record<string, unknown>)[key] : undefined),
-      ARTICLE_VARS,
-    )
-    if (typeof value !== 'string') throw new Error(`Статья: нет переменной $${path}`)
+    const value = articleVar(path)
+    if (value === undefined) throw new Error(`Статья: нет переменной $${path}`)
     return value
   })
+}
+
+/** Значение переменной статей по пути 'salon.address'; нет такой — undefined */
+export function articleVar(path: string): string | undefined {
+  const value = path.split('.').reduce<unknown>(
+    (obj, key) => (obj && typeof obj === 'object' ? (obj as Record<string, unknown>)[key] : undefined),
+    ARTICLE_VARS,
+  )
+  return typeof value === 'string' ? value : undefined
 }
