@@ -16,9 +16,20 @@
  */
 import { SITE } from '../../config/site'
 import { HERO_SLIDES, type HeroWay } from '../../data/hero-image'
+import { pluralRu } from '../../lib/plural'
+import { typograph } from '../../lib/typograph'
 
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
 const SLIDE_MS = 6000
+
+/* «В 2026 году продали более 1000 дверей». Число — счётчик (src/lib/
+   count-up.ts): досчитывает от нуля при загрузке. Четырёхзначное — без
+   пробела, от 10 000 — с пробелом; после «более» — родительный падеж.
+   «более 1000 дверей» не разрывается переносом. */
+const { count, year } = SITE.doorsSold
+const soldLead = typograph(`В ${year} году продали`)
+const soldCount = count >= 10_000 ? count.toLocaleString('ru-RU') : String(count)
+const soldNoun = pluralRu(count, ['двери', 'дверей', 'дверей'])
 
 const directions: { way: HeroWay; title: string; text: string; cta: string; href: string }[] = [
   { way: 'interior',   title: 'Межкомнатные двери',      text: 'Покрытия Эмалекс, эмаль, ПЭТ, экошпон', cta: 'Каталог дверей',       href: '/catalog/' },
@@ -62,7 +73,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         <h1 id="hero-heading" class="stage__title">
           Шоурум дверей {SITE.name} {SITE.city.in.replace(' ', '\u00A0')}
         </h1>
-        <p class="stage__since">{SITE.experience}</p>
+        <p class="stage__fact">
+          <span>{soldLead} <span class="stage__nowrap">более <span class="stage__count" data-count={count}>{soldCount}</span> {soldNoun}</span></span>
+        </p>
         <p class="stage__lead">
           Посмотрите двери, покрытия и&nbsp;фурнитуру вживую — в&nbsp;нашем салоне на&nbsp;северо-востоке
           Москвы, {SITE.address.districtIn} ({SITE.address.okrug}). Замер и&nbsp;монтаж под ключ.
@@ -122,6 +135,11 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 </section>
 
 <script>
+  import { countUp } from '../../lib/count-up'
+
+  /* Продано дверей — досчитывает до итога, длиннее обычного: масштаб */
+  countUp(document.querySelectorAll<HTMLElement>('.stage__count[data-count]'), 2000)
+
   /* Слайдер сцены. Таймер — цепочка setTimeout (после ручной смены кадр
      показывается полный интервал). Пауза: наведение или фокус на
      направлении, сцена вне экрана, скрытая вкладка, reduced motion. */
@@ -260,7 +278,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     text-wrap: balance;
   }
   /* Опыт — отдельной строкой с красной чертой: главный аргумент салона */
-  .stage__since {
+  .stage__fact {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -269,7 +287,15 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     font-weight: 600;
     color: var(--color-white);
   }
-  .stage__since::before {
+  /* Счётчик держит ширину итогового числа (count-up.ts) — «дверей» не
+     сдвигается; цифры одной ширины, число прижато вправо */
+  .stage__count {
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .stage__nowrap { white-space: nowrap; }
+  .stage__fact::before {
     content: '';
     flex: none;
     width: 1.5rem;

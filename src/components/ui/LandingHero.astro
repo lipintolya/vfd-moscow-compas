@@ -135,6 +135,7 @@ const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
 </section>
 
 <script>
+  import { countUp } from '../../lib/count-up'
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches
 
   /* ── Слайдер ──
@@ -290,42 +291,9 @@ const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
     sync()
   })
 
-  /* ── Счётчик фактов ──
-     Стартует, когда цифра на экране (на телефоне факты бывают ниже
-     первого экрана); формат чисел — как в итоговом значении, чтобы
-     в конце не было скачка «1 000+» → «1000+» */
-  if (!still && 'IntersectionObserver' in window) {
-    const run = (el: HTMLElement, to: number, final: string) => {
-      const digits = final.match(/^[\d\s  ]+/)?.[0] ?? ''
-      const suffix = final.slice(digits.length)
-      const grouped = /[\s  ]/.test(digits.trim())
-      const fmt = (n: number) => (grouped ? n.toLocaleString('ru-RU') : String(n)) + suffix
-      const ms = 1400
-      let t0 = 0
-      const tick = (now: number) => {
-        if (!t0) t0 = now
-        const p = Math.min(1, (now - t0) / ms)
-        el.textContent = p < 1 ? fmt(Math.round(to * (1 - Math.pow(1 - p, 3)))) : final
-        if (p < 1) requestAnimationFrame(tick)
-      }
-      requestAnimationFrame(tick)
-    }
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue
-        const el = e.target as HTMLElement
-        io.unobserve(el)
-        run(el, Number(el.dataset.count), el.dataset.final ?? '')
-      }
-    }, { rootMargin: '0px 0px -10% 0px' })
-    document.querySelectorAll<HTMLElement>('.lhero__value[data-count]').forEach((el) => {
-      const to = Number(el.dataset.count)
-      if (!Number.isFinite(to) || to <= 0) return
-      el.dataset.final = el.textContent ?? ''
-      el.textContent = (el.dataset.final.match(/^[\d\s  ]+/) ? '0' : '') + el.dataset.final.replace(/^[\d\s  ]+/, '')
-      io.observe(el)
-    })
-  }
+  /* ── Счётчик фактов ── стартует, когда цифра на экране (на телефоне
+     факты бывают ниже первого экрана) */
+  countUp(document.querySelectorAll<HTMLElement>('.lhero__value[data-count]'))
 </script>
 
 <style>
