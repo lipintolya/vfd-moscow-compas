@@ -13,13 +13,18 @@ interface Props {
   alt?:    string
   caption?: string
   href?:   string
+  /** Готовый набор копий (фото из Strapi) — тогда src уже облегчённый */
+  srcset?: string
+  /** Что открыть во весь экран; по умолчанию src */
+  zoom?:   string
 }
-const { src, alt = '', caption, href } = Astro.props
+const { src, alt = '', caption, href, srcset, zoom } = Astro.props
+const img = srcset ? { src, srcset } : articleImg(src)
 ---
 
 <figure class="dphoto">
-  <button type="button" class="dphoto__frame" data-zoom={src} data-zoom-caption={caption} aria-label={`Открыть фото на весь экран${alt ? `: ${alt}` : ''}`}>
-    <img {...articleImg(src)} sizes="(min-width: 40rem) 33vw, 50vw" alt={alt} loading="lazy" decoding="async" />
+  <button type="button" class="dphoto__frame" data-zoom={zoom ?? src} data-zoom-caption={caption} aria-label={`Открыть фото на весь экран${alt ? `: ${alt}` : ''}`}>
+    <img {...img} sizes="(min-width: 40rem) 33vw, 50vw" alt={alt} loading="lazy" decoding="async" />
   </button>
   {caption && (
     <figcaption class="dphoto__caption">

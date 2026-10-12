@@ -15,7 +15,6 @@
  * 16:9 без обрезки; рядом с панелью — прижата к левому краю, чтобы при
  * небольшой подрезке страдал правый край, а не надпись.
  */
-import { articleCoverImg } from '../../lib/article-images'
 import { articleHref, formatArticleDate, readingMinutes, articleAuthor, type Article } from '../../lib/articles'
 import { KIND_LABEL } from '../../data/article-kinds'
 import { typograph } from '../../lib/typograph'
@@ -38,7 +37,8 @@ const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : '(min-width: 56.25
   <span class="h-media acard__media">
     {data.coverImage
       ? <img
-          {...articleCoverImg(data.coverImage, feature ? 'hero' : 'card')}
+          src={data.cover.src}
+          srcset={data.cover.srcset}
           {sizes}
           width="800"
           height="450"

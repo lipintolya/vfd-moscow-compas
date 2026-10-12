@@ -8,7 +8,6 @@
  */
 import InlineVideo from '../articles/InlineVideo.astro'
 import { getSpotlight, articleHref, articleAuthor } from '../../lib/articles'
-import { articleImg } from '../../lib/article-images'
 import { KIND_LABEL } from '../../data/article-kinds'
 import { typograph } from '../../lib/typograph'
 
@@ -40,7 +39,7 @@ const author = article ? articleAuthor(article) : undefined
 
       <div class="spot__media">
         <a href={href} class="h-media spot__tile" aria-label={`Читать: ${article.data.title}`}>
-          <img {...articleImg(spot.image)} sizes="(min-width: 62.5rem) 25vw, 46vw" alt={spot.imageAlt} loading="lazy" decoding="async" />
+          <img src={spot.image} srcset={spot.imageSrcset} sizes="(min-width: 62.5rem) 25vw, 46vw" alt={spot.imageAlt} loading="lazy" decoding="async" />
         </a>
         {spot.video && spot.poster && (
           <div class="spot__tile spot__tile--video">

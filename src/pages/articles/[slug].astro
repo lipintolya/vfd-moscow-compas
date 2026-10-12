@@ -17,7 +17,7 @@
  * компонентом Breadcrumbs. Заголовки разделов —
  * вопросами, ответ — в первых строках раздела.
  */
-import { getCollection, render } from 'astro:content'
+import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
@@ -26,9 +26,9 @@ import Videos from '../../components/home/Videos.astro'
 import ArticleNav from '../../components/articles/ArticleNav.astro'
 import ArticleLightbox from '../../components/articles/ArticleLightbox.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
-import { articleCoverImg } from '../../lib/article-images'
+import ArticleBlocks from '../../components/articles/ArticleBlocks.astro'
 import {
-  getArticles, withArticleVars, articleHref, formatArticleDate, readingMinutes, articleWordCount, articleAuthor,
+  getArticles, articleHref, formatArticleDate, readingMinutes, articleWordCount, articleAuthor,
 } from '../../lib/articles'
 import { getCatalogCards, getSeriesList } from '../../lib/catalog-data'
 import { DOOR_CATEGORIES } from '../../data/door-categories'
@@ -42,12 +42,12 @@ import '../../styles/home.css'
 export async function getStaticPaths() {
   // Страницы есть и у заглушек (закрыты noindex) — адреса не пропадают
   const articles = await getCollection('articles')
-  return articles.map((article) => ({ params: { slug: article.id }, props: { article: withArticleVars(article) } }))
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article } }))
 }
 
 const { article } = Astro.props
 const { data } = article
-const { Content, headings } = await render(article)
+const headings = data.headings
 
 const pageUrl = new URL(articleHref(article.id), SITE.url).href
 const abs = (path: string) => new URL(path, SITE.url).href
@@ -61,7 +61,7 @@ const authorLink = author.external
   : { href: author.href, rel: 'author' }
 const summary = data.summary ?? []
 const faq = data.faq ?? []
-const cover = data.coverImage ? articleCoverImg(data.coverImage, 'hero') : undefined
+const cover = data.cover
 const COVER_SIZES = '(min-width: 80rem) 76rem, 100vw'
 
 /* Серии каталога по теме — все серии покрытий статьи и отдельно
@@ -239,7 +239,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         )}
 
         <div class="post-body">
-          <Content />
+          <ArticleBlocks blocks={data.blocks} />
         </div>
 
         {catalog.length > 0 && (

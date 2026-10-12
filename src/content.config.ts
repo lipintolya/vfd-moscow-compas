@@ -1,15 +1,14 @@
 import { defineCollection } from 'astro:content'
 import { z } from 'astro/zod'
-import { glob } from 'astro/loaders'
 import { ARTICLE_KINDS } from './data/article-kinds'
-import { promosLoader, worksLoader } from './lib/strapi-content'
+import { promosLoader, worksLoader, articlesLoader } from './lib/strapi-content'
 
-/* Статья = один файл src/content/articles/<slug>.mdoc; всё остальное —
-   карточки на главной и в разделе, разметка для поисковиков, sitemap,
-   /llms.txt, связь с каталогом — собирается из этих полей
-   (src/lib/articles.ts). Автор — основатель студии из SITE. */
+/* Статьи — из Strapi (раздел «Статьи»): toArticle (src/lib/strapi-content.ts)
+   приводит запись к этим полям; всё остальное — карточки на главной и в
+   разделе, разметка для поисковиков, sitemap, /llms.txt, связь с каталогом —
+   собирается из них (src/lib/articles.ts). Автор — основатель студии из SITE. */
 const articles = defineCollection({
-  loader: glob({ pattern: '*.mdoc', base: './src/content/articles' }),
+  loader: articlesLoader(),
   schema: z.object({
     /** H1 и заголовок карточки */
     title: z.string(),
@@ -49,6 +48,11 @@ const articles = defineCollection({
     updatedDate: z.coerce.date().optional(),
     coverImage: z.string().optional(),
     coverImageAlt: z.string().optional(),
+    /** Обложка для карточек и шапки — копия Strapi + srcset */
+    cover: z.object({ src: z.string(), srcset: z.string().optional(), width: z.number().optional(), height: z.number().optional(), alt: z.string() }),
+    /** Тело статьи — готовые блоки (src/lib/article-blocks.ts) и оглавление */
+    blocks: z.array(z.object({ type: z.string() }).passthrough()),
+    headings: z.array(z.object({ depth: z.number(), slug: z.string(), text: z.string() })),
     faq: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
     /** Слаги серий каталога (src/data/door-categories.ts / catalog/series/<slug>),
         к которым статья тематически относится — используется на моделях/
@@ -77,6 +81,7 @@ const articles = defineCollection({
       /** Лид блока, если описание статьи для него не подходит (повторяет заголовок) */
       lead: z.string().optional(),
       image: z.string(),
+      imageSrcset: z.string().optional(),
       imageAlt: z.string(),
       video: z.string().optional(),
       poster: z.string().optional(),

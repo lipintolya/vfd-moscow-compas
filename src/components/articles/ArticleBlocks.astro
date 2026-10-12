@@ -1,0 +1,39 @@
+---
+/**
+ * Тело статьи из Strapi: блоки по порядку (src/lib/article-blocks.ts).
+ * Текст — готовый HTML (подстановки заполнены, разметка экранирована);
+ * фото, галерея, выноска, видео, цены — прежние компоненты статей.
+ */
+import type { SiteBlock } from '../../lib/article-blocks'
+import Figure from './Figure.astro'
+import PhotoGrid from './PhotoGrid.astro'
+import Photo from './Photo.astro'
+import Callout from './Callout.astro'
+import InlineVideo from './InlineVideo.astro'
+import HiddenHeightPrices from './HiddenHeightPrices.astro'
+import CoatingPrices from './CoatingPrices.astro'
+
+interface Props { blocks: SiteBlock[] }
+const { blocks } = Astro.props
+---
+{blocks.map((b) => {
+  switch (b.type) {
+    case 'text': return <Fragment set:html={b.html} />
+    case 'photo': return <Figure src={b.image.src} srcset={b.image.srcset} zoom={b.zoom} alt={b.image.alt} caption={b.caption} narrow={b.layout === 'narrow'} natural={b.layout === 'natural'} />
+    case 'gallery': return (
+      <PhotoGrid cols={b.columns ?? b.photos.length} doors={b.doors}>
+        {b.photos.map((p) => <Photo src={p.image.src} srcset={p.image.srcset} zoom={p.zoom} alt={p.image.alt} caption={p.caption} href={p.href} />)}
+      </PhotoGrid>
+    )
+    case 'callout': return <Callout type={b.kind} title={b.title}><Fragment set:html={b.html} /></Callout>
+    case 'video': return <InlineVideo src={b.src} poster={b.poster} title={b.title} caption={b.caption} narrow={b.narrow} />
+    case 'table': return (
+      <table>
+        <thead><tr>{b.head.map((c) => <th set:html={c} />)}</tr></thead>
+        <tbody>{b.rows.map((r) => <tr>{r.map((c) => <td set:html={c} />)}</tr>)}</tbody>
+      </table>
+    )
+    case 'hiddenPrices': return <HiddenHeightPrices />
+    case 'coatingPrices': return <CoatingPrices />
+  }
+})}

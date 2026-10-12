@@ -7,26 +7,8 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { SITE } from '../config/site'
 import { FOUNDER } from '../data/about-page'
-import { fillArticleVars } from './article-vars'
 
 export type Article = CollectionEntry<'articles'>
-
-/** Переменные ({% $salon.phone %}, {% $hidden.kitFrom %} …) в тех полях
-    фронтматтера, что выводятся текстом: лид, «Коротко», вопросы-ответы.
-    Статьи берите только через getArticles / withArticleVars — иначе
-    в разметку уйдёт запись переменной вместо значения. */
-export function withArticleVars(article: Article): Article {
-  const { data } = article
-  return {
-    ...article,
-    data: {
-      ...data,
-      description: fillArticleVars(data.description),
-      summary: data.summary?.map(fillArticleVars),
-      faq: data.faq?.map((f) => ({ q: fillArticleVars(f.q), a: fillArticleVars(f.a) })),
-    },
-  }
-}
 
 let published: Promise<Article[]> | undefined
 
@@ -34,9 +16,7 @@ let published: Promise<Article[]> | undefined
 export function getArticles(): Promise<Article[]> {
   if (!published || import.meta.env.DEV) {
     published = getCollection('articles', (a) => !a.data.placeholder).then((list) =>
-      list
-        .map(withArticleVars)
-        .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()),
+      list.sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()),
     )
   }
   return published

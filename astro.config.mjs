@@ -1,5 +1,5 @@
 // @ts-check
-import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { defineConfig } from 'astro/config';
 import sitemap, { ChangeFreqEnum } from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
@@ -129,59 +129,54 @@ const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/catalog/skrytye-dveri/rabot
 
 const modelImages = await fetchModelImages()
 
+/** Все опубликованные записи раздела Strapi (постранично, по ключу из .env).
+    Любая ошибка — пустой список: карта сайта без этих данных, а саму сборку
+    остановят страницы, которые читают Strapi через src/lib/strapi.ts.
+    @param {string} collection @param {Record<string, string>} params
+    @returns {Promise<any[]>} */
+async function fetchStrapi(collection, params) {
+  const base = readEnvVar('STRAPI_URL').replace(/\/$/, '')
+  const token = readEnvVar('STRAPI_TOKEN')
+  if (!base || !token) return []
+  const items = []
+  try {
+    for (let page = 1; ; page++) {
+      const query = new URLSearchParams({ ...params, status: 'published', 'pagination[page]': String(page), 'pagination[pageSize]': '100' })
+      const res = await fetch(`${base}/api/${collection}?${query}`, { headers: { Authorization: `Bearer ${token}` } })
+      if (!res.ok) return []
+      const json = await res.json()
+      items.push(...json.data)
+      if (page >= json.meta.pagination.pageCount) return items
+    }
+  } catch {
+    return []
+  }
+}
+
 /** Адрес страницы работы → её фото (те же копии, что на странице: как
     strapiImage(…, 1920) в src/lib/strapi.ts — самая крупная не шире
     1920 px, оригинал — если сам не шире). Strapi недоступен — пусто: без
     картинок в карте, а саму сборку остановят страницы портфолио. */
 /** @returns {Promise<Map<string, string[]>>} */
 async function fetchWorkImages() {
-  /** @type {Map<string, string[]>} */
-  const map = new Map()
-  const base = readEnvVar('STRAPI_URL').replace(/\/$/, '')
-  const token = readEnvVar('STRAPI_TOKEN')
-  if (!base || !token) return map
   /** @param {{ url: string, width?: number, formats?: Record<string, { url: string, width: number }> | null }} img */
   const pick = (img) => {
     const all = [...Object.values(img.formats ?? {}), ...(img.width && img.width <= 1920 ? [{ url: img.url, width: img.width }] : [])]
     return all.filter((v) => v.width <= 1920).sort((a, b) => b.width - a.width)[0]?.url ?? img.url
   }
-  try {
-    for (let page = 1; ; page++) {
-      const params = new URLSearchParams({ status: 'published', 'fields[0]': 'slug', 'populate[images]': 'true', 'pagination[page]': String(page), 'pagination[pageSize]': '100' })
-      const res = await fetch(`${base}/api/works?${params}`, { headers: { Authorization: `Bearer ${token}` } })
-      if (!res.ok) return map
-      /** @type {{ data: { slug: string, images: Parameters<typeof pick>[0][] }[], meta: { pagination: { pageCount: number } } }} */
-      const json = await res.json()
-      for (const w of json.data) map.set(`${SITE_URL}/portfolio/${w.slug}/`, w.images.map((img) => `${SITE_URL}${pick(img)}`))
-      if (page >= json.meta.pagination.pageCount) return map
-    }
-  } catch {
-    return new Map()
-  }
+  /** @type {{ slug: string, images: Parameters<typeof pick>[0][] }[]} */
+  const works = await fetchStrapi('works', { 'fields[0]': 'slug', 'populate[images]': 'true' })
+  return new Map(works.map((w) => [`${SITE_URL}/portfolio/${w.slug}/`, w.images.map((img) => `${SITE_URL}${pick(img)}`)]))
 }
 const workImages = await fetchWorkImages()
 
-/* Статьи для sitemap — прямо из файлов src/content/articles/*.mdoc
-   (конфиг не видит коллекции Astro): заглушки (placeholder: true) не
-   попадают в карту, у остальных lastmod — updatedDate или publishDate.
-   Раздел /articles/ — в карте, только если есть хоть одна статья. */
-function readArticles() {
-  const dir = new URL('./src/content/articles/', import.meta.url)
-  return readdirSync(dir)
-    .filter((f) => f.endsWith('.mdoc'))
-    .map((f) => {
-      const front = readFileSync(new URL(f, dir), 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? ''
-      /** @param {string} name */
-      const field = (name) => front.match(new RegExp(`^${name}:\\s*['"]?([^'"\\n]+)`, 'm'))?.[1]?.trim()
-      return {
-        slug: f.replace(/\.mdoc$/, ''),
-        placeholder: field('placeholder') === 'true',
-        lastmod: field('updatedDate') ?? field('publishDate'),
-      }
-    })
-}
-const ARTICLES = readArticles()
-const ARTICLE_LASTMOD = new Map(ARTICLES.filter((a) => !a.placeholder).map((a) => [a.slug, a.lastmod]))
+/* Статьи для sitemap — из Strapi (конфиг не видит коллекции Astro): только
+   опубликованные, lastmod — updatedDate или publishDate. Раздел /articles/ —
+   в карте, только если есть хоть одна статья. Strapi недоступен — пусто,
+   но тогда сборку и так остановят страницы статей. */
+/** @type {{ slug: string, publishDate: string, updatedDate?: string | null }[]} */
+const ARTICLES = await fetchStrapi('articles', { 'fields[0]': 'slug', 'fields[1]': 'publishDate', 'fields[2]': 'updatedDate' })
+const ARTICLE_LASTMOD = new Map(ARTICLES.map((a) => [a.slug, a.updatedDate ?? a.publishDate]))
 const HAS_ARTICLES = ARTICLE_LASTMOD.size > 0
 /** @param {string} page */
 function isArticleInSitemap(page) {
@@ -211,7 +206,7 @@ export default defineConfig({
   integrations: [
     vue(),
     markdoc(),
-    strapiRefresh(['strapi-promos', 'strapi-works']),
+    strapiRefresh(['strapi-promos', 'strapi-works', 'strapi-articles']),
     sitemap({
       filter: (page) =>
         !SITEMAP_EXCLUDE.some(path => page === `${SITE_URL}${path}` || page === `${SITE_URL}${path.slice(0, -1)}`) &&
