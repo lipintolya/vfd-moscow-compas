@@ -15,8 +15,11 @@ type Inline = Leaf | Link
 export type RichNode =
   | { type: 'paragraph' | 'quote' | 'code'; children: Inline[] }
   | { type: 'heading'; level: number; children: Inline[] }
-  | { type: 'list'; format: 'ordered' | 'unordered'; children: { type: 'list-item'; children: Inline[] }[] }
+  | ListNode
   | { type: 'image'; image: StrapiMedia; children?: Inline[] }
+
+/** Список; вложенный (Tab в редакторе) лежит среди пунктов родителя */
+interface ListNode { type: 'list'; format: 'ordered' | 'unordered'; children: ({ type: 'list-item'; children: Inline[] } | ListNode)[] }
 
 export interface Heading { depth: number; slug: string; text: string }
 
@@ -74,6 +77,21 @@ class TextRenderer {
   private plain(nodes: Inline[]): string {
     return nodes.map((n) => (n.type === 'link' ? n.children.map((c) => c.text).join('') : n.text)).join('')
   }
+  /** Вложенный список дописывается в предыдущий пункт */
+  private list(n: ListNode): string {
+    const tag = n.format === 'ordered' ? 'ol' : 'ul'
+    const items: string[] = []
+    for (const child of n.children) {
+      if (child.type === 'list') {
+        if (items.length) items[items.length - 1] += this.list(child)
+        else items.push(this.list(child))
+      } else {
+        items.push(this.inline(child.children))
+      }
+    }
+    return `<${tag}>${items.map((i) => `<li>${i}</li>`).join('')}</${tag}>`
+  }
+
   render(nodes: RichNode[]): string {
     return nodes.map((n) => {
       switch (n.type) {
@@ -85,10 +103,8 @@ class TextRenderer {
           this.headings.push({ depth: n.level, slug, text })
           return `<h${n.level} id="${esc(slug)}">${this.inline(n.children)}</h${n.level}>`
         }
-        case 'list': {
-          const tag = n.format === 'ordered' ? 'ol' : 'ul'
-          return `<${tag}>${n.children.map((item) => `<li>${this.inline(item.children)}</li>`).join('')}</${tag}>`
-        }
+        case 'list':
+          return this.list(n)
         case 'quote':
           return `<blockquote><p>${this.inline(n.children)}</p></blockquote>`
         case 'code':

@@ -99,3 +99,14 @@ test('таблица без строки-разделителя — понятн
   assert.throws(() => toSiteBlocks([{ __component: 'article.table', markdown: '| a | b |\n| c | d |' } as StrapiBlock], 'Статья «Х»'),
     /Статья «Х»: таблица/)
 })
+
+test('вложенный список (Tab в редакторе) — внутри пункта', () => {
+  const { blocks } = toSiteBlocks([text(
+    { type: 'list', format: 'unordered', children: [
+      { type: 'list-item', children: [t('Двери')] },
+      { type: 'list', format: 'ordered', indentLevel: 1, children: [{ type: 'list-item', children: [t('Скрытые')] }] },
+      { type: 'list-item', children: [t('Перегородки')] },
+    ] },
+  )], 'Т')
+  assert.equal((blocks[0] as { html: string }).html, '<ul><li>Двери<ol><li>Скрытые</li></ol></li><li>Перегородки</li></ul>')
+})
