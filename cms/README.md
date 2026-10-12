@@ -14,6 +14,7 @@ npm run cms           # админка: http://localhost:1337/admin
 | `src/api/*`, `src/components/*` | разделы и поля (код, в Git) |
 | `src/bootstrap/labels.ts` | русские подписи и подсказки полей |
 | `src/bootstrap/access.ts` | права роли «Редактор», ключ сайта, вебхук разработки |
+| `src/bootstrap/publish-checks.ts` | проверка записи при «Опубликовать» — правилами сайта (`../src/lib/content-checks.ts`) |
 | `src/admin/translations/ru.json` | дописанный перевод Strapi; проверка — `npm run check:ru` |
 | `scripts/import-works.mjs`, `scripts/import-articles.mjs` | разовый перенос работ и статей с прежнего сайта (выполнен) |
 | `.tmp/`, `public/uploads/`, `.env` | база, загруженные фото, секреты — вне Git |

@@ -73,3 +73,10 @@ test('фото меньше лимита — оригинал лучше коп�
   assert.equal(img.width, 960)
   assert.equal(img.srcset, '/uploads/small_w.webp 480w, /uploads/medium_w.webp 720w, /uploads/w.webp 960w')
 })
+
+test('черновики — по просьбе (проверка перед публикацией)', async () => {
+  let status: string | null = null
+  const fetch = async (url: string | URL) => { status = new URL(String(url)).searchParams.get('status'); return page([], 1, 1) }
+  await strapiFetchAll('articles', {}, { fetch: fetch as typeof globalThis.fetch, env, status: 'draft' })
+  assert.equal(status, 'draft')
+})

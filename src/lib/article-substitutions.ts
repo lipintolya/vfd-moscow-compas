@@ -11,7 +11,7 @@ export function fillSubstitutions(text: string, where = 'Статья'): string 
     const name = raw.trim()
     const path = ARTICLE_SUBSTITUTIONS[name]
     const value = path ? articleVar(path) : undefined
-    if (value === undefined) throw new Error(`${where}: неизвестная подстановка {${name}} — список в docs/director-guide.md`)
+    if (value === undefined) throw new Error(`${where}: неизвестная подстановка {${name}} — проверьте имя по таблице подстановок в инструкции (docs/director-guide.md)`)
     return value
   })
 }

@@ -3,7 +3,7 @@
     "label": { "type": "string", "required": true, "maxLength": 30 },
     "lead": { "type": "text", "maxLength": 300 },
     "image": { "type": "media", "multiple": false, "required": true, "allowedTypes": ["images"] },
-    "imageAlt": { "type": "string", "required": true, "maxLength": 160 },
+    "imageAlt": { "type": "string", "maxLength": 160 },
     "video": { "type": "media", "multiple": false, "allowedTypes": ["videos"] },
     "poster": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
     "videoTitle": { "type": "string", "maxLength": 120 },

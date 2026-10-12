@@ -60,6 +60,63 @@ export interface ArticleCallout extends Struct.ComponentSchema {
   };
 }
 
+export interface ArticleCatalogPage extends Struct.ComponentSchema {
+  collectionName: 'components_article_catalog_pages';
+  info: {
+    displayName: '\u0421\u0442\u0440\u0430\u043D\u0438\u0446\u0430 \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430';
+    icon: 'link';
+  };
+  attributes: {
+    page: Schema.Attribute.Enumeration<
+      [
+        '\u0421\u043A\u0440\u044B\u0442\u044B\u0435 \u0434\u0432\u0435\u0440\u0438',
+        '\u0421\u043A\u0440\u044B\u0442\u044B\u0435 \u0434\u0432\u0435\u0440\u0438 \u0434\u043B\u044F \u0434\u043E\u043C\u0430',
+        '\u0421\u043A\u0440\u044B\u0442\u044B\u0435 \u0434\u0432\u0435\u0440\u0438 \u0434\u043B\u044F \u043E\u0444\u0438\u0441\u0430',
+        '\u0421\u043A\u0440\u044B\u0442\u044B\u0435 \u0434\u0432\u0435\u0440\u0438 \u0432 \u043D\u043E\u0432\u043E\u0441\u0442\u0440\u043E\u0439\u043A\u0443',
+        '\u0421\u043A\u0440\u044B\u0442\u044B\u0435 \u0434\u0432\u0435\u0440\u0438 \u043F\u043E\u0434 \u0434\u0438\u0437\u0430\u0439\u043D-\u043F\u0440\u043E\u0435\u043A\u0442',
+        '\u0414\u0432\u0435\u0440\u0438 \u0432 \u0441\u0442\u0438\u043B\u0435 \u043B\u043E\u0444\u0442',
+        '\u0414\u0432\u0435\u0440\u0438 \u0432 \u0441\u0442\u0438\u043B\u0435 \u043C\u0438\u043D\u0438\u043C\u0430\u043B\u0438\u0437\u043C',
+        '\u0414\u0432\u0435\u0440\u0438 \u0432 \u0441\u043A\u0430\u043D\u0434\u0438\u043D\u0430\u0432\u0441\u043A\u043E\u043C \u0441\u0442\u0438\u043B\u0435',
+        '\u0414\u0435\u043A\u043E\u0440 \u0438 \u043F\u043E\u0433\u043E\u043D\u0430\u0436',
+      ]
+    > &
+      Schema.Attribute.Required;
+  };
+}
+
+export interface ArticleCatalogSeries extends Struct.ComponentSchema {
+  collectionName: 'components_article_catalog_series';
+  info: {
+    displayName: '\u0421\u0435\u0440\u0438\u044F \u043A\u0430\u0442\u0430\u043B\u043E\u0433\u0430';
+    icon: 'layer';
+  };
+  attributes: {
+    series: Schema.Attribute.Enumeration<
+      [
+        'antique-luxe',
+        'basic',
+        'elegant',
+        'emalex',
+        'emalex-modern',
+        'innova',
+        'linea',
+        'next',
+        'premium',
+        'sektor',
+        'skinel',
+        'smart',
+        'stockholm',
+        'tehno',
+        'urban',
+        'urban-drevesnyy',
+        'urban-pet',
+        'winter',
+      ]
+    > &
+      Schema.Attribute.Required;
+  };
+}
+
 export interface ArticleCoating extends Struct.ComponentSchema {
   collectionName: 'components_article_coatings';
   info: {
@@ -183,7 +240,6 @@ export interface ArticlePhoto extends Struct.ComponentSchema {
   };
   attributes: {
     alt: Schema.Attribute.String &
-      Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 160;
       }>;
@@ -216,8 +272,8 @@ export interface ArticleSeo extends Struct.ComponentSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 70;
       }>;
-    pages: Schema.Attribute.Component<'shared.item', true>;
-    series: Schema.Attribute.Component<'shared.item', true>;
+    pages: Schema.Attribute.Component<'article.catalog-page', true>;
+    series: Schema.Attribute.Component<'article.catalog-series', true>;
     spotlight: Schema.Attribute.Component<'article.spotlight', false>;
     steps: Schema.Attribute.Component<'article.step', true>;
   };
@@ -232,7 +288,6 @@ export interface ArticleSpotlight extends Struct.ComponentSchema {
   attributes: {
     image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     imageAlt: Schema.Attribute.String &
-      Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 160;
       }>;
@@ -366,6 +421,8 @@ declare module '@strapi/strapi' {
     export interface ComponentSchemas {
       'article.author': ArticleAuthor;
       'article.callout': ArticleCallout;
+      'article.catalog-page': ArticleCatalogPage;
+      'article.catalog-series': ArticleCatalogSeries;
       'article.coating': ArticleCoating;
       'article.coating-prices': ArticleCoatingPrices;
       'article.faq': ArticleFaq;

@@ -70,6 +70,9 @@ const articles = defineCollection({
         скрытых дверей и его подстраницы. Путь — как в адресе, со слешем
         на конце. */
     relatedPages: z.array(z.string()).optional(),
+    /** «Статьи по теме» (Strapi): адреса статей для «Читайте также» —
+        первыми, по порядку; остальное место — свежие статьи. */
+    related: z.array(z.string()).optional(),
     /** Блок-новинка на главной перед статьями (Spotlight.astro): самая
         свежая статья с spotlight. label — плашка («Новинка»), lead — лид
         (по умолчанию description), image —
@@ -118,7 +121,7 @@ const works = defineCollection({
     location: z.string(), story: z.string().optional(), model: z.string().optional(),
     doorCount: z.number().int().positive().optional(),
     features: z.array(z.string()).optional(), tags: z.array(z.string()).optional(),
-    images: z.array(z.string()).min(1),
+    images: z.array(z.string()).min(1), alts: z.array(z.string()), metaTitle: z.string().optional(),
     cover: z.object({ src: z.string(), srcset: z.string().optional(), width: z.number().optional(), height: z.number().optional(), alt: z.string() }),
     relatedLink: z.object({ href: z.string(), label: z.string() }).optional(),
   }),

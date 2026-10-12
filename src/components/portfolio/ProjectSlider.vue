@@ -2,7 +2,8 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useScrollLock } from '../../lib/scroll-lock'
 
-const props = defineProps<{ images: string[] }>()
+/* alts — «Что на фото» из медиатеки Strapi, по одному на фото */
+const props = defineProps<{ images: string[]; alts: string[] }>()
 
 const current = ref(0)
 
@@ -76,7 +77,7 @@ onBeforeUnmount(() => {
       >
         <img
           :src="images[current]"
-          :alt="`Фото ${current + 1} из ${images.length}`"
+          :alt="alts[current]"
           loading="eager"
           decoding="async"
           class="w-full h-full object-cover"
@@ -183,7 +184,7 @@ onBeforeUnmount(() => {
           <figure class="pf-lightbox__figure" @click.self="closeLightbox">
             <img
               :src="images[current]"
-              :alt="`Фото ${current + 1} из ${images.length}`"
+              :alt="alts[current]"
               class="pf-lightbox__img"
               decoding="async"
             />

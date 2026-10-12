@@ -475,7 +475,6 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required;
     cover: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
     coverAlt: Schema.Attribute.String &
-      Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 160;
       }>;
@@ -505,6 +504,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     publishDate: Schema.Attribute.Date & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    related: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
     seo: Schema.Attribute.Component<'article.seo', false>;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     summary: Schema.Attribute.Component<'shared.item', true> &
@@ -634,6 +634,10 @@ export interface ApiWorkWork extends Struct.CollectionTypeSchema {
     location: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 120;
+      }>;
+    metaTitle: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 70;
       }>;
     model: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{

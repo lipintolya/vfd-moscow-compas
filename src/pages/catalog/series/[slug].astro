@@ -14,10 +14,12 @@ import type { CatalogCardItem } from '../../../components/catalog/types'
 import { merchantPolicy } from '../../../lib/contacts-data'
 import { coatingInline, hasWords, pluralRu } from '../../../lib/product-text'
 import { PHONE as SITE_PHONE } from '../../../config/site'
+import { checkArticleSeries } from '../../../lib/articles'
 
 export async function getStaticPaths() {
   const { cards } = await getCatalogCards()
   const seriesList = getSeriesList(cards)
+  await checkArticleSeries(seriesList.map((s) => s.slug))
 
   return seriesList.map(series => ({
     params: { slug: series.slug },

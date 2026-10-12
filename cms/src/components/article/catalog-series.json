@@ -1,0 +1,33 @@
+{
+  "collectionName": "components_article_catalog_series",
+  "info": {
+    "displayName": "Серия каталога",
+    "icon": "layer"
+  },
+  "attributes": {
+    "series": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "antique-luxe",
+        "basic",
+        "elegant",
+        "emalex",
+        "emalex-modern",
+        "innova",
+        "linea",
+        "next",
+        "premium",
+        "sektor",
+        "skinel",
+        "smart",
+        "stockholm",
+        "tehno",
+        "urban",
+        "urban-drevesnyy",
+        "urban-pet",
+        "winter"
+      ]
+    }
+  }
+}

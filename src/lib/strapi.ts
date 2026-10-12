@@ -1,6 +1,6 @@
 /**
- * Чтение Strapi (cms/) при сборке сайта: акции, портфолио (позже — статьи).
- * Только опубликованное, по ключу только для чтения (STRAPI_URL,
+ * Чтение Strapi (cms/) при сборке сайта: акции, портфолио, статьи.
+ * Только опубликованное (черновики — для проверки перед публикацией), по ключу только для чтения (STRAPI_URL,
  * STRAPI_TOKEN в .env). Ошибка — ошибка сборки: пустой раздел на сайт
  * не уходит. Фото — уменьшенные копии Strapi (strapiImage).
  */
@@ -8,6 +8,8 @@ const PAGE_SIZE = 100
 
 export interface StrapiMedia {
   url: string
+  /** Имя файла в медиатеке — для замечаний перед публикацией */
+  name?: string | null
   alternativeText?: string | null
   caption?: string | null
   width?: number | null
@@ -18,7 +20,11 @@ export interface StrapiMedia {
 export interface SiteImage { src: string; srcset?: string; width?: number; height?: number; alt: string }
 
 type Env = Record<string, string | undefined>
-interface Options { fetch?: typeof fetch; env?: Env }
+interface Options {
+  fetch?: typeof fetch; env?: Env
+  /** draft — черновики: проверка записи перед публикацией (scripts/check-content.ts) */
+  status?: 'published' | 'draft'
+}
 
 function settings(env: Env) {
   const url = env.STRAPI_URL?.replace(/\/$/, '')
@@ -35,7 +41,7 @@ export async function strapiFetchAll<T>(collection: string, query: Record<string
   const { url, token } = settings(env)
   const items: T[] = []
   for (let page = 1; ; page++) {
-    const params = new URLSearchParams({ ...query, status: 'published', 'pagination[page]': String(page), 'pagination[pageSize]': String(PAGE_SIZE) })
+    const params = new URLSearchParams({ ...query, status: opts.status ?? 'published', 'pagination[page]': String(page), 'pagination[pageSize]': String(PAGE_SIZE) })
     let res: Response
     try {
       res = await doFetch(`${url}/api/${collection}?${params}`, { headers: { Authorization: `Bearer ${token}` } })

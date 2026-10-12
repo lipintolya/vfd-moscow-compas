@@ -3,7 +3,7 @@
     "metaTitle": { "type": "string", "maxLength": 70 },
     "steps": { "type": "component", "repeatable": true, "component": "article.step" },
     "coatings": { "type": "component", "repeatable": true, "component": "article.coating" },
-    "series": { "type": "component", "repeatable": true, "component": "shared.item" },
-    "pages": { "type": "component", "repeatable": true, "component": "shared.item" },
+    "series": { "type": "component", "repeatable": true, "component": "article.catalog-series" },
+    "pages": { "type": "component", "repeatable": true, "component": "article.catalog-page" },
     "author": { "type": "component", "repeatable": false, "component": "article.author" },
     "spotlight": { "type": "component", "repeatable": false, "component": "article.spotlight" } } }

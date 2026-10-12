@@ -1,6 +1,6 @@
 { "collectionName": "components_article_photos", "info": { "displayName": "Фото", "icon": "picture" },
   "attributes": {
     "image": { "type": "media", "multiple": false, "required": true, "allowedTypes": ["images"] },
-    "alt": { "type": "string", "required": true, "maxLength": 160 },
+    "alt": { "type": "string", "maxLength": 160 },
     "caption": { "type": "string", "maxLength": 200 },
     "layout": { "type": "enumeration", "enum": ["Во всю колонку", "Узкое (схема)", "Без обрезки"], "default": "Во всю колонку" } } }

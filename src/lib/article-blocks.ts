@@ -26,7 +26,7 @@ export interface Heading { depth: number; slug: string; text: string }
 type Opt = string | null | undefined
 export type StrapiBlock =
   | { __component: 'article.text'; content: RichNode[] }
-  | { __component: 'article.photo'; image: StrapiMedia; alt: string; caption?: Opt; layout?: Opt }
+  | { __component: 'article.photo'; image: StrapiMedia; alt?: Opt; caption?: Opt; layout?: Opt }
   | { __component: 'article.gallery'; photos: { image: StrapiMedia; alt?: Opt; caption?: Opt; link?: Opt }[]; columns?: number | null; doors?: boolean | null }
   | { __component: 'article.callout'; kind?: Opt; title?: Opt; text: RichNode[] }
   | { __component: 'article.video'; video: StrapiMedia; poster: StrapiMedia; title: string; caption?: Opt; narrow?: boolean | null }
@@ -148,11 +148,11 @@ export function toSiteBlocks(raw: StrapiBlock[], where: string): { blocks: SiteB
       case 'article.text':
         return { type: 'text', html: text.render(b.content) }
       case 'article.photo':
-        return { type: 'photo', ...photo(b.image, b.alt), caption: opt(b.caption), layout: PHOTO_LAYOUT[b.layout ?? ''] ?? 'column' }
+        return { type: 'photo', ...photo(b.image, b.alt || b.image.alternativeText || ''), caption: opt(b.caption), layout: PHOTO_LAYOUT[b.layout ?? ''] ?? 'column' }
       case 'article.gallery':
         return {
           type: 'gallery',
-          photos: b.photos.map((p) => ({ ...photo(p.image, p.alt || p.caption || ''), caption: opt(p.caption), href: p.link ? safeUrl(p.link, where) : undefined })),
+          photos: b.photos.map((p) => ({ ...photo(p.image, p.alt || p.image.alternativeText || p.caption || ''), caption: opt(p.caption), href: p.link ? safeUrl(p.link, where) : undefined })),
           columns: b.columns ?? undefined,
           doors: Boolean(b.doors),
         }

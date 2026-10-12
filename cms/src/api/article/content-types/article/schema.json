@@ -16,7 +16,7 @@
     "publishDate": { "type": "date", "required": true },
     "updatedDate": { "type": "date" },
     "cover": { "type": "media", "multiple": false, "required": true, "allowedTypes": ["images"] },
-    "coverAlt": { "type": "string", "required": true, "maxLength": 160 },
+    "coverAlt": { "type": "string", "maxLength": 160 },
     "description": { "type": "text", "required": true, "maxLength": 170 },
     "summary": { "type": "component", "repeatable": true, "component": "shared.item", "max": 5 },
     "body": {
@@ -25,6 +25,7 @@
       "components": ["article.text", "article.photo", "article.gallery", "article.callout", "article.video", "article.table", "article.hidden-prices", "article.coating-prices"]
     },
     "faq": { "type": "component", "repeatable": true, "component": "article.faq" },
+    "related": { "type": "relation", "relation": "oneToMany", "target": "api::article.article" },
     "keywords": { "type": "component", "repeatable": true, "component": "shared.item" },
     "seo": { "type": "component", "repeatable": false, "component": "article.seo" }
   }

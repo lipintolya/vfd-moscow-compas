@@ -41,7 +41,8 @@ const titleSuffix = [
   city && !isInTitle(city) ? city : '',
 ].filter(Boolean).join(', ')
 // Второе тире подряд читается плохо: если в заголовке уже есть « — », место — через запятую.
-const pageTitle = `${work.title}${titleSuffix ? `${work.title.includes(' — ') ? ', ' : ' — '}${titleSuffix}` : ''} | ВФД`
+/* Свой «Заголовок для поисковиков» из Strapi — как есть */
+const pageTitle = work.metaTitle ?? `${work.title}${titleSuffix ? `${work.title.includes(' — ') ? ', ' : ' — '}${titleSuffix}` : ''} | ВФД`
 
 const doorWord = (n: number) =>
   n === 1 ? 'дверь' : n < 5 ? 'двери' : 'дверей'
@@ -96,7 +97,7 @@ const breadcrumbSchema = {
 
         {/* Photo slider */}
         <div class="lg:sticky lg:top-24">
-          <ProjectSlider images={work.images} client:load />
+          <ProjectSlider images={work.images} alts={work.alts} client:load />
         </div>
 
         <div>

@@ -7,6 +7,7 @@
 import { getCollection, type CollectionEntry } from 'astro:content'
 import { SITE } from '../config/site'
 import { FOUNDER } from '../data/about-page'
+import STRAPI_SERIES from '../../cms/src/components/article/catalog-series.json'
 
 export type Article = CollectionEntry<'articles'>
 
@@ -65,6 +66,21 @@ export async function relatedArticle({ pagePath, seriesSlugs = [], coatingSlugs 
     if (found) return found
   }
   return undefined
+}
+
+/** «Серии каталога» статей сверяются с каталогом: серии больше нет —
+    статья по теме молча пропала бы, поэтому ошибка сборки с названием
+    статьи. Серия каталога, которой нет в списке Strapi, — предупреждение:
+    её не выбрать в админке, пока не обновят список (npm run cms:series). */
+export async function checkArticleSeries(catalogSlugs: string[]) {
+  const known = new Set(catalogSlugs)
+  for (const a of await getArticles()) {
+    const gone = a.data.relatedSeriesSlugs?.find((s) => !known.has(s))
+    if (gone) throw new Error(`Статья «${a.data.title}»: серии «${gone}» нет в каталоге — выберите другую в Strapi («Для поисковиков и каталога» → «Серии каталога») и обновите список: npm run cms:series`)
+  }
+  const listed = new Set<string>(STRAPI_SERIES.attributes.series.enum)
+  const missing = catalogSlugs.filter((s) => !listed.has(s))
+  if (missing.length) console.warn(`[strapi] серий каталога нет в списке Strapi: ${missing.join(', ')} — npm run cms:series`)
 }
 
 /** Автор статей по умолчанию — основатель студии: имя и роль из SITE,

@@ -7,6 +7,7 @@ import { strapiFetchAll, strapiImage, type StrapiMedia } from './strapi'
 import type { Promo } from '../data/promos'
 import { toSiteBlocks, safeUrl, type StrapiBlock } from './article-blocks'
 import { fillSubstitutions } from './article-substitutions'
+import { ARTICLE_CATALOG_PAGES } from '../data/article-catalog-pages'
 import { CATALOG_LINKS, CATEGORY_LABELS, OBJECT_TYPE_LABELS, type PortfolioWork, type WorkCategory, type ObjectType } from '../data/portfolio-works'
 
 export interface StrapiPromo {
@@ -49,9 +50,12 @@ export function strapiLoader<T>(name: string, fetchAll: () => Promise<{ id: stri
   }
 }
 
+/** Запросы к Strapi — одни для сборки и проверки перед публикацией (scripts/check-content.ts) */
+export const PROMO_QUERY = { 'populate[image]': 'true', sort: 'validUntil:asc' }
+
 export const promosLoader = () =>
   strapiLoader('strapi-promos', async () =>
-    (await strapiFetchAll<StrapiPromo>('promos', { 'populate[image]': 'true', sort: 'validUntil:asc' }))
+    (await strapiFetchAll<StrapiPromo>('promos', PROMO_QUERY))
       .map((raw) => ({ id: raw.documentId, data: toPromo(raw) })))
 
 export interface StrapiWork {
@@ -60,6 +64,7 @@ export interface StrapiWork {
   description: string; story?: string | null; model?: string | null; doorCount?: number | null
   features?: { text: string }[] | null; tags?: { text: string }[] | null
   images: StrapiMedia[]; catalogLink?: { section: string; label?: string | null } | null
+  metaTitle?: string | null
 }
 
 /** Обратный словарь: подпись в Strapi → ключ сайта */
@@ -89,26 +94,32 @@ export function toWork(raw: StrapiWork): PortfolioWork {
     features: list(raw.features),
     tags: list(raw.tags),
     images: raw.images.map((img) => strapiImage(img, 1920).src),
+    /* «Что на фото» — из медиатеки; без него — название и номер */
+    alts: raw.images.map((img, i) => img.alternativeText || `${raw.title} — фото ${i + 1}`),
+    metaTitle: opt(raw.metaTitle),
     cover: strapiImage(raw.images[0]!, 960),
     relatedLink: link && { href: link.href, label: raw.catalogLink?.label || link.label },
   }
 }
 
+export const WORK_QUERY = { 'populate[images]': 'true', 'populate[features]': 'true', 'populate[tags]': 'true', 'populate[catalogLink]': 'true', sort: 'date:desc' }
+
 export const worksLoader = () =>
   strapiLoader('strapi-works', async () =>
-    (await strapiFetchAll<StrapiWork>('works', { 'populate[images]': 'true', 'populate[features]': 'true', 'populate[tags]': 'true', 'populate[catalogLink]': 'true', sort: 'date:desc' }))
+    (await strapiFetchAll<StrapiWork>('works', WORK_QUERY))
       .map((raw) => ({ id: raw.slug, data: toWork(raw) })))
 
 export interface StrapiArticle {
   documentId: string; slug: string; title: string; kind: string; publishDate: string; updatedDate?: string | null
-  cover: StrapiMedia; coverAlt: string; description: string
+  cover: StrapiMedia; coverAlt?: string | null; description: string
   summary?: { text: string }[] | null; keywords?: { text: string }[] | null; faq?: { q: string; a: string }[] | null
   body: StrapiBlock[]
+  related?: { slug: string }[] | null
   seo?: {
     metaTitle?: string | null; steps?: { name: string; text: string }[] | null; coatings?: { coating: string }[] | null
-    series?: { text: string }[] | null; pages?: { text: string }[] | null
+    series?: { series: string }[] | null; pages?: { page: string }[] | null
     author?: { name: string; role: string; href: string; photo?: StrapiMedia | null; linkLabel?: string | null; type?: string | null } | null
-    spotlight?: { label: string; lead?: string | null; image: StrapiMedia; imageAlt: string; video?: StrapiMedia | null; poster?: StrapiMedia | null; videoTitle?: string | null; points?: { text: string }[] | null } | null
+    spotlight?: { label: string; lead?: string | null; image: StrapiMedia; imageAlt?: string | null; video?: StrapiMedia | null; poster?: StrapiMedia | null; videoTitle?: string | null; points?: { text: string }[] | null } | null
   } | null
 }
 
@@ -126,6 +137,13 @@ export function toArticle(raw: StrapiArticle) {
   const texts = (items?: { text: string }[] | null) => (items?.length ? items.map((i) => i.text) : undefined)
   const spot = seo.spotlight
   const spotImage = spot ? strapiImage(spot.image, 960) : undefined
+  /* «Что на обложке» пусто — описание из медиатеки */
+  const coverAlt = raw.coverAlt || raw.cover.alternativeText || ''
+  const pages = seo.pages?.map(({ page }) => {
+    const path = ARTICLE_CATALOG_PAGES[page]
+    if (!path) throw new Error(`${where}: неизвестная страница каталога «${page}» — список в src/data/article-catalog-pages.ts`)
+    return path
+  })
   return {
     id: raw.slug,
     body: text,
@@ -146,18 +164,19 @@ export function toArticle(raw: StrapiArticle) {
       publishDate: raw.publishDate,
       updatedDate: raw.updatedDate ?? undefined,
       coverImage: strapiImage(raw.cover, 1920).src,
-      coverImageAlt: raw.coverAlt,
-      cover: { ...strapiImage(raw.cover, 1280), alt: raw.coverAlt },
+      coverImageAlt: coverAlt,
+      cover: { ...strapiImage(raw.cover, 1280), alt: coverAlt },
       faq: raw.faq?.length ? raw.faq.map((f) => ({ q: fill(f.q), a: fill(f.a) })) : undefined,
-      relatedSeriesSlugs: texts(seo.series),
+      relatedSeriesSlugs: seo.series?.length ? seo.series.map((s) => s.series) : undefined,
       relatedCoatings: seo.coatings?.length ? seo.coatings.map((c) => {
         const slug = COATING_SLUG[c.coating]
         if (!slug) throw new Error(`${where}: неизвестное покрытие «${c.coating}»`)
         return slug
       }) : undefined,
-      relatedPages: texts(seo.pages),
+      relatedPages: pages?.length ? pages : undefined,
+      related: raw.related?.length ? raw.related.map((r) => r.slug) : undefined,
       spotlight: spot && spotImage ? {
-        label: spot.label, lead: spot.lead ?? undefined, image: spotImage.src, imageSrcset: spotImage.srcset, imageAlt: spot.imageAlt,
+        label: spot.label, lead: spot.lead ?? undefined, image: spotImage.src, imageSrcset: spotImage.srcset, imageAlt: spot.imageAlt || spot.image.alternativeText || '',
         video: spot.video?.url, poster: spot.poster ? strapiImage(spot.poster, 960).src : undefined,
         videoTitle: spot.videoTitle ?? undefined, points: texts(spot.points),
       } : undefined,
@@ -168,21 +187,23 @@ export function toArticle(raw: StrapiArticle) {
 }
 
 const ALL = '*'
+export const ARTICLE_QUERY = {
+  'populate[cover]': 'true', 'populate[summary]': 'true', 'populate[keywords]': 'true', 'populate[faq]': 'true',
+  'populate[body][on][article.text][populate]': ALL,
+  'populate[body][on][article.photo][populate]': ALL,
+  'populate[body][on][article.gallery][populate][photos][populate]': ALL,
+  'populate[body][on][article.callout][populate]': ALL,
+  'populate[body][on][article.video][populate]': ALL,
+  'populate[body][on][article.table][populate]': ALL,
+  'populate[body][on][article.hidden-prices][populate]': ALL,
+  'populate[body][on][article.coating-prices][populate]': ALL,
+  'populate[seo][populate][steps]': 'true', 'populate[seo][populate][coatings]': 'true',
+  'populate[seo][populate][series]': 'true', 'populate[seo][populate][pages]': 'true',
+  'populate[related][fields][0]': 'slug',
+  'populate[seo][populate][author][populate]': ALL,
+  'populate[seo][populate][spotlight][populate]': ALL,
+  sort: 'publishDate:desc',
+}
+
 export const articlesLoader = () =>
-  strapiLoader('strapi-articles', async () =>
-    (await strapiFetchAll<StrapiArticle>('articles', {
-      'populate[cover]': 'true', 'populate[summary]': 'true', 'populate[keywords]': 'true', 'populate[faq]': 'true',
-      'populate[body][on][article.text][populate]': ALL,
-      'populate[body][on][article.photo][populate]': ALL,
-      'populate[body][on][article.gallery][populate][photos][populate]': ALL,
-      'populate[body][on][article.callout][populate]': ALL,
-      'populate[body][on][article.video][populate]': ALL,
-      'populate[body][on][article.table][populate]': ALL,
-      'populate[body][on][article.hidden-prices][populate]': ALL,
-      'populate[body][on][article.coating-prices][populate]': ALL,
-      'populate[seo][populate][steps]': 'true', 'populate[seo][populate][coatings]': 'true',
-      'populate[seo][populate][series]': 'true', 'populate[seo][populate][pages]': 'true',
-      'populate[seo][populate][author][populate]': ALL,
-      'populate[seo][populate][spotlight][populate]': ALL,
-      sort: 'publishDate:desc',
-    })).map(toArticle))
+  strapiLoader('strapi-articles', async () => (await strapiFetchAll<StrapiArticle>('articles', ARTICLE_QUERY)).map(toArticle))

@@ -68,7 +68,7 @@ test('статья из Strapi → данные сайта', () => {
     cover: media('/uploads/c.webp'), coverAlt: 'Обложка', description: 'Звоните {телефон}',
     summary: [{ text: 'Пункт' }], keywords: [], faq: [{ q: 'Где?', a: '{адрес салона}' }],
     body: [{ __component: 'article.text', content: [{ type: 'heading', level: 2, children: [{ type: 'text', text: 'Раздел' }] }, { type: 'paragraph', children: [{ type: 'text', text: 'Слово {телефон}' }] }] }],
-    seo: { metaTitle: null, steps: [], coatings: [{ coating: 'Эмаль' }], series: [{ text: 'urban' }], pages: [], author: null, spotlight: null },
+    seo: { metaTitle: null, steps: [], coatings: [{ coating: 'Эмаль' }], series: [{ series: 'urban' }], pages: [], author: null, spotlight: null },
   })
   assert.equal(a.id, 'skrytye')
   assert.equal(a.data.kind, 'publication')
@@ -93,4 +93,57 @@ test('статья без текста — ошибка с названием', 
 test('кнопка акции с javascript: — ошибка сборки', () => {
   assert.throws(() => toPromo({ documentId: 'p', title: 'Скидка', subtitle: 'С', validUntil: '2026-12-31', ctaText: 'Жми', ctaLink: 'javascript:alert(1)' }),
     /Акция «Скидка»: недопустимая ссылка/)
+})
+
+const article = (over: Record<string, unknown> = {}) => toArticle({
+  documentId: 'd', slug: 's', title: 'Статья', kind: 'Статья', publishDate: '2026-01-01',
+  cover: media('/uploads/c.webp'), coverAlt: 'Обложка', description: 'Лид',
+  body: [{ __component: 'article.text', content: [{ type: 'paragraph', children: [{ type: 'text', text: 'Текст' }] }] }],
+  ...over,
+} as Parameters<typeof toArticle>[0])
+
+test('страницы каталога и серии — из списка Strapi', () => {
+  const a = article({ seo: { pages: [{ page: 'Скрытые двери для дома' }, { page: 'Двери в стиле лофт' }], series: [{ series: 'urban-pet' }] } })
+  assert.deepEqual(a.data.relatedPages, ['/catalog/skrytye-dveri-dlya-doma/', '/catalog/loft-dveri/'])
+  assert.deepEqual(a.data.relatedSeriesSlugs, ['urban-pet'])
+})
+
+test('неизвестная страница каталога — ошибка с названием статьи', () => {
+  assert.throws(() => article({ seo: { pages: [{ page: 'Входные двери' }] } }), /«Статья».*страница каталога «Входные двери»/)
+})
+
+test('«Статьи по теме» — адреса выбранных статей по порядку', () => {
+  assert.deepEqual(article({ related: [{ slug: 'b' }, { slug: 'a' }] }).data.related, ['b', 'a'])
+  assert.equal(article().data.related, undefined)
+})
+
+test('описание фото и обложки — из медиатеки, если в статье пусто', () => {
+  const withAlt = (url: string, alternativeText: string) => ({ ...media(url), alternativeText })
+  const a = article({
+    coverAlt: null, cover: withAlt('/uploads/c.webp', 'Обложка из медиатеки'),
+    body: [
+      { __component: 'article.photo', image: withAlt('/uploads/p.webp', 'Дверь из медиатеки'), alt: null },
+      { __component: 'article.photo', image: withAlt('/uploads/q.webp', 'Не это'), alt: 'Своё описание' },
+      { __component: 'article.gallery', photos: [
+        { image: withAlt('/uploads/g1.webp', 'Галерея из медиатеки'), alt: null, caption: 'Подпись' },
+        { image: media('/uploads/g2.webp'), alt: null, caption: 'Только подпись' },
+      ] },
+    ],
+  })
+  assert.equal(a.data.coverImageAlt, 'Обложка из медиатеки')
+  assert.equal(a.data.cover.alt, 'Обложка из медиатеки')
+  const [p1, p2, g] = a.data.blocks as { image?: { alt: string }; photos?: { image: { alt: string } }[] }[]
+  assert.equal(p1!.image!.alt, 'Дверь из медиатеки')
+  assert.equal(p2!.image!.alt, 'Своё описание')
+  assert.deepEqual(g!.photos!.map((p) => p.image.alt), ['Галерея из медиатеки', 'Только подпись'])
+})
+
+test('работа: описания фото из медиатеки, SEO-заголовок', () => {
+  const noAlt = { ...photo(2), alternativeText: null }
+  const w = toWork({ documentId: 'd4', slug: 's', title: 'Кухня', date: '2026-01-05', category: 'Межкомнатные',
+    objectType: 'Офис', description: 'О', images: [photo(1), noAlt], metaTitle: 'Двери для кухни в ЖК' })
+  assert.deepEqual(w.alts, ['Фото 1', 'Кухня — фото 2'])
+  assert.equal(w.metaTitle, 'Двери для кухни в ЖК')
+  assert.equal(toWork({ documentId: 'd5', slug: 's', title: 'Т', date: '2026-01-05', category: 'Межкомнатные',
+    objectType: 'Офис', description: 'О', images: [photo(1)] }).metaTitle, undefined)
 })

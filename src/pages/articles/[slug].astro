@@ -84,8 +84,11 @@ const catalogLandings = coatings
   }))
 const rub = (n: number) => `${n.toLocaleString('ru-RU')} ₽`
 
-/* Читайте также — другие опубликованные, свежие сверху */
-const related = (await getArticles()).filter((a) => a.id !== article.id).slice(0, 3)
+/* Читайте также — сначала «Статьи по теме» из Strapi (по порядку;
+   снятая с публикации пропускается), остальное место — свежие */
+const others = (await getArticles()).filter((a) => a.id !== article.id)
+const chosen = (article.data.related ?? []).flatMap((slug) => others.filter((a) => a.id === slug))
+const related = [...chosen, ...others.filter((a) => !chosen.includes(a))].slice(0, 3)
 
 const structuredData = [
   localBusinessSchema({ url: SITE.url }),

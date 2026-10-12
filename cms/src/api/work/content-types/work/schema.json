@@ -12,6 +12,7 @@
   "attributes": {
     "title": { "type": "string", "required": true, "maxLength": 120 },
     "slug": { "type": "uid", "targetField": "title", "required": true },
+    "metaTitle": { "type": "string", "maxLength": 70 },
     "date": { "type": "date", "required": true },
     "category": { "type": "enumeration", "required": true, "enum": ["Межкомнатные", "Скрытые двери", "Перегородки"] },
     "objectType": { "type": "enumeration", "required": true, "enum": ["Квартира", "Частный дом", "Офис", "Коммерческая недвижимость"] },
