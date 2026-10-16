@@ -22,7 +22,6 @@
     "cms:install": "npm --prefix cms install",
     "cms:series": "node scripts/cms-series.mjs",
     "check:content": "tsx scripts/check-content.ts",
-    "demo:vercel": "node scripts/demo-vercel.mjs",
     "media:pull": "node scripts/media-pull.mjs",
     "gen:about": "node scripts/gen-about-images.mjs",
     "gen:contacts": "node scripts/gen-contacts-images.mjs",

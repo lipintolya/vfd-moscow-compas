@@ -75,8 +75,6 @@ cms/dist/
 cms/.strapi/
 cms/.env
 
-# Vercel CLI (временное демо): привязка проекта и готовые файлы
-.vercel/
 
 # Адрес продакшен-сервера — только локально (образец: deploy/server.example.json)
 deploy/server.json

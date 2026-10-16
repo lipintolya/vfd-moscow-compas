@@ -161,7 +161,6 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 | `npm test` | тесты |
 | `npm run deploy` | собрать и выложить сайт на https://dveriziz.ru (нужен запущенный Strapi) |
 | `npm run server:setup` | настроить сервер (`-- --cert` — выпустить HTTPS-сертификат) |
-| `npm run demo:vercel -- <адрес>` | собрать временное демо для Vercel (см. [«Деплой»](#деплой)) |
 | `node scripts/compare-builds.mjs <старая dist> <новая dist>` | какие страницы изменились по видимому тексту — проверка после переделок |
 
 **Облегчённые картинки** — запускать после замены исходного фото:
@@ -214,10 +213,6 @@ npm run deploy     # сборка → проверки → rsync страниц 
 
 **Админка для директора** (позже): VPS на 2 ГБ, Strapi + PostgreSQL как служба, nginx проксирует админку, пересборка по вебхуку публикации, ежедневные копии базы и `/uploads`. Подробно — [`docs/superpowers/specs/2026-10-11-strapi-cms-design.md`](docs/superpowers/specs/2026-10-11-strapi-cms-design.md).
 
-### Демо на Vercel
-
-https://vfd-moscow-compas.vercel.app — для показа заказчику до запуска, закрыто от поисковиков. После запуска его стоит удалить: из России Vercel открывается не у всех провайдеров.
-
 ## Перед запуском
 
 Заглушки в коде находит команда:
@@ -237,7 +232,6 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs package.json d
 - [ ] **Strapi на сервере** (админка для директора) — VPS на 2 ГБ, см. [«Продакшен»](#продакшен-httpsdverizizru); перенести материалы с локальной машины.
 - [ ] **Директор** — приглашён в Strapi с ролью «Редактор», получил [инструкцию](docs/director-guide.md).
 - [ ] **Поисковики** — сайт в Яндекс Вебмастере и Google Search Console, отправлена карта сайта, фид `/feed/yandex.xml` — в Яндекс Товары.
-- [ ] **Демо на Vercel** — удалить после запуска.
 
 ## Передача проекта
 
@@ -251,7 +245,6 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs package.json d
 | Сервер | VPS FirstVDS: панель хостинга, SSH-доступ |
 | Домен | регистратор домена, DNS |
 | Аналитика | Яндекс Метрика, Яндекс Вебмастер, Google Search Console |
-| Демо | проект Vercel (до удаления) |
 
 Секреты (`.env`, `cms/.env`, пароли) передаются защищённым каналом — не через репозиторий и не в открытом чате.
 
