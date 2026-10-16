@@ -16,9 +16,12 @@ interface Props {
   srcset?: string
   /** Что открыть во весь экран; по умолчанию src */
   zoom?:   string
+  /** Размер копии в src — пропорции до загрузки фото */
+  width?:  number
+  height?: number
 }
-const { src, alt = '', caption, href, srcset, zoom } = Astro.props
-const img = { src, srcset }
+const { src, alt = '', caption, href, srcset, zoom, width, height } = Astro.props
+const img = { src, srcset, width, height }
 ---
 
 <figure class="dphoto">

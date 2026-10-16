@@ -186,6 +186,11 @@ function isArticleInSitemap(page) {
 
 // https://astro.build/config
 export default defineConfig({
+  /* Стили — внутри страницы, а не отдельными файлами: первая отрисовка
+     не ждёт 4–7 запросов CSS (замер Lighthouse, мобильный: FCP −0,07…0,23 с
+     на главной, статье, контактах, каталоге). Цена — ~20 КБ к каждой
+     странице без кэша между страницами. */
+  build: { inlineStylesheets: 'always' },
   site: SITE_URL,
 
   vite: {

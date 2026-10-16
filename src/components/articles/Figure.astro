@@ -20,9 +20,13 @@ interface Props {
   srcset?: string
   /** Что открыть во весь экран; по умолчанию src */
   zoom?: string
+  /** Размер копии в src — браузер заранее оставляет место под фото
+      (без них текст «прыгает», когда фото без обрезки загрузится) */
+  width?: number
+  height?: number
 }
 
-const { src, alt = '', caption, narrow = false, natural = false, srcset, zoom } = Astro.props
+const { src, alt = '', caption, narrow = false, natural = false, srcset, zoom, width, height } = Astro.props
 
 /* В тексте — облегчённый вариант по ширине экрана (колонка статьи до 80rem,
    narrow — до 26rem); по нажатию оригинал открывается во весь экран
@@ -38,6 +42,8 @@ const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-w
         src={inline?.src ?? src}
         srcset={inline?.srcset}
         sizes={inline?.srcset ? sizes : undefined}
+        width={width}
+        height={height}
         alt={alt}
         loading="lazy"
         decoding="async"
@@ -66,6 +72,8 @@ const sizes  = narrow ? '(min-width: 448px) 416px, calc(100vw - 32px)' : '(min-w
 .article-figure__img {
   display: block;
   width: 100%;
+  /* width/height у <img> задают только пропорции, размер — CSS */
+  height: auto;
   aspect-ratio: 21 / 9;
   border-radius: var(--h-radius, 0.75rem);
   object-fit: cover;

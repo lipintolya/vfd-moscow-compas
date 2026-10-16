@@ -19,10 +19,10 @@ const { blocks } = Astro.props
 {blocks.map((b) => {
   switch (b.type) {
     case 'text': return <Fragment set:html={b.html} />
-    case 'photo': return <Figure src={b.image.src} srcset={b.image.srcset} zoom={b.zoom} alt={b.image.alt} caption={b.caption} narrow={b.layout === 'narrow'} natural={b.layout === 'natural'} />
+    case 'photo': return <Figure src={b.image.src} srcset={b.image.srcset} width={b.image.width} height={b.image.height} zoom={b.zoom} alt={b.image.alt} caption={b.caption} narrow={b.layout === 'narrow'} natural={b.layout === 'natural'} />
     case 'gallery': return (
       <PhotoGrid cols={b.columns ?? b.photos.length} doors={b.doors}>
-        {b.photos.map((p) => <Photo src={p.image.src} srcset={p.image.srcset} zoom={p.zoom} alt={p.image.alt} caption={p.caption} href={p.href} />)}
+        {b.photos.map((p) => <Photo src={p.image.src} srcset={p.image.srcset} width={p.image.width} height={p.image.height} zoom={p.zoom} alt={p.image.alt} caption={p.caption} href={p.href} />)}
       </PhotoGrid>
     )
     case 'callout': return <Callout type={b.kind} title={b.title}><Fragment set:html={b.html} /></Callout>
