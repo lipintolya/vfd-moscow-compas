@@ -20,6 +20,7 @@
  */
 import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import VisitBand from '../../components/home/VisitBand.astro'
@@ -166,7 +167,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 ---
 
 <BaseLayout
-  title={data.metaTitle ?? `${data.title} | ${SITE.name} ${SITE.city.in}`}
+  title={brandTitle(data.metaTitle ?? data.title)}
   description={data.description}
   canonical={pageUrl}
   structuredData={structuredData}

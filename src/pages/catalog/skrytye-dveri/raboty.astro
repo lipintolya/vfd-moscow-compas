@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../../lib/seo-title'
 import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import WorksGrid from '../../../components/catalog/WorksGrid.vue'
 import { INVISIBLE_WORKS } from '../../../data/skrytye-dveri-works'
@@ -53,7 +54,7 @@ const structuredData = canonicalUrl ? [
 
 <BaseLayout
   noIndex={INVISIBLE_WORKS.length === 0}
-  title="Наши работы — скрытые двери в Москве, фото объектов | ВФД"
+  title={brandTitle('Наши работы — скрытые двери в Москве, фото объектов')}
   description={`Реальные объекты монтажа скрытых дверей «Секрет» и «Секрет Реверс» в Москве и Московской области — ${INVISIBLE_WORKS.length} ${pluralWorks(INVISIBLE_WORKS.length)} с фото и спецификацией. Замер и монтаж по Москве.`}
   ogImage={IMAGES.invisible}
   canonical={canonicalUrl}

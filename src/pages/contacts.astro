@@ -8,6 +8,7 @@
  * (src/lib/contacts-data.ts). Тексты — src/data/contacts-page.ts.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import VisitBand from '../components/home/VisitBand.astro'
@@ -20,7 +21,7 @@ import { SITE, PHONE } from '../config/site'
 import { typograph } from '../lib/typograph'
 import '../styles/home.css'
 
-const title = `Контакты салона дверей ${SITE.name} ${SITE.city.in} — адрес, телефон, часы работы`
+const title = brandTitle(`Контакты — салон дверей ${SITE.name} в ${SITE.address.mall}, ${SITE.city.name}`)
 const description =
   `Салон дверей ${SITE.name} в ${SITE.address.mall}: ${SITE.address.street}, ${SITE.address.floor}. ` +
   `${companyLegalInfo.workingHours.shortDisplay}. Схема проезда, замер и монтаж по Москве и области.`

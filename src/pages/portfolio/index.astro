@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
 import PortfolioGrid from '../../components/portfolio/PortfolioGrid.vue'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
 import { getWorks } from '../../lib/works'
@@ -19,8 +20,8 @@ const breadcrumbSchema = {
 ---
 
 <BaseLayout
-  title="Наши работы — фотоотчёты монтажей дверей | ВФД Москва"
-  description="Фотоотчёты установки межкомнатных и скрытых дверей и алюминиевых перегородок — реальные объекты салона ВФД по Москве и области."
+  title={brandTitle('Наши работы — фотоотчёты монтажей дверей в Москве')}
+  description="Фотоотчёты установки межкомнатных и скрытых дверей и алюминиевых перегородок — реальные объекты Студии Зизевского по Москве и области."
   structuredData={[breadcrumbSchema]}
   noIndex={!SITE.features.portfolio}
 >

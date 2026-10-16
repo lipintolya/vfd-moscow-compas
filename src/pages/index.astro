@@ -21,7 +21,7 @@ import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import { faqs } from '../components/home/faq-data'
 import { howToSchema } from '../data/how-it-works'
 import { getCatalogCards } from '../lib/catalog-data'
-import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
+import { localBusinessSchema as buildLocalBusiness, websiteSchema } from '../lib/local-business-schema'
 import { PHONE, SITE } from '../config/site'
 import { getCollection } from 'astro:content'
 
@@ -55,9 +55,9 @@ const localBusinessSchema = buildLocalBusiness()
 ---
 
 <BaseLayout
-  title={`Шоурум дверей ${SITE.name} ${SITE.city.in}, ${SITE.address.okrug} — межкомнатные и скрытые двери`}
-  description={`Официальный дилер ${SITE.manufacturerOf} ${SITE.city.in}: шоурум в ${SITE.address.mall}, ${SITE.address.street}. Межкомнатные и скрытые двери, перегородки, замер и монтаж.`}
-  structuredData={[faqSchema, localBusinessSchema, howToSchema]}
+  title={`${SITE.studioName} — межкомнатные и скрытые двери ${SITE.name} ${SITE.city.in}`}
+  description={`${SITE.studioName} — официальный дилер ${SITE.manufacturerOf} ${SITE.city.in}. Шоурум в ${SITE.address.mall}: межкомнатные и скрытые двери, перегородки, замер и монтаж.`}
+  structuredData={[websiteSchema(), localBusinessSchema, faqSchema, howToSchema]}
   preloadImage={HERO_COVER_IMAGE}
   ogImage={HERO_COVER_IMAGE}
 >

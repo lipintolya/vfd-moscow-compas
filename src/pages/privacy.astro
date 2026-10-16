@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 import { SITE } from '../config/site'
 import { companyLegalInfo, HAS_EMAIL } from '../lib/contacts-data'
 
@@ -12,7 +13,7 @@ const inWriting = `в письменном виде по адресу: ${SITE.ad
 ---
 
 <BaseLayout
-  title="Политика конфиденциальности — ВФД в ТЦ «Компас»"
+  title={brandTitle('Политика конфиденциальности')}
   description={`Политика в отношении обработки персональных данных — ${SITE.host}`}
   noIndex={true}
 >

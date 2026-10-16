@@ -14,6 +14,7 @@
  * Тексты и факты — src/data/designers-page.ts (только от владельца).
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import LandingHero from '../components/ui/LandingHero.astro'
 import StepsRow from '../components/home/StepsRow.astro'
@@ -32,7 +33,7 @@ import '../styles/home.css'
 
 const CALL = `tel:${PHONE.raw}`
 const pageUrl = new URL('/designers/', SITE.url).href
-const title = `Дизайнерам и архитекторам — сотрудничество и шоурум ${SITE.name} ${SITE.city.in}`
+const title = brandTitle(`Дизайнерам и архитекторам — шоурум ${SITE.name} ${SITE.city.in}`)
 const description =
   `Для дизайнеров и архитекторов: двери до 3 м под заказ, скрытые двери в наличии, ` +
   `образцы и шоурум в ${SITE.address.mall} для встреч с заказчиками. Бонусы партнёрам.`

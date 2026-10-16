@@ -12,6 +12,7 @@
  * странице грузятся, только когда до них докрутили, и не играют за кадром.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import DoorLeafViewer from '../components/partitions/DoorLeafViewer.vue'
@@ -38,7 +39,7 @@ import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-sc
 import { typograph } from '../lib/typograph'
 
 /* ── SEO ── */
-const title = `Алюминиевые перегородки ${SITE.city.in} на заказ — ${SITE.name}, ${SITE.address.mall}`
+const title = brandTitle(`Алюминиевые перегородки на заказ ${SITE.city.in}`)
 // ~160 символов — длиннее поисковики обрезают
 const description =
   `Алюминиевые перегородки GRAFIA на заказ ${SITE.city.in}: раздвижные, распашные, стационарные. ` +

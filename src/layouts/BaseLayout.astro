@@ -91,7 +91,7 @@ const structuredDataJson = structuredData
     )}
 
     <meta property="og:locale"       content="ru_RU" />
-    <meta property="og:site_name"    content={`Салон дверей ${SITE.name}`} />
+    <meta property="og:site_name"    content={SITE.studioName} />
     <meta name="theme-color"         content="#f7f7f8" />{/* = slate-50, meta не понимает var() */}
 
     <meta name="twitter:card"        content="summary_large_image" />
@@ -113,8 +113,8 @@ const structuredDataJson = structuredData
     <meta name="theme-color" content="#1f1f23" />{/* = slate-900 (графит) */}
 
     {/* Имя сайта для системных поверхностей */}
-    <meta name="apple-mobile-web-app-title" content={`${SITE.name} в ${SITE.address.mall}`} />
-    <meta name="application-name" content={`${SITE.name} в ${SITE.address.mall}`} />
+    <meta name="apple-mobile-web-app-title" content={SITE.studioName} />
+    <meta name="application-name" content={SITE.studioName} />
 
     <YandexMetrika />
 

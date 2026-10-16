@@ -27,6 +27,19 @@ export const reviewsSchema = () => reviews.map((r) => ({
   reviewRating: { '@type': 'Rating', ratingValue: String(r.rating), bestRating: '5', worstRating: '1' },
 }))
 
+/** Сайт для поисковиков (главная): из name Google берёт название сайта
+    в выдаче, вместо домена */
+export const websiteSchema = () => ({
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${SITE.url}/#website`,
+  name: SITE.studioName,
+  alternateName: [`${SITE.studioName} — двери ${SITE.name} ${SITE.city.in}`, SITE.host],
+  url: `${SITE.url}/`,
+  inLanguage: 'ru-RU',
+  publisher: { '@id': LOCAL_BUSINESS_ID },
+})
+
 export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
   const { coordinates } = SITE.address
   const founded = companyLegalInfo.activity.founded
@@ -35,7 +48,10 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
     '@context': 'https://schema.org',
     '@type': 'Store',
     '@id': LOCAL_BUSINESS_ID,
-    name: `${SITE.name} — ${SITE.fullName}`,
+    /* Как на карточке в Яндекс Картах — одно название везде (сайт, карты,
+       разметка) помогает поисковикам связать их; ВФД — бренд дверей ниже */
+    name: SITE.studioName,
+    alternateName: SITE.fullName,
     description: companyLegalInfo.activity.description,
     url: SITE.url,
     telephone: SITE.phones.map(p => p.raw),

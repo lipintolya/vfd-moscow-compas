@@ -7,6 +7,7 @@
  * и на реальных ЖК Москвы, где двери уже установлены.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
 import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
 import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
@@ -30,7 +31,7 @@ const canonicalUrl = Astro.site
   ? new URL('/catalog/skrytye-dveri-novostroyka/', Astro.site).href
   : undefined
 
-const title       = 'Скрытые двери в новостройку в Москве — цены и монтаж | ВФД'
+const title       = brandTitle('Скрытые двери в новостройку в Москве — цены и монтаж')
 const description = `Скрытые двери в новостройку под черновую отделку в Москве: замер до финишной штукатурки, монтаж заподлицо со стеной. Комплект от ${fmt(SECRET_MIN_KIT_PRICE)}.`
 
 const breadcrumbItems = [

@@ -7,6 +7,7 @@
  * с содержанием — самый надёжный фикс, без правки nginx.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../../lib/seo-title'
 import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import SeriesCard from '../../../components/catalog/SeriesCard.astro'
 import { getCatalogCards, getSeriesCardsData } from '../../../lib/catalog-data'
@@ -14,7 +15,7 @@ import { getCatalogCards, getSeriesCardsData } from '../../../lib/catalog-data'
 const { cards } = await getCatalogCards()
 const seriesCardsData = getSeriesCardsData(cards)
 
-const title       = 'Все серии межкомнатных дверей — каталог | ВФД Москва'
+const title       = brandTitle('Все серии межкомнатных дверей ВФД — каталог')
 const description = `Все серии межкомнатных дверей ВФД в Москве: ${seriesCardsData.length} серий, покрытия эмаль, ПЭТ, Эмалекс, Протач. Цены, фото, модели каждой серии.`
 const canonicalUrl = Astro.site ? new URL('/catalog/series/', Astro.site).href : undefined
 

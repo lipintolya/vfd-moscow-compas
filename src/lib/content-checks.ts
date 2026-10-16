@@ -32,8 +32,11 @@ function lengthProblems(text: string | null | undefined, field: string, min: num
 }
 
 function metaTitleProblems(metaTitle: string | null | undefined): string[] {
-  const n = (metaTitle ?? '').trim().length
-  return n > META_TITLE_MAX ? [`Заголовок для поисковиков — ${n} знаков, нужно до ${META_TITLE_MAX}: длиннее поисковики обрезают`] : []
+  const t = (metaTitle ?? '').trim()
+  const problems = t.length > META_TITLE_MAX ? [`Заголовок для поисковиков — ${t.length} знаков, нужно до ${META_TITLE_MAX}: длиннее поисковики обрезают`] : []
+  /* «| Студия Зизевского» сайт добавляет сам (src/lib/seo-title.ts) */
+  if (t.includes('|')) problems.push('В заголовке для поисковиков не нужен «| …»: название салона добавится само')
+  return problems
 }
 
 function headingLevels(body: StrapiBlock[]): number[] {

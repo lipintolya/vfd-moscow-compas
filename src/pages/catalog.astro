@@ -6,6 +6,7 @@ import { MEASURE_TERMS } from '../data/services'
  * Фильтрация — клиентская (Vue island), без перезагрузки страницы.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import SectionNav from '../components/partitions/SectionNav.astro'
 import CatalogClient from '../components/catalog/CatalogClient.vue'
@@ -177,7 +178,7 @@ const structuredData = canonicalUrl ? [
 ---
 
 <BaseLayout
-  title={`Купить межкомнатные двери ${SITE.city.in} — каталог и цены | ${SITE.name}`}
+  title={brandTitle(`Межкомнатные двери ${SITE.name} ${SITE.city.in} — каталог и цены`)}
   description={`Межкомнатные двери ${SITE.city.in} от официального дилера ${SITE.name}: каталог с ценами, покрытия эмаль, ПЭТ, Эмалекс, Протач. Замер и монтаж по Москве, салон в ${SITE.address.mall}.`}
   canonical={canonicalUrl}
   structuredData={structuredData}

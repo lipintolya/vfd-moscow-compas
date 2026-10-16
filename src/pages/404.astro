@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 ---
 
 <BaseLayout
-  title="Страница не найдена — ВФД в ТЦ «Компас»"
+  title={brandTitle('Страница не найдена')}
   description="Такой страницы нет или она была перемещена. Посмотрите каталог дверей или перейдите на главную."
   noIndex={true}
 >

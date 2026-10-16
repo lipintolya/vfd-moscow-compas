@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
 import ProjectSlider from '../../components/portfolio/ProjectSlider.vue'
 import { CATEGORY_LABELS, CATEGORY_BADGE_COLORS, OBJECT_TYPE_LABELS } from '../../data/portfolio-works'
 import { getWorks } from '../../lib/works'
@@ -41,8 +42,8 @@ const titleSuffix = [
   city && !isInTitle(city) ? city : '',
 ].filter(Boolean).join(', ')
 // Второе тире подряд читается плохо: если в заголовке уже есть « — », место — через запятую.
-/* Свой «Заголовок для поисковиков» из Strapi — как есть */
-const pageTitle = work.metaTitle ?? `${work.title}${titleSuffix ? `${work.title.includes(' — ') ? ', ' : ' — '}${titleSuffix}` : ''} | ВФД`
+/* Свой «Заголовок для поисковиков» из Strapi — вместо названия и места */
+const pageTitle = brandTitle(work.metaTitle ?? `${work.title}${titleSuffix ? `${work.title.includes(' — ') ? ', ' : ' — '}${titleSuffix}` : ''}`)
 
 const doorWord = (n: number) =>
   n === 1 ? 'дверь' : n < 5 ? 'двери' : 'дверей'

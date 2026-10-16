@@ -8,6 +8,7 @@
  * Разметка: CollectionPage + ItemList статей; хлебные крошки — Breadcrumbs.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
 import ArticleNav from '../../components/articles/ArticleNav.astro'
@@ -22,7 +23,7 @@ const articles = await getArticles()
 const [first, ...rest] = articles
 const pageUrl = new URL('/articles/', SITE.url).href
 
-const title = `${ARTICLES_SECTION} о дверях | ${SITE.name} ${SITE.city.in}`
+const title = brandTitle(`${ARTICLES_SECTION} о дверях ${SITE.name}`)
 const description =
   `Статьи о выборе межкомнатных дверей, покрытиях и монтаже, новости и новинки салона ${SITE.studioName} в ${SITE.address.mall}, ${SITE.city.name}.`
 const lead = 'Разбираем выбор дверей, покрытия и монтаж, рассказываем о новинках фабрики и событиях салона.'

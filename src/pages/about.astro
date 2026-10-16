@@ -11,6 +11,7 @@
  * полоса фотографий не выводится.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
@@ -23,7 +24,7 @@ import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-sc
 import { typograph } from '../lib/typograph'
 import '../styles/home.css'
 
-const title       = `О нас — ${SITE.studioName}, официальный дилер ${SITE.name} ${SITE.city.in}`
+const title       = brandTitle(`О нас — официальный дилер ${SITE.name} ${SITE.city.in}`)
 const description =
   `${SITE.studioName} — официальный дилер ${SITE.manufacturerOf} ${SITE.city.in}. ` +
   `Семейный бизнес: межкомнатные двери с 2014 года, салон в ${SITE.address.mall}.`

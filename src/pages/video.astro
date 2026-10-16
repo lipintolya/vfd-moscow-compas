@@ -6,6 +6,7 @@
  * ролики смотрят в плеере и листают свайпом.
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import QuoteCta from '../components/ui/QuoteCta.astro'
 import VideoList from '../components/video/VideoList.astro'
@@ -15,7 +16,7 @@ import { VIDEOS } from '../data/videos'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
 import { PHONE, SITE } from '../config/site'
 
-const title = 'Видео о дверях и фурнитуре — шоурум ВФД в Москве'
+const title = brandTitle('Видео о дверях и фурнитуре')
 const description =
   `Скрытые двери, фурнитура, стеновые панели, новинки фабрики и монтаж — показывает ${SITE.contactPerson}, ${SITE.contactRole}, в салоне ВФД в ${SITE.address.mall}.`
 

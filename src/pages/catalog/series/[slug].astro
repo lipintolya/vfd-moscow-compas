@@ -5,6 +5,7 @@
  * характеристики + живая сетка моделей серии (Supabase, через catalog-data).
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../../lib/seo-title'
 import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import CatalogGrid from '../../../components/catalog/CatalogGrid.vue'
 import InfoImageViewer from '../../../components/catalog/InfoImageViewer.vue'
@@ -80,7 +81,7 @@ const modelsPhrase   = `${series.modelCount} ${pluralRu(series.modelCount, ['м�
 
 /* Тип товара первым — по нему ищут («межкомнатные двери скинель»),
    а само название серии тип не называет. */
-const pageTitle = `Межкомнатные двери ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — купить в Москве, цены | ВФД`
+const pageTitle = brandTitle(`Межкомнатные двери ВФД ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — купить в Москве, цены`)
 /* Короткая генерация всегда в meta — та же причина, что на models/[id].astro:
    spec.description (маркетинговый текст серии) длиннее ~155 символов нормы
    SERP-сниппета и не упоминает город/цену — Google обрежет её на середине

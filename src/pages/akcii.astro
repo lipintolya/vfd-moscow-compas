@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
+import { SITE } from '../config/site'
 import { getCollection } from 'astro:content'
 import { isPromoActive, getDaysLeft, formatDate } from '../lib/promo-dates'
 
@@ -10,8 +12,8 @@ const activePromos = (await getCollection('promos')).map((e) => e.data)
 ---
 
 <BaseLayout
-  title="Акции и специальные предложения — ВФД в ТЦ «Компас»"
-  description="Все текущие акции и специальные предложения салона дверей ВФД в ТЦ «Компас» в Москве."
+  title={brandTitle(`Акции и специальные предложения на двери ${SITE.name}`)}
+  description={`Все текущие акции и специальные предложения ${SITE.studioNameOf} — салона дверей ${SITE.name} в ${SITE.address.mall}, ${SITE.city.name}.`}
 >
   <div class="pa-page">
     <div class="container">

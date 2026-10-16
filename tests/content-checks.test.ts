@@ -74,3 +74,9 @@ test('работа: фото без описания в медиатеке, ко
 test('акция: опасная ссылка кнопки', () => {
   assert.match(promoProblems({ documentId: 'p', title: 'Скидка', subtitle: 'С', validUntil: '2026-12-31', ctaLink: 'javascript:alert(1)' }).join('\n'), /недопустимая ссылка/)
 })
+
+test('заголовок для поисковиков — без своего «| …»: название салона добавится само', () => {
+  assert.match(articleProblems(article({ seo: { metaTitle: 'Скрытые двери: цены | ВФД в Москве' } }), []).join('\n'), /название салона добавится само/)
+  assert.match(workProblems(work({ metaTitle: 'Кухня в ЖК | Студия Зизевского' })).join('\n'), /название салона добавится само/)
+  assert.deepEqual(articleProblems(article({ seo: { metaTitle: 'Скрытые двери: плюсы и минусы, цены' } }), []), [])
+})

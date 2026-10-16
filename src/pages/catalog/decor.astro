@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
+import { SITE } from '../../config/site'
 import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
 import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
@@ -73,7 +75,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
 ---
 
 <BaseLayout
-  title="Декор для дверей — плинтус, фальшфрамуга, декоративные рейки в Москве | ВФД"
+  title={brandTitle(`Декор для дверей ${SITE.name}: плинтус, фальшфрамуга, рейки ${SITE.city.in}`)}
   description={`Декоративные элементы к межкомнатным дверям в Москве: фальшфрамуга и компланарный короб от ${fmt(FROM_PRICE_FRAMUGA_KIT)}, плинтус от ${fmt(FROM_PRICE_PLINTUS)}, декоративные рейки от ${fmt(FROM_PRICE_REYKI)}. Покрытия Эмалекс, Экошпон, Эмаль Polar.`}
   ogImage={IMAGES.hero}
   preloadImage={IMAGES.hero}

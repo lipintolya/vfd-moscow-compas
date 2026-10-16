@@ -11,6 +11,7 @@
  * «Купить в Москве» добавляется только в <title> страницы.
  */
 import type { ModelEntry } from './model-entries'
+import { brandTitle } from './seo-title'
 import { describeTrim, lowerFirst } from './trim-labels'
 import { getSeriesSpec } from '../data/series-descriptions'
 
@@ -101,13 +102,15 @@ export function priceLabel(m: Pick<ModelEntry, 'minPrice' | 'maxPrice'>): string
   return `${m.maxPrice && m.maxPrice > m.minPrice ? 'от ' : ''}${formatRub(m.minPrice)}`
 }
 
+/* «Межкомнатная дверь ВФД Эмалекс ЕС2 — купить в Москве | Студия Зизевского»:
+   бренд дверей — в названии (по нему ищут), салон — в конце */
 export const productTitle = (m: NamingInput) =>
-  `${productName(m)} — купить в Москве | ВФД`
+  brandTitle(`${productName(m, { withBrand: true })} — купить в Москве`)
 
 /** <meta description>: здесь как раз место цене и городу (в отличие от фида). */
 export function productMetaDescription(m: ModelEntry): string {
   const price = m.minPrice ? `цена ${priceLabel(m)} за полотно` : 'цена по запросу'
-  return `${productName(m)} — ${price}. Купить в Москве в салоне ВФД в ТЦ «Компас»: замер, доставка и установка.`
+  return `${productName(m)} — ${price}. Купить в Студии Зизевского — салоне ВФД в ТЦ «Компас», Москва: замер, доставка и установка.`
 }
 
 const stripDot = (s: string) => s.trim().replace(/\.+$/, '')

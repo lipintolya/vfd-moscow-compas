@@ -42,7 +42,7 @@ export const howToSchema = {
   '@context': 'https://schema.org',
   '@type':    'HowTo',
   name:       `Как купить и установить двери или перегородки в ${SITE.name}`,
-  description: `Процесс покупки и монтажа дверей и алюминиевых перегородок в салоне ${SITE.name} в ${SITE.address.mall}, ${SITE.city.name} — от выбора модели до гарантии.`,
+  description: `Процесс покупки и монтажа дверей и алюминиевых перегородок в ${SITE.studioNameOf} — салоне ${SITE.name} в ${SITE.address.mall}, ${SITE.city.name} — от выбора модели до гарантии.`,
   step: howItWorksSteps.map((s) => ({
     '@type': 'HowToStep',
     position: Number(s.num),
