@@ -1,7 +1,8 @@
 /**
  * Временное демо на Vercel для заказчика — готовые файлы, без сборки на
  * Vercel (там нет Strapi). Собранный dist/ + фото Strapi (/uploads) →
- * .vercel/output (Build Output API): домен-заглушка заменён адресом демо,
+ * .vercel/output (Build Output API): домен сайта (SITE_URL из
+ * src/config/site.ts) в canonical, og:image, разметке заменён адресом демо,
  * поисковикам закрыто (X-Robots-Tag и robots.txt), 404 — своя страница.
  * Исходники и dist/ не меняются.
  *   npm run build && npm run demo:vercel -- https://<проект>.vercel.app
@@ -15,7 +16,9 @@ const DIST = path.join(ROOT, 'dist')
 const UPLOADS = path.join(ROOT, 'cms/public/uploads')
 const OUT = path.join(ROOT, '.vercel/output')
 const STATIC = path.join(OUT, 'static')
-const PLACEHOLDER = 'https://domain-placeholder.example'
+/* Домен сайта — из бренд-слоя, один источник */
+const SITE_URL = (await readFile(path.join(ROOT, 'src/config/site.ts'), 'utf8')).match(/export const SITE_URL = '([^']+)'/)?.[1]
+if (!SITE_URL) throw new Error('Не найден SITE_URL в src/config/site.ts')
 
 const demoUrl = process.argv[2]?.replace(/\/$/, '')
 if (!demoUrl?.startsWith('https://')) {
@@ -28,7 +31,7 @@ await mkdir(STATIC, { recursive: true })
 await cp(DIST, STATIC, { recursive: true })
 await cp(UPLOADS, path.join(STATIC, 'uploads'), { recursive: true, filter: (src) => !src.endsWith('.gitkeep') })
 
-/* Домен-заглушка в canonical, og:image, JSON-LD, sitemap → адрес демо */
+/* Домен сайта в canonical, og:image, JSON-LD, sitemap → адрес демо */
 let replaced = 0
 async function walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -36,8 +39,8 @@ async function walk(dir) {
     if (entry.isDirectory()) { if (entry.name !== 'uploads' && entry.name !== 'media') await walk(file); continue }
     if (!/\.(html|xml|txt|json|webmanifest)$/.test(entry.name)) continue
     const text = await readFile(file, 'utf8')
-    if (!text.includes(PLACEHOLDER)) continue
-    await writeFile(file, text.replaceAll(PLACEHOLDER, demoUrl))
+    if (!text.includes(SITE_URL)) continue
+    await writeFile(file, text.replaceAll(SITE_URL, demoUrl))
     replaced++
   }
 }

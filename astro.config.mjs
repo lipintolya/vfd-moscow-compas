@@ -118,7 +118,7 @@ async function fetchModelImages() {
    намеренно не импортирует .ts, см. комментарий у slugify выше). При
    смене домена поправить оба места (robots.txt и /sitemap.xml собираются
    из SITE.url — src/pages/robots.txt.ts, sitemap.xml.ts). */
-const SITE_URL = 'https://domain-placeholder.example'
+const SITE_URL = 'https://dveriziz.ru'
 
 /* Страницы вне сайтмапа: /privacy/ — служебная; /reviews/ —
    пока пустой и закрыт noindex (SITE.features в src/config/site.ts);

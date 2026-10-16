@@ -17,3 +17,12 @@ test('телефоны салона: городской — основной, з
   ])
   assert.equal(PHONE.raw, '+74993910057')
 })
+
+import { readFileSync } from 'node:fs'
+import { SITE_URL } from '../src/config/site'
+
+test('домен в astro.config.mjs совпадает с SITE_URL (конфиг не импортирует TS)', () => {
+  const config = readFileSync('astro.config.mjs', 'utf8').match(/const SITE_URL = '([^']+)'/)?.[1]
+  assert.equal(config, SITE_URL)
+  assert.doesNotMatch(SITE_URL, /placeholder|\/$/)
+})

@@ -1,13 +1,13 @@
 #!/bin/bash
-# One-time server setup for domain-placeholder.example on Beget VPS.
+# One-time server setup for dveriziz.ru on a VPS (Ubuntu).
 # Run on the server as root:
 #   bash setup-server.sh
 set -euo pipefail
 
-DOMAIN="domain-placeholder.example"
+DOMAIN="dveriziz.ru"
 REPO_DIR="/var/repo/vfd-moscow-compas.git"
-WORK_TREE="/var/www/domain-placeholder.example/build"
-WEB_ROOT="/var/www/domain-placeholder.example/public"
+WORK_TREE="/var/www/dveriziz.ru/build"
+WEB_ROOT="/var/www/dveriziz.ru/public"
 NODE_VERSION="22"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 

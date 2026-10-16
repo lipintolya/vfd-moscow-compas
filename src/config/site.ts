@@ -15,7 +15,7 @@
     JSON-LD, фиде. Дублируется в astro.config.mjs (SITE_URL) — конфиг
     Astro не импортирует .ts, при смене домена поправить оба места
     (robots.txt и /sitemap.xml собираются из SITE_URL сами). */
-export const SITE_URL = 'https://domain-placeholder.example'
+export const SITE_URL = 'https://dveriziz.ru'
 
 export const SITE = {
   url: SITE_URL,

@@ -4,7 +4,7 @@
 
 Проект вырос из кодовой базы сайта салона ВФД в Челябинске: архитектура общая, бренд, контент и дизайн — свои.
 
-> **Состояние на 16.10.2026.** Сайт готов к показу заказчику, демо — https://vfd-moscow-compas.vercel.app (закрыто от поисковиков). Для запуска нужны домен, сервер в России со Strapi и несколько данных от владельца — см. [«Перед запуском»](#перед-запуском).
+> **Состояние на 16.10.2026.** Сайт готов к показу заказчику, демо — https://vfd-moscow-compas.vercel.app (закрыто от поисковиков). Домен — `dveriziz.ru`. Для запуска нужны сервер в России со Strapi и несколько данных от владельца — см. [«Перед запуском»](#перед-запуском).
 
 ## Содержание
 
@@ -212,7 +212,7 @@ npx vercel deploy --prebuilt --prod
 - **Пересборка при публикации**: вебхук Strapi запускает `npm run build` и подменяет `dist/`.
 - **Резервные копии**: база Strapi и `cms/public/uploads/` — ежедневно.
 
-Шаблоны в [`deploy/`](deploy/) (`setup-server.sh`, хук `post-receive`: `git push production main` → `npm ci && npm run build` → `rsync` в веб-корень nginx) — от сайта в Челябинске, рассчитаны только на статический сайт без Strapi; домен в них — заглушка. Их нужно дополнить под этот план.
+Шаблоны в [`deploy/`](deploy/) (`setup-server.sh`, хук `post-receive`: `git push production main` → `npm ci && npm run build` → `rsync` в веб-корень nginx) — от сайта в Челябинске, рассчитаны только на статический сайт без Strapi. Их нужно дополнить под этот план.
 
 ## Перед запуском
 
@@ -222,7 +222,7 @@ npx vercel deploy --prebuilt --prod
 grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs package.json deploy
 ```
 
-- [ ] **Домен** — `SITE_URL` в `src/config/site.ts` и `astro.config.mjs` (конфиг не импортирует TS), `homepage` в `package.json`, `deploy/*`.
+- [x] **Домен** — `dveriziz.ru`: `SITE_URL` в `src/config/site.ts` и `astro.config.mjs` (конфиг не импортирует TS), `homepage` в `package.json`, `deploy/*`. DNS — направить на сервер, когда он будет.
 - [ ] **Почта салона** — `SITE.email` (пока заглушка, на сайте скрыта флагом `HAS_EMAIL`).
 - [ ] **Имя владельца для политики конфиденциальности** — `ownerName` в `src/lib/contacts-data.ts` (пока «владелец сайта <домен>»). Реквизиты юрлица не публикуются — владелец физлицо.
 - [ ] **Год открытия салона** — `activity.founded` в `src/lib/contacts-data.ts`.

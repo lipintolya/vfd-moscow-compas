@@ -3,9 +3,9 @@ set -euo pipefail
 
 BRANCH="main"
 GIT_DIR="/var/repo/vfd-moscow-compas.git"
-BUILD_DIR="/var/www/domain-placeholder.example/build"
+BUILD_DIR="/var/www/dveriziz.ru/build"
 # Тот же каталог, что root в nginx (setup-server.sh)
-WEB_ROOT="/var/www/domain-placeholder.example/public"
+WEB_ROOT="/var/www/dveriziz.ru/public"
 ENV_FILE="$BUILD_DIR/.env.production"
 
 export GIT_DIR
@@ -54,6 +54,6 @@ while read -r _ _ ref; do
     rsync -a --delete dist/ "$WEB_ROOT/"
 
     chown -R www-data:www-data "$WEB_ROOT"
-    echo "==> Deploy complete: https://domain-placeholder.example"
+    echo "==> Deploy complete: https://dveriziz.ru"
   fi
 done
