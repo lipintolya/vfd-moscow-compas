@@ -21,6 +21,8 @@
 
    Фото: оригиналы — assets/alum-partitions/, облегчённые — npm run gen:alum
    → public/renders/alum-partitions/ (width/height ниже — их реальный размер).
+   Фото фабрики с её логотипом на странице не используем (логотип с чужих
+   фото не стираем): раскладки показаны рисунками створки (AlumLeaf).
    Название салона и адрес — из src/config/site.ts.
    ============================================================ */
 import { SITE } from '../config/site'
@@ -183,7 +185,7 @@ export function sectionCount(g: AlumLayout): number {
 }
 
 export interface AlumModel {
-  /** Имя файла фото: alum-01 … */
+  /** alum-01 … */
   id:       string
   /** Номер раскладки по каталогу фабрики */
   num:      number
@@ -192,17 +194,16 @@ export interface AlumModel {
   /** Раскладка словами: «Сетка 2 × 3, 6 секций» */
   layout:   string
   geometry: AlumLayout
-  /** Отделка на фото фабрики — её подставляет «Собрать такую» */
+  /** Отделка, в которой раскладка нарисована, — её подставляет «Собрать такую» */
   profile:  string
   glass:    string
-  /** Отделка на фото словами */
+  /** Эта отделка словами */
   shown:    string
-  image:    string
 }
 
 /* Модельный ряд = раскладки фабрики. Раскладка — со схемы фабрики;
-   отделка — та, что на фото (профиль «металл» на фото — хром из палитры
-   фабрики, белый — цвет эмали). Фото — models/alum-<номер>.jpg. */
+   отделка — как на её фото раскладки (профиль «металл» — хром из палитры
+   фабрики, белый — цвет эмали). */
 const MODELS: { num: number; title: string; geometry: AlumLayout; profile: string; glass: string }[] = [
   { num: 1,  title: 'Одна перекладина',          geometry: { h: [0.5], v: [] },                                   profile: 'champagne', glass: 'triplex-white' },
   { num: 2,  title: 'Узкая полоса посередине',   geometry: { h: [0.451, 0.549], v: [] },                          profile: 'chrome',    glass: 'triplex-white' },
@@ -225,13 +226,11 @@ export const ALUM_MODELS: AlumModel[] = MODELS.map(({ title, ...m }) => {
     name:   `${ALUM_SYSTEM} №${m.num}`,
     layout: `${title}, ${sections} ${pluralRu(sections, ['секция', 'секции', 'секций'])}`,
     shown:  finishLabel(m.profile, m.glass),
-    image:  `${IMG}/models/${id}.webp`,
   }
 })
 
-/** Размер фото раскладок (все одинаковые) — в тех же пропорциях схема
-    створки в конструкторе */
-export const ALUM_MODEL_IMAGE = { width: 402, height: 1000 }
+/** Пропорции створки на рисунке (AlumLeaf) — как на схеме фабрики */
+export const ALUM_LEAF = { width: 402, height: 1000 }
 
 const FIRST = ALUM_MODELS[0]!.num
 const LAST = ALUM_MODELS.at(-1)!.num
@@ -277,9 +276,9 @@ export const ALUM_SECTIONS = {
     lead:  'Выберите раскладку, цвет профиля и стекло, и схема покажет створку: сквозь прозрачное стекло видно комнату, матовое её размывает, зеркало отражает.',
   },
   photos: {
-    nav:   'Фото',
-    title: 'Раскладки на фото фабрики',
-    lead:  'Каждая раскладка снята в одной из отделок. Если понравилась, нажмите «Собрать такую»: конструктор подставит её раскладку, профиль и стекло.',
+    nav:   'Раскладки',
+    title: `Все ${ALUM_LAYOUT_COUNT}`,
+    lead:  'Каждая показана в одной из отделок. Если понравилась, нажмите «Собрать такую»: конструктор подставит её раскладку, профиль и стекло.',
   },
   specs: {
     nav:   'Характеристики',
@@ -318,7 +317,7 @@ export const ALUM_KIT = {
   separate: { title: 'Отдельно',    items: ['карниз к треку', 'ролики', 'система открывания', 'ручки'] },
 }
 
-/* Комплектующие — с картинки фабрики */
+/* Комплектующие — список (картинка фабрики — с её логотипом, не берём) */
 export const ALUM_COMPONENTS = {
   title: 'Комплектующие',
   items: [
@@ -329,13 +328,6 @@ export const ALUM_COMPONENTS = {
     'Декоративный карниз высотой 70 мм, длиной 3000 мм',
     'Торцевые заглушки, разделитель трека, кронштейн стенового крепления',
   ],
-  image: {
-    src:    `${IMG}/components-1024.webp`,
-    srcset: `${IMG}/components-640.webp 640w, ${IMG}/components-1024.webp 1024w`,
-    width:  1024,
-    height: 703,
-    alt:    `Комплектующие перегородок ${ALUM_SYSTEM}: направляющая, ролик, профили, молдинг, карниз, заглушки, кронштейн`,
-  },
 }
 
 export const ALUM_OPTI_WHITE = {
@@ -365,7 +357,6 @@ export const ALUM_REFERENCES = {
         alt:    `Схема раскладок перегородок ${ALUM_SYSTEM} №${FIRST}–${LAST}: от одной перекладины до сетки 3 × 4`,
       },
     },
-    { caption: ALUM_COMPONENTS.title, image: ALUM_COMPONENTS.image },
     {
       caption: 'Цвета профиля вживую',
       image: {

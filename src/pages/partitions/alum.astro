@@ -6,8 +6,8 @@
  *
  * Порядок: первый экран (кто делает перегородки и кто их рассчитывает —
  * словами во вводке) → конструктор (раскладка, профиль, стекло —
- * AlumBuilder) → фото фабрики лентой, «Собрать такую» подставляет
- * отделку в конструктор → характеристики и материалы фабрики → как
+ * AlumBuilder) → все раскладки лентой — рисунками створки (AlumLeaf),
+ * «Собрать такую» подставляет отделку в конструктор → характеристики и материалы фабрики → как
  * заказать (StepsRow) → статьи по теме → вопросы → как добраться.
  *
  * Тексты, цифры и фото — src/data/alum-partitions.ts (в разметке — только
@@ -15,14 +15,15 @@
  * → npm run gen:alum. Салон — из src/config/site.ts.
  *
  * Для поисковиков: Service с салоном-исполнителем (без бренда фабрики),
- * FAQPage, хлебные крошки, LocalBusiness. Все фото открываются во весь
- * экран (ArticleLightbox, data-zoom).
+ * FAQPage, хлебные крошки, LocalBusiness. Фото открываются во весь экран
+ * (ArticleLightbox, светлый фон). Фото фабрики с её логотипом не используем.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import SectionNav from '../../components/partitions/SectionNav.astro'
 import AlumBuilder from '../../components/partitions/AlumBuilder.astro'
+import AlumLeaf from '../../components/partitions/AlumLeaf.astro'
 import StepsRow from '../../components/home/StepsRow.astro'
 import VisitBand from '../../components/home/VisitBand.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
@@ -31,8 +32,8 @@ import ArticleLightbox from '../../components/articles/ArticleLightbox.astro'
 import '../../styles/home.css'
 import {
   ALUM_SYSTEM, ALUM_PAGE, ALUM_FACTS, ALUM_LAYOUT_COUNT, ALUM_HERO, ALUM_SECTIONS as SEC,
-  ALUM_MODELS, ALUM_MODEL_IMAGE, ALUM_SPECS, ALUM_KIT, ALUM_COMPONENTS, ALUM_OPTI_WHITE,
-  ALUM_REFERENCES, ALUM_STEPS, ALUM_ARTICLES, ALUM_VISIT_LEAD, ALUM_FAQ,
+  ALUM_MODELS, ALUM_SPECS, ALUM_KIT, ALUM_COMPONENTS, ALUM_OPTI_WHITE,
+  ALUM_REFERENCES, ALUM_STEPS, ALUM_ARTICLES, ALUM_VISIT_LEAD, ALUM_FAQ, profileById, glassById,
 } from '../../data/alum-partitions'
 import { getArticles } from '../../lib/articles'
 import { PHONE, SITE } from '../../config/site'
@@ -56,7 +57,7 @@ const serviceSchema = {
   serviceType: 'Подбор и заказ раздвижных алюминиевых перегородок',
   description,
   url: pageUrl,
-  image: [abs(ALUM_HERO.image.src), ...ALUM_MODELS.slice(0, 4).map((m) => abs(m.image))],
+  image: [abs(ALUM_HERO.image.src), ...ALUM_REFERENCES.items.map((r) => abs(r.image.src))],
   provider: { '@id': LOCAL_BUSINESS_ID },
   areaServed: [
     { '@type': 'City', name: SITE.city.name },
@@ -162,7 +163,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
       </div>
     </section>
 
-    {/* ── Фото фабрики ── */}
+    {/* ── Все раскладки — рисунками створки ── */}
     <section id="oa-photos" class="h-sec h-sec--wall" aria-labelledby="oa-photos-title">
       <div class="container">
         <header class="h-head oa-photos__head">
@@ -180,19 +181,19 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
           {ALUM_MODELS.map((m) => (
             <li class="oa-card">
               <figure class="h-media oa-card__media">
-                <button
-                  type="button"
-                  data-zoom={m.image}
-                  data-oa-model-photo={m.num}
-                  data-zoom-caption={`${m.name}: ${m.layout.toLowerCase()}. ${m.shown}`}
-                  aria-label={zoom(`${m.name}, ${m.shown.toLowerCase()}`)}
-                >
-                  <img src={m.image} width={ALUM_MODEL_IMAGE.width} height={ALUM_MODEL_IMAGE.height} alt={`Перегородка ${m.name}: ${m.layout.toLowerCase()}, ${m.shown.toLowerCase()}`} loading="lazy" decoding="async" />
-                </button>
+                <AlumLeaf
+                  uid={`oa-m${m.num}`}
+                  layouts={[m]}
+                  active={m.num}
+                  profile={profileById(m.profile)}
+                  glass={glassById(m.glass)}
+                  title={`Перегородка ${m.name}: ${m.layout.toLowerCase()}, ${m.shown.toLowerCase()}`}
+                  class="oa-card__leaf"
+                />
               </figure>
               <h3 class="oa-card__name">{m.name}</h3>
               <p class="oa-card__layout">{typograph(m.layout)}</p>
-              <p class="h-meta oa-card__shown">{typograph(`На фото: ${m.shown.toLowerCase()}`)}</p>
+              <p class="h-meta oa-card__shown">{typograph(m.shown)}</p>
               <button type="button" class="h-pill h-pill--line oa-card__apply" data-oa-apply={`${m.num},${m.profile},${m.glass}`}>Собрать такую</button>
             </li>
           ))}
@@ -245,7 +246,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
         </div>
 
         <h3 class="oa-subhead oa-refs__title">{ALUM_REFERENCES.title}</h3>
-        <ul class="oa-refs" role="list">
+        <ul class="oa-refs" role="list" style={`--cols: ${ALUM_REFERENCES.items.length}`}>
           {ALUM_REFERENCES.items.map((r) => (
             <li>
               <figure class="oa-ref">
@@ -311,7 +312,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
     if (getComputedStyle(d).getPropertyValue('--oa-fold').trim() === 'closed') d.open = false
   })
 
-  /* Лента фото: стрелки на компьютере, гаснут у краёв ленты */
+  /* Лента раскладок: стрелки на компьютере, гаснут у краёв ленты */
   const rail = document.querySelector<HTMLElement>('[data-oa-rail]')
   const prev = document.querySelector<HTMLButtonElement>('[data-oa-rail-prev]')
   const next = document.querySelector<HTMLButtonElement>('[data-oa-rail-next]')
@@ -352,7 +353,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
   .oa-hero__media { aspect-ratio: 1000 / 743; border-radius: var(--h-tile-radius); }
   .oa-hero__media > button { height: 100%; }
 
-  /* ── Лента фото фабрики ── */
+  /* ── Лента раскладок ── */
   .oa-photos__head .oa-rail__nav { display: none; gap: 0.5rem; margin-top: 1.25rem; }
   @media (hover: hover) and (min-width: 62.5rem) {
     .oa-photos__head .oa-rail__nav { display: flex; }
@@ -389,8 +390,9 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
   }
   .oa-rail::-webkit-scrollbar { display: none; }
   .oa-card { display: flex; flex-direction: column; margin: 0; scroll-snap-align: start; }
-  .oa-card__media { aspect-ratio: 402 / 1000; background: var(--h-paper); }
-  .oa-card__media > button { height: 100%; }
+  /* Рисунок створки на белой подложке — как карточка товара */
+  .oa-card__media { padding: clamp(1rem, 2vw, 1.5rem) clamp(0.75rem, 1.5vw, 1.25rem) 0.5rem; background: var(--h-paper); }
+  .oa-card__media :global(.oa-card__leaf) { width: 100%; height: auto; }
   .oa-card__name { margin: 0.875rem 0 0; font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; color: var(--h-ink); }
   .oa-card__layout { margin: 0.25rem 0 0; font-size: 0.9375rem; line-height: 1.4; color: var(--h-ink); }
   .oa-card__shown { margin: 0.25rem 0 0.875rem; color: var(--h-muted); }
@@ -458,8 +460,10 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
 
   .oa-refs__title { margin-top: clamp(2.5rem, 5vw, 4rem); }
   .oa-refs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 62.5rem) { .oa-refs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  /* Колонок — по числу картинок; на телефоне непарная последняя — во всю ширину */
+  @media (min-width: 62.5rem) { .oa-refs { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
   .oa-refs > li { margin: 0; }
+  @media (max-width: 62.4375rem) { .oa-refs > li:last-child:nth-child(odd) { grid-column: 1 / -1; } }
   .oa-ref { margin: 0; }
   .oa-ref__media {
     aspect-ratio: 4 / 3;

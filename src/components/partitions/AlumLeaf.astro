@@ -1,0 +1,158 @@
+---
+/**
+ * Створка перегородки ALUM вектором — схема в конструкторе (AlumBuilder)
+ * и рисунки раскладок в карточках страницы /partitions/alum/.
+ *
+ * Рама и перекладины — цветом профиля, а стекло ведёт себя как стекло:
+ * сквозь прозрачное видна комната, сатинат её размывает, тонировка
+ * добавляет цвет, зеркало отражает, триплекс белый, чёрный и Лакобель
+ * непрозрачны. Цвета — CSS-переменные --oa-* на <svg> (их же меняет скрипт
+ * конструктора), вид стекла — data-kind. Цвета материалов — из
+ * src/data/alum-partitions.ts (условные, на странице об этом сказано).
+ *
+ * layouts — какие раскладки нарисовать (видна только active: конструктор
+ * переключает её без перерисовки), uid — префикс id фильтров и градиентов:
+ * схем на странице несколько. Размер задаёт тот, кто вставляет (class).
+ */
+import { ALUM_LEAF, type AlumModel, type AlumProfile, type AlumGlass, type AlumLayout } from '../../data/alum-partitions'
+
+interface Props {
+  uid:     string
+  layouts: AlumModel[]
+  active:  number
+  profile: AlumProfile
+  glass:   AlumGlass
+  title:   string
+  class?:  string
+  [attr: string]: unknown
+}
+const { uid, layouts, active, profile, glass, title, class: className, ...attrs } = Astro.props
+
+/* Геометрия (единицы viewBox): створка, под ней — полоса под тень на полу */
+const { width: W, height: H } = ALUM_LEAF
+const FLOOR = 40
+const FRAME = 18
+const BAR = 10
+const HANDLE = { w: 8, h: 120 }
+const IX = FRAME
+const IY = FRAME
+const IW = W - 2 * FRAME
+const IH = H - 2 * FRAME
+
+const bars = (g: AlumLayout) => [
+  ...g.h.map((y) => ({ x: IX, y: IY + y * IH - BAR / 2, w: IW, h: BAR })),
+  ...g.v.map((v) => ({ x: IX + v.x * IW - BAR / 2, y: IY + v.y1 * IH, w: BAR, h: (v.y2 - v.y1) * IH })),
+]
+
+const vars = [
+  `--oa-profile: ${profile.color}`,
+  `--oa-shade: ${profile.shade}`,
+  `--oa-tint: ${glass.color}`,
+  `--oa-tint-o: ${glass.opacity ?? 1}`,
+  `--oa-m1: ${glass.mirror?.[0] ?? glass.color}`,
+  `--oa-m2: ${glass.mirror?.[1] ?? glass.color}`,
+].join('; ')
+const id = (name: string) => `${uid}-${name}`
+const url = (name: string) => `url(#${id(name)})`
+---
+
+<svg
+  class:list={['oa-pv', className]}
+  viewBox={`0 0 ${W} ${H + FLOOR}`}
+  role="img"
+  aria-labelledby={id('title')}
+  data-kind={glass.kind}
+  style={vars}
+  {...attrs}
+>
+  <title id={id('title')} data-oa-pv-title>{title}</title>
+  <defs>
+    <clipPath id={id('glass-area')}><rect x={IX} y={IY} width={IW} height={IH} /></clipPath>
+    <filter id={id('frost')} x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18" /></filter>
+    <filter id={id('soft')} x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="7" /></filter>
+    <linearGradient id={id('mirror-grad')} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" class="oa-stop-m1" />
+      <stop offset="1" class="oa-stop-m2" />
+    </linearGradient>
+    <linearGradient id={id('sheen')} x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0.18" class="oa-stop-sheen" stop-opacity="0" />
+      <stop offset="0.3" class="oa-stop-sheen" stop-opacity="0.32" />
+      <stop offset="0.4" class="oa-stop-sheen" stop-opacity="0" />
+      <stop offset="0.62" class="oa-stop-sheen" stop-opacity="0" />
+      <stop offset="0.68" class="oa-stop-sheen" stop-opacity="0.14" />
+      <stop offset="0.74" class="oa-stop-sheen" stop-opacity="0" />
+    </linearGradient>
+    <radialGradient id={id('floor-shadow')}>
+      <stop offset="0" class="oa-stop-shadow" stop-opacity="0.22" />
+      <stop offset="1" class="oa-stop-shadow" stop-opacity="0" />
+    </radialGradient>
+    {/* Комната за стеклом: стена, окно со светом, диван, светильник, пол */}
+    <g id={id('room')}>
+      <rect width={W} height={H} style="fill: var(--color-slate-100)" />
+      <rect y="800" width={W} height="200" style="fill: var(--color-slate-300)" />
+      <rect y="794" width={W} height="8" style="fill: var(--color-slate-200)" />
+      <rect x="44" y="104" width="206" height="480" style="fill: var(--color-white)" />
+      <path d="M44 104h206v480H44zM147 104v480M44 330h206" style="fill: none; stroke: var(--color-slate-300); stroke-width: 8" />
+      <path d="M44 800h206l70 182H0z" style="fill: var(--color-white); opacity: 0.5" />
+      <path d="M330 0v170" style="stroke: var(--color-slate-400); stroke-width: 3" />
+      <circle cx="330" cy="206" r="36" style="fill: var(--color-white); stroke: var(--color-slate-300); stroke-width: 4" />
+      <rect x="166" y="660" width="280" height="140" rx="20" style="fill: var(--color-slate-500)" />
+      <rect x="190" y="604" width="104" height="86" rx="18" style="fill: var(--color-slate-400)" />
+      <rect x="300" y="604" width="120" height="86" rx="18" style="fill: var(--color-slate-400)" />
+    </g>
+  </defs>
+
+  <ellipse cx={W / 2} cy={H + FLOOR * 0.4} rx={W / 2 - 5} ry={FLOOR * 0.4} fill={url('floor-shadow')} />
+
+  <g clip-path={url('glass-area')}>
+    <use href={`#${id('room')}`} class="oa-pv__room" />
+    <use href={`#${id('room')}`} class="oa-pv__frost" filter={url('frost')} />
+    <rect class="oa-pv__tint" x={IX} y={IY} width={IW} height={IH} />
+    <rect class="oa-pv__mirror" x={IX} y={IY} width={IW} height={IH} fill={url('mirror-grad')} />
+    <use href={`#${id('room')}`} class="oa-pv__reflect" transform={`matrix(-1 0 0 1 ${W} 0)`} filter={url('soft')} />
+    <rect class="oa-pv__solid" x={IX} y={IY} width={IW} height={IH} />
+    <rect class="oa-pv__sheen" x={IX} y={IY} width={IW} height={IH} fill={url('sheen')} />
+  </g>
+
+  <g class="oa-pv__bars">
+    {layouts.map((m) => (
+      <g data-oa-layout={m.num} data-active={m.num === active ? '' : undefined}>
+        {bars(m.geometry).map((b) => <rect x={b.x} y={b.y} width={b.w} height={b.h} />)}
+      </g>
+    ))}
+  </g>
+  <path class="oa-pv__frame" fill-rule="evenodd" d={`M0 0H${W}V${H}H0Z M${IX} ${IY}V${IY + IH}H${IX + IW}V${IY}Z`} />
+  <rect class="oa-pv__handle" x={(FRAME - HANDLE.w) / 2} y={(H - HANDLE.h) / 2} width={HANDLE.w} height={HANDLE.h} rx={HANDLE.w / 2} />
+</svg>
+
+<style>
+  .oa-pv { display: block; overflow: visible; }
+
+  .oa-pv :is(.oa-pv__room, .oa-pv__frost, .oa-pv__tint, .oa-pv__mirror, .oa-pv__reflect, .oa-pv__solid) { display: none; }
+  .oa-pv[data-kind='clear'] :is(.oa-pv__room, .oa-pv__tint) { display: inline; }
+  .oa-pv[data-kind='frosted'] :is(.oa-pv__frost, .oa-pv__tint) { display: inline; }
+  .oa-pv[data-kind='mirror'] :is(.oa-pv__mirror, .oa-pv__reflect) { display: inline; }
+  .oa-pv[data-kind='solid'] .oa-pv__solid { display: inline; }
+
+  .oa-pv__tint { fill: var(--oa-tint); fill-opacity: var(--oa-tint-o); }
+  .oa-pv__solid { fill: var(--oa-tint); }
+  .oa-pv__reflect { opacity: 0.2; }
+  .oa-pv__sheen { opacity: 0.55; }
+  .oa-pv[data-kind='mirror'] .oa-pv__sheen { opacity: 0.9; }
+  .oa-pv[data-kind='frosted'] .oa-pv__sheen { opacity: 0.25; }
+  .oa-stop-m1 { stop-color: var(--oa-m1); }
+  .oa-stop-m2 { stop-color: var(--oa-m2); }
+  .oa-stop-sheen { stop-color: var(--color-white); }
+  .oa-stop-shadow { stop-color: var(--color-slate-950); }
+
+  .oa-pv__frame,
+  .oa-pv__bars rect {
+    fill: var(--oa-profile);
+    stroke: var(--oa-shade);
+    stroke-width: 1.25;
+    vector-effect: non-scaling-stroke;
+  }
+  .oa-pv__handle { fill: var(--oa-shade); }
+  /* Видна только выбранная раскладка (data-active) */
+  .oa-pv__bars g:not([data-active]) { display: none; }
+</style>
