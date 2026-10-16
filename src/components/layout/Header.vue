@@ -2,6 +2,8 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { useScrollLock } from '../../lib/scroll-lock'
+import { openingStatus } from '../../lib/opening-status'
+import { typograph } from '../../lib/typograph'
 import { SITE } from '../../config/site'
 
 /* ============================================================
@@ -78,13 +80,6 @@ const SUBMENU: Record<string, readonly { href: string; label: string; desc: stri
   '/partitions/': PARTITIONS_DROPDOWN,
 }
 
-/* Часы — из contacts-data (единственный источник), а не числами здесь:
-   раньше тут жил старый график 10–20/10–18, расходившийся с остальным сайтом. */
-const hourOf = (hhmm: string) => Number(hhmm.split(':')[0])
-const WORK_SCHEDULE = {
-  weekday: { open: hourOf(companyLegalInfo.workingHours.weekdays.opens), close: hourOf(companyLegalInfo.workingHours.weekdays.closes) },
-  weekend: { open: hourOf(companyLegalInfo.workingHours.saturday.opens), close: hourOf(companyLegalInfo.workingHours.saturday.closes) },
-} as const
 
 /* ============================================================
    State
@@ -127,39 +122,18 @@ const isSection = (href: string) => {
 /* ============================================================
    Work-hours logic
    ============================================================ */
-const getScheduleForDay = (date: Date) => {
-  const day = date.getDay()
-  if (day === 0 || day === 6) return WORK_SCHEDULE.weekend // Сб-Вс
-  return WORK_SCHEDULE.weekday                               // Пн-Пт
-}
-
-const schedule = computed(() => getScheduleForDay(now.value))
-
-const isOpen = computed(() => {
-  const h = now.value.getHours()
-  const s = schedule.value
-  return h >= s.open && h < s.close
-})
-
-const pad2 = (h: number) => `${String(h).padStart(2, '0')}:00`
+/* Часы — из contacts-data (единственный источник), время — московское:
+   посетитель из другого часового пояса видит статус салона, а не свой.
+   Расчёт с минутами (закрываемся в 19:30) — src/lib/opening-status.ts. */
+const status = computed(() => openingStatus(now.value, companyLegalInfo.workingHours, SITE.hours.timeZone))
+const isOpen = computed(() => status.value.open)
 
 /* Статус — обычным текстом: закрытый вечером салон — штатная ситуация,
    а не ошибка, поэтому «закрыто» не красим в красный. «Открыто» —
    голубым (тот же цвет, что «В наличии» в каталоге). */
 const statusTitle = computed(() => (isOpen.value ? 'Сейчас открыто' : 'Сейчас закрыто'))
-
-const statusDetail = computed(() => {
-  const s = schedule.value
-  if (isOpen.value) return `Работаем до ${pad2(s.close)}`
-
-  // Ещё не наступило время открытия сегодня
-  if (now.value.getHours() < s.open) return `Откроемся сегодня в ${pad2(s.open)}`
-
-  // Уже закрылись — смотрим на завтра
-  const tomorrow = new Date(now.value)
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  return `Откроемся завтра в ${pad2(getScheduleForDay(tomorrow).open)}`
-})
+/* «до 19:30» не разрывается переносом */
+const statusDetail = computed(() => typograph(status.value.detail))
 
 /* ============================================================
    Handlers
@@ -402,15 +376,17 @@ onUnmounted(() => {
                 aria-modal="false"
                 class="hdr-pop"
               >
-                <a
-                  v-for="p in CONTACTS.phones"
-                  :key="p.raw"
-                  :href="`tel:${p.raw}`"
-                  class="hdr-pop__phone"
-                >
-                  <span class="hdr-pop__phone-num hdr-num">{{ p.label }}</span>
-                  <span class="hdr-pop__muted">{{ p.title }}</span>
-                </a>
+                <div class="hdr-pop__phones">
+                  <a
+                    v-for="p in CONTACTS.phones"
+                    :key="p.raw"
+                    :href="`tel:${p.raw}`"
+                    class="hdr-pop__phone"
+                  >
+                    <span class="hdr-pop__phone-num hdr-num">{{ p.label }}</span>
+                    <span class="hdr-pop__muted">{{ p.title }}</span>
+                  </a>
+                </div>
 
                 <dl class="hdr-pop__list">
                   <div>
@@ -1001,17 +977,23 @@ onUnmounted(() => {
   text-align: left;
   box-shadow: 0 0 0 var(--hdr-hair) var(--hdr-line), 0 1.5rem 3.5rem -1rem var(--hdr-shadow);
 }
+/* Телефоны — одним блоком: общая подложка, между номерами — линия */
+.hdr-pop__phones {
+  overflow: hidden;
+  border-radius: 0.875rem;
+  background: var(--hdr-fill);
+}
 .hdr-pop__phone {
   display: flex;
   flex-direction: column;
   padding: 0.75rem 0.875rem;
-  border-radius: 0.875rem;
-  background: var(--hdr-fill);
   color: inherit;
   text-decoration: none;
   transition: background-color 150ms var(--hdr-ease);
 }
+.hdr-pop__phone + .hdr-pop__phone { box-shadow: inset 0 var(--hdr-hair) 0 var(--hdr-line); }
 .hdr-pop__phone:hover { background: var(--hdr-fill-hover); }
+.hdr-pop__phone:focus-visible { outline-offset: -0.125rem; }
 .hdr-pop__phone-num { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
 .hdr-pop__muted { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--hdr-fg-muted); }
 .hdr-pop__list { margin: 0.75rem 0 0; }

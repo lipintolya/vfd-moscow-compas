@@ -105,8 +105,8 @@ export const SITE = {
   ],
 
   /** Часы работы салона — ежедневно; подписи и schema.org строятся из них
-      (src/lib/contacts-data.ts) */
-  hours: { opens: '10:00', closes: '19:30' },
+      (src/lib/contacts-data.ts). timeZone — по нему «Сейчас открыто» в шапке */
+  hours: { opens: '10:00', closes: '19:30', timeZone: 'Europe/Moscow' },
   email: 'info@domain-placeholder.example',
 
   /** Единственная соцсеть салона — Telegram-КАНАЛ (не личный чат):
