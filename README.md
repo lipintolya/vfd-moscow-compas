@@ -6,7 +6,7 @@
 
 ## О проекте
 
-Витрина + каталог на Supabase с клиентской фильтрацией, отдельные товарные линейки (скрытые двери, алюминиевые перегородки GRAFIA и ОНИКС, декор) на статических данных, статьи, акции и портфолио работ салона из CMS Strapi (директор правит сам), калькулятор стоимости комплекта, ссылка на Telegram-канал.
+Витрина + каталог на Supabase с клиентской фильтрацией, отдельные товарные линейки (скрытые двери, алюминиевые перегородки GRAFIA и ALUM, декор) на статических данных, статьи, акции и портфолио работ салона из CMS Strapi (директор правит сам), калькулятор стоимости комплекта, ссылка на Telegram-канал.
 
 Сайт статически собирается (Astro `output: static`) и деплоится по `git push` на bare-metal VPS — без CI/CD-провайдеров, без Vercel/Netlify.
 
@@ -22,7 +22,7 @@
 ## Архитектура
 
 - **Каталог дверей** — данные приходят из Supabase на сервере при сборке, нормализуются в плоский `CardItem`, дальше вся фильтрация/сортировка/URL-синк — на клиенте в Vue-острове, без серверных round-trip'ов на каждый фильтр.
-- **Товарные линейки вне Supabase** (`src/data/*.ts`) — скрытые двери с калькулятором цены, алюминиевые перегородки GRAFIA и ОНИКС (конструктор раскладки, профиля и стекла), декор.
+- **Товарные линейки вне Supabase** (`src/data/*.ts`) — скрытые двери с калькулятором цены, алюминиевые перегородки GRAFIA и ALUM (конструктор раскладки, профиля и стекла), декор.
 - **SEO как часть архитектуры**, не довесок: `astro-sitemap` с кастомными приоритетами, JSON-LD (`Product`, `BreadcrumbList`, `FAQPage`, `Review`, `LocalBusiness`), единый trailing-slash по всем внутренним ссылкам и canonical-тегам, `robots.txt`/`sitemap.xml` и `/llms.txt` собираются из `site.ts`.
 - **Статьи, акции и портфолио** — в Strapi (см. «Strapi — контент для директора»): сайт при сборке забирает опубликованные записи в коллекции Astro `promos` и `works` (`src/lib/strapi-content.ts`), фото — уменьшенные копии, которые Strapi нарезает при загрузке. Strapi недоступен — сборка падает с подсказкой, пустой раздел на сайт не уходит.
 - **Изображения** — все фото сайта лежат в проекте: `public/media/<хранилище>/<путь>` (копии бывших облачных, в коде — `/media/…`), облегчённые версии для страниц — `public/renders/` (скрипты `npm run gen:*`), исходники, которых нет больше нигде, — `assets/`. Фото каталога из Supabase (`photo_url`) сайт при сборке подменяет на копию из `public/media` (`src/lib/media.ts`). В облаке остались только видео.
@@ -60,7 +60,7 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs public deploy
 |---|---|---|
 | Статьи и публикации `/articles/` | Strapi: раздел «Статьи» — текст блоками, подстановки `{адрес салона}` (список — `src/data/article-substitutions.ts`) | там же, в блоках статьи |
 | Перегородки GRAFIA `/partitions/` | `src/data/partitions.ts` | `public/media/catalog-vfd/…`; рендеры — `npm run gen:renders` |
-| Перегородки ОНИКС ALUM `/partitions/oniks-alum/` | `src/data/oniks-alum.ts` — все тексты страницы; цифры фабрики (высота, ширина, срок, стекло) — один раз в `ONIKS_SPEC` | оригиналы — `assets/oniks-alum/` (инструкция в README там же), облегчённые — `npm run gen:oniks` |
+| Перегородки ALUM `/partitions/alum/` | `src/data/alum-partitions.ts` — все тексты страницы; цифры фабрики (высота, ширина, срок, стекло) — один раз в `ALUM_SPEC` | оригиналы — `assets/alum-partitions/` (инструкция в README там же), облегчённые — `npm run gen:alum` |
 | Скрытые двери `/catalog/skrytye-dveri/` | `src/data/skrytye-dveri-products.ts`, `hidden-doors-page.ts` | `public/media/catalog-vfd/invisible/…` |
 | Видео | `src/data/videos.ts`; ролик для статьи — `npm run video:optimize` | ролики — облако; обложки и ролики статей — `public/renders/` |
 | Акции (главная, `/akcii/`, архив) | Strapi: раздел «Акции» | там же, в карточке акции |
@@ -129,7 +129,7 @@ npm run dev            # в другом терминале
 
 | Команда | Что обновляет |
 |---|---|
-| `npm run gen:oniks` | Фото страницы перегородок ОНИКС из `assets/oniks-alum/` |
+| `npm run gen:alum` | Фото страницы перегородок ALUM из `assets/alum-partitions/` |
 | `npm run gen:renders` | Галерея рендеров перегородок GRAFIA |
 | `npm run gen:partitions-hero` / `gen:partitions-tracks` / `gen:partitions-swatches` | Первый экран, направляющие и образцы цветов профиля на `/partitions/` |
 | `npm run gen:series-covers` | Обложки серий каталога |

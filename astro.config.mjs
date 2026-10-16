@@ -235,7 +235,7 @@ export default defineConfig({
         if (/\/(catalog|about|contacts|partitions|designers|video)\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
-        // Партнёрские страницы перегородок — /partitions/oniks-alum/
+        // Партнёрские страницы перегородок — /partitions/alum/
         if (/\/partitions\/[a-z0-9-]+\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.8 }
         }

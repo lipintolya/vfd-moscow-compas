@@ -8,7 +8,7 @@ import { reviews, YANDEX_RATING } from '../data/reviews'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { getArticles, articleHref } from '../lib/articles'
 import { ARTICLES_SECTION } from '../data/article-kinds'
-import { ONIKS, ONIKS_PAGE, ONIKS_FACTS, ONIKS_LAYOUT_COUNT } from '../data/oniks-alum'
+import { ALUM_PAGE, ALUM_FACTS, ALUM_LAYOUT_COUNT } from '../data/alum-partitions'
 
 const abs = (path: string) => new URL(path, SITE.url).href
 
@@ -18,7 +18,7 @@ export const GET: APIRoute = async () => {
     ['Каталог межкомнатных дверей', '/catalog/', 'серии, покрытия, цвета и цены'],
     ['Скрытые двери', '/catalog/skrytye-dveri/', 'двери скрытого монтажа, размеры и цены'],
     ['Алюминиевые перегородки', '/partitions/', 'раздвижные и стационарные системы со стеклом'],
-    [ONIKS_PAGE.name, ONIKS_PAGE.path, `раздвижные перегородки фабрики ${ONIKS.brand}: ${ONIKS_LAYOUT_COUNT}, ${ONIKS_FACTS.glass}, высота ${ONIKS_FACTS.height}`],
+    [ALUM_PAGE.name, ALUM_PAGE.path, `раздвижные алюминиевые перегородки: ${ALUM_LAYOUT_COUNT}, ${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height}`],
     ['Дизайнерам и архитекторам', '/designers/', 'сотрудничество и шоурум для встреч с заказчиками'],
     ['О нас', '/about/', `${SITE.studioName} — официальный дилер ${SITE.manufacturerOf}`],
     ['Контакты', '/contacts/', 'адрес, часы работы, как добраться'],

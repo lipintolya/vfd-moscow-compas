@@ -1,20 +1,20 @@
 ---
 /**
- * /partitions/oniks-alum/ — перегородки ALUM фабрики ОНИКС, коллаборация
- * со Студией Зизевского. Отдельно от /partitions/ (системы GRAFIA), но в
+ * /partitions/alum/ — раздвижные перегородки ALUM, подбор и расчёт в
+ * Студии Зизевского. Название фабрики на странице не упоминается. Отдельно от /partitions/ (системы GRAFIA), но в
  * дизайн-системе главной (home.css).
  *
  * Порядок: первый экран (кто делает перегородки и кто их рассчитывает —
  * словами во вводке) → конструктор (раскладка, профиль, стекло —
- * OniksBuilder) → фото фабрики лентой, «Собрать такую» подставляет
+ * AlumBuilder) → фото фабрики лентой, «Собрать такую» подставляет
  * отделку в конструктор → характеристики и материалы фабрики → как
  * заказать (StepsRow) → статьи по теме → вопросы → как добраться.
  *
- * Тексты, цифры и фото — src/data/oniks-alum.ts (в разметке — только
- * подписи кнопок), исходники фото — assets/oniks-alum/ (README там же)
- * → npm run gen:oniks. Салон — из src/config/site.ts.
+ * Тексты, цифры и фото — src/data/alum-partitions.ts (в разметке — только
+ * подписи кнопок), исходники фото — assets/alum-partitions/ (README там же)
+ * → npm run gen:alum. Салон — из src/config/site.ts.
  *
- * Для поисковиков: Service с брендом ОНИКС и салоном-исполнителем,
+ * Для поисковиков: Service с салоном-исполнителем (без бренда фабрики),
  * FAQPage, хлебные крошки, LocalBusiness. Все фото открываются во весь
  * экран (ArticleLightbox, data-zoom).
  */
@@ -22,7 +22,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import SectionNav from '../../components/partitions/SectionNav.astro'
-import OniksBuilder from '../../components/partitions/OniksBuilder.astro'
+import AlumBuilder from '../../components/partitions/AlumBuilder.astro'
 import StepsRow from '../../components/home/StepsRow.astro'
 import VisitBand from '../../components/home/VisitBand.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
@@ -30,34 +30,33 @@ import ArticleNav from '../../components/articles/ArticleNav.astro'
 import ArticleLightbox from '../../components/articles/ArticleLightbox.astro'
 import '../../styles/home.css'
 import {
-  ONIKS, ONIKS_PAGE, ONIKS_FACTS, ONIKS_LAYOUT_COUNT, ONIKS_HERO, ONIKS_SECTIONS as SEC,
-  ONIKS_MODELS, ONIKS_MODEL_IMAGE, ONIKS_SPECS, ONIKS_KIT, ONIKS_COMPONENTS, ONIKS_OPTI_WHITE,
-  ONIKS_REFERENCES, ONIKS_STEPS, ONIKS_ARTICLES, ONIKS_VISIT_LEAD, ONIKS_FAQ,
-} from '../../data/oniks-alum'
+  ALUM_SYSTEM, ALUM_PAGE, ALUM_FACTS, ALUM_LAYOUT_COUNT, ALUM_HERO, ALUM_SECTIONS as SEC,
+  ALUM_MODELS, ALUM_MODEL_IMAGE, ALUM_SPECS, ALUM_KIT, ALUM_COMPONENTS, ALUM_OPTI_WHITE,
+  ALUM_REFERENCES, ALUM_STEPS, ALUM_ARTICLES, ALUM_VISIT_LEAD, ALUM_FAQ,
+} from '../../data/alum-partitions'
 import { getArticles } from '../../lib/articles'
 import { PHONE, SITE } from '../../config/site'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../../lib/local-business-schema'
 import { typograph, upperFirst } from '../../lib/typograph'
 
 /* ── SEO ── Перегородки другой фабрики: в заголовке — салон, а не бренд ВФД */
-const title = `${ONIKS_PAGE.name} ${SITE.city.in} — ${SITE.studioName}, ${SITE.address.mall}`
+const title = `${ALUM_PAGE.name} ${SITE.city.in} — ${SITE.studioName}, ${SITE.address.mall}`
 // ~160 символов — длиннее поисковики обрезают
 const description =
-  `Раздвижные алюминиевые перегородки ${ONIKS.system} фабрики ${ONIKS.brand} ${SITE.city.in}: ${ONIKS_LAYOUT_COUNT}, ` +
-  `${ONIKS_FACTS.glass}, высота ${ONIKS_FACTS.height}. Подбор и расчёт в ${SITE.studioNameOf}.`
-const pageUrl = new URL(ONIKS_PAGE.path, SITE.url).href
+  `Раздвижные алюминиевые перегородки ${ALUM_SYSTEM} ${SITE.city.in}: ${ALUM_LAYOUT_COUNT}, ` +
+  `${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height}. Подбор и расчёт в ${SITE.studioNameOf}.`
+const pageUrl = new URL(ALUM_PAGE.path, SITE.url).href
 const abs = (src: string) => new URL(src, SITE.url).href
 
 const serviceSchema = {
   '@context': 'https://schema.org',
   '@type': 'Service',
   '@id': `${pageUrl}#service`,
-  name: `Алюминиевые перегородки ${ONIKS.system} фабрики ${ONIKS.brand} ${SITE.city.in}`,
+  name: `Раздвижные алюминиевые перегородки ${ALUM_SYSTEM} ${SITE.city.in}`,
   serviceType: 'Подбор и заказ раздвижных алюминиевых перегородок',
   description,
   url: pageUrl,
-  image: [abs(ONIKS_HERO.image.src), ...ONIKS_MODELS.slice(0, 4).map((m) => abs(m.image))],
-  brand: { '@type': 'Brand', name: ONIKS.brand },
+  image: [abs(ALUM_HERO.image.src), ...ALUM_MODELS.slice(0, 4).map((m) => abs(m.image))],
   provider: { '@id': LOCAL_BUSINESS_ID },
   areaServed: [
     { '@type': 'City', name: SITE.city.name },
@@ -68,7 +67,7 @@ const serviceSchema = {
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: ONIKS_FAQ.map((f) => ({
+  mainEntity: ALUM_FAQ.map((f) => ({
     '@type': 'Question',
     name: f.q,
     acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -78,7 +77,7 @@ const faqSchema = {
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
   { label: 'Перегородки', href: '/partitions/' },
-  { label: ONIKS_PAGE.name },
+  { label: ALUM_PAGE.name },
 ]
 
 const navItems = [
@@ -91,9 +90,9 @@ const navItems = [
 
 /* Статьи по теме — по списку из данных; опечатка в имени — ошибка сборки */
 const articles = await getArticles()
-const related = ONIKS_ARTICLES.map((id) => {
+const related = ALUM_ARTICLES.map((id) => {
   const article = articles.find((a) => a.id === id)
-  if (!article) throw new Error(`ОНИКС: нет статьи «${id}» — поправьте ONIKS_ARTICLES в src/data/oniks-alum.ts`)
+  if (!article) throw new Error(`Перегородки ALUM: нет статьи «${id}» — поправьте ALUM_ARTICLES в src/data/alum-partitions.ts`)
   return article
 })
 
@@ -106,10 +105,10 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
   title={title}
   description={description}
   canonical={pageUrl}
-  ogImage={abs(ONIKS_HERO.image.src)}
+  ogImage={abs(ALUM_HERO.image.src)}
   structuredData={[localBusinessSchema({ url: SITE.url }), serviceSchema, faqSchema]}
-  preloadImage={ONIKS_HERO.image.src}
-  preloadImageSrcset={ONIKS_HERO.image.srcset}
+  preloadImage={ALUM_HERO.image.src}
+  preloadImageSrcset={ALUM_HERO.image.srcset}
   preloadImageSizes="(min-width: 62.5rem) 52vw, 100vw"
 >
   <SectionNav items={navItems} />
@@ -125,22 +124,22 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
     <section class="oa-hero" aria-labelledby="oa-title">
       <div class="container oa-hero__grid">
         <div>
-          <h1 id="oa-title" class="oa-hero__title">{typograph(ONIKS_HERO.title)}</h1>
-          <p class="h-lead oa-hero__lead">{typograph(ONIKS_HERO.lead)}</p>
+          <h1 id="oa-title" class="oa-hero__title">{typograph(ALUM_HERO.title)}</h1>
+          <p class="h-lead oa-hero__lead">{typograph(ALUM_HERO.lead)}</p>
           <div class="oa-hero__actions">
             <a href="#oa-builder" class="h-btn h-btn--signal">Собрать перегородку</a>
             <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--quiet">Рассчитать по&nbsp;телефону</a>
           </div>
         </div>
         <figure class="h-media oa-hero__media">
-          <button type="button" data-zoom={ONIKS_HERO.image.src} data-zoom-caption={ONIKS_HERO.image.alt} aria-label={zoom(ONIKS_HERO.image.alt)}>
+          <button type="button" data-zoom={ALUM_HERO.image.src} data-zoom-caption={ALUM_HERO.image.alt} aria-label={zoom(ALUM_HERO.image.alt)}>
             <img
-              src={ONIKS_HERO.image.src}
-              srcset={ONIKS_HERO.image.srcset}
+              src={ALUM_HERO.image.src}
+              srcset={ALUM_HERO.image.srcset}
               sizes="(min-width: 62.5rem) 52vw, 100vw"
-              width={ONIKS_HERO.image.width}
-              height={ONIKS_HERO.image.height}
-              alt={ONIKS_HERO.image.alt}
+              width={ALUM_HERO.image.width}
+              height={ALUM_HERO.image.height}
+              alt={ALUM_HERO.image.alt}
               loading="eager"
               fetchpriority="high"
               decoding="async"
@@ -159,7 +158,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
             <p class="h-lead">{typograph(SEC.builder.lead)}</p>
           </div>
         </header>
-        <OniksBuilder />
+        <AlumBuilder />
       </div>
     </section>
 
@@ -178,7 +177,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
         </header>
 
         <ul class="oa-rail" role="list" data-oa-rail>
-          {ONIKS_MODELS.map((m) => (
+          {ALUM_MODELS.map((m) => (
             <li class="oa-card">
               <figure class="h-media oa-card__media">
                 <button
@@ -188,7 +187,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
                   data-zoom-caption={`${m.name}: ${m.layout.toLowerCase()}. ${m.shown}`}
                   aria-label={zoom(`${m.name}, ${m.shown.toLowerCase()}`)}
                 >
-                  <img src={m.image} width={ONIKS_MODEL_IMAGE.width} height={ONIKS_MODEL_IMAGE.height} alt={`Перегородка ${m.name}: ${m.layout.toLowerCase()}, ${m.shown.toLowerCase()}`} loading="lazy" decoding="async" />
+                  <img src={m.image} width={ALUM_MODEL_IMAGE.width} height={ALUM_MODEL_IMAGE.height} alt={`Перегородка ${m.name}: ${m.layout.toLowerCase()}, ${m.shown.toLowerCase()}`} loading="lazy" decoding="async" />
                 </button>
               </figure>
               <h3 class="oa-card__name">{m.name}</h3>
@@ -213,7 +212,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
 
         <div class="oa-specs-grid">
           <dl class="oa-specs">
-            {ONIKS_SPECS.map((s) => (
+            {ALUM_SPECS.map((s) => (
               <div class="oa-specs__row">
                 <dt class="h-meta">{s.label}</dt>
                 <dd class="h-body">{typograph(upperFirst(s.value))}</dd>
@@ -221,7 +220,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
             ))}
           </dl>
           <div class="oa-kit">
-            {Object.values(ONIKS_KIT).map((group) => (
+            {Object.values(ALUM_KIT).map((group) => (
               <div>
                 <h3 class="oa-subhead">{group.title}</h3>
                 <ul class="oa-rules" role="list">
@@ -234,20 +233,20 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
 
         <div class="oa-specs-grid oa-specs-grid--more">
           <details class="oa-fold" open data-collapse-mobile>
-            <summary class="oa-subhead">{ONIKS_COMPONENTS.title}</summary>
+            <summary class="oa-subhead">{ALUM_COMPONENTS.title}</summary>
             <ul class="oa-rules" role="list">
-              {ONIKS_COMPONENTS.items.map((c) => <li class="h-body">{typograph(c)}</li>)}
+              {ALUM_COMPONENTS.items.map((c) => <li class="h-body">{typograph(c)}</li>)}
             </ul>
           </details>
           <details class="oa-fold" open data-collapse-mobile>
-            <summary class="oa-subhead">{ONIKS_OPTI_WHITE.title}</summary>
-            <p class="h-body oa-opti">{typograph(ONIKS_OPTI_WHITE.text)}</p>
+            <summary class="oa-subhead">{ALUM_OPTI_WHITE.title}</summary>
+            <p class="h-body oa-opti">{typograph(ALUM_OPTI_WHITE.text)}</p>
           </details>
         </div>
 
-        <h3 class="oa-subhead oa-refs__title">{ONIKS_REFERENCES.title}</h3>
+        <h3 class="oa-subhead oa-refs__title">{ALUM_REFERENCES.title}</h3>
         <ul class="oa-refs" role="list">
-          {ONIKS_REFERENCES.items.map((r) => (
+          {ALUM_REFERENCES.items.map((r) => (
             <li>
               <figure class="oa-ref">
                 <button type="button" class="oa-ref__media" data-zoom={r.image.src} data-zoom-caption={r.caption} aria-label={zoom(r.image.alt)}>
@@ -262,7 +261,7 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
     </section>
 
     {/* ── Как заказать ── */}
-    <StepsRow id="oa-order" title={SEC.order.title} lead={SEC.order.lead} steps={ONIKS_STEPS}>
+    <StepsRow id="oa-order" title={SEC.order.title} lead={SEC.order.lead} steps={ALUM_STEPS}>
       <p class="oa-order__call">
         <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать по&nbsp;телефону</a>
       </p>
@@ -292,14 +291,15 @@ const chevron = (d: string) => `<svg viewBox="0 0 16 16" width="16" height="16" 
       <div class="container oa-faq">
         <h2 id="oa-faq-title" class="h-h2">{typograph(SEC.faq.title)}</h2>
         <div class="oa-faq__list">
-          <FaqAccordion items={ONIKS_FAQ} title={false} />
+          <FaqAccordion items={ALUM_FAQ} title={false} />
         </div>
       </div>
     </section>
 
-    <VisitBand lead={ONIKS_VISIT_LEAD} />
+    <VisitBand lead={ALUM_VISIT_LEAD} />
 
-    <ArticleLightbox />
+    {/* Светлый фон: чёрный профиль перегородок на тёмном теряется */}
+    <ArticleLightbox tone="light" />
   </div>
 </BaseLayout>
 

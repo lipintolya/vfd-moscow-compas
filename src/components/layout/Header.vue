@@ -70,7 +70,7 @@ const CATALOG_DROPDOWN = [
 
 const PARTITIONS_DROPDOWN = [
   { href: '/partitions/',            label: 'Перегородки ВФД',   desc: 'GRAFIA: раздвижные, распашные' },
-  { href: '/partitions/oniks-alum/', label: 'Перегородки ОНИКС', desc: 'ALUM: 10 раскладок' },
+  { href: '/partitions/alum/', label: 'Перегородки ALUM', desc: '10 раскладок и конструктор' },
 ] as const
 
 const SUBMENU: Record<string, readonly { href: string; label: string; desc: string }[]> = {
@@ -117,7 +117,7 @@ const isActive = (href: string) => currentPath.value === href
 
 /* Активный раздел для точки под пунктом: каталог подсвечивается
    и на вложенных страницах (/catalog/series/…, /models/…), перегородки —
-   и на /partitions/oniks-alum/. */
+   и на /partitions/alum/. */
 const isSection = (href: string) => {
   if (href === '/catalog/') return currentPath.value.startsWith('/catalog') || currentPath.value.startsWith('/models')
   if (href === '/partitions/') return currentPath.value.startsWith('/partitions')

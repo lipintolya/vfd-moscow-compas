@@ -13,10 +13,16 @@
  * из коробки. Прокрутку страницы держит useScrollLock (CLAUDE.md:
  * не body.style.overflow). Без анимаций: сначала показываем уже
  * загруженное фото из текста, оригинал подменяет его, когда загрузится.
+ *
+ * tone — фон окна: тёмный (статьи) или светлый — для фото, где главное
+ * тёмное (чёрный профиль перегородки теряется на тёмном фоне). Цвета
+ * окна — из двух переменных, --alb-bg и --alb-ink.
  */
+interface Props { tone?: 'dark' | 'light' }
+const { tone = 'dark' } = Astro.props
 ---
 
-<dialog class="alb" aria-label="Просмотр фото" data-alb>
+<dialog class:list={['alb', { 'alb--light': tone === 'light' }]} aria-label="Просмотр фото" data-alb>
   <div class="alb__top">
     <p class="alb__count" data-alb-count aria-live="polite"></p>
     <button type="button" class="alb__btn" data-alb-close aria-label="Закрыть">
@@ -138,8 +144,14 @@
     margin: 0;
     padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
     border: 0;
-    background: var(--color-slate-950);
-    color: var(--color-white);
+    --alb-bg: var(--color-slate-950);
+    --alb-ink: var(--color-white);
+    background: var(--alb-bg);
+    color: var(--alb-ink);
+  }
+  .alb--light {
+    --alb-bg: var(--color-slate-100);
+    --alb-ink: var(--color-slate-900);
   }
   .alb[open] {
     display: grid;
@@ -159,7 +171,7 @@
     margin: 0;
     font-size: 0.875rem;
     font-variant-numeric: tabular-nums;
-    color: color-mix(in srgb, var(--color-white) 70%, transparent);
+    color: color-mix(in srgb, var(--alb-ink) 70%, transparent);
   }
   .alb__caption {
     flex: 1;
@@ -167,7 +179,7 @@
     font-size: 0.875rem;
     line-height: 1.4;
     text-align: center;
-    color: color-mix(in srgb, var(--color-white) 85%, transparent);
+    color: color-mix(in srgb, var(--alb-ink) 85%, transparent);
     text-wrap: balance;
   }
   .alb__btn {
@@ -177,15 +189,15 @@
     width: 2.75rem;
     height: 2.75rem;
     padding: 0;
-    border: 0.0625rem solid color-mix(in srgb, var(--color-white) 22%, transparent);
+    border: 0.0625rem solid color-mix(in srgb, var(--alb-ink) 22%, transparent);
     border-radius: 50%;
-    background: color-mix(in srgb, var(--color-white) 8%, transparent);
+    background: color-mix(in srgb, var(--alb-ink) 8%, transparent);
     color: inherit;
     cursor: pointer;
     transition: background-color 150ms var(--ease-out);
   }
-  .alb__btn:hover { background: color-mix(in srgb, var(--color-white) 18%, transparent); }
-  .alb__btn:focus-visible { outline: 0.125rem solid var(--color-white); outline-offset: 0.1875rem; }
+  .alb__btn:hover { background: color-mix(in srgb, var(--alb-ink) 18%, transparent); }
+  .alb__btn:focus-visible { outline: 0.125rem solid var(--alb-ink); outline-offset: 0.1875rem; }
   .alb__btn[hidden] { visibility: hidden; display: grid !important; }
 
   .alb__stage {

@@ -1,48 +1,46 @@
 /* ============================================================
-   Страница /partitions/oniks-alum/ — алюминиевые перегородки ALUM
-   фабрики ОНИКС, коллаборация со Студией Зизевского.
+   Страница /partitions/alum/ — раздвижные алюминиевые перегородки ALUM,
+   подбор и расчёт в Студии Зизевского. Название фабрики на сайте не
+   упоминаем (решение владельца) — ни в текстах, ни в адресах, ни в
+   разметке.
 
    Всё, что на странице меняют руками, — здесь: цифры фабрики, тексты
    разделов, конструктор (профили, стёкла, раскладки), характеристики,
    шаги заказа, статьи по теме, вопросы. Вёрстка —
-   src/pages/partitions/oniks-alum.astro и
-   src/components/partitions/OniksBuilder.astro (там только подписи кнопок).
+   src/pages/partitions/alum.astro и
+   src/components/partitions/AlumBuilder.astro (там только подписи кнопок).
 
    Цифры (высота, ширина, срок, толщина стекла) заданы один раз — в
-   ONIKS_SPEC: тексты, характеристики, вопросы, описание для поисковиков
+   ALUM_SPEC: тексты, характеристики, вопросы, описание для поисковиков
    и /llms.txt собираются из них.
 
-   Факты — со страницы фабрики (oniks-dveri.ru/catalog/alum-peregorodki/,
-   октябрь 2026), тексты пересказаны своими словами (копия чужого
+   Факты — со страницы фабрики-производителя (источник — в
+   assets/alum-partitions/README.md, октябрь 2026), тексты пересказаны своими словами (копия чужого
    текста — дубль для поисковиков). Цен у фабрики на сайте нет — на
    странице их тоже нет, стоимость считаем по проёму. Монтаж не обещаем.
 
-   Фото: оригиналы — assets/oniks-alum/, облегчённые — npm run gen:oniks
-   → public/renders/oniks-alum/ (width/height ниже — их реальный размер).
+   Фото: оригиналы — assets/alum-partitions/, облегчённые — npm run gen:alum
+   → public/renders/alum-partitions/ (width/height ниже — их реальный размер).
    Название салона и адрес — из src/config/site.ts.
    ============================================================ */
 import { SITE } from '../config/site'
 import { pluralRu } from '../lib/plural'
 import { listRu, upperFirst } from '../lib/typograph'
 
-const IMG = '/renders/oniks-alum'
+const IMG = '/renders/alum-partitions'
 
-export const ONIKS = {
-  /** Как пишем название фабрики в текстах */
-  factory: 'фабрика ОНИКС',
-  brand:   'ОНИКС',
-  system:  'ALUM',
-} as const
+/** Название системы перегородок в текстах */
+export const ALUM_SYSTEM = 'ALUM'
 
-export const ONIKS_PAGE = {
-  path: '/partitions/oniks-alum/',
+export const ALUM_PAGE = {
+  path: '/partitions/alum/',
   /** Короткое имя — хлебные крошки, ссылки с других страниц */
-  name: `Перегородки ${ONIKS.brand} ${ONIKS.system}`,
+  name: `Перегородки ${ALUM_SYSTEM}`,
 }
 
 /* ── Цифры фабрики ──────────────────────────────────────────── */
 
-export const ONIKS_SPEC = {
+export const ALUM_SPEC = {
   /** Высота створки — до, мм */
   maxHeight: 3000,
   /** Ширина створки — до, мм */
@@ -56,10 +54,10 @@ export const ONIKS_SPEC = {
   triplex:   8,
 } as const
 
-const S = ONIKS_SPEC
+const S = ALUM_SPEC
 
 /** Те же цифры словами — для текстов страницы */
-export const ONIKS_FACTS = {
+export const ALUM_FACTS = {
   height:   `до ${S.maxHeight} мм`,
   width:    `до ${S.maxWidth} мм`,
   sizes:    `нестандартные, с шагом ${S.sizeStep} см`,
@@ -72,7 +70,7 @@ export const ONIKS_FACTS = {
    (как цвета профиля GRAFIA в partitions.ts): на экране они отличаются
    от реальных, на странице об этом сказано. */
 
-export interface OniksProfile {
+export interface AlumProfile {
   id:    string
   name:  string
   /** Цвет профиля на схеме */
@@ -83,7 +81,7 @@ export interface OniksProfile {
   enamel?: true
 }
 
-export const ONIKS_PROFILES: OniksProfile[] = [
+export const ALUM_PROFILES: AlumProfile[] = [
   { id: 'chrome',    name: 'Хром',    color: '#c9cdd2', shade: '#868c93' },
   { id: 'gold',      name: 'Золото',  color: '#cfaa52', shade: '#93722a' },
   { id: 'champagne', name: 'Шампань', color: '#dac6a0', shade: '#a68f66' },
@@ -92,18 +90,18 @@ export const ONIKS_PROFILES: OniksProfile[] = [
 ]
 
 /** Подпись под цветом из палитры эмали */
-export const ONIKS_ENAMEL_NOTE = 'цвет эмали фабрики'
+export const ALUM_ENAMEL_NOTE = 'цвет эмали фабрики'
 
 const profileNames = (enamel: boolean) =>
-  listRu(ONIKS_PROFILES.filter((p) => Boolean(p.enamel) === enamel).map((p) => p.name.toLowerCase()))
+  listRu(ALUM_PROFILES.filter((p) => Boolean(p.enamel) === enamel).map((p) => p.name.toLowerCase()))
 
 /** clear — прозрачное (видно комнату за стеклом), frosted — матовое
     (размыто), mirror — зеркало, solid — непрозрачное */
 export type GlassKind = 'clear' | 'frosted' | 'mirror' | 'solid'
-/** Стекло или триплекс — толщины в ONIKS_SPEC */
+/** Стекло или триплекс — толщины в ALUM_SPEC */
 export type GlassGroup = 'glass' | 'triplex'
 
-export interface OniksGlass {
+export interface AlumGlass {
   id:       string
   group:    GlassGroup
   name:     string
@@ -119,12 +117,12 @@ export interface OniksGlass {
   note?:    string
 }
 
-export const ONIKS_GLASS_GROUPS: { id: GlassGroup; title: string }[] = [
+export const ALUM_GLASS_GROUPS: { id: GlassGroup; title: string }[] = [
   { id: 'glass',   title: `Стекло ${S.glass} мм` },
   { id: 'triplex', title: `Триплекс ${S.triplex} мм` },
 ]
 
-export const ONIKS_GLASSES: OniksGlass[] = [
+export const ALUM_GLASSES: AlumGlass[] = [
   { id: 'clear',           group: 'glass',   name: 'Прозрачное',        kind: 'clear',   color: '#cfe3da', opacity: 0.14, phrase: 'прозрачное стекло' },
   { id: 'clear-bronze',    group: 'glass',   name: 'Прозрачное бронза', kind: 'clear',   color: '#7b5a3a', opacity: 0.42 },
   { id: 'clear-graphite',  group: 'glass',   name: 'Прозрачное графит', kind: 'clear',   color: '#2f3236', opacity: 0.5 },
@@ -142,32 +140,32 @@ export const ONIKS_GLASSES: OniksGlass[] = [
 
 /** Опечатка в id (раскладка «Собрать такую», сочетание по умолчанию) —
     ошибка сборки, а не пустая схема на сайте */
-export function profileById(id: string): OniksProfile {
-  const p = ONIKS_PROFILES.find((x) => x.id === id)
-  if (!p) throw new Error(`ОНИКС: нет цвета профиля «${id}» (src/data/oniks-alum.ts)`)
+export function profileById(id: string): AlumProfile {
+  const p = ALUM_PROFILES.find((x) => x.id === id)
+  if (!p) throw new Error(`Перегородки ALUM: нет цвета профиля «${id}» (src/data/alum-partitions.ts)`)
   return p
 }
-export function glassById(id: string): OniksGlass {
-  const g = ONIKS_GLASSES.find((x) => x.id === id)
-  if (!g) throw new Error(`ОНИКС: нет стекла «${id}» (src/data/oniks-alum.ts)`)
+export function glassById(id: string): AlumGlass {
+  const g = ALUM_GLASSES.find((x) => x.id === id)
+  if (!g) throw new Error(`Перегородки ALUM: нет стекла «${id}» (src/data/alum-partitions.ts)`)
   return g
 }
 
 /** «триплекс белый», «стекло сатинат бронза» — подпись в конструкторе */
-export const glassLabel = (g: OniksGlass) => `${g.group === 'triplex' ? 'триплекс' : 'стекло'} ${g.name.toLowerCase()}`
+export const glassLabel = (g: AlumGlass) => `${g.group === 'triplex' ? 'триплекс' : 'стекло'} ${g.name.toLowerCase()}`
 /** В тексте — как говорят: «прозрачное стекло», а не «стекло прозрачное» */
-export const glassPhrase = (g: OniksGlass) => g.phrase ?? glassLabel(g)
+export const glassPhrase = (g: AlumGlass) => g.phrase ?? glassLabel(g)
 /** «профиль чёрный» */
-export const profilePhrase = (p: OniksProfile) => `профиль ${p.name.toLowerCase()}`
+export const profilePhrase = (p: AlumProfile) => `профиль ${p.name.toLowerCase()}`
 /** «Профиль чёрный, триплекс белый» */
 export const finishLabel = (profile: string, glass: string) =>
   upperFirst(`${profilePhrase(profileById(profile))}, ${glassPhrase(glassById(glass))}`)
 
 /* Раскладка — доли внутренней области створки (0–1): h — перекладины
    по высоте, v — вертикали (x, от y1 до y2). Сняты со схемы фабрики
-   «Варианты перегородок» (assets/oniks-alum/info/layouts.jpg) и сверены
+   «Варианты перегородок» (assets/alum-partitions/info/layouts.jpg) и сверены
    с фото моделей. */
-export interface OniksLayout {
+export interface AlumLayout {
   h: number[]
   v: { x: number; y1: number; y2: number }[]
 }
@@ -176,7 +174,7 @@ const full = (x: number) => ({ x, y1: 0, y2: 1 })
 
 /** Секций (стёкол) в раскладке — по геометрии: в каждой полосе между
     перекладинами столько стёкол, сколько её пересекает вертикалей, плюс одно */
-export function sectionCount(g: OniksLayout): number {
+export function sectionCount(g: AlumLayout): number {
   const ys = [0, ...g.h, 1]
   return ys.slice(1).reduce((n, y, i) => {
     const mid = (ys[i]! + y) / 2
@@ -184,7 +182,7 @@ export function sectionCount(g: OniksLayout): number {
   }, 0)
 }
 
-export interface OniksModel {
+export interface AlumModel {
   /** Имя файла фото: alum-01 … */
   id:       string
   /** Номер раскладки по каталогу фабрики */
@@ -193,7 +191,7 @@ export interface OniksModel {
   name:     string
   /** Раскладка словами: «Сетка 2 × 3, 6 секций» */
   layout:   string
-  geometry: OniksLayout
+  geometry: AlumLayout
   /** Отделка на фото фабрики — её подставляет «Собрать такую» */
   profile:  string
   glass:    string
@@ -205,7 +203,7 @@ export interface OniksModel {
 /* Модельный ряд = раскладки фабрики. Раскладка — со схемы фабрики;
    отделка — та, что на фото (профиль «металл» на фото — хром из палитры
    фабрики, белый — цвет эмали). Фото — models/alum-<номер>.jpg. */
-const MODELS: { num: number; title: string; geometry: OniksLayout; profile: string; glass: string }[] = [
+const MODELS: { num: number; title: string; geometry: AlumLayout; profile: string; glass: string }[] = [
   { num: 1,  title: 'Одна перекладина',          geometry: { h: [0.5], v: [] },                                   profile: 'champagne', glass: 'triplex-white' },
   { num: 2,  title: 'Узкая полоса посередине',   geometry: { h: [0.451, 0.549], v: [] },                          profile: 'chrome',    glass: 'triplex-white' },
   { num: 3,  title: 'Две перекладины',           geometry: { h: [0.333, 0.667], v: [] },                          profile: 'black',     glass: 'satin-bronze' },
@@ -218,13 +216,13 @@ const MODELS: { num: number; title: string; geometry: OniksLayout; profile: stri
   { num: 10, title: 'Сетка 3 × 4',     geometry: { h: [0.25, 0.5, 0.75], v: [full(0.32), full(0.68)] }, profile: 'black',     glass: 'clear' },
 ]
 
-export const ONIKS_MODELS: OniksModel[] = MODELS.map(({ title, ...m }) => {
+export const ALUM_MODELS: AlumModel[] = MODELS.map(({ title, ...m }) => {
   const id = `alum-${String(m.num).padStart(2, '0')}`
   const sections = sectionCount(m.geometry)
   return {
     ...m,
     id,
-    name:   `${ONIKS.system} №${m.num}`,
+    name:   `${ALUM_SYSTEM} №${m.num}`,
     layout: `${title}, ${sections} ${pluralRu(sections, ['секция', 'секции', 'секций'])}`,
     shown:  finishLabel(m.profile, m.glass),
     image:  `${IMG}/models/${id}.webp`,
@@ -233,24 +231,24 @@ export const ONIKS_MODELS: OniksModel[] = MODELS.map(({ title, ...m }) => {
 
 /** Размер фото раскладок (все одинаковые) — в тех же пропорциях схема
     створки в конструкторе */
-export const ONIKS_MODEL_IMAGE = { width: 402, height: 1000 }
+export const ALUM_MODEL_IMAGE = { width: 402, height: 1000 }
 
-const FIRST = ONIKS_MODELS[0]!.num
-const LAST = ONIKS_MODELS.at(-1)!.num
+const FIRST = ALUM_MODELS[0]!.num
+const LAST = ALUM_MODELS.at(-1)!.num
 
 /** «10 раскладок» — описание страницы, карточка на /partitions/, /llms.txt */
-export const ONIKS_LAYOUT_COUNT =
-  `${ONIKS_MODELS.length} ${pluralRu(ONIKS_MODELS.length, ['раскладка', 'раскладки', 'раскладок'])}`
+export const ALUM_LAYOUT_COUNT =
+  `${ALUM_MODELS.length} ${pluralRu(ALUM_MODELS.length, ['раскладка', 'раскладки', 'раскладок'])}`
 
 /** С какой раскладки открывается конструктор — в отделке с её фото */
-export const ONIKS_DEFAULT = (() => {
-  const m = ONIKS_MODELS.find((x) => x.num === 7)
-  if (!m) throw new Error('ОНИКС: нет раскладки по умолчанию (src/data/oniks-alum.ts)')
+export const ALUM_DEFAULT = (() => {
+  const m = ALUM_MODELS.find((x) => x.num === 7)
+  if (!m) throw new Error('Перегородки ALUM: нет раскладки по умолчанию (src/data/alum-partitions.ts)')
   return m
 })()
 
 /** Пояснения в конструкторе: под схемой и под цветами профиля */
-export const ONIKS_BUILDER_NOTES = {
+export const ALUM_BUILDER_NOTES = {
   preview: 'Цвета на схеме условные. Сочетание и стоимость подтвердим при расчёте.',
   profile: 'Другие цвета эмали фабрики подберём при расчёте.',
 }
@@ -258,21 +256,21 @@ export const ONIKS_BUILDER_NOTES = {
 /* ── Тексты страницы — в порядке разделов ─────────────────────── */
 
 /* Первый экран: фото интерьера — справа от текста, в своих пропорциях.
-   Кто что делает в коллаборации — словами во вводке */
-export const ONIKS_HERO = {
-  title: `Перегородки ${ONIKS.system} фабрики ${ONIKS.brand}`,
-  lead:  `Раздвижные перегородки из алюминиевого профиля и стекла делят комнату на зоны и занимают минимум места. Делает их ${ONIKS.factory}, а в ${SITE.studioNameOf} помогут выбрать раскладку, профиль и стекло и рассчитают перегородку под ваш проём.`,
+   Что делает салон — словами во вводке */
+export const ALUM_HERO = {
+  title: `Раздвижные перегородки ${ALUM_SYSTEM}`,
+  lead:  `Раздвижные перегородки из алюминиевого профиля и стекла делят комнату на зоны и занимают минимум места. В ${SITE.studioNameOf} помогут выбрать раскладку, профиль и стекло и рассчитают перегородку под ваш проём.`,
   image: {
     src:    `${IMG}/interior-1000.webp`,
     srcset: `${IMG}/interior-640.webp 640w, ${IMG}/interior-1000.webp 1000w`,
     width:  1000,
     height: 743,
-    alt:    `Раздвижные алюминиевые перегородки ${ONIKS.system} в гостиной: створки в белом и чёрном профиле с прозрачным и матовым стеклом`,
+    alt:    `Раздвижные алюминиевые перегородки ${ALUM_SYSTEM} в гостиной: створки в белом и чёрном профиле с прозрачным и матовым стеклом`,
   },
 }
 
 /* Заголовки и вводки разделов; nav — пункт плавающего меню разделов */
-export const ONIKS_SECTIONS = {
+export const ALUM_SECTIONS = {
   builder: {
     nav:   'Конструктор',
     title: 'Соберите перегородку',
@@ -286,7 +284,7 @@ export const ONIKS_SECTIONS = {
   specs: {
     nav:   'Характеристики',
     title: 'Характеристики',
-    lead:  `Перегородку делают под ваш проём: размеры ${ONIKS_FACTS.sizes}.`,
+    lead:  `Перегородку делают под ваш проём: размеры ${ALUM_FACTS.sizes}.`,
   },
   order: {
     nav:   'Заказ',
@@ -301,27 +299,27 @@ export const ONIKS_SECTIONS = {
   },
   faq: {
     nav:   'Вопросы',
-    title: `Вопросы о перегородках ${ONIKS.system}`,
+    title: `Вопросы о перегородках ${ALUM_SYSTEM}`,
   },
 }
 
 /* Характеристики */
-export const ONIKS_SPECS = [
+export const ALUM_SPECS = [
   { label: 'Материал',          value: 'алюминиевый профиль и стекло' },
-  { label: 'Заполнение',        value: ONIKS_FACTS.glass },
-  { label: 'Высота створки',    value: ONIKS_FACTS.height },
-  { label: 'Ширина створки',    value: ONIKS_FACTS.width },
-  { label: 'Размеры',           value: ONIKS_FACTS.sizes },
-  { label: 'Срок изготовления', value: ONIKS_FACTS.leadTime },
+  { label: 'Заполнение',        value: ALUM_FACTS.glass },
+  { label: 'Высота створки',    value: ALUM_FACTS.height },
+  { label: 'Ширина створки',    value: ALUM_FACTS.width },
+  { label: 'Размеры',           value: ALUM_FACTS.sizes },
+  { label: 'Срок изготовления', value: ALUM_FACTS.leadTime },
   { label: 'Система',           value: 'раздвижная, на направляющей (трек)' },
 ]
-export const ONIKS_KIT = {
+export const ALUM_KIT = {
   included: { title: 'В комплекте', items: ['профиль', 'алюминиевая направляющая (трек)', 'молдинг (в зависимости от комплектации)'] },
   separate: { title: 'Отдельно',    items: ['карниз к треку', 'ролики', 'система открывания', 'ручки'] },
 }
 
 /* Комплектующие — с картинки фабрики */
-export const ONIKS_COMPONENTS = {
+export const ALUM_COMPONENTS = {
   title: 'Комплектующие',
   items: [
     'Алюминиевая направляющая (трек) и ролики',
@@ -336,11 +334,11 @@ export const ONIKS_COMPONENTS = {
     srcset: `${IMG}/components-640.webp 640w, ${IMG}/components-1024.webp 1024w`,
     width:  1024,
     height: 703,
-    alt:    `Комплектующие перегородок ${ONIKS.system}: направляющая, ролик, профили, молдинг, карниз, заглушки, кронштейн`,
+    alt:    `Комплектующие перегородок ${ALUM_SYSTEM}: направляющая, ролик, профили, молдинг, карниз, заглушки, кронштейн`,
   },
 }
 
-export const ONIKS_OPTI_WHITE = {
+export const ALUM_OPTI_WHITE = {
   title: 'Стекло Opti White',
   text:  'У обычного прозрачного стекла лёгкий зеленоватый оттенок, и он становится заметен, когда стекло окрашивают. Для чистого цвета перегородку можно сделать на стекле Opti White: у него такого оттенка нет.',
   image: {
@@ -354,7 +352,7 @@ export const ONIKS_OPTI_WHITE = {
 
 /* Материалы фабрики — справочные картинки под характеристиками,
    открываются во весь экран */
-export const ONIKS_REFERENCES = {
+export const ALUM_REFERENCES = {
   title: 'Материалы фабрики',
   items: [
     {
@@ -364,10 +362,10 @@ export const ONIKS_REFERENCES = {
         srcset: `${IMG}/layouts-960.webp 960w, ${IMG}/layouts-1600.webp 1600w`,
         width:  1600,
         height: 419,
-        alt:    `Схема раскладок перегородок ${ONIKS.system} №${FIRST}–${LAST}: от одной перекладины до сетки 3 × 4`,
+        alt:    `Схема раскладок перегородок ${ALUM_SYSTEM} №${FIRST}–${LAST}: от одной перекладины до сетки 3 × 4`,
       },
     },
-    { caption: ONIKS_COMPONENTS.title, image: ONIKS_COMPONENTS.image },
+    { caption: ALUM_COMPONENTS.title, image: ALUM_COMPONENTS.image },
     {
       caption: 'Цвета профиля вживую',
       image: {
@@ -375,44 +373,44 @@ export const ONIKS_REFERENCES = {
         srcset: `${IMG}/profile-colors-640.webp 640w, ${IMG}/profile-colors-1024.webp 1024w`,
         width:  1024,
         height: 507,
-        alt:    `Цвета алюминиевого профиля ${ONIKS.system}: ${profileNames(false)}`,
+        alt:    `Цвета алюминиевого профиля ${ALUM_SYSTEM}: ${profileNames(false)}`,
       },
     },
-    { caption: 'Opti White и обычное стекло', image: ONIKS_OPTI_WHITE.image },
+    { caption: 'Opti White и обычное стекло', image: ALUM_OPTI_WHITE.image },
   ],
 }
 
 /* Как заказать — реальная последовательность (StepsRow) */
-export const ONIKS_STEPS = [
+export const ALUM_STEPS = [
   { title: 'Выберите перегородку',    text: 'Соберите её в конструкторе или подберите раскладку, профиль и стекло вместе с нами в салоне.' },
   { title: 'Назовите размеры проёма', text: 'Ширину и высоту проёма можно сообщить по телефону или в салоне.' },
   { title: 'Получите расчёт',         text: 'Посчитаем стоимость под ваш проём и выбранную отделку.' },
-  { title: 'Изготовление на фабрике', text: `Срок изготовления — ${ONIKS_FACTS.leadTime}.` },
+  { title: 'Изготовление на фабрике', text: `Срок изготовления — ${ALUM_FACTS.leadTime}.` },
 ].map((s, i) => ({ ...s, num: String(i + 1).padStart(2, '0') }))
 
 /* Статьи по теме — адреса статей в Strapi (поле «Адрес страницы»).
    Статьи с таким именем нет — сборка остановится с ошибкой */
-export const ONIKS_ARTICLES = ['vfd-dizain-dveri-pod-zadachu', 'dveri-v-stile-loft', 'dveri-so-steklom-ili-gluhie']
+export const ALUM_ARTICLES = ['vfd-dizain-dveri-pod-zadachu', 'dveri-v-stile-loft', 'dveri-so-steklom-ili-gluhie']
 
 /** «Как к нам добраться» внизу страницы */
-export const ONIKS_VISIT_LEAD = `Приезжайте обсудить проект: подберём раскладку, профиль и стекло перегородки ${ONIKS.system} и рассчитаем её по вашим размерам.`
+export const ALUM_VISIT_LEAD = `Приезжайте обсудить проект: подберём раскладку, профиль и стекло перегородки ${ALUM_SYSTEM} и рассчитаем её по вашим размерам.`
 
-export const ONIKS_FAQ = [
+export const ALUM_FAQ = [
   {
-    q: `Что такое перегородки ${ONIKS.system}?`,
-    a: `Раздвижные межкомнатные перегородки фабрики ${ONIKS.brand} из алюминиевого профиля и стекла. Они делят комнату на зоны, занимают минимум места и служат недорогой альтернативой стене.`,
+    q: `Что такое перегородки ${ALUM_SYSTEM}?`,
+    a: `Раздвижные межкомнатные перегородки из алюминиевого профиля и стекла. Они делят комнату на зоны, занимают минимум места и служат недорогой альтернативой стене.`,
   },
   {
-    q: `Сколько вариантов раскладки у перегородок ${ONIKS.system}?`,
-    a: `Их ${ONIKS_MODELS.length}: от одной перекладины (№${FIRST}) до сетки 3 × 4 (№${LAST}), есть асимметричная раскладка (№6). Цвет профиля и стекло подбираются отдельно.`,
+    q: `Сколько вариантов раскладки у перегородок ${ALUM_SYSTEM}?`,
+    a: `Их ${ALUM_MODELS.length}: от одной перекладины (№${FIRST}) до сетки 3 × 4 (№${LAST}), есть асимметричная раскладка (№6). Цвет профиля и стекло подбираются отдельно.`,
   },
   {
     q: 'Какое стекло можно поставить в перегородку?',
     a: `Стекло ${S.glass} мм — прозрачное, прозрачное бронза или графит, сатинат белый, бронза или графит — или триплекс ${S.triplex} мм: прозрачный, белый, чёрный, зеркало, зеркало бронза или графит и Лакобель в цветах фабрики.`,
   },
   {
-    q: `Какого размера бывают перегородки ${ONIKS.system}?`,
-    a: `Высота створки — ${ONIKS_FACTS.height}, ширина — ${ONIKS_FACTS.width}. Размеры ${ONIKS_FACTS.sizes}: перегородку делают под ваш проём.`,
+    q: `Какого размера бывают перегородки ${ALUM_SYSTEM}?`,
+    a: `Высота створки — ${ALUM_FACTS.height}, ширина — ${ALUM_FACTS.width}. Размеры ${ALUM_FACTS.sizes}: перегородку делают под ваш проём.`,
   },
   {
     q: 'Какие цвета профиля доступны?',
@@ -420,14 +418,14 @@ export const ONIKS_FAQ = [
   },
   {
     q: 'Что входит в комплект перегородки?',
-    a: `${upperFirst(listRu(ONIKS_KIT.included.items))}. ${upperFirst(listRu(ONIKS_KIT.separate.items))} приобретаются отдельно.`,
+    a: `${upperFirst(listRu(ALUM_KIT.included.items))}. ${upperFirst(listRu(ALUM_KIT.separate.items))} приобретаются отдельно.`,
   },
   {
     q: 'Почему белое стекло может отличаться по оттенку?',
-    a: ONIKS_OPTI_WHITE.text,
+    a: ALUM_OPTI_WHITE.text,
   },
   {
-    q: `Сколько делают перегородку ${ONIKS.system}?`,
-    a: `Срок изготовления на фабрике — ${ONIKS_FACTS.leadTime}. Стоимость и точный срок рассчитаем по размерам вашего проёма.`,
+    q: `Сколько делают перегородку ${ALUM_SYSTEM}?`,
+    a: `Срок изготовления на фабрике — ${ALUM_FACTS.leadTime}. Стоимость и точный срок рассчитаем по размерам вашего проёма.`,
   },
 ]

@@ -32,7 +32,7 @@
     "gen:home-tiles": "node scripts/gen-home-tiles.mjs",
     "gen:mall": "node scripts/gen-mall-photos.mjs",
     "gen:og-about": "node scripts/gen-og-about.mjs",
-    "gen:oniks": "node scripts/gen-oniks-images.mjs",
+    "gen:alum": "node scripts/gen-alum-images.mjs",
     "gen:partitions-hero": "node scripts/gen-partitions-hero.mjs",
     "gen:partitions-swatches": "node scripts/gen-partitions-color-swatches.mjs",
     "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",

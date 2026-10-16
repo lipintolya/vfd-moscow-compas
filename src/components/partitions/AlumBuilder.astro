@@ -1,13 +1,13 @@
 ---
 /**
- * Конструктор перегородки ALUM (/partitions/oniks-alum/): раскладка №1–10,
+ * Конструктор перегородки ALUM (/partitions/alum/): раскладка №1–10,
  * цвет профиля и стекло — схема створки перерисовывается сразу.
  *
  * Схема — вектор по размерам фабрики (створка 402 × 1000, как фото
  * моделей): рама и перекладины цветом профиля, а стекло ведёт себя как
  * стекло — сквозь прозрачное видна комната, сатинат её размывает, тонировка
  * добавляет цвет, зеркало отражает, триплекс белый, чёрный и Лакобель
- * непрозрачны. Цвета материалов — из src/data/oniks-alum.ts (условные,
+ * непрозрачны. Цвета материалов — из src/data/alum-partitions.ts (условные,
  * на странице об этом сказано).
  *
  * Без JS видна схема сочетания по умолчанию и все варианты списком.
@@ -18,16 +18,16 @@
  * варианты.
  */
 import {
-  ONIKS_MODELS, ONIKS_PROFILES, ONIKS_GLASSES, ONIKS_GLASS_GROUPS, ONIKS_DEFAULT, ONIKS_MODEL_IMAGE,
-  ONIKS_BUILDER_NOTES, ONIKS_ENAMEL_NOTE, profileById, glassById, glassLabel, glassPhrase,
-  profilePhrase, finishLabel, type OniksLayout, type OniksGlass,
-} from '../../data/oniks-alum'
+  ALUM_MODELS, ALUM_PROFILES, ALUM_GLASSES, ALUM_GLASS_GROUPS, ALUM_DEFAULT, ALUM_MODEL_IMAGE,
+  ALUM_BUILDER_NOTES, ALUM_ENAMEL_NOTE, profileById, glassById, glassLabel, glassPhrase,
+  profilePhrase, finishLabel, type AlumLayout, type AlumGlass,
+} from '../../data/alum-partitions'
 import { PHONE } from '../../config/site'
 import { typograph, upperFirst } from '../../lib/typograph'
 
 /* ── Геометрия схемы (единицы viewBox): створка в пропорциях фото
    моделей фабрики, под ней — полоса под тень на полу ── */
-const { width: W, height: H } = ONIKS_MODEL_IMAGE
+const { width: W, height: H } = ALUM_MODEL_IMAGE
 const FLOOR = 40
 const FRAME = 18
 const BAR = 10
@@ -37,13 +37,13 @@ const IY = FRAME
 const IW = W - 2 * FRAME
 const IH = H - 2 * FRAME
 
-const bars = (g: OniksLayout) => [
+const bars = (g: AlumLayout) => [
   ...g.h.map((y) => ({ x: IX, y: IY + y * IH - BAR / 2, w: IW, h: BAR })),
   ...g.v.map((v) => ({ x: IX + v.x * IW - BAR / 2, y: IY + v.y1 * IH, w: BAR, h: (v.y2 - v.y1) * IH })),
 ]
 
 /* Иконка раскладки для кнопок выбора — те же доли, тонкими линиями */
-const icon = (g: OniksLayout) => {
+const icon = (g: AlumLayout) => {
   const x0 = 4, y0 = 4, w = 32, h = 92
   const lines = [
     ...g.h.map((y) => `<line x1="${x0}" x2="${x0 + w}" y1="${y0 + y * h}" y2="${y0 + y * h}"/>`),
@@ -53,13 +53,13 @@ const icon = (g: OniksLayout) => {
 }
 
 /* Образец стекла: «окно» за стеклом и слой стекла поверх */
-const glassLayer = (g: OniksGlass) =>
+const glassLayer = (g: AlumGlass) =>
   g.kind === 'mirror' ? `linear-gradient(135deg, ${g.mirror?.[0] ?? g.color}, ${g.mirror?.[1] ?? g.color})`
   : g.kind === 'solid' ? g.color
   : `color-mix(in srgb, ${g.color} ${Math.round((g.opacity ?? 0.2) * 100)}%, transparent)`
 
 /* Сочетание по умолчанию — раскладка в отделке с её фото */
-const model = ONIKS_DEFAULT
+const model = ALUM_DEFAULT
 const profile = profileById(model.profile)
 const glass = glassById(model.glass)
 const finish = finishLabel(profile.id, glass.id)
@@ -141,7 +141,7 @@ const vars = [
           </g>
 
           <g class="oa-pv__bars">
-            {ONIKS_MODELS.map((m) => (
+            {ALUM_MODELS.map((m) => (
               <g data-oa-layout={m.num} data-active={m.num === model.num ? '' : undefined}>
                 {bars(m.geometry).map((b) => <rect x={b.x} y={b.y} width={b.w} height={b.h} />)}
               </g>
@@ -169,7 +169,7 @@ const vars = [
         <button type="button" class="h-link oa-actions__copy" data-oa-copy>Скопировать ссылку на это сочетание</button>
         <span class="oa-actions__status" role="status" data-oa-copied></span>
       </p>
-      <p class="h-meta oa-actions__note">{typograph(ONIKS_BUILDER_NOTES.preview)}</p>
+      <p class="h-meta oa-actions__note">{typograph(ALUM_BUILDER_NOTES.preview)}</p>
     </div>
   </div>
 
@@ -178,7 +178,7 @@ const vars = [
     <fieldset class="oa-ctrl__group">
       <legend class="oa-ctrl__legend">Раскладка <span class="oa-ctrl__value" data-oa-value="layout">№{model.num}</span></legend>
       <div class="oa-chips oa-chips--layout">
-        {ONIKS_MODELS.map((m) => (
+        {ALUM_MODELS.map((m) => (
           <label class="oa-chip oa-chip--layout">
             <input class="oa-radio" type="radio" name="layout" value={m.num} checked={m.num === model.num} data-name={m.name} data-label={m.layout} />
             <span class="oa-chip__face" set:html={icon(m.geometry)} />
@@ -191,24 +191,24 @@ const vars = [
     <fieldset class="oa-ctrl__group">
       <legend class="oa-ctrl__legend">Профиль <span class="oa-ctrl__value" data-oa-value="profile">{profile.name}</span></legend>
       <div class="oa-chips oa-chips--profile">
-        {ONIKS_PROFILES.map((p) => (
+        {ALUM_PROFILES.map((p) => (
           <label class="oa-chip oa-chip--profile">
             <input class="oa-radio" type="radio" name="profile" value={p.id} checked={p.id === profile.id} data-name={p.name} data-phrase={profilePhrase(p)} data-color={p.color} data-shade={p.shade} />
             <span class="oa-chip__face oa-swatch oa-swatch--profile" style={`--sw: linear-gradient(145deg, ${p.color} 35%, ${p.shade})`} />
-            <span class="oa-chip__name">{p.name}{p.enamel && <span class="oa-chip__note">{ONIKS_ENAMEL_NOTE}</span>}</span>
+            <span class="oa-chip__name">{p.name}{p.enamel && <span class="oa-chip__note">{ALUM_ENAMEL_NOTE}</span>}</span>
           </label>
         ))}
       </div>
-      <p class="h-meta oa-ctrl__hint">{typograph(ONIKS_BUILDER_NOTES.profile)}</p>
+      <p class="h-meta oa-ctrl__hint">{typograph(ALUM_BUILDER_NOTES.profile)}</p>
     </fieldset>
 
     <fieldset class="oa-ctrl__group">
       <legend class="oa-ctrl__legend">Стекло <span class="oa-ctrl__value" data-oa-value="glass">{upperFirst(glassLabel(glass))}</span></legend>
-      {ONIKS_GLASS_GROUPS.map((grp) => (
+      {ALUM_GLASS_GROUPS.map((grp) => (
         <div class="oa-ctrl__sub">
           <p class="h-meta oa-ctrl__subtitle">{grp.title}</p>
           <div class="oa-chips oa-chips--glass">
-            {ONIKS_GLASSES.filter((g) => g.group === grp.id).map((g) => (
+            {ALUM_GLASSES.filter((g) => g.group === grp.id).map((g) => (
               <label class="oa-chip oa-chip--glass">
                 <input
                   class="oa-radio"
