@@ -41,7 +41,8 @@
     "gen:video-covers": "node scripts/gen-video-covers.mjs",
     "gen:visit-map": "node scripts/gen-visit-map.mjs",
     "video:optimize": "node scripts/optimize-video.mjs",
-    "deploy": "git push production main"
+    "deploy": "node scripts/deploy-site.mjs",
+    "server:setup": "node scripts/deploy-site.mjs setup"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

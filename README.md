@@ -4,7 +4,7 @@
 
 Проект вырос из кодовой базы сайта салона ВФД в Челябинске: архитектура общая, бренд, контент и дизайн — свои.
 
-> **Состояние на 16.10.2026.** Сайт готов к показу заказчику, демо — https://vfd-moscow-compas.vercel.app (закрыто от поисковиков). Домен — `dveriziz.ru`. Для запуска нужны сервер в России со Strapi и несколько данных от владельца — см. [«Перед запуском»](#перед-запуском).
+> **Состояние на 16.10.2026.** Сайт работает: **https://dveriziz.ru** (VPS в России, выкладка — `npm run deploy`). Материалы в Strapi пока ведёт разработчик; админка для директора на сервере и несколько данных от владельца — см. [«Перед запуском»](#перед-запуском).
 
 ## Содержание
 
@@ -159,6 +159,8 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 | `npm run check:content` | проверить всё опубликованное в Strapi правилами публикации |
 | `npm run media:pull` | скачать недостающие фото каталога в `public/media/` (`-- --check` — только показать) |
 | `npm test` | тесты |
+| `npm run deploy` | собрать и выложить сайт на https://dveriziz.ru (нужен запущенный Strapi) |
+| `npm run server:setup` | настроить сервер (`-- --cert` — выпустить HTTPS-сертификат) |
 | `npm run demo:vercel -- <адрес>` | собрать временное демо для Vercel (см. [«Деплой»](#деплой)) |
 | `node scripts/compare-builds.mjs <старая dist> <новая dist>` | какие страницы изменились по видимому тексту — проверка после переделок |
 
@@ -190,29 +192,31 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 
 ## Деплой
 
-### Сейчас: демо на Vercel
+### Продакшен: https://dveriziz.ru
 
-https://vfd-moscow-compas.vercel.app — для показа заказчику, **не для запуска**. Vercel не видит локальный Strapi, поэтому собирать на нём нельзя: сайт собирается локально и выкладывается готовыми файлами вместе с фото Strapi, домен-заглушка в копии заменяется адресом демо, индексация закрыта (`X-Robots-Tag`, `robots.txt`).
+VPS FirstVDS (Ubuntu 24.04, 1 vCPU / 1 ГБ / 15 ГБ), адрес сервера — локальный `deploy/server.json` (вне Git, образец — [`deploy/server.example.json`](deploy/server.example.json)). На сервере только nginx: сайт собирается на компьютере разработчика (для сборки нужен Strapi) и выкладывается готовыми файлами вместе с фото Strapi. Node.js, Strapi и базы на сервере нет — директор пока не публикует сам, материалы вносит разработчик в локальном Strapi.
 
 ```bash
-npm run cms        # в отдельном терминале
-npm run build && npm run demo:vercel -- https://vfd-moscow-compas.vercel.app
-npx vercel deploy --prebuilt --prod
+npm run cms        # в отдельном терминале — Strapi нужен для сборки
+npm run deploy     # сборка → проверки → rsync страниц и /uploads на сервер
 ```
 
-Из России Vercel открывается не у всех провайдеров (блокировки по IP), поэтому для рабочего сайта нужен хостинг в России. Автосборку из GitHub в проекте Vercel стоит отключить (Settings → Git): она всегда падает без Strapi.
+Перед отправкой `npm run deploy` проверяет сборку (все адреса карты сайта на месте, `robots.txt` рабочего домена и не закрыт от поисковиков, нет домена-заглушки) — не прошло, ничего не отправляется. `npm run deploy -- --no-build` — выложить уже собранный `dist/`.
 
-### Продакшен: VPS в России (не настроен)
+**Сервер** настраивается скриптом [`deploy/setup-server.sh`](deploy/setup-server.sh) (можно запускать повторно): `npm run server:setup`, с `-- --cert` — выпустить HTTPS-сертификат. Он ставит nginx, certbot, fail2ban, включает файрвол (SSH, HTTP, HTTPS) и раскладывает конфигурацию из [`deploy/nginx/`](deploy/nginx/):
 
-План — один сервер для сайта и Strapi. Подробно — [`docs/superpowers/specs/2026-10-11-strapi-cms-design.md`](docs/superpowers/specs/2026-10-11-strapi-cms-design.md).
+- только `https://dveriziz.ru`: `http://` и `www` — 301 на него; HSTS;
+- заголовки безопасности и CSP (`headers.conf`) — новый внешний сервис дописывается туда;
+- кэш: `/_astro/` и шрифты — год, `/uploads/` — 30 дней, остальные картинки — неделя; сжатие gzip; своя страница 404;
+- сертификат Let's Encrypt продлевается сам (`certbot.timer`), nginx перечитывает его после продления.
 
-- **Сервер**: 2 vCPU, от 2 ГБ памяти (лучше 4: сборка сайта и админки Strapi требовательны к памяти), 30–40 ГБ NVMe, Ubuntu 24.04, root-доступ по SSH.
-- **nginx** отдаёт `dist/` и фото Strapi по адресу `/uploads/`, HTTPS — Let's Encrypt.
-- **Strapi** — как служба (systemd или pm2), `NODE_ENV=production`, база — PostgreSQL. Перенести материалы из локальной SQLite и `cms/public/uploads/`; удалить автоматически созданный ключ «Full Access», оставить ключ только для чтения.
-- **Пересборка при публикации**: вебхук Strapi запускает `npm run build` и подменяет `dist/`.
-- **Резервные копии**: база Strapi и `cms/public/uploads/` — ежедневно.
+Резервная копия материалов — база `cms/.tmp/data.db` и `cms/public/uploads/` с компьютера разработчика: они есть только там.
 
-Шаблоны в [`deploy/`](deploy/) (`setup-server.sh`, хук `post-receive`: `git push production main` → `npm ci && npm run build` → `rsync` в веб-корень nginx) — от сайта в Челябинске, рассчитаны только на статический сайт без Strapi. Их нужно дополнить под этот план.
+**Админка для директора** (позже): VPS на 2 ГБ, Strapi + PostgreSQL как служба, nginx проксирует админку, пересборка по вебхуку публикации, ежедневные копии базы и `/uploads`. Подробно — [`docs/superpowers/specs/2026-10-11-strapi-cms-design.md`](docs/superpowers/specs/2026-10-11-strapi-cms-design.md).
+
+### Демо на Vercel
+
+https://vfd-moscow-compas.vercel.app — для показа заказчику до запуска, закрыто от поисковиков. После запуска его стоит удалить: из России Vercel открывается не у всех провайдеров.
 
 ## Перед запуском
 
@@ -229,7 +233,8 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs package.json d
 - [ ] **Яндекс Метрика** — `SITE.analytics.yandexMetrikaId`; пусто — счётчик не подключается.
 - [ ] **Гарантия 12 месяцев на монтаж** — сверить с салоном (перенесено из Челябинска): `src/components/home/faq-data.ts`, `src/data/how-it-works.ts`, `src/data/contacts-page.ts`.
 - [ ] **Цены каталога** — сверить с московским прайсом (Supabase, поправки — `src/lib/price-adjustments.ts`).
-- [ ] **Сервер и Strapi** — по плану [«Продакшен»](#продакшен-vps-в-россии-не-настроен); перенести материалы Strapi с локальной машины.
+- [x] **Сервер** — https://dveriziz.ru, HTTPS, выкладка `npm run deploy`.
+- [ ] **Strapi на сервере** (админка для директора) — VPS на 2 ГБ, см. [«Продакшен»](#продакшен-httpsdverizizru); перенести материалы с локальной машины.
 - [ ] **Директор** — приглашён в Strapi с ролью «Редактор», получил [инструкцию](docs/director-guide.md).
 - [ ] **Поисковики** — сайт в Яндекс Вебмастере и Google Search Console, отправлена карта сайта, фид `/feed/yandex.xml` — в Яндекс Товары.
 - [ ] **Демо на Vercel** — удалить после запуска.
@@ -243,7 +248,7 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs package.json d
 | Код | репозиторий GitHub `lipintolya/vfd-moscow-compas` |
 | Каталог и цены | проект Supabase |
 | Материалы сайта | учётные записи Strapi: администратор и директор («Редактор») |
-| Сервер | SSH-доступ к VPS, панель хостинга |
+| Сервер | VPS FirstVDS: панель хостинга, SSH-доступ |
 | Домен | регистратор домена, DNS |
 | Аналитика | Яндекс Метрика, Яндекс Вебмастер, Google Search Console |
 | Демо | проект Vercel (до удаления) |

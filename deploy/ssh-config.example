@@ -1,5 +1,6 @@
-Host compas-vps
-  HostName xxx.xxx.xxx.xxx
+# Необязательно: короткое имя сервера для ~/.ssh/config (ssh dveriziz)
+Host dveriziz
+  HostName IP_СЕРВЕРА
   User root
   IdentityFile ~/.ssh/id_ed25519
   IdentitiesOnly yes
