@@ -1,41 +1,98 @@
 ---
+/**
+ * /reviews/ — все отзывы с Яндекс Карт (src/data/reviews.ts) целиком.
+ * Разметка: LocalBusiness с aggregateRating и review (каждый отзыв),
+ * хлебные крошки. Дизайн-система главной: шапка раздела как у /articles/,
+ * отзывы — колонками на сером фоне, внизу «Как к нам добраться».
+ */
 import BaseLayout from '../layouts/BaseLayout.astro'
-import Reviews from '../components/home/Reviews.vue'
-import { reviews } from '../data/reviews'
-import { localBusinessSchema as buildLocalBusiness } from '../lib/local-business-schema'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import ReviewCard from '../components/reviews/ReviewCard.astro'
+import VisitBand from '../components/home/VisitBand.astro'
+import { reviews, YANDEX_RATING } from '../data/reviews'
+import { localBusinessSchema, reviewsSchema } from '../lib/local-business-schema'
 import { SITE } from '../config/site'
+import { pluralRu } from '../lib/plural'
+import { typograph } from '../lib/typograph'
+import '../styles/home.css'
 
-const reviewCount = reviews.length
+const pageUrl = `${SITE.url}/reviews/`
+const count = `${reviews.length} ${pluralRu(reviews.length, ['отзыв', 'отзыва', 'отзывов'])}`
+const rating = YANDEX_RATING.value.toLocaleString('ru-RU', { minimumFractionDigits: 1 })
+const ratings = `${YANDEX_RATING.ratings} ${pluralRu(YANDEX_RATING.ratings, ['оценке', 'оценкам', 'оценкам'])}`
 
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
-    { '@type': 'ListItem', position: 2, name: 'Отзывы',  item: `${SITE.url}/reviews/` },
-  ],
-}
+const title = `Отзывы о салоне дверей ${SITE.name} ${SITE.city.in} — ${SITE.address.mall}`
+const description = `${count} клиентов салона ${SITE.name} в ${SITE.address.mall} с Яндекс Карт: выбор дверей, замер, доставка и установка. Рейтинг ${rating} по ${ratings}.`
 
-const aggregateRatingSchema = buildLocalBusiness()
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
+      { '@type': 'ListItem', position: 2, name: 'Отзывы', item: pageUrl },
+    ],
+  },
+  localBusinessSchema({ review: reviewsSchema() }),
+]
 ---
 
-<BaseLayout
-  title="Отзывы клиентов — салон дверей ВФД в Москве"
-  description={`Реальные отзывы клиентов салона ВФД в ТЦ «Компас» в Москве — ${reviewCount} отзывов с Яндекс Карт и 2ГИС, с фото и датами.`}
-  structuredData={[breadcrumbSchema, aggregateRatingSchema]}
-  noIndex={!SITE.features.reviews}
->
-  <div class="section pb-0!">
+<BaseLayout title={title} description={description} canonical={pageUrl} structuredData={structuredData} noIndex={!SITE.features.reviews}>
+  <div class="breadcrumb-bar">
     <div class="container">
-      <nav aria-label="Хлебные крошки" class="mb-6">
-        <ol class="flex items-center gap-2 text-sm text-slate-500">
-          <li><a href="/" class="hover:text-secondary-600 transition-colors">Главная</a></li>
-          <li aria-hidden="true" class="text-slate-300">/</li>
-          <li class="text-slate-700 font-medium">Отзывы</li>
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Отзывы' }]} />
     </div>
   </div>
 
-  <Reviews headingTag="h1" eagerFirst={true} client:visible />
+  <div class="home">
+    <section class="rp" aria-labelledby="reviews-title">
+      <div class="container">
+        <header class="rp__head">
+          <h1 id="reviews-title" class="rp__title">Отзывы о&nbsp;салоне дверей {SITE.name} {SITE.city.in.replace(' ', ' ')}</h1>
+          <div class="rp__side">
+            <p class="h-lead">
+              {typograph(`Рейтинг ${rating} на Яндекс Картах по ${ratings}. Здесь — ${count} оттуда, слово в слово: как выбирали двери в ${SITE.address.mall}, замер, доставка и установка.`)}
+            </p>
+            <a href={`${SITE.yandexMaps}reviews/`} target="_blank" rel="noopener" class="h-btn h-btn--signal rp__btn">Оставить отзыв на&nbsp;Яндекс Картах</a>
+          </div>
+        </header>
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--wall" aria-label="Отзывы клиентов">
+      <div class="container">
+        <ul class="rp__list" role="list">
+          {reviews.map((review) => <li><ReviewCard review={review} /></li>)}
+        </ul>
+      </div>
+    </section>
+
+    <VisitBand />
+  </div>
 </BaseLayout>
+
+<style>
+  .rp { padding-block: clamp(1rem, 2vw, 1.5rem) clamp(2rem, 4vw, 3.5rem); }
+  .rp__head { display: grid; gap: 1.25rem var(--h-gutter); align-items: end; }
+  @media (min-width: 62.5rem) {
+    .rp__head { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .rp__title { grid-column: 1 / span 7; }
+    .rp__side  { grid-column: 9 / span 4; }
+  }
+  .rp__title {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    color: var(--h-ink);
+    text-wrap: balance;
+  }
+  .rp__btn { margin-top: 1.25rem; }
+  @media (max-width: 29.9375rem) { .rp__btn { width: 100%; } }
+
+  /* Колонки, а не сетка: отзывы разной длины не оставляют дыр */
+  .rp__list { columns: 3 20rem; column-gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
+  .rp__list > li { break-inside: avoid; margin-bottom: var(--h-tile-gap); }
+</style>

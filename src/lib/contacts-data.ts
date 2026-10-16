@@ -12,6 +12,8 @@ import { SITE } from '../config/site'
 /** Почта задана? Пока в конфиге заглушка — адрес на сайте не выводим */
 export const HAS_EMAIL = !/placeholder/i.test(SITE.email)
 
+const { opens, closes } = SITE.hours
+
 export const companyLegalInfo = {
   /** ФИО владельца сайта (оператора персональных данных) — уточнить у владельца */
   ownerName: '',
@@ -31,12 +33,12 @@ export const companyLegalInfo = {
     website: SITE.url,
   },
 
-  // Время работы салона — ежедневно 11:00–20:00
+  // Время работы салона — ежедневно, из SITE.hours
   workingHours: {
-    weekdays: { opens: '11:00', closes: '20:00', label: 'Пн–Пт: 11:00–20:00' },
-    saturday: { opens: '11:00', closes: '20:00', label: 'Сб: 11:00–20:00' },
-    sunday: { opens: '11:00', closes: '20:00', label: 'Вс: 11:00–20:00' },
-    shortDisplay: 'Ежедневно: 11:00–20:00',
+    weekdays: { opens, closes, label: `Пн–Пт: ${opens}–${closes}` },
+    saturday: { opens, closes, label: `Сб: ${opens}–${closes}` },
+    sunday: { opens, closes, label: `Вс: ${opens}–${closes}` },
+    shortDisplay: `Ежедневно: ${opens}–${closes}`,
   },
 
   // Информация о деятельности
@@ -48,7 +50,7 @@ export const companyLegalInfo = {
 
   // Рабочее время для поисковых систем (schema.org) — синхронно с workingHours
   schemaOrgHours: [
-    { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '11:00', closes: '20:00' },
+    { dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens, closes },
   ],
 
   // Способы оплаты — только названия, без подробностей; id — ключ иконки

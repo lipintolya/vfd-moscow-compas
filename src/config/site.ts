@@ -98,9 +98,15 @@ export const SITE = {
       (со слов заказчика); с новым годом — обновить или убрать */
   doorsSold: { count: 1000, year: 2026 },
 
+  /* Первый — основной: на него ведут все кнопки «Позвонить» (PHONE) */
   phones: [
+    { raw: '+74993910057', label: '+7 (499) 391-00-57', title: 'Салон' },
     { raw: '+79687748820', label: '+7 (968) 774-88-20', title: 'Константин Зизевский' },
   ],
+
+  /** Часы работы салона — ежедневно; подписи и schema.org строятся из них
+      (src/lib/contacts-data.ts) */
+  hours: { opens: '10:00', closes: '19:30' },
   email: 'info@domain-placeholder.example',
 
   /** Единственная соцсеть салона — Telegram-КАНАЛ (не личный чат):
@@ -119,16 +125,13 @@ export const SITE = {
       false → ссылки в меню, блоки на главной и JSON-LD рейтинга скрыты,
       а сами страницы закрыты noindex. */
   features: {
-    reviews:   false,
+    reviews:   true,
     portfolio: true,
   },
 
-  /** Где читать/оставлять отзывы. Пока у салона нет карточек на картах —
-      поиск по адресу; потом заменить на прямые ссылки на карточки. */
-  reviewLinks: {
-    twoGis: `https://2gis.ru/moscow/search/${encodeURIComponent('ВФД Красная Сосна 2А')}`,
-    yandex: `https://yandex.ru/maps/?text=${encodeURIComponent('ВФД Москва Красная Сосна 2А')}`,
-  },
+  /** Карточка салона на Яндекс Картах — отзывы (src/data/reviews.ts),
+      рейтинг, sameAs в разметке организации */
+  yandexMaps: 'https://yandex.ru/maps/org/studiya_zizevskogo/167320599705/',
 
   analytics: {
     /** ID счётчика Яндекс Метрики. Пусто → счётчик не подключается. */

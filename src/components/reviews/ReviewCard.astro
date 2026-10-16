@@ -1,0 +1,67 @@
+---
+/**
+ * Карточка отзыва — главная (Reviews.astro) и /reviews/. Текст целиком,
+ * абзацами: его читают посетители и поисковики (разметка Review — в
+ * JSON-LD страницы). Звёзды — по оценке, подпись — имя и дата отзыва на
+ * Яндекс Картах. Дизайн-система главной: белая плитка на сером фоне.
+ */
+import type { Review } from '../../data/reviews'
+import { typograph } from '../../lib/typograph'
+
+interface Props { review: Review }
+const { review } = Astro.props
+
+/* «28 марта 2025» — без «г.», который добавляет Intl */
+const date = new Date(review.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }).replace(/\s*г\.$/, '')
+const star = 'M8 1.2l2.1 4.3 4.7.7-3.4 3.3.8 4.7L8 12l-4.2 2.2.8-4.7L1.2 6.2l4.7-.7z'
+---
+
+<article class="rv" id={`review-${review.id}`}>
+  <div class="rv__stars" role="img" aria-label={`Оценка ${review.rating} из 5`}>
+    {[1, 2, 3, 4, 5].map((i) => (
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" class:list={{ 'is-on': i <= review.rating }}><path d={star} /></svg>
+    ))}
+  </div>
+  <div class="rv__text">
+    {review.text.split('\n\n').map((p) => <p>{typograph(p)}</p>)}
+  </div>
+  <footer class="rv__by">
+    <span class="rv__name">{review.name}</span>
+    <time class="h-meta" datetime={review.date}>{date}</time>
+  </footer>
+</article>
+
+<style>
+  .rv {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+    padding: clamp(1.25rem, 2.2vw, 1.75rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-paper);
+    color: var(--h-ink);
+  }
+  .rv__stars { display: flex; gap: 0.125rem; }
+  .rv__stars svg { fill: var(--h-rule); }
+  .rv__stars svg.is-on { fill: var(--h-ink); }
+  .rv__text {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--h-soft);
+    text-wrap: pretty;
+  }
+  .rv__text p { margin: 0; }
+  .rv__text p + p { margin-top: 0.75em; }
+  .rv__by {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding-top: 1rem;
+    border-top: 0.0625rem solid var(--h-rule);
+  }
+  .rv__name { font-weight: 600; }
+</style>

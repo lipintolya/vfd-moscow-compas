@@ -1,0 +1,53 @@
+---
+/**
+ * «Отзывы о салоне» на главной — свежие отзывы с Яндекс Карт
+ * (src/data/reviews.ts) и рейтинг карточки салона. Все отзывы — /reviews/.
+ * Блок есть, пока SITE.features.reviews и есть отзывы. На телефоне —
+ * лента вбок, «Все отзывы» — кнопкой под ней (как у статей).
+ */
+import ReviewCard from '../reviews/ReviewCard.astro'
+import { reviews, YANDEX_RATING } from '../../data/reviews'
+import { SITE } from '../../config/site'
+import { pluralRu } from '../../lib/plural'
+
+const HOME_REVIEWS = 6
+const shown = SITE.features.reviews ? reviews.slice(0, HOME_REVIEWS) : []
+const rating = YANDEX_RATING.value.toLocaleString('ru-RU', { minimumFractionDigits: 1 })
+const ratings = `${YANDEX_RATING.ratings} ${pluralRu(YANDEX_RATING.ratings, ['оценке', 'оценкам', 'оценкам'])}`
+const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+---
+
+{shown.length > 0 && (
+  <section class="h-sec h-sec--wall" aria-labelledby="reviews-heading">
+    <div class="container">
+      <header class="h-head">
+        <h2 id="reviews-heading" class="h-h2">Отзывы о&nbsp;салоне</h2>
+        <div>
+          <p class="h-lead">
+            Рейтинг {rating} на&nbsp;<a href={`${SITE.yandexMaps}reviews/`} target="_blank" rel="noopener" class="h-link">Яндекс Картах</a> по&nbsp;{ratings}.
+            Здесь&nbsp;— отзывы оттуда, слово в&nbsp;слово.
+          </p>
+          <a href="/reviews/" class="h-pill h-pill--line rvs-all">Все отзывы <Fragment set:html={arrow} /></a>
+        </div>
+      </header>
+
+      <ul class="rvs h-rail" role="list">
+        {shown.map((review) => <li><ReviewCard review={review} /></li>)}
+      </ul>
+
+      <a href="/reviews/" class="h-btn h-btn--quiet rvs-all-bottom">Все отзывы <Fragment set:html={arrow} /></a>
+    </div>
+  </section>
+)}
+
+<style>
+  .rvs-all { margin-top: 1.25rem; }
+  .rvs-all-bottom { display: none; }
+  @media (max-width: 43.6875rem) {
+    .rvs-all { display: none; }
+    .rvs-all-bottom { display: flex; gap: 0.5rem; width: 100%; margin-top: 1.5rem; background: var(--h-paper); }
+  }
+  .rvs { display: grid; gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .rvs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .rvs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>

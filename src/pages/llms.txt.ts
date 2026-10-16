@@ -3,7 +3,8 @@
    опубликованные статьи с выжимкой «Коротко». Собирается из SITE и
    коллекции статей — новая статья попадает сюда сама. */
 import type { APIRoute } from 'astro'
-import { SITE, PHONE } from '../config/site'
+import { SITE } from '../config/site'
+import { reviews, YANDEX_RATING } from '../data/reviews'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { getArticles, articleHref } from '../lib/articles'
 import { ARTICLES_SECTION } from '../data/article-kinds'
@@ -21,6 +22,7 @@ export const GET: APIRoute = async () => {
     ['Дизайнерам и архитекторам', '/designers/', 'сотрудничество и шоурум для встреч с заказчиками'],
     ['О нас', '/about/', `${SITE.studioName} — официальный дилер ${SITE.manufacturerOf}`],
     ['Контакты', '/contacts/', 'адрес, часы работы, как добраться'],
+    ...(SITE.features.reviews ? [['Отзывы клиентов', '/reviews/', `${reviews.length} отзывов с Яндекс Карт, рейтинг ${YANDEX_RATING.value.toLocaleString('ru-RU', { minimumFractionDigits: 1 })} по ${YANDEX_RATING.ratings} оценкам`]] : []),
   ]
 
   const lines = [
@@ -30,7 +32,7 @@ export const GET: APIRoute = async () => {
     '',
     `- Адрес: ${SITE.address.full}`,
     `- ${companyLegalInfo.workingHours.shortDisplay}`,
-    `- Телефон: ${PHONE.label}`,
+    `- Телефон: ${SITE.phones.map((p) => p.label).join(', ')}`,
     `- Сайт: ${SITE.url}`,
     '',
     '## Разделы',

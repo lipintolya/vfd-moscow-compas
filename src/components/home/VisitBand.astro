@@ -21,7 +21,7 @@
  * Подписи с адресом — для поиска по картинкам; те же фото — в
  * LocalBusiness.image. Грузятся лениво — первый экран не тяжелеют.
  */
-import { SITE, PHONE } from '../../config/site'
+import { SITE } from '../../config/site'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { ROUTE_URL } from '../../lib/map-links'
 import { typograph } from '../../lib/typograph'
@@ -70,8 +70,14 @@ const L = map.layers
           <dd>{hours.shortDisplay}</dd>
         </div>
         <div>
-          <dt class="h-meta">Телефон</dt>
-          <dd><a href={`tel:${PHONE.raw}`} class="h-link">{PHONE.label}</a></dd>
+          <dt class="h-meta">{SITE.phones.length > 1 ? 'Телефоны' : 'Телефон'}</dt>
+          <dd>
+            <ul class="visit__metro" role="list">
+              {SITE.phones.map((p) => (
+                <li><a href={`tel:${p.raw}`} class="h-link visit__phone">{p.label}</a> <span class="visit__metro-time">{p.title}</span></li>
+              ))}
+            </ul>
+          </dd>
         </div>
       </dl>
 
@@ -262,6 +268,7 @@ const L = map.layers
     font-variant-numeric: tabular-nums;
   }
   .visit__metro { margin: 0; padding: 0; list-style: none; }
+  .visit__phone { white-space: nowrap; }
   .visit__metro-time { margin-left: 0.375rem; font-size: 0.9375rem; font-weight: 500; color: var(--h-muted); }
 
   /* ── Маршрут ── */

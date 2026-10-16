@@ -12,9 +12,20 @@ import { MALL_PHOTOS } from '../data/mall-photos'
 
 export const LOCAL_BUSINESS_ID = `${SITE.url}/#localbusiness`
 
-/** Ссылки на карточки организации на картах (2ГИС, Яндекс Карты) —
-    добавить, когда салон появится на картах. */
-const MAP_PROFILES: string[] = []
+/** Карточки организации на картах — sameAs */
+const MAP_PROFILES: string[] = [SITE.yandexMaps]
+
+/** Средняя оценка опубликованных отзывов, до десятых */
+const averageRating = () => Math.round(reviews.reduce((s, r) => s + r.rating, 0) / reviews.length * 10) / 10
+
+/** Отзывы с сайта — schema.org Review для LocalBusiness.review (/reviews/) */
+export const reviewsSchema = () => reviews.map((r) => ({
+  '@type': 'Review',
+  author: { '@type': 'Person', name: r.name },
+  datePublished: r.date,
+  reviewBody: r.text,
+  reviewRating: { '@type': 'Rating', ratingValue: String(r.rating), bestRating: '5', worstRating: '1' },
+}))
 
 export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
   const { coordinates } = SITE.address
@@ -55,15 +66,16 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
     ...(founded ? { foundingDate: String(founded) } : {}),
     priceRange: '₽₽',
     acceptsPaymentMethod: ['Cash', 'CreditCard', 'DebitCard'],
-    /* Рейтинг — только из реальных отзывов (src/data/reviews.ts). Нет
-       отзывов → нет aggregateRating: выдуманный рейтинг в разметке —
-       нарушение правил Яндекса/Google. ratingValue — уточнить по картам. */
+    /* Рейтинг — по отзывам, опубликованным на сайте (src/data/reviews.ts):
+       разметка описывает то, что на странице. Нет отзывов — нет рейтинга:
+       выдуманный рейтинг — нарушение правил Яндекса и Google. */
     ...(SITE.features.reviews && reviews.length > 0 ? {
       aggregateRating: {
         '@type': 'AggregateRating',
-        ratingValue: '5',
+        ratingValue: String(averageRating()),
         reviewCount: String(reviews.length),
         bestRating: '5',
+        worstRating: '1',
       },
     } : {}),
     sameAs: [SITE.social.telegram, ...MAP_PROFILES],

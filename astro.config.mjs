@@ -124,7 +124,7 @@ const SITE_URL = 'https://domain-placeholder.example'
    пока пустой и закрыт noindex (SITE.features в src/config/site.ts);
    /catalog/skrytye-dveri/raboty/ — noindex, пока пуст INVISIBLE_WORKS.
    Включили раздел там — уберите его отсюда. */
-const SITEMAP_EXCLUDE = ['/privacy/', '/reviews/', '/catalog/skrytye-dveri/raboty/']
+const SITEMAP_EXCLUDE = ['/privacy/', '/catalog/skrytye-dveri/raboty/']
 
 const modelImages = await fetchModelImages()
 
