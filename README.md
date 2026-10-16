@@ -222,7 +222,7 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs package.json d
 ```
 
 - [x] **Домен** — `dveriziz.ru`: `SITE_URL` в `src/config/site.ts` и `astro.config.mjs` (конфиг не импортирует TS), `homepage` в `package.json`, `deploy/*`. DNS — направить на сервер, когда он будет.
-- [ ] **Почта салона** — `SITE.email` (пока заглушка, на сайте скрыта флагом `HAS_EMAIL`).
+- [x] **Почта салона** — `mail@dverizz.ru` (`SITE.email`).
 - [ ] **Имя владельца для политики конфиденциальности** — `ownerName` в `src/lib/contacts-data.ts` (пока «владелец сайта <домен>»). Реквизиты юрлица не публикуются — владелец физлицо.
 - [ ] **Год открытия салона** — `activity.founded` в `src/lib/contacts-data.ts`.
 - [ ] **Яндекс Метрика** — `SITE.analytics.yandexMetrikaId`; пусто — счётчик не подключается.

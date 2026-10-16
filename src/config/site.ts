@@ -107,7 +107,7 @@ export const SITE = {
   /** Часы работы салона — ежедневно; подписи и schema.org строятся из них
       (src/lib/contacts-data.ts). timeZone — по нему «Сейчас открыто» в шапке */
   hours: { opens: '10:00', closes: '19:30', timeZone: 'Europe/Moscow' },
-  email: 'info@domain-placeholder.example',
+  email: 'mail@dverizz.ru',
 
   /** Единственная соцсеть салона — Telegram-КАНАЛ (не личный чат):
       «Владимирская Фабрика Дверей. Шоу-рум в Москве, ул. Красная Сосна, 2А,
