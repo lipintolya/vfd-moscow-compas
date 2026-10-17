@@ -2,4 +2,4 @@
 
 `garantee-door.webp` — установленная дверь со шпоном «ёлочкой», фото от
 владельца (17.10.2026) для карточки «Гарантия на монтаж» вместо рендера.
-`npm run gen:contacts` режет кадр 4:3 → `public/renders/contacts/garantee-*`.
+`npm run gen:contacts` режет кадр 4:3 → `public/renders/contacts/install-door-*`.

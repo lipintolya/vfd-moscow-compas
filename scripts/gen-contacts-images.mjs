@@ -21,11 +21,13 @@ const WIDTHS = [480, 800, 1100]
 const RATIO = 4 / 3
 
 /* focus — доля ширины/высоты исходника, вокруг которой режем кадр 4:3;
-   local — исходник в проекте (assets/), а не в облаке */
+   local — исходник в проекте (assets/), а не в облаке.
+   Заменили фото — дайте новое name: картинки кэшируются в браузерах на
+   неделю, под старым именем посетители ещё неделю видят прежний кадр */
 const PHOTOS = [
   { name: 'consultation', file: 'consultation_render.webp', focus: { x: 0.5, y: 0.25 } }, // лицо и руки консультанта
   { name: 'zamer',        file: 'zamer_render.webp',        focus: { x: 0.5, y: 0.5 } },
-  { name: 'garantee',     local: 'assets/contacts/garantee-door.webp', focus: { x: 0.5, y: 0.45 } }, // полотно и ручка; стройматериалы внизу слева — за кадром
+  { name: 'install-door', local: 'assets/contacts/garantee-door.webp', focus: { x: 0.5, y: 0.45 } }, // полотно и ручка; стройматериалы внизу слева — за кадром
 ]
 
 await mkdir(OUT_DIR, { recursive: true })
