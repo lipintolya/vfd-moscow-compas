@@ -12,12 +12,13 @@ import { SERIES_COVER_PREVIEWS, SERIES_COVER_THUMBS } from '../data/series-cover
 import { adjustPrice } from './price-adjustments'
 import { isNewModel } from './new-models'
 import { describeTrim } from './trim-labels'
+import { colorFamily, type ColorFamilySlug } from '../data/color-families'
 
-/* Подпись под названием в карточке: «Кромка серебро» / «Стекло сатин белый»
+/* Строка характеристик в карточке: «Кромка: Серебряная» / «Стекло: Сатин белый»
    (серия Некст хранит в models.trim остекление, не кромку — см. describeTrim). */
 const trimCaption = (trim: string | null | undefined): string => {
-  const phrase = describeTrim(trim)?.phrase ?? ''
-  return phrase.charAt(0).toUpperCase() + phrase.slice(1)
+  const info = describeTrim(trim)
+  return info ? `${info.kind === 'glass' ? 'Стекло' : 'Кромка'}: ${info.label}` : ''
 }
 import { withInStockFirst } from './made-to-order'
 import type { CatalogCardItem } from '../components/catalog/types'
@@ -87,7 +88,7 @@ async function loadCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
      Свотчи (name+hex) — та же карта, чтобы на карточке в каталоге сразу было
      видно все доступные цвета, а не только тот, что выбран для обложки. ── */
   const colorsByModel = new Map<string, string[]>()
-  const colorSwatchesByModel = new Map<string, { name: string; hex: string; price: number | null; photo: string; available: boolean }[]>()
+  const colorSwatchesByModel = new Map<string, CatalogCardItem['colorSwatches']>()
   for (const row of (data ?? [])) {
     const model = row.models as any
     const color = row.colors as any
@@ -105,6 +106,7 @@ async function loadCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
         price:     adjustPrice(seriesSlug, row.price_rrp ?? null),
         photo:     row.photo_url,
         available: true,
+        family:    colorFamily(color.name, normalizeHexColor(color.hex_preview)),
       })
     }
     colorSwatchesByModel.set(model.id, swatches)
@@ -147,7 +149,10 @@ async function loadCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
       colorHex:    cover?.hex  ?? normalizeHexColor(color.hex_preview),
       trim:        trimCaption(model.trim),
       colorNames:  colorsByModel.get(model.id) ?? [color.name],
-      colorSwatches: swatches ?? [{ name: color.name, hex: normalizeHexColor(color.hex_preview), price: adjustPrice(seriesSlug, row.price_rrp ?? null), photo: row.photo_url ?? '', available: Boolean(row.photo_url) }],
+      colorSwatches: swatches ?? [{ name: color.name, hex: normalizeHexColor(color.hex_preview), price: adjustPrice(seriesSlug, row.price_rrp ?? null), photo: row.photo_url ?? '', available: Boolean(row.photo_url), family: colorFamily(color.name, normalizeHexColor(color.hex_preview)) }],
+      /* Группы — только цветов с фото: фильтр «белые» не должен приводить
+         к модели, у которой белый есть лишь на словах */
+      colorFamilies: [...new Set<ColorFamilySlug>((swatches ?? []).map(s => s.family))],
       photo:       cover?.photo ?? row.photo_url ?? '',
       price:       cover?.price ?? adjustPrice(seriesSlug, row.price_rrp ?? null),
       hasGlass:    model.has_glass ?? false,

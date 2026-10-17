@@ -71,11 +71,6 @@ const allSeries = [...new Map(
 const allCoatings = [...new Map(
   matchedCards.filter(c => c.coatingSlug).map(c => [c.coatingSlug, { label: c.coating, value: c.coatingSlug }])
 ).values()]
-const allColors = [...new Map(
-  matchedCards.flatMap(c => c.colorSwatches.filter(s => s.available && (!colorFilter || matchesColor(s.name)))
-    .map(s => [s.name, { label: s.name, value: s.name, color: s.hex }] as const))
-).values()]
-
 const canonicalUrl = Astro.site ? new URL(`/catalog/${category.slug}/`, Astro.site).href : undefined
 
 const breadcrumbItems = [
@@ -148,10 +143,6 @@ const structuredData = canonicalUrl ? [
         cards={matchedCards}
         series={allSeries}
         coatings={allCoatings}
-        colors={allColors}
-        initialSeries=""
-        initialCoating=""
-        initialColor=""
       />
     </div>
   </div>

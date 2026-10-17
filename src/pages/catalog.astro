@@ -11,7 +11,6 @@
  */
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
-import SectionNav from '../components/partitions/SectionNav.astro'
 import CatalogClient from '../components/catalog/CatalogClient.vue'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import VisitBand from '../components/home/VisitBand.astro'
@@ -69,12 +68,8 @@ const coatingNames = coatingGroups.map((g) => g.name)
 const uniqueBy = <T,>(items: T[], key: (item: T) => string) => [...new Map(items.map((i) => [key(i), i])).values()]
 const allSeries = uniqueBy(cards.filter((c) => c.seriesSlug), (c) => c.seriesSlug).map((c) => ({ label: c.series, value: c.seriesSlug }))
 const allCoatings = uniqueBy(cards.filter((c) => c.coatingSlug), (c) => c.coatingSlug).map((c) => ({ label: c.coating, value: c.coatingSlug }))
-/* Цвета — из свотчей (все цвета модели, не только обложки); цвет без фото
-   под модель (available: false) в фильтр не попадает — дал бы пустую выдачу */
-const allColors = uniqueBy(
-  cards.flatMap((c) => c.colorSwatches.filter((s) => s.available).map((s) => ({ label: s.name, value: s.name, color: s.hex }))),
-  (o) => o.value,
-)
+/* Карточки покрытий над каталогом: фото серии в интерьере и цена «от» */
+const coatingCards = coatingGroups.map((g) => ({ value: g.slug, label: g.name, cover: g.cover, minPrice: g.minPrice }))
 
 /* ── Вопросы ── */
 const catalogFaq = [
@@ -151,13 +146,6 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     </div>
   </div>
 
-  <SectionNav items={[
-    { id: 'ct-title',       label: 'Модели' },
-    { id: 'coatings-title', label: 'Покрытия' },
-    { id: 'picks-title',    label: 'Подборки' },
-    { id: 'faq-title',      label: 'Вопросы' },
-  ]} />
-
   <div class="home">
     <section class="ct" aria-labelledby="ct-title">
       <div class="container">
@@ -173,10 +161,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           cards={cards}
           series={allSeries}
           coatings={allCoatings}
-          colors={allColors}
-          initialSeries=""
-          initialCoating=""
-          initialColor=""
+          coatingCards={coatingCards}
           hideTitle
         />
       </div>
@@ -185,18 +170,13 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     <section id="coatings" class="h-sec h-sec--wall" aria-labelledby="coatings-title">
       <div class="container">
         <header class="h-head">
-          <h2 id="coatings-title" class="h-h2">Покрытия и&nbsp;серии</h2>
+          <h2 id="coatings-title" class="h-h2">О&nbsp;покрытиях и&nbsp;сериях</h2>
           <p class="h-lead">{typograph('Покрытие определяет, как дверь выглядит, как ощущается рукой и как переносит влажную уборку. Серия — рисунок полотна и конструкция.')}</p>
         </header>
 
         <ul class="co-list" role="list">
           {coatingGroups.map((g) => (
             <li class="co" id={`coating-${g.slug}`}>
-              {g.cover && (
-                <span class="h-media co__media">
-                  <img src={g.cover} alt={`${g.series[0]!.name}, покрытие ${g.name}`} width="480" height="600" loading="lazy" decoding="async" />
-                </span>
-              )}
               <div class="co__text">
                 <h3 class="co__name">{g.name}</h3>
                 <p class="h-meta co__facts">
@@ -285,15 +265,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     scroll-margin-top: calc(var(--header-height) + 1rem);
   }
   .co:last-child { border-bottom: 0.0625rem solid var(--h-rule); }
-  .co__media { display: none; aspect-ratio: 4 / 5; }
-  @media (min-width: 43.75rem) {
-    .co { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .co__media { display: block; grid-column: 1 / span 4; grid-row: span 2; }
-    .co__text, .co__series { grid-column: 5 / span 8; }
-  }
   @media (min-width: 62.5rem) {
-    .co__media { grid-column: 1 / span 3; grid-row: auto; }
-    .co__text { grid-column: 4 / span 5; padding-right: var(--h-gutter); }
+    .co { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .co__text { grid-column: 1 / span 7; padding-right: var(--h-gutter); }
     .co__series { grid-column: 9 / span 4; }
   }
   .co__name {
@@ -312,7 +286,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   .co__text > .co__desc:first-of-type:not(.co__tagline + .co__desc) { margin-top: 1.25rem; }
   .co__link { margin-top: 1.5rem; }
 
-  .co__series { margin: 0; padding: 0; list-style: none; align-self: start; }
+  /* Список серий начинается вровень с названием покрытия; линейка сверху —
+     общая у строки покрытия */
+  .co__series { margin: -0.875rem 0 0; padding: 0; list-style: none; align-self: start; }
   .co__serie {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -323,7 +299,6 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     color: var(--h-ink);
     text-decoration: none;
   }
-  .co__series li:first-child .co__serie { border-top: 0.0625rem solid var(--h-rule); }
   .co__serie-name { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
   .co__serie-arrow {
     display: grid;

@@ -18,7 +18,6 @@ defineEmits<{
   flex-direction: column;
   align-items: flex-start;
   padding: clamp(2rem, 5vw, 3.5rem);
-  border-radius: var(--h-tile-radius);
   background: var(--h-wall);
 }
 .ce__text { margin-top: 0.5rem; max-width: 28rem; font-size: 0.9375rem; }

@@ -1,3 +1,5 @@
+import type { ColorFamilySlug } from '../../data/color-families'
+
 export interface CatalogCardItem {
   id: string
   slug: string
@@ -23,7 +25,9 @@ export interface CatalogCardItem {
       существует, хотя на деле просто нет фото. Такие цвета НЕ участвуют в
       фильтре каталога (см. colorNames/allColors) — иначе фильтр по ним давал
       бы пустую выдачу. */
-  colorSwatches: { name: string; hex: string; price: number | null; photo: string; available: boolean }[]
+  colorSwatches: { name: string; hex: string; price: number | null; photo: string; available: boolean; family: ColorFamilySlug }[]
+  /** Группы цветов модели (src/data/color-families.ts) — по ним фильтр «Цвет» */
+  colorFamilies: ColorFamilySlug[]
   photo: string
   price: number | null
   hasGlass: boolean
