@@ -16,8 +16,7 @@ import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import {
-  COLLAB_PARTNER, FOUNDER, FOUNDER_QUOTE, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS,
-} from '../data/about-page'
+  COLLAB_PARTNER, FOUNDER, FOUNDER_QUOTE, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS, SHOWROOM } from '../data/about-page'
 import { SITE } from '../config/site'
 import { VFD_DEALER, VFD_CARDS, VFD_ORG_ID, vfdOrganizationSchema } from '../data/vfd-factory'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
@@ -138,8 +137,56 @@ const breadcrumbItems = [
       </div>
     </section>
 
+    {/* Шоурум: на ПК — превью из пяти кадров (первый крупный, на последнем
+         «+N фото»), на телефоне — лента со свайпом (.h-rail). Клик — окно
+         просмотра со всеми кадрами */}
+    <section class="h-sec" id="showroom" aria-labelledby="showroom-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="showroom-title" class="h-h2">{SHOWROOM.title}</h2>
+          <p class="h-lead">{typograph(SHOWROOM.lead)}</p>
+        </header>
+
+        <div data-lightbox data-lightbox-images={JSON.stringify(SHOWROOM.photos.map((p) => ({ src: p.large, alt: p.alt })))}>
+          <ul class="showroom h-rail" role="list">
+            {SHOWROOM.photos.slice(0, SHOWROOM.previewCount).map((p, i) => {
+              const rest = SHOWROOM.photos.length - SHOWROOM.previewCount
+              const last = i === SHOWROOM.previewCount - 1 && rest > 0
+              return (
+                <li class:list={['showroom__item', { 'showroom__item--main': i === 0 }]}>
+                  <button
+                    type="button"
+                    class="h-media showroom__zoom"
+                    aria-label={last ? `Смотреть все ${SHOWROOM.photos.length} фото шоурума` : `Открыть фото: ${p.alt}`}
+                    data-lightbox-index={i}
+                  >
+                    <img
+                      src={p.src}
+                      srcset={p.srcset}
+                      sizes={i === 0
+                        ? '(min-width: 80rem) 37rem, (min-width: 43.75rem) 50vw, 82vw'
+                        : '(min-width: 80rem) 18rem, (min-width: 43.75rem) 25vw, 82vw'}
+                      alt={p.alt}
+                      width={p.width}
+                      height={p.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    {last && <span class="showroom__more" aria-hidden="true">+{rest} фото</span>}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          <button type="button" class="h-btn h-btn--quiet showroom__all" data-lightbox-index="0">
+            Смотреть все {SHOWROOM.photos.length} фото
+          </button>
+        </div>
+      </div>
+    </section>
+
     {/* Выводы о рынке — пункты под линейками вместо сплошного абзаца */}
-    <section class="h-sec" aria-labelledby="market-title">
+    <section class="h-sec h-sec--tight-top" aria-labelledby="market-title">
       <div class="container split">
         <header class="split__head">
           <h2 id="market-title" class="h-h2">{typograph(MARKET.title)}</h2>
@@ -520,6 +567,58 @@ const breadcrumbItems = [
 
   @media (prefers-reduced-motion: reduce) {
     .tl::after, .tl__item > * { transition: none; }
+  }
+
+  /* ── Шоурум ──
+     ПК и планшет: 4 колонки, первый кадр — 2×2, рядом четыре 3:4; на
+     последнем — «+N фото». Телефон: лента вбок (.h-rail). */
+  .showroom {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .showroom__item { aspect-ratio: 3 / 4; }
+  /* Крупный кадр не задаёт высоту рядов: кнопка с фото — поверх ячейки 2×2 */
+  .showroom__item--main { position: relative; grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
+  .showroom__item--main .showroom__zoom { position: absolute; inset: 0; }
+  .showroom__zoom {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+  }
+  .showroom__zoom img { transition: transform 700ms var(--ease-out); }
+  .showroom__zoom:hover img { transform: scale(1.025); }
+  .showroom__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
+  /* «+N фото» — затемнение во весь кадр, крупная белая подпись */
+  .showroom__more {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--color-slate-950) 55%, transparent);
+    font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+    font-weight: var(--h-weight-display);
+    letter-spacing: -0.02em;
+    color: var(--color-white);
+    transition: background-color 200ms var(--ease-out);
+  }
+  .showroom__zoom:hover .showroom__more { background: color-mix(in srgb, var(--color-slate-950) 45%, transparent); }
+  .showroom__all { margin-top: 1.5rem; cursor: pointer; font-family: inherit; background: none; }
+  /* Телефон: лента — все превью одного размера, кнопка во всю ширину */
+  @media (max-width: 43.6875rem) {
+    .showroom__item--main { position: static; grid-column: auto; grid-row: auto; aspect-ratio: 3 / 4; }
+    .showroom__item--main .showroom__zoom { position: relative; }
+    .showroom__all { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .showroom__zoom img, .showroom__more { transition: none; }
+    .showroom__zoom:hover img { transform: none; }
   }
 
   /* ── Производство ──

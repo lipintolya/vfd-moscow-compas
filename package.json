@@ -24,6 +24,7 @@
     "check:content": "tsx scripts/check-content.ts",
     "media:pull": "node scripts/media-pull.mjs",
     "gen:about": "node scripts/gen-about-images.mjs",
+    "gen:showroom": "node scripts/gen-showroom-photos.mjs",
     "gen:contacts": "node scripts/gen-contacts-images.mjs",
     "gen:designers-hero": "node scripts/gen-designers-hero.mjs",
     "gen:hidden-doors-hero": "node scripts/gen-hidden-doors-hero.mjs",

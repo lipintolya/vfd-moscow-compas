@@ -5,6 +5,7 @@
    ============================================================ */
 import { SITE } from '../config/site'
 import factoryPhotos from './about-factory-photos.json'
+import showroomPhotos from './showroom-photos.json'
 
 /* Вторая часть заголовка-коллаборации «Студия Зизевского × фабрика VFD»
    (h1 /about/, превью /og/about.jpg — scripts/gen-og-about.mjs читает
@@ -112,6 +113,53 @@ export const FACTORY = {
       alt:    FACTORY_ALTS[p.n] ?? 'Производство дверей',
     }
   }),
+}
+
+/* Шоурум в ТЦ «Компас» — фото салона от владельца (assets/showroom,
+   npm run gen:showroom). Подписи — что в кадре: по ним фото находят в
+   Яндекс и Google Картинках; название студии — в нескольких, не во всех.
+   Порядок — сначала превью (PREVIEW первых кадров видно на странице),
+   остальные открываются в окне просмотра. */
+const SHOWROOM_ALTS: Record<number, string> = {
+  1:  `Шоурум ${SITE.studioNameOf}: межкомнатные двери ВФД — белые филёнчатые, графитовая и белая со вставкой под дерево`,
+  2:  'Белые, графитовая и остеклённая межкомнатные двери на стене шоурума',
+  3:  `Стенды дверных ручек Punto, Fuaro, Bussare и Morelli в ${SITE.studioNameOf}`,
+  4:  'Образцы напольных покрытий, классические двери и резной погонаж в шоуруме',
+  5:  'Двери со вставками под дерево, скрытая дверь под покраску и стенды дверных ручек',
+  6:  'Три белые филёнчатые двери, одна со стеклом в раскладке, на графитовой стене шоурума',
+  7:  `Скрытая дверь в стеновых панелях «ёлочкой» и дверь под дерево с чёрным стеклом в ${SITE.studioNameOf}`,
+  8:  'Белая классическая дверь и бирюзовая дверь с овальным рифлёным стеклом на синей стене шоурума',
+  9:  'Входная дверь с чёрной панелью и белые межкомнатные двери в зале шоурума',
+  10: `Входная дверь с отделкой рейками, межкомнатные двери и образцы напольных покрытий в ${SITE.studioNameOf}`,
+  11: 'Срез дверного полотна из массива: внутреннее устройство двери и наличника',
+  12: 'Дверь под серый дуб с чёрными молдингами вблизи',
+  13: 'Двери с фрезеровкой, рейками и вставками под дерево на синей стене шоурума',
+  14: 'Чёрная ручка и магнитный замок на двери под светлый дуб вблизи',
+}
+/** Номера кадров в превью — по порядку */
+const SHOWROOM_PREVIEW = [1, 2, 3, 7, 10]
+
+const showroomPhoto = (p: (typeof showroomPhotos.photos)[number]) => {
+  const file = (w: number) => `/renders/about/showroom-${p.n}-${w}.webp`
+  return {
+    src:    file(showroomPhotos.widths[0]!),
+    srcset: showroomPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
+    large:  file(showroomPhotos.widths.at(-1)!),
+    width:  p.width,
+    height: p.height,
+    alt:    SHOWROOM_ALTS[p.n] ?? `Шоурум ${SITE.studioNameOf}`,
+  }
+}
+
+export const SHOWROOM = {
+  title: `Шоурум в\u00a0${SITE.address.mall}`,
+  lead:  'Большой выбор межкомнатных и входных дверей и фурнитура топовых производителей — всё можно посмотреть и потрогать вживую.',
+  previewCount: SHOWROOM_PREVIEW.length,
+  /** Все кадры: сначала превью, потом остальные по порядку */
+  photos: [
+    ...SHOWROOM_PREVIEW.map((n) => showroomPhotos.photos.find((p) => p.n === n)!),
+    ...showroomPhotos.photos.filter((p) => !SHOWROOM_PREVIEW.includes(p.n)),
+  ].map(showroomPhoto),
 }
 
 /* Тёмный блок (StepsRow без номеров — это не последовательность) */
