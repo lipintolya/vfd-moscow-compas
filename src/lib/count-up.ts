@@ -21,6 +21,13 @@ export function countFormatter(final: string): (n: number) => string {
   return (n) => (grouped ? n.toLocaleString('ru-RU') : String(n)) + suffix
 }
 
+/** Кривая счёта (expo-out): к середине времени — больше 95 % пути, а
+    последние числа сменяются всё реже — счёт «дотягивает» до итога.
+    p — доля времени 0…1 */
+export const countEase = (p: number): number => (p >= 1 ? 1 : p <= 0 ? 0 : 1 - Math.pow(2, -10 * p))
+
+/** По окончании счёта элемент получает data-counted — страница может
+    отметить итог (например, короткой вспышкой числа) */
 export function countUp(elements: Iterable<HTMLElement>, ms = 1400) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return
   const run = (el: HTMLElement, to: number, final: string) => {
@@ -29,10 +36,14 @@ export function countUp(elements: Iterable<HTMLElement>, ms = 1400) {
     const tick = (now: number) => {
       if (!t0) t0 = now
       const p = Math.min(1, (now - t0) / ms)
-      /* ease-out: быстро в начале, плавно подходит к итогу */
-      el.textContent = p < 1 ? fmt(Math.round(to * (1 - Math.pow(1 - p, 3)))) : final
+      /* Округление вниз: итоговое число появляется ровно в конце, а не
+         раньше времени на последних долях процента */
+      el.textContent = p < 1 ? fmt(Math.floor(to * countEase(p))) : final
       if (p < 1) requestAnimationFrame(tick)
-      else el.style.minWidth = ''
+      else {
+        el.style.minWidth = ''
+        el.dataset.counted = ''
+      }
     }
     requestAnimationFrame(tick)
   }

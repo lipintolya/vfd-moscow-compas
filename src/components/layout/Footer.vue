@@ -3,7 +3,9 @@ import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { useScrollLock } from '../../lib/scroll-lock'
 import { PHONE, SITE } from '../../config/site'
-import { ROUTE_URL } from '../../lib/map-links'
+import { ROUTE_URL, MAP_URL } from '../../lib/map-links'
+import { whatsappUrl } from '../../lib/messengers'
+import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import { CONSENT_SETTINGS_EVENT } from '../../lib/cookie-consent'
 
 /* ============================================================
@@ -48,7 +50,8 @@ const CONTACTS = {
    (src/pages/visit-map-dark.svg.ts): одна лёгкая картинка, кешируется
    на все страницы, без JS и тайлов карт. Клик — на Яндекс Карты. */
 const MAP_PREVIEW_IMAGE = '/visit-map-dark.svg'
-const MAP_LINK = SITE.address.mapUrl
+const MAP_LINK = MAP_URL
+const WHATSAPP_URL = whatsappUrl()
 
 /* ============================================================
    Legal modal
@@ -299,6 +302,17 @@ onUnmounted(() => {
                   {{ p.label }}
                 </a>
                 <span class="block text-white/40">{{ p.title }}</span>
+                <a
+                  v-if="'whatsapp' in p && p.whatsapp"
+                  :href="WHATSAPP_URL"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-1.5 inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
+                  :aria-label="`Написать в WhatsApp на ${p.label}`"
+                >
+                  <WhatsAppIcon class="w-4 h-4" />
+                  Написать в WhatsApp
+                </a>
               </li>
               <li class="text-white/60">{{ CONTACTS.worktime }}</li>
               <li v-if="HAS_EMAIL">

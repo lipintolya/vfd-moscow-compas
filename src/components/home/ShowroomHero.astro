@@ -18,6 +18,7 @@ import { SITE } from '../../config/site'
 import { HERO_SLIDES, type HeroWay } from '../../data/hero-image'
 import { pluralRu } from '../../lib/plural'
 import { typograph } from '../../lib/typograph'
+import { MAP_URL } from '../../lib/map-links'
 
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
 const SLIDE_MS = 6000
@@ -115,7 +116,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
         </a>
       </li>
       <li>
-        <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-tile h-tile--photo tile tile--place" aria-label={`${SITE.address.full} — открыть на Яндекс Картах`}>
+        <a href={MAP_URL} target="_blank" rel="noopener" class="h-tile h-tile--photo tile tile--place" aria-label={`${SITE.address.full} — открыть на Яндекс Картах`}>
           <img src={SITE.address.photo} alt={`${SITE.address.mallFull}, ${SITE.address.street} — ${SITE.studioName} ${SITE.address.floorIn}`} loading="lazy" decoding="async" />
           <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
           <span class="h-tile__title">{SITE.address.mall}, {SITE.address.floor}</span>
@@ -138,7 +139,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   import { countUp } from '../../lib/count-up'
 
   /* Продано дверей — досчитывает до итога, длиннее обычного: масштаб */
-  countUp(document.querySelectorAll<HTMLElement>('.stage__count[data-count]'), 2000)
+  countUp(document.querySelectorAll<HTMLElement>('.stage__count[data-count]'), 3200)
 
   /* Слайдер сцены. Таймер — цепочка setTimeout (после ручной смены кадр
      показывается полный интервал). Пауза: наведение или фокус на
@@ -283,23 +284,37 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     align-items: center;
     gap: 0.75rem;
     margin: 1.25rem 0 0;
-    font-size: clamp(1rem, 1.3vw, 1.125rem);
+    /* Акцент первого экрана — крупнее подзаголовка (18 → 24 px), но на
+       ступень мельче заголовка; число — ещё чуть крупнее строки */
+    font-size: clamp(1.1875rem, 1.9vw, 1.5rem);
     font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
     color: var(--color-white);
+    text-wrap: balance;
   }
   /* Счётчик держит ширину итогового числа (count-up.ts) — «дверей» не
      сдвигается; цифры одной ширины, число прижато вправо */
   .stage__count {
     display: inline-block;
+    font-size: 1.15em;
+    font-weight: 700;
     text-align: right;
     font-variant-numeric: tabular-nums;
+  }
+  /* Счёт дошёл до итога — число коротко «вспыхивает»: чуть крупнее и
+     обратно. Только после счёта (data-counted), без reduced-motion
+     счёта нет — нет и вспышки */
+  .stage__count[data-counted] { animation: stage-count-done 600ms var(--ease-out); }
+  @keyframes stage-count-done {
+    40% { transform: scale(1.12); }
   }
   .stage__nowrap { white-space: nowrap; }
   .stage__fact::before {
     content: '';
     flex: none;
-    width: 1.5rem;
-    height: 0.125rem;
+    width: 1.75rem;
+    height: 0.1875rem;
     border-radius: 0.125rem;
     background: var(--h-signal);
   }

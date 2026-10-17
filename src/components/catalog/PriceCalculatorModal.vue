@@ -9,6 +9,8 @@ import {
   type HingeType, type HardwareImages,
 } from '../../data/hardware'
 import { PHONE, SITE } from '../../config/site'
+import { WHATSAPP, whatsappWithText } from '../../lib/messengers'
+import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 
 /* ============================================================
    mounted — гейт для Teleport ниже, прокинут пропом от родителя
@@ -92,10 +94,9 @@ const lines = computed<Line[]>(() => {
 const total = computed(() => props.bladePrice + lines.value.reduce((sum, l) => sum + l.total, 0))
 
 /* ============================================================
-   Текст расчёта — бэкенда нет, мессенджера для заявок у салона тоже
-   (есть только Telegram-канал). Расчёт собирается текстом, его можно
-   скопировать в буфер, чтобы продиктовать или переслать менеджеру
-   при звонке.
+   Текст расчёта — бэкенда нет: расчёт собирается текстом и уходит
+   менеджеру в WhatsApp готовым сообщением, или его можно скопировать,
+   чтобы продиктовать по телефону или переслать.
    ============================================================ */
 const calcMessage = computed(() => {
   const parts: string[] = [
@@ -109,10 +110,9 @@ const calcMessage = computed(() => {
   return parts.join('\n')
 })
 
-/* Отправить расчёт в мессенджер нельзя: у салона только Telegram-канал.
-   Поэтому — звонок менеджеру и копирование текста расчёта (чтобы
-   продиктовать или переслать). */
+/* Звонок в салон, WhatsApp менеджеру с текстом расчёта, копирование */
 const callHref = `tel:${PHONE.raw}`
+const whatsappHref = computed(() => whatsappWithText(calcMessage.value))
 
 /** Best-effort — если буфер недоступен (нет разрешения/старый браузер),
     просто ничего не происходит. */
@@ -303,14 +303,25 @@ onUnmounted(() => {
                 <p class="calc-send__label">Обсудить расчёт с менеджером — {{ SITE.contactPerson }}</p>
                 <div class="calc-send__row">
                   <a :href="callHref" class="calc-send__btn" :aria-label="`Позвонить: ${PHONE.label}`">
-                    Позвонить {{ PHONE.label }}
+                    Позвонить
+                  </a>
+                  <a
+                    v-if="WHATSAPP"
+                    :href="whatsappHref"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="calc-send__btn"
+                    :aria-label="`Отправить расчёт в WhatsApp на ${WHATSAPP.label}`"
+                  >
+                    <WhatsAppIcon class="calc-send__ico" />
+                    WhatsApp
                   </a>
                   <button type="button" class="calc-send__btn" @click="copyCalcMessage">
                     Скопировать расчёт
                   </button>
                 </div>
                 <p class="calc-send__hint" :class="{ 'calc-send__hint--copied': copied }" aria-live="polite">
-                  {{ copied ? 'Текст расчёта скопирован' : 'Расчёт можно скопировать, чтобы переслать или продиктовать по телефону' }}
+                  {{ copied ? 'Текст расчёта скопирован' : `Позвонить — ${PHONE.label}. В WhatsApp расчёт уйдёт готовым сообщением` }}
                 </p>
               </div>
             </div>
@@ -564,7 +575,8 @@ onUnmounted(() => {
   gap: 0.625rem;
 }
 .calc-send__btn {
-  flex: 1 1 6rem;
+  flex: 1 1 7rem;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -585,7 +597,7 @@ onUnmounted(() => {
   border-color: var(--color-accent-200);
   transform: translateY(-1px);
 }
-.calc-send__btn img { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+.calc-send__btn img, .calc-send__ico { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
 .calc-send__hint {
   margin: 0.625rem 0 0;
   font-size: 0.75rem;

@@ -18,6 +18,9 @@ import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-sc
 import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ, SALON } from '../data/contacts-page'
 import { PRICES_DATE_LABEL } from '../data/services'
 import { SITE, PHONE } from '../config/site'
+import { WHATSAPP, whatsappUrl } from '../lib/messengers'
+import WhatsAppIcon from '../components/ui/WhatsAppIcon.vue'
+import TelegramIcon from '../components/ui/TelegramIcon.vue'
 import { typograph } from '../lib/typograph'
 import '../styles/home.css'
 
@@ -88,7 +91,17 @@ const breadcrumbItems = [
               <span class="h-cap">Городской номер салона</span>
             </a>
           </li>
-          <li>
+          {WHATSAPP && (
+            <li>
+              <a href={whatsappUrl()} target="_blank" rel="noopener" class="h-tile h-tile--light ct-tile ct-tile--half" aria-label={`Написать в WhatsApp на ${WHATSAPP.label}`}>
+                <span class="h-tile__corner h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
+                <span class="ct-tile__label ct-tile__label--icon"><WhatsAppIcon class="ct-tile__ico" />WhatsApp</span>
+                <span class="h-tile__title">Написать</span>
+                <span class="h-cap">{WHATSAPP.label}</span>
+              </a>
+            </li>
+          )}
+          <li class="ct-tiles__salon">
             <a href="#visit" class="h-tile h-tile--dark ct-tile">
               <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
               <span class="ct-tile__label">Салон</span>
@@ -101,11 +114,11 @@ const breadcrumbItems = [
             </a>
           </li>
           <li>
-            <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-tile h-tile--light ct-tile">
+            <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-tile h-tile--light ct-tile ct-tile--half" aria-label={`Telegram-канал салона ${SITE.social.telegramHandle}`}>
               <span class="h-tile__corner h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
-              <span class="ct-tile__label">Telegram-канал</span>
-              <span class="h-tile__title">{SITE.social.telegramHandle}</span>
-              <span class="h-cap">Подписаться на канал салона</span>
+              <span class="ct-tile__label ct-tile__label--icon"><TelegramIcon class="ct-tile__ico" />Telegram</span>
+              <span class="h-tile__title">Читать</span>
+              <span class="h-cap">Канал {SITE.social.telegramHandle}</span>
             </a>
           </li>
         </ul>
@@ -284,9 +297,26 @@ const breadcrumbItems = [
     padding: 0;
     list-style: none;
   }
-  @media (min-width: 47.5rem) { .ct-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ct-tiles > li:first-child { grid-column: 1 / -1; } }
-  @media (min-width: 68.75rem) { .ct-tiles { grid-template-columns: 2fr 1fr 1fr; } .ct-tiles > li:first-child { grid-column: auto; } }
+  /* Телефон: «Позвонить» во всю ширину, WhatsApp и Telegram — рядом
+     (писать — короткие плитки), «Салон» — последней во всю ширину.
+     Планшет — 2×2, компьютер — в ряд, «Позвонить» шире */
+  .ct-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ct-tiles > li:first-child, .ct-tiles__salon { grid-column: 1 / -1; }
+  .ct-tiles__salon { order: 1; }
+  @media (min-width: 47.5rem) {
+    .ct-tiles > li:first-child, .ct-tiles__salon { grid-column: auto; }
+    .ct-tiles__salon { order: 0; }
+  }
+  @media (min-width: 68.75rem) { .ct-tiles { grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); } }
   .ct-tile { min-height: clamp(11rem, 18vw, 15rem); }
+  .ct-tile__label--icon { display: inline-flex; align-items: center; gap: 0.4375rem; }
+  :global(.ct-tile__ico) { width: 1.25rem; height: 1.25rem; flex: none; }
+  @media (max-width: 47.4375rem) {
+    /* Мессенджеры на телефоне — две плитки рядом: ниже, без угловой
+       стрелки (вся плитка — ссылка, стрелке места нет) */
+    .ct-tile--half { min-height: 9rem; }
+    .ct-tile--half .h-tile__corner { display: none; }
+  }
   .ct-tile__cap { display: flex; flex-direction: column; gap: 0.125rem; }
   .ct-tile__hours { white-space: nowrap; }
   .ct-tile__label {
@@ -339,7 +369,7 @@ const breadcrumbItems = [
   .ct-salon__zoom:hover img { transform: scale(1.025); }
   .ct-salon__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
   /* Плашка на фото — что это за место */
-  .ct-salon__chip { position: absolute; left: clamp(0.75rem, 1.4vw, 1rem); bottom: clamp(0.75rem, 1.4vw, 1rem); }
+  .ct-salon__chip { position: absolute; left: clamp(0.75rem, 1.4vw, 1rem); bottom: clamp(0.75rem, 1.4vw, 1rem); max-width: calc(100% - 1.5rem); overflow: hidden; text-overflow: ellipsis; }
   .ct-salon__all { margin-top: 1.5rem; background: none; font-family: inherit; cursor: pointer; }
   @media (max-width: 43.6875rem) {
     .ct-salon__all { width: 100%; }

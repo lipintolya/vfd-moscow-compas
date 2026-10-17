@@ -23,7 +23,9 @@
  */
 import { SITE } from '../../config/site'
 import { companyLegalInfo } from '../../lib/contacts-data'
-import { ROUTE_URL } from '../../lib/map-links'
+import { ROUTE_URL, MAP_URL } from '../../lib/map-links'
+import { whatsappUrl } from '../../lib/messengers'
+import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import { typograph } from '../../lib/typograph'
 import map from '../../data/visit-map.json'
 import { MALL_PHOTOS } from '../../data/mall-photos'
@@ -74,7 +76,14 @@ const L = map.layers
           <dd>
             <ul class="visit__metro" role="list">
               {SITE.phones.map((p) => (
-                <li><a href={`tel:${p.raw}`} class="h-link visit__phone">{p.label}</a> <span class="visit__metro-time">{p.title}</span></li>
+                <li>
+                  <a href={`tel:${p.raw}`} class="h-link visit__phone">{p.label}</a> <span class="visit__metro-time">{p.title}</span>
+                  {'whatsapp' in p && p.whatsapp && (
+                    <a href={whatsappUrl()} target="_blank" rel="noopener" class="h-link visit__wa" aria-label={`Написать в WhatsApp на ${p.label}`}>
+                      <WhatsAppIcon class="visit__wa-ico" />WhatsApp
+                    </a>
+                  )}
+                </li>
               ))}
             </ul>
           </dd>
@@ -121,7 +130,7 @@ const L = map.layers
       </span>
 
       <figcaption class="map__foot">
-        <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="map__open">Открыть в&nbsp;Яндекс Картах</a>
+        <a href={MAP_URL} target="_blank" rel="noopener" class="map__open">Открыть в&nbsp;Яндекс Картах</a>
         <span class="map__credit">{map.attribution}</span>
       </figcaption>
     </figure>
@@ -428,4 +437,7 @@ const L = map.layers
     .map__dot::after { animation: none; opacity: 0; }
     .map, .map path, .map__label, .map__pin > * { transition: none; }
   }
+  /* WhatsApp рядом с номером, на который в нём пишут */
+  .visit__wa { display: flex; align-items: center; gap: 0.3125rem; width: fit-content; margin-top: 0.25rem; white-space: nowrap; }
+  :global(.visit__wa-ico) { width: 1.0625rem; height: 1.0625rem; flex: none; }
 </style>

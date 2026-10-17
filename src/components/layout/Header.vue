@@ -5,6 +5,8 @@ import { useScrollLock } from '../../lib/scroll-lock'
 import { openingStatus } from '../../lib/opening-status'
 import { typograph } from '../../lib/typograph'
 import { SITE } from '../../config/site'
+import { whatsappUrl, WHATSAPP } from '../../lib/messengers'
+import { MAP_URL } from '../../lib/map-links'
 
 /* ============================================================
    Constants
@@ -15,14 +17,24 @@ const LOGO_URL = '/svg/logo.svg'
 const DESKTOP_MQ = '(min-width: 80rem)'
 
 /* Единственная соцсеть салона — Telegram-канал (см. SITE.social) */
+const WHATSAPP_URL = whatsappUrl()
+
+/* Круглые кнопки мессенджеров в мобильном меню: написать — WhatsApp,
+   читать — Telegram-канал */
 const SOCIAL_NETWORKS = [
+  ...(WHATSAPP ? [{
+    name: 'WhatsApp',
+    label: `Написать в WhatsApp на ${WHATSAPP.label}`,
+    url: WHATSAPP_URL,
+    icon: '/icons/whatsapp.svg',
+  }] : []),
   {
     name: 'Telegram',
     label: 'Telegram-канал',
     url: SITE.social.telegram,
     icon: '/icons/b_tg_logo.webp',
   },
-] as const
+]
 
 const CONTACTS = {
   phones:  companyLegalInfo.contacts.phone,
@@ -391,13 +403,24 @@ onUnmounted(() => {
                 <dl class="hdr-pop__list">
                   <div>
                     <dt>Адрес</dt>
-                    <dd>{{ CONTACTS.address }}<span class="hdr-pop__muted">{{ CONTACTS.entrance }}</span></dd>
+                    <dd>
+                      {{ CONTACTS.address }}<span class="hdr-pop__muted">{{ CONTACTS.entrance }}</span>
+                      <a :href="MAP_URL" target="_blank" rel="noopener noreferrer" class="hdr-pop__link hdr-pop__map">На Яндекс Картах</a>
+                    </dd>
                   </div>
                   <div>
                     <dt>Часы</dt>
                     <dd aria-live="polite" aria-atomic="true">
                       {{ CONTACTS.worktime }}
                       <span class="hdr-pop__status" :class="{ 'is-open': isOpen }">{{ statusTitle }}. {{ statusDetail }}</span>
+                    </dd>
+                  </div>
+                  <div v-if="WHATSAPP">
+                    <dt>WhatsApp</dt>
+                    <dd>
+                      <a :href="WHATSAPP_URL" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
+                        Написать в чат
+                      </a>
                     </dd>
                   </div>
                   <div>
@@ -995,6 +1018,7 @@ onUnmounted(() => {
 .hdr-pop__phone:hover { background: var(--hdr-fill-hover); }
 .hdr-pop__phone:focus-visible { outline-offset: -0.125rem; }
 .hdr-pop__phone-num { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
+.hdr-pop__map { display: inline-block; margin-top: 0.25rem; }
 .hdr-pop__muted { display: block; font-size: 0.8125rem; font-weight: 400; color: var(--hdr-fg-muted); }
 .hdr-pop__list { margin: 0.75rem 0 0; }
 .hdr-pop__list > div {

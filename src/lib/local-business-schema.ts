@@ -9,6 +9,7 @@ import { companyLegalInfo, HAS_EMAIL } from './contacts-data'
 import { reviews } from '../data/reviews'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
 import { MALL_PHOTOS } from '../data/mall-photos'
+import { MAP_URL } from './map-links'
 
 export const LOCAL_BUSINESS_ID = `${SITE.url}/#localbusiness`
 
@@ -96,6 +97,8 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
         worstRating: '1',
       },
     } : {}),
+    /* Карточка на Яндекс Картах — карта организации для поисковиков */
+    hasMap: MAP_URL,
     sameAs: [SITE.social.telegram, ...MAP_PROFILES],
     ...overrides,
   }

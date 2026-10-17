@@ -27,7 +27,7 @@ import {
 import { PHONE as SITE_PHONE } from '../../config/site'
 
 const PHONE = SITE_PHONE.raw
-const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок: у салона только Telegram-канал, написать в него нельзя
+const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок в салон (WhatsApp — в шапке и на /contacts/)
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
