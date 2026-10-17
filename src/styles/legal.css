@@ -1,0 +1,73 @@
+/* Юридические страницы: политика (/privacy/) и согласие (/consent/) */
+.prv-page {
+  padding: 3rem 1.25rem 5rem;
+}
+.prv-wrap {
+  max-width: 51.25rem;
+  margin: 0 auto;
+  color: var(--color-slate-800);
+  line-height: 1.75;
+  font-size: 0.9375rem;
+}
+.prv-title {
+  font-size: clamp(1.5rem, 3.5vw, 2.125rem);
+  font-weight: 500;
+  color: var(--color-slate-900);
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 0.125rem solid var(--color-accent-600);
+}
+.prv-section { margin-bottom: 0.25rem; }
+.prv-wrap h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-slate-900);
+  margin: 2rem 0 0.875rem;
+  padding: 0.625rem 1rem;
+  background: var(--color-accent-50);
+  border-left: 0.1875rem solid var(--color-accent-600);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.prv-wrap p { margin-bottom: 0.75rem; color: var(--color-slate-700); }
+.prv-wrap ul { padding-left: 1.5rem; margin-bottom: 0.875rem; }
+.prv-wrap li { margin-bottom: 0.5rem; color: var(--color-slate-700); }
+.prv-wrap a { color: var(--color-link); text-decoration: underline; }
+.prv-wrap a:hover { color: var(--color-link-hover); }
+.prv-wrap strong { color: var(--color-slate-900); font-weight: 600; }
+.prv-table-wrap {
+  overflow-x: auto;
+  margin: 1rem 0;
+  border-radius: 0.75rem;
+  border: 0.0625rem solid var(--color-slate-200);
+}
+.prv-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.prv-table th {
+  background: var(--color-accent-600);
+  color: var(--color-white);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+.prv-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 0.0625rem solid var(--color-slate-200);
+  vertical-align: top;
+  color: var(--color-slate-700);
+}
+.prv-table tr:last-child td { border-bottom: none; }
+.prv-table tr:nth-child(even) td { background: var(--color-slate-50); }
+.prv-requisites {
+  margin-top: 2rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-slate-50);
+  border: 0.0625rem solid var(--color-slate-200);
+  border-radius: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.prv-requisites p { margin: 0; font-size: 0.9rem; }
+@media (max-width: 39.9375rem) {
+  .prv-page { padding: 2rem 1rem 4rem; }
+  .prv-wrap h2 { font-size: 0.9375rem; }
+}

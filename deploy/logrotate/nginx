@@ -1,0 +1,22 @@
+# Журналы nginx: IP посетителей, адреса страниц, браузер. Хранятся 14 дней
+# и удаляются — этот срок назван в политике конфиденциальности
+# (SERVER_LOG_DAYS в src/data/personal-data.ts, тест сверяет). Остальное —
+# как в пакете nginx Ubuntu 24.04.
+/var/log/nginx/*.log {
+	daily
+	missingok
+	rotate 14
+	compress
+	delaycompress
+	notifempty
+	create 0640 www-data adm
+	sharedscripts
+	prerotate
+		if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+			run-parts /etc/logrotate.d/httpd-prerotate; \
+		fi \
+	endscript
+	postrotate
+		invoke-rc.d nginx rotate >/dev/null 2>&1
+	endscript
+}

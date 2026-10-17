@@ -225,7 +225,7 @@ grep -rn "PLACEHOLDER\|placeholder\.example" src astro.config.mjs package.json d
 - [x] **Почта салона** — `mail@dverizz.ru` (`SITE.email`).
 - [ ] **Имя владельца для политики конфиденциальности** — `ownerName` в `src/lib/contacts-data.ts` (пока «владелец сайта <домен>»). Реквизиты юрлица не публикуются — владелец физлицо.
 - [ ] **Год открытия салона** — `activity.founded` в `src/lib/contacts-data.ts`.
-- [ ] **Яндекс Метрика** — `SITE.analytics.yandexMetrikaId`; пусто — счётчик не подключается.
+- [ ] **Яндекс Метрика** — `SITE.analytics.yandexMetrikaId`; пусто — счётчик не подключается. Задан — появляется баннер согласия (152-ФЗ), Метрика грузится только после «Принять»; согласие — `/consent/`.
 - [ ] **Гарантия 12 месяцев на монтаж** — сверить с салоном (перенесено из Челябинска): `src/components/home/faq-data.ts`, `src/data/how-it-works.ts`, `src/data/contacts-page.ts`.
 - [ ] **Цены каталога** — сверить с московским прайсом (Supabase, поправки — `src/lib/price-adjustments.ts`).
 - [x] **Сервер** — https://dveriziz.ru, HTTPS, выкладка `npm run deploy`.

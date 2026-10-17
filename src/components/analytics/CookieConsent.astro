@@ -1,0 +1,174 @@
+---
+/**
+ * Согласие на cookie Яндекс Метрики (152-ФЗ) и сама Метрика.
+ *
+ * Метрика загружается только после «Принять»; «Отказаться» — такая же
+ * кнопка, отказ запоминается и сайт работает полностью. Крестика нет:
+ * закрыть баннер = сделать выбор. Без JavaScript Метрика не грузится
+ * совсем (пикселя в noscript нет — согласия там не спросить). Передумать
+ * можно кнопкой «Настройки cookie» в подвале (событие CONSENT_SETTINGS_EVENT);
+ * при отзыве cookie Метрики удаляются и страница перезагружается без неё.
+ *
+ * Нет счётчика (SITE.analytics.yandexMetrikaId пуст) — cookie сайт не
+ * ставит, спрашивать не о чем: компонент ничего не выводит. В dev баннер
+ * показывается, но Метрика не загружается — статистика чистая.
+ *
+ * Метрика стартует после window 'load': Вебвизор сразу сканирует DOM, и
+ * если это совпадает с гидратацией Vue-островов, Vue видит чужой DOM →
+ * «Hydration completed but contains mismatches».
+ */
+import { SITE } from '../../config/site'
+
+const counterId = SITE.analytics.yandexMetrikaId
+---
+
+{counterId && (
+  <div id="cookie-banner" class="cookie" role="region" aria-label="Согласие на cookie" data-counter={counterId} hidden>
+    <p class="cookie__text">
+      Разрешите Яндекс Метрике ставить cookie — так мы видим, какие страницы
+      полезны, и делаем сайт удобнее. Без вашего согласия она не работает.{' '}
+      <a href="/consent/" class="cookie__link">Условия согласия</a>
+    </p>
+    <p class="cookie__state" data-cookie-state hidden></p>
+    <div class="cookie__actions">
+      <button type="button" class="btn btn-primary" data-cookie="accepted">Принять</button>
+      <button type="button" class="btn btn-outline" data-cookie="declined">Отказаться</button>
+    </div>
+  </div>
+)}
+
+<script>
+  import {
+    CONSENT_KEY, LEGACY_CONSENT_KEY, CONSENT_SETTINGS_EVENT,
+    readConsent, writeConsent, metrikaKeys, cookieDomains, type ConsentChoice,
+  } from '../../lib/cookie-consent'
+
+  /* localStorage может бросить исключение (приватный режим Safari, запрет
+     данных сайта) — тогда выбор действует до перезагрузки страницы */
+  const store = {
+    get(key: string) { try { return localStorage.getItem(key) } catch { return null } },
+    set(key: string, value: string) { try { localStorage.setItem(key, value) } catch { /* без памяти */ } },
+    remove(key: string) { try { localStorage.removeItem(key) } catch { /* нечего удалять */ } },
+    keys() { try { return Object.keys(localStorage) } catch { return [] } },
+  }
+
+  const banner = document.getElementById('cookie-banner')
+  if (banner) initConsent(banner)
+
+  function initConsent(banner: HTMLElement) {
+    const counterId = Number(banner.dataset.counter)
+    const state = banner.querySelector<HTMLElement>('[data-cookie-state]')!
+    let choice = readConsent(store.get(CONSENT_KEY))
+    store.remove(LEGACY_CONSENT_KEY)
+
+    if (choice === 'accepted') startMetrika(counterId)
+    if (choice === null) show()
+
+    function show(reopened = false) {
+      state.hidden = !reopened
+      state.textContent = choice === 'accepted' ? 'Сейчас Метрика включена.' : 'Сейчас Метрика выключена.'
+      banner.classList.remove('cookie--leaving')
+      banner.hidden = false
+      if (reopened) banner.querySelector<HTMLButtonElement>('[data-cookie]')!.focus()
+    }
+
+    function hide() {
+      banner.classList.add('cookie--leaving')
+      setTimeout(() => { banner.hidden = true }, 250)
+    }
+
+    function decide(next: ConsentChoice) {
+      const previous = choice
+      choice = next
+      store.set(CONSENT_KEY, writeConsent(next))
+      hide()
+      if (next === 'accepted') startMetrika(counterId)
+      else if (previous === 'accepted') withdraw(counterId)
+    }
+
+    banner.querySelectorAll<HTMLButtonElement>('[data-cookie]').forEach((btn) => {
+      btn.addEventListener('click', () => decide(btn.dataset.cookie as ConsentChoice))
+    })
+    window.addEventListener(CONSENT_SETTINGS_EVENT, () => show(true))
+  }
+
+  /** Отзыв: счётчик выключается, его cookie и записи стираются, страница — без Метрики */
+  function withdraw(counterId: number) {
+    ;(window as any)[`disableYaCounter${counterId}`] = true
+    const cookies = document.cookie.split(';').map((c) => c.split('=')[0].trim())
+    for (const name of metrikaKeys(cookies)) {
+      for (const domain of cookieDomains(location.hostname)) {
+        document.cookie = `${name}=; max-age=0; path=/${domain ? `; domain=${domain}` : ''}`
+      }
+    }
+    metrikaKeys(store.keys()).forEach(store.remove)
+    if ('ym' in window) location.reload()
+  }
+
+  function startMetrika(counterId: number) {
+    if (!import.meta.env.PROD) return
+    const run = () => {
+      const w = window as any
+      w.dataLayer = w.dataLayer || []
+      w.ym = w.ym || function (...args: unknown[]) { (w.ym.a = w.ym.a || []).push(args) }
+      w.ym.l = Date.now()
+      const src = 'https://mc.yandex.ru/metrika/tag.js'
+      if (![...document.scripts].some((s) => s.src === src)) {
+        const tag = document.createElement('script')
+        tag.async = true
+        tag.src = src
+        document.head.append(tag)
+      }
+      w.ym(counterId, 'init', {
+        clickmap: true,
+        trackLinks: true,
+        accurateTrackBounce: true,
+        webvisor: true,
+        ecommerce: 'dataLayer',
+      })
+    }
+    if (document.readyState === 'complete') run()
+    else window.addEventListener('load', run, { once: true })
+  }
+</script>
+
+<style is:global>
+  /* Карточка в углу, без затемнения: страницей можно пользоваться,
+     не отвечая. Ниже шапки (50) и окон (9999), выше кнопки «Наверх» (48). */
+  .cookie {
+    position: fixed;
+    left: 1.5rem;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0rem));
+    z-index: 49;
+    width: min(23rem, calc(100% - 3rem));
+    padding: 1rem 1.125rem 1.125rem;
+    border: 0.0625rem solid var(--color-slate-200);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    box-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--color-slate-900) 12%, transparent);
+    transition: opacity 250ms var(--ease-out), translate 250ms var(--ease-out);
+  }
+  .cookie[hidden] { display: none; }
+  .cookie--leaving { opacity: 0; translate: 0 0.75rem; }
+  @starting-style { .cookie { opacity: 0; translate: 0 0.75rem; } }
+
+  .cookie__text { margin: 0; font-size: 0.8125rem; line-height: 1.5; color: var(--color-body); }
+  .cookie__link { color: var(--color-link); text-decoration: underline; text-underline-offset: 0.125rem; }
+  .cookie__link:hover { color: var(--color-link-hover); }
+  .cookie__state { margin: 0.5rem 0 0; font-size: 0.8125rem; font-weight: 600; color: var(--color-ink); }
+  .cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.875rem; }
+  .cookie__link:focus-visible { outline: 0.125rem solid var(--color-secondary); outline-offset: 0.125rem; }
+
+  /* Телефон: полоса у нижнего края на всю ширину, текст короче по высоте */
+  @media (max-width: 39.9375rem) {
+    .cookie {
+      left: 0.75rem;
+      bottom: calc(0.75rem + env(safe-area-inset-bottom, 0rem));
+      width: calc(100% - 1.5rem);
+      padding: 0.875rem 1rem 1rem;
+    }
+    .cookie__text { font-size: 0.75rem; }
+    .cookie__actions { margin-top: 0.75rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .cookie { transition: none; } }
+</style>

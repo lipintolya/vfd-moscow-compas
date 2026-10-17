@@ -4,6 +4,7 @@ import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { useScrollLock } from '../../lib/scroll-lock'
 import { PHONE, SITE } from '../../config/site'
 import { ROUTE_URL } from '../../lib/map-links'
+import { CONSENT_SETTINGS_EVENT } from '../../lib/cookie-consent'
 
 /* ============================================================
    Data
@@ -19,6 +20,10 @@ const NAV_LINKS = [
   ...(SITE.features.reviews ? [{ href: '/reviews/', label: 'Отзывы' }] : []),
   { href: '/contacts/',   label: 'Контакты' },
 ] as const
+
+/* Есть Метрика — есть cookie и баннер согласия; кнопка открывает его снова */
+const HAS_COOKIES = Boolean(SITE.analytics.yandexMetrikaId)
+const openCookieSettings = () => window.dispatchEvent(new Event(CONSENT_SETTINGS_EVENT))
 
 const LEGAL_LINKS = [
   { href: '/promo-archive/', label: 'Архив акций' },
@@ -381,6 +386,14 @@ onUnmounted(() => {
             >
               {{ link.label }}
             </a>
+            <button
+              v-if="HAS_COOKIES"
+              type="button"
+              class="text-white/60 hover:text-white transition-colors duration-200 ml-3"
+              @click="openCookieSettings"
+            >
+              Настройки cookie
+            </button>
           </span>
           <span>
             Разработка и дизайн —

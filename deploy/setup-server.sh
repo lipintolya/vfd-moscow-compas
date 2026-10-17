@@ -36,6 +36,9 @@ install -m 644 "$HERE/nginx/site.conf"    /etc/nginx/snippets/dveriziz-site.conf
 install -m 644 "$HERE/nginx/ssl.conf"     /etc/nginx/snippets/dveriziz-ssl.conf
 rm -f /etc/nginx/sites-enabled/default
 
+echo "==> Журналы nginx: 14 дней (срок из политики конфиденциальности)"
+install -m 644 "$HERE/logrotate/nginx" /etc/logrotate.d/nginx
+
 use_config() {
   install -m 644 "$1" "/etc/nginx/sites-available/$DOMAIN"
   ln -sf "/etc/nginx/sites-available/$DOMAIN" "/etc/nginx/sites-enabled/$DOMAIN"
