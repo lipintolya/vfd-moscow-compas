@@ -5,7 +5,7 @@ import { useScrollLock } from '../../lib/scroll-lock'
 import { openingStatus } from '../../lib/opening-status'
 import { typograph } from '../../lib/typograph'
 import { SITE } from '../../config/site'
-import { whatsappUrl, WHATSAPP } from '../../lib/messengers'
+import { whatsappUrl, WHATSAPP, TELEGRAM_CHAT, telegramChatUrl } from '../../lib/messengers'
 import { MAP_URL } from '../../lib/map-links'
 
 /* ============================================================
@@ -16,11 +16,12 @@ const LOGO_URL = '/svg/logo.svg'
 /* Брейкпоинт полной шапки — тот же, что в стилях ниже (80rem = xl). */
 const DESKTOP_MQ = '(min-width: 80rem)'
 
-/* Единственная соцсеть салона — Telegram-канал (см. SITE.social) */
+/* Написать Константину — WhatsApp и личный Telegram (src/lib/messengers.ts);
+   Telegram-канал салона — только читать */
 const WHATSAPP_URL = whatsappUrl()
+const TELEGRAM_CHAT_URL = telegramChatUrl()
 
-/* Круглые кнопки мессенджеров в мобильном меню: написать — WhatsApp,
-   читать — Telegram-канал */
+/* Круглые кнопки мессенджеров в мобильном меню — написать */
 const SOCIAL_NETWORKS = [
   ...(WHATSAPP ? [{
     name: 'WhatsApp',
@@ -28,12 +29,12 @@ const SOCIAL_NETWORKS = [
     url: WHATSAPP_URL,
     icon: '/icons/whatsapp.svg',
   }] : []),
-  {
+  ...(TELEGRAM_CHAT ? [{
     name: 'Telegram',
-    label: 'Telegram-канал',
-    url: SITE.social.telegram,
+    label: `Написать в Telegram: @${TELEGRAM_CHAT}`,
+    url: TELEGRAM_CHAT_URL,
     icon: '/icons/b_tg_logo.webp',
-  },
+  }] : []),
 ]
 
 const CONTACTS = {
@@ -423,11 +424,19 @@ onUnmounted(() => {
                       </a>
                     </dd>
                   </div>
-                  <div>
+                  <div v-if="TELEGRAM_CHAT">
                     <dt>Telegram</dt>
                     <dd>
+                      <a :href="TELEGRAM_CHAT_URL" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
+                        Написать @{{ TELEGRAM_CHAT }}
+                      </a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Канал</dt>
+                    <dd>
                       <a :href="SITE.social.telegram" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
-                        Канал {{ SITE.social.telegramHandle }}
+                        {{ SITE.social.telegramHandle }}
                       </a>
                     </dd>
                   </div>
@@ -524,7 +533,7 @@ onUnmounted(() => {
         <div class="container mnav__body">
           <p class="mnav__address">{{ SITE.address.full }}</p>
 
-          <!-- Звонок + Telegram-канал -->
+          <!-- Звонок + написать в WhatsApp и Telegram -->
           <div class="mnav__actions">
             <a
               v-if="CONTACTS.phones[0]"

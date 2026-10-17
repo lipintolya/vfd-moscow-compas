@@ -9,8 +9,9 @@ import {
   type HingeType, type HardwareImages,
 } from '../../data/hardware'
 import { PHONE, SITE } from '../../config/site'
-import { WHATSAPP, whatsappWithText } from '../../lib/messengers'
+import { WHATSAPP, whatsappWithText, TELEGRAM_CHAT, telegramWithText } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
+import TelegramIcon from '../ui/TelegramIcon.vue'
 
 /* ============================================================
    mounted — гейт для Teleport ниже, прокинут пропом от родителя
@@ -110,9 +111,10 @@ const calcMessage = computed(() => {
   return parts.join('\n')
 })
 
-/* Звонок в салон, WhatsApp менеджеру с текстом расчёта, копирование */
+/* Звонок в салон, WhatsApp и Telegram менеджеру с текстом расчёта, копирование */
 const callHref = `tel:${PHONE.raw}`
 const whatsappHref = computed(() => whatsappWithText(calcMessage.value))
+const telegramHref = computed(() => telegramWithText(calcMessage.value))
 
 /** Best-effort — если буфер недоступен (нет разрешения/старый браузер),
     просто ничего не происходит. */
@@ -316,12 +318,23 @@ onUnmounted(() => {
                     <WhatsAppIcon class="calc-send__ico" />
                     WhatsApp
                   </a>
-                  <button type="button" class="calc-send__btn" @click="copyCalcMessage">
-                    Скопировать расчёт
+                  <a
+                    v-if="TELEGRAM_CHAT"
+                    :href="telegramHref"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="calc-send__btn"
+                    :aria-label="`Отправить расчёт в Telegram: @${TELEGRAM_CHAT}`"
+                  >
+                    <TelegramIcon class="calc-send__ico" />
+                    Telegram
+                  </a>
+                  <button type="button" class="calc-send__btn" aria-label="Скопировать текст расчёта" @click="copyCalcMessage">
+                    Скопировать
                   </button>
                 </div>
                 <p class="calc-send__hint" :class="{ 'calc-send__hint--copied': copied }" aria-live="polite">
-                  {{ copied ? 'Текст расчёта скопирован' : `Позвонить — ${PHONE.label}. В WhatsApp расчёт уйдёт готовым сообщением` }}
+                  {{ copied ? 'Текст расчёта скопирован' : `Позвонить — ${PHONE.label}. В WhatsApp и Telegram расчёт уйдёт готовым сообщением` }}
                 </p>
               </div>
             </div>

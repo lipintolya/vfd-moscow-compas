@@ -107,13 +107,16 @@ export const SITE = {
   hours: { opens: '10:00', closes: '19:30', timeZone: 'Europe/Moscow' },
   email: 'mail@dverizz.ru',
 
-  /** Telegram — КАНАЛ салона (не личный чат): «Владимирская Фабрика Дверей.
-      Шоу-рум в Москве, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж». Написать
-      в канал нельзя — написать можно в WhatsApp (номер с whatsapp: true в
-      phones). ВК и MAX у салона нет. */
+  /** telegram — КАНАЛ салона: «Владимирская Фабрика Дверей. Шоу-рум в
+      Москве, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж», только читать.
+      Написать — Константину: WhatsApp (номер с whatsapp: true в phones) или
+      личный Telegram (telegramChat). ВК и MAX у салона нет. */
   social: {
     telegram: 'https://t.me/zizekos_studio',
     telegramHandle: '@zizekos_studio',
+    /** Личный Telegram Константина — написать (src/lib/messengers.ts);
+        канал выше — только читать */
+    telegramChat: 'zizekos',
   },
 
   /** Разделы, которые появляются на сайте, когда в них есть данные.

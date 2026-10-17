@@ -18,7 +18,7 @@ import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-sc
 import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ, SALON } from '../data/contacts-page'
 import { PRICES_DATE_LABEL } from '../data/services'
 import { SITE, PHONE } from '../config/site'
-import { WHATSAPP, whatsappUrl } from '../lib/messengers'
+import { WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl } from '../lib/messengers'
 import WhatsAppIcon from '../components/ui/WhatsAppIcon.vue'
 import TelegramIcon from '../components/ui/TelegramIcon.vue'
 import { typograph } from '../lib/typograph'
@@ -101,6 +101,16 @@ const breadcrumbItems = [
               </a>
             </li>
           )}
+          {TELEGRAM_CHAT && (
+            <li>
+              <a href={telegramChatUrl()} target="_blank" rel="noopener" class="h-tile h-tile--light ct-tile ct-tile--half" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+                <span class="h-tile__corner h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
+                <span class="ct-tile__label ct-tile__label--icon"><TelegramIcon class="ct-tile__ico" />Telegram</span>
+                <span class="h-tile__title">Написать</span>
+                <span class="h-cap">@{TELEGRAM_CHAT}</span>
+              </a>
+            </li>
+          )}
           <li class="ct-tiles__salon">
             <a href="#visit" class="h-tile h-tile--dark ct-tile">
               <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
@@ -113,15 +123,12 @@ const breadcrumbItems = [
               </span>
             </a>
           </li>
-          <li>
-            <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-tile h-tile--light ct-tile ct-tile--half" aria-label={`Telegram-канал салона ${SITE.social.telegramHandle}`}>
-              <span class="h-tile__corner h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
-              <span class="ct-tile__label ct-tile__label--icon"><TelegramIcon class="ct-tile__ico" />Telegram</span>
-              <span class="h-tile__title">Читать</span>
-              <span class="h-cap">Канал {SITE.social.telegramHandle}</span>
-            </a>
-          </li>
         </ul>
+        {/* Канал — читать, не писать: отдельной строкой под плитками */}
+        <p class="h-body ct-channel">
+          Новинки, работы и&nbsp;акции салона&nbsp;— в&nbsp;Telegram-канале{' '}
+          <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-link">{SITE.social.telegramHandle}</a>
+        </p>
       </div>
     </section>
 
@@ -298,15 +305,14 @@ const breadcrumbItems = [
     list-style: none;
   }
   /* Телефон: «Позвонить» во всю ширину, WhatsApp и Telegram — рядом
-     (писать — короткие плитки), «Салон» — последней во всю ширину.
+     (написать — короткие плитки), «Салон» — во всю ширину.
      Планшет — 2×2, компьютер — в ряд, «Позвонить» шире */
   .ct-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ct-tiles > li:first-child, .ct-tiles__salon { grid-column: 1 / -1; }
-  .ct-tiles__salon { order: 1; }
   @media (min-width: 47.5rem) {
     .ct-tiles > li:first-child, .ct-tiles__salon { grid-column: auto; }
-    .ct-tiles__salon { order: 0; }
   }
+  .ct-channel { margin-top: 1.25rem; font-size: 0.9375rem; }
   @media (min-width: 68.75rem) { .ct-tiles { grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); } }
   .ct-tile { min-height: clamp(11rem, 18vw, 15rem); }
   .ct-tile__label--icon { display: inline-flex; align-items: center; gap: 0.4375rem; }

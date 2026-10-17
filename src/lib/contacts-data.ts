@@ -61,7 +61,7 @@ export const companyLegalInfo = {
     { id: 'sbp',     label: 'QR-код СБП' },
   ] as const,
 
-  // Социальные сети — только Telegram-канал (см. SITE.social)
+  // Telegram-канал салона (читать); написать — WhatsApp и личный Telegram, src/lib/messengers.ts
   socialMedia: [
     { name: 'Telegram', label: 'Telegram-канал', url: SITE.social.telegram, icon: '/media/catalog-vfd/icons/tg_logo.svg' },
   ],

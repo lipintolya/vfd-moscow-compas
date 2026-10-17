@@ -1,19 +1,36 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { WHATSAPP, whatsappUrl } from '../src/lib/messengers'
+import {
+  WHATSAPP, whatsappUrl, whatsappWithText,
+  TELEGRAM_CHAT, telegramChatUrl, telegramWithText, CONSULT_MESSAGE,
+} from '../src/lib/messengers'
 import { ROUTE_URL, MAP_URL } from '../src/lib/map-links'
 import { SITE } from '../src/config/site'
 
-test('WhatsApp — номер Константина, ссылка wa.me только с цифрами номера', () => {
-  assert.equal(WHATSAPP?.raw, '+79687748820')
-  assert.match(whatsappUrl(), /^https:\/\/wa\.me\/79687748820\?text=/)
+const textOf = (url: string) => new URL(url).searchParams.get('text')!
+
+test('текст обращения: по имени, откуда пишут, зачем; без «добрый день» — сообщение могут прочесть вечером', () => {
+  assert.equal(CONSULT_MESSAGE, `Здравствуйте, Константин! Пишу с сайта ${SITE.host} — нужна ваша консультация.`)
 })
 
-test('WhatsApp: текст сообщения — с сайта, а не «из Яндекс Карт», переносы и кириллица закодированы', () => {
-  const text = decodeURIComponent(new URL(whatsappUrl()).searchParams.get('text')!)
-  assert.match(text, new RegExp(`^Обращение с сайта ${SITE.host}\\nЗдравствуйте!`))
-  assert.doesNotMatch(text, /Яндекс Карт/)
+test('WhatsApp — номер Константина, ссылка wa.me только с цифрами номера и закодированным текстом', () => {
+  assert.equal(WHATSAPP?.raw, '+79687748820')
+  assert.match(whatsappUrl(), /^https:\/\/wa\.me\/79687748820\?text=/)
+  assert.equal(textOf(whatsappUrl()), CONSULT_MESSAGE)
   assert.doesNotMatch(whatsappUrl(), /[а-яё\s]/i)
+})
+
+test('Telegram — личный чат Константина (не канал) с тем же текстом', () => {
+  assert.equal(TELEGRAM_CHAT, 'zizekos')
+  assert.match(telegramChatUrl(), /^https:\/\/t\.me\/zizekos\?text=/)
+  assert.equal(textOf(telegramChatUrl()), CONSULT_MESSAGE)
+  assert.notEqual(new URL(telegramChatUrl()).pathname, new URL(SITE.social.telegram).pathname)
+})
+
+test('расчёт из калькулятора: приветствие, откуда пишут, пустая строка, расчёт — одинаково в обоих мессенджерах', () => {
+  const expected = `Здравствуйте, Константин! Пишу с сайта ${SITE.host}.\n\nИтого: 21 760 ₽`
+  assert.equal(textOf(whatsappWithText('Итого: 21 760 ₽')), expected)
+  assert.equal(textOf(telegramWithText('Итого: 21 760 ₽')), expected)
 })
 
 test('карта — карточка салона на Яндекс Картах, маршрут — до неё же', () => {
@@ -22,11 +39,4 @@ test('карта — карточка салона на Яндекс Карта�
   assert.equal(route.origin + route.pathname, 'https://yandex.ru/maps/')
   assert.equal(route.searchParams.get('ruri'), '~ymapsbm1://org?oid=167320599705')
   assert.match(route.searchParams.get('rtext')!, /^~55\.\d+,37\.\d+$/)
-})
-
-import { whatsappWithText } from '../src/lib/messengers'
-
-test('WhatsApp с готовым текстом (расчёт): та же пометка «с сайта», приветствие и сам текст', () => {
-  const text = new URL(whatsappWithText('Итого: 21 760 ₽')).searchParams.get('text')!
-  assert.equal(text, `Обращение с сайта ${SITE.host}\nЗдравствуйте!\n\nИтого: 21 760 ₽`)
 })

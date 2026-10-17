@@ -4,8 +4,9 @@ import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { useScrollLock } from '../../lib/scroll-lock'
 import { PHONE, SITE } from '../../config/site'
 import { ROUTE_URL, MAP_URL } from '../../lib/map-links'
-import { whatsappUrl } from '../../lib/messengers'
+import { whatsappUrl, telegramChatUrl } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
+import TelegramIcon from '../ui/TelegramIcon.vue'
 import { CONSENT_SETTINGS_EVENT } from '../../lib/cookie-consent'
 
 /* ============================================================
@@ -52,6 +53,7 @@ const CONTACTS = {
 const MAP_PREVIEW_IMAGE = '/visit-map-dark.svg'
 const MAP_LINK = MAP_URL
 const WHATSAPP_URL = whatsappUrl()
+const TELEGRAM_CHAT_URL = telegramChatUrl()
 
 /* ============================================================
    Legal modal
@@ -242,7 +244,7 @@ onUnmounted(() => {
               {{ SITE.studioName }} — шоу-рум Владимирской фабрики дверей
               в Москве, {{ SITE.address.mall }}, {{ SITE.address.floor }}.
             </p>
-            <!-- Единственная соцсеть салона — Telegram-канал -->
+            <!-- Telegram-канал салона — читать (написать — в контактах справа) -->
             <a
               :href="SITE.social.telegram"
               target="_blank"
@@ -302,17 +304,29 @@ onUnmounted(() => {
                   {{ p.label }}
                 </a>
                 <span class="block text-white/40">{{ p.title }}</span>
-                <a
-                  v-if="'whatsapp' in p && p.whatsapp"
-                  :href="WHATSAPP_URL"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="mt-1.5 inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
-                  :aria-label="`Написать в WhatsApp на ${p.label}`"
-                >
-                  <WhatsAppIcon class="w-4 h-4" />
-                  Написать в WhatsApp
-                </a>
+                <span v-if="'whatsapp' in p && p.whatsapp" class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+                  <a
+                    :href="WHATSAPP_URL"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
+                    :aria-label="`Написать в WhatsApp на ${p.label}`"
+                  >
+                    <WhatsAppIcon class="w-4 h-4" />
+                    WhatsApp
+                  </a>
+                  <a
+                    v-if="TELEGRAM_CHAT_URL"
+                    :href="TELEGRAM_CHAT_URL"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
+                    :aria-label="`Написать в Telegram: @${SITE.social.telegramChat}`"
+                  >
+                    <TelegramIcon class="w-4 h-4" />
+                    Telegram
+                  </a>
+                </span>
               </li>
               <li class="text-white/60">{{ CONTACTS.worktime }}</li>
               <li v-if="HAS_EMAIL">
