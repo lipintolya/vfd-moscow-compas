@@ -78,3 +78,5 @@ cms/.env
 
 # Адрес продакшен-сервера — только локально (образец: deploy/server.example.json)
 deploy/server.json
+# Хэши страниц прошлой выкладки — какие страницы отправить в IndexNow
+deploy/indexnow-state.json

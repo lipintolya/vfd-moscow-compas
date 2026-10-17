@@ -133,6 +133,12 @@ export const SITE = {
       рейтинг, sameAs в разметке организации */
   yandexMaps: 'https://yandex.ru/maps/org/studiya_zizevskogo/167320599705/',
 
+  /** Ключ IndexNow: сайт сообщает Яндексу и Bing об изменённых страницах
+      (scripts/lib/indexnow.mjs). Ключ публичный по устройству протокола —
+      сайт отдаёт его файлом /<ключ>.txt; подтверждает только, что
+      отправитель управляет этим доменом. */
+  indexNowKey: '80860fbb25ec71e1c8d2510257996e20',
+
   analytics: {
     /** ID счётчика Яндекс Метрики. Пусто → счётчик не подключается. */
     yandexMetrikaId: '',

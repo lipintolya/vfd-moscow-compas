@@ -11,10 +11,16 @@
  * robots.txt — рабочий (не закрытый от поисковиков, как демо), в страницах
  * нет домена-заглушки, домен сайта совпадает с доменом сервера. Не прошло —
  * ничего не отправляется.
+ *
+ * После выкладки изменившиеся страницы карты сайта уходят в IndexNow
+ * (Яндекс, Bing) — переобход сразу, а не по графику поисковика. Что
+ * изменилось — по хэшам страниц прошлой выкладки (deploy/indexnow-state.json,
+ * вне Git); первый раз уходят все.
  */
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { htmlHashes, changedUrls, sitemapUrls, submitIndexNow } from './lib/indexnow.mjs'
 
 const ROOT = path.resolve(import.meta.dirname, '..')
 const DIST = path.join(ROOT, 'dist')
@@ -70,3 +76,17 @@ const rsync = ['-az', '--delete']
 run('rsync', [...rsync, '--exclude', '/uploads/', 'dist/', `${server.host}:${server.webRoot}/`])
 run('rsync', [...rsync, '--exclude', '.gitkeep', 'cms/public/uploads/', `${server.host}:${server.webRoot}/uploads/`])
 console.log(`\n✓ Выложено: https://${server.domain}`)
+
+/* ── IndexNow: изменившиеся страницы — Яндексу и Bing ── */
+const STATE_FILE = path.join(ROOT, 'deploy/indexnow-state.json')
+const indexNowKey = readFileSync(path.join(ROOT, 'src/config/site.ts'), 'utf8').match(/indexNowKey: '([0-9a-f]+)'/)?.[1]
+const hashes = htmlHashes(DIST)
+const prevHashes = existsSync(STATE_FILE) ? JSON.parse(readFileSync(STATE_FILE, 'utf8')) : null
+const toSubmit = changedUrls(siteUrl, prevHashes, hashes, sitemapUrls(DIST))
+if (!indexNowKey) console.warn('IndexNow: нет SITE.indexNowKey — поисковикам не сообщено')
+else if (!toSubmit.length) console.log('IndexNow: изменившихся страниц нет')
+else {
+  const results = await submitIndexNow(siteUrl, indexNowKey, toSubmit)
+  console.log(`IndexNow: ${toSubmit.length} стр. → ${results.join(', ')}`)
+}
+writeFileSync(STATE_FILE, JSON.stringify(hashes))

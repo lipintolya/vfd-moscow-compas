@@ -160,6 +160,7 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 | `npm run media:pull` | скачать недостающие фото каталога в `public/media/` (`-- --check` — только показать) |
 | `npm test` | тесты |
 | `npm run deploy` | собрать и выложить сайт на https://dveriziz.ru (нужен запущенный Strapi) |
+| `npm run indexnow` | сообщить Яндексу и Bing о страницах сайта (IndexNow); `-- /catalog/` — только эти |
 | `npm run server:setup` | настроить сервер (`-- --cert` — выпустить HTTPS-сертификат) |
 | `node scripts/compare-builds.mjs <старая dist> <новая dist>` | какие страницы изменились по видимому тексту — проверка после переделок |
 
@@ -200,7 +201,7 @@ npm run cms        # в отдельном терминале — Strapi нуж�
 npm run deploy     # сборка → проверки → rsync страниц и /uploads на сервер
 ```
 
-Перед отправкой `npm run deploy` проверяет сборку (все адреса карты сайта на месте, `robots.txt` рабочего домена и не закрыт от поисковиков, нет домена-заглушки) — не прошло, ничего не отправляется. `npm run deploy -- --no-build` — выложить уже собранный `dist/`.
+Перед отправкой `npm run deploy` проверяет сборку (все адреса карты сайта на месте, `robots.txt` рабочего домена и не закрыт от поисковиков, нет домена-заглушки) — не прошло, ничего не отправляется. `npm run deploy -- --no-build` — выложить уже собранный `dist/`. После выкладки изменившиеся страницы карты сайта сами уходят в IndexNow — Яндекс и Bing переобходят их сразу (что изменилось — по хэшам прошлой выкладки в `deploy/indexnow-state.json`, вне Git; ключ — `SITE.indexNowKey`, файл ключа `/<ключ>.txt` отдаёт сайт). Google IndexNow не поддерживает: для него — «Запросить индексирование» в Search Console.
 
 **Сервер** настраивается скриптом [`deploy/setup-server.sh`](deploy/setup-server.sh) (можно запускать повторно): `npm run server:setup`, с `-- --cert` — выпустить HTTPS-сертификат. Он ставит nginx, certbot, fail2ban, включает файрвол (SSH, HTTP, HTTPS) и раскладывает конфигурацию из [`deploy/nginx/`](deploy/nginx/):
 
