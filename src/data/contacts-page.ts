@@ -7,6 +7,7 @@ import { SITE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { SERVICES, rub, MEASURE_REFUND, MEASURE_TERMS, INSTALL_TERMS } from './services'
 import contactsImages from './contacts-images.json'
+import salonPhotos from './salon-photos.json'
 
 const hours = companyLegalInfo.workingHours
 const phone = companyLegalInfo.contacts.phone[0]!
@@ -78,3 +79,40 @@ export const CONTACTS_FAQ = [
     a: `Позвоните по номеру ${phone.label} — ${SITE.contactPerson} подскажет по моделям, ценам и срокам.`,
   },
 ]
+
+/* Вход в салон и место консультации — фото салона от владельца
+   (assets/salon, npm run gen:showroom). Подпись под фото — что поможет
+   узнать место на месте; alt — подробнее, для поиска по картинкам
+   и экранных читалок. */
+const { mall, street, floorIn } = SITE.address
+const SALON_TEXT: Record<number, { caption: string; alt: string }> = {
+  1: { caption: 'Вывеска «Фабрика дверей VFD» над входом',
+       alt: `Вход в ${SITE.studioName}: вывеска «Фабрика дверей VFD» ${floorIn} ${mall}, ${street}` },
+  2: { caption: 'Вход с галереи ТЦ — стеклянная дверь в зелёной раме',
+       alt: `Вход в салон ${SITE.studioNameOf} с галереи ${mall}: стеклянная дверь в зелёной раме` },
+  3: { caption: 'Сразу за входом — образцы дверей, стенд ручек и стол менеджера',
+       alt: 'Вид в салон от входа: образцы межкомнатных дверей, стенд дверных ручек и стол менеджера' },
+  4: { caption: `Вид от входа на галерею ${mall}`,
+       alt: `Вид изнутри салона на галерею ${mall} через распахнутую дверь` },
+  5: { caption: 'Место консультации: каталоги и образцы покрытий под рукой',
+       alt: `Место консультации в ${SITE.studioNameOf}: стол менеджера, каталоги и образцы покрытий ВФД` },
+  6: { caption: 'Стол менеджера у стены с образцами — здесь рассчитываем комплект',
+       alt: 'Стол менеджера в салоне рядом с образцами дверей на синей стене' },
+}
+
+export const SALON = {
+  title: 'Вход и место консультации',
+  lead:  `Салон — ${floorIn} ${mall}, вход с галереи под вывеской «Фабрика дверей VFD». За столом у образцов менеджер подберёт двери и рассчитает комплект.`,
+  photos: salonPhotos.photos.map((p) => {
+    const file = (w: number) => `/renders/contacts/salon-${p.n}-${w}.webp`
+    const text = SALON_TEXT[p.n] ?? { caption: `${SITE.studioName}`, alt: `Салон ${SITE.studioNameOf}` }
+    return {
+      src:    file(salonPhotos.widths[0]!),
+      srcset: salonPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
+      large:  file(salonPhotos.widths.at(-1)!),
+      width:  p.width,
+      height: p.height,
+      ...text,
+    }
+  }),
+}

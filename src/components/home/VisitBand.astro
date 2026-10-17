@@ -33,9 +33,12 @@ interface Props {
   lead?: string
   /** Ряд фото ТЦ под картой */
   mallPhotos?: boolean
+  /** Без отступа сверху — когда выше секция того же фона продолжает тему */
+  tightTop?: boolean
 }
 const {
   mallPhotos = true,
+  tightTop = false,
   lead = 'У нас можно рассмотреть покрытия вблизи, сравнить цвета и фурнитуру и рассчитать комплект вместе с менеджером.',
 } = Astro.props
 
@@ -44,7 +47,7 @@ const hours = companyLegalInfo.workingHours
 const L = map.layers
 ---
 
-<section id="visit" class="h-sec" aria-labelledby="visit-heading">
+<section id="visit" class:list={['h-sec', { 'h-sec--tight-top': tightTop }]} aria-labelledby="visit-heading">
   <div class="container visit">
     <div class="visit__info">
       <h2 id="visit-heading" class="h-h2">Как к&nbsp;нам добраться</h2>

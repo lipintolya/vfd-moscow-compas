@@ -15,7 +15,7 @@ import VisitBand from '../components/home/VisitBand.astro'
 import PaymentMethods from '../components/contacts/PaymentMethods.astro'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
-import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ } from '../data/contacts-page'
+import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ, SALON } from '../data/contacts-page'
 import { PRICES_DATE_LABEL } from '../data/services'
 import { SITE, PHONE } from '../config/site'
 import { typograph } from '../lib/typograph'
@@ -179,13 +179,55 @@ const breadcrumbItems = [
       </div>
     </section>
 
+    {/* Вход и место консультации — перед маршрутом: сначала как выглядит
+         салон, потом как до него дойти. ПК — сетка 3×2 с подписями, телефон —
+         лента со свайпом; клик — окно просмотра */}
+    <section class="h-sec" id="salon" aria-labelledby="ct-salon-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ct-salon-title" class="h-h2">{SALON.title}</h2>
+          <p class="h-lead">{typograph(SALON.lead)}</p>
+        </header>
+        <ul
+          class="ct-salon h-rail"
+          role="list"
+          data-lightbox
+          data-lightbox-images={JSON.stringify(SALON.photos.map((p) => ({ src: p.large, alt: p.alt })))}
+        >
+          {SALON.photos.map((p, i) => (
+            <li class="ct-salon__item">
+              <button type="button" class="h-media ct-salon__zoom" aria-label={`Открыть фото: ${p.alt}`} data-lightbox-index={i}>
+                <img
+                  src={p.src}
+                  srcset={p.srcset}
+                  sizes="(min-width: 80rem) 24rem, (min-width: 43.75rem) 31vw, 82vw"
+                  alt={p.alt}
+                  width={p.width}
+                  height={p.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+              <p class="h-meta ct-salon__caption">{typograph(p.caption)}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
     {/* Как к нам добраться — в конце страницы, как на остальных страницах;
-         на него ведёт тёмная плитка «Салон» в первом экране (#visit) */}
-    <VisitBand lead="Приходите без записи — салон работает без выходных. Если нужны образцы под ваш проект, предупредите заранее по телефону." />
+         на него ведёт тёмная плитка «Салон» в первом экране (#visit).
+         Без отступа сверху: продолжает блок о салоне на том же фоне */}
+    <VisitBand tightTop lead="Приходите без записи — салон работает без выходных. Если нужны образцы под ваш проект, предупредите заранее по телефону." />
   </div>
 </BaseLayout>
 
 <script>
+  import { initLightboxGroups } from '../lib/lightbox'
+
+  /* Фото входа и места консультации — окно просмотра */
+  initLightboxGroups()
+
   /* «Что вы получаете» — каждая карточка появляется один раз, когда сама
      доходит до экрана: на телефоне они идут одна под другой, и общий
      запуск проигрывал бы нижние карточки за пределами экрана. Карточки,
@@ -258,6 +300,33 @@ const breadcrumbItems = [
   }
 
   /* ── Что вы получаете ── */
+  /* ── Вход и место консультации ──
+     ПК и планшет: 3 колонки, кадры 4:5 с подписью; телефон — лента (.h-rail) */
+  .ct-salon {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2rem var(--h-tile-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ct-salon__zoom {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    padding: 0;
+    border: 0;
+    cursor: zoom-in;
+  }
+  .ct-salon__zoom img { transition: transform 700ms var(--ease-out); }
+  .ct-salon__zoom:hover img { transform: scale(1.025); }
+  .ct-salon__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
+  .ct-salon__caption { margin: 0.75rem 0 0; max-width: 22rem; font-size: 0.875rem; color: var(--h-soft); }
+  @media (prefers-reduced-motion: reduce) {
+    .ct-salon__zoom img { transition: none; }
+    .ct-salon__zoom:hover img { transform: none; }
+  }
+
   .ct-benefits {
     display: grid;
     gap: 2.5rem var(--h-gutter);
