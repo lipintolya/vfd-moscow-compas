@@ -29,8 +29,6 @@ export interface CatalogCardItem {
   hasGlass: boolean
   /** Бейдж "Новинка" — см. src/lib/new-models.ts */
   isNew: boolean
-  /** Бейдж "Выбор покупателей" — см. src/lib/popular-series.ts */
-  isPopular: boolean
 }
 
 export interface CatalogFilterOption {

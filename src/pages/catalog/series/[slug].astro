@@ -8,6 +8,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../../lib/seo-title'
 import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import CatalogGrid from '../../../components/catalog/CatalogGrid.vue'
+import '../../../styles/home.css'
 import InfoImageViewer from '../../../components/catalog/InfoImageViewer.vue'
 import { getCatalogCards, getSeriesList, getSeriesCards, getColorsByCoatingSlug } from '../../../lib/catalog-data'
 import { getSeriesSpec } from '../../../data/series-descriptions'
@@ -389,7 +390,7 @@ const structuredData = canonicalUrl ? [
         {series.modelCount} {series.modelCount === 1 ? 'модель' : 'моделей'}
         {series.minPrice && <span> · от {fmt(series.minPrice)}</span>}
       </p>
-      <div class="sr-grid-wrap">
+      <div class="sr-grid-wrap home">
         <CatalogGrid client:visible cards={seriesCards} />
       </div>
     </div>

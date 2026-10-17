@@ -13,6 +13,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumbs from '../ui/Breadcrumbs.astro'
 import FaqAccordion from '../ui/FaqAccordion.astro'
 import CatalogClient from './CatalogClient.vue'
+import '../../styles/home.css'
 import type { ColorCategory } from '../../data/color-categories'
 import type { CatalogCardItem } from './types'
 
@@ -137,7 +138,7 @@ const structuredData = canonicalUrl ? [
     </div>
   </div>
 
-  <div class="section bg-white" id="catalog-title">
+  <div class="section home">
     <div class="container">
       <CatalogClient
         client:load

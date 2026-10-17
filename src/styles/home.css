@@ -96,6 +96,17 @@
 }
 
 /* ── Типографские роли ─────────────────────────────────── */
+/* H1 страницы раздела (каталог; так же свёрстаны статьи и отзывы) */
+.h-h1 {
+  margin: 0;
+  font-family: var(--h-font);
+  font-size: clamp(2.25rem, 5vw, 4rem);     /* 36 → 64 */
+  font-weight: var(--h-weight-display);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--h-ink);
+  text-wrap: balance;
+}
 .h-h2,
 .h-h3 {
   margin: 0;
@@ -155,6 +166,8 @@
   color: var(--tone);
 }
 .h-status[data-status='new'] { --tone: var(--h-status-new); }
+/* «Под заказ» — справка, не сигнал: нейтральный графит */
+.h-status[data-status='order'] { --tone: var(--h-soft); }
 .h-status--photo {
   padding: 0.4375rem 0.75rem;
   background-color: var(--color-white);
@@ -165,6 +178,14 @@
   color: var(--h-ink);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* ── Частые вопросы: заголовок слева, список справа ─────── */
+.h-faq { display: grid; gap: 2rem var(--h-gutter); align-items: start; }
+@media (min-width: 56.25rem) {
+  .h-faq { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .h-faq > :first-child { grid-column: 1 / span 4; }
+  .h-faq > :nth-child(2) { grid-column: 6 / span 7; }
 }
 
 /* ── Действия ──────────────────────────────────────────── */

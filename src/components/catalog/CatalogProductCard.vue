@@ -1,16 +1,20 @@
 <script setup lang="ts">
+/**
+ * Карточка модели в каталоге — язык дизайн-системы сайта (styles/home.css,
+ * нужен предок .home): дверь на серой подложке, как образец в зале; подпись
+ * под фото, а не поверх; статус одним словом; цена табличными цифрами.
+ * Вся карточка — ссылка на модель (растянутая ссылка у названия); свотчи и
+ * «что в комплекте» лежат выше неё и работают сами по себе.
+ */
 import { computed, ref } from 'vue'
 import { calcKitPrice, BASE_KIT_DESCRIPTION } from '../../data/accessories'
-import { isMadeToOrder, isInStock } from '../../lib/made-to-order'
+import { modelStatus, MODEL_STATUS_LABEL } from '../../lib/made-to-order'
 import type { CatalogCardItem } from './types'
 
 const props = withDefaults(defineProps<{
   card: CatalogCardItem
   isKitOpen: boolean
-  isDimmed: boolean
-  /** Первый экран сетки — грузим фото сразу, не lazy, иначе тормозим LCP
-      (браузер лишний раз решает, "не пора ли ещё" грузить видимую с
-      первого кадра картинку). */
+  /** Первый ряд сетки — фото сразу, не lazy: иначе тормозим LCP */
   priority?: boolean
 }>(), {
   priority: false,
@@ -20,24 +24,19 @@ const emit = defineEmits<{
   'kit-toggle': []
 }>()
 
-const formatPrice = (price: number | null) =>
-  price ? `${Number(price).toLocaleString('ru-RU')} ₽` : 'По запросу'
+const rub = (price: number) => `${price.toLocaleString('ru-RU')} ₽`
 
-/* Свотчи доступных цветов на карточке — кликабельные: переключают обложку,
-   цену и подпись цвета прямо в каталоге (раньше был виден только один цвет,
-   и понять цену в другом варианте можно было только зайдя в товар).
-   Показываем до 5 кружков + "+N", остальное — в самом товаре. */
+/* Свотчи переключают фото, цену и подпись цвета прямо в каталоге.
+   До 5 кружков и «+N» — остальные цвета на странице модели. */
 const MAX_VISIBLE_SWATCHES = 5
 const visibleSwatches = computed(() => props.card.colorSwatches.slice(0, MAX_VISIBLE_SWATCHES))
 const extraSwatchCount = computed(() => Math.max(0, props.card.colorSwatches.length - MAX_VISIBLE_SWATCHES))
 
 const activeSwatchIdx = ref(0)
 const activeSwatch = computed(() => props.card.colorSwatches[activeSwatchIdx.value] ?? props.card.colorSwatches[0])
-/* Фото не переключаем на пустое — у цвета без фото под эту модель остаётся
-   текущее/дефолтное фото, а не пустой плейсхолдер (цвет выглядел бы "сломанным"). */
+/* У цвета без фото под эту модель остаётся прежнее фото, а не пустая подложка */
 const activePhoto = computed(() => activeSwatch.value?.photo || props.card.photo)
-/* Цену не наследуем от базовой при отсутствии фото — цена под конкретный
-   цвет не подтверждена, честнее показать «По запросу», чем чужую цифру. */
+/* Цена цвета без фото не подтверждена — «по запросу», а не чужая цифра */
 const activePrice = computed(() => activeSwatch.value?.available === false ? null : (activeSwatch.value?.price ?? props.card.price))
 const activeColorName = computed(() => activeSwatch.value?.name ?? props.card.colorName)
 const activeColorHex = computed(() => activeSwatch.value?.hex ?? props.card.colorHex)
@@ -45,16 +44,10 @@ const activeSwatchUnavailable = computed(() => activeSwatch.value?.available ===
 
 const selectSwatch = (idx: number) => { activeSwatchIdx.value = idx }
 
-/* Свайп по фото листает цвета — тот же паттерн свайпа по фото, что и в других галереях сайта.
-   Порог 40px: реальный свайп (>40px) браузер сам не превращает в click по
-   растянутой ссылке карточки (стандартная эвристика тач-жестов), поэтому
-   тап по фото по-прежнему открывает товар, а свайп — просто меняет цвет.
-
-   Слушатели висят на <article>, а не на самом блоке с фото: у карточки
-   растянутая ссылка "Подробнее" (::after inset-0 от края до края article),
-   она перекрывает фото по paint-order, так что touch-события физически
-   долетают до article/<a>, а не до div с картинкой — проверяем координаты
-   старта вручную через photoBoxRef, чтобы свайп ловился только над фото. */
+/* Свайп по фото листает цвета. Слушатели — на <article>: растянутая ссылка
+   перекрывает фото, касание долетает до неё; свайп ловим только над фото
+   (координаты старта сверяем с photoBoxRef). Реальный свайп (> 40px)
+   браузер не превращает в клик — тап по фото по-прежнему открывает модель. */
 const SWIPE_THRESHOLD = 40
 const photoBoxRef = ref<HTMLElement | null>(null)
 let touchStartX = 0
@@ -79,185 +72,272 @@ const onPhotoTouchEnd = (e: TouchEvent) => {
   const dy = touchStartY - e.changedTouches[0].clientY
   if (Math.abs(dx) <= Math.abs(dy) || Math.abs(dx) <= SWIPE_THRESHOLD) return
   const total = props.card.colorSwatches.length
-  const nextIdx = dx > 0
-    ? (activeSwatchIdx.value + 1) % total
-    : (activeSwatchIdx.value - 1 + total) % total
-  selectSwatch(nextIdx)
+  selectSwatch(dx > 0 ? (activeSwatchIdx.value + 1) % total : (activeSwatchIdx.value - 1 + total) % total)
 }
 
-/* Цена за комплект (полотно + короб + наличники) — тот же расчёт, что и на странице
-   товара, но от АКТИВНОГО (выбранного свотчем) цвета и его цены за полотно */
+/* Комплект (полотно + короб + наличники) — тот же расчёт, что на странице
+   модели, от выбранного цвета */
 const kitPrice = computed(() =>
   activePrice.value ? activePrice.value + calcKitPrice(props.card.coatingSlug, activeColorName.value) : null
 )
 
-/* Бейдж серии — цвет группы, только фирменная палитра (как полоски
-   покрытий на /catalog/):
-   ПЭТ (Иннова, Урбан ПЭТ) — красный
-   Эмалекс/Эмалекс Модерн + Урбан/Элегант/Бэйсик — голубой
-   Протач — тёмный графит, остальные эмалевые коллекции — графит */
-const RED_SERIES  = new Set(['innova', 'urban-pet'])
-const BLUE_SERIES = new Set(['emalex', 'emalex-modern', 'urban', 'elegant', 'basic'])
+/* Покрытие и кромка/стекло — одной строкой: «Экошпон, кромка серебро» */
+const meta = computed(() => [props.card.coating, props.card.trim && props.card.trim.charAt(0).toLowerCase() + props.card.trim.slice(1)].filter(Boolean).join(', '))
 
-const seriesBadgeClass = computed(() => {
-  const slug = props.card.seriesSlug
-  if (props.card.coatingSlug === 'protach') return 'bg-slate-900 text-white'
-  if (RED_SERIES.has(slug))  return 'bg-accent-600 text-white'
-  if (BLUE_SERIES.has(slug)) return 'bg-secondary-600 text-white'
-  return 'bg-slate-700 text-white'
-})
-
-const madeToOrder = computed(() => isMadeToOrder(props.card.seriesSlug, props.card.id, activeColorName.value))
-const inStock     = computed(() => isInStock(props.card.id, activeColorName.value))
+const status = computed(() => modelStatus(props.card, activeColorName.value))
+const kitId = computed(() => `kit-${props.card.id}`)
 </script>
 
 <template>
   <article
-    class="group @container relative flex min-h-full flex-col rounded-2xl border border-slate-200 bg-white transition hover:border-accent-200 hover:shadow-lg hover:-translate-y-0.5"
-    :class="isKitOpen ? 'z-30' : isDimmed ? 'pointer-events-none opacity-40 blur-[0.0625rem]' : ''"
+    class="pc"
+    :class="{ 'is-kit-open': isKitOpen }"
     :data-kit-card="card.id"
     @touchstart.passive="onPhotoTouchStart"
     @touchend="onPhotoTouchEnd"
   >
-    <div
-      ref="photoBoxRef"
-      class="relative m-3.5 mb-0 flex aspect-2/3 items-center justify-center overflow-hidden rounded-xl bg-slate-50 sm:m-5 sm:mb-0"
-    >
+    <div ref="photoBoxRef" class="pc__media">
       <img
         v-if="activePhoto"
         :key="activePhoto"
         :src="activePhoto"
-        :alt="`${card.name} — ${activeColorName}`"
-        class="h-full w-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+        :alt="`${card.name}, ${activeColorName}`"
         :loading="priority ? 'eager' : 'lazy'"
         :fetchpriority="priority ? 'high' : undefined"
         decoding="async"
         width="320"
-        height="420"
+        height="480"
       />
-      <div v-else class="flex h-full w-full items-center justify-center text-slate-300" aria-hidden="true">
-        <svg class="h-13 w-13" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-          <rect x="5" y="3" width="14" height="18" rx="1.5" />
-          <path d="M15 12h.01" stroke-linecap="round" />
-        </svg>
-      </div>
-
-      <!-- Бейдж серии и «Новинка» — раньше стояли рядом (серия слева, «Новинка»
-           справа) и на узких мобильных карточках (grid-cols-2, ~135px под
-           фото) «Новинка» одна съедала половину ширины — серии почти не
-           оставалось места, имя обрезалось до одной буквы. Теперь оба
-           флагом друг под другом у левого края — конкурируют за высоту,
-           не за ширину, и каждый читается полностью в любую сторону. -->
-      <div class="absolute left-0 top-3 flex max-w-[88%] flex-col items-start gap-1">
-        <span class="max-w-full truncate rounded-r-full px-2.5 py-0.5 text-[0.625rem] font-medium uppercase tracking-wide" :class="seriesBadgeClass">{{ card.series }}</span>
-        <span
-          v-if="card.isNew"
-          class="max-w-full truncate rounded-r-full bg-accent-500 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
-        >
-          Новинка
-        </span>
-        <span
-          v-else-if="card.isPopular"
-          class="max-w-full truncate rounded-r-full bg-slate-900 px-2.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-wide text-white shadow-sm"
-        >
-          Выбор клиентов
-        </span>
-      </div>
-
-      <span
-        v-if="inStock"
-        class="absolute right-0 bottom-3 max-w-[85%] truncate rounded-l-full bg-secondary-600 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white shadow-sm"
-      >
-        В наличии
-      </span>
-      <span
-        v-else-if="madeToOrder"
-        class="absolute right-0 bottom-3 max-w-[85%] truncate rounded-l-full bg-fg px-3 py-1 text-xs font-medium uppercase tracking-wide text-white shadow-sm"
-      >
-        Под заказ
-      </span>
+      <svg v-else class="pc__placeholder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <rect x="5" y="3" width="14" height="18" rx="1.5" />
+        <path d="M15 12h.01" stroke-linecap="round" />
+      </svg>
+      <span v-if="status" class="h-status h-meta h-status--photo pc__status" :data-status="status">{{ MODEL_STATUS_LABEL[status] }}</span>
     </div>
 
-    <div class="flex flex-1 flex-col gap-2.5 p-3.5 sm:gap-3 sm:p-5">
-      <div>
-        <h2 class="m-0 min-h-12 text-step-2 font-medium leading-snug text-ink line-clamp-2">{{ card.name }}</h2>
-        <p class="m-0 mt-1 text-sm font-semibold text-slate-500">
-          {{ card.coating }}<span v-if="card.trim"> · {{ card.trim }}</span>
+    <div class="pc__body">
+      <p class="h-meta pc__meta">{{ meta }}</p>
+      <h3 class="pc__name">
+        <a :href="`/models/${card.slug}/`" class="pc__link">{{ card.name }}</a>
+      </h3>
+
+      <div class="pc__colors">
+        <template v-if="card.colorSwatches.length > 1">
+          <button
+            v-for="(swatch, idx) in visibleSwatches"
+            :key="swatch.name"
+            type="button"
+            class="pc__swatch"
+            :class="{ 'is-empty': swatch.available === false }"
+            :style="{ backgroundColor: swatch.hex }"
+            :title="swatch.available === false ? `${swatch.name} — фото уточняется` : swatch.name"
+            :aria-label="`Цвет: ${swatch.name}${swatch.available === false ? ', фото уточняется' : ''}`"
+            :aria-pressed="idx === activeSwatchIdx"
+            @click="selectSwatch(idx)"
+          />
+          <span v-if="extraSwatchCount > 0" class="h-meta pc__more">+{{ extraSwatchCount }}</span>
+        </template>
+        <span v-else class="pc__swatch pc__swatch--static" :style="{ backgroundColor: activeColorHex }" aria-hidden="true" />
+        <span class="h-meta pc__color">{{ activeColorName }}<template v-if="activeSwatchUnavailable">, фото уточняется</template></span>
+      </div>
+
+      <div class="pc__price">
+        <p class="pc__blade">
+          <span class="pc__value">{{ activePrice ? rub(activePrice) : 'Цена по запросу' }}</span>
+          <span v-if="activePrice" class="h-meta">за полотно</span>
         </p>
-      </div>
-
-      <div v-if="card.colorSwatches.length > 1" class="relative z-10 flex min-w-0 flex-wrap items-center gap-1.5">
-        <button
-          v-for="(swatch, idx) in visibleSwatches"
-          :key="swatch.name"
-          type="button"
-          class="h-6 w-6 shrink-0 rounded-full transition-transform active:scale-90 lg:h-5.5 lg:w-5.5"
-          :class="[
-            idx === activeSwatchIdx ? 'ring-2 ring-offset-1 ring-secondary-600' : '',
-            swatch.available === false
-              ? 'border-2 border-dashed border-slate-950/30'
-              : 'border border-slate-950/10 shadow-[inset_0_0_0_0.0625rem_color-mix(in_srgb,var(--color-white)_55%,transparent)]',
-          ]"
-          :style="{ backgroundColor: swatch.hex }"
-          :title="swatch.available === false ? `${swatch.name} — фото уточняется` : swatch.name"
-          :aria-label="`Цвет: ${swatch.name}${swatch.available === false ? ', фото уточняется' : ''}`"
-          :aria-pressed="idx === activeSwatchIdx"
-          @click="selectSwatch(idx)"
-        />
-        <span v-if="extraSwatchCount > 0" class="shrink-0 text-xs font-semibold text-slate-400">+{{ extraSwatchCount }}</span>
-        <span class="ml-0.5 w-full truncate text-sm text-slate-500 @[13rem]:w-auto">
-          {{ activeColorName }}<span v-if="activeSwatchUnavailable" class="text-slate-400"> · фото уточняется</span>
-        </span>
-      </div>
-      <div v-else class="flex min-w-0 items-center gap-2">
-        <span
-          class="h-4 w-4 shrink-0 rounded-full border border-slate-950/10 shadow-[inset_0_0_0_0.0625rem_color-mix(in_srgb,var(--color-white)_55%,transparent)]"
-          :style="{ backgroundColor: activeColorHex }"
-          :title="`Цвет: ${activeColorName}`"
-        />
-        <span class="truncate text-sm text-slate-500">{{ activeColorName }}</span>
-      </div>
-
-      <div class="mt-auto flex flex-col gap-2 pt-1">
-        <div class="flex flex-col items-stretch gap-2.5 @[17rem]:flex-row @[17rem]:items-end @[17rem]:justify-between @[17rem]:gap-3">
-          <p class="m-0 flex flex-col leading-none">
-            <span class="whitespace-nowrap text-xl font-medium text-ink">{{ formatPrice(activePrice) }}</span>
-            <span class="mt-1 text-xs font-semibold text-slate-500">за полотно</span>
-            <span v-if="kitPrice" class="mt-1.5 whitespace-nowrap text-xs font-semibold text-slate-500">
-              {{ Number(kitPrice).toLocaleString('ru-RU') }} ₽ за комплект
-            </span>
-          </p>
-          <a
-            :href="`/models/${card.slug}/`"
-            class="btn btn-outline shrink-0 justify-center px-4 py-2 text-sm after:absolute after:inset-0 after:content-['']"
-            :aria-label="`${card.name} — подробнее`"
-          >
-            Подробнее
-          </a>
-        </div>
-
-        <div v-if="kitPrice" class="relative z-10">
+        <p v-if="kitPrice" class="h-meta pc__kit">
+          Комплект {{ rub(kitPrice) }}
           <button
             type="button"
-            class="flex w-fit cursor-pointer items-start gap-1 text-left text-[0.6875rem] font-semibold text-accent-700 transition hover:text-accent-800"
+            class="pc__kit-btn"
             :aria-expanded="isKitOpen"
+            :aria-controls="kitId"
+            aria-label="Что входит в комплект"
             @click="emit('kit-toggle')"
           >
-            <svg class="mt-0.5 h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 20 20" aria-hidden="true">
-              <circle cx="10" cy="10" r="8" />
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <circle cx="10" cy="10" r="7.5" />
               <path d="M10 9.25v4.25" stroke-linecap="round" />
               <circle cx="10" cy="6.75" r="0.9" fill="currentColor" stroke="none" />
             </svg>
-            Что входит в комплект?
           </button>
-          <p
-            v-if="isKitOpen"
-            class="absolute inset-x-0 top-full z-20 m-0 mt-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-[0.6875rem] leading-snug text-slate-600 shadow-xl"
-          >
-            Полотно, {{ BASE_KIT_DESCRIPTION }}
-          </p>
-        </div>
+        </p>
+        <p v-if="kitPrice && isKitOpen" :id="kitId" class="pc__kit-pop">
+          Полотно, {{ BASE_KIT_DESCRIPTION }}
+        </p>
       </div>
     </div>
   </article>
 </template>
+
+<style scoped>
+.pc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.pc.is-kit-open { z-index: 2; }
+
+/* Дверь целиком, с полями — как образец на стене зала */
+.pc__media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: var(--h-radius);
+  background: var(--h-media-bg);
+}
+.pc__media img {
+  width: 100%;
+  height: 100%;
+  padding: 9% 14%;
+  object-fit: contain;
+  transition: transform 500ms var(--ease-out);
+}
+.pc:hover .pc__media img { transform: scale(1.03); }
+.pc__placeholder { width: 3rem; height: 3rem; color: var(--color-slate-300); }
+.pc__status { position: absolute; top: 0.625rem; left: 0.625rem; }
+
+.pc__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding-top: 0.875rem;
+}
+/* Кромка с молдингом — длинная подпись: две строки, дальше многоточие */
+.pc__meta {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.pc__name {
+  margin: 0.25rem 0 0;
+  font-family: var(--h-font);
+  font-size: clamp(1rem, 1.3vw, 1.125rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--h-ink);
+  text-wrap: balance;
+}
+.pc__link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 0.0625rem;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 180ms var(--ease-out);
+}
+/* Растянутая ссылка: вся карточка открывает модель */
+.pc__link::after { content: ''; position: absolute; inset: 0; }
+.pc:hover .pc__link { text-decoration-color: var(--h-signal); }
+.pc__link:focus-visible { outline: none; }
+.pc__link:focus-visible::after {
+  border-radius: var(--h-radius);
+  outline: 0.125rem solid var(--color-secondary-500);
+  outline-offset: 0.25rem;
+}
+
+/* Свотчи — над растянутой ссылкой */
+.pc__colors {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+}
+.pc__swatch {
+  position: relative;
+  flex: none;
+  width: 1.375rem;
+  height: 1.375rem;
+  padding: 0;
+  border: 0.0625rem solid color-mix(in srgb, var(--color-slate-950) 14%, transparent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: box-shadow 150ms var(--ease-out);
+}
+/* Палец попадает в 2.25rem, кружок остаётся маленьким */
+.pc__swatch::before { content: ''; position: absolute; inset: -0.4375rem; }
+.pc__swatch[aria-pressed='true'] { box-shadow: 0 0 0 0.125rem var(--h-paper), 0 0 0 0.25rem var(--h-ink); }
+.pc__swatch.is-empty { border: 0.125rem dashed color-mix(in srgb, var(--color-slate-950) 30%, transparent); }
+.pc__swatch--static { cursor: default; }
+.pc__swatch--static::before { content: none; }
+.pc__swatch:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.25rem; }
+.pc__more { color: var(--h-muted); }
+.pc__color {
+  flex-basis: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Цена прижата к низу: у соседних карточек — на одной линии */
+.pc__price { position: relative; margin-top: auto; padding-top: 0.875rem; }
+.pc__blade { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.125rem 0.375rem; margin: 0; }
+.pc__value {
+  font-size: clamp(1.125rem, 1.5vw, 1.3125rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--h-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pc__kit {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  margin: 0.25rem 0 0;
+}
+.pc__kit-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--h-muted);
+  cursor: pointer;
+  transition: color 150ms var(--ease-out);
+}
+.pc__kit-btn::before { content: ''; position: absolute; inset: -0.75rem; }
+.pc__kit-btn:hover, .pc__kit-btn[aria-expanded='true'] { color: var(--h-ink); }
+.pc__kit-btn svg { width: 1rem; height: 1rem; }
+.pc__kit-btn:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
+.pc__kit-pop {
+  position: absolute;
+  z-index: 2;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 0.375rem 0 0;
+  padding: 0.625rem 0.75rem;
+  border: 0.0625rem solid var(--h-rule);
+  border-radius: 0.75rem;
+  background: var(--h-paper);
+  box-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--color-slate-900) 12%, transparent);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--h-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc__media img, .pc__link, .pc__swatch { transition: none; }
+  .pc:hover .pc__media img { transform: none; }
+}
+</style>

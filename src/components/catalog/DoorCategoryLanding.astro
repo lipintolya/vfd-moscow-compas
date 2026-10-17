@@ -15,6 +15,7 @@ import Breadcrumbs from '../ui/Breadcrumbs.astro'
 import SeriesCard from './SeriesCard.astro'
 import FaqAccordion from '../ui/FaqAccordion.astro'
 import CatalogClient from './CatalogClient.vue'
+import '../../styles/home.css'
 import { getSeriesCardsData } from '../../lib/catalog-data'
 import { getSeriesSpec, coatingGroupCopy } from '../../data/series-descriptions'
 import type { DoorCategory } from '../../data/door-categories'
@@ -154,7 +155,7 @@ const structuredData = canonicalUrl ? [
     </div>
   </div>
 
-  <div class="section bg-white" id="catalog-title">
+  <div class="section home">
     <div class="container">
       <CatalogClient
         client:load

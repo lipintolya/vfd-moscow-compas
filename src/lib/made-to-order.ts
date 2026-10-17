@@ -39,3 +39,19 @@ export function withInStockFirst<T extends { name: string }>(modelId: string, co
   if (idx <= 0) return colors
   return [colors[idx]!, ...colors.slice(0, idx), ...colors.slice(idx + 1)]
 }
+
+/** Статус модели в выбранном цвете — одно слово на карточке каталога:
+    наличие важнее новизны, «Под заказ» — только у серий под заказ */
+export type ModelStatus = 'stock' | 'new' | 'order'
+
+export const MODEL_STATUS_LABEL: Record<ModelStatus, string> = {
+  stock: 'В наличии',
+  new:   'Новинка',
+  order: 'Под заказ',
+}
+
+export function modelStatus(model: { id: string; seriesSlug: string; isNew: boolean }, colorName: string): ModelStatus | null {
+  if (isInStock(model.id, colorName)) return 'stock'
+  if (model.isNew) return 'new'
+  return isMadeToOrder(model.seriesSlug, model.id, colorName) ? 'order' : null
+}

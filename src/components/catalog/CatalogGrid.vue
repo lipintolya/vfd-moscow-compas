@@ -7,14 +7,13 @@ defineProps<{
   cards: CatalogCardItem[]
 }>()
 
-/* Только одна карточка может показывать попап "Что входит в комплект" за раз —
-   соседние карточки притемняются, чтобы попап не выглядел слипшимся с рядом снизу */
+/* «Что входит в комплект» открыт у одной карточки за раз; клик мимо или
+   Esc закрывают */
 const openKitId = ref<string | null>(null)
 
 const closeOnOutsideClick = (event: MouseEvent) => {
   if (openKitId.value === null) return
-  const target = event.target as HTMLElement
-  const card = target.closest('[data-kit-card]') as HTMLElement | null
+  const card = (event.target as HTMLElement).closest<HTMLElement>('[data-kit-card]')
   if (!card || card.dataset.kitCard !== openKitId.value) openKitId.value = null
 }
 
@@ -34,16 +33,34 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4" aria-live="polite">
-    <CatalogProductCard
-      v-for="(card, index) in cards"
-      :key="card.id"
-      :card="card"
-      :priority="index < 4"
-      :is-kit-open="openKitId === card.id"
-      :is-dimmed="openKitId !== null && openKitId !== card.id"
-      @kit-toggle="openKitId = openKitId === card.id ? null : card.id"
-    />
-  </div>
+  <ul class="cg" role="list">
+    <li v-for="(card, index) in cards" :key="card.id">
+      <CatalogProductCard
+        :card="card"
+        :priority="index < 4"
+        :is-kit-open="openKitId === card.id"
+        @kit-toggle="openKitId = openKitId === card.id ? null : card.id"
+      />
+    </li>
+  </ul>
 </template>
 
+<style scoped>
+/* Колонки — от ширины места под сетку, а не экрана: на /catalog/ рядом
+   фильтры, на странице серии их нет */
+.cg {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr));
+  gap: 2.5rem var(--h-tile-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Широкий монитор: не больше четырёх в ряд — 24 на странице делятся ровно */
+@media (width >= 1920px) {
+  .cg { grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
+}
+@media (max-width: 35.9375rem) {
+  .cg { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem 0.75rem; }
+}
+</style>

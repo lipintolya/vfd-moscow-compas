@@ -11,7 +11,6 @@ import { getSeriesSpec } from '../data/series-descriptions'
 import { SERIES_COVER_PREVIEWS, SERIES_COVER_THUMBS } from '../data/series-cover-previews'
 import { adjustPrice } from './price-adjustments'
 import { isNewModel } from './new-models'
-import { isPopularSeries } from './popular-series'
 import { describeTrim } from './trim-labels'
 
 /* Подпись под названием в карточке: «Кромка серебро» / «Стекло сатин белый»
@@ -153,7 +152,6 @@ async function loadCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
       price:       cover?.price ?? adjustPrice(seriesSlug, row.price_rrp ?? null),
       hasGlass:    model.has_glass ?? false,
       isNew:       isNewModel(model.id),
-      isPopular:   isPopularSeries(seriesSlug),
     })
   }
 
