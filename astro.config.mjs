@@ -7,6 +7,7 @@ import vue from '@astrojs/vue';
 import { createClient } from '@supabase/supabase-js';
 import { CLOUD, cloudToMedia, mediaFile } from './scripts/lib/media.mjs';
 import strapiRefresh from './src/integrations/strapi-refresh.mjs';
+import imageSitemap from './src/integrations/image-sitemap.mjs';
 
 /* ── Картинки для sitemap (xmlns:image) ────────────────────────────────
    serialize() ниже — чистый Node, import.meta.env тут недоступен (это
@@ -279,5 +280,7 @@ export default defineConfig({
         return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.6 }
       },
     }),
+    /* После sitemap(): дописывает в готовую карту фото со всех страниц */
+    imageSitemap(SITE_URL),
   ]
 });

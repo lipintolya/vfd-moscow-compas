@@ -258,7 +258,7 @@ onMounted(() => { isMounted.value = true })
           @click="pickCoating(c.value)"
         >
           <span class="cc__media">
-            <img v-if="c.cover" :src="c.cover" alt="" width="360" height="270" decoding="async" />
+            <img v-if="c.cover" :src="c.cover" :alt="`Межкомнатная дверь, покрытие ${c.label}, в интерьере`" width="360" height="270" decoding="async" />
           </span>
           <span class="cc__name">{{ c.label }}</span>
           <span class="cc__meta">{{ c.count }} {{ modelsWord(c.count) }}<template v-if="c.minPrice">, от&nbsp;{{ rub(c.minPrice) }}</template></span>

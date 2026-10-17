@@ -106,7 +106,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </li>
       <li>
         <a href="#video" class="h-tile h-tile--dark tile tile--video">
-          <img class="tile__person" src={SITE.contactPhoto} alt="" width="640" height="640" loading="lazy" decoding="async" />
+          <img class="tile__person" src={SITE.contactPhoto} alt={`${SITE.contactPerson}, основатель ${SITE.studioNameOf}`} width="640" height="640" loading="lazy" decoding="async" />
           <span class="h-tile__corner h-tile__corner--left tile__play" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="14" height="14"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>
           </span>
@@ -116,7 +116,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </li>
       <li>
         <a href={SITE.address.mapUrl} target="_blank" rel="noopener" class="h-tile h-tile--photo tile tile--place" aria-label={`${SITE.address.full} — открыть на Яндекс Картах`}>
-          <img src={SITE.address.photo} alt="" loading="lazy" decoding="async" />
+          <img src={SITE.address.photo} alt={`${SITE.address.mallFull}, ${SITE.address.street} — ${SITE.studioName} ${SITE.address.floorIn}`} loading="lazy" decoding="async" />
           <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
           <span class="h-tile__title">{SITE.address.mall}, {SITE.address.floor}</span>
           <span class="h-cap place__street">{SITE.address.street}</span>

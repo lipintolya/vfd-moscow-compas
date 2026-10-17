@@ -104,7 +104,7 @@ const status = computed(() => modelStatus(props.card, activeColorName.value))
         v-if="activePhoto"
         :key="activePhoto"
         :src="activePhoto"
-        :alt="`${card.name}, ${activeColorName}`"
+        :alt="`Межкомнатная дверь ${card.name}, ${activeColorName}`"
         :loading="priority ? 'eager' : 'lazy'"
         :fetchpriority="priority ? 'high' : undefined"
         decoding="async"

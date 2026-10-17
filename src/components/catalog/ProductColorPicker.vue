@@ -134,7 +134,7 @@ const shareModel = async () => {
         <img
           :key="displayPhoto"
           :src="displayPhoto"
-          :alt="`${modelName} — ${selected.name}`"
+          :alt="`Межкомнатная дверь ${modelName}, ${selected.name}`"
           class="color-picker__photo"
           width="600"
           height="780"
@@ -179,7 +179,7 @@ const shareModel = async () => {
             </svg>
           </button>
           <figure class="color-picker__zoom-figure" @click.self="closeZoom">
-            <img :src="displayPhoto" :alt="`${modelName} — ${selected.name}`" class="color-picker__zoom-img" decoding="async" />
+            <img :src="displayPhoto" :alt="`Межкомнатная дверь ${modelName}, ${selected.name}`" class="color-picker__zoom-img" decoding="async" />
             <figcaption class="color-picker__zoom-caption">{{ modelName }} — {{ selected.name }}</figcaption>
           </figure>
         </div>

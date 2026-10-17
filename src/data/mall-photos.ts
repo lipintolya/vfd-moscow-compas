@@ -10,11 +10,14 @@ import mallPhotos from './mall-photos.json'
 const { mallFull, street } = SITE.address
 const PLACE = `${street}, ${SITE.city.name}`
 
+/* Салон — в этом здании: название студии в подписи, чтобы фото находились
+   и по запросу «Студия Зизевского» */
+const HERE = `${SITE.studioName} ${SITE.address.floorIn}`
 const ALTS: Record<number, string> = {
-  1: `${mallFull} на ${PLACE} — вид с проезжей части`,
-  2: `Вход в ${SITE.address.mall}, ${PLACE}`,
-  3: `Парковка у ${SITE.address.mall} и вход в здание, ${PLACE}`,
-  4: `${SITE.address.mall} со стороны тротуара, ${PLACE}`,
+  1: `${mallFull} на ${PLACE} — вид с проезжей части; ${HERE}`,
+  2: `Вход в ${SITE.address.mall}, ${PLACE} — ${HERE}`,
+  3: `Парковка у ${SITE.address.mall} и вход в здание, ${PLACE} — ${HERE}`,
+  4: `${SITE.address.mall} со стороны тротуара, ${PLACE} — ${HERE}`,
 }
 
 const file = (n: number, w: number) => `/renders/mall/compass-${n}-${w}.webp`

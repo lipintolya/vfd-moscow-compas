@@ -12,6 +12,7 @@ import { renderGallery } from './partitions'
 import { DOOR_SIZES } from './door-sizes'
 import { SECRET_STOCK_HEIGHTS } from './skrytye-dveri-products'
 import hero from './designers-hero.json'
+import { DIRECTION_PHOTOS } from './direction-photos'
 
 const hours = companyLegalInfo.workingHours.shortDisplay
 const days  = companyLegalInfo.workingHours.weekdays
@@ -141,11 +142,10 @@ export const DESIGNER_STEPS = [
 ]
 
 /* Ассортимент для проектов — фото те же, что у направлений на главной */
-const PREVIEW = '/media/vfd.moscow.compass/hero.block/catalog.preview.main'
 export const DESIGNER_RANGE = [
-  { title: 'Межкомнатные двери',      text: 'Эмаль, Эмалекс, ПЭТ, экошпон — серии и цвета каталога',       href: '/catalog/',              image: `${PREVIEW}/catalog_preview_left.webp`,       position: '72% 50%' },
-  { title: 'Скрытые двери',           text: `Заподлицо со стеной; в наличии ${stockList}`,                  href: '/catalog/skrytye-dveri/', image: `${PREVIEW}/catalog_preview_top_right.webp`,  position: '56% 50%' },
-  { title: 'Алюминиевые перегородки', text: 'Раздвижные и стационарные конструкции со стеклом',           href: '/partitions/',            image: `${PREVIEW}/catalog_preview_down_right.webp`, position: '50% 50%' },
+  { title: 'Межкомнатные двери',      text: 'Эмаль, Эмалекс, ПЭТ, экошпон — серии и цвета каталога',       href: '/catalog/',              photo: DIRECTION_PHOTOS.interior,   position: '72% 50%' },
+  { title: 'Скрытые двери',           text: `Заподлицо со стеной; в наличии ${stockList}`,                  href: '/catalog/skrytye-dveri/', photo: DIRECTION_PHOTOS.hidden,     position: '56% 50%' },
+  { title: 'Алюминиевые перегородки', text: 'Раздвижные и стационарные конструкции со стеклом',           href: '/partitions/',            photo: DIRECTION_PHOTOS.partitions, position: '50% 50%' },
 ]
 export const DESIGNER_RANGE_MORE = [
   { label: 'Декор: плинтус, фрамуги, рейки', href: '/catalog/decor/' },
