@@ -34,7 +34,9 @@ export const websiteSchema = () => ({
   '@type': 'WebSite',
   '@id': `${SITE.url}/#website`,
   name: SITE.studioName,
-  alternateName: [`${SITE.studioName} — двери ${SITE.name} ${SITE.city.in}`, SITE.host],
+  /* Без домена: Google берёт запасное название, и «dveriziz.ru» оставалось бы
+     в выдаче вместо названия студии */
+  alternateName: `${SITE.studioName} — двери ${SITE.name} ${SITE.city.in}`,
   url: `${SITE.url}/`,
   inLanguage: 'ru-RU',
   publisher: { '@id': LOCAL_BUSINESS_ID },
