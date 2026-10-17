@@ -12,7 +12,7 @@
  * Когда запускать снова: заменили фото в contact.block или точку кадра.
  */
 import sharp from 'sharp'
-import { writeFile, mkdir } from 'node:fs/promises'
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { loadMedia } from './lib/media.mjs'
 
 const SRC = 'https://storage.yandexcloud.net/vfd.moscow.compass/contact.block/'
@@ -20,17 +20,18 @@ const OUT_DIR = new URL('../public/renders/contacts/', import.meta.url)
 const WIDTHS = [480, 800, 1100]
 const RATIO = 4 / 3
 
-/* focus — доля ширины/высоты исходника, вокруг которой режем кадр 4:3 */
+/* focus — доля ширины/высоты исходника, вокруг которой режем кадр 4:3;
+   local — исходник в проекте (assets/), а не в облаке */
 const PHOTOS = [
   { name: 'consultation', file: 'consultation_render.webp', focus: { x: 0.5, y: 0.25 } }, // лицо и руки консультанта
   { name: 'zamer',        file: 'zamer_render.webp',        focus: { x: 0.5, y: 0.5 } },
-  { name: 'garantee',     file: 'garantee_render.webp',     focus: { x: 0.62, y: 0.5 } }, // щит справа от двери
+  { name: 'garantee',     local: 'assets/contacts/garantee-door.webp', focus: { x: 0.5, y: 0.45 } }, // полотно и ручка; стройматериалы внизу слева — за кадром
 ]
 
 await mkdir(OUT_DIR, { recursive: true })
 const meta = {}
 for (const p of PHOTOS) {
-  const buf = await loadMedia(SRC + p.file)
+  const buf = p.local ? await readFile(new URL(`../${p.local}`, import.meta.url)) : await loadMedia(SRC + p.file)
   const { width: W, height: H } = await sharp(buf).metadata()
 
   // Наибольший кадр 4:3 внутри исходника, центр — в точке focus (с упором в края)

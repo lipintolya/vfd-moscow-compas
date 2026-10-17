@@ -112,6 +112,49 @@ const breadcrumbItems = [
       </div>
     </section>
 
+    {/* Как выглядит салон — сразу под способами связаться: продолжает
+         первый экран (тот же фон, без отступа сверху). ПК — вход крупно
+         2×2, рядом колонка «вход» и колонка «консультация»; телефон —
+         лента со свайпом. Клик — окно просмотра со всеми кадрами */}
+    <section class="h-sec h-sec--tight-top" id="salon" aria-labelledby="ct-salon-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ct-salon-title" class="h-h2">{SALON.title}</h2>
+          <p class="h-lead">{typograph(SALON.lead)}</p>
+        </header>
+        <div data-lightbox data-lightbox-images={JSON.stringify(SALON.photos.map((p) => ({ src: p.large, alt: p.alt })))}>
+          <ul class="ct-salon h-rail" role="list">
+            {SALON.preview.map((n, i) => {
+              const index = SALON.photos.findIndex((p) => p.n === n)
+              const p = SALON.photos[index]!
+              return (
+                <li class="ct-salon__item">
+                  <button type="button" class="h-media ct-salon__zoom" aria-label={`Открыть фото: ${p.alt}`} data-lightbox-index={index}>
+                    <img
+                      src={p.src}
+                      srcset={p.srcset}
+                      sizes={i === 0
+                        ? '(min-width: 80rem) 37rem, (min-width: 43.75rem) 50vw, 82vw'
+                        : '(min-width: 80rem) 18rem, (min-width: 43.75rem) 25vw, 82vw'}
+                      alt={p.alt}
+                      width={p.width}
+                      height={p.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    {p.chip && <span class="h-chip ct-salon__chip" aria-hidden="true">{p.chip}</span>}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+          <button type="button" class="h-btn h-btn--quiet ct-salon__all" data-lightbox-index="0">
+            Смотреть все {SALON.photos.length} фото
+          </button>
+        </div>
+      </div>
+    </section>
+
     {/* Что вы получаете: подпись под фото, как табличка у образца */}
     <section class="h-sec h-sec--wall" aria-labelledby="ct-benefits-title">
       <div class="container">
@@ -179,46 +222,9 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    {/* Вход и место консультации — перед маршрутом: сначала как выглядит
-         салон, потом как до него дойти. ПК — сетка 3×2 с подписями, телефон —
-         лента со свайпом; клик — окно просмотра */}
-    <section class="h-sec" id="salon" aria-labelledby="ct-salon-title">
-      <div class="container">
-        <header class="h-head">
-          <h2 id="ct-salon-title" class="h-h2">{SALON.title}</h2>
-          <p class="h-lead">{typograph(SALON.lead)}</p>
-        </header>
-        <ul
-          class="ct-salon h-rail"
-          role="list"
-          data-lightbox
-          data-lightbox-images={JSON.stringify(SALON.photos.map((p) => ({ src: p.large, alt: p.alt })))}
-        >
-          {SALON.photos.map((p, i) => (
-            <li class="ct-salon__item">
-              <button type="button" class="h-media ct-salon__zoom" aria-label={`Открыть фото: ${p.alt}`} data-lightbox-index={i}>
-                <img
-                  src={p.src}
-                  srcset={p.srcset}
-                  sizes="(min-width: 80rem) 24rem, (min-width: 43.75rem) 31vw, 82vw"
-                  alt={p.alt}
-                  width={p.width}
-                  height={p.height}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </button>
-              <p class="h-meta ct-salon__caption">{typograph(p.caption)}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-
     {/* Как к нам добраться — в конце страницы, как на остальных страницах;
-         на него ведёт тёмная плитка «Салон» в первом экране (#visit).
-         Без отступа сверху: продолжает блок о салоне на том же фоне */}
-    <VisitBand tightTop lead="Приходите без записи — салон работает без выходных. Если нужны образцы под ваш проект, предупредите заранее по телефону." />
+         на него ведёт тёмная плитка «Салон» в первом экране (#visit) */}
+    <VisitBand lead="Приходите без записи — салон работает без выходных. Если нужны образцы под ваш проект, предупредите заранее по телефону." />
   </div>
 </BaseLayout>
 
@@ -300,20 +306,31 @@ const breadcrumbItems = [
   }
 
   /* ── Что вы получаете ── */
-  /* ── Вход и место консультации ──
-     ПК и планшет: 3 колонки, кадры 4:5 с подписью; телефон — лента (.h-rail) */
+  /* ── Как выглядит салон ──
+     ПК и планшет: 4 колонки × 2 ряда, кадры 3:4. Вход (1-й) — 2×2 слева;
+     колонка 3 — дверь входа (2-й, внизу) и вид внутрь (3-й, вверху),
+     колонка 4 — место консультации (4-й и 5-й). Телефон — лента (.h-rail) */
   .ct-salon {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 2rem var(--h-tile-gap);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--h-tile-gap);
     margin: 0;
     padding: 0;
     list-style: none;
   }
+  .ct-salon__item { aspect-ratio: 3 / 4; }
+  @media (min-width: 43.75rem) {
+    .ct-salon__item:nth-child(1) { position: relative; grid-area: 1 / 1 / span 2 / span 2; aspect-ratio: auto; }
+    .ct-salon__item:nth-child(1) .ct-salon__zoom { position: absolute; inset: 0; }
+    .ct-salon__item:nth-child(2) { grid-area: 2 / 3; }
+    .ct-salon__item:nth-child(3) { grid-area: 1 / 3; }
+    .ct-salon__item:nth-child(4) { grid-area: 1 / 4; }
+    .ct-salon__item:nth-child(5) { grid-area: 2 / 4; }
+  }
   .ct-salon__zoom {
-    display: block;
+    position: relative;
     width: 100%;
-    aspect-ratio: 4 / 5;
+    height: 100%;
     padding: 0;
     border: 0;
     cursor: zoom-in;
@@ -321,7 +338,12 @@ const breadcrumbItems = [
   .ct-salon__zoom img { transition: transform 700ms var(--ease-out); }
   .ct-salon__zoom:hover img { transform: scale(1.025); }
   .ct-salon__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
-  .ct-salon__caption { margin: 0.75rem 0 0; max-width: 22rem; font-size: 0.875rem; color: var(--h-soft); }
+  /* Плашка на фото — что это за место */
+  .ct-salon__chip { position: absolute; left: clamp(0.75rem, 1.4vw, 1rem); bottom: clamp(0.75rem, 1.4vw, 1rem); }
+  .ct-salon__all { margin-top: 1.5rem; background: none; font-family: inherit; cursor: pointer; }
+  @media (max-width: 43.6875rem) {
+    .ct-salon__all { width: 100%; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .ct-salon__zoom img { transition: none; }
     .ct-salon__zoom:hover img { transform: none; }
