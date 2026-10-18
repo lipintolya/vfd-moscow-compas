@@ -20,7 +20,13 @@ CERT="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
 echo "==> Пакеты"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq nginx certbot rsync fail2ban ufw >/dev/null
+apt-get install -y -qq nginx certbot rsync fail2ban ufw unattended-upgrades >/dev/null
+
+echo "==> Автообновления безопасности"
+cat > /etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+EOF
 
 echo "==> Файрвол: SSH, HTTP, HTTPS"
 ufw allow OpenSSH >/dev/null
