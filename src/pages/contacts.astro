@@ -13,7 +13,7 @@ import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import PaymentMethods from '../components/contacts/PaymentMethods.astro'
-import { companyLegalInfo } from '../lib/contacts-data'
+import { companyLegalInfo, HAS_EMAIL } from '../lib/contacts-data'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
 import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ, SALON } from '../data/contacts-page'
 import { PRICES_DATE_LABEL } from '../data/services'
@@ -129,6 +129,12 @@ const breadcrumbItems = [
           Новинки, работы и&nbsp;акции салона&nbsp;— в&nbsp;Telegram-канале{' '}
           <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-link">{SITE.social.telegramHandle}</a>
         </p>
+        {HAS_EMAIL && (
+          <p class="h-body ct-channel">
+            Письма — на почту{' '}
+            <a href={`mailto:${SITE.email}`} class="h-link">{SITE.email}</a>
+          </p>
+        )}
       </div>
     </section>
 
@@ -191,7 +197,7 @@ const breadcrumbItems = [
                   <img
                     src={b.photo.src}
                     srcset={b.photo.srcset}
-                    sizes="(min-width: 80rem) 24rem, (min-width: 56.25rem) 31vw, 100vw"
+                    sizes="(min-width: 56.25rem) 46vw, 100vw"
                     alt={b.photo.alt}
                     width={b.photo.width}
                     height={b.photo.height}
@@ -219,6 +225,13 @@ const breadcrumbItems = [
             * Цены на&nbsp;услуги актуальны на&nbsp;{typograph(PRICES_DATE_LABEL)} Точную стоимость
             рассчитаем на&nbsp;консультации в&nbsp;салоне.
           </p>
+        )}
+
+        {(SITE.features.portfolio || SITE.features.reviews) && (
+          <div class="ct-links">
+            {SITE.features.portfolio && <a href="/portfolio/" class="h-btn h-btn--quiet">Смотреть наши работы</a>}
+            {SITE.features.reviews && <a href="/reviews/" class="h-btn h-btn--quiet">Читать отзывы</a>}
+          </div>
         )}
       </div>
     </section>
@@ -392,7 +405,9 @@ const breadcrumbItems = [
     padding: 0;
     list-style: none;
   }
-  @media (min-width: 56.25rem) { .ct-benefits { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  /* Четыре карточки — две колонки: без пустой строки из одной карточки */
+  @media (min-width: 56.25rem) { .ct-benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .ct-links { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin-top: 2.5rem; }
   /* Карточка «фото + подпись», как табличка у образца: фото сверху,
      заголовок и текст под ним; цена прижата к низу — у соседних карточек
      на одной линии. Без фото — линейка сверху вместо него. */

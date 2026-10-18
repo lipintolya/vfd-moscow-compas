@@ -51,6 +51,11 @@ export const BENEFITS: {
     price: { value: rub(SERVICES.measure.price), note: MEASURE_REFUND },
   },
   {
+    title: 'Монтаж под ключ',
+    text:  'Двери устанавливает собственная бригада. Соблюдаем согласованные сроки и убираем за собой строительный мусор.',
+    price: { value: `от\u00A0${rub(SERVICES.install.priceFrom)}`, note: 'За установку одной двери' },
+  },
+  {
     photo: photo('install-door', 'Установленная межкомнатная дверь со шпоном «ёлочкой» и чёрной ручкой'),
     title: 'Гарантия',
     text:  `${WARRANTY_TERMS}. Если после установки что-то потребует внимания, обращайтесь напрямую в салон.`,
