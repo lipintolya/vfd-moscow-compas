@@ -17,12 +17,12 @@
     {
       "n": 3,
       "width": 900,
-      "height": 1200
+      "height": 675
     },
     {
       "n": 4,
       "width": 900,
-      "height": 1200
+      "height": 675
     },
     {
       "n": 5,
@@ -37,25 +37,10 @@
     {
       "n": 7,
       "width": 900,
-      "height": 675
+      "height": 1200
     },
     {
       "n": 8,
-      "width": 900,
-      "height": 675
-    },
-    {
-      "n": 9,
-      "width": 900,
-      "height": 1200
-    },
-    {
-      "n": 10,
-      "width": 900,
-      "height": 1200
-    },
-    {
-      "n": 11,
       "width": 900,
       "height": 675
     }
