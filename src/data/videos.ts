@@ -56,6 +56,16 @@ export const HOME_VIDEOS = 5
 
 export const VIDEOS: Video[] = [
   {
+    id:       'funny-reel',
+    title:    'Бэкстейдж\nсо съёмок',
+    text:     'Закулисье съёмок: короткий весёлый ролик без серьёзных советов — просто хорошее настроение.',
+    src:      'https://storage.yandexcloud.net/vfd.moscow.compass/video.block/compressed_reels1.mp4',
+    cover:    '/renders/home/videos/funny-reel.webp',
+    coverAt:  4,
+    duration: '0:16',
+    vertical: true,
+  },
+  {
     id:       'hidden-handles',
     title:    'Скрытые ручки\nдля межкомнатных дверей',
     text:     'Такой стиль набирает популярность: его выбирают не только для квартир, но и для коммерческих помещений.',
