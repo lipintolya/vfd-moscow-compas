@@ -52,7 +52,7 @@ const finish = finishLabel(profile.id, glass.id)
   <div class="oa-build__left">
     {/* ── Схема: на компьютере — крупно, на телефоне — карточка «створка +
          подпись», прилипает под шапкой, пока листаются варианты ── */}
-    <div class="oa-visual" data-oa-visual>
+    <div class="oa-visual">
       <div class="oa-visual__card">
       <div class="oa-stage">
         <AlumLeaf
@@ -218,21 +218,6 @@ const finish = finishLabel(profile.id, glass.id)
 
     form.addEventListener('change', () => { apply(); syncUrl() })
 
-    /* Телефон: пока карточка прилипла, подложка закрывает полосу над ней
-       (под шапкой и меню разделов) — варианты не мелькают над карточкой.
-       Только при прилипании: в обычном потоке подложка легла бы на вводку */
-    const visual = $<HTMLElement>('[data-oa-visual]')
-    const visualStyle = getComputedStyle(visual)
-    let ticking = false
-    const markStuck = () => {
-      ticking = false
-      const sticky = visualStyle.position === 'sticky'
-      visual.toggleAttribute('data-stuck', sticky && visual.getBoundingClientRect().top <= parseFloat(visualStyle.top) + 1)
-    }
-    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(markStuck) } }, { passive: true })
-    addEventListener('resize', markStuck)
-    markStuck()
-
     /* «Собрать такую» под рисунком раскладки — её раскладка и отделка */
     document.querySelectorAll<HTMLButtonElement>('[data-oa-apply]').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -271,24 +256,13 @@ const finish = finishLabel(profile.id, glass.id)
     gap: 1.5rem;
   }
   .oa-build__left { display: contents; }
-  /* Белая подложка — во всю ширину экрана, вместе с полями: лента
-     раскладок уходит в поля, и под прилипшей карточкой её не видно */
+  /* Телефон: схема — обычная карточка в начале конструктора. Раньше она
+     прилипала под шапкой: прилипшая закрывала варианты, а её место в потоке
+     оставалось пустым. Теперь вариант виден сразу и уходит вместе с листанием */
   .oa-visual {
     order: 0;
-    position: sticky;
-    top: var(--oa-stick);
-    z-index: 3;
-    margin-inline: calc(-1 * var(--h-pad));
-    padding: 0 var(--h-pad) 0.75rem;
-    background: var(--h-paper);
-  }
-  .oa-visual[data-stuck]::before {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    bottom: 100%;
-    height: var(--oa-stick);
-    background: inherit;
+    margin-inline: 0;
+    padding: 0 0 0.75rem;
   }
   .oa-ctrl { order: 1; }
   .oa-actions { order: 2; }
@@ -304,12 +278,13 @@ const finish = finishLabel(profile.id, glass.id)
     background: var(--h-wall);
   }
   .oa-stage { display: grid; place-items: center; }
-  /* Высота створки на телефоне — от высоты экрана: на маленьком
-     карточка не закрывает варианты (svh — экран с панелями браузера) */
+  /* Высота створки на телефоне — компактная: прилипшая карточка закрывает
+     меньше вариантов, а место, которое она оставляет в потоке, — меньше
+     (svh — экран с панелями браузера) */
   .oa-stage :global(.oa-pv) {
     width: auto;
-    height: min(28vh, 14rem);
-    height: min(26svh, 14rem);
+    height: min(20vh, 10rem);
+    height: min(18svh, 10rem);
   }
 
   @media (min-width: 62.5rem) {
