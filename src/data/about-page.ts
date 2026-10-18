@@ -6,6 +6,7 @@
 import { SITE } from '../config/site'
 import factoryPhotos from './about-factory-photos.json'
 import showroomPhotos from './showroom-photos.json'
+import founderPhotos from './founder-photos.json'
 
 /* Вторая часть заголовка-коллаборации «Студия Зизевского × фабрика VFD»
    (h1 /about/, превью /og/about.jpg — scripts/gen-og-about.mjs читает
@@ -27,6 +28,29 @@ export const FOUNDER = {
     height: 640,
   },
 }
+
+/* Слайдер на обложке: первый кадр — FOUNDER.photo (студийный портрет),
+   дальше — фото из assets/founder/ (scripts/gen-showroom-photos.mjs,
+   набор «founder»). Подписи — по кадру: имя из FOUNDER, без новых фактов. */
+const FOUNDER_SLIDE_ALTS: Record<number, string> = {
+  2: `${FOUNDER.name} с межкомнатной дверью`,
+  3: `${FOUNDER.name}, основатель студии`,
+}
+export const FOUNDER_SLIDES = [
+  FOUNDER.photo,
+  ...founderPhotos.photos.map((p) => {
+    const file = (w: number) => `/renders/about/founder2-${p.n}-${w}.webp`
+    return {
+      src:    file(founderPhotos.widths[0]!),
+      srcset: founderPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
+      width:  p.width,
+      height: p.height,
+      alt:    FOUNDER_SLIDE_ALTS[p.n] ?? `${FOUNDER.name}, основатель студии`,
+    }
+  }),
+]
+/** Пауза между кадрами слайдера, мс */
+export const FOUNDER_SLIDE_INTERVAL = 5000
 
 /* Обложка страницы — приветствие основателя. Дальше его письмо
    разложено по блокам: история — в таймлайн, выводы о рынке — списком,

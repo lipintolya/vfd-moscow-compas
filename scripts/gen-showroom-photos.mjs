@@ -6,6 +6,7 @@
  *   assets/showroom/ → public/renders/about/showroom2-*   (шоурум, /about/)
  *   assets/salon/    → public/renders/contacts/salon2-*   (вход и консультация, /contacts/)
  *   assets/factory/  → public/renders/about/factory2-*    (производство, /about/)
+ *   assets/founder/  → public/renders/about/founder2-*    (слайдер основателя, обложка /about/)
  *
  * Запуск: npm run gen:showroom — когда фото в этих папках добавили или
  * заменили. Подписи — src/data/about-page.ts (SHOWROOM) и contacts-page.ts (SALON).
@@ -18,6 +19,7 @@ const SETS = [
   { src: 'assets/showroom/', out: 'public/renders/about/', name: 'showroom2', json: 'src/data/showroom-photos.json' },
   { src: 'assets/salon/', out: 'public/renders/contacts/', name: 'salon2', json: 'src/data/salon-photos.json' },
   { src: 'assets/factory/', out: 'public/renders/about/', name: 'factory2', json: 'src/data/about-factory-photos.json' },
+  { src: 'assets/founder/', out: 'public/renders/about/', name: 'founder2', json: 'src/data/founder-photos.json' },
 ]
 const root = new URL('../', import.meta.url)
 

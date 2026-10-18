@@ -16,7 +16,7 @@ import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import {
-  COLLAB_PARTNER, FOUNDER, FOUNDER_QUOTE, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS, SHOWROOM } from '../data/about-page'
+  COLLAB_PARTNER, FOUNDER, FOUNDER_QUOTE, FOUNDER_SLIDES, FOUNDER_SLIDE_INTERVAL, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS, SHOWROOM } from '../data/about-page'
 import { SITE } from '../config/site'
 import { VFD_DEALER, VFD_CARDS, VFD_ORG_ID, vfdOrganizationSchema } from '../data/vfd-factory'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
@@ -104,18 +104,37 @@ const breadcrumbItems = [
             </figure>
           </div>
 
-          <div class="cover__photo">
-            <img
-              src={FOUNDER.photo.src}
-              srcset={FOUNDER.photo.srcset}
-              sizes={FOUNDER.photo.sizes}
-              alt={`${FOUNDER.name}, основатель ${SITE.studioNameOf}`}
-              width={FOUNDER.photo.width}
-              height={FOUNDER.photo.height}
-              loading="eager"
-              fetchpriority="high"
-              decoding="async"
-            />
+          {/* Слайдер: первый кадр — портрет на обложке, дальше — по таймеру
+               (script внизу страницы). Кадры лежат друг на друге, переход — прозрачностью */}
+          <div class="cover__photo" data-founder-slider data-interval={FOUNDER_SLIDE_INTERVAL}>
+            {FOUNDER_SLIDES.map((p, i) => (
+              <img
+                class:list={['cover__slide', { 'is-active': i === 0 }]}
+                data-slide
+                src={p.src}
+                srcset={p.srcset}
+                sizes={FOUNDER.photo.sizes}
+                alt={i === 0 ? `${FOUNDER.name}, основатель ${SITE.studioNameOf}` : p.alt}
+                width={p.width}
+                height={p.height}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                fetchpriority={i === 0 ? 'high' : undefined}
+                decoding="async"
+              />
+            ))}
+            {FOUNDER_SLIDES.length > 1 && (
+              <div class="cover__dots">
+                {FOUNDER_SLIDES.map((_, i) => (
+                  <button
+                    type="button"
+                    class:list={['cover__dot', { 'is-active': i === 0 }]}
+                    data-slide-dot
+                    aria-label={`Фото ${i + 1} из ${FOUNDER_SLIDES.length}`}
+                    aria-current={i === 0 ? 'true' : undefined}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -325,6 +344,42 @@ const breadcrumbItems = [
 
   initLightboxGroups()
 
+  /* Слайдер основателя на обложке: кадры сменяются по таймеру, точки —
+     переход к кадру (и сбрасывают таймер). Без анимации при «меньше
+     движения» и на паузе, пока вкладка скрыта */
+  const founder = document.querySelector<HTMLElement>('[data-founder-slider]')
+  if (founder) {
+    const slides = founder.querySelectorAll<HTMLImageElement>('[data-slide]')
+    const dots = founder.querySelectorAll<HTMLButtonElement>('[data-slide-dot]')
+    const interval = Number(founder.dataset.interval) || 5000
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+    let current = 0
+    let timer: number | undefined
+
+    const show = (i: number) => {
+      current = i
+      slides.forEach((s, k) => s.classList.toggle('is-active', k === i))
+      dots.forEach((d, k) => {
+        d.classList.toggle('is-active', k === i)
+        if (k === i) d.setAttribute('aria-current', 'true')
+        else d.removeAttribute('aria-current')
+      })
+    }
+    const stop = () => {
+      if (timer !== undefined) clearInterval(timer)
+      timer = undefined
+    }
+    const start = () => {
+      stop()
+      if (still || slides.length < 2) return
+      timer = window.setInterval(() => show((current + 1) % slides.length), interval)
+    }
+
+    dots.forEach((d, k) => d.addEventListener('click', () => { show(k); start() }))
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()))
+    start()
+  }
+
   /* Производство: на ПК сетка свёрнута до двух рядов (лишние кадры
      скрыты CSS и, раз loading="lazy", даже не скачиваются), кнопка
      раскрывает остальные */
@@ -378,14 +433,42 @@ const breadcrumbItems = [
     padding: clamp(1.5rem, 4vw, 3.5rem);
   }
   .cover__photo { position: relative; }
-  .cover__photo img {
+  .cover__slide {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center top;
     mask-image: linear-gradient(90deg, transparent 0%, var(--color-white) 38%);
+    opacity: 0;
+    transition: opacity 900ms var(--ease-out);
   }
+  .cover__slide.is-active { opacity: 1; }
+  /* Точки под фото: видно, что кадров несколько; нажатие — перейти к кадру */
+  .cover__dots {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1rem;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .cover__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-white) 45%, transparent);
+    cursor: pointer;
+  }
+  .cover__dot.is-active { background: var(--color-white); }
+  .cover__dot:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
+  @media (prefers-reduced-motion: reduce) { .cover__slide { transition: none; } }
 
   /* «Студия Зизевского × фабрика VFD»: крестик — тонкий и приглушённый,
      как в подписях коллабораций */
@@ -456,7 +539,7 @@ const breadcrumbItems = [
   /* Телефон и планшет: портрет сверху, его низ растворяется в плитке */
   @media (max-width: 56.1875rem) {
     .cover__photo { order: -1; aspect-ratio: 1; max-height: 28rem; }
-    .cover__photo img { mask-image: linear-gradient(180deg, var(--color-white) 62%, transparent 100%); }
+    .cover__slide { mask-image: linear-gradient(180deg, var(--color-white) 62%, transparent 100%); }
     .cover__text { padding-top: 0; }
     .quote { margin-top: 0; }
   }
