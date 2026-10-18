@@ -90,7 +90,7 @@ export const CONTACTS_FAQ = [
    по картинкам и экранных читалок; chip — плашка на фото в превью. */
 const { mall, street, floorIn } = SITE.address
 const SALON_TEXT: Record<number, { alt: string; chip?: string }> = {
-  1: { alt: `Вход в ${SITE.studioName}: вывеска «Фабрика дверей VFD» ${floorIn} ${mall}, ${street}`, chip: 'Вход' },
+  1: { alt: `Вход в салон ${SITE.studioNameOf}: вывеска «Фабрика дверей VFD» ${floorIn} ${mall}, ${street}`, chip: 'Вход' },
   2: { alt: `Вход в салон ${SITE.studioNameOf} с галереи ${mall}: стеклянная дверь в зелёной раме` },
   3: { alt: `Вид в салон от входа: образцы межкомнатных дверей, стенд дверных ручек и стол менеджера в ${SITE.studioNameOf}`, chip: 'Консультация' },
   4: { alt: `Палитра цветов и образцы покрытий для дверей на столе в ${SITE.studioNameOf}` },

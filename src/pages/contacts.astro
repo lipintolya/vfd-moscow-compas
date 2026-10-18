@@ -197,7 +197,7 @@ const breadcrumbItems = [
                   <img
                     src={b.photo.src}
                     srcset={b.photo.srcset}
-                    sizes="(min-width: 56.25rem) 46vw, 100vw"
+                    sizes="(min-width: 80rem) 24rem, (min-width: 56.25rem) 31vw, 100vw"
                     alt={b.photo.alt}
                     width={b.photo.width}
                     height={b.photo.height}
@@ -405,8 +405,7 @@ const breadcrumbItems = [
     padding: 0;
     list-style: none;
   }
-  /* Четыре карточки — две колонки: без пустой строки из одной карточки */
-  @media (min-width: 56.25rem) { .ct-benefits { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 56.25rem) { .ct-benefits { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   .ct-links { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin-top: 2.5rem; }
   /* Карточка «фото + подпись», как табличка у образца: фото сверху,
      заголовок и текст под ним; цена прижата к низу — у соседних карточек
