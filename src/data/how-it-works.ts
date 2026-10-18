@@ -1,6 +1,6 @@
 import { SITE } from '../config/site'
 import type { Step } from './partitions'
-import { SERVICES, rub, MEASURE_REFUND } from './services'
+import { SERVICES, rub, MEASURE_REFUND, WARRANTY_TERMS } from './services'
 
 /* «Как мы работаем» на главной — общий процесс покупки (двери, скрытые
    двери, перегородки), в отличие от steps в partitions.ts (тот описывает
@@ -31,7 +31,7 @@ export const howItWorksSteps: HowStep[] = [
   {
     num:   '04',
     title: 'Гарантия и поддержка',
-    text:  'На монтажные работы даём гарантию 12 месяцев, на сами двери и перегородки — по условиям производителя. Если возникнут вопросы, обращайтесь напрямую в салон.',
+    text:  `${WARRANTY_TERMS}. Если возникнут вопросы, обращайтесь напрямую в салон.`,
   },
 ]
 

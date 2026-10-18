@@ -1,4 +1,4 @@
-import { MEASURE_TERMS } from '../../data/services'
+import { MEASURE_TERMS, WARRANTY_TERMS } from '../../data/services'
 import { SITE } from '../../config/site'
 import { VFD } from '../../data/vfd-factory'
 
@@ -31,7 +31,7 @@ export const faqs: FaqItem[] = [
     id: 4,
     question: 'Есть ли гарантия?',
     answer:
-      'Да: на двери и перегородки — 2 года, на монтаж — 12 месяцев при соблюдении условий эксплуатации.',
+      `Да. ${WARRANTY_TERMS} — при соблюдении условий эксплуатации. Если после установки что-то потребует внимания, обращайтесь напрямую в салон.`,
   },
   {
     id: 6,

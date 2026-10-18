@@ -7,6 +7,7 @@
  * персональных данных в политике и согласии — ownerName.
  */
 import { SITE } from '../config/site'
+import { WARRANTY_TERMS } from '../data/services'
 
 /** Почта задана? Пока в конфиге заглушка — адрес на сайте не выводим */
 export const HAS_EMAIL = !/placeholder/i.test(SITE.email)
@@ -68,8 +69,8 @@ export const companyLegalInfo = {
 
   // Дополнительная информация
   additional: {
-    warranty: 'Гарантия на двери согласно условиям производителя',
-    warranty_installation: 'Гарантия на монтажные работы - 12 месяцев',
+    /** Гарантия — одна формулировка на весь сайт (src/data/services.ts) */
+    warranty: WARRANTY_TERMS,
     free_consultation: true,
     free_measurement: true,
   },

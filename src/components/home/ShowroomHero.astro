@@ -14,21 +14,22 @@
  *
  * H1 — единственный на странице и несёт ключевой запрос.
  */
-import { SITE } from '../../config/site'
+import { SITE, PHONE } from '../../config/site'
 import { HERO_SLIDES, type HeroWay } from '../../data/hero-image'
 import { pluralRu } from '../../lib/plural'
-import { typograph } from '../../lib/typograph'
 import { MAP_URL } from '../../lib/map-links'
+import { BOOK_MESSAGE, WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl } from '../../lib/messengers'
+import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
+import TelegramIcon from '../ui/TelegramIcon.vue'
 
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
 const SLIDE_MS = 6000
 
-/* «В 2026 году продали более 1000 дверей». Число — счётчик (src/lib/
-   count-up.ts): досчитывает от нуля при загрузке. Четырёхзначное — без
-   пробела, от 10 000 — с пробелом; после «более» — родительный падеж.
-   «более 1000 дверей» не разрывается переносом. */
-const { count, year } = SITE.doorsSold
-const soldLead = typograph(`В ${year} году продали`)
+/* «Более 1000 дверей установлено нашим клиентам». Число — счётчик
+   (src/lib/count-up.ts): досчитывает от нуля при загрузке. Четырёхзначное —
+   без пробела, от 10 000 — с пробелом; после «более» — родительный падеж.
+   «Более 1000 дверей» не разрывается переносом. */
+const { count } = SITE.doorsInstalled
 const soldCount = count >= 10_000 ? count.toLocaleString('ru-RU') : String(count)
 const soldNoun = pluralRu(count, ['двери', 'дверей', 'дверей'])
 
@@ -75,12 +76,42 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           Шоурум дверей {SITE.name} {SITE.city.in.replace(' ', '\u00A0')}
         </h1>
         <p class="stage__fact">
-          <span>{soldLead} <span class="stage__nowrap">более <span class="stage__count" data-count={count}>{soldCount}</span> {soldNoun}</span></span>
+          <span><span class="stage__nowrap">Более <span class="stage__count" data-count={count}>{soldCount}</span> {soldNoun}</span> установлено нашим клиентам</span>
         </p>
         <p class="stage__lead">
           Посмотрите двери, покрытия и&nbsp;фурнитуру вживую — в&nbsp;нашем салоне на&nbsp;северо-востоке
           Москвы, {SITE.address.districtIn} ({SITE.address.okrug}). Замер и&nbsp;монтаж под ключ.
         </p>
+        {/* Главные действия: записаться — выбор, как связаться (форм на сайте
+             нет: звонок или мессенджер с готовым текстом); рассчитать — каталог,
+             где у каждой модели цена комплекта и калькулятор */}
+        <div class="stage__actions">
+          <details class="book" data-book>
+            <summary class="h-btn h-btn--signal book__btn">Записаться в&nbsp;салон</summary>
+            <div class="book__menu">
+              <a href={`tel:${PHONE.raw}`} class="book__item">
+                <svg class="book__ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span class="book__name">Позвонить</span>
+                <span class="book__meta">{PHONE.label}</span>
+              </a>
+              {WHATSAPP && (
+                <a href={whatsappUrl(BOOK_MESSAGE)} target="_blank" rel="noopener" class="book__item">
+                  <WhatsAppIcon class="book__ico" />
+                  <span class="book__name">WhatsApp</span>
+                  <span class="book__meta">написать</span>
+                </a>
+              )}
+              {TELEGRAM_CHAT && (
+                <a href={telegramChatUrl(BOOK_MESSAGE)} target="_blank" rel="noopener" class="book__item">
+                  <TelegramIcon class="book__ico" />
+                  <span class="book__name">Telegram</span>
+                  <span class="book__meta">написать</span>
+                </a>
+              )}
+            </div>
+          </details>
+          <a href="/catalog/" class="h-btn stage__calc">Рассчитать двери</a>
+        </div>
       </div>
 
       <nav class="ways" aria-label="Направления салона">
@@ -139,6 +170,14 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   import { countUp } from '../../lib/count-up'
 
   /* Продано дверей — досчитывает до итога, длиннее обычного: масштаб */
+  /* Выбор «Записаться в салон»: закрывается кликом мимо и Esc */
+  const book = document.querySelector<HTMLDetailsElement>('[data-book]')
+  if (book) {
+    document.addEventListener('click', (e) => { if (book.open && !book.contains(e.target as Node)) book.open = false })
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && book.open) { book.open = false; book.querySelector('summary')?.focus() }
+    })
+  }
   countUp(document.querySelectorAll<HTMLElement>('.stage__count[data-count]'), 3200)
 
   /* Слайдер сцены. Таймер — цепочка setTimeout (после ручной смены кадр
@@ -281,7 +320,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   /* Опыт — отдельной строкой с красной чертой: главный аргумент салона */
   .stage__fact {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
     margin: 1.25rem 0 0;
     /* Акцент первого экрана — крупнее подзаголовка (18 → 24 px), но на
@@ -310,9 +349,11 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     40% { transform: scale(1.12); }
   }
   .stage__nowrap { white-space: nowrap; }
+  /* Черта — у первой строки, когда фраза переносится */
   .stage__fact::before {
     content: '';
     flex: none;
+    margin-top: 0.6em;
     width: 1.75rem;
     height: 0.1875rem;
     border-radius: 0.125rem;
@@ -324,6 +365,55 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     font-size: 0.9375rem;
     line-height: 1.6;
     color: color-mix(in srgb, var(--color-white) 82%, transparent);
+  }
+
+  /* ── Действия первого экрана ── */
+  .stage__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.5rem; }
+  /* Вторая кнопка — на фото: белый контур, на наведение — белая */
+  .stage__calc {
+    border-color: color-mix(in srgb, var(--color-white) 60%, transparent);
+    color: var(--color-white);
+  }
+  .stage__calc:hover { border-color: var(--color-white); background: var(--color-white); color: var(--h-ink); }
+  .book { position: relative; }
+  .book__btn { list-style: none; cursor: pointer; }
+  .book__btn::-webkit-details-marker { display: none; }
+  /* Выбор, как записаться — карточка под кнопкой */
+  .book__menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 3;
+    display: grid;
+    min-width: 19.5rem;
+    padding: 0.375rem;
+    border-radius: 1rem;
+    background: var(--color-white);
+    box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--color-slate-950) 28%, transparent);
+  }
+  /* Подпись справа; не помещается — уходит на вторую строку, не наезжая */
+  .book__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.125rem 0.75rem;
+    min-height: 3rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.75rem;
+    color: var(--h-ink);
+    text-decoration: none;
+    transition: background-color 150ms var(--ease-out);
+  }
+  .book__item:hover { background: var(--h-wall); }
+  .book__item:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: -0.125rem; }
+  :global(.book__ico) { width: 1.25rem; height: 1.25rem; flex: none; }
+  .book__name { font-size: 0.9375rem; font-weight: 600; }
+  .book__meta { margin-left: auto; font-size: 0.8125rem; color: var(--h-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  /* Телефон: кнопки друг под другом во всю ширину */
+  @media (max-width: 29.9375rem) {
+    .stage__actions { display: grid; }
+    .book__btn, .stage__calc { width: 100%; }
+    .book__menu { right: 0; min-width: 0; }
   }
 
   /* ── Панель направлений ──────────────────────────────── */

@@ -15,6 +15,10 @@ export const SERVICES = {
   install: { priceFrom: 6500 },
 } as const
 
+/** Гарантия, лет: на двери и перегородки — производителя, на монтаж — салона.
+    Одна формулировка на весь сайт (WARRANTY_TERMS) — двух трактовок быть не должно */
+export const WARRANTY = { products: 1, install: 1 } as const
+
 /** 2200 → «2 200 ₽» (пробелы неразрывные) */
 export const rub = (n: number) => `${n.toLocaleString('ru-RU')}${NBSP}₽`
 
@@ -30,3 +34,6 @@ const REFUND_FROM = `от${NBSP}${GENITIVE[SERVICES.measure.refundFrom]} две�
 export const MEASURE_REFUND = `Вернём при заказе ${REFUND_FROM}`
 export const MEASURE_TERMS  = `Замер стоит ${rub(SERVICES.measure.price)}, эту сумму вернём при заказе ${REFUND_FROM}`
 export const INSTALL_TERMS  = `Установка одной двери — от${NBSP}${rub(SERVICES.install.priceFrom)}`
+
+const years = (n: number) => `${n}${NBSP}${n % 10 === 1 && n % 100 !== 11 ? 'год' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'года' : 'лет'}`
+export const WARRANTY_TERMS = `На двери и перегородки — гарантия производителя ${years(WARRANTY.products)}, на монтаж — ${years(WARRANTY.install)}`

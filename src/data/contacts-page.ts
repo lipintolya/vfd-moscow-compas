@@ -5,7 +5,7 @@
    ============================================================ */
 import { SITE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
-import { SERVICES, rub, MEASURE_REFUND, MEASURE_TERMS, INSTALL_TERMS } from './services'
+import { SERVICES, rub, MEASURE_REFUND, MEASURE_TERMS, INSTALL_TERMS, WARRANTY_TERMS } from './services'
 import contactsImages from './contacts-images.json'
 import salonPhotos from './salon-photos.json'
 
@@ -52,8 +52,8 @@ export const BENEFITS: {
   },
   {
     photo: photo('install-door', 'Установленная межкомнатная дверь со шпоном «ёлочкой» и чёрной ручкой'),
-    title: 'Гарантия на монтаж',
-    text:  'На монтажные работы — 12 месяцев, на двери и перегородки — по условиям производителя. Если после установки что-то потребует внимания, обращайтесь напрямую в салон.',
+    title: 'Гарантия',
+    text:  `${WARRANTY_TERMS}. Если после установки что-то потребует внимания, обращайтесь напрямую в салон.`,
   },
 ]
 
