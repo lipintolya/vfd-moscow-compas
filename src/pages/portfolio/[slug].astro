@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../lib/seo-title'
 import ProjectSlider from '../../components/portfolio/ProjectSlider.vue'
-import { CATEGORY_LABELS, CATEGORY_BADGE_COLORS, OBJECT_TYPE_LABELS } from '../../data/portfolio-works'
+import { CATEGORY_LABELS, OBJECT_TYPE_LABELS } from '../../data/portfolio-works'
 import { getWorks } from '../../lib/works'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { SITE } from '../../config/site'
@@ -102,28 +102,11 @@ const breadcrumbSchema = {
         </div>
 
         <div>
-          {/* Header */}
+          {/* Заголовок. Факты — ниже, в таблице характеристик, а не строкой с разделителями */}
           <header class="mt-8 mb-6 lg:mt-0">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-              <span class="inline-flex items-center gap-1.5">
-                <span class:list={['h-1.5 w-1.5 rounded-full', CATEGORY_BADGE_COLORS[work.category]]} aria-hidden="true" />
-                {CATEGORY_LABELS[work.category]}
-              </span>
-              <span class="text-slate-300" aria-hidden="true">·</span>
-              <span class="normal-case tracking-normal">{OBJECT_TYPE_LABELS[work.objectType]}</span>
-              <span class="text-slate-300" aria-hidden="true">·</span>
-              <time datetime={work.date} class="tabular-nums normal-case tracking-normal">{work.label}</time>
-            </div>
             <h1 class="text-2xl font-medium leading-tight tracking-tight text-slate-900 md:text-3xl">
               {work.title}
             </h1>
-            <p class="mt-2 flex items-center gap-1.5 text-sm text-slate-500">
-              <svg viewBox="0 0 24 24" fill="none" class="h-3.5 w-3.5 shrink-0" aria-hidden="true">
-                <path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-                <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/>
-              </svg>
-              {work.location}{work.doorCount ? ` · ${work.doorCount} ${doorWord(work.doorCount)}` : ''}
-            </p>
           </header>
 
           {/* Story */}
@@ -133,18 +116,42 @@ const breadcrumbSchema = {
             </div>
           )}
 
-          {/* Спецификация — строки с разделителями, как в паспорте изделия,
-               не суп из одинаковых серых чипов. */}
-          {(work.model || (work.features && work.features.length > 0)) && (
-            <ul class="pw-specs" role="list">
-              {work.model && (
-                <li class="pw-specs__row pw-specs__row--model">
-                  <span class="pw-specs__label">Модель / серия</span>
-                  <span class="pw-specs__value">{work.model}</span>
-                </li>
-              )}
-              {work.features?.map(f => (
-                <li class="pw-specs__row">{f}</li>
+          {/* Характеристики — пары «подпись — значение»; особенности — строками без маркеров */}
+          <dl class="pw-specs">
+            {work.model && (
+              <div class="pw-specs__row">
+                <dt class="pw-specs__label">Модель / серия</dt>
+                <dd class="pw-specs__value">{work.model}</dd>
+              </div>
+            )}
+            <div class="pw-specs__row">
+              <dt class="pw-specs__label">Категория</dt>
+              <dd class="pw-specs__value">{CATEGORY_LABELS[work.category]}</dd>
+            </div>
+            <div class="pw-specs__row">
+              <dt class="pw-specs__label">Объект</dt>
+              <dd class="pw-specs__value">{OBJECT_TYPE_LABELS[work.objectType]}</dd>
+            </div>
+            <div class="pw-specs__row">
+              <dt class="pw-specs__label">Место</dt>
+              <dd class="pw-specs__value">{work.location}</dd>
+            </div>
+            {work.doorCount ? (
+              <div class="pw-specs__row">
+                <dt class="pw-specs__label">Дверей</dt>
+                <dd class="pw-specs__value">{work.doorCount} {doorWord(work.doorCount)}</dd>
+              </div>
+            ) : null}
+            <div class="pw-specs__row">
+              <dt class="pw-specs__label">Дата</dt>
+              <dd class="pw-specs__value"><time datetime={work.date}>{work.label}</time></dd>
+            </div>
+          </dl>
+
+          {work.features && work.features.length > 0 && (
+            <ul class="pw-features" role="list">
+              {work.features.map((f) => (
+                <li class="pw-features__item">{f}</li>
               ))}
             </ul>
           )}
@@ -229,35 +236,39 @@ const breadcrumbSchema = {
   }
 
   .pw-specs {
+    display: grid;
     margin: 0;
-    padding: 0;
-    list-style: none;
     border-top: 1px solid var(--color-border);
   }
   .pw-specs__row {
+    display: grid;
+    gap: 0.25rem 1rem;
     padding: 0.75rem 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--color-body);
     border-bottom: 1px solid var(--color-border);
   }
-  .pw-specs__row--model {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
+  @media (min-width: 30rem) {
+    .pw-specs__row { grid-template-columns: 9rem minmax(0, 1fr); align-items: baseline; }
   }
   .pw-specs__label {
-    flex-shrink: 0;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    font-size: 0.8125rem;
     color: var(--color-fg-subtle);
   }
   .pw-specs__value {
+    margin: 0;
+    font-size: 0.9375rem;
     font-weight: 600;
     color: var(--color-ink);
-    text-align: right;
+  }
+  .pw-features {
+    margin: 1.25rem 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .pw-features__item {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-body);
   }
 </style>
