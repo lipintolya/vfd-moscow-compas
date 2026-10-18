@@ -13,12 +13,14 @@ import VideoCard from './VideoCard.astro'
 interface Props {
   videos: Video[]
   rail?: boolean
+  /** Сколько колонок в ряду на широком экране; по умолчанию — 3 и 5 (главная) */
+  cols?: number
 }
 
-const { videos, rail = false } = Astro.props
+const { videos, rail = false, cols } = Astro.props
 ---
 
-<ul class:list={['vids', { 'vids--rail': rail }]} role="list">
+<ul class:list={['vids', { 'vids--rail': rail }]} role="list" style={cols ? `--vids-cols:${cols}` : undefined}>
   {videos.map((v) => (
     <li><VideoCard video={v} /></li>
   ))}
@@ -35,8 +37,8 @@ const { videos, rail = false } = Astro.props
   }
   /* Колонки — под пять роликов в ряд на широком экране; ноутбук — по три */
   @media (min-width: 43.75rem) { .vids { gap: 2rem var(--h-tile-gap); } }
-  @media (min-width: 62.5rem) { .vids { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (min-width: 80rem) { .vids { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .vids { grid-template-columns: repeat(var(--vids-cols, 3), minmax(0, 1fr)); } }
+  @media (min-width: 80rem) { .vids { grid-template-columns: repeat(var(--vids-cols, 5), minmax(0, 1fr)); } }
 
   /* Телефон, вариант rail: лента с прокруткой вбок */
   @media (max-width: 43.6875rem) {

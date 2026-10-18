@@ -54,7 +54,7 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
 </script>
 
 <template>
-  <div>
+  <div class="pf-root">
     <!-- Фильтр — тихие текстовые вкладки, не заливные пилюли: активная
          состояние читается подчёркиванием, а не блоком чёрного цвета. -->
     <div class="pf-tabs" role="tablist">
@@ -124,22 +124,28 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
 </template>
 
 <style scoped>
-/* ── Фильтр-вкладки ── */
+/* Токены и типографика — дизайн-система (home.css, класс .home на странице):
+   цвета — --h-*, шрифт — --h-font, поля — --h-gutter. Сетка — по тем же
+   брейкпоинтам, что у блоков главной (56.25rem = 900px). */
+.pf-root { font-family: var(--h-font); color: var(--h-ink); }
+
+/* ── Фильтр-вкладки: тихие текстовые, активная — подчёркиванием ── */
 .pf-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1.5rem;
-  border-bottom: 1px solid var(--color-border);
+  gap: 0.25rem 1.75rem;
+  border-bottom: 0.0625rem solid var(--h-rule);
   margin-bottom: 1.5rem;
 }
 .pf-tab {
   position: relative;
-  padding: 0.625rem 0.125rem;
-  font-size: 0.875rem;
+  padding: 0.75rem 0.125rem;
+  font: inherit;
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--color-fg-muted);
+  color: var(--h-muted);
   background: none;
-  border: none;
+  border: 0;
   cursor: pointer;
   transition: color 150ms ease;
 }
@@ -148,67 +154,63 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -1px;
-  height: 2px;
-  background: var(--color-accent);
+  bottom: -0.0625rem;
+  height: 0.125rem;
+  background: var(--h-signal);
   transform: scaleX(0);
   transition: transform 200ms ease;
 }
-.pf-tab:hover { color: var(--color-ink); }
-.pf-tab--active { color: var(--color-ink); }
+.pf-tab:hover { color: var(--h-ink); }
+.pf-tab:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.125rem; border-radius: 0.25rem; }
+.pf-tab--active { color: var(--h-ink); }
 .pf-tab--active::after { transform: scaleX(1); }
 
-.pf-count {
-  font-size: 0.8125rem;
-  color: var(--color-fg-subtle);
-  margin-bottom: 2rem;
-}
+.pf-count { margin: 0 0 2rem; }
 
-/* ── Строка категорий ── */
+/* ── Строка категорий: плитки-навигация со снимком ── */
 .pf-cat-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 3rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem var(--h-gutter);
+  margin: 0 0 3rem;
   padding: 0;
   list-style: none;
 }
 .pf-cat-row > li { min-width: 0; }
-@media (min-width: 640px) {
-  .pf-cat-row { grid-template-columns: repeat(4, 1fr); }
-}
+/* Категорий три — три колонки в ряд, без пустого места справа */
+@media (min-width: 40rem) { .pf-cat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .pf-cat {
   display: flex;
   align-items: center;
   gap: 0.625rem;
   min-width: 0;
-  padding: 0.625rem;
-  border: 1px solid var(--color-border);
-  border-radius: 0.875rem;
+  padding: 0.5rem;
+  border: 0.0625rem solid var(--h-rule);
+  border-radius: var(--h-radius);
+  color: var(--h-ink);
   text-decoration: none;
   transition: border-color 200ms ease, background-color 200ms ease;
 }
 .pf-cat:hover {
-  border-color: var(--color-accent);
-  background: var(--color-accent-light);
+  border-color: var(--h-signal);
+  background: var(--h-wall);
 }
+.pf-cat:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
 .pf-cat__thumb {
   flex-shrink: 0;
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 0.5rem;
   overflow: hidden;
-  background: var(--color-slate-100);
+  background: var(--h-media-bg);
 }
 .pf-cat__thumb img { width: 100%; height: 100%; object-fit: cover; }
 .pf-cat__label {
   display: flex;
   align-items: center;
-  gap: 0.4375rem;
   min-width: 0;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -217,27 +219,26 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
 .pf-cat__count {
   display: none;
   flex-shrink: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--color-fg-subtle);
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--h-muted);
   white-space: nowrap;
 }
-@media (min-width: 480px) {
-  .pf-cat__count { display: inline; margin-left: auto; }
-}
+@media (min-width: 30rem) { .pf-cat__count { display: inline; } }
 
-/* ── Архивная сетка ── */
+/* ── Сетка работ: портретные кадры 3:4, подпись под каждым ── */
 .pf-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.75rem 1.25rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2.5rem var(--h-gutter);
 }
-@media (min-width: 640px) { .pf-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 1024px) { .pf-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 56.25rem) { .pf-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 .pf-card {
   display: block;
   min-width: 0;
+  color: inherit;
   text-decoration: none;
 }
 .pf-card__frame {
@@ -245,8 +246,8 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  border-radius: 0.5rem;
-  background: var(--color-slate-100);
+  border-radius: var(--h-radius);
+  background: var(--h-media-bg);
 }
 .pf-card__img {
   width: 100%;
@@ -254,53 +255,49 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   object-fit: cover;
   transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
-.pf-card:hover .pf-card__img { transform: scale(1.045); }
+.pf-card:hover .pf-card__img { transform: scale(1.025); }
+.pf-card:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.25rem; border-radius: var(--h-radius); }
 
-.pf-card__caption {
-  display: block;
-  padding-top: 0.75rem;
-}
+.pf-card__caption { display: block; padding-top: 0.875rem; }
 .pf-card__title {
   display: block;
   overflow-wrap: break-word;
   text-wrap: balance;
-  font-size: 0.8125rem;
+  font-size: 1.0625rem;
   font-weight: 600;
-  line-height: 1.4;
-  color: var(--color-ink);
+  line-height: 1.3;
+  color: var(--h-ink);
   transition: color 150ms ease;
 }
-.pf-card:hover .pf-card__title { color: var(--color-accent-hover); }
+.pf-card:hover .pf-card__title { color: var(--h-signal); }
 
 .pf-card__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem 0.5rem;
-  margin-top: 0.375rem;
+  margin-top: 0.5rem;
 }
-@media (min-width: 640px) { .pf-card__meta { flex-wrap: nowrap; justify-content: space-between; } }
+@media (min-width: 40rem) { .pf-card__meta { flex-wrap: nowrap; justify-content: space-between; } }
 .pf-card__cat {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--color-fg-subtle);
+  letter-spacing: 0.04em;
+  color: var(--h-soft);
 }
 .pf-card__date {
   flex-shrink: 0;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
-  color: var(--color-fg-subtle);
+  color: var(--h-muted);
 }
 
 .pf-empty {
+  margin: 0;
   padding: 3rem 0;
   text-align: center;
   font-size: 1rem;
-  color: var(--color-fg-muted);
+  color: var(--h-soft);
 }
 </style>
