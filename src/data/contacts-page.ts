@@ -8,6 +8,8 @@ import { companyLegalInfo } from '../lib/contacts-data'
 import { SERVICES, rub, MEASURE_REFUND, MEASURE_TERMS, INSTALL_TERMS } from './services'
 import contactsImages from './contacts-images.json'
 import salonPhotos from './salon-photos.json'
+import { setPhotos, type SetPhoto } from '../lib/photo-set'
+import { showroomPhoto } from './showroom'
 
 const hours = companyLegalInfo.workingHours
 const phone = companyLegalInfo.contacts.phone[0]!
@@ -81,41 +83,29 @@ export const CONTACTS_FAQ = [
   },
 ]
 
-/* Вход в салон и место консультации — фото салона от владельца
-   (assets/salon, npm run gen:showroom). alt — что в кадре, для поиска
-   по картинкам и экранных читалок; chip — плашка на фото в превью. */
+/* «Как выглядит салон»: вход с галереи ТЦ — свои фото (assets/salon,
+   npm run gen:photos), дальше — кадры шоурума (src/data/showroom.ts) по
+   номерам: те же файлы, что на /about/, без копий. alt — что в кадре, для
+   поиска по картинкам и экранных читалок; chip — плашка на фото в превью. */
 const { mall, street, floorIn } = SITE.address
-const SALON_TEXT: Record<number, { alt: string; chip?: string }> = {
-  1: { alt: `Вход в салон ${SITE.studioNameOf}: вывеска «Фабрика дверей VFD» ${floorIn} ${mall}, ${street}`, chip: 'Вход' },
-  2: { alt: `Вход в салон ${SITE.studioNameOf} с галереи ${mall}: стеклянная дверь в зелёной раме` },
-  3: { alt: 'Графитовая, белая со вставкой под дерево и дверь под светлое дерево на стене шоурума' },
-  4: { alt: 'Белые филёнчатые и остеклённые двери и графитовая дверь на стене шоурума' },
-  5: { alt: 'Белые межкомнатные двери в ряд у серой стены шоурума, одна со стеклом в раскладке' },
-  6: { alt: `Стенды дверных ручек Punto, Fuaro, Bussare и Morelli в ${SITE.studioNameOf}` },
-  7: { alt: `Шоурум ${SITE.studioNameOf}: межкомнатные двери ВФД — белые филёнчатые, графитовая и белая со вставкой под дерево` },
-  8: { alt: 'Белые филёнчатые и остеклённые двери на тёмно-серой стене шоурума' },
+const SALON_ALTS: Record<number, string> = {
+  1: `Вход в салон ${SITE.studioNameOf}: вывеска «Фабрика дверей VFD» ${floorIn} ${mall}, ${street}`,
+  2: `Вход в салон ${SITE.studioNameOf} с галереи ${mall}: стеклянная дверь в зелёной раме`,
 }
-/** Кадры в превью (остальные — в окне просмотра): вход крупно, затем
-    дверь и вид внутрь, затем место консультации */
-const SALON_PREVIEW = [1, 2, 3, 4, 5]
+const SALON_CHIPS: Record<number, string> = { 1: 'Вход' }
+/** Кадры шоурума после фото входа — номера файлов assets/showroom, по порядку */
+const SALON_FROM_SHOWROOM = [5, 6, 12, 3, 1, 9]
+
+const SALON_PHOTOS: (SetPhoto & { chip?: string })[] = [
+  ...setPhotos(salonPhotos, SALON_ALTS).map((p) => ({ ...p, chip: SALON_CHIPS[p.n] })),
+  ...SALON_FROM_SHOWROOM.map(showroomPhoto),
+]
 
 export const SALON = {
   title: 'Как выглядит салон',
   lead:  `Салон — ${floorIn} ${mall}, вход с галереи под вывеской «Фабрика дверей VFD». За столом у образцов менеджер подберёт двери и рассчитает комплект.`,
-  photos: salonPhotos.photos.map((p) => {
-    const file = (w: number) => `/renders/contacts/salon2-${p.n}-${w}.webp`
-    const text = SALON_TEXT[p.n] ?? { alt: `Салон ${SITE.studioNameOf}` }
-    return {
-      n:      p.n,
-      src:    file(salonPhotos.widths[0]!),
-      srcset: salonPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
-      large:  file(salonPhotos.widths.at(-1)!),
-      width:  p.width,
-      height: p.height,
-      ...text,
-    }
-  }),
-  /** Номера кадров превью — по порядку (ПК: вход 2×2, рядом колонки
-      «вход» и «консультация»; телефон — лента) */
-  preview: SALON_PREVIEW,
+  photos: SALON_PHOTOS,
+  /** Сколько первых кадров в превью: раскладка на ПК (.ct-salon в
+      contacts.astro) — ровно под пять, остальные — в окне просмотра */
+  previewCount: 5,
 }

@@ -197,19 +197,25 @@
   padding: 0 1.75rem;
   border-radius: 999rem;
   border: 0.0625rem solid transparent;
+  font-family: inherit;
   font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
+  cursor: pointer;
   transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), border-color 180ms var(--ease-out);
 }
 .h-btn--signal { background: var(--h-signal); color: var(--color-white); }
 .h-btn--signal:hover { background: var(--color-accent-600); }
 .h-btn--ink { background: var(--h-ink); color: var(--color-white); }
 .h-btn--ink:hover { background: var(--color-slate-700); }
-.h-btn--quiet { border-color: var(--color-slate-300); color: var(--h-ink); }
+.h-btn--quiet { border-color: var(--color-slate-300); background: none; color: var(--h-ink); }
 .h-btn--quiet:hover { border-color: var(--h-signal); color: var(--h-signal); }
+/* Кнопка под галереей или блоком: на телефоне — во всю ширину */
+@media (max-width: 43.6875rem) {
+  .h-btn--phone-wide { width: 100%; }
+}
 
 .h-link {
   color: var(--h-ink);

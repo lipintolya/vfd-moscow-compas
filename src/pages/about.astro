@@ -104,8 +104,10 @@ const breadcrumbItems = [
             </figure>
           </div>
 
-          {/* Слайдер: первый кадр — портрет на обложке, дальше — по таймеру
-               (script внизу страницы). Кадры лежат друг на друге, переход — прозрачностью */}
+          {/* Слайдер: первый кадр — портрет на обложке (LCP, preload), дальше —
+               по таймеру (script внизу страницы). Кадры лежат друг на друге,
+               переход — прозрачностью; остальные кадры грузятся с низким
+               приоритетом — не мешают первому */}
           <div class="cover__photo" data-founder-slider data-interval={FOUNDER_SLIDE_INTERVAL}>
             {FOUNDER_SLIDES.map((p, i) => (
               <img
@@ -114,11 +116,11 @@ const breadcrumbItems = [
                 src={p.src}
                 srcset={p.srcset}
                 sizes={FOUNDER.photo.sizes}
-                alt={i === 0 ? `${FOUNDER.name}, основатель ${SITE.studioNameOf}` : p.alt}
+                alt={p.alt}
                 width={p.width}
                 height={p.height}
                 loading={i === 0 ? 'eager' : 'lazy'}
-                fetchpriority={i === 0 ? 'high' : undefined}
+                fetchpriority={i === 0 ? 'high' : 'low'}
                 decoding="async"
               />
             ))}
@@ -197,7 +199,7 @@ const breadcrumbItems = [
               )
             })}
           </ul>
-          <button type="button" class="h-btn h-btn--quiet showroom__all" data-lightbox-index="0">
+          <button type="button" class="h-btn h-btn--quiet h-btn--phone-wide showroom__all" data-lightbox-index="0">
             Смотреть все {SHOWROOM.photos.length} фото
           </button>
         </div>
@@ -224,7 +226,7 @@ const breadcrumbItems = [
         <div class="brand__text">
           {FAMILY_BRAND.paragraphs.map((p) => <p>{typograph(p)}</p>)}
           {SITE.features.portfolio && (
-            <a href="/portfolio/" class="h-btn h-btn--quiet brand__link">Смотреть наши работы</a>
+            <a href="/portfolio/" class="h-btn h-btn--quiet h-btn--phone-wide brand__link">Смотреть наши работы</a>
           )}
         </div>
       </div>
@@ -345,8 +347,9 @@ const breadcrumbItems = [
   initLightboxGroups()
 
   /* Слайдер основателя на обложке: кадры сменяются по таймеру, точки —
-     переход к кадру (и сбрасывают таймер). Без анимации при «меньше
-     движения» и на паузе, пока вкладка скрыта */
+     переход к кадру (и сбрасывают таймер). Пауза, пока указатель или фокус
+     на фото (успеть рассмотреть кадр, WCAG 2.2.2) и пока вкладка скрыта;
+     при «меньше движения» кадры сами не сменяются */
   const founder = document.querySelector<HTMLElement>('[data-founder-slider]')
   if (founder) {
     const slides = founder.querySelectorAll<HTMLImageElement>('[data-slide]')
@@ -355,6 +358,8 @@ const breadcrumbItems = [
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     let current = 0
     let timer: number | undefined
+    let hovered = false
+    let focused = false
 
     const show = (i: number) => {
       current = i
@@ -369,15 +374,23 @@ const breadcrumbItems = [
       if (timer !== undefined) clearInterval(timer)
       timer = undefined
     }
-    const start = () => {
+    /* Запускает таймер заново (с полной паузой до следующего кадра) или
+       останавливает его — по текущему состоянию */
+    const sync = () => {
       stop()
-      if (still || slides.length < 2) return
+      if (still || slides.length < 2 || hovered || focused || document.hidden) return
       timer = window.setInterval(() => show((current + 1) % slides.length), interval)
     }
 
-    dots.forEach((d, k) => d.addEventListener('click', () => { show(k); start() }))
-    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()))
-    start()
+    dots.forEach((d, k) => d.addEventListener('click', () => { show(k); sync() }))
+    founder.addEventListener('pointerenter', () => { hovered = true; sync() })
+    founder.addEventListener('pointerleave', () => { hovered = false; sync() })
+    /* Только фокус с клавиатуры: после клика мышью по точке фокус остаётся
+       на ней, и слайдер иначе стоял бы, пока не кликнут в другое место */
+    founder.addEventListener('focusin', (e) => { focused = (e.target as HTMLElement).matches(':focus-visible'); sync() })
+    founder.addEventListener('focusout', () => { focused = false; sync() })
+    document.addEventListener('visibilitychange', sync)
+    sync()
   }
 
   /* Производство: на ПК сетка свёрнута до двух рядов (лишние кадры
@@ -464,6 +477,8 @@ const breadcrumbItems = [
     border: 0;
     border-radius: 999px;
     background: color-mix(in srgb, var(--color-white) 45%, transparent);
+    /* Тонкая тёмная обводка — точки видны и на светлом кадре (белая рубашка) */
+    box-shadow: 0 0 0 0.0625rem color-mix(in srgb, var(--color-slate-950) 35%, transparent);
     cursor: pointer;
   }
   .cover__dot.is-active { background: var(--color-white); }
@@ -695,12 +710,11 @@ const breadcrumbItems = [
     transition: background-color 200ms var(--ease-out);
   }
   .showroom__zoom:hover .showroom__more { background: color-mix(in srgb, var(--color-slate-950) 45%, transparent); }
-  .showroom__all { margin-top: 1.5rem; cursor: pointer; font-family: inherit; background: none; }
-  /* Телефон: лента — все превью одного размера, кнопка во всю ширину */
+  .showroom__all { margin-top: 1.5rem; }
+  /* Телефон: лента — все превью одного размера */
   @media (max-width: 43.6875rem) {
     .showroom__item--main { position: static; grid-column: auto; grid-row: auto; aspect-ratio: 3 / 4; }
     .showroom__item--main .showroom__zoom { position: relative; }
-    .showroom__all { width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) {
     .showroom__zoom img, .showroom__more { transition: none; }

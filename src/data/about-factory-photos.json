@@ -1,51 +1,93 @@
 {
-  "widths": [
-    480,
-    900
-  ],
+  "base": "/renders/about/factory",
   "photos": [
     {
       "n": 1,
+      "hash": "aec3f324",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 2,
+      "hash": "b4d384dd",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 3,
+      "hash": "f1a8d2dc",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 4,
+      "hash": "98419b2e",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 5,
+      "hash": "b3184007",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 6,
+      "hash": "d95278d9",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 7,
+      "hash": "6bb3e759",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 8,
+      "hash": "d1fd36e4",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 9,
+      "hash": "4ccbd565",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     }

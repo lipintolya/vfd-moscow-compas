@@ -1,66 +1,123 @@
 {
-  "widths": [
-    480,
-    900
-  ],
+  "base": "/renders/about/showroom",
   "photos": [
     {
       "n": 1,
+      "hash": "6d1a83db",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 2,
+      "hash": "da2d9fb6",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 3,
+      "hash": "688383a4",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 4,
+      "hash": "e7468cb6",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 5,
+      "hash": "5b3f5929",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 6,
+      "hash": "71a3587d",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 7,
+      "hash": "9de3d7d9",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 8,
+      "hash": "02ceaedc",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 9,
+      "hash": "13220dc3",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 10,
+      "hash": "2e8bbe1d",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     },
     {
       "n": 11,
+      "hash": "96c9296c",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 12,
+      "hash": "47993d8e",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 675
     }

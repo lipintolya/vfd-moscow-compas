@@ -7,8 +7,8 @@
  * ~900px по ширине, feature-links карточки — ~700px, галерея жёстко
  * задана 480×600.
  *
- * Фото производства — не здесь: assets/factory/ → npm run gen:showroom
- * (scripts/gen-showroom-photos.mjs, набор «factory»).
+ * Фото производства и слайды основателя — не здесь: assets/factory/,
+ * assets/founder/ → npm run gen:photos (scripts/gen-photo-sets.mjs).
  *
  * Запуск:        node scripts/gen-about-images.mjs
  */

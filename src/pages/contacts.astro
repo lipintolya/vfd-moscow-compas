@@ -1,8 +1,8 @@
 ---
 /**
  * /contacts/ — контакты салона в дизайн-системе главной (home.css):
- * первый экран с тремя плитками (звонок, адрес, Telegram-канал),
- * «Что вы получаете», способы оплаты, частые вопросы и в конце
+ * первый экран с плитками (звонок, WhatsApp, Telegram, салон), фото
+ * салона, «Что вы получаете», способы оплаты, частые вопросы и в конце
  * «Как к нам добраться» (VisitBand — своя карта и фото ТЦ).
  * Реквизиты юрлица не публикуются: владелец сайта — физлицо
  * (src/lib/contacts-data.ts). Тексты — src/data/contacts-page.ts.
@@ -140,8 +140,8 @@ const breadcrumbItems = [
 
     {/* Как выглядит салон — сразу под способами связаться: продолжает
          первый экран (тот же фон, без отступа сверху). ПК — вход крупно
-         2×2, рядом колонка «вход» и колонка «консультация»; телефон —
-         лента со свайпом. Клик — окно просмотра со всеми кадрами */}
+         2×2 и ещё четыре кадра рядом; телефон — лента со свайпом. Клик —
+         окно просмотра со всеми кадрами */}
     <section class="h-sec h-sec--tight-top" id="salon" aria-labelledby="ct-salon-title">
       <div class="container">
         <header class="h-head">
@@ -150,31 +150,27 @@ const breadcrumbItems = [
         </header>
         <div data-lightbox data-lightbox-images={JSON.stringify(SALON.photos.map((p) => ({ src: p.large, alt: p.alt })))}>
           <ul class="ct-salon h-rail" role="list">
-            {SALON.preview.map((n, i) => {
-              const index = SALON.photos.findIndex((p) => p.n === n)
-              const p = SALON.photos[index]!
-              return (
-                <li class="ct-salon__item">
-                  <button type="button" class="h-media ct-salon__zoom" aria-label={`Открыть фото: ${p.alt}`} data-lightbox-index={index}>
-                    <img
-                      src={p.src}
-                      srcset={p.srcset}
-                      sizes={i === 0
-                        ? '(min-width: 80rem) 37rem, (min-width: 43.75rem) 50vw, 82vw'
-                        : '(min-width: 80rem) 18rem, (min-width: 43.75rem) 25vw, 82vw'}
-                      alt={p.alt}
-                      width={p.width}
-                      height={p.height}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                    {p.chip && <span class="h-chip ct-salon__chip" aria-hidden="true">{p.chip}</span>}
-                  </button>
-                </li>
-              )
-            })}
+            {SALON.photos.slice(0, SALON.previewCount).map((p, i) => (
+              <li class="ct-salon__item">
+                <button type="button" class="h-media ct-salon__zoom" aria-label={`Открыть фото: ${p.alt}`} data-lightbox-index={i}>
+                  <img
+                    src={p.src}
+                    srcset={p.srcset}
+                    sizes={i === 0
+                      ? '(min-width: 80rem) 37rem, (min-width: 43.75rem) 50vw, 82vw'
+                      : '(min-width: 80rem) 18rem, (min-width: 43.75rem) 25vw, 82vw'}
+                    alt={p.alt}
+                    width={p.width}
+                    height={p.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  {p.chip && <span class="h-chip ct-salon__chip" aria-hidden="true">{p.chip}</span>}
+                </button>
+              </li>
+            ))}
           </ul>
-          <button type="button" class="h-btn h-btn--quiet ct-salon__all" data-lightbox-index="0">
+          <button type="button" class="h-btn h-btn--quiet h-btn--phone-wide ct-salon__all" data-lightbox-index="0">
             Смотреть все {SALON.photos.length} фото
           </button>
         </div>
@@ -229,8 +225,8 @@ const breadcrumbItems = [
 
         {(SITE.features.portfolio || SITE.features.reviews) && (
           <div class="ct-links">
-            {SITE.features.portfolio && <a href="/portfolio/" class="h-btn h-btn--quiet">Смотреть наши работы</a>}
-            {SITE.features.reviews && <a href="/reviews/" class="h-btn h-btn--quiet">Читать отзывы</a>}
+            {SITE.features.portfolio && <a href="/portfolio/" class="h-btn h-btn--quiet h-btn--phone-wide">Смотреть наши работы</a>}
+            {SITE.features.reviews && <a href="/reviews/" class="h-btn h-btn--quiet h-btn--phone-wide">Читать отзывы</a>}
           </div>
         )}
       </div>
@@ -264,7 +260,7 @@ const breadcrumbItems = [
 <script>
   import { initLightboxGroups } from '../lib/lightbox'
 
-  /* Фото входа и места консультации — окно просмотра */
+  /* Фото салона — окно просмотра */
   initLightboxGroups()
 
   /* «Что вы получаете» — каждая карточка появляется один раз, когда сама
@@ -354,11 +350,10 @@ const breadcrumbItems = [
     white-space: nowrap;
   }
 
-  /* ── Что вы получаете ── */
   /* ── Как выглядит салон ──
      ПК и планшет: 4 колонки × 2 ряда, кадры 3:4. Вход (1-й) — 2×2 слева;
-     колонка 3 — дверь входа (2-й, внизу) и вид внутрь (3-й, вверху),
-     колонка 4 — место консультации (4-й и 5-й). Телефон — лента (.h-rail) */
+     колонка 3 — дверь входа (2-й, внизу) и 3-й кадр (вверху), колонка 4 —
+     4-й и 5-й. Кадров в превью — SALON.previewCount. Телефон — лента (.h-rail) */
   .ct-salon {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -389,15 +384,13 @@ const breadcrumbItems = [
   .ct-salon__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
   /* Плашка на фото — что это за место */
   .ct-salon__chip { position: absolute; left: clamp(0.75rem, 1.4vw, 1rem); bottom: clamp(0.75rem, 1.4vw, 1rem); max-width: calc(100% - 1.5rem); overflow: hidden; text-overflow: ellipsis; }
-  .ct-salon__all { margin-top: 1.5rem; background: none; font-family: inherit; cursor: pointer; }
-  @media (max-width: 43.6875rem) {
-    .ct-salon__all { width: 100%; }
-  }
+  .ct-salon__all { margin-top: 1.5rem; }
   @media (prefers-reduced-motion: reduce) {
     .ct-salon__zoom img { transition: none; }
     .ct-salon__zoom:hover img { transform: none; }
   }
 
+  /* ── Что вы получаете ── */
   .ct-benefits {
     display: grid;
     gap: 2.5rem var(--h-gutter);

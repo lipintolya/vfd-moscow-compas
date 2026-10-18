@@ -1,48 +1,25 @@
 {
-  "widths": [
-    480,
-    900
-  ],
+  "base": "/renders/contacts/salon",
   "photos": [
     {
       "n": 1,
+      "hash": "d2406862",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
     },
     {
       "n": 2,
+      "hash": "56941a30",
+      "widths": [
+        480,
+        900
+      ],
       "width": 900,
       "height": 1200
-    },
-    {
-      "n": 3,
-      "width": 900,
-      "height": 675
-    },
-    {
-      "n": 4,
-      "width": 900,
-      "height": 675
-    },
-    {
-      "n": 5,
-      "width": 900,
-      "height": 675
-    },
-    {
-      "n": 6,
-      "width": 900,
-      "height": 1200
-    },
-    {
-      "n": 7,
-      "width": 900,
-      "height": 1200
-    },
-    {
-      "n": 8,
-      "width": 900,
-      "height": 675
     }
   ]
 }

@@ -4,8 +4,9 @@
    вычитаны. Имя, телефон, адрес — из src/config/site.ts.
    ============================================================ */
 import { SITE } from '../config/site'
+import { setPhotos } from '../lib/photo-set'
+import { SHOWROOM_PHOTOS, showroomPhoto } from './showroom'
 import factoryPhotos from './about-factory-photos.json'
-import showroomPhotos from './showroom-photos.json'
 import founderPhotos from './founder-photos.json'
 
 /* Вторая часть заголовка-коллаборации «Студия Зизевского × фабрика VFD»
@@ -26,29 +27,19 @@ export const FOUNDER = {
     sizes:  '(min-width: 56.25rem) 40vw, 100vw',
     width:  640,
     height: 640,
+    alt:    `${SITE.contactPerson}, основатель ${SITE.studioNameOf}`,
   },
 }
 
-/* Слайдер на обложке: первый кадр — FOUNDER.photo (студийный портрет),
-   дальше — фото из assets/founder/ (scripts/gen-showroom-photos.mjs,
-   набор «founder»). Подписи — по кадру: имя из FOUNDER, без новых фактов. */
+/* Слайдер на обложке: первый кадр — FOUNDER.photo (студийный портрет,
+   он же LCP и preload), дальше — фото из assets/founder/ (npm run
+   gen:photos; фон у них прозрачный — ложатся на тёмную плитку).
+   Подписи — по кадру: имя из FOUNDER, без новых фактов. */
 const FOUNDER_SLIDE_ALTS: Record<number, string> = {
   2: `${FOUNDER.name} с межкомнатной дверью`,
   3: `${FOUNDER.name}, основатель студии`,
 }
-export const FOUNDER_SLIDES = [
-  FOUNDER.photo,
-  ...founderPhotos.photos.map((p) => {
-    const file = (w: number) => `/renders/about/founder2-${p.n}-${w}.webp`
-    return {
-      src:    file(founderPhotos.widths[0]!),
-      srcset: founderPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
-      width:  p.width,
-      height: p.height,
-      alt:    FOUNDER_SLIDE_ALTS[p.n] ?? `${FOUNDER.name}, основатель студии`,
-    }
-  }),
-]
+export const FOUNDER_SLIDES = [FOUNDER.photo, ...setPhotos(founderPhotos, FOUNDER_SLIDE_ALTS)]
 /** Пауза между кадрами слайдера, мс */
 export const FOUNDER_SLIDE_INTERVAL = 5000
 
@@ -104,9 +95,8 @@ export const FAMILY_BRAND = {
   ],
 }
 
-/* Собственный цех (индивидуальные заказы) — ниже «фамильного бренда». Файлы и размеры —
-   scripts/gen-about-images.mjs (public/renders/about/factory2-N-*.webp,
-   about-factory-photos.json); здесь — подписи по номеру кадра. */
+/* Собственный цех (индивидуальные заказы) — ниже «фамильного бренда».
+   Фото — assets/factory/ (npm run gen:photos); здесь — подписи по номеру кадра. */
 const FACTORY_ALTS: Record<number, string> = {
   1: 'Станок KUPER и полосы шпона на столе',
   2: 'Оператор у станка с ЧПУ Biesse Rover K, на столе заготовка и оснастка',
@@ -122,53 +112,16 @@ const FACTORY_ALTS: Record<number, string> = {
 export const FACTORY = {
   title: 'Как устроено наше производство',
   lead:  'Помимо проверенных поставщиков у нас есть свой производственный цех — в нём мы выполняем индивидуальные заказы.',
-  photos: factoryPhotos.photos.map((p) => {
-    const file = (w: number) => `/renders/about/factory2-${p.n}-${w}.webp`
-    return {
-      src:    file(factoryPhotos.widths[0]!),
-      srcset: factoryPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
-      large:  file(factoryPhotos.widths.at(-1)!),
-      width:  p.width,
-      height: p.height,
-      wide:   p.width > p.height,
-      alt:    FACTORY_ALTS[p.n] ?? 'Производство дверей',
-    }
-  }),
+  /* Горизонтальный кадр в сетке на ПК — на две колонки */
+  photos: setPhotos(factoryPhotos, FACTORY_ALTS).map((p) => ({ ...p, wide: p.width > p.height })),
 }
 
-/* Шоурум в ТЦ «Компас» — фото салона от владельца (assets/showroom,
-   npm run gen:showroom). Подписи — что в кадре: по ним фото находят в
-   Яндекс и Google Картинках; название студии — в нескольких, не во всех.
-   Порядок — сначала превью (PREVIEW первых кадров видно на странице),
-   остальные открываются в окне просмотра. */
-const SHOWROOM_ALTS: Record<number, string> = {
-  1:  `Шоурум ${SITE.studioNameOf}: межкомнатные двери ВФД — белые филёнчатые, графитовая и белая со вставкой под дерево`,
-  2:  'Белые, графитовая и остеклённая межкомнатные двери на стене шоурума',
-  3:  `Стенды дверных ручек Punto, Fuaro, Bussare и Morelli в ${SITE.studioNameOf}`,
-  4:  `Палитра цветов и образцы покрытий для дверей на столе в ${SITE.studioNameOf}`,
-  5:  'Графитовая, белая со вставкой под дерево и дверь под светлое дерево на стене шоурума',
-  6:  'Белые филёнчатые и остеклённые двери и графитовая дверь на стене шоурума',
-  7:  'Входная дверь с рейками, дверь под дерево «ёлочкой» и зелёные двустворчатые двери в зале шоурума',
-  8:  'Белая классическая дверь, бирюзовая дверь с овальным рифлёным стеклом и чёрная дверь с ромбовидным стеклом',
-  9:  'Белые филёнчатые и остеклённые двери на тёмно-серой стене шоурума',
-  10: 'Зелёная дверь с нижней панелью под рейки и двери под дерево с рельефными и чёрными вставками на синей стене',
-  11: 'Серая ручка на двери под светлый дуб вблизи, в глубине зала белая дверь',
-  12: 'Белые межкомнатные двери в ряд у серой стены шоурума, одна со стеклом в раскладке',
-}
+/* Шоурум в ТЦ «Компас» (кадры и подписи — src/data/showroom.ts).
+   Порядок — сначала превью (их видно на странице, на ПК раскладка
+   .showroom в about.astro — ровно под пять кадров), остальные
+   открываются в окне просмотра. */
 /** Номера кадров в превью — по порядку */
 const SHOWROOM_PREVIEW = [1, 2, 3, 4, 5]
-
-const showroomPhoto = (p: (typeof showroomPhotos.photos)[number]) => {
-  const file = (w: number) => `/renders/about/showroom2-${p.n}-${w}.webp`
-  return {
-    src:    file(showroomPhotos.widths[0]!),
-    srcset: showroomPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
-    large:  file(showroomPhotos.widths.at(-1)!),
-    width:  p.width,
-    height: p.height,
-    alt:    SHOWROOM_ALTS[p.n] ?? `Шоурум ${SITE.studioNameOf}`,
-  }
-}
 
 export const SHOWROOM = {
   title: `Шоурум в\u00a0${SITE.address.mall}`,
@@ -176,9 +129,9 @@ export const SHOWROOM = {
   previewCount: SHOWROOM_PREVIEW.length,
   /** Все кадры: сначала превью, потом остальные по порядку */
   photos: [
-    ...SHOWROOM_PREVIEW.map((n) => showroomPhotos.photos.find((p) => p.n === n)!),
-    ...showroomPhotos.photos.filter((p) => !SHOWROOM_PREVIEW.includes(p.n)),
-  ].map(showroomPhoto),
+    ...SHOWROOM_PREVIEW.map(showroomPhoto),
+    ...SHOWROOM_PHOTOS.filter((p) => !SHOWROOM_PREVIEW.includes(p.n)),
+  ],
 }
 
 /* Тёмный блок (StepsRow без номеров — это не последовательность) */

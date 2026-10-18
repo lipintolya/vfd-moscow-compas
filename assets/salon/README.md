@@ -1,9 +1,11 @@
-# Фото салона «Студии Зизевского» (ТЦ «Компас»)
+# Фото входа в салон «Студии Зизевского» (ТЦ «Компас»)
 
-Фото салона и шоурума, 8 кадров: 01–02 — вход в салон с галереи 3 этажа
-ТЦ «Компас», 03–08 — кадры шоурума. Исходники
-пришли PNG, здесь — WebP q92.
+Фото от владельца (17.10.2026), 2 кадра 900×1200: вход в салон с галереи
+3 этажа ТЦ «Компас». Исходники пришли PNG, здесь — WebP q92.
 
-`npm run gen:showroom` → `public/renders/contacts/salon-N-{480,900}.webp`
-и размеры в `src/data/salon-photos.json`. Подписи — `src/data/contacts-page.ts`
-(`SALON`).
+Остальные кадры галереи «Как выглядит салон» на `/contacts/` — фото
+шоурума из `assets/showroom/` (номера — `SALON_FROM_SHOWROOM` в
+`src/data/contacts-page.ts`), копии сюда не кладём.
+
+`npm run gen:photos` → `public/renders/contacts/salon-N-<хеш>-{480,900}.webp`
+и `src/data/salon-photos.json`. Подписи — `src/data/contacts-page.ts` (`SALON`).

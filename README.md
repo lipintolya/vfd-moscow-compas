@@ -179,7 +179,7 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 | `npm run gen:hidden-doors-hero` | первый экран скрытых дверей |
 | `npm run gen:about` / `gen:og-about` | фото «О нас» и картинка для соцсетей |
 | `npm run gen:decor` | облегчённые копии фото «Декора» (`/catalog/decor/`, плинтус на страницах моделей) |
-| `npm run gen:showroom` | фото салона: шоурум для «О нас» (`assets/showroom/`), вход и место консультации для «Контактов» (`assets/salon/`) |
+| `npm run gen:photos` | наборы фото из `assets/`: шоурум (`showroom/` — «О нас» и галерея «Контактов»), вход в салон (`salon/`), производство (`factory/`), слайдер основателя (`founder/`); в имени копии — хеш, старые копии удаляются |
 | `npm run gen:contacts` / `gen:mall` | фото контактов и ТЦ «Компас» |
 | `npm run gen:visit-map` | карта «Как к нам добраться» — после смены координат |
 

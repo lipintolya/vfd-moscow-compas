@@ -1,16 +1,23 @@
 {
-  "widths": [
-    480,
-    900
-  ],
+  "base": "/renders/about/founder",
   "photos": [
     {
       "n": 2,
+      "hash": "6c2c54ef",
+      "widths": [
+        480,
+        853
+      ],
       "width": 853,
       "height": 1280
     },
     {
       "n": 3,
+      "hash": "1d826282",
+      "widths": [
+        480,
+        853
+      ],
       "width": 853,
       "height": 1280
     }
