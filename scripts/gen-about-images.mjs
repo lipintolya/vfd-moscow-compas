@@ -7,15 +7,10 @@
  * ~900px по ширине, feature-links карточки — ~700px, галерея жёстко
  * задана 480×600.
  *
- * Фото производства (about.block/factory/photo_N.webp, 960 px по короткой
- * стороне) → factory-N-480.webp и factory-N-960.webp + размеры кадров
- * в src/data/about-factory-photos.json (ширина/высота для <img>, без CLS).
- * В сетке на ПК плитка ~300 px CSS — грузится 480 (1x) или 960 (retina);
- * 960 же открывается в лайтбоксе.
+ * Фото производства — не здесь: assets/factory/ → npm run gen:showroom
+ * (scripts/gen-showroom-photos.mjs, набор «factory»).
  *
  * Запуск:        node scripts/gen-about-images.mjs
- * Когда запускать снова: если фото в папке factory добавили или заменили
- * (поправить FACTORY_COUNT).
  */
 import sharp from 'sharp'
 import { writeFile, mkdir } from 'node:fs/promises'
@@ -68,29 +63,6 @@ const jobs = []
     JSON.stringify({ widths: WIDTHS, photos }, null, 2) + '\n',
   )
 }
-
-/* ── Фото производства ── */
-const FACTORY_SRC = 'https://storage.yandexcloud.net/vfd.moscow.compass/about.block/factory/'
-const FACTORY_COUNT = 11
-const FACTORY_WIDTHS = [480, 960]
-const factory = []
-for (let n = 1; n <= FACTORY_COUNT; n++) {
-  const src = `${FACTORY_SRC}photo_${n}.webp`
-  const buf = await loadMedia(src)
-  const meta = await sharp(buf).metadata()
-  for (const w of FACTORY_WIDTHS) {
-    const out = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 76 }).toBuffer()
-    await writeFile(new URL(`factory-${n}-${w}.webp`, OUT_DIR), out)
-    console.log(`factory-${n}-${w}.webp: ${(buf.length / 1024).toFixed(0)}KB -> ${(out.length / 1024).toFixed(0)}KB`)
-  }
-  // Размеры самого крупного варианта — по ним <img width/height>
-  const big = Math.min(FACTORY_WIDTHS.at(-1), meta.width)
-  factory.push({ n, width: big, height: Math.round(meta.height * big / meta.width) })
-}
-await writeFile(
-  new URL('../src/data/about-factory-photos.json', import.meta.url),
-  JSON.stringify({ widths: FACTORY_WIDTHS, photos: factory }, null, 2) + '\n',
-)
 
 for (const { src, out, width, quality } of jobs) {
   const buf = await loadMedia(src)
