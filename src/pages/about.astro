@@ -16,7 +16,8 @@ import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import {
-  COLLAB_PARTNER, FOUNDER, FOUNDER_QUOTE, FOUNDER_SLIDES, FOUNDER_SLIDE_INTERVAL, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS, SHOWROOM } from '../data/about-page'
+  COLLAB_PARTNER, FOUNDER, FOUNDER_QUOTE, FOUNDER_SLIDES, FOUNDER_SLIDE_INTERVAL, MILESTONES, MARKET, FAMILY_BRAND, FACTORY, FAMILY_BUSINESS, SHOWROOM, INSTALL_CONTROL } from '../data/about-page'
+import InstallControl from '../components/about/InstallControl.astro'
 import { SITE } from '../config/site'
 import { VFD_DEALER, VFD_CARDS, VFD_ORG_ID, vfdOrganizationSchema } from '../data/vfd-factory'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
@@ -334,6 +335,9 @@ const breadcrumbItems = [
         </button>
       </div>
     </section>
+
+    {/* Контроль монтажа — после производства (светлый фон), перед тёмным блоком «семейный бизнес» */}
+    <InstallControl {...INSTALL_CONTROL} />
 
     <StepsRow id="family" title={FAMILY_BUSINESS.title} lead={FAMILY_BUSINESS.lead} steps={FAMILY_BUSINESS.points} />
 

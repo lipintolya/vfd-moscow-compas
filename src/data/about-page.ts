@@ -8,6 +8,8 @@ import { setPhotos } from '../lib/photo-set'
 import { SHOWROOM_PHOTOS, showroomPhoto } from './showroom'
 import factoryPhotos from './about-factory-photos.json'
 import founderPhotos from './founder-photos.json'
+import installPhotos from './install-photos.json'
+import { WARRANTY_TERMS } from './services'
 
 /* Вторая часть заголовка-коллаборации «Студия Зизевского × фабрика VFD»
    (h1 /about/, превью /og/about.jpg — scripts/gen-og-about.mjs читает
@@ -156,4 +158,33 @@ export const FAMILY_BUSINESS = {
       text:  'Продавец ведёт заказ лично: от выбора модели до установки.',
     },
   ],
+}
+
+/* Контроль качества монтажа — блок на /about/ (components/about/InstallControl.astro).
+   Фото — assets/install (npm run gen:photos). Пункты — то, что салон делает сам:
+   замер, проверка комплекта, монтаж своей бригадой, выезд руководителя.
+   Гарантия — та же формулировка, что на всём сайте (WARRANTY_TERMS). */
+export const INSTALL_CONTROL = {
+  title: 'Контроль качества монтажа',
+  lead:  'Качество видно после установки, поэтому монтаж проверяем на объекте, а руководитель выезжает туда сам.',
+  photo: setPhotos(installPhotos, { 1: `${FOUNDER.name} у установленной двери на объекте` })[0]!,
+  points: [
+    {
+      title: 'Замер перед заказом',
+      text:  'Специалист приезжает на объект, снимает проём и учитывает стены. От замера зависят размер полотна и качество установки.',
+    },
+    {
+      title: 'Проверка комплекта до монтажа',
+      text:  'Перед установкой сверяем полотна, коробки, наличники и фурнитуру с заказом. Недостающее выясняем до выезда бригады, а не на объекте.',
+    },
+    {
+      title: 'Монтаж своей бригадой',
+      text:  'Двери устанавливают наши специалисты. Выравниваем коробку, проверяем зазоры, ход полотна и замок до того, как бригада уедет.',
+    },
+    {
+      title: 'Руководитель на объекте',
+      text:  `${FOUNDER.name} выезжает на объекты сам и смотрит установку. Если что-то не так, исправляем сразу.`,
+    },
+  ],
+  note: WARRANTY_TERMS,
 }

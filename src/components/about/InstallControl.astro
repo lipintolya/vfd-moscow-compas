@@ -1,0 +1,107 @@
+---
+/**
+ * «Контроль качества монтажа» на /about/: фото руководителя у установленной
+ * двери, четыре пункта о том, как салон проверяет монтаж, и гарантия.
+ * Тексты и фото — INSTALL_CONTROL в src/data/about-page.ts.
+ *
+ * Собран из блоков дизайн-системы (home.css): шапка — .h-head, пункты —
+ * .h-h3 и .h-body, фото — .h-media. Без анимации: блок — на одном экране
+ * с текстом, и читать его удобнее без движения.
+ */
+import { typograph } from '../../lib/typograph'
+import type { SetPhoto } from '../../lib/photo-set'
+
+interface Props {
+  title: string
+  lead: string
+  photo: SetPhoto
+  points: { title: string; text: string }[]
+  /** Гарантия под списком — формулировка, общая для сайта */
+  note?: string
+  id?: string
+}
+const { title, lead, photo, points, note, id = 'install-control' } = Astro.props
+const headingId = `${id}-heading`
+---
+
+<section id={id} class="h-sec ic" aria-labelledby={headingId}>
+  <div class="container">
+    <header class="h-head">
+      <h2 id={headingId} class="h-h2">{typograph(title)}</h2>
+      <p class="h-lead">{typograph(lead)}</p>
+    </header>
+
+    <div class="ic__body">
+      <figure class="h-media ic__photo">
+        <img
+          src={photo.src}
+          srcset={photo.srcset}
+          sizes="(min-width: 56.25rem) 42vw, 100vw"
+          alt={photo.alt}
+          width={photo.width}
+          height={photo.height}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+
+      <div class="ic__content">
+        <ul class="ic__points" role="list">
+          {points.map((p) => (
+            <li class="ic__point">
+              <h3 class="h-h3 ic__title">{typograph(p.title)}</h3>
+              <p class="h-body ic__text">{typograph(p.text)}</p>
+            </li>
+          ))}
+        </ul>
+        {note && <p class="h-meta ic__note">{typograph(note)}</p>}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Фото — портрет 3:4 (на телефоне чуть шире), в кадре лицо и дверь */
+  .ic__body {
+    display: grid;
+    gap: clamp(2rem, 4vw, 3rem) var(--h-gutter);
+    align-items: start;
+  }
+  .ic__photo {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+  }
+  .ic__photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  @media (min-width: 56.25rem) {
+    .ic__body { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .ic__photo { grid-column: 1 / span 5; aspect-ratio: 3 / 4; }
+    .ic__content { grid-column: 7 / span 6; }
+  }
+
+  /* Пункты — строки с линейками, как список «Что мы поняли о рынке»: без
+     маркеров и номеров; заголовок пункта и текст под ним */
+  .ic__points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 0.0625rem solid var(--h-rule);
+  }
+  .ic__point {
+    padding-block: clamp(1.25rem, 2.5vw, 1.75rem);
+    border-top: 0.0625rem solid var(--h-rule);
+  }
+  .ic__title { margin: 0; }
+  .ic__text {
+    margin: 0.5rem 0 0;
+    max-width: 36em;
+    color: var(--h-soft);
+    text-wrap: pretty;
+  }
+  .ic__note { margin: 1.5rem 0 0; }
+</style>

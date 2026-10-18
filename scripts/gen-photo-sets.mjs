@@ -7,6 +7,7 @@
  *   assets/salon/    → /renders/contacts/salon-*    (вход в салон, /contacts/)
  *   assets/factory/  → /renders/about/factory-*     (производство, /about/)
  *   assets/founder/  → /renders/about/founder-*     (слайдер основателя на обложке /about/)
+ *   assets/install/  → /renders/about/install-*     (контроль качества монтажа, /about/)
  *
  * Копии — 480 (сетка, 1x) и 900 (retina и окно просмотра), но не шире
  * исходника: в srcset ширина должна совпадать с настоящей. Имя копии —
@@ -30,6 +31,7 @@ const SETS = [
   { src: 'assets/salon/', dir: 'contacts', name: 'salon', json: 'src/data/salon-photos.json' },
   { src: 'assets/factory/', dir: 'about', name: 'factory', json: 'src/data/about-factory-photos.json' },
   { src: 'assets/founder/', dir: 'about', name: 'founder', json: 'src/data/founder-photos.json' },
+  { src: 'assets/install/', dir: 'about', name: 'install', json: 'src/data/install-photos.json' },
 ]
 const root = new URL('../', import.meta.url)
 

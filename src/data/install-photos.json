@@ -1,0 +1,15 @@
+{
+  "base": "/renders/about/install",
+  "photos": [
+    {
+      "n": 1,
+      "hash": "657bc9c5",
+      "widths": [
+        480,
+        900
+      ],
+      "width": 900,
+      "height": 1200
+    }
+  ]
+}

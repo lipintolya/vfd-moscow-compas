@@ -2,12 +2,13 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readdirSync } from 'node:fs'
 import { setPhotos, photoByN, type PhotoSetJson } from '../src/lib/photo-set'
-import { FOUNDER_SLIDES, FACTORY, SHOWROOM } from '../src/data/about-page'
+import { FOUNDER_SLIDES, FACTORY, SHOWROOM, INSTALL_CONTROL } from '../src/data/about-page'
 import { SALON } from '../src/data/contacts-page'
 import showroomJson from '../src/data/showroom-photos.json'
 import salonJson from '../src/data/salon-photos.json'
 import factoryJson from '../src/data/about-factory-photos.json'
 import founderJson from '../src/data/founder-photos.json'
+import installJson from '../src/data/install-photos.json'
 
 const SET: PhotoSetJson = {
   base: '/renders/about/demo',
@@ -36,7 +37,7 @@ test('photoByN: нет кадра — ошибка с именем набора'
 })
 
 test('фото «О нас» и «Контактов» — все копии из srcset и крупный кадр лежат в public/', () => {
-  const photos = [...SHOWROOM.photos, ...FACTORY.photos, ...FOUNDER_SLIDES, ...SALON.photos]
+  const photos = [...SHOWROOM.photos, ...FACTORY.photos, ...FOUNDER_SLIDES, INSTALL_CONTROL.photo, ...SALON.photos]
   for (const p of photos) {
     const files = [p.src, ...p.srcset.split(', ').map((s) => s.split(' ')[0]!), ...('large' in p ? [p.large] : [])]
     for (const f of files) assert.ok(existsSync(`public${f}`), `нет файла public${f}`)
@@ -45,7 +46,7 @@ test('фото «О нас» и «Контактов» — все копии и�
 })
 
 test('наборы: в public/ нет копий, которых нет в JSON (генератор убирает старые)', () => {
-  for (const set of [showroomJson, salonJson, factoryJson, founderJson] as PhotoSetJson[]) {
+  for (const set of [showroomJson, salonJson, factoryJson, founderJson, installJson] as PhotoSetJson[]) {
     const dir = set.base.slice(0, set.base.lastIndexOf('/'))
     const name = set.base.slice(dir.length + 1)
     const own = new RegExp(`^${name}-\\d+-[0-9a-f]{8}-\\d+\\.webp$`)
