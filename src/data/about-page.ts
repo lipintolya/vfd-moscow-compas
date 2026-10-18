@@ -81,7 +81,7 @@ export const FAMILY_BRAND = {
 }
 
 /* Собственный цех (индивидуальные заказы) — ниже «фамильного бренда». Файлы и размеры —
-   scripts/gen-about-images.mjs (public/renders/about/factory-N-*.webp,
+   scripts/gen-about-images.mjs (public/renders/about/factory2-N-*.webp,
    about-factory-photos.json); здесь — подписи по номеру кадра. */
 const FACTORY_ALTS: Record<number, string> = {
   1: 'Станок KUPER и полосы шпона на столе',
@@ -99,7 +99,7 @@ export const FACTORY = {
   title: 'Как устроено наше производство',
   lead:  'Помимо проверенных поставщиков у нас есть свой производственный цех — в нём мы выполняем индивидуальные заказы.',
   photos: factoryPhotos.photos.map((p) => {
-    const file = (w: number) => `/renders/about/factory-${p.n}-${w}.webp`
+    const file = (w: number) => `/renders/about/factory2-${p.n}-${w}.webp`
     return {
       src:    file(factoryPhotos.widths[0]!),
       srcset: factoryPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),
@@ -135,7 +135,7 @@ const SHOWROOM_ALTS: Record<number, string> = {
 const SHOWROOM_PREVIEW = [1, 2, 3, 4, 5]
 
 const showroomPhoto = (p: (typeof showroomPhotos.photos)[number]) => {
-  const file = (w: number) => `/renders/about/showroom-${p.n}-${w}.webp`
+  const file = (w: number) => `/renders/about/showroom2-${p.n}-${w}.webp`
   return {
     src:    file(showroomPhotos.widths[0]!),
     srcset: showroomPhotos.widths.map((w) => `${file(w)} ${w}w`).join(', '),

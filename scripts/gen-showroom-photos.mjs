@@ -3,9 +3,9 @@
  * NAME-N-480.webp (сетка, 1x) и -900.webp (retina и окно просмотра)
  * + размеры кадров в src/data/<набор>-photos.json:
  *
- *   assets/showroom/ → public/renders/about/showroom-*    (шоурум, /about/)
- *   assets/salon/    → public/renders/contacts/salon-*    (вход и консультация, /contacts/)
- *   assets/factory/  → public/renders/about/factory-*    (производство, /about/)
+ *   assets/showroom/ → public/renders/about/showroom2-*   (шоурум, /about/)
+ *   assets/salon/    → public/renders/contacts/salon2-*   (вход и консультация, /contacts/)
+ *   assets/factory/  → public/renders/about/factory2-*    (производство, /about/)
  *
  * Запуск: npm run gen:showroom — когда фото в этих папках добавили или
  * заменили. Подписи — src/data/about-page.ts (SHOWROOM) и contacts-page.ts (SALON).
@@ -15,9 +15,9 @@ import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises'
 
 const WIDTHS = [480, 900]
 const SETS = [
-  { src: 'assets/showroom/', out: 'public/renders/about/', name: 'showroom', json: 'src/data/showroom-photos.json' },
-  { src: 'assets/salon/', out: 'public/renders/contacts/', name: 'salon', json: 'src/data/salon-photos.json' },
-  { src: 'assets/factory/', out: 'public/renders/about/', name: 'factory', json: 'src/data/about-factory-photos.json' },
+  { src: 'assets/showroom/', out: 'public/renders/about/', name: 'showroom2', json: 'src/data/showroom-photos.json' },
+  { src: 'assets/salon/', out: 'public/renders/contacts/', name: 'salon2', json: 'src/data/salon-photos.json' },
+  { src: 'assets/factory/', out: 'public/renders/about/', name: 'factory2', json: 'src/data/about-factory-photos.json' },
 ]
 const root = new URL('../', import.meta.url)
 

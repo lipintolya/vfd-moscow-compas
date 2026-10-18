@@ -103,7 +103,7 @@ export const SALON = {
   title: 'Как выглядит салон',
   lead:  `Салон — ${floorIn} ${mall}, вход с галереи под вывеской «Фабрика дверей VFD». За столом у образцов менеджер подберёт двери и рассчитает комплект.`,
   photos: salonPhotos.photos.map((p) => {
-    const file = (w: number) => `/renders/contacts/salon-${p.n}-${w}.webp`
+    const file = (w: number) => `/renders/contacts/salon2-${p.n}-${w}.webp`
     const text = SALON_TEXT[p.n] ?? { alt: `Салон ${SITE.studioNameOf}` }
     return {
       n:      p.n,
