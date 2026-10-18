@@ -2,10 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../lib/seo-title'
 import PortfolioGrid from '../../components/portfolio/PortfolioGrid.vue'
+import Videos from '../../components/home/Videos.astro'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
 import { getWorks } from '../../lib/works'
 import { PHONE, SITE } from '../../config/site'
 import { HERO_COVER_IMAGE } from '../../data/hero-image'
+import { WORK_VIDEOS } from '../../data/videos'
+import '../../styles/home.css'
 
 const works = await getWorks()
 
@@ -49,6 +52,18 @@ const breadcrumbSchema = {
       </header>
 
       <PortfolioGrid works={works} client:visible />
+
+      {/* Ролики с объектов — тот же блок и окно просмотра, что на главной
+           (components/home/Videos.astro); .home — стили дизайн-системы */}
+      <div class="home mt-14 md:mt-16">
+        <Videos
+          id="works-video"
+          videos={WORK_VIDEOS}
+          heading="Видео с объектов"
+          lead="Короткие ролики с наших работ: двери и проёмы в интерьере."
+          allHref={null}
+        />
+      </div>
 
       <div class="mt-14 md:mt-16">
         <QuoteCta

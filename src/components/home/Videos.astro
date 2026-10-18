@@ -1,37 +1,59 @@
 ---
 /**
- * «Видео о дверях и фурнитуре» на главной — первые HOME_VIDEOS роликов основателя студии
- * шоурума (src/data/videos.ts) и ссылка на страницу со всеми, /video/.
+ * Блок видео с окном просмотра — один компонент на нескольких страницах:
+ *   • главная: «Видео о дверях и фурнитуре» — первые HOME_VIDEOS роликов
+ *     основателя (src/data/videos.ts) и ссылка на страницу со всеми, /video/;
+ *   • «Наши работы» (/portfolio/): вертикальные ролики с объектов
+ *     (WORK_VIDEOS), заголовок и ссылки своими.
  * Карточки — VideoList/VideoCard, просмотр и листание — VideoPlayer.
  * Тот же блок — в статьях и в разделе статей.
  */
 import { SITE } from '../../config/site'
-import { VIDEOS, HOME_VIDEOS } from '../../data/videos'
+import { VIDEOS, HOME_VIDEOS, type Video } from '../../data/videos'
 import VideoList from '../video/VideoList.astro'
 import VideoPlayer from '../video/VideoPlayer.astro'
 
 interface Props {
+  /** Ролики блока; по умолчанию — первые HOME_VIDEOS основателя */
+  videos?: Video[]
+  heading?: string
+  /** Пояснение под заголовком; по умолчанию — от основателя */
+  lead?: string
+  /** Ссылка «Все видео»; null — без кнопки */
+  allHref?: string | null
   /** Без верхнего поля — на главной блок продолжает предыдущую белую
       секцию; в статьях идёт после серой — поле нужно */
   tightTop?: boolean
+  /** id секции — якорь; на одной странице — один блок */
+  id?: string
 }
-const { tightTop = true } = Astro.props
+const {
+  videos = VIDEOS.slice(0, HOME_VIDEOS),
+  heading = 'Видео о дверях и фурнитуре',
+  lead = `${SITE.contactPerson}, ${SITE.contactRole}, делится в видео полезными советами о выборе дверей и перегородок.`,
+  allHref = '/video/',
+  tightTop = true,
+  id = 'video',
+} = Astro.props
+const headingId = `${id}-heading`
 ---
 
-<section id="video" class:list={['h-sec', { 'h-sec--tight-top': tightTop }]} aria-labelledby="video-heading">
+<section id={id} class:list={['h-sec', { 'h-sec--tight-top': tightTop }]} aria-labelledby={headingId}>
   <div class="container">
     <header class="h-head">
-      <h2 id="video-heading" class="h-h2">Видео о&nbsp;дверях и&nbsp;фурнитуре</h2>
+      <h2 id={headingId} class="h-h2">{heading}</h2>
       <div>
-        <p class="h-lead">{SITE.contactPerson}, {SITE.contactRole}, делится в&nbsp;видео полезными советами о&nbsp;выборе дверей и&nbsp;перегородок.</p>
-        <a href="/video/" class="h-pill h-pill--line video-head__all">
-          Все видео
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
+        <p class="h-lead">{lead}</p>
+        {allHref && (
+          <a href={allHref} class="h-pill h-pill--line video-head__all">
+            Все видео
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        )}
       </div>
     </header>
 
-    <VideoList videos={VIDEOS.slice(0, HOME_VIDEOS)} rail />
+    <VideoList videos={videos} rail />
   </div>
 
   <VideoPlayer />

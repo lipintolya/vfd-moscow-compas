@@ -156,3 +156,53 @@ export const VIDEOS: Video[] = [
     vertical: true,
   },
 ]
+
+/* Ролики с наших работ — вертикальные клипы с объектов. Отдельный список:
+   на главной и на /video/ не показываются, их выводит раздел «Наши работы»
+   (/portfolio/). Обложки — npm run gen:video-covers; первый кадр часто
+   чёрный или смазанный, поэтому обложка берётся со 2-й секунды (coverAt). */
+const WORK = 'https://storage.yandexcloud.net/vfd.moscow.compass/video.block'
+
+export const WORK_VIDEOS: Video[] = [
+  {
+    id:       'work-panel-door',
+    title:    'Дверь в стеновой панели\nна объекте',
+    text:     'Полотно стоит в одной плоскости с отделкой стены, поэтому дверь почти не видна среди панелей.',
+    src:      `${WORK}/compressed_object1.mp4`,
+    cover:    '/renders/home/videos/work-panel-door.webp',
+    coverAt:  2,
+    duration: '0:28',
+    /* Горизонтальный ролик 16:9 — плеер показывает его без вертикальной рамки */
+    vertical: false,
+  },
+  {
+    id:       'work-trim-door',
+    title:    'Дверь с наличником\nи золотистой ручкой',
+    text:     'Проём отделан наличником, полотно в цвет стены, ручка и замок — в одном тоне.',
+    src:      `${WORK}/compressed_object2.mp4`,
+    cover:    '/renders/home/videos/work-trim-door.webp',
+    coverAt:  2,
+    duration: '0:23',
+    vertical: true,
+  },
+  {
+    id:       'work-wood-door',
+    title:    'Дверь в одном тоне\nс деревянной стеной',
+    text:     'Полотно и стеновая панель вокруг выполнены в одном оттенке, поэтому проём смотрится цельно.',
+    src:      `${WORK}/compressed_object3.mp4`,
+    cover:    '/renders/home/videos/work-wood-door.webp',
+    coverAt:  2,
+    duration: '0:34',
+    vertical: true,
+  },
+  {
+    id:       'work-interior-doors',
+    title:    'Межкомнатные двери\nв интерьере',
+    text:     'Тёмные двери на фоне светлого пола и отделки: так выглядит проект целиком, а не отдельная дверь.',
+    src:      `${WORK}/compressed_object17.10.26.mp4`,
+    cover:    '/renders/home/videos/work-interior-doors.webp',
+    coverAt:  2,
+    duration: '0:32',
+    vertical: true,
+  },
+]
