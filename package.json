@@ -26,6 +26,7 @@
     "gen:about": "node scripts/gen-about-images.mjs",
     "gen:showroom": "node scripts/gen-showroom-photos.mjs",
     "gen:contacts": "node scripts/gen-contacts-images.mjs",
+    "gen:decor": "node scripts/gen-decor-images.mjs",
     "gen:designers-hero": "node scripts/gen-designers-hero.mjs",
     "gen:hidden-doors-hero": "node scripts/gen-hidden-doors-hero.mjs",
     "gen:home": "node scripts/gen-home-images.mjs",

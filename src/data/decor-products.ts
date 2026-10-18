@@ -4,21 +4,46 @@
    ============================================================ */
 
 // ── Фото ──
-// Постеры 1920×1080 под таблицей каждой секции (компонент InfoImageViewer,
-// variant="photo" — без леттербоксинга, aspect-ratio 16:9).
+// Облегчённые копии в проекте (npm run gen:decor → public/renders/decor/,
+// размеры — decor-images.json): страница берёт копию под ширину экрана,
+// крупная (large) — в окне просмотра. Постеры 16:9 под таблицами секций
+// (InfoImageViewer, variant="photo").
+import decorImages from './decor-images.json'
+
+export interface DecorImage {
+  src: string
+  srcset: string
+  /** Крупная копия — окно просмотра */
+  large: string
+  width: number
+  height: number
+}
+
+const decorImage = (name: keyof typeof decorImages): DecorImage => {
+  const { widths, width, height } = decorImages[name]
+  const file = (w: number) => `/renders/decor/${name}-${w}.webp`
+  return {
+    src: file(widths[0]!),
+    srcset: widths.map((w) => `${file(w)} ${w}w`).join(', '),
+    large: file(widths.at(-1)!),
+    width,
+    height,
+  }
+}
+
 export const IMAGES = {
-  hero:    '/media/vfd74ru/decor/render_framuga.webp',
-  framuga: '/media/vfd74ru/decor/framuga_type.webp',
-  plintus: '/media/vfd74ru/decor/plintus/plintus_type.webp',
-} as const
+  hero:    decorImage('hero'),
+  framuga: decorImage('framuga'),
+  plintus: decorImage('plintus'),
+}
 
 // Декоративные рейки — 4 фото, по порядку соответствуют строкам REYKI_ROWS
 // (портретные, ~3:4 — не 16:9, как постеры выше).
-export const REYKI_IMAGES: string[] = [
-  '/media/vfd74ru/decor/reika/reyki_1.webp',
-  '/media/vfd74ru/decor/reika/reyki_2.webp',
-  '/media/vfd74ru/decor/reika/reyki_3.webp',
-  '/media/vfd74ru/decor/reika/reyki_4.webp',
+export const REYKI_IMAGES: DecorImage[] = [
+  decorImage('reyki-1'),
+  decorImage('reyki-2'),
+  decorImage('reyki-3'),
+  decorImage('reyki-4'),
 ]
 
 export type Material = 'emalex' | 'ekoshpon' | 'emal'

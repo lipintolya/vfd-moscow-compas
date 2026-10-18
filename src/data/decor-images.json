@@ -1,0 +1,65 @@
+{
+  "hero": {
+    "widths": [
+      640,
+      1024,
+      1672
+    ],
+    "width": 1672,
+    "height": 941
+  },
+  "framuga": {
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "width": 1920,
+    "height": 1080
+  },
+  "plintus": {
+    "widths": [
+      640,
+      1280,
+      1920
+    ],
+    "width": 1920,
+    "height": 1080
+  },
+  "reyki-1": {
+    "widths": [
+      400,
+      800,
+      1265
+    ],
+    "width": 1267,
+    "height": 1657
+  },
+  "reyki-2": {
+    "widths": [
+      400,
+      800,
+      1265
+    ],
+    "width": 1265,
+    "height": 1655
+  },
+  "reyki-3": {
+    "widths": [
+      400,
+      800,
+      1265
+    ],
+    "width": 1268,
+    "height": 1657
+  },
+  "reyki-4": {
+    "widths": [
+      400,
+      800,
+      1265
+    ],
+    "width": 1265,
+    "height": 1656
+  }
+}

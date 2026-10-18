@@ -66,7 +66,7 @@ const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
         client:visible
         variant="photo"
         images={[{
-          src: IMAGES.plintus,
+          ...IMAGES.plintus,
           caption: 'Плинтус в интерьере',
           alt: 'Плинтус в цвет дверного полотна — ВФД',
         }]}

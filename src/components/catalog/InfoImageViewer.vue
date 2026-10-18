@@ -13,6 +13,12 @@ interface InfoImage {
   src: string
   caption: string
   alt: string
+  /** Копии под ширину экрана — превью берёт подходящую */
+  srcset?: string
+  /** Крупная копия для окна просмотра; нет — открывается src */
+  large?: string
+  width?: number
+  height?: number
 }
 
 const props = withDefaults(defineProps<{
@@ -28,7 +34,10 @@ const props = withDefaults(defineProps<{
       привычные пары/четвёрки фото; 3 — под нечётные наборы вроде триптиха
       постеров, чтобы последняя карточка не повисала одна в пустой строке. */
   columns?: 2 | 3
+  /** Ширина превью на экране — для выбора копии из srcset */
+  sizes?: string
 }>(), {
+  sizes: '(min-width: 48rem) 50vw, 100vw',
   variant: 'diagram',
   aspectRatio: '16 / 9',
   columns: 2,
@@ -85,7 +94,16 @@ onUnmounted(() => {
           :aria-label="`Открыть изображение: ${img.caption}`"
           @click="open(img)"
         >
-          <img :src="img.src" :alt="img.alt" loading="lazy" decoding="async" />
+          <img
+            :src="img.src"
+            :srcset="img.srcset"
+            :sizes="img.srcset ? sizes : undefined"
+            :alt="img.alt"
+            :width="img.width"
+            :height="img.height"
+            loading="lazy"
+            decoding="async"
+          />
         </button>
       </figure>
     </div>
@@ -107,7 +125,7 @@ onUnmounted(() => {
             </svg>
           </button>
           <figure class="iiv-figure" @click.self="close">
-            <img :src="active.src" :alt="active.alt" class="iiv-modal-img" decoding="async" />
+            <img :src="active.large ?? active.src" :alt="active.alt" class="iiv-modal-img" decoding="async" />
             <figcaption class="iiv-figcap">{{ active.caption }}</figcaption>
           </figure>
         </div>

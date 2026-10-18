@@ -28,6 +28,9 @@ const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсуд�
 
 const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
 
+/* Первый экран — во всю ширину контейнера; та же строка — у preload */
+const HERO_SIZES = '(min-width: 80rem) 76rem, 100vw'
+
 const canonicalUrl = Astro.site
   ? new URL('/catalog/decor/', Astro.site).href
   : undefined
@@ -77,8 +80,10 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
 <BaseLayout
   title={brandTitle(`Декор для дверей ${SITE.name}: плинтус, фальшфрамуга, рейки ${SITE.city.in}`)}
   description={`Декоративные элементы к межкомнатным дверям в Москве: фальшфрамуга и компланарный короб от ${fmt(FROM_PRICE_FRAMUGA_KIT)}, плинтус от ${fmt(FROM_PRICE_PLINTUS)}, декоративные рейки от ${fmt(FROM_PRICE_REYKI)}. Покрытия Эмалекс, Экошпон, Эмаль Polar.`}
-  ogImage={IMAGES.hero}
-  preloadImage={IMAGES.hero}
+  ogImage={IMAGES.hero.large}
+  preloadImage={IMAGES.hero.src}
+  preloadImageSrcset={IMAGES.hero.srcset}
+  preloadImageSizes={HERO_SIZES}
   canonical={canonicalUrl}
   structuredData={structuredData}
 >
@@ -95,14 +100,16 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
   <div class="container dc-hero-wrap">
     <section class="dc-hero" aria-label="Декор для дверей">
       <img
-        src={IMAGES.hero}
+        src={IMAGES.hero.src}
+        srcset={IMAGES.hero.srcset}
+        sizes={HERO_SIZES}
         alt="Фальшфрамуга и декор дверного проёма — ВФД"
         class="dc-hero__img"
         loading="eager"
         fetchpriority="high"
         decoding="async"
-        width="1600"
-        height="900"
+        width={IMAGES.hero.width}
+        height={IMAGES.hero.height}
       />
       <div class="dc-hero__overlay" aria-hidden="true"></div>
       <div class="dc-hero__body">
@@ -172,7 +179,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
           client:visible
           variant="photo"
           images={[{
-            src: IMAGES.framuga,
+            ...IMAGES.framuga,
             caption: 'Фальшфрамуга и компланарный короб',
             alt: 'Фальшфрамуга и компланарный короб в интерьере — ВФД',
           }]}
@@ -273,8 +280,8 @@ const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
           client:visible
           variant="photo"
           aspectRatio="3 / 4"
-          images={REYKI_IMAGES.map((src, i) => ({
-            src,
+          images={REYKI_IMAGES.map((img, i) => ({
+            ...img,
             caption: REYKI_ROWS[i]?.name ?? `Рейка, фото ${i + 1}`,
             alt: `${REYKI_ROWS[i]?.name ?? 'Декоративная рейка'} — ВФД`,
           }))}
