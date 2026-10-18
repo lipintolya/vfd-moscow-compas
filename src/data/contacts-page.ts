@@ -5,7 +5,7 @@
    ============================================================ */
 import { SITE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
-import { SERVICES, rub, MEASURE_REFUND, MEASURE_TERMS, INSTALL_TERMS, WARRANTY_TERMS } from './services'
+import { SERVICES, rub, MEASURE_REFUND, MEASURE_TERMS, INSTALL_TERMS } from './services'
 import contactsImages from './contacts-images.json'
 import salonPhotos from './salon-photos.json'
 
@@ -55,10 +55,6 @@ export const BENEFITS: {
     title: 'Монтаж под ключ',
     text:  'Двери устанавливает собственная бригада. Соблюдаем согласованные сроки и убираем за собой строительный мусор.',
     price: { value: `от\u00A0${rub(SERVICES.install.priceFrom)}`, note: 'За установку одной двери' },
-  },
-  {
-    title: 'Гарантия',
-    text:  `${WARRANTY_TERMS}. Если после установки что-то потребует внимания, обращайтесь напрямую в салон.`,
   },
 ]
 
