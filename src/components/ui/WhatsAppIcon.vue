@@ -1,8 +1,17 @@
-<!-- Знак WhatsApp линией в цвет текста (currentColor) — рядом с текстом
-     ссылки «WhatsApp». Рисунок — Tabler Icons «brand-whatsapp» (MIT). -->
+<!-- Знак WhatsApp — официальный значок из файлов бренда (PNG с прозрачным фоном):
+     чёрный на светлом фоне, белый на тёмном. Знак не меняем, размер задаёт класс
+     снаружи. tone — цвет фона, на котором стоит знак. -->
+<script setup lang="ts">
+withDefaults(defineProps<{ tone?: 'light' | 'dark' }>(), { tone: 'light' })
+</script>
+
 <template>
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9l-5.05.9" />
-    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
-  </svg>
+  <img
+    :src="tone === 'dark' ? '/icons/whatsapp-white.png' : '/icons/whatsapp-black.png'"
+    alt=""
+    aria-hidden="true"
+    width="24"
+    height="24"
+    decoding="async"
+  />
 </template>

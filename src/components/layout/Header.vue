@@ -28,7 +28,7 @@ const SOCIAL_NETWORKS = [
     name: 'WhatsApp',
     label: `Написать в WhatsApp на ${WHATSAPP.label}`,
     url: WHATSAPP_URL,
-    icon: '/icons/whatsapp.svg',
+    icon: '/icons/whatsapp-black.png',
   }] : []),
   ...(TELEGRAM_CHAT ? [{
     name: 'Telegram',

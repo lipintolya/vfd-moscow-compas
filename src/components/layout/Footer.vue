@@ -314,7 +314,7 @@ onUnmounted(() => {
                     class="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
                     :aria-label="`Написать в WhatsApp на ${p.label}`"
                   >
-                    <WhatsAppIcon class="w-4 h-4" />
+                    <WhatsAppIcon class="w-4 h-4" tone="dark" />
                     WhatsApp
                   </a>
                   <a
