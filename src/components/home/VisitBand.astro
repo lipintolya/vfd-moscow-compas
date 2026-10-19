@@ -24,9 +24,10 @@
 import { SITE } from '../../config/site'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { ROUTE_URL, MAP_URL } from '../../lib/map-links'
-import { whatsappUrl, TELEGRAM_CHAT, telegramChatUrl } from '../../lib/messengers'
+import { whatsappUrl, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
+import MaxIcon from '../ui/MaxIcon.vue'
 import { typograph } from '../../lib/typograph'
 import map from '../../data/visit-map.json'
 import { MALL_PHOTOS } from '../../data/mall-photos'
@@ -87,6 +88,11 @@ const L = map.layers
                       {TELEGRAM_CHAT && (
                         <a href={telegramChatUrl()} target="_blank" rel="noopener" class="h-link visit__wa" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
                           <TelegramIcon class="visit__wa-ico" />Telegram
+                        </a>
+                      )}
+                      {MAX_CHAT && (
+                        <a href={maxChatUrl()} target="_blank" rel="noopener" class="h-link visit__wa" data-copy-text={CONSULT_MESSAGE} aria-label="Написать в MAX (текст скопируется)">
+                          <MaxIcon class="visit__wa-ico" />MAX
                         </a>
                       )}
                     </span>

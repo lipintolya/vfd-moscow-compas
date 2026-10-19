@@ -111,13 +111,16 @@ export const SITE = {
   /** telegram — КАНАЛ салона: «Владимирская Фабрика Дверей. Шоу-рум в
       Москве, ул. Красная Сосна, 2А, ТЦ «Компас», 3 этаж», только читать.
       Написать — Константину: WhatsApp (номер с whatsapp: true в phones) или
-      личный Telegram (telegramChat). ВК и MAX у салона нет. */
+      личный Telegram (telegramChat) или личный MAX (maxChat). ВК у салона нет. */
   social: {
     telegram: 'https://t.me/zizekos_studio',
     telegramHandle: '@zizekos_studio',
     /** Личный Telegram Константина — написать (src/lib/messengers.ts);
         канал выше — только читать */
     telegramChat: 'zizekos',
+    /** Личный MAX Константина — написать (src/lib/messengers.ts). В ссылку текст
+        не подставляется: он копируется по клику (data-copy-text) */
+    maxChat: 'https://max.ru/u/f9LHodD0cOKVoDWLIT1-yu7tjAhFrj4S67yJY8KepHKlsVeRy3AhZYlvB0I',
   },
 
   /** Разделы, которые появляются на сайте, когда в них есть данные.

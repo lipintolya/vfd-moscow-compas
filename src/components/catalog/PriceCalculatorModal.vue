@@ -9,9 +9,10 @@ import {
   type HingeType, type HardwareImages,
 } from '../../data/hardware'
 import { PHONE, SITE } from '../../config/site'
-import { WHATSAPP, whatsappWithText, TELEGRAM_CHAT, telegramWithText } from '../../lib/messengers'
+import { WHATSAPP, whatsappWithText, TELEGRAM_CHAT, telegramWithText, MAX_CHAT, maxChatUrl, maxWithText } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
+import MaxIcon from '../ui/MaxIcon.vue'
 
 /* ============================================================
    mounted — гейт для Teleport ниже, прокинут пропом от родителя
@@ -115,6 +116,8 @@ const calcMessage = computed(() => {
 const callHref = `tel:${PHONE.raw}`
 const whatsappHref = computed(() => whatsappWithText(calcMessage.value))
 const telegramHref = computed(() => telegramWithText(calcMessage.value))
+const maxHref = maxChatUrl()
+const maxCopy = computed(() => maxWithText(calcMessage.value))
 
 /** Best-effort — если буфер недоступен (нет разрешения/старый браузер),
     просто ничего не происходит. */
@@ -329,12 +332,24 @@ onUnmounted(() => {
                     <TelegramIcon class="calc-send__ico" />
                     Telegram
                   </a>
+                  <a
+                    v-if="MAX_CHAT"
+                    :href="maxHref"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="calc-send__btn"
+                    :data-copy-text="maxCopy"
+                    aria-label="Отправить расчёт в MAX (текст скопируется)"
+                  >
+                    <MaxIcon class="calc-send__ico" />
+                    MAX
+                  </a>
                   <button type="button" class="calc-send__btn" aria-label="Скопировать текст расчёта" @click="copyCalcMessage">
                     Скопировать
                   </button>
                 </div>
                 <p class="calc-send__hint" :class="{ 'calc-send__hint--copied': copied }" aria-live="polite">
-                  {{ copied ? 'Текст расчёта скопирован' : `Позвонить — ${PHONE.label}. В WhatsApp и Telegram расчёт уйдёт готовым сообщением` }}
+                  {{ copied ? 'Текст расчёта скопирован' : `Позвонить — ${PHONE.label}. В WhatsApp и Telegram расчёт уйдёт готовым сообщением, в MAX — скопируется` }}
                 </p>
               </div>
             </div>

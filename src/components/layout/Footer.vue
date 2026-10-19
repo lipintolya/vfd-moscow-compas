@@ -4,9 +4,10 @@ import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { useScrollLock } from '../../lib/scroll-lock'
 import { PHONE, SITE } from '../../config/site'
 import { ROUTE_URL, MAP_URL } from '../../lib/map-links'
-import { whatsappUrl, telegramChatUrl } from '../../lib/messengers'
+import { whatsappUrl, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
+import MaxIcon from '../ui/MaxIcon.vue'
 import { CONSENT_SETTINGS_EVENT } from '../../lib/cookie-consent'
 
 /* ============================================================
@@ -54,6 +55,7 @@ const MAP_PREVIEW_IMAGE = '/visit-map-dark.svg'
 const MAP_LINK = MAP_URL
 const WHATSAPP_URL = whatsappUrl()
 const TELEGRAM_CHAT_URL = telegramChatUrl()
+const MAX_CHAT_URL = maxChatUrl()
 
 /* ============================================================
    Legal modal
@@ -325,6 +327,18 @@ onUnmounted(() => {
                   >
                     <TelegramIcon class="w-4 h-4" />
                     Telegram
+                  </a>
+                  <a
+                    v-if="MAX_CHAT_URL"
+                    :href="MAX_CHAT_URL"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :data-copy-text="CONSULT_MESSAGE"
+                    class="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
+                    :aria-label="`Написать в MAX на ${p.label} (текст скопируется)`"
+                  >
+                    <MaxIcon class="w-4 h-4" />
+                    MAX
                   </a>
                 </span>
               </li>

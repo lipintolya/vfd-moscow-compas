@@ -18,9 +18,10 @@ import { SITE, PHONE } from '../../config/site'
 import { HERO_SLIDES, type HeroWay } from '../../data/hero-image'
 import { pluralRu } from '../../lib/plural'
 import { MAP_URL } from '../../lib/map-links'
-import { BOOK_MESSAGE, WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl } from '../../lib/messengers'
+import { BOOK_MESSAGE, WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
+import MaxIcon from '../ui/MaxIcon.vue'
 
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
 const SLIDE_MS = 6000
@@ -106,6 +107,13 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
                   <TelegramIcon class="book__ico" />
                   <span class="book__name">Telegram</span>
                   <span class="book__meta">написать</span>
+                </a>
+              )}
+              {MAX_CHAT && (
+                <a href={maxChatUrl()} target="_blank" rel="noopener" class="book__item" data-copy-text={BOOK_MESSAGE}>
+                  <MaxIcon class="book__ico" />
+                  <span class="book__name">MAX</span>
+                  <span class="book__meta">текст скопируется</span>
                 </a>
               )}
             </div>

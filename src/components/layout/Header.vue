@@ -5,7 +5,7 @@ import { useScrollLock } from '../../lib/scroll-lock'
 import { openingStatus } from '../../lib/opening-status'
 import { typograph } from '../../lib/typograph'
 import { SITE } from '../../config/site'
-import { whatsappUrl, WHATSAPP, TELEGRAM_CHAT, telegramChatUrl } from '../../lib/messengers'
+import { whatsappUrl, WHATSAPP, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../../lib/messengers'
 import { MAP_URL } from '../../lib/map-links'
 
 /* ============================================================
@@ -34,6 +34,13 @@ const SOCIAL_NETWORKS = [
     label: `Написать в Telegram: @${TELEGRAM_CHAT}`,
     url: TELEGRAM_CHAT_URL,
     icon: '/icons/b_tg_logo.webp',
+  }] : []),
+  ...(MAX_CHAT ? [{
+    name: 'MAX',
+    label: 'Написать в MAX (текст скопируется)',
+    url: maxChatUrl(),
+    icon: '/icons/max.svg',
+    copy: CONSULT_MESSAGE,
   }] : []),
 ]
 
@@ -553,6 +560,7 @@ onUnmounted(() => {
               target="_blank"
               rel="noopener noreferrer"
               :aria-label="`${s.label} (откроется в новой вкладке)`"
+              :data-copy-text="s.copy"
               class="hdr-round mnav__social"
             >
               <img :src="s.icon" alt="" class="hdr-ico hdr-ico--lg" />

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   WHATSAPP, whatsappUrl, whatsappWithText,
   TELEGRAM_CHAT, telegramChatUrl, telegramWithText, CONSULT_MESSAGE,
+  MAX_CHAT, maxChatUrl, maxWithText,
 } from '../src/lib/messengers'
 import { ROUTE_URL, MAP_URL } from '../src/lib/map-links'
 import { SITE } from '../src/config/site'
@@ -39,4 +40,11 @@ test('карта — карточка салона на Яндекс Карта�
   assert.equal(route.origin + route.pathname, 'https://yandex.ru/maps/')
   assert.equal(route.searchParams.get('ruri'), '~ymapsbm1://org?oid=167320599705')
   assert.match(route.searchParams.get('rtext')!, /^~55\.\d+,37\.\d+$/)
+})
+
+test('MAX — личный чат Константина; в ссылке нет текста (его копируют по клику), копия — то же приветствие', () => {
+  assert.equal(MAX_CHAT, SITE.social.maxChat)
+  assert.match(maxChatUrl(), /^https:\/\/max\.ru\/u\/[\w-]+$/)
+  assert.doesNotMatch(maxChatUrl(), /text=/)
+  assert.equal(maxWithText('Итого: 21 760 ₽'), `Здравствуйте, Константин! Пишу с сайта ${SITE.host}.\n\nИтого: 21 760 ₽`)
 })

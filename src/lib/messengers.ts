@@ -36,3 +36,13 @@ export const telegramChatUrl = (text: string = CONSULT_MESSAGE): string =>
   TELEGRAM_CHAT ? `https://t.me/${TELEGRAM_CHAT}?text=${encodeURIComponent(text)}` : ''
 
 export const telegramWithText = (body: string): string => telegramChatUrl(withBody(body))
+
+/* MAX — личный чат Константина (SITE.social.maxChat). В документации MAX нет
+   параметра с текстом для ссылки на чат, поэтому текст в ссылку не кладём:
+   он копируется по клику (атрибут data-copy-text, src/lib/copy-on-click.ts) */
+export const MAX_CHAT: string = SITE.social.maxChat
+
+export const maxChatUrl = (): string => MAX_CHAT
+
+/** Текст для копирования в MAX — то же приветствие, что в WhatsApp и Telegram */
+export const maxWithText = (body: string): string => withBody(body)
