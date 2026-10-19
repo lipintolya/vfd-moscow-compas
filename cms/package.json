@@ -16,7 +16,8 @@
     "check:ru": "node scripts/ru-missing.mjs --check",
     "import:works": "node scripts/import-works.mjs",
     "import:articles": "node scripts/import-articles.mjs",
-    "add:work": "node scripts/add-work.mjs"
+    "add:work": "node scripts/add-work.mjs",
+    "add:article": "node scripts/add-article.mjs"
   },
   "dependencies": {
     "@strapi/database": "5.57.0",

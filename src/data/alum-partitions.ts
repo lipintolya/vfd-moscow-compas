@@ -335,7 +335,7 @@ export const ALUM_COMPONENTS = {
   items: [
     'Алюминиевая направляющая (трек) и ролики',
     'Горизонтальный профиль 41 × 25 мм',
-    'Стоевой профиль 44 × 23 мм, в том числе со вставками под замок',
+    'Стоечный профиль 44 × 23 мм, в том числе со вставками под замок',
     'Молдинг 20 × 13 мм',
     'Декоративный карниз высотой 70 мм, длиной 3000 мм',
     'Торцевые заглушки, разделитель трека, кронштейн стенового крепления',
@@ -413,7 +413,7 @@ export const ALUM_STEPS = [
 
 /* Статьи по теме — адреса статей в Strapi (поле «Адрес страницы»).
    Статьи с таким именем нет — сборка остановится с ошибкой */
-export const ALUM_ARTICLES = ['vfd-dizain-dveri-pod-zadachu', 'dveri-v-stile-loft', 'dveri-so-steklom-ili-gluhie']
+export const ALUM_ARTICLES = ['alyuminievye-peregorodki-v-kvartire', 'vfd-dizain-dveri-pod-zadachu', 'dveri-v-stile-loft', 'dveri-so-steklom-ili-gluhie']
 
 /** «Как к нам добраться» внизу страницы */
 export const ALUM_VISIT_LEAD = `Приезжайте обсудить проект: подберём раскладку, профиль и стекло перегородки ${ALUM_SYSTEM} и рассчитаем её по вашим размерам.`
