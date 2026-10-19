@@ -240,7 +240,7 @@ onUnmounted(() => {
           <div>
             <a href="/" class="flex items-center gap-2 mb-4 w-fit" :aria-label="`${SITE.name} в ${SITE.address.mall} — главная`">
               <span class="text-lg font-semibold text-white tracking-wide">VFD</span>
-              <span class="text-xs text-white/40 uppercase tracking-widest">{{ SITE.address.mallName }}</span>
+              <span class="text-xs text-white/40 uppercase tracking-widest">{{ SITE.studioName }}</span>
             </a>
             <p class="text-sm leading-relaxed text-white/60 max-w-xs">
               {{ SITE.studioName }} — шоу-рум Владимирской фабрики дверей
