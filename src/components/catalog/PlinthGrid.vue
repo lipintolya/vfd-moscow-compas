@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
- * Карточки напольного плинтуса и окно «Запросить цену» (/catalog/plintus/).
- * По кнопке — окно с фото и описанием позиции, телефонами (SITE.phones) и
+ * Карточки напольного плинтуса (/catalog/plintus/): фото, описание и две кнопки.
+ * «Смотреть в интерьере» открывает общий просмотрщик сайта (PhotoLightbox) с
+ * отрисовками белого варианта. «Запросить цену» — окно с телефонами менеджера и
  * ссылками на WhatsApp, Telegram, MAX и ВКонтакте (ВК — когда задан social.vk).
  * В WhatsApp текст уже в ссылке; в Telegram, MAX и ВКонтакте он копируется по клику.
  */
@@ -43,6 +44,12 @@ function close() {
   unlock()
   trigger.value?.focus()
 }
+
+/* Отрисовки в интерьере — в общем просмотрщике: листание, номер, возврат фокуса на кнопку */
+function openInterior(item: PlintusItem) {
+  const images = item.interior.map((src) => ({ src, alt: 'В интерьере — белый вариант' }))
+  window.dispatchEvent(new CustomEvent('open-lightbox', { detail: { images, index: 0 } }))
+}
 </script>
 
 <template>
@@ -59,7 +66,10 @@ function close() {
           decoding="async"
         />
         <p class="pl-card__text">{{ item.text }}</p>
-        <button type="button" class="h-pill h-pill--line pl-card__btn" @click="open(item, $event)">Запросить цену</button>
+        <div class="pl-card__actions">
+          <button type="button" class="h-pill pl-card__btn pl-card__btn--main" @click="open(item, $event)">Запросить цену</button>
+          <button type="button" class="h-pill h-pill--line pl-card__btn" @click="openInterior(item)">Смотреть в интерьере</button>
+        </div>
       </li>
     </ul>
 
@@ -75,15 +85,6 @@ function close() {
               <p class="pm__item">{{ active.text }}</p>
             </div>
           </header>
-
-          <div v-if="active.interior.length" class="pm__gallery">
-            <p class="pm__gallery-title">В интерьере — белый вариант</p>
-            <ul class="pm__strip" role="list">
-              <li v-for="(src, i) in active.interior" :key="src" class="pm__shot">
-                <img :src="src" :alt="`Напольный плинтус из МДФ в интерьере, белый вариант ${i + 1}`" width="1000" height="1000" loading="lazy" decoding="async" />
-              </li>
-            </ul>
-          </div>
 
           <div class="pm__call">
             <p class="pm__call-title">Позвонить менеджеру:</p>
@@ -153,7 +154,11 @@ function close() {
   background: var(--h-media-bg);
 }
 .pl-card__text { margin: 0.75rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
-.pl-card__btn { align-self: flex-start; margin-top: 0.625rem; font: inherit; cursor: pointer; }
+.pl-card__actions { display: grid; gap: 0.5rem; margin-top: 0.625rem; }
+.pl-card__btn { width: 100%; justify-content: center; text-align: center; white-space: normal; font: inherit; cursor: pointer; }
+.pl-card__btn--main,
+.pl-card__btn--main:hover { background: var(--color-slate-900); border-color: var(--color-slate-900); color: var(--color-white); }
+.pl-card__btn--main:hover { background: var(--color-slate-700); border-color: var(--color-slate-700); }
 
 /* Окно «Запросить цену»: поверх страницы, прокрутка страницы заблокирована */
 .pm {
@@ -192,30 +197,6 @@ function close() {
 }
 .pm__close:hover { background: var(--color-slate-100); }
 .pm__head { display: flex; gap: 1rem; align-items: center; padding-right: 2rem; }
-.pm__gallery { margin: 1.25rem 0 0; }
-.pm__gallery-title { margin: 0 0 0.5rem; font-size: 0.875rem; color: var(--h-muted); }
-/* Лента интерьеров: листается пальцем, кадр — почти вся ширина окна */
-.pm__strip {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 78%;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0 0 0.25rem;
-  list-style: none;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-.pm__shot { min-width: 0; scroll-snap-align: start; }
-.pm__shot img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: var(--h-radius);
-  background: var(--h-media-bg);
-}
 .pm__photo {
   flex: none;
   width: 6rem;
