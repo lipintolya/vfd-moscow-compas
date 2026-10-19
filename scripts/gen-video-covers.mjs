@@ -2,7 +2,7 @@
  * Генерирует обложки карточек «Видео о дверях и фурнитуре» (src/components/video/VideoCard.astro)
  * из кадра самого ролика: public/renders/home/videos/<id>.webp, 2:3.
  *
- * Список роликов — src/data/videos.ts (VIDEOS и WORK_VIDEOS): берутся записи с `src` и `cover`.
+ * Список роликов — src/data/videos.ts (VIDEOS и WORK_VIDEOS): берутся записи с `src` и `cover`, кроме `coverManual`.
  * Кадр — начало ролика или `coverAt`, если задан. Затемнение обложки —
  * стилем карточки, файл остаётся чистым. ffmpeg читает ролик по ссылке
  * и скачивает только нужный кусок, без всего файла.
@@ -42,10 +42,11 @@ function grabFrame(src, at) {
 }
 
 for (const v of [...VIDEOS, ...WORK_VIDEOS]) {
-  if (!v.src || !v.cover) continue
+  if (!v.src || !v.cover || v.coverManual) continue
   const at = v.coverAt ?? 0
   const out = PUBLIC + v.cover
-  const frame = await grabFrame(v.src, at)
+  // Файл из public/ (путь от корня сайта) читаем с диска, облачный — по ссылке
+  const frame = await grabFrame(v.src.startsWith('/') ? PUBLIC + v.src : v.src, at)
   // Из кадра 9:16 вырезаем 2:3 от верхнего края: там обычно лицо или
   // предмет, а в центре — красная кнопка «плей» и вшитые субтитры
   const img = await sharp(frame)

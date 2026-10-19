@@ -11,6 +11,7 @@
  * `text`, `cover`, `duration` и одним из источников:
  *   - `src`   — прямая ссылка на .mp4 (бакет Yandex Cloud) — играет
  *               встроенный плеер браузера, без сторонних сервисов.
+ *               Файл из public/ — путь от корня сайта, например /renders/home/videos/….mp4.
  *               Перед загрузкой сжать (720 px по ширине, H.264, faststart):
  *               ffmpeg -i in.mp4 -vf "scale='min(720,iw)':-2" -c:v libx264 \
  *                 -preset slow -crf 26 -pix_fmt yuv420p -c:a aac -b:a 64k \
@@ -18,7 +19,8 @@
  *   - `embed` — адрес встраивания плеера площадки:
  *               VK Видео  https://vk.com/video_ext.php?oid=…&id=…&hash=…
  *               Rutube    https://rutube.ru/play/embed/<id>
- * Обложку из первого кадра ролика делает `npm run gen:video-covers`;
+ * Обложку из кадра ролика делает `npm run gen:video-covers`, кроме
+ * `coverManual` (её рисуют вручную);
  * затемнение — стилем карточки (VideoCard.astro), не в файле.
  * Вертикальный ролик (снят на телефон, 9:16) — `vertical: true`.
  */
@@ -36,6 +38,9 @@ export interface Video {
   /** Секунда кадра для обложки, если начало не подходит (чёрный кадр,
    *  заставка). По умолчанию — первый кадр. Читает scripts/gen-video-covers.mjs */
   coverAt?:  number
+  /** Обложка нарисована вручную (кадр обрезан, чтобы убрать субтитры):
+   *  gen:video-covers её не перезаписывает */
+  coverManual?: boolean
   src?:      string
   embed?:    string
   /** Подпись длительности, например «4:12» */
@@ -55,6 +60,16 @@ const CDN = 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/short
 export const HOME_VIDEOS = 5
 
 export const VIDEOS: Video[] = [
+  {
+    id:       'club-designers-2026-10',
+    title:    'Встреча клуба\nдизайнеров в\u00A0Москве',
+    text:     'К сожалению, двери недооценивают: их выбирают в последнюю очередь, хотя от них зависит весь интерьер.',
+    src:      '/renders/home/videos/club-designers-2026-10-19.mp4',
+    cover:    '/renders/home/videos/club-designers-2026-10-19.webp',
+    coverManual: true,  // кадр обрезан ниже субтитров: gen:video-covers его не трогает
+    duration: '0:55',
+    vertical: true,
+  },
   {
     id:       'funny-reel',
     title:    'Бэкстейдж\nсо съёмок',
