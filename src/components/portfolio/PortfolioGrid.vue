@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, nextTick } from 'vue'
 import type { PortfolioWork, WorkCategory } from '../../data/portfolio-works'
-import { CATEGORY_LABELS } from '../../data/portfolio-works'
+import { CATEGORY_LABELS, CATEGORY_PAGES } from '../../data/portfolio-works'
 
 const props = defineProps<{ works: PortfolioWork[] }>()
 
 type FilterKey = WorkCategory | 'all'
 
+/* Категории — из данных (CATEGORY_LABELS): новый раздел появляется здесь сам */
+const CATEGORIES = Object.keys(CATEGORY_LABELS) as WorkCategory[]
 const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: 'all',        label: 'Все работы' },
-  { key: 'interior',   label: CATEGORY_LABELS.interior },
-  { key: 'hidden',     label: CATEGORY_LABELS.hidden },
-  { key: 'partitions', label: CATEGORY_LABELS.partitions },
+  { key: 'all', label: 'Все работы' },
+  ...CATEGORIES.map((key) => ({ key, label: CATEGORY_LABELS[key] })),
 ]
 
 const active = ref<FilterKey>('all')
@@ -37,6 +37,7 @@ const CATEGORY_FALLBACK: Record<WorkCategory, string> = {
   interior:   '/renders/home/tehno-1.webp',
   hidden:     '/renders/home/secret-2.webp',
   partitions: '/renders/alum-covers/3.webp',
+  walls:      '/renders/home/videos/work-panel-door.webp',
 }
 const coverOf = (key: WorkCategory) => {
   const work = props.works.find((w) => w.category === key)
@@ -51,6 +52,8 @@ const worksWord = (n: number) => {
 const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   partitions: '/partitions/',
 }
+/* Плитка ведёт на страницу раздела (CATEGORY_PAGES), иначе — на фильтр ниже */
+const hrefOf = (key: WorkCategory) => CATEGORY_PAGES[key] ?? CATEGORY_HREF[key]
 </script>
 
 <template>
@@ -76,11 +79,11 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
     <!-- Строка категорий — квадратные образцы (снимок + подпись + счётчик),
          не постеры с градиентом: это навигация, а не витрина. -->
     <ul class="pf-cat-row" role="list">
-      <li v-for="key in (['interior','hidden','partitions'] as WorkCategory[])" :key="key">
+      <li v-for="key in CATEGORIES" :key="key">
         <a
-          :href="CATEGORY_HREF[key]"
+          :href="hrefOf(key)"
           class="pf-cat"
-          @click="(e) => { if (!CATEGORY_HREF[key]) { e.preventDefault(); selectAndScroll(key) } }"
+          @click="(e) => { if (!hrefOf(key)) { e.preventDefault(); selectAndScroll(key) } }"
         >
           <span class="pf-cat__thumb">
             <img :src="coverOf(key).src" :srcset="coverOf(key).srcset" sizes="(min-width: 640px) 25vw, 50vw" :alt="CATEGORY_LABELS[key]" loading="lazy" decoding="async" />
@@ -177,8 +180,9 @@ const CATEGORY_HREF: Partial<Record<WorkCategory, string>> = {
   list-style: none;
 }
 .pf-cat-row > li { min-width: 0; }
-/* Категорий три — три колонки в ряд, без пустого места справа */
-@media (min-width: 40rem) { .pf-cat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Категорий четыре: две колонки на планшете, четыре в ряд на компьютере */
+@media (min-width: 40rem) { .pf-cat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 80rem) { .pf-cat-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 .pf-cat {
   display: flex;
   align-items: center;

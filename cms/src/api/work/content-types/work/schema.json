@@ -14,7 +14,7 @@
     "slug": { "type": "uid", "targetField": "title", "required": true },
     "metaTitle": { "type": "string", "maxLength": 70 },
     "date": { "type": "date", "required": true },
-    "category": { "type": "enumeration", "required": true, "enum": ["Межкомнатные", "Скрытые двери", "Перегородки"] },
+    "category": { "type": "enumeration", "required": true, "enum": ["Межкомнатные", "Скрытые двери", "Перегородки", "Стеновые панели"] },
     "objectType": { "type": "enumeration", "required": true, "enum": ["Квартира", "Частный дом", "Офис", "Коммерческая недвижимость"] },
     "location": { "type": "string", "maxLength": 120 },
     "description": { "type": "text", "required": true, "maxLength": 170 },

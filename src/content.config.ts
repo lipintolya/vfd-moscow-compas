@@ -116,7 +116,7 @@ const works = defineCollection({
   schema: z.object({
     id: z.string(), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), label: z.string(),
     title: z.string(), description: z.string(),
-    category: z.enum(['interior', 'hidden', 'partitions']),
+    category: z.enum(['interior', 'hidden', 'partitions', 'walls']),
     objectType: z.enum(['apartment', 'house', 'office', 'commercial']),
     location: z.string(), story: z.string().optional(), model: z.string().optional(),
     doorCount: z.number().int().positive().optional(),

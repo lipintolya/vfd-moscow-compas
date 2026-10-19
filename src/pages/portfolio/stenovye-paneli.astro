@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import WorkCard from '../../components/portfolio/WorkCard.astro'
+import QuoteCta from '../../components/ui/QuoteCta.astro'
+import { getWorks } from '../../lib/works'
+import { CATEGORY_LABELS } from '../../data/portfolio-works'
+import { PHONE, SITE } from '../../config/site'
+import { HERO_COVER_IMAGE } from '../../data/hero-image'
+import { typograph } from '../../lib/typograph'
+import '../../styles/home.css'
+
+/* Раздел «Стеновые панели»: работы категории walls из Strapi, новые сверху */
+const works = (await getWorks()).filter((w) => w.category === 'walls')
+
+const lead = 'Дверь, которая продолжает стеновые панели: полотно в одной плоскости с отделкой стены, древесная фактура с одной стороны и эмаль с багетом с другой. Фото с объектов клиентов салона.'
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
+    { '@type': 'ListItem', position: 2, name: 'Наши работы', item: `${SITE.url}/portfolio/` },
+    { '@type': 'ListItem', position: 3, name: CATEGORY_LABELS.walls, item: `${SITE.url}/portfolio/stenovye-paneli/` },
+  ],
+}
+---
+
+<BaseLayout
+  title={brandTitle('Двери в стеновых панелях — работы в Москве')}
+  description="Двери в стеновых панелях на объектах клиентов в Москве: полотно в одной плоскости со стеной, древесная фактура, эмаль с багетом. Фото монтажа."
+  structuredData={[breadcrumbSchema]}
+  noIndex={!SITE.features.portfolio}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Наши работы', href: '/portfolio/' }, { label: CATEGORY_LABELS.walls }]} />
+    </div>
+  </div>
+
+  <div class="home">
+    <section class="pfh" aria-labelledby="walls-title">
+      <div class="container">
+        <header class="pfh__head">
+          <h1 id="walls-title" class="h-h1 pfh__title">Двери в стеновых панелях</h1>
+          <p class="h-lead pfh__lead">{typograph(lead)}</p>
+        </header>
+
+        {works.length > 0 ? (
+          <ul class="works" role="list">
+            {works.map((w) => <li><WorkCard work={w} /></li>)}
+          </ul>
+        ) : (
+          <p class="h-lead">Фотоотчёты по этому разделу появятся позже.</p>
+        )}
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--tight-top" aria-label="Заказать">
+      <div class="container">
+        <QuoteCta
+          image={works[0]?.images[0] ?? HERO_COVER_IMAGE}
+          title="Понравился результат?"
+          description="Отделку и полотна можно посмотреть вживую в шоуруме: замер и монтаж — по объекту"
+          primaryHref={`tel:${PHONE.raw}`}
+          primaryLabel="Позвонить"
+          primaryExternal={false}
+          secondaryHref="/portfolio/"
+          secondaryLabel="Все работы"
+        />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Шапка раздела — та же сетка, что у «Наших работ» */
+  .pfh { padding-top: clamp(1rem, 2vw, 1.5rem); }
+  .pfh__head {
+    display: grid;
+    gap: 1.25rem var(--h-gutter);
+    align-items: end;
+    margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  }
+  @media (min-width: 62.5rem) {
+    .pfh__head { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .pfh__title { grid-column: 1 / span 7; }
+    .pfh__lead { grid-column: 9 / span 4; }
+  }
+
+  .works {
+    display: grid;
+    gap: 3rem var(--h-gutter);
+    margin: 0 0 3rem;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 43.75rem) { .works { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 56.25rem) { .works { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>

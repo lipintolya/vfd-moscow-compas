@@ -271,6 +271,10 @@ export default defineConfig({
         if (/\/portfolio\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
+        // Раздел «Стеновые панели» — отдельная страница, как /portfolio/
+        if (/\/portfolio\/stenovye-paneli\/?$/.test(u)) {
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
+        }
         if (portfolioMatch) {
           return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.65, ...portfolioImg }
         }

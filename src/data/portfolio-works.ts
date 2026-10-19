@@ -7,13 +7,14 @@
 
 import type { SiteImage } from '../lib/strapi'
 
-export type WorkCategory = 'interior' | 'hidden' | 'partitions'
+export type WorkCategory = 'interior' | 'hidden' | 'partitions' | 'walls'
 export type ObjectType   = 'apartment' | 'house' | 'office' | 'commercial'
 
 export const CATEGORY_LABELS: Record<WorkCategory, string> = {
   interior:   'Межкомнатные',
   hidden:     'Скрытые двери',
   partitions: 'Перегородки',
+  walls:      'Стеновые панели',
 }
 
 /** Цвет бейджа категории на карточке/странице работы — разные цвета на
@@ -22,6 +23,7 @@ export const CATEGORY_BADGE_COLORS: Record<WorkCategory, string> = {
   interior:   'bg-[oklch(50.5%_0.213_27.518)]', // красный
   hidden:     'bg-accent-600',                  // фирменный акцент — флагманский продукт
   partitions: 'bg-indigo-600',                  // холодный синий — алюминий/стекло
+  walls:      'bg-slate-700',                    // графит — отделка стен
 }
 
 /** Тот же цветовой код категории, но как цвет текста подписи — вместо
@@ -30,6 +32,12 @@ export const CATEGORY_TEXT_COLORS: Record<WorkCategory, string> = {
   interior:   'text-[oklch(50.5%_0.213_27.518)]',
   hidden:     'text-accent-600',
   partitions: 'text-indigo-600',
+  walls:      'text-slate-700',
+}
+
+/** Разделы с отдельной страницей: плитка на /portfolio/ ведёт туда, а не на фильтр */
+export const CATEGORY_PAGES: Partial<Record<WorkCategory, string>> = {
+  walls: '/portfolio/stenovye-paneli/',
 }
 
 export const OBJECT_TYPE_LABELS: Record<ObjectType, string> = {
