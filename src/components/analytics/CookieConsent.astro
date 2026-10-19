@@ -1,6 +1,6 @@
 ---
 /**
- * Согласие на cookie Яндекс Метрики (152-ФЗ) и сама Метрика.
+ * Согласие на cookie и сама Метрика.
  *
  * Метрика загружается только после «Принять»; «Отказаться» — такая же
  * кнопка, отказ запоминается и сайт работает полностью. Крестика нет:
@@ -16,6 +16,8 @@
  * Метрика стартует после window 'load': Вебвизор сразу сканирует DOM, и
  * если это совпадает с гидратацией Vue-островов, Vue видит чужой DOM →
  * «Hydration completed but contains mismatches».
+ *
+ * В тексте баннера сервис не назван: подробности — на /consent/.
  */
 import { SITE } from '../../config/site'
 
@@ -24,15 +26,17 @@ const counterId = SITE.analytics.yandexMetrikaId
 
 {counterId && (
   <div id="cookie-banner" class="cookie" role="region" aria-label="Согласие на cookie" data-counter={counterId} hidden>
-    <p class="cookie__text">
-      Разрешите Яндекс Метрике ставить cookie — так мы видим, какие страницы
-      полезны, и делаем сайт удобнее. Без вашего согласия она не работает.{' '}
-      <a href="/consent/" class="cookie__link">Условия согласия</a>
-    </p>
-    <p class="cookie__state" data-cookie-state hidden></p>
+    <div class="cookie__body">
+      <p class="cookie__text">
+        Используем cookie для статистики посещений: так видно, какие страницы полезны, и сайт становится удобнее.
+        Без вашего согласия статистика не собирается.{' '}
+        <a href="/consent/" class="cookie__link">Условия согласия</a>
+      </p>
+      <p class="cookie__state" data-cookie-state hidden></p>
+    </div>
     <div class="cookie__actions">
-      <button type="button" class="btn btn-primary" data-cookie="accepted">Принять</button>
-      <button type="button" class="btn btn-outline" data-cookie="declined">Отказаться</button>
+      <button type="button" class="cookie__btn cookie__btn--accept" data-cookie="accepted">Принять</button>
+      <button type="button" class="cookie__btn cookie__btn--decline" data-cookie="declined">Отказаться</button>
     </div>
   </div>
 )}
@@ -66,7 +70,7 @@ const counterId = SITE.analytics.yandexMetrikaId
 
     function show(reopened = false) {
       state.hidden = !reopened
-      state.textContent = choice === 'accepted' ? 'Сейчас Метрика включена.' : 'Сейчас Метрика выключена.'
+      state.textContent = choice === 'accepted' ? 'Статистика включена.' : 'Статистика выключена.'
       banner.classList.remove('cookie--leaving')
       banner.hidden = false
       if (reopened) banner.querySelector<HTMLButtonElement>('[data-cookie]')!.focus()
@@ -133,42 +137,86 @@ const counterId = SITE.analytics.yandexMetrikaId
 </script>
 
 <style is:global>
-  /* Карточка в углу, без затемнения: страницей можно пользоваться,
-     не отвечая. Ниже шапки (50) и окон (9999), выше кнопки «Наверх» (48). */
+  /* Плашка по центру внизу экрана: на компьютере — строка текста и кнопки,
+     на телефоне — текст над кнопками в ряд. Без затемнения: страницей можно
+     пользоваться, не отвечая. Ниже шапки (50) и окон (9999), выше «Наверх» (48). */
   .cookie {
     position: fixed;
-    left: 1.5rem;
-    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0rem));
+    left: 0;
+    right: 0;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom, 0rem));
     z-index: 49;
-    width: min(23rem, calc(100% - 3rem));
-    padding: 1rem 1.125rem 1.125rem;
-    border: 0.0625rem solid var(--color-slate-200);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
-    box-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--color-slate-900) 12%, transparent);
+    display: flex;
+    align-items: center;
+    gap: 1rem 1.5rem;
+    width: min(48rem, calc(100% - 2rem));
+    margin-inline: auto;
+    padding: 1rem 1rem 1rem 1.375rem;
+    border-radius: 1.25rem;
+    background: var(--color-white);
+    box-shadow:
+      0 1.25rem 3rem color-mix(in srgb, var(--color-slate-900) 16%, transparent),
+      0 0 0 0.0625rem color-mix(in srgb, var(--color-slate-900) 8%, transparent);
     transition: opacity 250ms var(--ease-out), translate 250ms var(--ease-out);
   }
   .cookie[hidden] { display: none; }
   .cookie--leaving { opacity: 0; translate: 0 0.75rem; }
   @starting-style { .cookie { opacity: 0; translate: 0 0.75rem; } }
 
-  .cookie__text { margin: 0; font-size: 0.8125rem; line-height: 1.5; color: var(--color-body); }
-  .cookie__link { color: var(--color-link); text-decoration: underline; text-underline-offset: 0.125rem; }
+  .cookie__body { flex: 1 1 auto; min-width: 0; }
+  .cookie__text {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--color-ink);
+    text-wrap: pretty;
+  }
+  .cookie__link {
+    color: var(--color-link);
+    text-decoration: underline;
+    text-underline-offset: 0.125rem;
+  }
   .cookie__link:hover { color: var(--color-link-hover); }
-  .cookie__state { margin: 0.5rem 0 0; font-size: 0.8125rem; font-weight: 600; color: var(--color-ink); }
-  .cookie__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.875rem; }
-  .cookie__link:focus-visible { outline: 0.125rem solid var(--color-secondary); outline-offset: 0.125rem; }
+  .cookie__state { margin: 0.375rem 0 0; font-size: 0.8125rem; font-weight: 600; color: var(--color-ink); }
 
-  /* Телефон: полоса у нижнего края на всю ширину, текст короче по высоте */
+  /* Обе кнопки одного размера и одной силы: отказаться так же легко, как принять */
+  .cookie__actions { display: flex; flex: none; gap: 0.5rem; }
+  .cookie__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 8.5rem;
+    height: 2.75rem;
+    padding: 0 1.25rem;
+    border: 0;
+    border-radius: 999rem;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+  }
+  .cookie__btn--accept { background: var(--color-slate-900); color: var(--color-white); }
+  .cookie__btn--accept:hover { background: var(--color-slate-800); }
+  .cookie__btn--decline { background: var(--color-slate-100); color: var(--color-slate-900); }
+  .cookie__btn--decline:hover { background: var(--color-slate-200); }
+  .cookie__link:focus-visible,
+  .cookie__btn:focus-visible { outline: 0.125rem solid var(--color-secondary); outline-offset: 0.125rem; }
+
+  /* Телефон: плашка на всю ширину с полем по краям, кнопки — в две равные колонки */
   @media (max-width: 39.9375rem) {
     .cookie {
-      left: 0.75rem;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.875rem;
       bottom: calc(0.75rem + env(safe-area-inset-bottom, 0rem));
       width: calc(100% - 1.5rem);
-      padding: 0.875rem 1rem 1rem;
+      padding: 1rem;
+      border-radius: 1rem;
     }
-    .cookie__text { font-size: 0.75rem; }
-    .cookie__actions { margin-top: 0.75rem; }
+    .cookie__text { font-size: 0.875rem; }
+    .cookie__actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .cookie__btn { min-width: 0; width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) { .cookie { transition: none; } }
 </style>
