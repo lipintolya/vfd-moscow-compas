@@ -337,7 +337,7 @@ onUnmounted(() => {
                     class="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
                     :aria-label="`Написать в MAX на ${p.label} (текст скопируется)`"
                   >
-                    <MaxIcon class="w-4 h-4" />
+                    <MaxIcon class="w-4 h-4" tone="dark" />
                     MAX
                   </a>
                 </span>

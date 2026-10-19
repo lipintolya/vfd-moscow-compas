@@ -20,6 +20,7 @@ const DESKTOP_MQ = '(min-width: 80rem)'
    Telegram-канал салона — только читать */
 const WHATSAPP_URL = whatsappUrl()
 const TELEGRAM_CHAT_URL = telegramChatUrl()
+const MAX_CHAT_URL = maxChatUrl()
 
 /* Круглые кнопки мессенджеров в мобильном меню — написать */
 const SOCIAL_NETWORKS = [
@@ -39,7 +40,7 @@ const SOCIAL_NETWORKS = [
     name: 'MAX',
     label: 'Написать в MAX (текст скопируется)',
     url: maxChatUrl(),
-    icon: '/icons/max.svg',
+    icon: '/icons/max-dark.svg',
     copy: CONSULT_MESSAGE,
   }] : []),
 ]
@@ -436,6 +437,14 @@ onUnmounted(() => {
                     <dd>
                       <a :href="TELEGRAM_CHAT_URL" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
                         Написать @{{ TELEGRAM_CHAT }}
+                      </a>
+                    </dd>
+                  </div>
+                  <div v-if="MAX_CHAT">
+                    <dt>MAX</dt>
+                    <dd>
+                      <a :href="MAX_CHAT_URL" target="_blank" rel="noopener noreferrer" class="hdr-pop__link" :data-copy-text="CONSULT_MESSAGE">
+                        Написать в чат
                       </a>
                     </dd>
                   </div>
