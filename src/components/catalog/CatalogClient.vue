@@ -414,7 +414,7 @@ onMounted(() => { isMounted.value = true })
 }
 .cc__card.is-dim { opacity: 0.5; }
 .cc__card.is-dim:hover { opacity: 0.8; }
-.cc__media { position: relative; aspect-ratio: 11 / 10; overflow: hidden; background: var(--h-wall); }
+.cc__media { position: relative; aspect-ratio: 11 / 12; overflow: hidden; background: var(--h-wall); }
 .cc__media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--ease-out); }
 .cc__card:hover .cc__media img { transform: scale(1.03); }
 /* Выбранное покрытие — графитовая линия под фото */
