@@ -144,7 +144,7 @@ export const SITE = {
 
   analytics: {
     /** ID счётчика Яндекс Метрики. Пусто → счётчик не подключается. */
-    yandexMetrikaId: '',
+    yandexMetrikaId: '113672040',
   },
 } as const
 
