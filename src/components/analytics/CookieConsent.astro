@@ -63,12 +63,14 @@ const counterId = SITE.analytics.yandexMetrikaId
     const counterId = Number(banner.dataset.counter)
     const state = banner.querySelector<HTMLElement>('[data-cookie-state]')!
     let choice = readConsent(store.get(CONSENT_KEY))
+    let hideTimer: number | undefined
     store.remove(LEGACY_CONSENT_KEY)
 
     if (choice === 'accepted') startMetrika(counterId)
     if (choice === null) show()
 
     function show(reopened = false) {
+      clearTimeout(hideTimer)
       state.hidden = !reopened
       state.textContent = choice === 'accepted' ? 'Статистика включена.' : 'Статистика выключена.'
       banner.classList.remove('cookie--leaving')
@@ -78,7 +80,7 @@ const counterId = SITE.analytics.yandexMetrikaId
 
     function hide() {
       banner.classList.add('cookie--leaving')
-      setTimeout(() => { banner.hidden = true }, 250)
+      hideTimer = window.setTimeout(() => { banner.hidden = true }, 250)
     }
 
     function decide(next: ConsentChoice) {
@@ -161,7 +163,9 @@ const counterId = SITE.analytics.yandexMetrikaId
   }
   .cookie[hidden] { display: none; }
   .cookie--leaving { opacity: 0; translate: 0 0.75rem; }
-  @starting-style { .cookie { opacity: 0; translate: 0 0.75rem; } }
+  @media (prefers-reduced-motion: no-preference) {
+    @starting-style { .cookie { opacity: 0; translate: 0 0.75rem; } }
+  }
 
   .cookie__body { flex: 1 1 auto; min-width: 0; }
   .cookie__text {
@@ -219,4 +223,5 @@ const counterId = SITE.analytics.yandexMetrikaId
     .cookie__btn { min-width: 0; width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) { .cookie { transition: none; } }
+  @media print { .cookie { display: none; } }
 </style>
