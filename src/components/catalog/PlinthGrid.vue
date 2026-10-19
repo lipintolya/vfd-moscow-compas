@@ -1,14 +1,14 @@
 <script setup lang="ts">
 /**
  * Карточки напольного плинтуса и окно «Запросить цену» (/catalog/plintus/).
- * По кнопке — окно с фото и описанием позиции, телефоном салона и ссылками
- * на WhatsApp, Telegram и ВКонтакте (ВК — когда задан social.vk в site.ts).
- * В WhatsApp текст уже в ссылке; в Telegram и ВКонтакте он копируется по клику.
+ * По кнопке — окно с фото и описанием позиции, телефонами (SITE.phones) и
+ * ссылками на WhatsApp, Telegram, MAX и ВКонтакте (ВК — когда задан social.vk).
+ * В WhatsApp текст уже в ссылке; в Telegram, MAX и ВКонтакте он копируется по клику.
  */
 import { nextTick, onMounted, ref } from 'vue'
 import type { PlintusItem } from '../../data/plintus'
-import { PHONE, SITE } from '../../config/site'
-import { telegramWithText, textWithBody, whatsappWithText } from '../../lib/messengers'
+import { SITE } from '../../config/site'
+import { maxChatUrl, telegramWithText, textWithBody, whatsappWithText } from '../../lib/messengers'
 import { useScrollLock } from '../../lib/scroll-lock'
 
 defineProps<{ items: PlintusItem[] }>()
@@ -16,6 +16,10 @@ defineProps<{ items: PlintusItem[] }>()
 /* Текст запроса — одна фраза про позицию; приветствие добавляет messengers.ts */
 const requestBody = (item: PlintusItem) =>
   `Интересует напольный плинтус из МДФ: ${item.text.toLowerCase()}. Подскажите, пожалуйста, цену и наличие.`
+
+const copyHint = SITE.social.vk
+  ? 'В WhatsApp текст уже в ссылке. В Telegram, MAX и ВКонтакте он копируется при нажатии — вставьте его в чат.'
+  : 'В WhatsApp текст уже в ссылке. В Telegram и MAX он копируется при нажатии — вставьте его в чат.'
 
 const active = ref<PlintusItem | null>(null)
 const dialog = ref<HTMLElement | null>(null)
@@ -72,10 +76,10 @@ function close() {
             </div>
           </header>
 
-          <p class="pm__call">
-            Позвонить салону:
-            <a class="pm__phone" :href="`tel:${PHONE.raw}`">{{ PHONE.label }}</a>
-          </p>
+          <div class="pm__call">
+            <p class="pm__call-title">Позвонить менеджеру:</p>
+            <a v-for="phone in SITE.phones" :key="phone.raw" class="pm__phone" :href="`tel:${phone.raw}`">{{ phone.label }}</a>
+          </div>
 
           <ul class="pm__links" role="list">
             <li>
@@ -90,6 +94,15 @@ function close() {
                 rel="noopener noreferrer"
               >Telegram</a>
             </li>
+            <li>
+              <a
+                class="h-pill h-pill--line pm__link"
+                :href="maxChatUrl()"
+                :data-copy-text="textWithBody(requestBody(active))"
+                target="_blank"
+                rel="noopener noreferrer"
+              >MAX</a>
+            </li>
             <li v-if="SITE.social.vk">
               <a
                 class="h-pill h-pill--line pm__link"
@@ -101,9 +114,7 @@ function close() {
             </li>
           </ul>
 
-          <p class="pm__hint">
-            В WhatsApp текст уже в ссылке. В Telegram<template v-if="SITE.social.vk"> и ВКонтакте</template> он копируется при нажатии — вставьте его в чат.
-          </p>
+          <p class="pm__hint">{{ copyHint }}</p>
         </div>
       </div>
     </Teleport>
@@ -182,7 +193,8 @@ function close() {
 }
 .pm__title { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--h-ink); }
 .pm__item { margin: 0.25rem 0 0; font-weight: 600; color: var(--h-ink); }
-.pm__call { margin: 1.25rem 0 0; color: var(--h-muted); }
+.pm__call { margin: 1.25rem 0 0; }
+.pm__call-title { margin: 0; color: var(--h-muted); }
 .pm__phone {
   display: block;
   margin-top: 0.25rem;
