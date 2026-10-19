@@ -253,7 +253,7 @@ onUnmounted(() => {
               rel="noopener noreferrer"
               class="mt-5 inline-flex items-center gap-2.5 text-sm text-white/60 hover:text-white transition-colors duration-200"
             >
-              <img src="/svg/w_tg_logo.svg" alt="" class="w-6 h-6" width="24" height="24" loading="lazy" />
+              <img src="/icons/telegram-white.png" alt="" class="w-6 h-6" width="24" height="24" loading="lazy" />
               <span>Telegram-канал <span class="text-white/40">{{ SITE.social.telegramHandle }}</span></span>
             </a>
           </div>
@@ -325,7 +325,7 @@ onUnmounted(() => {
                     class="inline-flex items-center gap-1.5 text-white/60 hover:text-white transition-colors duration-200"
                     :aria-label="`Написать в Telegram: @${SITE.social.telegramChat}`"
                   >
-                    <TelegramIcon class="w-4 h-4" />
+                    <TelegramIcon class="w-4 h-4" tone="dark" />
                     Telegram
                   </a>
                   <a

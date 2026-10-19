@@ -34,7 +34,7 @@ const SOCIAL_NETWORKS = [
     name: 'Telegram',
     label: `Написать в Telegram: @${TELEGRAM_CHAT}`,
     url: TELEGRAM_CHAT_URL,
-    icon: '/icons/b_tg_logo.webp',
+    icon: '/icons/telegram-black.png',
   }] : []),
   ...(MAX_CHAT ? [{
     name: 'MAX',

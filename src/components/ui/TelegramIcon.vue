@@ -1,7 +1,17 @@
-<!-- Знак Telegram линией в цвет текста (currentColor) — пара к WhatsAppIcon.
-     Рисунок — Tabler Icons «brand-telegram» (MIT). -->
+<!-- Знак Telegram — официальный значок из файлов бренда (PNG с прозрачным фоном):
+     чёрный на светлом фоне, белый на тёмном. Знак не меняем, размер задаёт класс
+     снаружи. tone — цвет фона, на котором стоит знак. -->
+<script setup lang="ts">
+withDefaults(defineProps<{ tone?: 'light' | 'dark' }>(), { tone: 'light' })
+</script>
+
 <template>
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M15 10l-4 4 6 6 4-16-18 7 4 2 2 6 3-4" />
-  </svg>
+  <img
+    :src="tone === 'dark' ? '/icons/telegram-white.png' : '/icons/telegram-black.png'"
+    alt=""
+    aria-hidden="true"
+    width="24"
+    height="24"
+    decoding="async"
+  />
 </template>
