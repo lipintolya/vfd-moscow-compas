@@ -1,8 +1,8 @@
 ---
 /**
  * Напольный плинтус из МДФ — страница каталога (/catalog/plintus/).
- * Фото и описания — из src/data/plintus.ts. Названий позиций и цен нет:
- * цену называет менеджер по запросу в мессенджере.
+ * Фото и описания позиций — из src/data/plintus.ts. Названий позиций и цен
+ * нет: цену называет менеджер по запросу в мессенджере.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../lib/seo-title'
@@ -15,8 +15,22 @@ import { typograph } from '../../lib/typograph'
 import '../../styles/home.css'
 
 const title = 'Напольный плинтус из МДФ в Москве — цвета и профили'
-const description = 'Напольный плинтус из МДФ толщиной 8–25 мм и высотой 60–250 мм: белый под покраску, финишная эмаль, цвета по RAL и NCS. Выберите по фото и запросите цену.'
+const description = 'Напольный плинтус из МДФ в Москве: толщина 8–25 мм, высота 60–250 мм, белый под покраску, эмаль и цвета по RAL и NCS. Фото позиций, цена по запросу.'
+const h1 = 'Напольный плинтус из МДФ в Москве'
 const lead = 'Толщина 8–25 мм, высота 60–250 мм. Белый под покраску, белая финишная эмаль или цвет по палитре RAL или NCS. Цвета на фото — ориентир: точный оттенок уточняйте у менеджера.'
+
+const TIPS = [
+  { title: 'Высота', text: 'Высоту подбирают под потолки: для стандартных комнат обычно берут 60–100 мм, для высоких потолков — выше 100 мм.' },
+  { title: 'Толщина', text: 'Толщина — от 8 до 25 мм. Тонкий профиль смотрится легче, толстый — основательнее: выбирайте по пропорциям стены и двери.' },
+  { title: 'Покраска', text: 'Белый под покраску — грунтованный, его красят в нужный цвет. Белая финишная эмаль — готовый белый. Цвет по RAL или NCS — окрашивание эмалью в выбранный оттенок.' },
+]
+
+const FAQ = [
+  { q: 'Какой толщины и высоты бывает напольный плинтус?', a: 'Толщина — от 8 до 25 мм, высота — от 60 до 250 мм. Размер подбирают под стену и высоту дверей.' },
+  { q: 'Из чего сделан плинтус?', a: 'Из МДФ — плиты из древесного волокна. Поверхность ровная, хорошо держит покраску.' },
+  { q: 'Можно ли покрасить плинтус в нужный цвет?', a: 'Да. Белый поставляется под покраску, цветной окрашивается эмалью по палитрам RAL и NCS. Точный оттенок уточняйте у менеджера.' },
+  { q: 'Как узнать цену?', a: 'Цену называет менеджер. Нажмите «Запросить цену» у понравившегося варианта — откроется WhatsApp с готовым сообщением о позиции.' },
+]
 
 const breadcrumbSchema = {
   '@context': 'https://schema.org',
@@ -27,12 +41,22 @@ const breadcrumbSchema = {
     { '@type': 'ListItem', position: 3, name: 'Напольный плинтус', item: `${SITE.url}/catalog/plintus/` },
   ],
 }
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQ.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
 ---
 
 <BaseLayout
   title={brandTitle(title)}
   description={description}
-  structuredData={[breadcrumbSchema]}
+  structuredData={[breadcrumbSchema, faqSchema]}
 >
   <div class="breadcrumb-bar">
     <div class="container">
@@ -44,32 +68,59 @@ const breadcrumbSchema = {
     <section class="plh" aria-labelledby="plintus-title">
       <div class="container">
         <header class="plh__head">
-          <h1 id="plintus-title" class="h-h1 plh__title">Напольный плинтус из МДФ</h1>
+          <h1 id="plintus-title" class="h-h1 plh__title">{h1}</h1>
           <p class="h-lead plh__lead">{typograph(lead)}</p>
         </header>
 
-        <ul class="pl-grid" role="list">
-          {PLINTUS.map((item) => (
-            <li class="pl-card">
-              <img
-                class="pl-card__img"
-                src={item.photo}
-                alt={`Напольный плинтус из МДФ: ${item.text.toLowerCase()}`}
-                width="1000"
-                height="1000"
-                loading="lazy"
-                decoding="async"
-              />
-              <p class="pl-card__text">{item.text}</p>
-              <a
-                class="h-pill h-pill--line pl-card__btn"
-                href={whatsappWithText(`Интересует напольный плинтус из МДФ: ${item.text.toLowerCase()}. Подскажите, пожалуйста, цену и наличие.`)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >Запросить цену</a>
-            </li>
-          ))}
-        </ul>
+        <section class="pl-block" aria-labelledby="plintus-colors">
+          <h2 id="plintus-colors" class="h-h2 pl-h2">Цвета и профили</h2>
+          <ul class="pl-grid" role="list">
+            {PLINTUS.map((item) => (
+              <li class="pl-card">
+                <img
+                  class="pl-card__img"
+                  src={item.photo}
+                  alt={`Напольный плинтус из МДФ: ${item.text.toLowerCase()}`}
+                  width="1000"
+                  height="1000"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <p class="pl-card__text">{item.text}</p>
+                <a
+                  class="h-pill h-pill--line pl-card__btn"
+                  href={whatsappWithText(`Интересует напольный плинтус из МДФ: ${item.text.toLowerCase()}. Подскажите, пожалуйста, цену и наличие.`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >Запросить цену</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section class="pl-block" aria-labelledby="plintus-choose">
+          <h2 id="plintus-choose" class="h-h2 pl-h2">Как выбрать плинтус</h2>
+          <div class="pl-tips">
+            {TIPS.map((tip) => (
+              <div class="pl-tip">
+                <h3>{tip.title}</h3>
+                <p>{tip.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section class="pl-block" aria-labelledby="plintus-faq">
+          <h2 id="plintus-faq" class="h-h2 pl-h2">Частые вопросы о напольном плинтусе</h2>
+          <div class="pl-faq">
+            {FAQ.map((f) => (
+              <div class="pl-faq__item">
+                <h3 class="pl-faq__q">{f.q}</h3>
+                <p class="pl-faq__a">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </section>
 
@@ -78,7 +129,7 @@ const breadcrumbSchema = {
         <QuoteCta
           image={PLINTUS[0]!.photo}
           title="Нужна цена?"
-          description="Выберите цвет и профиль по фото и напишите менеджеру: ответит с ценой и условиями"
+          description="Выберите цвет и профиль по фото и напишите менеджеру — ответит с ценой"
           primaryHref={whatsappWithText('Хочу узнать цену на напольный плинтус из МДФ.')}
           primaryLabel="Написать в WhatsApp"
           primaryExternal={true}
@@ -105,12 +156,15 @@ const breadcrumbSchema = {
     .plh__lead { grid-column: 9 / span 4; }
   }
 
+  .pl-block { margin: 0 0 3.5rem; }
+  .pl-h2 { margin: 0 0 1.75rem; }
+
   /* Карточки: фото без подписи-названия, описание цветом и профилем */
   .pl-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2rem var(--h-gutter);
-    margin: 0 0 3rem;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
@@ -128,4 +182,16 @@ const breadcrumbSchema = {
   }
   .pl-card__text { margin: 0.75rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
   .pl-card__btn { align-self: flex-start; margin-top: 0.625rem; }
+
+  /* Как выбрать: три короткие колонки */
+  .pl-tips { display: grid; gap: 1.75rem var(--h-gutter); }
+  @media (min-width: 43.75rem) { .pl-tips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .pl-tip h3,
+  .pl-faq__q { margin: 0 0 0.5rem; font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
+  .pl-tip p,
+  .pl-faq__a { margin: 0; color: var(--h-muted); line-height: 1.6; }
+
+  /* Вопросы: список с линиями, без раскрывашек — текст виден поисковику */
+  .pl-faq { border-top: 1px solid var(--h-rule); }
+  .pl-faq__item { padding: 1.25rem 0; border-bottom: 1px solid var(--h-rule); }
 </style>

@@ -256,6 +256,10 @@ export default defineConfig({
         if (/\/catalog\/(belye|seryye|bezhevye|shokolad-mokko)-dveri\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
+        // Напольный плинтус — страница каталога под поиск (src/pages/catalog/plintus.astro)
+        if (/\/catalog\/plintus\/?$/.test(u)) {
+          return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
+        }
         // Стилевые SEO-лендинги — см. src/data/style-categories.ts.
         if (/\/catalog\/(loft-dveri|minimalizm-dveri)\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
