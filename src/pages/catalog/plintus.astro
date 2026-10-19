@@ -1,0 +1,131 @@
+---
+/**
+ * Напольный плинтус из МДФ — страница каталога (/catalog/plintus/).
+ * Фото и описания — из src/data/plintus.ts. Названий позиций и цен нет:
+ * цену называет менеджер по запросу в мессенджере.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import QuoteCta from '../../components/ui/QuoteCta.astro'
+import { PLINTUS } from '../../data/plintus'
+import { whatsappWithText } from '../../lib/messengers'
+import { SITE } from '../../config/site'
+import { typograph } from '../../lib/typograph'
+import '../../styles/home.css'
+
+const title = 'Напольный плинтус из МДФ в Москве — цвета и профили'
+const description = 'Напольный плинтус из МДФ толщиной 8–25 мм и высотой 60–250 мм: белый под покраску, финишная эмаль, цвета по RAL и NCS. Выберите по фото и запросите цену.'
+const lead = 'Толщина 8–25 мм, высота 60–250 мм. Белый под покраску, белая финишная эмаль или цвет по палитре RAL или NCS. Цвета на фото — ориентир: точный оттенок уточняйте у менеджера.'
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
+    { '@type': 'ListItem', position: 2, name: 'Декор', item: `${SITE.url}/catalog/decor/` },
+    { '@type': 'ListItem', position: 3, name: 'Напольный плинтус', item: `${SITE.url}/catalog/plintus/` },
+  ],
+}
+---
+
+<BaseLayout
+  title={brandTitle(title)}
+  description={description}
+  structuredData={[breadcrumbSchema]}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Декор', href: '/catalog/decor/' }, { label: 'Напольный плинтус' }]} />
+    </div>
+  </div>
+
+  <div class="home">
+    <section class="plh" aria-labelledby="plintus-title">
+      <div class="container">
+        <header class="plh__head">
+          <h1 id="plintus-title" class="h-h1 plh__title">Напольный плинтус из МДФ</h1>
+          <p class="h-lead plh__lead">{typograph(lead)}</p>
+        </header>
+
+        <ul class="pl-grid" role="list">
+          {PLINTUS.map((item) => (
+            <li class="pl-card">
+              <img
+                class="pl-card__img"
+                src={item.photo}
+                alt={`Напольный плинтус из МДФ: ${item.text.toLowerCase()}`}
+                width="1000"
+                height="1000"
+                loading="lazy"
+                decoding="async"
+              />
+              <p class="pl-card__text">{item.text}</p>
+              <a
+                class="h-pill h-pill--line pl-card__btn"
+                href={whatsappWithText(`Интересует напольный плинтус из МДФ: ${item.text.toLowerCase()}. Подскажите, пожалуйста, цену и наличие.`)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >Запросить цену</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--tight-top" aria-label="Запрос цены">
+      <div class="container">
+        <QuoteCta
+          image={PLINTUS[0]!.photo}
+          title="Нужна цена?"
+          description="Выберите цвет и профиль по фото и напишите менеджеру: ответит с ценой и условиями"
+          primaryHref={whatsappWithText('Хочу узнать цену на напольный плинтус из МДФ.')}
+          primaryLabel="Написать в WhatsApp"
+          primaryExternal={true}
+          secondaryHref="/catalog/decor/"
+          secondaryLabel="Декор и погонаж"
+        />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  /* Шапка — та же сетка, что у «Наших работ» */
+  .plh { padding-top: clamp(1rem, 2vw, 1.5rem); }
+  .plh__head {
+    display: grid;
+    gap: 1.25rem var(--h-gutter);
+    align-items: end;
+    margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  }
+  @media (min-width: 62.5rem) {
+    .plh__head { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .plh__title { grid-column: 1 / span 7; }
+    .plh__lead { grid-column: 9 / span 4; }
+  }
+
+  /* Карточки: фото без подписи-названия, описание цветом и профилем */
+  .pl-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem var(--h-gutter);
+    margin: 0 0 3rem;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 43.75rem) { .pl-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .pl-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .pl-card { display: flex; flex-direction: column; min-width: 0; }
+  .pl-card__img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--h-radius);
+    background: var(--h-media-bg);
+  }
+  .pl-card__text { margin: 0.75rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
+  .pl-card__btn { align-self: flex-start; margin-top: 0.625rem; }
+</style>
