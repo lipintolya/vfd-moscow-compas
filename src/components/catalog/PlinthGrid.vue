@@ -76,6 +76,15 @@ function close() {
             </div>
           </header>
 
+          <div v-if="active.interior.length" class="pm__gallery">
+            <p class="pm__gallery-title">В интерьере — белый вариант</p>
+            <ul class="pm__strip" role="list">
+              <li v-for="(src, i) in active.interior" :key="src" class="pm__shot">
+                <img :src="src" :alt="`Напольный плинтус из МДФ в интерьере, белый вариант ${i + 1}`" width="1000" height="1000" loading="lazy" decoding="async" />
+              </li>
+            </ul>
+          </div>
+
           <div class="pm__call">
             <p class="pm__call-title">Позвонить менеджеру:</p>
             <a v-for="phone in SITE.phones" :key="phone.raw" class="pm__phone" :href="`tel:${phone.raw}`">{{ phone.label }}</a>
@@ -183,6 +192,30 @@ function close() {
 }
 .pm__close:hover { background: var(--color-slate-100); }
 .pm__head { display: flex; gap: 1rem; align-items: center; padding-right: 2rem; }
+.pm__gallery { margin: 1.25rem 0 0; }
+.pm__gallery-title { margin: 0 0 0.5rem; font-size: 0.875rem; color: var(--h-muted); }
+/* Лента интерьеров: листается пальцем, кадр — почти вся ширина окна */
+.pm__strip {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 78%;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0 0 0.25rem;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.pm__shot { min-width: 0; scroll-snap-align: start; }
+.pm__shot img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--h-radius);
+  background: var(--h-media-bg);
+}
 .pm__photo {
   flex: none;
   width: 6rem;

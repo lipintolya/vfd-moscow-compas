@@ -9,6 +9,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../lib/seo-title'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
+import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import PlinthGrid from '../../components/catalog/PlinthGrid.vue'
 import { PLINTUS } from '../../data/plintus'
 import { whatsappWithText } from '../../lib/messengers'
@@ -92,15 +93,10 @@ const faqSchema = {
         </section>
 
         <section class="pl-block" aria-labelledby="plintus-faq">
-          <h2 id="plintus-faq" class="h-h2 pl-h2">Частые вопросы о напольном плинтусе</h2>
-          <div class="pl-faq">
-            {FAQ.map((f) => (
-              <div class="pl-faq__item">
-                <h3 class="pl-faq__q">{f.q}</h3>
-                <p class="pl-faq__a">{f.a}</p>
-              </div>
-            ))}
-          </div>
+          <header class="h-head">
+            <h2 id="plintus-faq" class="h-h2">Частые вопросы о напольном плинтусе</h2>
+          </header>
+          <FaqAccordion items={FAQ} title={false} />
         </section>
       </div>
     </section>
@@ -143,12 +139,6 @@ const faqSchema = {
   /* Как выбрать: три короткие колонки */
   .pl-tips { display: grid; gap: 1.75rem var(--h-gutter); }
   @media (min-width: 43.75rem) { .pl-tips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .pl-tip h3,
-  .pl-faq__q { margin: 0 0 0.5rem; font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
-  .pl-tip p,
-  .pl-faq__a { margin: 0; color: var(--h-muted); line-height: 1.6; }
-
-  /* Вопросы: список с линиями, без раскрывашек — текст виден поисковику */
-  .pl-faq { border-top: 1px solid var(--h-rule); }
-  .pl-faq__item { padding: 1.25rem 0; border-bottom: 1px solid var(--h-rule); }
+  .pl-tip h3 { margin: 0 0 0.5rem; font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
+  .pl-tip p { margin: 0; color: var(--h-muted); line-height: 1.6; }
 </style>
