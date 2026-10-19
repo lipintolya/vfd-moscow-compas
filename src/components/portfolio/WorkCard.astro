@@ -10,17 +10,18 @@ import { CATEGORY_LABELS, OBJECT_TYPE_LABELS, type PortfolioWork, type WorkCateg
 import { typograph } from '../../lib/typograph'
 
 type Props =
-  | { work: PortfolioWork; category?: never; headingLevel?: 'h3' | 'h4' }
-  | { work?: never; category: WorkCategory; headingLevel?: never }
+  | { work: PortfolioWork; category?: never; headingLevel?: 'h3' | 'h4'; sizes?: string }
+  | { work?: never; category: WorkCategory; headingLevel?: never; sizes?: never }
 
-const { work, category, headingLevel = 'h3' } = Astro.props
+/* sizes — ширина картинки в сетке, по которой браузер выбирает копию из srcset */
+const { work, category, headingLevel = 'h3', sizes = '(min-width: 56.25rem) 33vw, 85vw' } = Astro.props
 const Heading = headingLevel
 ---
 
 {work ? (
   <a href={`/portfolio/${work.id}/`} class="work">
     <span class="h-media work__media">
-      <img src={work.cover.src} srcset={work.cover.srcset} sizes="(min-width: 56.25rem) 33vw, 85vw" alt={work.title} loading="lazy" decoding="async" />
+      <img src={work.cover.src} srcset={work.cover.srcset} sizes={sizes} alt={work.title} loading="lazy" decoding="async" />
     </span>
     <p class="h-meta work__meta">
       <span class="work__kind">{CATEGORY_LABELS[work.category]}</span>
