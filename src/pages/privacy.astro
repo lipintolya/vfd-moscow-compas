@@ -203,6 +203,7 @@ const inWriting = `в письменном виде по адресу: ${SITE.ad
 
         <div class="prv-requisites">
           <p><strong>Оператор:</strong> {operator}</p>
+          <p><strong>Адрес оператора:</strong> {SITE.address.full}</p>
           {HAS_EMAIL
             ? <p><strong>E-mail:</strong> <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
             : <p><strong>Адрес для обращений:</strong> {SITE.address.full}</p>}

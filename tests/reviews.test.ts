@@ -4,12 +4,12 @@ import { reviews } from '../src/data/reviews'
 import { localBusinessSchema, reviewsSchema } from '../src/lib/local-business-schema'
 import { SITE } from '../src/config/site'
 
-test('отзывы: только о салоне, имя с инициалом, даты ISO, свежие первыми', () => {
+test('отзывы: только о салоне, имя без фамилии, даты ISO, свежие первыми', () => {
   assert.ok(reviews.length > 0)
   for (const r of reviews) {
     assert.doesNotMatch(r.text, /дв[еe]р+[иеэ]з+/i, `${r.name}: другая фирма`)
     assert.doesNotMatch(r.name, /Зизевск/, 'отзыв владельца')
-    assert.match(r.name, /^\S+( \S\.)?$/, `${r.name}: фамилия — первой буквой`)
+    assert.match(r.name, /^[^\s.]+$/, `${r.name}: только имя — без фамилии и инициала`)
     assert.match(r.date, /^\d{4}-\d{2}-\d{2}$/)
     assert.doesNotMatch(r.text, / [,.!?:;]/, `${r.name}: пробел перед знаком`)
   }

@@ -25,7 +25,7 @@ const mail = `mailto:${PD_OPERATOR.email}`
 
       <h1 class="prv-title">Согласие на обработку персональных данных с помощью cookie</h1>
 
-      <p>Нажимая «Принять» в уведомлении о cookie на сайте <strong>{SITE.host}</strong>, я свободно, своей волей и в своём интересе даю согласие <strong>{PD_OPERATOR.name}</strong> (далее — Оператор, e-mail <a href={mail}>{PD_OPERATOR.email}</a>) на обработку моих персональных данных на условиях ниже. Согласие конкретное, информированное и сознательное: я ознакомлен(а) с этими условиями и с <a href="/privacy/">Политикой в отношении обработки персональных данных</a>.</p>
+      <p>Нажимая «Принять» в уведомлении о cookie на сайте <strong>{SITE.host}</strong>, я свободно, своей волей и в своём интересе даю согласие <strong>{PD_OPERATOR.name}</strong>, адрес: {SITE.address.full} (далее — Оператор, e-mail <a href={mail}>{PD_OPERATOR.email}</a>) на обработку моих персональных данных на условиях ниже. Согласие конкретное, информированное и сознательное: я ознакомлен(а) с этими условиями и с <a href="/privacy/">Политикой в отношении обработки персональных данных</a>.</p>
 
       <section class="prv-section">
         <h2>1. Цель обработки</h2>
@@ -67,6 +67,7 @@ const mail = `mailto:${PD_OPERATOR.email}`
 
       <div class="prv-requisites">
         <p><strong>Оператор:</strong> {PD_OPERATOR.name}</p>
+        <p><strong>Адрес оператора:</strong> {SITE.address.full}</p>
         <p><strong>E-mail:</strong> <a href={mail}>{PD_OPERATOR.email}</a></p>
         <p><strong>Редакция от</strong> {PD_DOCS_DATE}</p>
       </div>
