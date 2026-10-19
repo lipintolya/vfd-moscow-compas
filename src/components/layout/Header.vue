@@ -89,6 +89,7 @@ const CATALOG_DROPDOWN = [
   { href: '/catalog/',               label: 'Все двери',      desc: 'Межкомнатные' },
   { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери', desc: 'Скрытый монтаж' },
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
+  { href: '/catalog/plintus/',       label: 'Напольный плинтус', desc: 'Цвета и профили из МДФ' },
 ] as const
 
 const PARTITIONS_DROPDOWN = [
