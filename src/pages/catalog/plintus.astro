@@ -2,12 +2,14 @@
 /**
  * Напольный плинтус из МДФ — страница каталога (/catalog/plintus/).
  * Фото и описания позиций — из src/data/plintus.ts. Названий позиций и цен
- * нет: цену называет менеджер по запросу в мессенджере.
+ * нет: по кнопке «Запросить цену» открывается окно с телефоном и мессенджерами
+ * (островок PlinthGrid.vue).
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../lib/seo-title'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
+import PlinthGrid from '../../components/catalog/PlinthGrid.vue'
 import { PLINTUS } from '../../data/plintus'
 import { whatsappWithText } from '../../lib/messengers'
 import { SITE } from '../../config/site'
@@ -29,7 +31,7 @@ const FAQ = [
   { q: 'Какой толщины и высоты бывает напольный плинтус?', a: 'Толщина — от 8 до 25 мм, высота — от 60 до 250 мм. Размер подбирают под стену и высоту дверей.' },
   { q: 'Из чего сделан плинтус?', a: 'Из МДФ — плиты из древесного волокна. Поверхность ровная, хорошо держит покраску.' },
   { q: 'Можно ли покрасить плинтус в нужный цвет?', a: 'Да. Белый поставляется под покраску, цветной окрашивается эмалью по палитрам RAL и NCS. Точный оттенок уточняйте у менеджера.' },
-  { q: 'Как узнать цену?', a: 'Цену называет менеджер. Нажмите «Запросить цену» у понравившегося варианта — откроется WhatsApp с готовым сообщением о позиции.' },
+  { q: 'Как узнать цену?', a: 'Цену называет менеджер. Нажмите «Запросить цену» у понравившегося варианта — откроется окно с телефоном салона и ссылками на мессенджеры.' },
 ]
 
 const breadcrumbSchema = {
@@ -74,28 +76,7 @@ const faqSchema = {
 
         <section class="pl-block" aria-labelledby="plintus-colors">
           <h2 id="plintus-colors" class="h-h2 pl-h2">Цвета и профили</h2>
-          <ul class="pl-grid" role="list">
-            {PLINTUS.map((item) => (
-              <li class="pl-card">
-                <img
-                  class="pl-card__img"
-                  src={item.photo}
-                  alt={`Напольный плинтус из МДФ: ${item.text.toLowerCase()}`}
-                  width="1000"
-                  height="1000"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <p class="pl-card__text">{item.text}</p>
-                <a
-                  class="h-pill h-pill--line pl-card__btn"
-                  href={whatsappWithText(`Интересует напольный плинтус из МДФ: ${item.text.toLowerCase()}. Подскажите, пожалуйста, цену и наличие.`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >Запросить цену</a>
-              </li>
-            ))}
-          </ul>
+          <PlinthGrid items={PLINTUS} client:visible />
         </section>
 
         <section class="pl-block" aria-labelledby="plintus-choose">
@@ -158,30 +139,6 @@ const faqSchema = {
 
   .pl-block { margin: 0 0 3.5rem; }
   .pl-h2 { margin: 0 0 1.75rem; }
-
-  /* Карточки: фото без подписи-названия, описание цветом и профилем */
-  .pl-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2rem var(--h-gutter);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  @media (min-width: 43.75rem) { .pl-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  @media (min-width: 62.5rem) { .pl-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-
-  .pl-card { display: flex; flex-direction: column; min-width: 0; }
-  .pl-card__img {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: var(--h-radius);
-    background: var(--h-media-bg);
-  }
-  .pl-card__text { margin: 0.75rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
-  .pl-card__btn { align-self: flex-start; margin-top: 0.625rem; }
 
   /* Как выбрать: три короткие колонки */
   .pl-tips { display: grid; gap: 1.75rem var(--h-gutter); }

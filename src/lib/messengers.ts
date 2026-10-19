@@ -46,3 +46,6 @@ export const maxChatUrl = (): string => MAX_CHAT
 
 /** Текст для копирования в MAX — то же приветствие, что в WhatsApp и Telegram */
 export const maxWithText = (body: string): string => withBody(body)
+
+/** Текст для копирования по клику (ВКонтакте, Telegram) — то же приветствие */
+export const textWithBody = (body: string): string => withBody(body)
