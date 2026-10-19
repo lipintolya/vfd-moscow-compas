@@ -25,11 +25,11 @@ import TelegramIcon from '../ui/TelegramIcon.vue'
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
 const SLIDE_MS = 6000
 
-/* «Более 1000 дверей установлено нашим клиентам». Число — счётчик
-   (src/lib/count-up.ts): досчитывает от нуля при загрузке. Четырёхзначное —
-   без пробела, от 10 000 — с пробелом; после «более» — родительный падеж.
-   «Более 1000 дверей» не разрывается переносом. */
-const { count } = SITE.doorsInstalled
+/* «Более 1000 дверей установлено нашим клиентам в … году». Число и год —
+   из SITE.doorsInstalled. Счётчик (src/lib/count-up.ts): досчитывает от нуля
+   при загрузке. Четырёхзначное — без пробела, от 10 000 — с пробелом; после
+   «более» — родительный падеж. «Более 1000 дверей» не разрывается переносом. */
+const { count, year } = SITE.doorsInstalled
 const soldCount = count >= 10_000 ? count.toLocaleString('ru-RU') : String(count)
 const soldNoun = pluralRu(count, ['двери', 'дверей', 'дверей'])
 
@@ -76,7 +76,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           Шоурум дверей {SITE.name} {SITE.city.in.replace(' ', '\u00A0')}
         </h1>
         <p class="stage__fact">
-          <span><span class="stage__nowrap">Более <span class="stage__count" data-count={count}>{soldCount}</span> {soldNoun}</span> установлено нашим клиентам</span>
+          <span><span class="stage__nowrap">Более <span class="stage__count" data-count={count}>{soldCount}</span> {soldNoun}</span> установлено нашим клиентам в&nbsp;{year}&nbsp;году</span>
         </p>
         <p class="stage__lead">
           Посмотрите двери, покрытия и&nbsp;фурнитуру вживую — в&nbsp;нашем салоне на&nbsp;северо-востоке

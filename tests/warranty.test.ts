@@ -18,9 +18,12 @@ test('нигде нет другой трактовки гарантии: ни �
   }
 })
 
-test('счётчик продаж — без года: утверждение не устареет в январе', () => {
-  assert.ok(!('year' in SITE.doorsInstalled))
-  assert.doesNotMatch(readFileSync('src/components/home/ShowroomHero.astro', 'utf8'), /году продали/)
+test('счётчик продаж — год из данных: в тексте главной нет своей цифры года', () => {
+  assert.match(String(SITE.doorsInstalled.year), /^20\d\d$/)
+  const hero = readFileSync('src/components/home/ShowroomHero.astro', 'utf8')
+  assert.doesNotMatch(hero, /2026/)
+  assert.doesNotMatch(hero, /году продали/)
+  assert.match(hero, /установлено нашим клиентам в&nbsp;\{year\}&nbsp;году/)
 })
 
 test('запись в салон — то же приветствие и просьба назвать удобное время', () => {
