@@ -60,8 +60,9 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     --vid-shade: 0.8;
     --vid-shade-hover: 0.92;
 
-    display: flex;
-    flex-direction: column;
+    /* Обычный блок, не flex: в Safari на iPhone обложка внутри flex-кнопки
+       сжималась до ширины кнопки «плей» — и карточка выглядела узкой полоской */
+    display: block;
     width: 100%;
     padding: 0;
     border: 0;
@@ -76,6 +77,7 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     position: relative;
     display: grid;
     place-items: center;
+    width: 100%;           /* явно на всю карточку: по содержимому её не сжимать */
     aspect-ratio: 2 / 3;   /* = пропорция обложек в scripts/gen-video-covers.mjs */
     border-radius: var(--h-tile-radius);
     background: var(--color-slate-900);
