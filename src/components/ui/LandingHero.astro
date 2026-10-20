@@ -39,11 +39,12 @@ interface Props {
   lead:   string
   /** Один кадр — статичное фото; массив — слайдер (первый кадр — обложка) */
   image:  HeroImage | HeroImage[]
-  facts: { value: string; label: string; count?: number }[]
+  /** Факты под линейками; нет — блок не выводится */
+  facts?: { value: string; label: string; count?: number }[]
   /** Время показа кадра в слайдере, мс */
   interval?: number
 }
-const { title, lead, image, facts, interval = 6500 } = Astro.props
+const { title, lead, image, facts = [], interval = 6500 } = Astro.props
 const slides = Array.isArray(image) ? image : [image]
 const slider = slides.length > 1
 const TALL_MEDIA = '(max-width: 47.9375rem)'
@@ -123,14 +124,16 @@ const WIDE_SIZES = '(min-width: 80rem) 76rem, 100vw'
       )}
     </div>
 
-    <dl class="lhero__facts">
-      {facts.map((f) => (
-        <div>
-          <dt class="lhero__value" data-count={f.count}>{f.value}</dt>
-          <dd class="h-meta">{typograph(f.label)}</dd>
-        </div>
-      ))}
-    </dl>
+    {facts.length > 0 && (
+      <dl class="lhero__facts">
+        {facts.map((f) => (
+          <div>
+            <dt class="lhero__value" data-count={f.count}>{f.value}</dt>
+            <dd class="h-meta">{typograph(f.label)}</dd>
+          </div>
+        ))}
+      </dl>
+    )}
   </div>
 </section>
 

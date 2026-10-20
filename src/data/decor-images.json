@@ -8,6 +8,22 @@
     "width": 1672,
     "height": 941
   },
+  "hero-wide": {
+    "widths": [
+      960,
+      1600
+    ],
+    "width": 1672,
+    "height": 732
+  },
+  "hero-tall": {
+    "widths": [
+      640,
+      752
+    ],
+    "width": 753,
+    "height": 941
+  },
   "framuga": {
     "widths": [
       640,

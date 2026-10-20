@@ -1,581 +1,118 @@
 ---
+/**
+ * Декор к дверям (/catalog/decor/): фальшфрамуга с компланарным коробом,
+ * плинтус в цвет дверей, декоративные рейки.
+ * Тексты — src/data/decor-page.ts, цены и фото — decor-products.ts: на
+ * странице только разметка. Категория — секция DecorSection (та же, что
+ * «Плинтус к дверям» на страницах моделей). Первый экран — LandingHero,
+ * работы — WorkCard, визит в салон — VisitBand.
+ * JSON-LD: LocalBusiness, Product + AggregateOffer на каждую категорию,
+ * FAQPage; BreadcrumbList отдают сами хлебные крошки.
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../lib/seo-title'
-import { SITE } from '../../config/site'
-import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
-import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import LandingHero from '../../components/ui/LandingHero.astro'
+import SectionNav from '../../components/partitions/SectionNav.astro'
+import DecorSection from '../../components/catalog/DecorSection.astro'
+import WorkCard from '../../components/portfolio/WorkCard.astro'
+import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
-import InfoImageViewer from '../../components/catalog/InfoImageViewer.vue'
-import PlinthSection from '../../components/catalog/PlinthSection.astro'
+import VisitBand from '../../components/home/VisitBand.astro'
+import '../../styles/home.css'
+
+import { DECOR_CATEGORIES, DECOR_FAQ, DECOR_PAGE, decorProducts } from '../../data/decor-page'
+import { HERO_IMAGE, IMAGES } from '../../data/decor-products'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import { getWorks } from '../../lib/works'
-import {
-  IMAGES,
-  REYKI_IMAGES,
-  MATERIAL_LABELS,
-  FRAMUGA_MATERIALS, FRAMUGA_ROWS,
-  REYKI_MATERIALS,   REYKI_ROWS,
-  FROM_PRICE_FRAMUGA_KIT,
-  FROM_PRICE_PLINTUS,
-  FROM_PRICE_REYKI,
-  type PriceRow,
-  type Material,
-} from '../../data/decor-products'
-import { PHONE as SITE_PHONE } from '../../config/site'
+import { localBusinessSchema } from '../../lib/local-business-schema'
+import { productSchema } from '../../lib/product-schema'
+import { PHONE, SITE } from '../../config/site'
 
-const PHONE = SITE_PHONE.raw
-const CALL  = `tel:${PHONE}`  // кнопки «рассчитать/обсудить» — звонок в салон (WhatsApp — в шапке и на /contacts/)
+const path = Astro.url.pathname
+const pageUrl = new URL(path, SITE.url).href
 
-const fmt = (n: number) => n.toLocaleString('ru-RU') + ' ₽'
+/* Наш монтаж — работы портфолио, которые в Strapi сослались на этот раздел */
+const works = (await getWorks()).filter((w) => w.relatedLink?.href === path).slice(0, 3)
 
-/* Первый экран — во всю ширину контейнера; та же строка — у preload */
-const HERO_SIZES = '(min-width: 80rem) 76rem, 100vw'
+/* Статья по теме — та, что назвала эту страницу в relatedPages */
+const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
 
-const canonicalUrl = Astro.site
-  ? new URL('/catalog/decor/', Astro.site).href
-  : undefined
-
-const breadcrumbItems = [
-  { label: 'Главная', href: '/' },
-  { label: 'Каталог', href: '/catalog/' },
-  { label: 'Декор' },
+const navItems = [
+  ...DECOR_CATEGORIES.map((c) => ({ id: c.id, label: c.nav })),
+  ...(works.length ? [{ id: 'decor-works', label: 'Работы' }] : []),
+  { id: 'decor-faq', label: 'Вопросы' },
 ]
 
-const faq = [
-  { q: 'Что такое фальшфрамуга и зачем она нужна?',
-    a: 'Декоративная панель, которая заполняет пространство над дверным проёмом до потолка при компланарном (безфальцевом) монтаже — коробка и наличник идут заподлицо со стеной, и фрамуга сохраняет единую плоскость. Используется, когда высота проёма меньше высоты стены.' },
-  { q: 'В каких покрытиях доступен декор?',
-    a: 'Фальшфрамуга, компланарные коробка/наличник и декоративные рейки — в Эмалекс и Экошпон. Плинтус дополнительно доступен в Эмаль Polar.' },
-  { q: 'Можно подобрать плинтус и рейки не в цвет дверей?',
-    a: 'Да. Материал и оттенок подбираются отдельно от дверного полотна — под пол, стены или контрастно. Поможем подобрать сочетание при заказе.' },
-  { q: 'Что входит в минимальный комплект декоративных реек?',
-    a: 'По 4 шт каждого типа: декоративная рейка, фоновая рейка, крепёжная и соединительная рейки. Этого достаточно для сборки одного модуля реечной панели на стену.' },
-  { q: 'Можно купить декор отдельно, без дверей?',
-    a: 'Да, плинтус, фальшфрамугу и декоративные рейки можно заказать отдельно от дверного комплекта.' },
-  { q: 'Есть доставка и монтаж?',
-    a: 'Доставка по Москве, самовывоз с шоурума в ТЦ «Компас». Монтаж декоративных реек, плинтуса и фальшфрамуги — уточняйте у менеджера при заказе.' },
-] as const
-
-const structuredData = canonicalUrl ? [
-  /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
+const structuredData = [
+  localBusinessSchema({ url: SITE.url }),
+  ...decorProducts().map((p) => productSchema(p)),
   {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faq.map(f => ({
+    mainEntity: DECOR_FAQ.map((f) => ({
       '@type': 'Question',
       name: f.q,
       acceptedAnswer: { '@type': 'Answer', text: f.a },
     })),
   },
-] : undefined
-
-// Свой монтаж из портфолио — под блоком «Плинтус»: самая свежая работа,
-// у которой в Strapi выбрана ссылка на раздел «Декор и погонаж».
-const plinthWork = (await getWorks()).find(w => w.relatedLink?.href === '/catalog/decor/')
-
-/* Статья по теме — та, что назвала эту страницу в relatedPages */
-const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
+]
 ---
 
 <BaseLayout
-  title={brandTitle(`Декор для дверей ${SITE.name}: плинтус, фальшфрамуга, рейки ${SITE.city.in}`)}
-  description={`Декоративные элементы к межкомнатным дверям в Москве: фальшфрамуга и компланарный короб от ${fmt(FROM_PRICE_FRAMUGA_KIT)}, плинтус от ${fmt(FROM_PRICE_PLINTUS)}, декоративные рейки от ${fmt(FROM_PRICE_REYKI)}. Покрытия Эмалекс, Экошпон, Эмаль Polar.`}
+  title={brandTitle(DECOR_PAGE.title)}
+  description={DECOR_PAGE.description}
+  canonical={pageUrl}
   ogImage={IMAGES.hero.large}
-  preloadImage={IMAGES.hero.src}
-  preloadImageSrcset={IMAGES.hero.srcset}
-  preloadImageSizes={HERO_SIZES}
-  canonical={canonicalUrl}
+  ogImageMeta={{ width: IMAGES.hero.width, height: IMAGES.hero.height, alt: HERO_IMAGE.alt }}
   structuredData={structuredData}
 >
+  <SectionNav items={navItems} />
 
   <div class="breadcrumb-bar">
     <div class="container">
-      <Breadcrumbs items={breadcrumbItems} />
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Каталог', href: '/catalog/' }, { label: 'Декор' }]} />
     </div>
   </div>
 
-  {/* ══════════════════════════════════════════════
-       HERO
-  ══════════════════════════════════════════════ */}
-  <div class="container dc-hero-wrap">
-    <section class="dc-hero" aria-label="Декор для дверей">
-      <img
-        src={IMAGES.hero.src}
-        srcset={IMAGES.hero.srcset}
-        sizes={HERO_SIZES}
-        alt="Фальшфрамуга и декор дверного проёма — ВФД"
-        class="dc-hero__img"
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-        width={IMAGES.hero.width}
-        height={IMAGES.hero.height}
-      />
-      <div class="dc-hero__overlay" aria-hidden="true"></div>
-      <div class="dc-hero__body">
-        <p class="dc-eyebrow">Декор · Москва</p>
-        <h1 class="dc-hero__h1">Плинтус, фрамуги <br/>и декоративные рейки</h1>
-        <p class="dc-hero__lead">
-          Комплектующие для завершённого вида дверного проёма и стен:
-          фальшфрамуга и компланарный короб над дверью, плинтус в цвет
-          пола или полотна, декоративные рейки для акцентных стен.
-        </p>
-        <div class="dc-hero__actions">
-          <a href={CALL} class="btn btn-ghost">Получить расчёт</a>
-          <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
+  <div class="home">
+    <LandingHero title={DECOR_PAGE.h1} lead={DECOR_PAGE.lead} image={HERO_IMAGE}>
+      <Fragment slot="actions">
+        <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать декор</a>
+        <a href={`#${DECOR_CATEGORIES[0]!.id}`} class="h-btn h-btn--quiet">Смотреть цены</a>
+      </Fragment>
+    </LandingHero>
+
+    {DECOR_CATEGORIES.map((c, i) => <DecorSection category={c} wall={i % 2 === 0} />)}
+
+    {works.length > 0 && (
+      <section id="decor-works" class="h-sec" aria-labelledby="decor-works-title">
+        <div class="container">
+          <header class="h-head">
+            <h2 id="decor-works-title" class="h-h2">Декор в&nbsp;наших работах</h2>
+            <p class="h-lead">Объекты клиентов салона с&nbsp;фото и&nbsp;описанием монтажа.</p>
+          </header>
+          <ul class="dc-works h-rail" role="list">
+            {works.map((w) => <li><WorkCard work={w} /></li>)}
+          </ul>
         </div>
+      </section>
+    )}
+
+    {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
+
+    <section id="decor-faq" class="h-sec h-sec--wall" aria-labelledby="decor-faq-title">
+      <div class="container h-faq">
+        <h2 id="decor-faq-title" class="h-h2">Вопросы о&nbsp;декоре к&nbsp;дверям</h2>
+        <FaqAccordion items={DECOR_FAQ} title={false} />
       </div>
     </section>
+
+    <VisitBand lead={DECOR_PAGE.visit} />
   </div>
-
-  {/* ══════════════════════════════════════════════
-       ФАЛЬШФРАМУГА
-  ══════════════════════════════════════════════ */}
-  <section class="section" style="padding-bottom: 0">
-    <div class="container">
-      <div class="dc-section">
-        <div class="dc-section__text">
-          <h2 class="dc-h2">Фальшфрамуга и компланарный короб</h2>
-          <p class="dc-p">
-            Заполняет пространство над дверным проёмом до потолка — актуально,
-            когда высота проёма меньше высоты стены, а короб и наличник
-            монтируются заподлицо (компланарно), без фальца и нахлёста.
-            Сохраняет единую плоскость проёма и стены.
-          </p>
-          <p class="dc-p">
-            <strong>Область применения:</strong> двери со скрытым/компланарным монтажом
-            и высокие проёмы, где нужно визуально продлить дверь до потолка,
-            сохранив ровную плоскость без наличников внахлёст.
-          </p>
-        </div>
-      </div>
-
-      <div class="dc-table-wrap">
-        <table class="dc-table">
-          <thead>
-            <tr>
-              <th scope="col" class="dc-table__row-head"></th>
-              <th scope="col" class="dc-table__row-head"></th>
-              {FRAMUGA_MATERIALS.map((m: Material) => <th scope="col">{MATERIAL_LABELS[m]}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {FRAMUGA_ROWS.map((row: PriceRow, i: number) => (
-              <tr class:list={{ 'dc-table__kit-row': i === FRAMUGA_ROWS.length - 1 }}>
-                <th scope="row">{row.name}{row.size && <span class="dc-row-size">{row.size}</span>}</th>
-                <td class="dc-table__unit" data-label="Ед.">{row.unit}</td>
-                {FRAMUGA_MATERIALS.map((m: Material) => (
-                  <td data-label={MATERIAL_LABELS[m]}>{row.prices[m] != null ? fmt(row.prices[m]!) : '—'}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="dc-table-foot">Цены за единицу/комплект, РРЦ. * Цены ознакомительные — точный расчёт под ваш проём у менеджера салона.</p>
-
-      {IMAGES.framuga && (
-        <InfoImageViewer
-          client:visible
-          variant="photo"
-          images={[{
-            ...IMAGES.framuga,
-            caption: 'Фальшфрамуга и компланарный короб',
-            alt: 'Фальшфрамуга и компланарный короб в интерьере — ВФД',
-          }]}
-        />
-      )}
-    </div>
-  </section>
-
-  {/* ══════════════════════════════════════════════
-       ПЛИНТУС
-  ══════════════════════════════════════════════ */}
-  <PlinthSection moreHref="/catalog/plintus/" moreLabel="Цвета и профили напольного плинтуса из МДФ →" />
-
-  {plinthWork && (
-    <section class="section" style="padding-bottom: 0">
-      <div class="container">
-        <a
-          href={`/portfolio/${plinthWork.id}/`}
-          class="group grid grid-cols-1 overflow-hidden rounded-2xl border border-slate-200 transition-colors hover:border-slate-300 sm:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
-        >
-          <div class="aspect-4/3 self-center overflow-hidden bg-slate-100">
-            <img
-              src={plinthWork.cover.src}
-              srcset={plinthWork.cover.srcset}
-              sizes="(min-width: 640px) 40vw, 100vw"
-              alt={plinthWork.title}
-              loading="lazy"
-              decoding="async"
-              width="600"
-              height="450"
-              class="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-            />
-          </div>
-          <div class="flex flex-col justify-center p-6 sm:p-8">
-            <p class="m-0 mb-2 text-xs font-semibold text-accent-600">Наш монтаж · {plinthWork.label}</p>
-            <h3 class="m-0 mb-2 text-lg font-medium leading-snug text-ink sm:text-xl">{plinthWork.title}</h3>
-            <p class="m-0 mb-4 text-sm leading-relaxed text-slate-600">{plinthWork.description}</p>
-            <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700">
-              Смотреть все фото
-              <svg class="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </div>
-        </a>
-      </div>
-    </section>
-  )}
-
-  {/* ══════════════════════════════════════════════
-       ДЕКОРАТИВНЫЕ РЕЙКИ
-  ══════════════════════════════════════════════ */}
-  <section class="section">
-    <div class="container">
-      <div class="dc-section">
-        <div class="dc-section__text">
-          <h2 class="dc-h2">Декоративные рейки</h2>
-          <p class="dc-p">
-            Реечные панели для отделки стен: декоративная рейка — лицевой профиль,
-            фоновая рейка — задник между рейками, крепёжная и соединительная —
-            для сборки и стыковки модулей между собой.
-          </p>
-          <p class="dc-p">
-            <strong>Область применения:</strong> акцентные стены в гостиной и спальне,
-            зона у изголовья кровати, ниша под телевизор, фасады гардеробных —
-            в цвет дверей и мебели для единого стиля интерьера.
-          </p>
-        </div>
-      </div>
-
-      <h3 class="dc-h3">Минимальный комплект</h3>
-      <div class="dc-table-wrap">
-        <table class="dc-table">
-          <thead>
-            <tr>
-              <th scope="col" class="dc-table__row-head"></th>
-              <th scope="col" class="dc-table__row-head"></th>
-              {REYKI_MATERIALS.map((m: Material) => <th scope="col">{MATERIAL_LABELS[m]}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {REYKI_ROWS.map((row: PriceRow) => (
-              <tr>
-                <th scope="row">{row.name}{row.size && <span class="dc-row-size">{row.size}</span>}</th>
-                <td class="dc-table__unit" data-label="Ед.">{row.unit}</td>
-                {REYKI_MATERIALS.map((m: Material) => (
-                  <td data-label={MATERIAL_LABELS[m]}>{row.prices[m] != null ? fmt(row.prices[m]!) : '—'}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p class="dc-table-foot">Длина рейки — 2750 мм, комплект — по 4 шт каждого типа. * Цены ознакомительные — точный расчёт у менеджера салона.</p>
-
-      {REYKI_IMAGES.length > 0 && (
-        <InfoImageViewer
-          client:visible
-          variant="photo"
-          aspectRatio="3 / 4"
-          images={REYKI_IMAGES.map((img, i) => ({
-            ...img,
-            caption: REYKI_ROWS[i]?.name ?? `Рейка, фото ${i + 1}`,
-            alt: `${REYKI_ROWS[i]?.name ?? 'Декоративная рейка'} — ВФД`,
-          }))}
-        />
-      )}
-    </div>
-  </section>
-
-  {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
-
-  {/* ══════════════════════════════════════════════
-       FAQ
-  ══════════════════════════════════════════════ */}
-  <section class="section">
-    <div class="container">
-      <FaqAccordion items={faq} />
-    </div>
-  </section>
-
-  {/* ══════════════════════════════════════════════
-       CTA
-  ══════════════════════════════════════════════ */}
-  <section class="section">
-    <div class="container">
-      <div class="dc-cta">
-        <div class="dc-cta__text">
-          <h2 class="dc-cta__h2">Подберём декор под ваш проект</h2>
-          <p class="dc-cta__lead">
-            Рассчитаем количество и стоимость под ваш проём и площадь стен.
-            Доставка по Москве, самовывоз с шоурума.
-          </p>
-        </div>
-        <div class="dc-cta__actions">
-          <a href={`tel:${PHONE}`} class="btn btn-ghost">Позвонить</a>
-        </div>
-      </div>
-
-      <nav class="dc-related" aria-label="Смежные разделы">
-        <a href="/catalog/">Каталог дверей</a>
-        <a href="/catalog/skrytye-dveri/">Скрытые двери</a>
-        <a href="/contacts/">Контакты</a>
-      </nav>
-    </div>
-  </section>
-
 </BaseLayout>
 
 <style>
-.dc-eyebrow {
-  display: block;
-  margin: 0 0 0.875rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.55);
-}
-.dc-h2 {
-  margin: 0 0 1rem;
-  font-size: clamp(1.625rem, 3vw, 2.125rem);
-  font-weight: 500;
-  color: var(--color-slate-900);
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-.dc-h3 {
-  margin: 2rem 0 1rem;
-  font-size: clamp(1.125rem, 2vw, 1.375rem);
-  font-weight: 500;
-  color: var(--color-slate-900);
-  letter-spacing: -0.015em;
-}
-.dc-p {
-  margin: 0 0 1rem;
-  color: var(--color-slate-500);
-  font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
-  line-height: 1.75;
-}
-.dc-p strong { color: var(--color-slate-700); font-weight: 600; }
-
-.dc-section { display: flex; flex-direction: column; margin-bottom: 0; }
-
-/* ── Hero ─────────────────────────────────────────────────────── */
-.dc-hero-wrap { padding-top: clamp(0.75rem, 1.5vw, 1.25rem); padding-bottom: clamp(2.5rem, 4vw, 3.5rem); }
-.dc-hero {
-  position: relative;
-  overflow: hidden;
-  border-radius: 1.5rem;
-  min-height: clamp(22rem, 40vw, 30rem);
-  padding: clamp(2.5rem, 6vw, 4.5rem);
-  background: var(--color-slate-900);
-  display: flex;
-  align-items: flex-end;
-}
-.dc-hero__img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
-.dc-hero__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, color-mix(in srgb, var(--color-slate-900) 88%, transparent), color-mix(in srgb, var(--color-slate-900) 55%, transparent) 55%, color-mix(in srgb, var(--color-slate-900) 20%, transparent));
-}
-.dc-hero__body { position: relative; z-index: 1; max-width: 44rem; color: #fff; }
-.dc-hero__h1 {
-  margin: 0 0 1rem;
-  font-size: clamp(2.25rem, 5vw, 3.5rem);
-  font-weight: 500;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
-.dc-hero__lead {
-  margin: 0 0 2rem;
-  max-width: 38rem;
-  font-size: clamp(1rem, 1.6vw, 1.125rem);
-  line-height: 1.65;
-  color: rgba(255,255,255,0.8);
-}
-.dc-hero__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; }
-
-/* ── Table ────────────────────────────────────────────────────── */
-.dc-table-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 1rem;
-  margin: 1.5rem 0 0.75rem;
-}
-.dc-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9375rem;
-  background: #fff;
-}
-.dc-table thead tr { border-bottom: 2px solid var(--color-slate-900); }
-.dc-table thead th {
-  padding: 1rem 1.375rem;
-  text-align: left;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-  white-space: nowrap;
-}
-.dc-table thead .dc-table__row-head { color: transparent; }
-.dc-table tbody th {
-  padding: 0.875rem 1.375rem;
-  text-align: left;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-slate-700);
-  border-right: 1px solid var(--color-slate-100);
-  max-width: 13rem;
-  white-space: normal;
-}
-.dc-row-size {
-  display: block;
-  margin-top: 0.125rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--color-slate-400);
-  text-transform: none;
-  letter-spacing: 0;
-  white-space: normal;
-}
-.dc-table tbody td {
-  padding: 0.875rem 1.375rem;
-  color: var(--color-slate-700);
-  font-weight: 600;
-  border-bottom: 1px solid var(--color-slate-50);
-  white-space: nowrap;
-}
-.dc-table__unit {
-  color: var(--color-slate-400) !important;
-  font-weight: 500 !important;
-  font-size: 0.8125rem;
-}
-.dc-table tbody tr:last-child td,
-.dc-table tbody tr:last-child th { border-bottom: none; }
-.dc-table__kit-row { border-top: 1px solid var(--color-slate-200); }
-.dc-table__kit-row th { font-size: 0.9375rem; color: var(--color-slate-900); }
-.dc-table__kit-row td { font-size: 1.0625rem; color: var(--color-slate-900); }
-
-.dc-table-foot {
-  margin: 0 0 2.5rem;
-  font-size: 0.8125rem;
-  color: var(--color-slate-400);
-  line-height: 1.6;
-}
-
-/* ── CTA ──────────────────────────────────────────────────────── */
-.dc-cta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  flex-wrap: wrap;
-  padding: clamp(2.5rem, 5vw, 4rem);
-  border-radius: 1.25rem;
-  background: var(--color-fg);
-  color: #fff;
-}
-.dc-cta__h2 {
-  margin: 0 0 0.5rem;
-  font-size: clamp(1.5rem, 3vw, 2.125rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-.dc-cta__lead {
-  margin: 0;
-  font-size: 0.9375rem;
-  color: rgba(255,255,255,0.6);
-  line-height: 1.6;
-}
-.dc-cta__actions { display: flex; gap: 0.625rem; flex-wrap: wrap; flex-shrink: 0; }
-
-/* ── Related ──────────────────────────────────────────────────── */
-.dc-related {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.625rem;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-.dc-related > a {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-slate-500);
-  text-decoration: none;
-  padding: 0.4rem 0.875rem;
-  border-radius: 9999px;
-  border: 1px solid var(--color-slate-200);
-  transition: color 150ms ease, border-color 150ms ease;
-}
-.dc-related > a:hover { color: var(--color-slate-900); border-color: var(--color-slate-400); }
-
-/* ── Responsive ───────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .dc-cta { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 1.75rem 1.5rem; }
-}
-@media (max-width: 560px) {
-  .dc-hero { padding: 1.75rem 1.5rem; }
-}
-
-/* ── Таблица → карточки на мобиле: колонки материалов в строку
-   не помещаются даже с укороченными подписями (до 3 материалов +
-   ед. изм. + название), поэтому вместо горизонтального скролла
-   таблица превращается в список карточек (по одной на строку),
-   а значения покрытий идут парами «подпись: цена». ──────────── */
-@media (max-width: 640px) {
-  .dc-table-wrap { overflow-x: visible; border: none; border-radius: 0; margin-top: 1.25rem; }
-  .dc-table, .dc-table thead, .dc-table tbody, .dc-table tr, .dc-table th, .dc-table td {
-    display: block;
-    width: 100%;
-  }
-  .dc-table thead { display: none; }
-  .dc-table tbody tr {
-    padding: 1rem 1.125rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid var(--color-slate-200);
-    border-radius: 0.875rem;
-    background: #fff;
-  }
-  .dc-table tbody tr:last-child { margin-bottom: 0; }
-  .dc-table tbody th {
-    padding: 0 0 0.625rem;
-    background: transparent;
-    border-right: none;
-    border-bottom: 1px solid var(--color-slate-100);
-    margin-bottom: 0.5rem;
-    max-width: none;
-  }
-  .dc-table tbody td {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.375rem 0;
-    border-bottom: none;
-    white-space: normal;
-  }
-  .dc-table tbody td::before {
-    content: attr(data-label);
-    color: var(--color-slate-400);
-    font-weight: 500;
-    font-size: 0.8125rem;
-    flex-shrink: 0;
-  }
-  .dc-table__unit { color: var(--color-slate-400) !important; }
-  .dc-table__kit-row { border-top: none; }
-  .dc-table__kit-row th { font-size: 1rem; }
-  .dc-table__kit-row td { font-size: 1rem; }
-}
+  .dc-works { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 56.25rem) { .dc-works { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 </style>

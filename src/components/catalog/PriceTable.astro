@@ -15,8 +15,10 @@ interface Props {
   /** Ключ колонки — заголовок строки (на телефоне — заголовок карточки) */
   rowHeader: string
   caption?: string
+  /** Ключ подписи под заголовком строки (размер, единица) — мелко, не колонкой */
+  rowNote?: string
 }
-const { columns, rows, rowHeader, caption } = Astro.props
+const { columns, rows, rowHeader, caption, rowNote } = Astro.props
 const head = columns.find((c) => c.key === rowHeader)!
 const rest = columns.filter((c) => c.key !== rowHeader)
 ---
@@ -33,7 +35,7 @@ const rest = columns.filter((c) => c.key !== rowHeader)
     <tbody>
       {rows.map((r) => (
         <tr>
-          <th scope="row">{r[rowHeader]}</th>
+          <th scope="row">{r[rowHeader]}{rowNote && r[rowNote] && <span class="ptab__note">{r[rowNote]}</span>}</th>
           {rest.map((c) => (
             <td data-label={c.label} class:list={{ 'is-strong': c.strong }}>{r[c.key]}</td>
           ))}
@@ -65,6 +67,7 @@ const rest = columns.filter((c) => c.key !== rowHeader)
     color: var(--h-muted);
   }
   .ptab tbody th { font-weight: 600; color: var(--h-ink); }
+  .ptab__note { display: block; margin-top: 0.125rem; font-size: 0.8125rem; font-weight: 500; color: var(--h-muted); }
   .ptab td { color: var(--h-soft); white-space: nowrap; }
   .ptab td.is-strong { font-weight: 600; color: var(--h-ink); }
 

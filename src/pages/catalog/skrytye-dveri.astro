@@ -41,8 +41,8 @@ import { HERO_FACTS, MOSCOW_NOTES, SEGMENTS, HIDDEN_DOORS_FAQ } from '../../data
 import { getWorks } from '../../lib/works'
 import { STATUS_LABEL, type Status } from '../../data/in-salon'
 import { rub } from '../../data/services'
-import { merchantPolicy } from '../../lib/contacts-data'
-import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../../lib/local-business-schema'
+import { productSchema } from '../../lib/product-schema'
+import { localBusinessSchema } from '../../lib/local-business-schema'
 import { typograph } from '../../lib/typograph'
 import { PHONE, SITE } from '../../config/site'
 
@@ -137,28 +137,8 @@ const description =
   `Скрытые двери ${SITE.city.in}: «Секрет», «Секрет Реверс» и зеркальная «Рефлекс». ` +
   `Комплект с коробом от ${rub(SECRET_MIN_KIT_PRICE)}, высота до ${CUSTOM_MAX_HEIGHT} мм, замер и монтаж по Москве и области.`
 
-const areaServed = [
-  { '@type': 'City', name: SITE.city.name },
-  { '@type': 'AdministrativeArea', name: 'Московская область' },
-]
-const product = (name: string, text: string, image: string, low: number, high: number) => ({
-  '@context': 'https://schema.org',
-  '@type': 'Product',
-  name,
-  description: text,
-  brand: { '@type': 'Brand', name: SITE.name },
-  image: new URL(image, SITE.url).href,
-  offers: {
-    '@type': 'AggregateOffer',
-    priceCurrency: 'RUB',
-    lowPrice: low,
-    highPrice: high,
-    availability: 'https://schema.org/InStock',
-    areaServed,
-    seller: { '@id': LOCAL_BUSINESS_ID },
-    hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-  },
-})
+const product = (name: string, description: string, image: string, low: number, high: number) =>
+  productSchema({ name, description, image, low, high, inStock: true })
 const structuredData = [
   localBusinessSchema({ url: SITE.url }),
   product(

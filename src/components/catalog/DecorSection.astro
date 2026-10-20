@@ -1,0 +1,108 @@
+---
+/**
+ * Секция одной категории декора (фальшфрамуга, плинтус, рейки) — на
+ * /catalog/decor/ все три подряд, на страницах моделей — плинтус
+ * (PlinthSection.astro). Данные и тексты — src/data/decor-page.ts,
+ * цены — decor-products.ts; здесь только разметка.
+ *
+ * Шапка секции, текст и инфографика (одна — справа от текста, несколько —
+ * рядом под ним), ниже таблица цен (PriceTable). Инфографика с текстом —
+ * показывается целиком, без кадрирования; по нажатию открывается крупно
+ * в общем просмотрщике сайта (data-lightbox, без своего островка).
+ * Стили — токены дизайн-системы: нужен предок .home и home.css.
+ */
+import PriceTable from './PriceTable.astro'
+import { DECOR_PRICE_NOTE, type DecorCategory } from '../../data/decor-page'
+import { MATERIAL_LABELS, type PriceRow } from '../../data/decor-products'
+import { rub } from '../../data/services'
+import { typograph } from '../../lib/typograph'
+
+interface Props {
+  category: DecorCategory
+  /** Заголовок вместо category.title — на странице модели «Плинтус к дверям» */
+  title?: string
+  /** Ссылка вместо category.more — со страницы модели ведём на весь декор */
+  more?: DecorCategory['more']
+  /** Серый фон — чередование секций на странице */
+  wall?: boolean
+}
+const { category: c, title = c.title, more = c.more, wall = false } = Astro.props
+const gallery = c.images.length > 1
+const titleId = `${c.id}-title`
+
+/* Размер и единица — подписью под названием: на телефоне карточка строки
+   остаётся короткой — название и цены по покрытиям */
+const columns = [
+  { key: 'name', label: 'Позиция' },
+  ...c.materials.map((m) => ({ key: m, label: MATERIAL_LABELS[m] })),
+]
+const rowNote = (r: PriceRow) =>
+  [r.size && `${r.size} мм`, r.contents ?? (r.qty ? `комплект из ${r.qty}` : `цена за ${r.unit}`)].filter(Boolean).join(', ')
+const rows = c.rows.map((r) => ({
+  name: r.name,
+  note: rowNote(r),
+  ...Object.fromEntries(c.materials.map((m) => [m, r.prices[m] != null ? rub(r.prices[m]!) : '—'])),
+}))
+const sizes = gallery ? '(min-width: 62.5rem) 25vw, 50vw' : '(min-width: 62.5rem) 55vw, 100vw'
+---
+
+<section id={c.id} class:list={['h-sec', 'dsec', { 'h-sec--wall': wall }]} aria-labelledby={titleId}>
+  <div class="container">
+    <header class="h-head">
+      <h2 id={titleId} class="h-h2">{typograph(title)}</h2>
+      <p class="h-lead">{typograph(c.lead)}</p>
+    </header>
+
+    <div class:list={['dsec__body', { 'dsec__body--gallery': gallery }]}>
+      <div class="dsec__text">
+        {c.text.map((p) => <p class="h-body">{typograph(p)}</p>)}
+        {more && <a class="h-link" href={more.href}>{typograph(more.label)}</a>}
+      </div>
+      <ul
+        class="dsec__media"
+        role="list"
+        data-lightbox
+        data-lightbox-images={JSON.stringify(c.images.map((i) => ({ src: i.large, alt: i.alt })))}
+      >
+        {c.images.map((img, i) => (
+          <li>
+            <button type="button" class="h-media dsec__zoom" data-lightbox-index={i} aria-label={`Открыть крупно: ${img.alt}`}>
+              <img src={img.src} srcset={img.srcset} sizes={sizes} alt={img.alt} width={img.width} height={img.height} loading="lazy" decoding="async" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <PriceTable caption={`Цены: ${title}`} rowHeader="name" rowNote="note" columns={columns} rows={rows} />
+    <p class="h-meta dsec__note">{typograph([c.note, DECOR_PRICE_NOTE].filter(Boolean).join(' '))}</p>
+  </div>
+</section>
+
+<script>
+  import { initLightboxGroups } from '../../lib/lightbox'
+  initLightboxGroups()
+</script>
+
+<style>
+  /* Текст и инфографика: одна — справа от текста, несколько — рядом под ним */
+  .dsec__body { display: grid; gap: 1.5rem var(--h-gutter); align-items: start; margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .dsec__text { display: grid; gap: 1rem; justify-items: start; max-width: 36rem; }
+  .dsec__media { display: grid; gap: var(--h-tile-gap); margin: 0; padding: 0; list-style: none; }
+  .dsec__body--gallery .dsec__media { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 62.5rem) {
+    .dsec__body:not(.dsec__body--gallery) { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .dsec__body:not(.dsec__body--gallery) .dsec__text { grid-column: 1 / span 5; }
+    .dsec__body:not(.dsec__body--gallery) .dsec__media { grid-column: 6 / span 7; }
+    /* Колонок столько, сколько листов */
+    .dsec__body--gallery .dsec__media { grid-template-columns: none; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; }
+  }
+
+  /* Инфографика с текстом — целиком, на светлой подложке; курсор — «увеличить» */
+  .dsec__zoom { width: 100%; padding: 0; border: 0; cursor: zoom-in; }
+  .dsec__zoom img { height: auto; object-fit: contain; transition: transform 400ms var(--ease-out); }
+  .dsec__zoom:hover img { transform: scale(1.02); }
+  @media (prefers-reduced-motion: reduce) { .dsec__zoom img { transition: none; } .dsec__zoom:hover img { transform: none; } }
+
+  .dsec__note { margin: 1rem 0 0; max-width: 48rem; }
+</style>
