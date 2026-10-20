@@ -20,7 +20,7 @@
    только из scoped-стилей Vue/Astro (сканер Tailwind их не видит).
 
    Контраст на белом (WCAG): accent-500 = 4.0 (крупный/жирный текст,
-   плашки), accent-600 = 5.0, secondary-500 = 3.0 (только плашки и
+   плашки, линии и иконки), accent-600 = 5.0, secondary-500 = 3.0 (только плашки и
    иконки, не текст), secondary-700 = 6.1 (ссылки), slate-500 = 5.0.
    ============================================================ */
 @theme static {
@@ -75,6 +75,12 @@
   --color-body:          var(--color-slate-700);  /* основной текст */
   --color-accent:        var(--color-accent-500); /* красный акцент */
   --color-accent-hover:  var(--color-accent-600); /* hover акцента */
+  /* Красная заливка под белым текстом (кнопки, плитка-предложение):
+     #FF0020 с белым — 4,0 при норме 4,5 (WCAG AA), поэтому на ступень
+     плотнее — 5,0; наведение — ещё на ступень (6,7). Сам #FF0020 —
+     для линий, иконок, контуров и отметок, где норма 3:1 */
+  --color-accent-fill:       var(--color-accent-600);
+  --color-accent-fill-hover: var(--color-accent-700);
   --color-accent-light:  var(--color-accent-50);  /* лёгкий фон акцента */
   --color-secondary:     var(--color-secondary-500); /* голубой акцент */
   --color-link:          var(--color-secondary-700); /* текстовые ссылки */
@@ -415,7 +421,7 @@ astro-island:has(> .section) + .section,
   background: var(--color-fg);
   color: #fff;
 }
-.btn-primary:hover { background: var(--color-accent); }
+.btn-primary:hover { background: var(--color-accent-fill); }
 
 /* box-shadow: inset вместо border — рамка не добавляет высоту к боксу
    (в отличие от border, даже с box-sizing:border-box), поэтому кайма

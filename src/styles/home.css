@@ -46,6 +46,9 @@
   --h-status-new:   var(--color-accent-700);
   --h-status-stock: var(--color-secondary-700);
   --h-signal: var(--color-accent-500);
+  /* Под белым текстом — плотнее, ради контраста (global.css, --color-accent-fill) */
+  --h-signal-fill: var(--color-accent-fill);
+  --h-signal-fill-hover: var(--color-accent-fill-hover);
 
   --h-gutter: 1.5rem;
   --h-pad:    clamp(1rem, 4vw, 2rem);         /* поле .container — для лент во всю ширину */
@@ -209,8 +212,8 @@
   cursor: pointer;
   transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), border-color 180ms var(--ease-out);
 }
-.h-btn--signal { background: var(--h-signal); color: var(--color-white); }
-.h-btn--signal:hover { background: var(--color-accent-600); }
+.h-btn--signal { background: var(--h-signal-fill); color: var(--color-white); }
+.h-btn--signal:hover { background: var(--h-signal-fill-hover); }
 .h-btn--ink { background: var(--h-ink); color: var(--color-white); }
 .h-btn--ink:hover { background: var(--color-slate-700); }
 .h-btn--quiet { border-color: var(--color-slate-300); background: none; color: var(--h-ink); }
@@ -380,8 +383,8 @@
 
 .h-tile--light { background: var(--h-wall); color: var(--h-ink); }
 .h-tile--dark  { background: var(--color-slate-900); color: var(--color-white); }
-.h-tile--signal { background: var(--h-signal); color: var(--color-white); transition: background-color 180ms var(--ease-out); }
-.h-tile--signal:hover { background: var(--color-accent-600); }
+.h-tile--signal { background: var(--h-signal-fill); color: var(--color-white); transition: background-color 180ms var(--ease-out); }
+.h-tile--signal:hover { background: var(--h-signal-fill-hover); }
 .h-tile--photo { background: var(--color-slate-700); color: var(--color-white); }
 .h-tile--photo > img {
   position: absolute;
@@ -434,7 +437,7 @@
 }
 .h-tile--photo .h-cap { color: color-mix(in srgb, var(--color-white) 82%, transparent); }
 .h-tile--dark .h-cap  { color: var(--color-slate-400); }
-.h-tile--signal .h-cap { color: color-mix(in srgb, var(--color-white) 88%, transparent); }
+.h-tile--signal .h-cap { color: var(--color-white); } /* 88 % белого давало 4,1 — ниже нормы */
 
 @media (prefers-reduced-motion: reduce) {
   .h-arrow, .h-tile--photo > img, .h-tile--signal { transition: none; }

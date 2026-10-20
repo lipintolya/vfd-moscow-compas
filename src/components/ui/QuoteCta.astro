@@ -61,7 +61,8 @@ const {
     grid-template-columns: 1fr auto;
     border-radius: 1.5rem;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--color-accent-hover) 0%, var(--color-accent) 60%, var(--color-accent-700) 100%);
+    /* Под белым текстом — плотная заливка (--color-accent-fill): #FF0020 с белым ниже нормы контраста */
+    background: linear-gradient(135deg, var(--color-accent-fill) 0%, var(--color-accent-fill) 60%, var(--color-accent-fill-hover) 100%);
     box-shadow: 0 8px 32px color-mix(in srgb, var(--color-accent-hover) 28%, transparent);
   }
 

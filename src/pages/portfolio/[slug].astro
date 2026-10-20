@@ -225,14 +225,14 @@ const breadcrumbSchema = {
     background: var(--color-fg);
   }
   /* Телефон — единственная сплошная кнопка в блоке (акцент на главном
-     действии), берёт токен --color-accent, а не голый Tailwind accent-500 —
-     тот же цвет, что и везде в фирменной палитре, hover темнее, а не светлее. */
+     действии), берёт токен --color-accent-fill (красная заливка под белым текстом,
+     контраст ≥ 4,5), а не голый Tailwind accent-500; hover темнее, а не светлее. */
   .pw-cta__phone {
-    background: var(--color-accent);
-    color: #fff;
+    background: var(--color-accent-fill);
+    color: var(--color-white);
   }
   .pw-cta__phone:hover {
-    background: var(--color-accent-hover);
+    background: var(--color-accent-fill-hover);
   }
 
   .pw-specs {
@@ -251,7 +251,7 @@ const breadcrumbSchema = {
   }
   .pw-specs__label {
     font-size: 0.8125rem;
-    color: var(--color-fg-subtle);
+    color: var(--color-fg-muted); /* slate-400 на белом — 2,7, ниже нормы */
   }
   .pw-specs__value {
     margin: 0;
