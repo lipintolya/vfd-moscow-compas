@@ -12,6 +12,7 @@
  */
 import type { ModelEntry } from './model-entries'
 import { brandTitle } from './seo-title'
+import { SITE } from '../config/site'
 import { describeTrim, lowerFirst } from './trim-labels'
 import { getSeriesSpec } from '../data/series-descriptions'
 
@@ -102,15 +103,59 @@ export function priceLabel(m: Pick<ModelEntry, 'minPrice' | 'maxPrice'>): string
   return `${m.maxPrice && m.maxPrice > m.minPrice ? 'от ' : ''}${formatRub(m.minPrice)}`
 }
 
-/* «Межкомнатная дверь ВФД Эмалекс ЕС2 — купить в Москве | Студия Зизевского»:
-   бренд дверей — в названии (по нему ищут), салон — в конце */
-export const productTitle = (m: NamingInput) =>
-  brandTitle(`${productName(m, { withBrand: true })} — купить в Москве`)
+/** Длина заголовка в поиске: показываем до ~70 знаков, дальше — «…».
+    Салон и «| Студия Зизевского» дописываются к базе, поэтому база короче. */
+export const TITLE_MAX = 75
+export const DESCRIPTION_MAX = 158
 
-/** <meta description>: здесь как раз место цене и городу (в отличие от фида). */
+/**
+ * Фраза из обязательной головы и необязательных частей по порядку: часть
+ * добавляется, только если вся фраза уместилась в max. Так заголовок
+ * не обрывается посреди слова, а важное (модель, бренд) остаётся всегда.
+ */
+export function fitPhrase(head: string, optional: [string, string][], max: number): string {
+  let out = head
+  for (const [part, sep] of optional) {
+    if (!part) continue
+    const next = `${out}${sep}${part}`
+    if (next.length <= max) out = next
+  }
+  return out
+}
+
+/** Признаки модели для заголовка и описания — по приоритету: кромка или
+    остекление (отличает SKU с одинаковым названием), покрытие, город. */
+function modelAttributes(m: NamingInput, withCity: boolean): [string, string][] {
+  const trim = describeTrim(m.model.trim)?.phrase ?? ''
+  const coating = m.coatingName && !hasWords(productHeadline(m), m.coatingName) ? coatingInline(m) : ''
+  return [
+    [trim, ', '],
+    [coating, ', '],
+    ...(withCity ? [['в Москве', ' '] as [string, string]] : []),
+  ]
+}
+
+/* «Межкомнатная дверь ВФД Эмалекс ЕС2, кромка серебро, в Москве | Студия Зизевского»:
+   тип, бренд и кромка/остекление — всегда (кромка отличает модели с одним
+   названием; без неё страницы получают одинаковые заголовки). Покрытие и
+   город — по остатку длины. */
+export const productTitle = (m: NamingInput) => {
+  const head = `${DOOR_TYPE} ${BRAND} ${productHeadline(m)}`
+  const trim = describeTrim(m.model.trim)?.phrase ?? ''
+  const withTrim = trim ? `${head}, ${trim}` : head
+  const coating = m.coatingName && !hasWords(productHeadline(m), m.coatingName) ? coatingInline(m) : ''
+  const base = fitPhrase(withTrim, [[coating, ', '], ['в Москве', ' ']], TITLE_MAX - ` | ${SITE.studioName}`.length)
+  return brandTitle(base)
+}
+
+/** <meta description>: цена и город — здесь (в отличие от фида), признаки — пока
+    помещаются, в конце — что входит в услугу салона. */
 export function productMetaDescription(m: ModelEntry): string {
   const price = m.minPrice ? `цена ${priceLabel(m)} за полотно` : 'цена по запросу'
-  return `${productName(m)} — ${price}. Купить в Студии Зизевского — салоне ВФД в ТЦ «Компас», Москва: замер, доставка и установка.`
+  const tail = `. Салон ВФД в ТЦ «Компас», Москва: замер, доставка и установка.`
+  const head = `${DOOR_TYPE} ${BRAND} ${productHeadline(m)}`
+  const name = fitPhrase(head, modelAttributes(m, false), DESCRIPTION_MAX - tail.length - `, ${price}`.length)
+  return `${name}, ${price}${tail}`
 }
 
 const stripDot = (s: string) => s.trim().replace(/\.+$/, '')

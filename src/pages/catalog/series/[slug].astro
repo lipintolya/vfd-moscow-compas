@@ -7,6 +7,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { sellerRef } from '../../../lib/local-business-schema'
 import { brandTitle } from '../../../lib/seo-title'
+import { SITE } from '../../../config/site'
 import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import CatalogGrid from '../../../components/catalog/CatalogGrid.vue'
 import '../../../styles/home.css'
@@ -15,7 +16,7 @@ import { getCatalogCards, getSeriesList, getSeriesCards, getColorsByCoatingSlug 
 import { getSeriesSpec } from '../../../data/series-descriptions'
 import type { CatalogCardItem } from '../../../components/catalog/types'
 import { merchantPolicy } from '../../../lib/contacts-data'
-import { coatingInline, hasWords, pluralRu } from '../../../lib/product-text'
+import { coatingInline, fitPhrase, hasWords, pluralRu, TITLE_MAX } from '../../../lib/product-text'
 import { PHONE as SITE_PHONE } from '../../../config/site'
 import { checkArticleSeries } from '../../../lib/articles'
 
@@ -83,7 +84,9 @@ const modelsPhrase   = `${series.modelCount} ${pluralRu(series.modelCount, ['м�
 
 /* Тип товара первым — по нему ищут («межкомнатные двери скинель»),
    а само название серии тип не называет. */
-const pageTitle = brandTitle(`Межкомнатные двери ВФД ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — купить в Москве, цены`)
+const seriesTitleHead = `Межкомнатные двери ВФД ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''}`
+/* «в Москве» — пока заголовок вмещается (см. TITLE_MAX в product-text.ts) */
+const pageTitle = brandTitle(fitPhrase(seriesTitleHead, [['в Москве', ' ']], TITLE_MAX - ` | ${SITE.studioName}`.length))
 /* Короткая генерация всегда в meta — та же причина, что на models/[id].astro:
    spec.description (маркетинговый текст серии) длиннее ~155 символов нормы
    SERP-сниппета и не упоминает город/цену — Google обрежет её на середине
