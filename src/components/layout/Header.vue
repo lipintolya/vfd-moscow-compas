@@ -6,7 +6,7 @@ import { openingStatus } from '../../lib/opening-status'
 import { typograph } from '../../lib/typograph'
 import { SITE } from '../../config/site'
 import { whatsappUrl, WHATSAPP, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../../lib/messengers'
-import { MAP_URL } from '../../lib/map-links'
+import { MAP_URL, ROUTE_URL } from '../../lib/map-links'
 
 /* ============================================================
    Constants
@@ -72,13 +72,15 @@ const brandIntro = (() => {
   }
 })()
 
+/* desc — пояснение пункта в мобильном меню (у разделов с подменю —
+   пояснения у его пунктов) */
 const NAV_LINKS = [
-  { href: '/',            label: 'Главная' },
-  { href: '/catalog/',    label: 'Каталог' },
-  { href: '/partitions/', label: 'Перегородки' },
-  { href: '/designers/',  label: 'Дизайнерам' },
-  { href: '/about/',      label: 'О нас' },
-  { href: '/contacts/',   label: 'Контакты' },
+  { href: '/',            label: 'Главная',     desc: '' },
+  { href: '/catalog/',    label: 'Каталог',     desc: '' },
+  { href: '/partitions/', label: 'Перегородки', desc: '' },
+  { href: '/designers/',  label: 'Дизайнерам',  desc: 'Условия и материалы для проектов' },
+  { href: '/about/',      label: 'О нас',       desc: `${SITE.studioName} и фабрика ${SITE.name}` },
+  { href: '/contacts/',   label: 'Контакты',    desc: 'Адрес, часы и как добраться' },
 ] as const
 
 /* На десктопе «Главная» не выводится — на главную ведёт логотип, а
@@ -102,6 +104,14 @@ const SUBMENU: Record<string, readonly { href: string; label: string; desc: stri
   '/partitions/': PARTITIONS_DROPDOWN,
 }
 
+/* Мобильное меню — группы-карточки: разделы с подменю (заголовок — название
+   раздела, строки — его пункты) и «Студия» — остальные страницы. «Главная»
+   не выводится: на неё ведёт бренд в верхней строке меню. */
+const MOBILE_GROUPS = [
+  ...NAV_LINKS.filter((l) => SUBMENU[l.href]).map((l) => ({ title: l.label, items: SUBMENU[l.href]! })),
+  { title: 'Студия', items: NAV_LINKS.filter((l) => !SUBMENU[l.href] && l.href !== '/') },
+]
+
 
 /* ============================================================
    State
@@ -122,7 +132,6 @@ const contactsBtnRef   = ref<HTMLButtonElement | null>(null)
 const contactsPanelRef = ref<HTMLDivElement | null>(null)
 const mobileMenuRef    = ref<HTMLDivElement | null>(null)
 const burgerBtnRef     = ref<HTMLButtonElement | null>(null)
-const menuCloseRef     = ref<HTMLButtonElement | null>(null)
 
 let timerId: ReturnType<typeof setInterval> | null = null
 let desktopMql: MediaQueryList | null = null
@@ -181,7 +190,7 @@ const trapFocus = (e: KeyboardEvent) => {
   const active = document.activeElement as HTMLElement | null
   const inside = !!active && !!mobileMenuRef.value?.contains(active)
 
-  if (e.shiftKey && (active === first || !inside)) { e.preventDefault(); last.focus() }
+  if (e.shiftKey && (active === first || active === mobileMenuRef.value || !inside)) { e.preventDefault(); last.focus() }
   else if (!e.shiftKey && (active === last || !inside)) { e.preventDefault(); first.focus() }
 }
 
@@ -210,7 +219,10 @@ const openMobileMenu = async () => {
   mobileOpen.value = true
   menuLock.lock()
   await nextTick()
-  menuCloseRef.value?.focus({ preventScroll: true })
+  /* Фокус — на само окно (WAI-ARIA, модальный диалог), а не на «Закрыть»:
+     программный фокус на кнопке iOS рисует обводкой, хотя меню открыли
+     пальцем. С клавиатуры Tab идёт по порядку: бренд, «Закрыть», разделы. */
+  mobileMenuRef.value?.focus({ preventScroll: true })
 }
 /* Фокус возвращается на кнопку меню — клавиатурный пользователь
    продолжает с того же места, а не с начала страницы. */
@@ -514,6 +526,7 @@ onUnmounted(() => {
         role="dialog"
         aria-modal="true"
         aria-label="Меню сайта"
+        tabindex="-1"
       >
         <!-- Верхняя строка повторяет закрытую панель шапки (та же геометрия:
              контейнер, отступ сверху, высота) — при открытии меню бренд
@@ -531,7 +544,6 @@ onUnmounted(() => {
             </a>
             <div class="hdr-actions">
               <button
-                ref="menuCloseRef"
                 type="button"
                 class="hdr-round hdr-round--primary burger-btn is-open"
                 aria-label="Закрыть меню"
@@ -547,15 +559,84 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <div class="container mnav__body">
-          <p class="mnav__address">{{ SITE.address.full }}</p>
+        <div class="mnav__body">
+          <div class="container">
+            <!-- Салон: открыто ли сейчас — первым, крупно; куда ехать — под ним -->
+            <section class="mnav__visit" aria-label="Салон">
+              <p class="mnav__state" :class="{ 'is-open': isOpen }" aria-live="polite" aria-atomic="true">
+                <span class="mnav__dot" aria-hidden="true" />
+                <span class="mnav__state-title">{{ isOpen ? 'Открыто' : 'Закрыто' }}</span>
+                <span class="mnav__state-detail">{{ statusDetail }}</span>
+              </p>
+              <div class="mnav__where">
+                <p class="mnav__where-text">
+                  <span class="mnav__where-main">{{ CONTACTS.entrance }}</span>
+                  <span class="mnav__muted">{{ SITE.address.street }}</span>
+                  <span class="mnav__muted">{{ CONTACTS.worktime }}</span>
+                </p>
+                <a :href="ROUTE_URL" target="_blank" rel="noopener noreferrer" class="mnav__route" aria-label="Маршрут до салона в Яндекс Картах (откроется в новой вкладке)">
+                  Маршрут
+                  <svg class="hdr-ico" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
+            </section>
 
-          <!-- Звонок + написать в WhatsApp и Telegram -->
-          <div class="mnav__actions">
+            <!-- Разделы — группы-карточки: заголовок группы, строки с пояснением.
+                 Текущая страница — красная черта слева и тёмный текст. -->
+            <nav class="mnav__nav" aria-label="Разделы сайта">
+              <section v-for="(g, gi) in MOBILE_GROUPS" :key="g.title" class="mnav__group" :aria-labelledby="`mnav-g${gi}`">
+                <h2 :id="`mnav-g${gi}`" class="mnav__group-title">{{ g.title }}</h2>
+                <ul class="mnav__list" role="list">
+                  <li v-for="item in g.items" :key="item.href">
+                    <a
+                      :href="item.href"
+                      class="mnav__row"
+                      :class="{ 'is-active': isActive(item.href) }"
+                      :aria-current="isActive(item.href) ? 'page' : undefined"
+                      @click="closeMobileMenu(false)"
+                    >
+                      <span class="mnav__row-text">
+                        <span class="mnav__row-title">{{ item.label }}</span>
+                        <span v-if="item.desc" class="mnav__row-desc">{{ item.desc }}</span>
+                      </span>
+                      <svg class="hdr-ico mnav__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
+                      </svg>
+                    </a>
+                  </li>
+                </ul>
+              </section>
+            </nav>
+
+            <!-- Оба номера — в конце списка; внизу закреплена кнопка звонка в салон -->
+            <section class="mnav__group" aria-labelledby="mnav-phones">
+              <h2 id="mnav-phones" class="mnav__group-title">Телефоны</h2>
+              <ul class="mnav__list" role="list">
+                <li v-for="p in CONTACTS.phones" :key="p.raw">
+                  <a :href="`tel:${p.raw}`" class="mnav__row" :aria-label="`Позвонить: ${p.label}, ${p.title}`" @click="closeMobileMenu(false)">
+                    <span class="mnav__row-text" aria-hidden="true">
+                      <span class="mnav__row-title hdr-num">{{ p.label }}</span>
+                      <span class="mnav__row-desc">{{ p.title }}</span>
+                    </span>
+                    <svg class="hdr-ico mnav__row-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+                    </svg>
+                  </a>
+                </li>
+              </ul>
+            </section>
+          </div>
+        </div>
+
+        <!-- Внизу закреплено главное действие: звонок в салон и мессенджеры
+             с логотипами — крупно, по ним узнают сервис, а не по подписи -->
+        <div class="mnav__foot">
+          <div class="container mnav__bar">
             <a
               v-if="CONTACTS.phones[0]"
               :href="`tel:${CONTACTS.phones[0].raw}`"
               class="mnav__call"
+              :aria-label="`Позвонить в салон: ${CONTACTS.phones[0].label}`"
               @click="closeMobileMenu(false)"
             >
               <svg class="hdr-ico hdr-ico--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -571,85 +652,9 @@ onUnmounted(() => {
               rel="noopener noreferrer"
               :aria-label="`${s.label} (откроется в новой вкладке)`"
               :data-copy-text="s.copy"
-              class="hdr-round mnav__social"
+              class="mnav__msg"
             >
-              <img :src="s.icon" alt="" class="hdr-ico hdr-ico--lg" />
-            </a>
-          </div>
-
-          <!-- Навигация. Активный пункт — красная черта слева (не только
-               цвет текста: так его видно и при беглом взгляде). Стрелка —
-               только у пунктов без подразделов: у «Каталог»/«Перегородки» ниже
-               сразу видны вложенные ссылки. -->
-          <nav class="mnav__nav" aria-label="Разделы сайта">
-            <ul class="mnav__list" role="list">
-              <li
-                v-for="link in NAV_LINKS"
-                :key="link.href"
-                class="mnav__item"
-                :class="{ 'is-active': isSection(link.href) }"
-              >
-                <a
-                  :href="link.href"
-                  class="mnav__link"
-                  :aria-current="isActive(link.href) ? 'page' : undefined"
-                  @click="closeMobileMenu(false)"
-                >
-                  {{ link.label }}
-                  <svg v-if="!SUBMENU[link.href]" class="hdr-ico mnav__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/>
-                  </svg>
-                </a>
-                <ul v-if="SUBMENU[link.href]" class="mnav__sub" role="list">
-                  <li v-for="item in SUBMENU[link.href]" :key="item.href">
-                    <a
-                      :href="item.href"
-                      class="mnav__sublink"
-                      :aria-current="isActive(item.href) ? 'page' : undefined"
-                      @click="closeMobileMenu(false)"
-                    >{{ item.label }}</a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-
-            <!-- Статус салона + график -->
-            <div class="mnav__status" aria-live="polite" aria-atomic="true">
-              <span class="mnav__status-ico" :class="{ 'is-open': isOpen }" aria-hidden="true">
-                <svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-              </span>
-              <span class="mnav__status-text">
-                <span class="mnav__status-title" :class="{ 'is-open': isOpen }">{{ statusTitle }}</span>
-                <span class="mnav__muted">{{ statusDetail }}. {{ CONTACTS.worktime }}</span>
-              </span>
-            </div>
-          </nav>
-        </div>
-
-        <!-- Телефоны — закреплены внизу: номер + подпись + иконка трубки,
-             чтобы было видно, что это действие, а не просто текст. -->
-        <div class="mnav__foot">
-          <div class="container mnav__phones">
-            <a
-              v-for="p in CONTACTS.phones"
-              :key="p.raw"
-              :href="`tel:${p.raw}`"
-              :aria-label="`Позвонить: ${p.label}, ${p.title}`"
-              class="mnav__phone"
-              @click="closeMobileMenu(false)"
-            >
-              <span class="mnav__phone-text" aria-hidden="true">
-                <span class="mnav__phone-num hdr-num">{{ p.label }}</span>
-                <span class="mnav__muted">{{ p.title }}</span>
-              </span>
-              <span class="mnav__phone-ico" aria-hidden="true">
-                <svg class="hdr-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
-                </svg>
-              </span>
+              <img :src="s.icon" alt="" width="26" height="26" />
             </a>
           </div>
         </div>
@@ -1139,156 +1144,187 @@ onUnmounted(() => {
   .mnav { display: none; }
 }
 
+.mnav:focus { outline: none; }
 .mnav__top { flex: none; border-bottom: var(--hdr-hair) solid var(--hdr-line); }
 
-/* Середина прокручивается, телефон внизу закреплён */
+/* Середина прокручивается, панель звонка внизу закреплена */
 .mnav__body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding-bottom: 1.5rem;
 }
 
-.mnav__address {
-  margin: 1.25rem 0 1rem;
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--hdr-fg-muted);
+/* ── Салон: статус крупно, адрес и маршрут ── */
+.mnav__visit {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--hdr-fill);
 }
-
-.mnav__actions { display: flex; align-items: center; gap: 0.625rem; }
-.mnav__call {
+.mnav__state {
   display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: var(--hdr-tap);
-  border-radius: 999rem;
-  background: var(--hdr-primary);
-  color: var(--hdr-on-primary);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 180ms var(--hdr-ease);
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.625rem;
+  margin: 0;
 }
-.mnav__call:active { background: var(--hdr-primary-hover); }
-.mnav__social img { display: block; }
-
-.mnav__list {
-  margin: 1.25rem 0 0;
-  padding: 0;
-  list-style: none;
+.mnav__dot {
+  flex: none;
+  align-self: center;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+  background: var(--hdr-fg-faint);
+}
+.mnav__state.is-open .mnav__dot {
+  background: var(--hdr-open);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--hdr-open) 18%, transparent);
+}
+.mnav__state-title { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; color: var(--hdr-fg); }
+.mnav__state.is-open .mnav__state-title { color: var(--hdr-open); }
+.mnav__state-detail { font-size: 0.9375rem; font-weight: 500; color: var(--hdr-fg); }
+.mnav__where {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
   border-top: var(--hdr-hair) solid var(--hdr-line);
 }
-.mnav__item {
-  position: relative;
-  border-bottom: var(--hdr-hair) solid var(--hdr-line);
+/* Не уже 11 rem: на узком экране «Маршрут» уходит под адрес, а не сжимает его */
+.mnav__where-text { display: flex; flex: 1 1 11rem; flex-direction: column; gap: 0.125rem; min-width: 0; margin: 0; }
+.mnav__where-main { font-size: 0.9375rem; font-weight: 600; }
+.mnav__muted { font-size: 0.8125rem; line-height: 1.4; color: var(--hdr-fg-soft); }
+.mnav__route {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--hdr-tap);
+  padding: 0 1rem;
+  border-radius: 999rem;
+  background: var(--hdr-bg);
+  color: var(--hdr-fg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line);
 }
-/* Активный раздел — красная черта слева, в поле контейнера */
-.mnav__item.is-active::before {
+.mnav__route:active { background: var(--hdr-fill-hover); }
+
+/* ── Разделы: группы-карточки, строки — название и пояснение ── */
+.mnav__group { margin-top: 1.5rem; }
+.mnav__group-title {
+  margin: 0 0 0.5rem 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--hdr-fg-muted);
+}
+.mnav__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--hdr-fill);
+}
+/* Линия между строками — с отступом слева, как в системных списках */
+.mnav__list > li { position: relative; }
+.mnav__list > li + li::before {
   content: '';
   position: absolute;
-  left: -0.75rem;
-  top: 1rem;
-  height: 1.5rem;
-  width: 0.1875rem;
-  border-radius: 0.125rem;
-  background: var(--hdr-signal);
+  top: 0;
+  left: 1rem;
+  right: 0;
+  height: var(--hdr-hair);
+  background: var(--hdr-line);
 }
-.mnav__link {
+.mnav__row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  min-height: 3.5rem;
-  font-size: 1.0625rem;
-  font-weight: 600;
-  color: var(--hdr-fg-soft);
-  text-decoration: none;
-  transition: color 150ms var(--hdr-ease);
-}
-.mnav__link:hover,
-.mnav__item.is-active > .mnav__link { color: var(--hdr-fg); }
-.mnav__chev { color: var(--hdr-fg-faint); }
-
-.mnav__sub {
-  margin: -0.25rem 0 0.75rem;
-  padding: 0;
-  list-style: none;
-}
-.mnav__sublink {
-  display: flex;
-  align-items: center;
-  min-height: var(--hdr-tap);
-  margin-inline: -0.75rem;
-  padding-inline: 0.75rem;
-  border-radius: 0.75rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--hdr-fg-muted);
-  text-decoration: none;
-  transition: background-color 150ms var(--hdr-ease), color 150ms var(--hdr-ease);
-}
-.mnav__sublink:hover,
-.mnav__sublink[aria-current='page'] { background: var(--hdr-fill); color: var(--hdr-fg); }
-
-/* Статус салона: та же поверхность и круглая иконка, что у телефона внизу */
-.mnav__status {
-  display: flex;
-  align-items: center;
   gap: 0.75rem;
-  margin: 1.25rem 0;
-  padding: 0.875rem 1rem;
-  border-radius: 0.875rem;
-  background: var(--hdr-fill);
-  font-size: 0.875rem;
-  line-height: 1.4;
-}
-.mnav__status-ico,
-.mnav__phone-ico {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  background: var(--hdr-fill);
+  min-height: 3.5rem;
+  padding: 0.625rem 0.875rem 0.625rem 1rem;
   color: var(--hdr-fg);
+  text-decoration: none;
+  transition: background-color 150ms var(--hdr-ease);
 }
-.mnav__status-ico.is-open { color: var(--hdr-open); }
-.mnav__status-text { display: flex; flex-direction: column; min-width: 0; }
-.mnav__status-title { font-weight: 600; }
-.mnav__status-title.is-open { color: var(--hdr-open); }
-.mnav__muted { font-size: 0.8125rem; color: var(--hdr-fg-muted); }
+.mnav__row:active { background: var(--hdr-fill-hover); }
+.mnav__row:focus-visible { outline-offset: -0.125rem; border-radius: 1rem; }
+.mnav__row-text { display: flex; flex-direction: column; gap: 0.125rem; min-width: 0; }
+.mnav__row-title { font-size: 1rem; font-weight: 600; line-height: 1.3; }
+/* Пояснения на серой карточке — на ступень темнее подписей: slate-500 на
+   slate-100 даёт 4,3 при норме 4,5 (WCAG AA), slate-600 — 6,6 */
+.mnav__row-desc { font-size: 0.8125rem; line-height: 1.35; color: var(--hdr-fg-soft); }
+.mnav__chev { color: var(--hdr-fg-muted); }
+.mnav__row-ico { width: 1.125rem; height: 1.125rem; color: var(--hdr-fg); }
+/* Текущая страница — красная черта слева */
+.mnav__row.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 0.1875rem;
+  border-radius: 0 0.125rem 0.125rem 0;
+  background: var(--hdr-signal);
+}
 
+/* ── Внизу: звонок в салон и мессенджеры ── */
 .mnav__foot {
   flex: none;
   padding-block: 0.75rem calc(0.75rem + env(safe-area-inset-bottom, 0rem));
   border-top: var(--hdr-hair) solid var(--hdr-line);
   background: var(--hdr-bg);
 }
-.mnav__phones { display: flex; flex-direction: column; gap: 0.5rem; }
-.mnav__phone {
+.mnav__bar { display: flex; align-items: center; gap: 0.5rem; }
+.mnav__call {
   display: flex;
+  flex: 1;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-height: 3.5rem;
-  padding: 0.5rem 0.625rem 0.5rem 1rem;
-  border-radius: 0.875rem;
-  background: var(--hdr-fill);
-  color: var(--hdr-fg);
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 3.25rem;
+  border-radius: 999rem;
+  background: var(--hdr-primary);
+  color: var(--hdr-on-primary);
+  font-size: 1rem;
+  font-weight: 600;
   text-decoration: none;
+  transition: background-color 180ms var(--hdr-ease);
+}
+.mnav__call:active { background: var(--hdr-primary-hover); }
+.mnav__msg {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  background: var(--hdr-fill);
   transition: background-color 150ms var(--hdr-ease);
 }
-.mnav__phone:active { background: var(--hdr-fill-hover); }
-.mnav__phone-text { display: flex; flex-direction: column; min-width: 0; }
-.mnav__phone-num { font-size: 1rem; font-weight: 600; }
+.mnav__msg:active { background: var(--hdr-fill-hover); }
+.mnav__msg img { display: block; width: 1.625rem; height: 1.625rem; }
+/* Узкий телефон (320–359 px): кнопки мессенджеров — минимальная зона
+   нажатия, чтобы «Позвонить» с иконкой помещалась в строку */
+@media (max-width: 22.4375rem) {
+  .mnav__msg { width: var(--hdr-tap); height: var(--hdr-tap); }
+  .mnav__msg img { width: 1.5rem; height: 1.5rem; }
+  .mnav__call { min-height: var(--hdr-tap); font-size: 0.9375rem; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .hdr, .hdr-link, .hdr-link__chev, .hdr-phone, .hdr-cta, .hdr-round,
-  .hdr-mark img, .burger-icon__line, .mnav__link, .mnav__sublink, .mnav__call, .mnav__phone {
+  .hdr-mark img, .burger-icon__line, .mnav__row, .mnav__call, .mnav__msg {
     transition: none;
   }
   .hdr-brand__text.is-intro .hdr-brand__line > span { animation: none; }
