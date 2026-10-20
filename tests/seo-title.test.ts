@@ -43,7 +43,7 @@ test('сайт для поисковиков называется «Студия
   assert.equal(site.url, `${SITE.url}/`)
 })
 
-import { fitPhrase, productMetaDescription, TITLE_MAX, DESCRIPTION_MAX } from '../src/lib/product-text'
+import { fitPhrase, productMetaDescription, compactTrim, TITLE_MAX, DESCRIPTION_MAX } from '../src/lib/product-text'
 import type { ModelEntry } from '../src/lib/model-entries'
 
 test('fitPhrase: часть добавляется, только если фраза целиком уместилась', () => {
@@ -71,4 +71,24 @@ test('описание модели: не длиннее DESCRIPTION_MAX, с ц�
   assert.ok(d.length <= DESCRIPTION_MAX, `${d.length}: ${d}`)
   assert.match(d, /цена 10\s742\s₽ за полотно/)
   assert.match(d, /Салон ВФД в ТЦ «Компас»/)
+})
+
+test('заголовок не длиннее 75 знаков даже у самых длинных моделей; короткие формы — там, где полная не влезает', () => {
+  const titleOf = (name: string, trim: string | null, coatingName = 'Эмалекс', coatingSlug = 'emalex', seriesName = 'Урбан') =>
+    productTitle({ model: { name, trim }, seriesName, coatingName, coatingSlug } as never)
+  // Длинное остекление: полная фраза не влезает — остаётся «стекло сатин белый», модель и кромка сохраняются
+  const nekst = titleOf('Некст НР2', 'английская решётка, стекло сатин белый', 'Протач', 'protach', 'Некст')
+  assert.equal(nekst, `Межкомнатная дверь ВФД Некст НР2, стекло сатин белый${STUDIO}`)
+  // Кромка с молдингом: «с молдингом» уходит, цвет кромки остаётся
+  assert.equal(titleOf('Штрих 2А', 'Золотая с молдингом'), `Межкомнатная дверь ВФД Урбан Штрих 2А, кромка золотая${STUDIO}`)
+  // Название модели само содержит «стекло» и отделку: тип сокращается до «Дверь», бренд и модель остаются
+  const glass = titleOf('Эмалекс E1 Флай Сатин Графит стекло', null, 'Эмалекс', 'emalex', 'Эмалекс')
+  assert.ok(glass.startsWith('Дверь ВФД Эмалекс E1 Флай Сатин Графит стекло'), glass)
+  for (const t of [nekst, glass]) assert.ok(t.length <= TITLE_MAX, `${t.length}: ${t}`)
+})
+
+test('compactTrim: убирает описание, сохраняет цвет кромки или последнюю часть остекления', () => {
+  assert.equal(compactTrim('кромка золотая с молдингом'), 'кромка золотая')
+  assert.equal(compactTrim('английская решётка, стекло сатин белый'), 'стекло сатин белый')
+  assert.equal(compactTrim('кромка серебро'), 'кромка серебро')
 })

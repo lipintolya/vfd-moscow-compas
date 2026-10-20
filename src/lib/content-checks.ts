@@ -8,11 +8,13 @@
 import type { StrapiMedia } from './strapi'
 import type { RichNode, StrapiBlock } from './article-blocks'
 import { toArticle, toWork, toPromo, type StrapiArticle, type StrapiWork, type StrapiPromo } from './strapi-content'
+import { TITLE_MAX } from './product-text'
 
 /** Лид и короткое описание: короче — поисковик возьмёт кусок текста страницы */
 export const LEAD_MIN = 70
-/** Длиннее поисковики обрезают заголовок в выдаче */
-export const META_TITLE_MAX = 60
+/** Заголовок в выдаче — до TITLE_MAX знаков вместе с «| Студия Зизевского»
+    (его сайт добавляет сам), значит поле «для поисковиков» — на 20 короче */
+export const META_TITLE_MAX = TITLE_MAX - ' | Студия Зизевского'.length
 
 /** Ошибка сборки → замечание; «Статья «…»: » в начале — лишнее, запись и так открыта */
 function buildProblems(map: () => unknown): string[] {

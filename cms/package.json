@@ -18,7 +18,8 @@
     "import:articles": "node scripts/import-articles.mjs",
     "add:work": "node scripts/add-work.mjs",
     "add:article": "node scripts/add-article.mjs",
-    "set:cover": "node scripts/set-article-cover.mjs"
+    "set:cover": "node scripts/set-article-cover.mjs",
+    "work:meta": "node scripts/work-meta.mjs"
   },
   "dependencies": {
     "@strapi/database": "5.57.0",

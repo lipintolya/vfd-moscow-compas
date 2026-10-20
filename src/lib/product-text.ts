@@ -139,12 +139,34 @@ function modelAttributes(m: NamingInput, withCity: boolean): [string, string][] 
    тип, бренд и кромка/остекление — всегда (кромка отличает модели с одним
    названием; без неё страницы получают одинаковые заголовки). Покрытие и
    город — по остатку длины. */
+/* Короткая форма кромки для заголовка, когда полная не влезает: длинное
+   описание («английская решётка, стекло сатин белый», «кромка золотая с
+   молдингом») — у нескольких моделей. Кромка остаётся (по ней отличаются
+   SKU), уходит описание: «стекло сатин белый», «кромка золотая». Проверка
+   уникальности заголовков по всем моделям — в tests/seo-title.test.ts
+   (на собранном сайте — npm run build + проверка дублей). */
+export function compactTrim(trim: string): string {
+  if (trim.includes(', ')) return trim.slice(trim.lastIndexOf(', ') + 2)
+  return trim.replace(/ с молдингом$/, '')
+}
+
+/** База заголовка модели: тип → короткий тип «Дверь» → короткая кромка —
+    первый вариант, который вмещается в бюджет (без покрытия и города). */
+function titleHead(headline: string, trim: string, budget: number): string {
+  const variants = [
+    `${DOOR_TYPE} ${BRAND} ${headline}${trim ? `, ${trim}` : ''}`,
+    `${DOOR_TYPE} ${BRAND} ${headline}${trim ? `, ${compactTrim(trim)}` : ''}`,
+    `Дверь ${BRAND} ${headline}${trim ? `, ${compactTrim(trim)}` : ''}`,
+  ]
+  return variants.find((v) => v.length <= budget) ?? variants[variants.length - 1]!
+}
+
 export const productTitle = (m: NamingInput) => {
-  const head = `${DOOR_TYPE} ${BRAND} ${productHeadline(m)}`
+  const headline = productHeadline(m)
   const trim = describeTrim(m.model.trim)?.phrase ?? ''
-  const withTrim = trim ? `${head}, ${trim}` : head
-  const coating = m.coatingName && !hasWords(productHeadline(m), m.coatingName) ? coatingInline(m) : ''
-  const base = fitPhrase(withTrim, [[coating, ', '], ['в Москве', ' ']], TITLE_MAX - ` | ${SITE.studioName}`.length)
+  const coating = m.coatingName && !hasWords(headline, m.coatingName) ? coatingInline(m) : ''
+  const budget = TITLE_MAX - ` | ${SITE.studioName}`.length
+  const base = fitPhrase(titleHead(headline, trim, budget), [[coating, ', '], ['в Москве', ' ']], budget)
   return brandTitle(base)
 }
 

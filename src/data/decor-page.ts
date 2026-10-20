@@ -108,7 +108,7 @@ const plinthFrom = `плинтус от ${rub(FROM_PRICE_PLINTUS)}`
 const reykiFrom = `декоративные рейки от ${rub(FROM_PRICE_REYKI)} за ${REYKI_KIT_PCS} шт`
 
 export const DECOR_PAGE = {
-  title: `Декор к дверям ${SITE.name} ${SITE.city.in}: плинтус, фальшфрамуга, рейки`,
+  title: `Декор к дверям ${SITE.name} ${SITE.city.in}: плинтус, фрамуга, рейки`,
   description:
     `Плинтус от ${rub(FROM_PRICE_PLINTUS)}, фальшфрамуга с компланарным коробом — комплект от ${rub(FROM_PRICE_FRAMUGA_KIT)}, ` +
     `рейки от ${rub(FROM_PRICE_REYKI)}. Покрытия ${materials(PLINTUS_MATERIALS)}, салон в ${SITE.address.mall}.`,

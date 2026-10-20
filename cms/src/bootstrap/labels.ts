@@ -20,7 +20,7 @@ const LABELS: Record<string, Labels> = {
   'api::work.work': {
     title: { label: 'Название', description: 'Заголовок страницы работы' },
     slug: { label: 'Адрес страницы', description: 'Составляется из названия; после публикации не меняйте — старая ссылка перестанет работать' },
-    metaTitle: { label: 'Заголовок для поисковиков', description: 'Если пусто — «Название — место объекта». «| Студия Зизевского» добавится сам; до 60 знаков' },
+    metaTitle: { label: 'Заголовок для поисковиков', description: 'Если пусто — «Название — место объекта». «| Студия Зизевского» добавится сам; до 55 знаков (вместе с ним — не длиннее 75)' },
     date: { label: 'Дата' },
     category: { label: 'Вид работ' },
     objectType: { label: 'Объект' },
@@ -64,7 +64,7 @@ const LABELS: Record<string, Labels> = {
   'article.coating': { coating: { label: 'Покрытие' } },
   'article.author': { name: { label: 'Имя' }, role: { label: 'Кто это' }, href: { label: 'Ссылка' }, photo: { label: 'Фото или логотип' }, linkLabel: { label: 'Подпись ссылки' }, type: { label: 'Автор' } },
   'article.spotlight': { label: { label: 'Плашка', placeholder: 'Новинка' }, lead: { label: 'Лид', description: 'Если пусто — лид статьи' }, image: { label: 'Фото', description: 'Вертикальное' }, imageAlt: { label: 'Что на фото', description: 'Если пусто — из медиатеки' }, video: { label: 'Ролик' }, poster: { label: 'Обложка ролика' }, videoTitle: { label: 'Что в ролике' }, points: { label: 'Факты', description: '2–4 коротких' } },
-  'article.seo': { metaTitle: { label: 'Заголовок для поисковиков', description: 'Если пусто — заголовок статьи. «| Студия Зизевского» добавится сам; до 60 знаков' }, steps: { label: 'Шаги (инструкция)' }, coatings: { label: 'Покрытия', description: 'В конце статьи — серии с ценами; статья появится на страницах покрытий' }, series: { label: 'Серии каталога', description: 'Статья появится «статьёй по теме» у моделей серии; список — npm run cms:series' }, pages: { label: 'Страницы каталога', description: 'Где показать «Статья по теме» первой' }, author: { label: 'Автор', description: 'Если пусто — основатель студии' }, spotlight: { label: 'Показ на главной', description: 'Самая свежая статья с этим блоком — перед лентой статей' } },
+  'article.seo': { metaTitle: { label: 'Заголовок для поисковиков', description: 'Если пусто — заголовок статьи. «| Студия Зизевского» добавится сам; до 55 знаков (вместе с ним — не длиннее 75)' }, steps: { label: 'Шаги (инструкция)' }, coatings: { label: 'Покрытия', description: 'В конце статьи — серии с ценами; статья появится на страницах покрытий' }, series: { label: 'Серии каталога', description: 'Статья появится «статьёй по теме» у моделей серии; список — npm run cms:series' }, pages: { label: 'Страницы каталога', description: 'Где показать «Статья по теме» первой' }, author: { label: 'Автор', description: 'Если пусто — основатель студии' }, spotlight: { label: 'Показ на главной', description: 'Самая свежая статья с этим блоком — перед лентой статей' } },
   'article.catalog-page': { page: { label: 'Страница' } },
   'article.catalog-series': { series: { label: 'Серия' } },
   'shared.item': { text: { label: 'Текст' } },
