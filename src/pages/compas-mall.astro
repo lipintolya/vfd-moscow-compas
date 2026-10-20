@@ -1,0 +1,131 @@
+---
+/**
+ * Двери в ТЦ «Компас» (/compas-mall/) — посадочная страница под запросы
+ * «двери/салон в ТЦ Компас». Тексты — src/data/compas-mall-page.ts; адрес,
+ * метро и часы — из SITE и contacts-data. Маршрут, карта и фото здания —
+ * общий блок VisitBand (не дублируем). Проезд на машине и парковка — не
+ * публикуем, пока владелец не подтвердит (см. комментарий в данных).
+ */
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { brandTitle } from '../lib/seo-title'
+import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import VisitBand from '../components/home/VisitBand.astro'
+import { COMPAS_PAGE } from '../data/compas-mall-page'
+import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
+import { SITE, PHONE } from '../config/site'
+import { typograph } from '../lib/typograph'
+import '../styles/home.css'
+
+const pageUrl = new URL(COMPAS_PAGE.path, SITE.url).href
+
+const structuredData = [
+  localBusinessSchema({ url: pageUrl }),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    url: pageUrl,
+    name: COMPAS_PAGE.title,
+    about: { '@id': LOCAL_BUSINESS_ID },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: COMPAS_PAGE.faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+]
+
+const breadcrumbItems = [
+  { label: 'Главная', href: '/' },
+  { label: 'Контакты', href: '/contacts/' },
+  { label: 'ТЦ «Компас»' },
+]
+---
+
+<BaseLayout
+  title={brandTitle(COMPAS_PAGE.title)}
+  description={COMPAS_PAGE.description}
+  canonical={pageUrl}
+  structuredData={structuredData}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={breadcrumbItems} />
+    </div>
+  </div>
+
+  <div class="home">
+    <section class="cm-intro" aria-labelledby="cm-title">
+      <div class="container">
+        <h1 id="cm-title" class="h-h1">{typograph(COMPAS_PAGE.h1)}</h1>
+        <p class="h-lead cm-intro__lead">{typograph(COMPAS_PAGE.lead)}</p>
+        <div class="cm-intro__actions">
+          <a class="h-btn h-btn--ink h-btn--phone-wide" href={`tel:${PHONE.raw}`}>Позвонить: {PHONE.label}</a>
+          <a class="h-btn h-btn--quiet h-btn--phone-wide" href="#visit-heading">Как добраться</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="h-sec cm-see" aria-labelledby="cm-see-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="cm-see-title" class="h-h2">Что увидеть в салоне</h2>
+        </header>
+        <ul class="cm-cards" role="list">
+          {COMPAS_PAGE.see.map((c) => (
+            <li class="cm-card">
+              <h3 class="h-h3">{typograph(c.title)}</h3>
+              <p class="h-body">{typograph(c.text)}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--wall cm-find" aria-labelledby="cm-find-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="cm-find-title" class="h-h2">Как найти салон</h2>
+        </header>
+        <dl class="cm-facts">
+          {COMPAS_PAGE.find.map((f) => (
+            <div>
+              <dt class="h-meta">{f.label}</dt>
+              <dd class="h-body">{typograph(f.text)}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+
+    <VisitBand lead="Маршрут на карте, станции метро и фото здания с улицы — чтобы узнать ТЦ «Компас» на месте." />
+
+    <section class="h-sec" aria-labelledby="cm-faq-title">
+      <div class="container cm-faq">
+        <h2 id="cm-faq-title" class="h-h2">Вопросы о визите</h2>
+        <FaqAccordion items={COMPAS_PAGE.faq} title={false} />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .cm-intro { padding-top: clamp(1.5rem, 3vw, 2.5rem); padding-bottom: clamp(2rem, 4vw, 3rem); }
+  .cm-intro__lead { margin-top: 1.25rem; }
+  .cm-intro__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+
+  .cm-cards { display: grid; gap: 2.5rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 56.25rem) { .cm-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .cm-card { padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
+  .cm-card .h-h3 { margin-bottom: 0.75rem; }
+
+  .cm-facts { display: grid; gap: 1.75rem var(--h-gutter); margin: 0; }
+  @media (min-width: 56.25rem) { .cm-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .cm-facts > div { padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
+  .cm-facts dt { margin-bottom: 0.5rem; }
+  .cm-facts dd { margin: 0; color: var(--h-ink); font-size: 1.0625rem; font-weight: 500; }
+</style>
