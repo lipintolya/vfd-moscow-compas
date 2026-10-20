@@ -22,8 +22,8 @@ import VisitBand from '../components/home/VisitBand.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import {
   DESIGNERS_HERO, DESIGNERS_INTRO, DESIGNER_BENEFITS, DESIGNERS_SHOWROOM, DESIGNER_STEPS,
-  DESIGNER_RANGE, DESIGNER_RANGE_MORE, DESIGNER_RESOURCES, DESIGNER_RENDERS, DESIGNER_RENDERS_FEATURED,
-  DESIGNERS_FAQ,
+  DESIGNER_RANGE, DESIGNER_RANGE_MORE, DESIGNER_RESOURCES, DESIGNER_RESOURCES_LEAD, DESIGNER_RENDERS, DESIGNER_RENDERS_FEATURED,
+  DESIGNERS_FAQ, RESOURCE_ACTION, resourceMeta, type ResourceType,
 } from '../data/designers-page'
 import { SITE, PHONE } from '../config/site'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
@@ -84,13 +84,18 @@ const structuredData = [
   },
 ]
 
-/* Файлы — что за файл и что будет при нажатии: формат и «откроется в новой вкладке» */
-const RESOURCE_FORMAT: Record<string, string> = { '3D': '3D-модель', PDF: 'PDF-документ' }
-const resourceCount = DESIGNER_RESOURCES.length
-const resourcesLead = typograph(
-  `${resourceCount} ${pluralRu(resourceCount, ['файл', 'файла', 'файлов'])}: 3D-модели, каталоги и чертежи ${SITE.manufacturerOf}. Каждый откроется в новой вкладке.`,
-)
-const downloadIcon = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M8 2.5v7.5M4.75 7 8 10.25 11.25 7M3 13.5h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+/* «Помощь на всех этапах»: строк в двухколоночной раскладке дорожки */
+const helpRows = Math.ceil(DESIGNER_BENEFITS.help.stages.length / 2)
+
+/* Материалы: значок строки по типу ресурса и значок действия */
+const svg = (size: number, d: string) =>
+  `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" fill="none" aria-hidden="true"><path d="${d}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+const RESOURCE_GLYPH: Record<ResourceType, string> = {
+  file:    svg(20, 'M5.5 2.5h6l3.5 3.5v11.5h-9.5zM11.5 2.5V6H15'),
+  folder:  svg(20, 'M2.5 5.25c0-.7.55-1.25 1.25-1.25h3.6l1.8 2h7.1c.7 0 1.25.55 1.25 1.25v7.5c0 .7-.55 1.25-1.25 1.25H3.75c-.7 0-1.25-.55-1.25-1.25z'),
+  catalog: svg(20, 'M10 2.5 16.5 6v8L10 17.5 3.5 14V6zM3.5 6 10 9.5 16.5 6M10 9.5v8'),
+}
+const downloadIcon = svg(16, 'M8 2.5v7.5M4.75 7 8 10.25 11.25 7M3 13.5h10')
 
 const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 
@@ -205,9 +210,12 @@ const breadcrumbItems = [
               <h3 class="ds-tile__title">{typograph(help.title)}</h3>
               <p class="ds-help__text">{typograph(help.text)}</p>
             </div>
-            <ol class="ds-track" role="list">
+            <ol class="ds-track" role="list" style={`--n: ${help.stages.length}; --rows: ${helpRows}`}>
               {help.stages.map((st, k) => (
-                <li class:list={['ds-track__step', { 'is-last': k === help.stages.length - 1 }]} style={`--k: ${k}`}>
+                <li
+                  class:list={['ds-track__step', { 'is-last': k === help.stages.length - 1, 'is-col-end': k === helpRows - 1 }]}
+                  style={`--k: ${k}`}
+                >
                   <span class="ds-track__num">{String(k + 1).padStart(2, '0')}</span>
                   <span class="ds-track__label">{typograph(st)}</span>
                 </li>
@@ -343,20 +351,28 @@ const breadcrumbItems = [
       <div class="container ds-split">
         <header class="ds-split__head">
           <h2 id="ds-res-title" class="h-h2">Материалы для проектирования</h2>
-          <p class="h-lead ds-res__lead" set:html={resourcesLead}></p>
+          <p class="h-lead ds-res__lead">
+            {/* Слова с дефисом («3D-модели») не рвутся по дефису */}
+            {typograph(DESIGNER_RESOURCES_LEAD).split(/(\S+-\S+)/).map((part, i) => (i % 2 ? <span class="ds-nobr">{part}</span> : part))}
+          </p>
         </header>
         <ul class="ds-split__body ds-res" role="list">
           {DESIGNER_RESOURCES.map((r) => (
             <li>
               <a href={r.href} target="_blank" rel="noopener" class="ds-res__link">
-                <span class="ds-res__kind">{r.kind}</span>
+                <span class="ds-res__icon" aria-hidden="true">
+                  <Fragment set:html={RESOURCE_GLYPH[r.type]} />
+                  <span class="ds-res__format">{r.format}</span>
+                </span>
                 <span class="ds-res__body">
                   <span class="ds-res__title">{typograph(r.title)}</span>
-                  <span class="h-meta">{RESOURCE_FORMAT[r.kind]}, откроется в новой вкладке</span>
+                  <span class="h-meta ds-res__meta">{typograph(resourceMeta(r))}</span>
                 </span>
-                <span class="h-pill h-pill--line ds-res__action">
-                  Открыть файл<Fragment set:html={downloadIcon} />
+                <span class="ds-res__action">
+                  <span class="ds-res__action-label">{RESOURCE_ACTION[r.type]}</span>
+                  <Fragment set:html={r.type === 'file' ? downloadIcon : arrow} />
                 </span>
+                <span class="sr-only">(откроется в новой вкладке)</span>
               </a>
             </li>
           ))}
@@ -589,6 +605,9 @@ const breadcrumbItems = [
   /* Подход — рендер во всю ширину плитки, подпись под ним */
   .ds-tile--photo { gap: 0; padding: 0; overflow: hidden; }
   .ds-tile__media { position: relative; flex: 1 1 auto; min-height: 12rem; border-radius: 0; }
+  /* ПК: фото растягивается на высоту ряда вместе с соседней плиткой этапов —
+     собственный минимум ниже, чтобы ряд не задавал пустоту в той плитке */
+  @media (min-width: 62.5rem) { .ds-tile--photo .ds-tile__media { min-height: 9rem; } }
   .ds-tile__media > img { position: absolute; inset: 0; }
   .ds-tile__body { display: flex; flex-direction: column; gap: 0.75rem; padding: clamp(1.25rem, 2vw, 1.75rem); }
   /* Планшет: плитка во всю ширину — рендер слева, подпись справа */
@@ -598,10 +617,18 @@ const breadcrumbItems = [
     .ds-tile__body { flex: 1 1 45%; }
   }
 
-  /* Этапы — дорожка из семи шагов: номер, точка на линии, название.
-     От 62,5 rem — ряд: линия горизонтальная, точка на ней; ниже — столбик.
-     Плитка графитовая: на ней один красный сигнал — точка результата «Монтаж». */
+  /* Этапы — дорожка: номер, точка на линии, название; точка результата
+     («Монтаж») красная. Раскладка — по ширине САМОЙ плитки (container
+     queries), а не экрана: плитка бывает во всю ширину, в две трети и в
+     колонку телефона.
+       уже 30 rem — столбик;
+       30–45 rem — две колонки сверху вниз (--rows строк);
+       от 45 rem — ряд: колонки minmax(min-content, 1fr) — длинное слово
+       («Производство») раздвигает свою колонку, а не налезает на соседнюю.
+     Плитка тянется по высоте ряда сетки — дорожка прижата к низу. */
   .ds-tile--help {
+    container: ds-help / inline-size;
+    justify-content: space-between;
     gap: clamp(1.75rem, 3vw, 2.5rem);
     background: var(--color-slate-900);
     color: var(--color-white);
@@ -616,15 +643,15 @@ const breadcrumbItems = [
     color: var(--color-slate-400);
     text-wrap: pretty;
   }
-  @media (min-width: 62.5rem) {
+  @container ds-help (width >= 36rem) {
     .ds-help__head { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: end; column-gap: var(--h-gutter); }
   }
 
   .ds-track {
     --dot: 0.75rem;
+    --num: 1rem;     /* строка номера: по её середине — точка и линия */
     --gap: 1.25rem;
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: var(--gap);
     margin: 0;
     padding: 0;
@@ -633,17 +660,17 @@ const breadcrumbItems = [
   .ds-track__step {
     position: relative;
     display: grid;
-    grid-template-columns: var(--dot) minmax(0, 1fr);
+    grid-template-columns: var(--dot) auto;
+    grid-template-rows: var(--num) auto;
     column-gap: 1rem;
     row-gap: 0.25rem;
-    align-items: start;
   }
   .ds-track__num {
     grid-column: 2;
     grid-row: 1;
     font-size: 0.75rem;
     font-weight: 600;
-    line-height: 1rem;
+    line-height: var(--num);
     letter-spacing: 0.04em;
     font-variant-numeric: tabular-nums;
     color: var(--color-slate-400);
@@ -656,14 +683,16 @@ const breadcrumbItems = [
     line-height: 1.3;
     letter-spacing: -0.01em;
     color: var(--color-white);
+    text-wrap: balance;
   }
-  /* Точка — псевдоэлемент шага, линия — до точки следующего шага */
+  /* Точка — на середине строки номера; линия — от неё до точки следующего шага */
   .ds-track__step::before {
     content: '';
     position: relative;
     z-index: 1;
     grid-column: 1;
-    grid-row: 1 / span 2;
+    grid-row: 1;
+    align-self: center;
     width: var(--dot);
     height: var(--dot);
     box-sizing: border-box;
@@ -671,28 +700,36 @@ const breadcrumbItems = [
     border-radius: 50%;
     background: var(--color-slate-900);
   }
-  .ds-track__step.is-last::before { background: var(--h-signal); border-color: var(--h-signal); }
+  .ds-track__step.is-last::before {
+    border-color: var(--h-signal);
+    background: var(--h-signal);
+    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--h-signal) 28%, transparent);
+  }
   .ds-track__step:not(.is-last)::after {
     content: '';
     position: absolute;
-    top: calc(var(--dot) / 2);
-    bottom: calc(-1 * var(--gap));
+    top: calc(var(--num) / 2);
+    bottom: calc(-1 * (var(--gap) + var(--num) / 2));
     left: calc(var(--dot) / 2 - 0.03125rem);
     width: 0.0625rem;
-    background: color-mix(in srgb, var(--color-white) 30%, transparent);
+    background: color-mix(in srgb, var(--color-white) 24%, transparent);
     transform-origin: top;
   }
-  /* Ряд из семи шагов — от 80 rem: на колонку ~110 px, «Производство» в ней
-     не переносится; уже — столбик. Дорожка прижата к низу плитки */
-  @media (min-width: 80rem) {
-    .ds-tile--help { justify-content: space-between; }
-    .ds-track { flex-direction: row; gap: 0; }
-    .ds-track__step { flex: 1 1 0; grid-template-columns: minmax(0, 1fr); grid-template-rows: 1rem var(--dot) auto; row-gap: 0.75rem; }
-    .ds-track__num { grid-column: 1; grid-row: 1; }
-    .ds-track__label { grid-column: 1; grid-row: 3; font-size: 0.875rem; padding-right: 0.5rem; }
+
+  @container ds-help (30rem <= width < 45rem) {
+    .ds-track { grid-template-rows: repeat(var(--rows), auto); grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); column-gap: var(--h-gutter); }
+    /* Последний шаг колонки — линия не уходит в соседнюю колонку */
+    .ds-track__step.is-col-end::after { display: none; }
+  }
+
+  @container ds-help (width >= 45rem) {
+    .ds-track { --dot: 0.875rem; grid-template-columns: repeat(var(--n), minmax(min-content, 1fr)); gap: 0; }
+    .ds-track__step { grid-template-columns: auto; grid-template-rows: var(--num) var(--dot) auto; row-gap: 1rem; }
+    .ds-track__num { grid-column: 1; grid-row: 1; font-size: 0.8125rem; }
     .ds-track__step::before { grid-column: 1; grid-row: 2; }
+    .ds-track__label { grid-column: 1; grid-row: 3; padding-right: 0.75rem; }
     .ds-track__step:not(.is-last)::after {
-      top: calc(1rem + 0.75rem + var(--dot) / 2);
+      top: calc(var(--num) + 1rem + var(--dot) / 2);
       bottom: auto;
       left: calc(var(--dot) / 2);
       right: calc(-1 * var(--dot) / 2);
@@ -718,14 +755,14 @@ const breadcrumbItems = [
   .ds-stock__list li:nth-child(3) { transition-delay: calc(var(--t, 0ms) + 490ms); }
   [data-reveal='hidden'] .ds-stock__list li { opacity: 0; translate: 0 0.5rem; }
 
-  /* Дорожка: точки по очереди, линия до каждой следующей, названия проявляются */
+  /* Дорожка: точки по очереди, линия дорастает до следующей, названия проявляются */
   .ds-track__step::before { transition: scale 400ms cubic-bezier(0.34, 1.5, 0.64, 1) calc(var(--t, 0ms) + 250ms + var(--k) * 110ms); }
-  .ds-track__step::after { transition: scale 600ms var(--ease-out) calc(var(--t, 0ms) + 300ms + var(--k) * 110ms); }
+  .ds-track__step::after { transition: scale 500ms var(--ease-out) calc(var(--t, 0ms) + 320ms + var(--k) * 110ms); }
   .ds-track__num, .ds-track__label { transition: opacity 400ms var(--ease-out) calc(var(--t, 0ms) + 300ms + var(--k) * 110ms); }
   [data-reveal='hidden'] .ds-track__step::before { scale: 0; }
   [data-reveal='hidden'] .ds-track__step::after { scale: 1 0; }
   [data-reveal='hidden'] .ds-track__num, [data-reveal='hidden'] .ds-track__label { opacity: 0; }
-  @media (min-width: 80rem) { [data-reveal='hidden'] .ds-track__step::after { scale: 0 1; } }
+  @container ds-help (width >= 45rem) { [data-reveal='hidden'] .ds-track__step::after { scale: 0 1; } }
 
   /* ── Шоурум: графитовая сцена ── */
   .ds-room {
@@ -832,44 +869,66 @@ const breadcrumbItems = [
   }
   .ds-renders__foot { margin: clamp(1.25rem, 2vw, 1.75rem) 0 0; }
 
-  /* ── Материалы: строки под линейками, внешние ссылки ── */
+  /* ── Материалы: строки под линейками. Значок — что за ресурс (файл,
+     папка, каталог 3D) и формат; подпись — что это и где лежит; справа —
+     действие словами («Скачать», «Открыть папку»). Строка — одна ссылка:
+     при наведении значок и кнопка темнеют вместе. ── */
   .ds-res__lead { margin-top: 1rem; }
+  .ds-nobr { white-space: nowrap; }
   .ds-res { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
   .ds-res__link {
     display: grid;
     grid-template-columns: 3rem minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.5rem 1rem;
-    padding-block: 1.125rem;
+    gap: 1rem;
+    padding-block: 1rem;
     border-bottom: 0.0625rem solid var(--h-rule);
     color: var(--h-ink);
     text-decoration: none;
   }
-  .ds-res__kind {
-    justify-self: start;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.5rem;
+  .ds-res__icon {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.125rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
     background: var(--h-wall);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--h-soft);
+    color: var(--h-ink);
+    transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
   }
+  .ds-res__format { font-size: 0.625rem; font-weight: 700; line-height: 1; letter-spacing: 0.06em; color: var(--h-soft); transition: color 180ms var(--ease-out); }
   .ds-res__body { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
   .ds-res__title { font-size: 1.0625rem; font-weight: 600; line-height: 1.35; }
-  /* Кнопка «Открыть файл» — видна сразу, подсвечивается вместе со строкой */
-  .ds-res__action { gap: 0.375rem; padding: 0.4375rem 0.875rem; font-size: 0.8125rem; white-space: nowrap; }
+  .ds-res__meta { color: var(--h-soft); }
+  .ds-res__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border: 0.0625rem solid var(--color-slate-300);
+    border-radius: 999rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), color 180ms var(--ease-out);
+  }
   .ds-res__action svg { flex: none; }
-  .ds-res__link:hover .ds-res__title { color: var(--h-signal); }
-  .ds-res__link:hover .ds-res__action { border-color: var(--h-signal); color: var(--h-signal); }
-  /* Телефон: кнопка — под названием, во всю строку по левому краю */
+  .ds-res__link:hover .ds-res__icon,
+  .ds-res__link:hover .ds-res__action { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
+  .ds-res__link:hover .ds-res__format { color: color-mix(in srgb, var(--color-white) 75%, transparent); }
+  /* Телефон: кнопка — круглая, со значком; подпись остаётся для экранных читалок */
   @media (max-width: 29.9375rem) {
-    .ds-res__link { grid-template-columns: 3rem minmax(0, 1fr); }
-    .ds-res__action { grid-column: 2; justify-self: start; }
+    .ds-res__action { width: 2.5rem; padding: 0; }
+    .ds-res__action-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     [data-reveal], [data-reveal] *, .ds-track__step::before, .ds-track__step::after,
+    .ds-res__icon, .ds-res__format, .ds-res__action,
     .ds-range__media img, .ds-renders__item > img { transition: none; }
     .ds-range__card:hover .ds-range__media img, .ds-renders__item:hover > img { transform: none; }
   }

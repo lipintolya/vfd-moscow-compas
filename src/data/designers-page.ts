@@ -8,11 +8,13 @@
 import { SITE, PHONE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { pluralRu } from '../lib/plural'
+import { listRu } from '../lib/typograph'
 import { renderGallery } from './partitions'
 import { DOOR_SIZES } from './door-sizes'
 import { SECRET_STOCK_HEIGHTS } from './skrytye-dveri-products'
 import hero from './designers-hero.json'
 import { DIRECTION_PHOTOS } from './direction-photos'
+import { VFD } from './vfd-factory'
 
 const hours = companyLegalInfo.workingHours.shortDisplay
 const days  = companyLegalInfo.workingHours.weekdays
@@ -155,15 +157,54 @@ export const DESIGNER_RANGE_MORE = [
   { label: 'Видео о дверях',                  href: '/video/' },
 ]
 
-/* Материалы для проектирования — файлы фабрики: 3D-модели и PDF. Открываются
-   в новой вкладке (страница DESIGNERS: блок «Материалы для проектирования») */
-export const DESIGNER_RESOURCES = [
-  { kind: '3D',  title: '3D-модели алюминиевых дверей',         href: 'https://3ddd.ru/3dmodels?query=alumdoor&order=relevance' },
-  { kind: 'PDF', title: 'Каталог алюминиевых дверей',           href: 'https://crm.vfd.ru/docs/pub/7c3fe99768a64437fc6c2a0371c7414f/default/?&' },
-  { kind: 'PDF', title: 'Инструкции и технические чертежи',     href: 'https://crm.vfd.ru/docs/pub/1041f6446d1a6eb72c8f75161e08de65/default/?&' },
-  { kind: 'PDF', title: 'Визуализация конструкций и профилей',  href: 'https://crm.vfd.ru/docs/pub/ded5bbfb131cea40a5f33f05006e5bd4/default/?path=%2F%D0%BF%D1%80%D0%BE%D1%84%D0%B8%D0%BB%D1%8F%20%D0%BF%D0%BE%D0%BB%D0%BE%D1%82%D0%B5%D0%BD%2F' },
-  { kind: 'PDF', title: 'Изображения стёкол и перегородок',     href: 'https://crm.vfd.ru/docs/pub/8481c384fc078da3e1cea168258b98e0/default/?&' },
+/* Материалы для проектирования. Что за ссылкой — проверено по самим
+   страницам (2026-10-20): каталог — страница скачивания одного PDF;
+   инструкции — папка PDF; визуализации и стёкла — папки JPG; 3D-модели —
+   подборка в каталоге 3ddd.ru. Подпись, действие и значок строки выводятся
+   из type и format (resourceMeta, RESOURCE_ACTION) — в разметке их нет.
+   Где лежит — по адресу: домен фабрики (VFD.url) или сторонний сайт. */
+export type ResourceType = 'file' | 'folder' | 'catalog'
+export type ResourceFormat = 'PDF' | 'JPG' | '3D'
+export interface DesignerResource { type: ResourceType; format: ResourceFormat; title: string; href: string }
+
+export const DESIGNER_RESOURCES: DesignerResource[] = [
+  { type: 'catalog', format: '3D',  title: '3D-модели алюминиевых дверей',        href: 'https://3ddd.ru/3dmodels?query=alumdoor&order=relevance' },
+  { type: 'file',    format: 'PDF', title: 'Каталог алюминиевых дверей',          href: 'https://crm.vfd.ru/docs/pub/7c3fe99768a64437fc6c2a0371c7414f/default/?&' },
+  { type: 'folder',  format: 'PDF', title: 'Инструкции и технические чертежи',    href: 'https://crm.vfd.ru/docs/pub/1041f6446d1a6eb72c8f75161e08de65/default/?&' },
+  { type: 'folder',  format: 'JPG', title: 'Визуализация конструкций и профилей', href: 'https://crm.vfd.ru/docs/pub/ded5bbfb131cea40a5f33f05006e5bd4/default/?path=%2F%D0%BF%D1%80%D0%BE%D1%84%D0%B8%D0%BB%D1%8F%20%D0%BF%D0%BE%D0%BB%D0%BE%D1%82%D0%B5%D0%BD%2F' },
+  { type: 'folder',  format: 'JPG', title: 'Изображения стёкол и перегородок',    href: 'https://crm.vfd.ru/docs/pub/8481c384fc078da3e1cea168258b98e0/default/?&' },
 ]
+
+/** Что произойдёт по нажатию — подпись кнопки строки */
+export const RESOURCE_ACTION: Record<ResourceType, string> = {
+  file:    'Скачать',
+  folder:  'Открыть папку',
+  catalog: 'Открыть каталог',
+}
+
+const FACTORY_HOST = new URL(VFD.url).hostname
+const hostOf = (href: string) => new URL(href).hostname.replace(/^www\./, '')
+/** Домен фабрики или его поддомен (crm.vfd.ru) */
+const isFactory = (host: string) => host === FACTORY_HOST || host.endsWith(`.${FACTORY_HOST}`)
+/** «на сайте фабрики» или «на 3ddd.ru» */
+const whereOf = (href: string) => (isFactory(hostOf(href)) ? 'на сайте фабрики' : `на ${hostOf(href)}`)
+const FOLDER_OF: Record<ResourceFormat, string> = { PDF: 'Папка с PDF-файлами', JPG: 'Папка с изображениями', '3D': 'Папка с 3D-моделями' }
+
+/** Подпись под названием: что это и где лежит — «PDF-файл на сайте фабрики» */
+export const resourceMeta = (r: DesignerResource) => {
+  const what = r.type === 'file' ? `${r.format}-файл` : r.type === 'folder' ? FOLDER_OF[r.format] : 'Подборка моделей'
+  return `${what} ${whereOf(r.href)}`
+}
+
+/** Вводка блока: что на сайте фабрики и что — на сторонних (по адресам списка) */
+const FORMAT_NOUN: Record<ResourceFormat, string> = { PDF: 'документы', JPG: 'изображения', '3D': '3D-модели' }
+const external = [...new Set(
+  DESIGNER_RESOURCES.filter((r) => !isFactory(hostOf(r.href))).map((r) => `${FORMAT_NOUN[r.format]} — на ${hostOf(r.href)}`),
+)]
+export const DESIGNER_RESOURCES_LEAD =
+  `Каталог, инструкции, чертежи и изображения — на сайте ${SITE.manufacturerOf}` +
+  (external.length ? `, ${listRu(external)}` : '') +
+  '. Всё открывается в новой вкладке.'
 
 /* Визуализации — алюминиевые перегородки и двери ВФД в интерьере: та же
    галерея, что на /partitions/ (public/renders/alum-covers/: 1920 px и
