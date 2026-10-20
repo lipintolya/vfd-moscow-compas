@@ -195,6 +195,7 @@ const trapFocus = (e: KeyboardEvent) => {
 }
 
 const onKeydown = (e: KeyboardEvent) => {
+  lastInput = 'keyboard'
   if (e.key === 'Tab' && mobileOpen.value) { trapFocus(e); return }
   if (e.key !== 'Escape') return
   // Закрываем только верхний слой
@@ -215,6 +216,20 @@ const onClickOutside = (e: MouseEvent) => {
 
 const menuLock = useScrollLock()
 
+/* Последний способ ввода. Фокус, возвращённый после закрытия пальцем или
+   мышью, — без обводки: iOS считает программный фокус «видимым» и обводил
+   бургер после нажатия на крестик. С клавиатуры обводка остаётся. */
+let lastInput: 'keyboard' | 'pointer' = 'pointer'
+const onPointerDown = () => { lastInput = 'pointer' }
+const returnFocusTo = (el: HTMLElement | null | undefined) => {
+  if (!el) return
+  if (lastInput === 'pointer') {
+    el.dataset.focusQuiet = ''
+    el.addEventListener('blur', () => { delete el.dataset.focusQuiet }, { once: true })
+  }
+  el.focus({ preventScroll: true })
+}
+
 const openMobileMenu = async () => {
   mobileOpen.value = true
   menuLock.lock()
@@ -230,7 +245,7 @@ const closeMobileMenu = (returnFocus = true) => {
   if (!mobileOpen.value) return
   mobileOpen.value = false
   menuLock.unlock()
-  if (returnFocus) burgerBtnRef.value?.focus({ preventScroll: true })
+  if (returnFocus) returnFocusTo(burgerBtnRef.value)
 }
 const toggleMobileMenu = () => mobileOpen.value ? closeMobileMenu() : openMobileMenu()
 
@@ -256,7 +271,7 @@ const closeContacts = (returnFocus = true) => {
   // Возвращаем фокус на кнопку только при закрытии с клавиатуры (Escape) —
   // иначе после клика мышью (вне попапа или по ссылке внутри) на кнопке
   // повисает focus-visible обводка, хотя пользователь работал мышью.
-  if (returnFocus) contactsBtnRef.value?.focus()
+  if (returnFocus) returnFocusTo(contactsBtnRef.value)
 }
 const toggleContacts = () => contactsOpen.value ? closeContacts() : openContacts()
 
@@ -269,6 +284,7 @@ onMounted(() => {
   desktopMql.addEventListener('change', onDesktopChange)
   window.addEventListener('keydown', onKeydown)
   document.addEventListener('click', onClickOutside, { capture: true })
+  document.addEventListener('pointerdown', onPointerDown, { capture: true })
   timerId = setInterval(() => { now.value = new Date() }, 30_000)
 })
 
@@ -276,6 +292,7 @@ onUnmounted(() => {
   desktopMql?.removeEventListener('change', onDesktopChange)
   window.removeEventListener('keydown', onKeydown)
   document.removeEventListener('click', onClickOutside, { capture: true })
+  document.removeEventListener('pointerdown', onPointerDown, { capture: true })
   if (timerId !== null) clearInterval(timerId)
   if (catalogTimer !== null) clearTimeout(catalogTimer)
   if (partitionsTimer !== null) clearTimeout(partitionsTimer)
@@ -562,8 +579,8 @@ onUnmounted(() => {
         <div class="mnav__body">
           <div class="container">
             <!-- Салон: открыто ли сейчас — первым, крупно; куда ехать — под ним -->
-            <section class="mnav__visit" aria-label="Салон">
-              <p class="mnav__state" :class="{ 'is-open': isOpen }" aria-live="polite" aria-atomic="true">
+            <section class="mnav__visit" :class="isOpen ? 'is-open' : 'is-closed'" aria-label="Салон">
+              <p class="mnav__state" aria-live="polite" aria-atomic="true">
                 <span class="mnav__dot" aria-hidden="true" />
                 <span class="mnav__state-title">{{ isOpen ? 'Открыто' : 'Закрыто' }}</span>
                 <span class="mnav__state-detail">{{ statusDetail }}</span>
@@ -701,7 +718,12 @@ onUnmounted(() => {
   --hdr-primary-hover: var(--color-slate-700);
   --hdr-on-primary:    var(--color-white);
   --hdr-signal:        var(--color-accent-500);  /* текущий раздел */
-  --hdr-open:          var(--color-secondary-700); /* «Сейчас открыто» */
+  /* Статус салона: открыто — зелёный, закрыто — красный; *-tint — точка
+     и подсветка карточки, текст — тёмный оттенок (контраст ≥ 5:1) */
+  --hdr-open:          var(--color-success-800);
+  --hdr-open-tint:     var(--color-success-500);
+  --hdr-closed:        var(--color-accent-800);
+  --hdr-closed-tint:   var(--color-accent-500);
   --hdr-shadow:        color-mix(in srgb, var(--color-slate-950) 10%, transparent);
   --hdr-focus:         var(--color-secondary-600);
   --hdr-hair:          0.0625rem;
@@ -790,6 +812,8 @@ onUnmounted(() => {
   outline: 0.125rem solid var(--hdr-focus);
   outline-offset: 0.125rem;
 }
+/* Фокус, возвращённый после закрытия пальцем, — без обводки (returnFocusTo) */
+.site-header [data-focus-quiet]:focus-visible { outline: none; }
 
 .hdr-ico { flex: none; width: 1rem; height: 1rem; }
 .hdr-ico--lg { width: 1.25rem; height: 1.25rem; }
@@ -1158,11 +1182,15 @@ onUnmounted(() => {
 
 /* ── Салон: статус крупно, адрес и маршрут ── */
 .mnav__visit {
+  --tint: var(--hdr-closed-tint);
+  --state: var(--hdr-closed);
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 1rem;
-  background: var(--hdr-fill);
+  /* Подсветка статуса — из угла со статусом, к середине уходит в серый */
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tint) 16%, var(--hdr-fill)) 0%, var(--hdr-fill) 70%);
 }
+.mnav__visit.is-open { --tint: var(--hdr-open-tint); --state: var(--hdr-open); }
 .mnav__state {
   display: flex;
   flex-wrap: wrap;
@@ -1176,14 +1204,10 @@ onUnmounted(() => {
   width: 0.625rem;
   height: 0.625rem;
   border-radius: 50%;
-  background: var(--hdr-fg-faint);
+  background: var(--tint);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--tint) 22%, transparent);
 }
-.mnav__state.is-open .mnav__dot {
-  background: var(--hdr-open);
-  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--hdr-open) 18%, transparent);
-}
-.mnav__state-title { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; color: var(--hdr-fg); }
-.mnav__state.is-open .mnav__state-title { color: var(--hdr-open); }
+.mnav__state-title { font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; color: var(--state); }
 .mnav__state-detail { font-size: 0.9375rem; font-weight: 500; color: var(--hdr-fg); }
 .mnav__where {
   display: flex;
