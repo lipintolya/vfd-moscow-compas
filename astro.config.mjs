@@ -178,6 +178,14 @@ const workImages = await fetchWorkImages()
 const ARTICLES = await fetchStrapi('articles', { 'fields[0]': 'slug', 'fields[1]': 'publishDate', 'fields[2]': 'updatedDate' })
 const ARTICLE_LASTMOD = new Map(ARTICLES.map((a) => [a.slug, a.updatedDate ?? a.publishDate]))
 const HAS_ARTICLES = ARTICLE_LASTMOD.size > 0
+
+/* Акции: раздел /akcii/ — в карте только если есть активная акция (срок —
+   до конца дня validUntil, как в src/lib/promo-dates.ts; дата — московская).
+   Пустой раздел закрыт noindex (src/pages/akcii.astro), чтобы не тонуть
+   в выдаче тонкой страницей «акций нет». */
+const PROMOS = await fetchStrapi('promos', { 'fields[0]': 'validUntil' })
+const MOSCOW_TODAY = new Date(Date.now() + 3 * 3600_000).toISOString().slice(0, 10)
+const HAS_ACTIVE_PROMOS = PROMOS.some((p) => typeof p.validUntil === 'string' && p.validUntil >= MOSCOW_TODAY)
 /** @param {string} page */
 function isArticleInSitemap(page) {
   const m = page.match(/\/articles(?:\/([a-z0-9-]+))?\/?$/)
@@ -220,7 +228,8 @@ export default defineConfig({
         !/\/models\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/?$/.test(page) &&
         // Статьи: заглушки (закрыты noindex) — не в карте; раздел — только
         // если есть опубликованные (см. readArticles выше)
-        isArticleInSitemap(page),
+        isArticleInSitemap(page) &&
+        (page !== `${SITE_URL}/akcii/` || HAS_ACTIVE_PROMOS),
       serialize(item) {
         const u = item.url
 

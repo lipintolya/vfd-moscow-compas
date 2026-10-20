@@ -163,7 +163,7 @@ const structuredData = [{
           </div>
 
           <h1 class="product-title">
-            <span class="product-title__type">{`${DOOR_TYPE} `}</span>{displayName}{coatingName && <span class="product-title__coating"> — {coatingName}</span>}
+            <span class="product-title__type">{`${DOOR_TYPE} `}</span>{displayName}{coatingName && <span class="product-title__coating"> — {coatingName}</span>}{trim && <span class="product-title__coating">, {trim.phrase}</span>}
           </h1>
 
           {spec.description && (

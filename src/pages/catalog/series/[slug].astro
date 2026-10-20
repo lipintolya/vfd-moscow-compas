@@ -92,7 +92,7 @@ const pageTitle = brandTitle(fitPhrase(seriesTitleHead, [['в Москве', ' '
    SERP-сниппета и не упоминает город/цену — Google обрежет её на середине
    фразы. spec.description остаётся на странице как есть (блок "О коллекции"). */
 const pageDesc  =
-  `Межкомнатные двери серии ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — ${modelsPhrase}${series.minPrice ? `, цены от ${fmt(series.minPrice)} за полотно` : ''}. Купить в Москве в салоне ВФД в ТЦ «Компас»: замер, доставка и установка.`
+  `Межкомнатные двери серии ${series.name}${coatingPhrase ? ` (${coatingPhrase})` : ''} — ${modelsPhrase}${series.minPrice ? `, цены от ${fmt(series.minPrice)} за полотно` : ''}. Купить в Москве: салон ВФД в ТЦ «Компас», замер, доставка и установка.`
 
 /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
 const structuredData = canonicalUrl ? [

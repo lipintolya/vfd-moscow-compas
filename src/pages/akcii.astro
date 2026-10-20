@@ -14,6 +14,7 @@ const activePromos = (await getCollection('promos')).map((e) => e.data)
 <BaseLayout
   title={brandTitle(`Акции и специальные предложения на двери ${SITE.name}`)}
   description={`Все текущие акции и специальные предложения ${SITE.studioNameOf} — салона дверей ${SITE.name} в ${SITE.address.mall}, ${SITE.city.name}.`}
+  noIndex={activePromos.length === 0}
 >
   <div class="pa-page">
     <div class="container">
