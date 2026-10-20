@@ -1,8 +1,8 @@
 ---
 /**
  * /contacts/ — контакты салона в дизайн-системе главной (home.css):
- * первый экран с плитками (звонок, WhatsApp, Telegram, салон), фото
- * салона, «Что вы получаете», способы оплаты, частые вопросы и в конце
+ * первый экран с плитками (звонок, WhatsApp, Telegram, салон),
+ * «Что вы получаете», способы оплаты, частые вопросы и в конце
  * «Как к нам добраться» (VisitBand — своя карта и фото ТЦ).
  * Реквизиты юрлица не публикуются: владелец сайта — физлицо
  * (src/lib/contacts-data.ts). Тексты — src/data/contacts-page.ts.
@@ -15,7 +15,7 @@ import VisitBand from '../components/home/VisitBand.astro'
 import PaymentMethods from '../components/contacts/PaymentMethods.astro'
 import { companyLegalInfo, HAS_EMAIL } from '../lib/contacts-data'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
-import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ, SALON } from '../data/contacts-page'
+import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ } from '../data/contacts-page'
 import { PRICES_DATE_LABEL } from '../data/services'
 import { SITE, PHONE } from '../config/site'
 import { WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../lib/messengers'
@@ -149,45 +149,6 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    {/* Как выглядит салон — сразу под способами связаться: продолжает
-         первый экран (тот же фон, без отступа сверху). ПК — вход крупно
-         2×2 и ещё четыре кадра рядом; телефон — лента со свайпом. Клик —
-         окно просмотра со всеми кадрами */}
-    <section class="h-sec h-sec--tight-top" id="salon" aria-labelledby="ct-salon-title">
-      <div class="container">
-        <header class="h-head">
-          <h2 id="ct-salon-title" class="h-h2">{SALON.title}</h2>
-          <p class="h-lead">{typograph(SALON.lead)}</p>
-        </header>
-        <div data-lightbox data-lightbox-images={JSON.stringify(SALON.photos.map((p) => ({ src: p.large, alt: p.alt })))}>
-          <ul class="ct-salon h-rail" role="list">
-            {SALON.photos.slice(0, SALON.previewCount).map((p, i) => (
-              <li class="ct-salon__item">
-                <button type="button" class="h-media ct-salon__zoom" aria-label={`Открыть фото: ${p.alt}`} data-lightbox-index={i}>
-                  <img
-                    src={p.src}
-                    srcset={p.srcset}
-                    sizes={i === 0
-                      ? '(min-width: 80rem) 37rem, (min-width: 43.75rem) 50vw, 82vw'
-                      : '(min-width: 80rem) 18rem, (min-width: 43.75rem) 25vw, 82vw'}
-                    alt={p.alt}
-                    width={p.width}
-                    height={p.height}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  {p.chip && <span class="h-chip ct-salon__chip" aria-hidden="true">{p.chip}</span>}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button type="button" class="h-btn h-btn--quiet h-btn--phone-wide ct-salon__all" data-lightbox-index="0">
-            Смотреть все {SALON.photos.length} фото
-          </button>
-        </div>
-      </div>
-    </section>
-
     {/* Что вы получаете: подпись под фото, как табличка у образца */}
     <section class="h-sec h-sec--wall" aria-labelledby="ct-benefits-title">
       <div class="container">
@@ -269,11 +230,6 @@ const breadcrumbItems = [
 </BaseLayout>
 
 <script>
-  import { initLightboxGroups } from '../lib/lightbox'
-
-  /* Фото салона — окно просмотра */
-  initLightboxGroups()
-
   /* «Что вы получаете» — каждая карточка появляется один раз, когда сама
      доходит до экрана: на телефоне они идут одна под другой, и общий
      запуск проигрывал бы нижние карточки за пределами экрана. Карточки,
@@ -363,46 +319,6 @@ const breadcrumbItems = [
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-  }
-
-  /* ── Как выглядит салон ──
-     ПК и планшет: 4 колонки × 2 ряда, кадры 3:4. Вход (1-й) — 2×2 слева;
-     колонка 3 — дверь входа (2-й, внизу) и 3-й кадр (вверху), колонка 4 —
-     4-й и 5-й. Кадров в превью — SALON.previewCount. Телефон — лента (.h-rail) */
-  .ct-salon {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--h-tile-gap);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .ct-salon__item { aspect-ratio: 3 / 4; }
-  @media (min-width: 43.75rem) {
-    .ct-salon__item:nth-child(1) { position: relative; grid-area: 1 / 1 / span 2 / span 2; aspect-ratio: auto; }
-    .ct-salon__item:nth-child(1) .ct-salon__zoom { position: absolute; inset: 0; }
-    .ct-salon__item:nth-child(2) { grid-area: 2 / 3; }
-    .ct-salon__item:nth-child(3) { grid-area: 1 / 3; }
-    .ct-salon__item:nth-child(4) { grid-area: 1 / 4; }
-    .ct-salon__item:nth-child(5) { grid-area: 2 / 4; }
-  }
-  .ct-salon__zoom {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    cursor: zoom-in;
-  }
-  .ct-salon__zoom img { transition: transform 700ms var(--ease-out); }
-  .ct-salon__zoom:hover img { transform: scale(1.025); }
-  .ct-salon__zoom:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
-  /* Плашка на фото — что это за место */
-  .ct-salon__chip { position: absolute; left: clamp(0.75rem, 1.4vw, 1rem); bottom: clamp(0.75rem, 1.4vw, 1rem); max-width: calc(100% - 1.5rem); overflow: hidden; text-overflow: ellipsis; }
-  .ct-salon__all { margin-top: 1.5rem; }
-  @media (prefers-reduced-motion: reduce) {
-    .ct-salon__zoom img { transition: none; }
-    .ct-salon__zoom:hover img { transform: none; }
   }
 
   /* ── Что вы получаете ── */
