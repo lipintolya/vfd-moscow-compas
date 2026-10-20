@@ -115,6 +115,13 @@ export const CUSTOM_HEIGHT_TIERS = [
 ] as const
 
 export const CUSTOM_LEAD_TIME = '6–8 недель'
+
+/** Нестандартные высоты из наличия («Секрет» и «Секрет Реверс»): срок
+    изготовления к ним не относится, надбавка ступени — относится */
+export const SECRET_STOCK_CUSTOM_HEIGHTS = SECRET_STOCK_HEIGHTS.filter((h) => h !== DOOR_HEIGHT)
+/** Высоты из наличия внутри ступени */
+export const stockHeightsIn = (tier: { from: number; to: number }) =>
+  SECRET_STOCK_CUSTOM_HEIGHTS.filter((h) => h >= tier.from && h <= tier.to)
 /** Максимальная высота под заказ, мм — из таблицы надбавок */
 export const CUSTOM_MAX_HEIGHT = CUSTOM_HEIGHT_TIERS[CUSTOM_HEIGHT_TIERS.length - 1]!.to
 

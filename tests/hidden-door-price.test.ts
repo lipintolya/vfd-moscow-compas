@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  quote, normalize, describe, configToParams, paramsToConfig, DEFAULT_CONFIG, type HiddenConfig,
+  quote, normalize, describe, notesOf, configToParams, paramsToConfig, DEFAULT_CONFIG, type HiddenConfig,
 } from '../src/lib/hidden-door-price'
 import { SECRET_PRICES, REFLEX_PRICES, REFLEX_TWO_SIDED_MIRROR_SURCHARGE } from '../src/data/skrytye-dveri-products'
 
@@ -75,4 +75,14 @@ test('описание выбора — для подписи и сообщен�
     describe(cfg({ series: 'reflex', reverse: true, edge: 'gold', height: 2400, twoSided: true })),
     '«Рефлекс», от себя, кромка золото, короб Стандарт, высота 2400–2500 мм, зеркало с двух сторон',
   )
+})
+
+test('срок высоты: 2100 и 2300 мм «Секрет» — в наличии, остальное и «Рефлекс» — под заказ', () => {
+  const note = (c: Partial<HiddenConfig>) => notesOf(cfg(c)).at(-1)!
+  assert.equal(note({ height: 2050 }), '2100 мм — в наличии, другие высоты диапазона — изготовление 6–8 недель')
+  assert.equal(note({ series: 'revers', height: 2300 }), '2300 мм — в наличии, другие высоты диапазона — изготовление 6–8 недель')
+  assert.equal(note({ height: 2400 }), 'Нестандартная высота — изготовление 6–8 недель')
+  assert.equal(note({ series: 'reflex', height: 2300 }), 'Нестандартная высота — изготовление 6–8 недель')
+  // Стандартная высота — без строки о сроке
+  assert.ok(!notesOf(cfg({})).some((n) => n.includes('изготовление')))
 })

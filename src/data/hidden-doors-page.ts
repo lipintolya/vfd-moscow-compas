@@ -7,9 +7,10 @@
 import { SITE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { MEASURE_TERMS, INSTALL_TERMS, rub } from './services'
+import { listRu } from '../lib/typograph'
 import {
-  CUSTOM_HEIGHT_TIERS, HIDDEN_EDGES,
-  DOOR_HEIGHT, CUSTOM_LEAD_TIME, CUSTOM_MAX_HEIGHT, REFLEX_MAX_HEIGHT,
+  CUSTOM_HEIGHT_TIERS, HIDDEN_EDGES, SECRET_STOCK_HEIGHTS,
+  CUSTOM_LEAD_TIME, CUSTOM_MAX_HEIGHT, REFLEX_MAX_HEIGHT,
   SECRET_MIN_KIT_PRICE, SECRET_REVERS_MIN_KIT_PRICE, REFLEX_MIN_KIT_PRICE,
 } from './skrytye-dveri-products'
 
@@ -79,7 +80,7 @@ export const HIDDEN_DOORS_FAQ = [
   },
   {
     q: 'Подойдёт ли скрытая дверь для высоких потолков?',
-    a: `Да. Стандартная высота — ${DOOR_HEIGHT} мм, под заказ — до ${CUSTOM_MAX_HEIGHT} мм («Рефлекс» — до ${REFLEX_MAX_HEIGHT} мм). Срок изготовления — ${CUSTOM_LEAD_TIME}.`,
+    a: `Да. «Секрет» и «Секрет Реверс» высотой ${listRu(SECRET_STOCK_HEIGHTS.map(String))} мм есть в наличии, под заказ — до ${CUSTOM_MAX_HEIGHT} мм («Рефлекс» — до ${REFLEX_MAX_HEIGHT} мм), срок изготовления — ${CUSTOM_LEAD_TIME}.`,
   },
   {
     q: 'Какой нужен проём и какие стены подходят?',

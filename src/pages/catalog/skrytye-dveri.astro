@@ -30,10 +30,11 @@ import '../../styles/home.css'
 
 import {
   HIDDEN_STATUS, HIDDEN_SERIES, type HiddenSeries, IMAGES, HERO_IMAGES, INFO_IMAGES, BOX_PRO_IMAGE, BOX_LITE_IMAGE, FACTS,
-  SECRET_SIZES, SECRET_REVERS_SIZES, DOOR_HEIGHT,
+  SECRET_SIZES, SECRET_REVERS_SIZES,
   SECRET_PRICES, SECRET_MIN_BLADE_PRICE, SECRET_MIN_KIT_PRICE,
   SECRET_REVERS_MIN_BLADE_PRICE, SECRET_REVERS_MIN_KIT_PRICE,
   CUSTOM_HEIGHT_TIERS, CUSTOM_LEAD_TIME, CUSTOM_MAX_HEIGHT, calcCustomPrice,
+  SECRET_STOCK_HEIGHTS, SECRET_STOCK_CUSTOM_HEIGHTS,
   REFLEX_IMAGE, REFLEX_OPENING_DIAGRAM, REFLEX_PRICES, REFLEX_MIN_BLADE_PRICE,
   REFLEX_MIN_KIT_PRICE, REFLEX_REVERS_MIN_KIT_PRICE, REFLEX_HEIGHT_TIERS, REFLEX_MAX_HEIGHT,
   REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
@@ -44,7 +45,7 @@ import { MODEL_STATUS_LABEL, type ModelStatus } from '../../lib/made-to-order'
 import { rub } from '../../data/services'
 import { productSchema } from '../../lib/product-schema'
 import { localBusinessSchema } from '../../lib/local-business-schema'
-import { typograph } from '../../lib/typograph'
+import { listRu, typograph } from '../../lib/typograph'
 import { PHONE, SITE } from '../../config/site'
 
 const CALL = `tel:${PHONE.raw}`
@@ -62,7 +63,7 @@ const series: {
     image: IMAGES.invisible, alt: 'Скрытая дверь «Секрет» вровень со стеной',
     specs: [
       ['Ширины в наличии', `${SECRET_SIZES.join(', ')} мм`],
-      ['Высота', `${DOOR_HEIGHT} мм, под заказ до ${CUSTOM_MAX_HEIGHT}`],
+      ['Высота в наличии', `${listRu(SECRET_STOCK_HEIGHTS.map(String))} мм, под заказ до ${CUSTOM_MAX_HEIGHT}`],
       ['Кромка', 'чёрная, серебро, золото'],
     ],
     kit: SECRET_MIN_KIT_PRICE,
@@ -74,7 +75,7 @@ const series: {
     image: IMAGES.invisibleRev, alt: 'Скрытая дверь «Секрет Реверс» с обратным открыванием',
     specs: [
       ['Ширины в наличии', `${SECRET_REVERS_SIZES.join(', ')} мм`],
-      ['Высота', `${DOOR_HEIGHT} мм, под заказ до ${CUSTOM_MAX_HEIGHT}`],
+      ['Высота в наличии', `${listRu(SECRET_STOCK_HEIGHTS.map(String))} мм, под заказ до ${CUSTOM_MAX_HEIGHT}`],
       ['Кромка', 'чёрная, серебро, золото'],
     ],
     kit: SECRET_REVERS_MIN_KIT_PRICE,
@@ -303,8 +304,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
             <div class="hd-prices__block">
               <h3 class="hd-subhead">Нестандартная высота</h3>
               <p class="h-body hd-prices__lead">
-                Для высоких потолков: надбавка применяется к&nbsp;полотну и&nbsp;коробу,
-                срок изготовления&nbsp;— {CUSTOM_LEAD_TIME}. Цены&nbsp;— за&nbsp;самый доступный комплект.
+                {typograph(`Для высоких потолков: надбавка применяется к полотну и коробу. «Секрет» и «Секрет Реверс» высотой ${listRu(SECRET_STOCK_CUSTOM_HEIGHTS.map(String))} мм — в наличии, остальные высоты — изготовление ${CUSTOM_LEAD_TIME}. Цены — за самый доступный комплект.`)}
               </p>
               <div class="hd-heights">
                 <PriceTable

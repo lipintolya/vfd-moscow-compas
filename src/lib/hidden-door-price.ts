@@ -16,7 +16,7 @@
 import {
   SECRET_PRICES, REFLEX_PRICES, CUSTOM_HEIGHT_TIERS, REFLEX_HEIGHT_TIERS,
   REFLEX_TWO_SIDED_MIRROR_SURCHARGE, HIDDEN_SERIES, HIDDEN_EDGES, DOOR_HEIGHT,
-  SECRET_SIZES, SECRET_REVERS_SIZES, REFLEX_MAX_HEIGHT, CUSTOM_LEAD_TIME,
+  SECRET_SIZES, SECRET_REVERS_SIZES, REFLEX_MAX_HEIGHT, CUSTOM_LEAD_TIME, stockHeightsIn,
   calcCustomPrice,
   type HiddenSeries, type SecretEdgeColor,
 } from '../data/skrytye-dveri-products'
@@ -125,6 +125,16 @@ export function describe(input: HiddenConfig): string {
 /** Сообщение менеджеру: выбор словами и цена с сайта */
 export const managerMessage = (c: HiddenConfig) => `Хочу рассчитать скрытую дверь: ${describe(c)}. На сайте — ${rub(quote(c).total)}.`
 
+/** Срок нестандартной высоты: высоты из наличия в ступени — названы
+    («Рефлекс» делается по размеру — у него наличия нет) */
+function heightNote(c: HiddenConfig) {
+  const tier = tiersOf(c.series).find((t) => t.from === c.height)!
+  const stock = c.series === 'reflex' ? [] : stockHeightsIn(tier)
+  return stock.length
+    ? `${listRu(stock.map(String))} мм — в наличии, другие высоты диапазона — изготовление ${CUSTOM_LEAD_TIME}`
+    : `Нестандартная высота — изготовление ${CUSTOM_LEAD_TIME}`
+}
+
 /** Что важно знать о выборе: размеры в наличии и срок нестандартной высоты */
 export function notesOf(input: HiddenConfig): string[] {
   const c = normalize(input)
@@ -133,7 +143,7 @@ export function notesOf(input: HiddenConfig): string[] {
     c.series === 'reflex'
       ? `Делается по размеру проёма, высота — до ${REFLEX_MAX_HEIGHT} мм`
       : `Ширина в наличии — ${listRu(widths.map(String))} мм`,
-    ...(c.height != null ? [`Нестандартная высота — изготовление ${CUSTOM_LEAD_TIME}`] : []),
+    ...(c.height != null ? [heightNote(c)] : []),
   ]
 }
 
