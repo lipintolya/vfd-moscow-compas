@@ -7,6 +7,7 @@ import { typograph } from '../../lib/typograph'
 import { SITE } from '../../config/site'
 import { whatsappUrl, WHATSAPP, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../../lib/messengers'
 import { MAP_URL, ROUTE_URL } from '../../lib/map-links'
+import { MESSENGER_ICONS } from '../../lib/messenger-icons'
 
 /* ============================================================
    Constants
@@ -28,19 +29,19 @@ const SOCIAL_NETWORKS = [
     name: 'WhatsApp',
     label: `Написать в WhatsApp на ${WHATSAPP.label}`,
     url: WHATSAPP_URL,
-    icon: '/icons/whatsapp-black.png',
+    icon: MESSENGER_ICONS.whatsapp.onLight,
   }] : []),
   ...(TELEGRAM_CHAT ? [{
     name: 'Telegram',
     label: `Написать в Telegram: @${TELEGRAM_CHAT}`,
     url: TELEGRAM_CHAT_URL,
-    icon: '/icons/telegram-black.png',
+    icon: MESSENGER_ICONS.telegram.onLight,
   }] : []),
   ...(MAX_CHAT ? [{
     name: 'MAX',
     label: 'Написать в MAX (текст скопируется)',
     url: maxChatUrl(),
-    icon: '/icons/max-dark.svg',
+    icon: MESSENGER_ICONS.max.onLight,
     copy: CONSULT_MESSAGE,
   }] : []),
 ]

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { MESSENGER_ICONS } from '../../lib/messenger-icons'
 import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { useScrollLock } from '../../lib/scroll-lock'
@@ -253,7 +254,7 @@ onUnmounted(() => {
               rel="noopener noreferrer"
               class="mt-5 inline-flex items-center gap-2.5 text-sm text-white/60 hover:text-white transition-colors duration-200"
             >
-              <img src="/icons/telegram-white.png" alt="" class="w-6 h-6" width="24" height="24" loading="lazy" />
+              <img :src="MESSENGER_ICONS.telegram.onDark" alt="" class="w-6 h-6" width="24" height="24" loading="lazy" />
               <span>Telegram-канал <span class="text-white/55">{{ SITE.social.telegramHandle }}</span></span>
             </a>
           </div>
