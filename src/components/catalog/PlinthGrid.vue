@@ -1,22 +1,39 @@
 <script setup lang="ts">
 /**
- * Карточки напольного плинтуса (/catalog/plintus/): фото, описание и две кнопки.
- * «Смотреть в интерьере» открывает общий просмотрщик сайта (PhotoLightbox) с
- * отрисовками белого варианта. «Запросить цену» — окно с телефонами менеджера и
- * ссылками на WhatsApp, Telegram, MAX и ВКонтакте (ВК — когда задан social.vk).
- * В WhatsApp текст уже в ссылке; в Telegram, MAX и ВКонтакте он копируется по клику.
+ * Карточки напольного плинтуса (/catalog/plintus/): переключатель профиля,
+ * фото, номер, описание, размеры и кнопка «Запросить цену».
+ * Фото — кнопка: открывает общий просмотрщик сайта (PhotoLightbox) с
+ * отрисовками белого варианта в интерьере. «Запросить цену» — окно с
+ * телефонами менеджера и ссылками на WhatsApp, Telegram, MAX и ВКонтакте
+ * (ВК — когда задан social.vk). В WhatsApp текст уже в ссылке; в Telegram,
+ * MAX и ВКонтакте он копируется по клику. Карточки отрисованы на сервере
+ * все — переключатель только скрывает лишние.
  */
-import { nextTick, onMounted, ref } from 'vue'
-import type { PlintusItem } from '../../data/plintus'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { itemName, itemSizes, PROFILE_LABELS, type PlintusItem, type PlintusProfile } from '../../data/plintus'
 import { SITE } from '../../config/site'
+import { openLightbox } from '../../lib/lightbox'
 import { maxChatUrl, telegramWithText, textWithBody, whatsappWithText } from '../../lib/messengers'
 import { useScrollLock } from '../../lib/scroll-lock'
+import { upperFirst } from '../../lib/typograph'
+import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
+import TelegramIcon from '../ui/TelegramIcon.vue'
+import MaxIcon from '../ui/MaxIcon.vue'
 
-defineProps<{ items: PlintusItem[] }>()
+const props = defineProps<{ items: PlintusItem[] }>()
+
+/* Переключатель: «Все» и профили, которые есть в списке */
+const profile = ref<PlintusProfile | ''>('')
+const profiles = (Object.keys(PROFILE_LABELS) as PlintusProfile[])
+  .map((value) => ({ value, label: PROFILE_LABELS[value], count: props.items.filter((i) => i.profile === value).length }))
+  .filter((p) => p.count)
+const shown = computed(() => (profile.value ? props.items.filter((i) => i.profile === profile.value) : props.items))
+
+const photoAlt = (item: PlintusItem) => `Напольный плинтус из МДФ, ${itemName(item)}: ${item.text.toLowerCase()}`
 
 /* Текст запроса — одна фраза про позицию; приветствие добавляет messengers.ts */
 const requestBody = (item: PlintusItem) =>
-  `Интересует напольный плинтус из МДФ: ${item.text.toLowerCase()}. Подскажите, пожалуйста, цену и наличие.`
+  `Интересует напольный плинтус из МДФ, ${itemName(item)} (на фото ${item.text.toLowerCase()}). Подскажите, пожалуйста, цену и наличие.`
 
 const copyHint = SITE.social.vk
   ? 'В WhatsApp текст уже в ссылке. В Telegram, MAX и ВКонтакте он копируется при нажатии — вставьте его в чат.'
@@ -47,29 +64,51 @@ function close() {
 
 /* Отрисовки в интерьере — в общем просмотрщике: листание, номер, возврат фокуса на кнопку */
 function openInterior(item: PlintusItem) {
-  const images = item.interior.map((src) => ({ src, alt: 'В интерьере — белый вариант' }))
-  window.dispatchEvent(new CustomEvent('open-lightbox', { detail: { images, index: 0 } }))
+  openLightbox(item.interior.map((src) => ({ src, alt: `${upperFirst(itemName(item))} в интерьере, белый вариант` })), 0)
 }
 </script>
 
 <template>
   <div>
+    <div v-if="profiles.length > 1" class="h-toggles pl-toggles" role="group" aria-label="Профиль">
+      <button type="button" class="h-toggle" :aria-pressed="!profile" @click="profile = ''">
+        Все <span class="h-toggle__count">{{ items.length }}</span>
+      </button>
+      <button
+        v-for="p in profiles"
+        :key="p.value"
+        type="button"
+        class="h-toggle"
+        :aria-pressed="profile === p.value"
+        @click="profile = profile === p.value ? '' : p.value"
+      >
+        {{ p.label }} <span class="h-toggle__count">{{ p.count }}</span>
+      </button>
+    </div>
+
     <ul class="pl-grid" role="list">
-      <li v-for="item in items" :key="item.photo" class="pl-card">
-        <img
-          class="pl-card__img"
-          :src="item.photo"
-          :alt="`Напольный плинтус из МДФ: ${item.text.toLowerCase()}`"
-          width="1000"
-          height="1000"
-          loading="lazy"
-          decoding="async"
-        />
+      <li v-for="item in shown" :key="item.num" class="pl-card">
+        <button
+          type="button"
+          class="pl-card__media"
+          :aria-label="`${upperFirst(itemName(item))} в интерьере: ${item.interior.length} фото`"
+          @click="openInterior(item)"
+        >
+          <img
+            class="pl-card__img"
+            :src="item.photo"
+            :alt="photoAlt(item)"
+            width="1000"
+            height="1000"
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="h-status h-meta h-status--photo pl-card__tag" data-status="order" aria-hidden="true">В интерьере</span>
+        </button>
+        <h3 class="pl-card__title">Профиль № {{ item.num }}</h3>
         <p class="pl-card__text">{{ item.text }}</p>
-        <div class="pl-card__actions">
-          <button type="button" class="h-pill pl-card__btn pl-card__btn--main" @click="open(item, $event)">Запросить цену</button>
-          <button type="button" class="h-pill h-pill--line pl-card__btn" @click="openInterior(item)">Смотреть в интерьере</button>
-        </div>
+        <p class="h-meta pl-card__sizes">{{ itemSizes(item) }}</p>
+        <button type="button" class="h-pill pl-card__btn" @click="open(item, $event)">Запросить цену</button>
       </li>
     </ul>
 
@@ -82,7 +121,8 @@ function openInterior(item: PlintusItem) {
             <img class="pm__photo" :src="active.photo" alt="" width="96" height="96" />
             <div>
               <h2 id="pm-title" class="pm__title">Запросить цену</h2>
-              <p class="pm__item">{{ active.text }}</p>
+              <p class="pm__item">Профиль № {{ active.num }}, {{ active.text.toLowerCase() }}</p>
+              <p class="pm__sizes">{{ itemSizes(active) }}</p>
             </div>
           </header>
 
@@ -93,7 +133,9 @@ function openInterior(item: PlintusItem) {
 
           <ul class="pm__links" role="list">
             <li>
-              <a class="h-pill pm__link pm__link--main" :href="whatsappWithText(requestBody(active))" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a class="h-pill pm__link pm__link--main" :href="whatsappWithText(requestBody(active))" target="_blank" rel="noopener noreferrer">
+                <WhatsAppIcon tone="dark" class="pm__icon" />WhatsApp
+              </a>
             </li>
             <li>
               <a
@@ -102,7 +144,7 @@ function openInterior(item: PlintusItem) {
                 :data-copy-text="textWithBody(requestBody(active))"
                 target="_blank"
                 rel="noopener noreferrer"
-              >Telegram</a>
+              ><TelegramIcon class="pm__icon" />Telegram</a>
             </li>
             <li>
               <a
@@ -111,7 +153,7 @@ function openInterior(item: PlintusItem) {
                 :data-copy-text="textWithBody(requestBody(active))"
                 target="_blank"
                 rel="noopener noreferrer"
-              >MAX</a>
+              ><MaxIcon class="pm__icon" />MAX</a>
             </li>
             <li v-if="SITE.social.vk">
               <a
@@ -132,7 +174,9 @@ function openInterior(item: PlintusItem) {
 </template>
 
 <style scoped>
-/* Карточки: фото без подписи-названия, описание цветом и профилем */
+.pl-toggles { margin-bottom: clamp(1.5rem, 3vw, 2rem); }
+
+/* Карточки: фото-кнопка, номер, описание, размеры, одна кнопка */
 .pl-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -141,24 +185,52 @@ function openInterior(item: PlintusItem) {
   padding: 0;
   list-style: none;
 }
+@media (max-width: 23.4375rem) { .pl-grid { column-gap: 0.75rem; } }
 @media (min-width: 43.75rem) { .pl-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 62.5rem) { .pl-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 .pl-card { display: flex; flex-direction: column; min-width: 0; }
+.pl-card__media {
+  position: relative;
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--h-radius);
+  background: var(--h-media-bg);
+  cursor: zoom-in;
+}
 .pl-card__img {
   display: block;
   width: 100%;
+  height: auto;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: var(--h-radius);
-  background: var(--h-media-bg);
+  transition: transform 400ms var(--ease-out);
 }
-.pl-card__text { margin: 0.75rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
-.pl-card__actions { display: grid; gap: 0.5rem; margin-top: 0.625rem; }
-.pl-card__btn { width: 100%; justify-content: center; text-align: center; white-space: normal; font: inherit; cursor: pointer; }
-.pl-card__btn--main,
-.pl-card__btn--main:hover { background: var(--color-slate-900); border-color: var(--color-slate-900); color: var(--color-white); }
-.pl-card__btn--main:hover { background: var(--color-slate-700); border-color: var(--color-slate-700); }
+.pl-card__media:hover .pl-card__img { transform: scale(1.04); }
+.pl-card__tag { position: absolute; left: 0.5rem; bottom: 0.5rem; font-size: 0.75rem; }
+.pl-card__title { margin: 0.75rem 0 0; font-size: 1rem; font-weight: 600; color: var(--h-ink); }
+.pl-card__text { margin: 0.125rem 0 0; font-size: 0.9375rem; color: var(--h-soft); }
+.pl-card__sizes { margin: 0.375rem 0 0.75rem; color: var(--h-muted); }
+/* Кнопка прижата к низу: ряд карточек ровный при описаниях в одну и две строки */
+.pl-card__btn {
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: normal;
+  cursor: pointer;
+}
+.pl-card__btn,
+.pl-card__btn:hover { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
+.pl-card__btn:hover { background: var(--color-slate-700); border-color: var(--color-slate-700); }
+@media (prefers-reduced-motion: reduce) {
+  .pl-card__img { transition: none; }
+  .pl-card__media:hover .pl-card__img { transform: none; }
+}
 
 /* Окно «Запросить цену»: поверх страницы, прокрутка страницы заблокирована */
 .pm {
@@ -207,6 +279,7 @@ function openInterior(item: PlintusItem) {
 }
 .pm__title { margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--h-ink); }
 .pm__item { margin: 0.25rem 0 0; font-weight: 600; color: var(--h-ink); }
+.pm__sizes { margin: 0.125rem 0 0; font-size: 0.875rem; color: var(--h-muted); }
 .pm__call { margin: 1.25rem 0 0; }
 .pm__call-title { margin: 0; color: var(--h-muted); }
 .pm__phone {
@@ -218,9 +291,10 @@ function openInterior(item: PlintusItem) {
   text-decoration: none;
 }
 .pm__links { display: grid; gap: 0.5rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
-.pm__link { justify-content: center; width: 100%; }
+.pm__link { justify-content: center; width: 100%; min-height: 3rem; }
+.pm__icon { width: 1.25rem; height: 1.25rem; }
 .pm__link--main,
-.pm__link--main:hover { background: var(--color-slate-900); border-color: var(--color-slate-900); color: var(--color-white); }
+.pm__link--main:hover { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
 .pm__link--main:hover { background: var(--color-slate-700); border-color: var(--color-slate-700); }
 .pm__hint { margin: 1rem 0 0; font-size: 0.8125rem; color: var(--h-muted); line-height: 1.5; }
 </style>

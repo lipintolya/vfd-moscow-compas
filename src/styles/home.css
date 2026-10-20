@@ -217,6 +217,31 @@
   .h-btn--phone-wide { width: 100%; }
 }
 
+/* Переключатель «Все / вариант» — кнопки с aria-pressed и счётчиком:
+   покрытия в каталоге, профили плинтуса */
+.h-toggles { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.h-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  min-height: 2.75rem;
+  padding: 0 1.125rem;
+  border: 0.0625rem solid var(--color-slate-300);
+  border-radius: 999rem;
+  background: none;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--h-ink);
+  cursor: pointer;
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), color 180ms var(--ease-out);
+}
+.h-toggle:hover { border-color: var(--h-signal); color: var(--h-signal); }
+.h-toggle[aria-pressed='true'] { border-color: var(--h-ink); background: var(--h-ink); color: var(--color-white); }
+.h-toggle__count { font-size: 0.8125rem; font-weight: 500; color: var(--h-muted); font-variant-numeric: tabular-nums; }
+.h-toggle[aria-pressed='true'] .h-toggle__count { color: var(--color-slate-400); }
+@media (prefers-reduced-motion: reduce) { .h-toggle { transition: none; } }
+
 .h-link {
   color: var(--h-ink);
   font-weight: 600;

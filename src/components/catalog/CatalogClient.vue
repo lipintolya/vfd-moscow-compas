@@ -265,19 +265,19 @@ onMounted(() => { isMounted.value = true })
         </button>
       </li>
     </ul>
-    <div v-else-if="coatingOptions.length > 1" class="cat__coatings" role="group" aria-label="Покрытие">
-      <button type="button" class="cat__coating" :aria-pressed="!coating" @click="coating = ''">
-        Все <span class="cat__coating-count">{{ coatingTotal }}</span>
+    <div v-else-if="coatingOptions.length > 1" class="h-toggles cat__coatings" role="group" aria-label="Покрытие">
+      <button type="button" class="h-toggle" :aria-pressed="!coating" @click="coating = ''">
+        Все <span class="h-toggle__count">{{ coatingTotal }}</span>
       </button>
       <button
         v-for="o in coatingOptions"
         :key="o.value"
         type="button"
-        class="cat__coating"
+        class="h-toggle"
         :aria-pressed="coating === o.value"
         @click="coating = coating === o.value ? '' : o.value"
       >
-        {{ o.label }} <span class="cat__coating-count">{{ coatingCounts.get(o.value) ?? 0 }}</span>
+        {{ o.label }} <span class="h-toggle__count">{{ coatingCounts.get(o.value) ?? 0 }}</span>
       </button>
     </div>
 
@@ -454,27 +454,7 @@ onMounted(() => { isMounted.value = true })
 }
 
 /* ── Покрытия кнопками (подборки) ── */
-.cat__coatings { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: clamp(1.5rem, 3vw, 2rem); }
-.cat__coating {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4375rem;
-  min-height: 2.75rem;
-  padding: 0 1.125rem;
-  border: 0.0625rem solid var(--color-slate-300);
-  border-radius: 999rem;
-  background: none;
-  font: inherit;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--h-ink);
-  cursor: pointer;
-  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), color 180ms var(--ease-out);
-}
-.cat__coating:hover { border-color: var(--h-signal); color: var(--h-signal); }
-.cat__coating[aria-pressed='true'] { border-color: var(--h-ink); background: var(--h-ink); color: var(--color-white); }
-.cat__coating-count { font-size: 0.8125rem; font-weight: 500; color: var(--h-muted); font-variant-numeric: tabular-nums; }
-.cat__coating[aria-pressed='true'] .cat__coating-count { color: var(--color-slate-400); }
+.cat__coatings { margin-bottom: clamp(1.5rem, 3vw, 2rem); }
 
 /* ── Колонка фильтров и сетка ── */
 .cat__layout { display: grid; gap: 0 2.5rem; align-items: start; }
@@ -626,7 +606,7 @@ onMounted(() => { isMounted.value = true })
 .cat :is(button):focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cc__card, .cc__media img, .cc__media::after, .cat__coating, .cat__chip { transition: none; }
+  .cc__card, .cc__media img, .cc__media::after, .cat__chip { transition: none; }
   .cc__card:hover .cc__media img { transform: none; }
 }
 </style>

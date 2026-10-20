@@ -1,9 +1,10 @@
 ---
 /**
  * Напольный плинтус из МДФ — страница каталога (/catalog/plintus/).
- * Фото и описания позиций — из src/data/plintus.ts. Названий позиций и цен
- * нет: по кнопке «Запросить цену» открывается окно с телефоном и мессенджерами
- * (островок PlinthGrid.vue).
+ * Данные и все тексты — src/data/plintus.ts (размеры, покрытия, советы, FAQ
+ * собираются из PLINTUS_SPEC и списка позиций). Цен нет: «Запросить цену»
+ * открывает окно с телефонами и мессенджерами (островок PlinthGrid.vue).
+ * Хлебные крошки отдают BreadcrumbList сами — здесь не дублируем.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../lib/seo-title'
@@ -11,44 +12,19 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import PlinthGrid from '../../components/catalog/PlinthGrid.vue'
-import { PLINTUS } from '../../data/plintus'
+import { PLINTUS, PLINTUS_FAQ, PLINTUS_PAGE, PLINTUS_SPEC_ROWS, PLINTUS_TIPS } from '../../data/plintus'
 import { whatsappWithText } from '../../lib/messengers'
-import { SITE } from '../../config/site'
+import { localBusinessSchema } from '../../lib/local-business-schema'
+import { PHONE, SITE } from '../../config/site'
 import { typograph } from '../../lib/typograph'
 import '../../styles/home.css'
 
-const title = 'Напольный плинтус из МДФ в Москве — цвета и профили'
-const description = 'Напольный плинтус из МДФ в Москве: толщина 8–25 мм, высота 60–250 мм, белый под покраску, эмаль и цвета по RAL и NCS. Фото позиций, цена по запросу.'
-const h1 = 'Напольный плинтус из МДФ в Москве'
-const lead = 'Толщина 8–25 мм, высота 60–250 мм. Белый под покраску, белая финишная эмаль или цвет по палитре RAL или NCS. Цвета на фото — ориентир: точный оттенок уточняйте у менеджера.'
-
-const TIPS = [
-  { title: 'Высота', text: 'Высоту подбирают под потолки: для стандартных комнат обычно берут 60–100 мм, для высоких потолков — выше 100 мм.' },
-  { title: 'Толщина', text: 'Толщина — от 8 до 25 мм. Тонкий профиль смотрится легче, толстый — основательнее: выбирайте по пропорциям стены и двери.' },
-  { title: 'Покраска', text: 'Белый под покраску — грунтованный, его красят в нужный цвет. Белая финишная эмаль — готовый белый. Цвет по RAL или NCS — окрашивание эмалью в выбранный оттенок.' },
-]
-
-const FAQ = [
-  { q: 'Какой толщины и высоты бывает напольный плинтус?', a: 'Толщина — от 8 до 25 мм, высота — от 60 до 250 мм. Размер подбирают под стену и высоту дверей.' },
-  { q: 'Из чего сделан плинтус?', a: 'Из МДФ — плиты из древесного волокна. Поверхность ровная, хорошо держит покраску.' },
-  { q: 'Можно ли покрасить плинтус в нужный цвет?', a: 'Да. Белый поставляется под покраску, цветной окрашивается эмалью по палитрам RAL и NCS. Точный оттенок уточняйте у менеджера.' },
-  { q: 'Как узнать цену?', a: 'Цену называет менеджер. Нажмите «Запросить цену» у понравившегося варианта — откроется окно с телефонами и ссылками на мессенджеры.' },
-]
-
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE.url },
-    { '@type': 'ListItem', position: 2, name: 'Декор', item: `${SITE.url}/catalog/decor/` },
-    { '@type': 'ListItem', position: 3, name: 'Напольный плинтус', item: `${SITE.url}/catalog/plintus/` },
-  ],
-}
+const { hero } = PLINTUS_PAGE
 
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: FAQ.map((f) => ({
+  mainEntity: PLINTUS_FAQ.map((f) => ({
     '@type': 'Question',
     name: f.q,
     acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -57,9 +33,12 @@ const faqSchema = {
 ---
 
 <BaseLayout
-  title={brandTitle(title)}
-  description={description}
-  structuredData={[breadcrumbSchema, faqSchema]}
+  title={brandTitle(PLINTUS_PAGE.title)}
+  description={PLINTUS_PAGE.description}
+  ogImage={hero.src}
+  ogImageMeta={{ width: 1000, height: 1000, alt: hero.alt }}
+  preloadImage={hero.src}
+  structuredData={[localBusinessSchema({ url: SITE.url }), faqSchema]}
 >
   <div class="breadcrumb-bar">
     <div class="container">
@@ -69,35 +48,68 @@ const faqSchema = {
 
   <div class="home">
     <section class="plh" aria-labelledby="plintus-title">
+      <div class="container plh__grid">
+        <div class="plh__text">
+          <h1 id="plintus-title" class="h-h1 plh__title">{typograph(PLINTUS_PAGE.h1)}</h1>
+          <p class="h-lead plh__lead">{typograph(PLINTUS_PAGE.lead)}</p>
+          <div class="plh__actions">
+            <a class="h-btn h-btn--ink h-btn--phone-wide" href="#plintus-profiles">Выбрать профиль</a>
+            <a class="h-btn h-btn--quiet h-btn--phone-wide" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+          </div>
+        </div>
+        <img
+          class="plh__img"
+          src={hero.src}
+          alt={hero.alt}
+          width="1000"
+          height="1000"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--tight-top" aria-labelledby="plintus-profiles">
       <div class="container">
-        <header class="plh__head">
-          <h1 id="plintus-title" class="h-h1 plh__title">{h1}</h1>
-          <p class="h-lead plh__lead">{typograph(lead)}</p>
+        <header class="h-head pl-head">
+          <h2 id="plintus-profiles" class="h-h2">Профили и цвета</h2>
+          <p class="h-body pl-head__note">Нажмите на фото, чтобы посмотреть профиль в интерьере.</p>
         </header>
+        <PlinthGrid items={PLINTUS} client:visible />
+      </div>
+    </section>
 
-        <section class="pl-block" aria-labelledby="plintus-colors">
-          <h2 id="plintus-colors" class="h-h2 pl-h2">Цвета и профили</h2>
-          <PlinthGrid items={PLINTUS} client:visible />
-        </section>
-
-        <section class="pl-block" aria-labelledby="plintus-choose">
-          <h2 id="plintus-choose" class="h-h2 pl-h2">Как выбрать плинтус</h2>
+    <section class="h-sec h-sec--tight-top" aria-labelledby="plintus-spec">
+      <div class="container pl-two">
+        <div>
+          <h2 id="plintus-spec" class="h-h2 pl-h2">Размеры и покрытие</h2>
+          <dl class="pl-spec">
+            {PLINTUS_SPEC_ROWS.map((row) => (
+              <div class="pl-spec__row">
+                <dt>{row.label}</dt>
+                <dd>{typograph(row.value)}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <div>
+          <h2 class="h-h2 pl-h2">Как выбрать плинтус</h2>
           <div class="pl-tips">
-            {TIPS.map((tip) => (
-              <div class="pl-tip">
-                <h3>{tip.title}</h3>
-                <p>{tip.text}</p>
+            {PLINTUS_TIPS.map((tip) => (
+              <div>
+                <h3 class="h-h3 pl-tip__title">{tip.title}</h3>
+                <p class="h-body pl-tip__text">{typograph(tip.text)}</p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
+      </div>
+    </section>
 
-        <section class="pl-block" aria-labelledby="plintus-faq">
-          <header class="h-head">
-            <h2 id="plintus-faq" class="h-h2">Частые вопросы о напольном плинтусе</h2>
-          </header>
-          <FaqAccordion items={FAQ} title={false} />
-        </section>
+    <section class="h-sec h-sec--tight-top" aria-labelledby="plintus-faq">
+      <div class="container h-faq">
+        <h2 id="plintus-faq" class="h-h2">Частые вопросы о напольном плинтусе</h2>
+        <FaqAccordion items={PLINTUS_FAQ} title={false} />
       </div>
     </section>
 
@@ -106,7 +118,7 @@ const faqSchema = {
         <QuoteCta
           image={PLINTUS[0]!.photo}
           title="Нужна цена?"
-          description="Выберите цвет и профиль по фото и напишите менеджеру — ответит с ценой"
+          description="Выберите профиль по фото и напишите менеджеру — ответит с ценой и сроком"
           primaryHref={whatsappWithText('Хочу узнать цену на напольный плинтус из МДФ.')}
           primaryLabel="Написать в WhatsApp"
           primaryExternal={true}
@@ -119,26 +131,44 @@ const faqSchema = {
 </BaseLayout>
 
 <style>
-  /* Шапка — та же сетка, что у «Наших работ» */
-  .plh { padding-top: clamp(1rem, 2vw, 1.5rem); }
-  .plh__head {
-    display: grid;
-    gap: 1.25rem var(--h-gutter);
-    align-items: end;
-    margin-bottom: clamp(2rem, 4vw, 3.5rem);
+  /* Первый экран: текст и кнопки слева, интерьер справа; на телефоне фото под текстом */
+  .plh { padding: clamp(1rem, 2vw, 1.5rem) 0 0; }
+  .plh__grid { display: grid; gap: 1.5rem var(--h-gutter); align-items: center; }
+  .plh__title { margin: 0; }
+  .plh__lead { margin: 1rem 0 0; }
+  .plh__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+  .plh__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: 50% 100%; /* плинтус — у пола, внизу кадра */
+    border-radius: var(--h-tile-radius);
+    background: var(--h-media-bg);
   }
   @media (min-width: 62.5rem) {
-    .plh__head { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .plh__title { grid-column: 1 / span 7; }
-    .plh__lead { grid-column: 9 / span 4; }
+    .plh__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .plh__text { grid-column: 1 / span 6; }
+    .plh__img { grid-column: 8 / span 5; aspect-ratio: 1; }
   }
 
-  .pl-block { margin: 0 0 3.5rem; }
-  .pl-h2 { margin: 0 0 1.75rem; }
+  .pl-head { display: grid; gap: 0.75rem var(--h-gutter); margin-bottom: clamp(1.5rem, 3vw, 2rem); }
+  .pl-head :global(h2), .pl-head__note { margin: 0; }
+  .pl-head__note { max-width: 40rem; color: var(--h-soft); }
 
-  /* Как выбрать: три короткие колонки */
-  .pl-tips { display: grid; gap: 1.75rem var(--h-gutter); }
-  @media (min-width: 43.75rem) { .pl-tips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .pl-tip h3 { margin: 0 0 0.5rem; font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
-  .pl-tip p { margin: 0; color: var(--h-muted); line-height: 1.6; }
+  /* Характеристики и советы — две колонки на компьютере */
+  .pl-two { display: grid; gap: clamp(2.5rem, 5vw, 3.5rem) var(--h-gutter); align-items: start; }
+  @media (min-width: 62.5rem) { .pl-two { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(2.5rem, 5vw, 4.5rem); } }
+  .pl-h2 { margin: 0 0 1.25rem; }
+
+  .pl-spec { margin: 0; border-top: 0.0625rem solid var(--h-rule); }
+  .pl-spec__row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; padding: 0.875rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
+  .pl-spec__row dt { color: var(--h-muted); }
+  .pl-spec__row dd { margin: 0; color: var(--h-ink); }
+
+  .pl-tips { display: grid; gap: 1.5rem var(--h-gutter); }
+  @media (min-width: 43.75rem) { .pl-tips { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .pl-tip__title { margin: 0 0 0.375rem; }
+  .pl-tip__text { margin: 0; color: var(--h-soft); }
 </style>
