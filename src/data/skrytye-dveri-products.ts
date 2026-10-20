@@ -58,6 +58,23 @@ export const SECRET_REVERS_SIZES = [600, 700, 800]      as const
 // (позиции с простым грунтом убраны из продажи).
 export type SecretEdgeColor = 'black' | 'silver' | 'gold'
 
+/** Кромка: название и цвета образца — превью кромки (ColorSelector.vue) и
+    калькулятор цены. Цвета — физического материала (анод), поэтому здесь,
+    а не в токенах сайта; серебро — тот же графит сайта */
+export const HIDDEN_EDGES: Record<SecretEdgeColor, { name: string; material: string; main: string; highlight: string; shadow: string; gradient: boolean }> = {
+  black:  { name: 'Чёрная',  material: 'Чёрный анод',          main: '#1a1a1a', highlight: '#363636', shadow: '#0a0a0a', gradient: false },
+  silver: { name: 'Серебро', material: 'Натуральный алюминий', main: 'var(--color-slate-400)', highlight: 'var(--color-slate-200)', shadow: 'var(--color-slate-500)', gradient: true },
+  gold:   { name: 'Золото',  material: 'Золотой анод',         main: '#c5a84a', highlight: '#e8c96e', shadow: '#9e8236', gradient: true },
+}
+
+/** Серии: название и сторона открывания — карточки серий и калькулятор */
+export type HiddenSeries = 'sekret' | 'revers' | 'reflex'
+export const HIDDEN_SERIES: Record<HiddenSeries, { name: string; opening: string }> = {
+  sekret: { name: '«Секрет»',        opening: 'Открывается на себя' },
+  revers: { name: '«Секрет Реверс»', opening: 'Открывается от себя' },
+  reflex: { name: '«Рефлекс»',       opening: 'Зеркало во всю высоту' },
+}
+
 export interface SecretPriceRow {
   edgeColor:        SecretEdgeColor
   edgeLabel:        string

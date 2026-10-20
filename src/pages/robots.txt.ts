@@ -9,6 +9,7 @@ import type { APIRoute } from 'astro'
 import { SITE } from '../config/site'
 import { CATALOG_URL_PARAMS } from '../lib/catalog-filter'
 import { ALUM_PAGE, ALUM_URL_PARAMS } from '../data/alum-partitions'
+import { HIDDEN_URL_PARAMS } from '../lib/hidden-door-price'
 
 /** Метки рекламы и переходов — у любого адреса */
 const TRACKING_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'yclid', 'ysclid', 'gclid', 'fbclid', 'from', '_openstat']
@@ -25,6 +26,7 @@ export const GET: APIRoute = () =>
       clean(TRACKING_PARAMS),
       clean(CATALOG_URL_PARAMS, '/catalog/'),
       clean(ALUM_URL_PARAMS, ALUM_PAGE.path),
+      clean(HIDDEN_URL_PARAMS, '/catalog/skrytye-dveri/'),
       '',
       `Sitemap: ${SITE.url}/sitemap-index.xml`,
       '',

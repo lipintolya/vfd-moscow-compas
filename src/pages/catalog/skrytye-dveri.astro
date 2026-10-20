@@ -20,6 +20,7 @@ import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import LandingHero from '../../components/ui/LandingHero.astro'
 import SectionNav from '../../components/partitions/SectionNav.astro'
 import PriceTable from '../../components/catalog/PriceTable.astro'
+import HiddenPriceBuilder from '../../components/catalog/HiddenPriceBuilder.astro'
 import ColorSelector from '../../components/catalog/ColorSelector.vue'
 import InfoImageViewer from '../../components/catalog/InfoImageViewer.vue'
 import WorkCard from '../../components/portfolio/WorkCard.astro'
@@ -28,7 +29,7 @@ import VisitBand from '../../components/home/VisitBand.astro'
 import '../../styles/home.css'
 
 import {
-  HIDDEN_STATUS, IMAGES, HERO_IMAGES, INFO_IMAGES, BOX_PRO_IMAGE, BOX_LITE_IMAGE, FACTS,
+  HIDDEN_STATUS, HIDDEN_SERIES, type HiddenSeries, IMAGES, HERO_IMAGES, INFO_IMAGES, BOX_PRO_IMAGE, BOX_LITE_IMAGE, FACTS,
   SECRET_SIZES, SECRET_REVERS_SIZES, DOOR_HEIGHT,
   SECRET_PRICES, SECRET_MIN_BLADE_PRICE, SECRET_MIN_KIT_PRICE,
   SECRET_REVERS_MIN_BLADE_PRICE, SECRET_REVERS_MIN_KIT_PRICE,
@@ -51,12 +52,12 @@ const opening = (reverse: boolean) => (reverse ? 'от себя' : 'на себ�
 
 /* ── Серии: карточки наверху страницы ── */
 const series: {
-  id: string; name: string; type: string; status: ModelStatus; text: string
+  id: HiddenSeries; name: string; type: string; status: ModelStatus; text: string
   image: string; alt: string; specs: [string, string][]
   kit: number; blade: number; href: string
 }[] = [
   {
-    id: 'sekret', name: '«Секрет»', type: 'Открывается на себя', status: HIDDEN_STATUS.sekret,
+    id: 'sekret', name: HIDDEN_SERIES.sekret.name, type: HIDDEN_SERIES.sekret.opening, status: HIDDEN_STATUS.sekret,
     text: 'Классический скрытый монтаж. Полотно в грунте — под покраску, штукатурку или обои в цвет стены.',
     image: IMAGES.invisible, alt: 'Скрытая дверь «Секрет» вровень со стеной',
     specs: [
@@ -68,7 +69,7 @@ const series: {
     blade: SECRET_MIN_BLADE_PRICE, href: '#prices',
   },
   {
-    id: 'revers', name: '«Секрет Реверс»', type: 'Открывается от себя', status: HIDDEN_STATUS.revers,
+    id: 'revers', name: HIDDEN_SERIES.revers.name, type: HIDDEN_SERIES.revers.opening, status: HIDDEN_STATUS.revers,
     text: 'Полотно уходит в соседнее помещение — открытая дверь не занимает место в комнате.',
     image: IMAGES.invisibleRev, alt: 'Скрытая дверь «Секрет Реверс» с обратным открыванием',
     specs: [
@@ -80,7 +81,7 @@ const series: {
     blade: SECRET_REVERS_MIN_BLADE_PRICE, href: '#prices',
   },
   {
-    id: 'reflex', name: '«Рефлекс»', type: 'Зеркало во всю высоту', status: HIDDEN_STATUS.reflex,
+    id: 'reflex', name: HIDDEN_SERIES.reflex.name, type: HIDDEN_SERIES.reflex.opening, status: HIDDEN_STATUS.reflex,
     text: 'Тот же монтаж вровень со стеной, но полотно — зеркало: прихожая выглядит больше и светлее.',
     image: REFLEX_IMAGE, alt: 'Скрытая дверь с зеркалом «Рефлекс»',
     specs: [
@@ -88,7 +89,7 @@ const series: {
       ['Высота', `по размеру, до ${REFLEX_MAX_HEIGHT} мм`],
       ['Опция', `зеркало с двух сторон, +${rub(REFLEX_TWO_SIDED_MIRROR_SURCHARGE)}`],
     ],
-    kit: REFLEX_MIN_KIT_PRICE, blade: REFLEX_MIN_BLADE_PRICE, href: '#prices-reflex',
+    kit: REFLEX_MIN_KIT_PRICE, blade: REFLEX_MIN_BLADE_PRICE, href: '#prices',
   },
 ]
 
@@ -224,7 +225,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
                 </span>
                 <span class="h-meta">Полотно от&nbsp;{rub(s.blade)}</span>
               </div>
-              <a href={s.href} class="h-link hd-serie__link">Все цены</a>
+              <a href={s.href} data-hd-series={s.id} class="h-link hd-serie__link">Рассчитать цену</a>
             </li>
           ))}
         </ul>
@@ -255,79 +256,83 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
       <div class="container">
         <header class="h-head">
           <h2 id="prices-title" class="h-h2">Цены на&nbsp;скрытые двери</h2>
-          <p class="h-lead">Цена зависит от&nbsp;кромки, стороны открывания и&nbsp;короба. Комплект&nbsp;— полотно, короб, ответная планка и&nbsp;две скрытые петли.</p>
+          <p class="h-lead">Выберите серию, кромку, короб и&nbsp;высоту&nbsp;— цена комплекта пересчитается сразу. Комплект&nbsp;— полотно, короб, ответная планка и&nbsp;две скрытые петли.</p>
         </header>
 
-        <div class="hd-prices">
-          <div class="hd-prices__block">
-            <h3 class="hd-subhead">«Секрет» и&nbsp;«Секрет Реверс»</h3>
-            <PriceTable
-              caption="Цены на скрытые двери «Секрет» и «Секрет Реверс»"
-              rowHeader="variant"
-              columns={[
-                { key: 'variant',  label: 'Кромка и открывание' },
-                { key: 'blade',    label: 'Полотно' },
-                { key: 'standard', label: 'Комплект Стандарт', strong: true },
-                { key: 'lite',     label: 'Комплект Лайт' },
-              ]}
-              rows={secretRows}
-            />
-          </div>
+        <HiddenPriceBuilder />
 
-          <details id="prices-reflex" class="hd-prices__block" open data-collapse-mobile>
-            <summary class="hd-subhead">«Рефлекс» с&nbsp;зеркалом</summary>
-            <PriceTable
-              caption="Цены на скрытую дверь с зеркалом «Рефлекс»"
-              rowHeader="variant"
-              columns={[
-                { key: 'variant',   label: 'Кромка и открывание' },
-                { key: 'blade',     label: 'Полотно' },
-                { key: 'standard',  label: 'Комплект Стандарт', strong: true },
-                { key: 'lite',      label: 'Комплект Лайт' },
-                { key: 'standard2', label: 'Стандарт, зеркало с двух сторон' },
-                { key: 'lite2',     label: 'Лайт, зеркало с двух сторон' },
-              ]}
-              rows={reflexRows}
-            />
-          </details>
-
-          <details class="hd-prices__block" open data-collapse-mobile>
-            <summary class="hd-subhead">Нестандартная высота</summary>
-            <p class="h-body hd-prices__lead">
-              Для высоких потолков: надбавка применяется к&nbsp;полотну и&nbsp;коробу,
-              срок изготовления&nbsp;— {CUSTOM_LEAD_TIME}. Цены&nbsp;— за&nbsp;самый доступный комплект.
-            </p>
-            <div class="hd-heights">
+        {/* Все цены — справочник: свёрнут, но в HTML (поисковики и сравнение) */}
+        <details id="prices-all" class="hd-all">
+          <summary class="hd-all__summary">
+            <span>Все цены таблицей</span>
+            <span class="h-meta">Кромки, короба, стороны открывания и&nbsp;нестандартная высота</span>
+          </summary>
+          <div class="hd-prices">
+            <div class="hd-prices__block">
+              <h3 class="hd-subhead">{HIDDEN_SERIES.sekret.name} и&nbsp;{HIDDEN_SERIES.revers.name}</h3>
               <PriceTable
-                caption="«Секрет» нестандартной высоты"
-                rowHeader="range"
+                caption="Цены на скрытые двери «Секрет» и «Секрет Реверс»"
+                rowHeader="variant"
                 columns={[
-                  { key: 'range',  label: `«Секрет», до ${CUSTOM_MAX_HEIGHT} мм` },
-                  { key: 'pct',    label: 'Надбавка' },
-                  { key: 'secret', label: '«Секрет»', strong: true },
-                  { key: 'revers', label: '«Секрет Реверс»', strong: true },
+                  { key: 'variant',  label: 'Кромка и открывание' },
+                  { key: 'blade',    label: 'Полотно' },
+                  { key: 'standard', label: 'Комплект Стандарт', strong: true },
+                  { key: 'lite',     label: 'Комплект Лайт' },
                 ]}
-                rows={secretHeightRows}
-              />
-              <PriceTable
-                caption="«Рефлекс» нестандартной высоты"
-                rowHeader="range"
-                columns={[
-                  { key: 'range',   label: `«Рефлекс», до ${REFLEX_MAX_HEIGHT} мм` },
-                  { key: 'pct',     label: 'Надбавка' },
-                  { key: 'direct',  label: 'На себя', strong: true },
-                  { key: 'reverse', label: 'От себя', strong: true },
-                ]}
-                rows={reflexHeightRows}
+                rows={secretRows}
               />
             </div>
-          </details>
-        </div>
 
-        <p class="h-meta hd-note">
-          Комплекты Стандарт и&nbsp;Лайт отличаются коробом&nbsp;— разница ниже. Для&nbsp;кромки золото
-          комплект Лайт не&nbsp;делают. Ручка, стопор и&nbsp;завёртка WC&nbsp;— отдельно.
-        </p>
+            <div id="prices-reflex" class="hd-prices__block">
+              <h3 class="hd-subhead">{HIDDEN_SERIES.reflex.name} с&nbsp;зеркалом</h3>
+              <PriceTable
+                caption="Цены на скрытую дверь с зеркалом «Рефлекс»"
+                rowHeader="variant"
+                columns={[
+                  { key: 'variant',   label: 'Кромка и открывание' },
+                  { key: 'blade',     label: 'Полотно' },
+                  { key: 'standard',  label: 'Комплект Стандарт', strong: true },
+                  { key: 'lite',      label: 'Комплект Лайт' },
+                  { key: 'standard2', label: 'Стандарт, зеркало с двух сторон' },
+                  { key: 'lite2',     label: 'Лайт, зеркало с двух сторон' },
+                ]}
+                rows={reflexRows}
+              />
+            </div>
+
+            <div class="hd-prices__block">
+              <h3 class="hd-subhead">Нестандартная высота</h3>
+              <p class="h-body hd-prices__lead">
+                Для высоких потолков: надбавка применяется к&nbsp;полотну и&nbsp;коробу,
+                срок изготовления&nbsp;— {CUSTOM_LEAD_TIME}. Цены&nbsp;— за&nbsp;самый доступный комплект.
+              </p>
+              <div class="hd-heights">
+                <PriceTable
+                  caption="«Секрет» нестандартной высоты"
+                  rowHeader="range"
+                  columns={[
+                    { key: 'range',  label: `«Секрет», до ${CUSTOM_MAX_HEIGHT} мм` },
+                    { key: 'pct',    label: 'Надбавка' },
+                    { key: 'secret', label: '«Секрет»', strong: true },
+                    { key: 'revers', label: '«Секрет Реверс»', strong: true },
+                  ]}
+                  rows={secretHeightRows}
+                />
+                <PriceTable
+                  caption="«Рефлекс» нестандартной высоты"
+                  rowHeader="range"
+                  columns={[
+                    { key: 'range',   label: `«Рефлекс», до ${REFLEX_MAX_HEIGHT} мм` },
+                    { key: 'pct',     label: 'Надбавка' },
+                    { key: 'direct',  label: 'На себя', strong: true },
+                    { key: 'reverse', label: 'От себя', strong: true },
+                  ]}
+                  rows={reflexHeightRows}
+                />
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -481,14 +486,11 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
 </BaseLayout>
 
 <script>
-  /* Телефон: длинные таблицы цен свёрнуты (без JS — раскрыты) */
-  if (matchMedia('(max-width: 43.6875rem)').matches) {
-    document.querySelectorAll<HTMLDetailsElement>('[data-collapse-mobile]').forEach((d) => { d.open = false })
-  }
-  /* Переход по якорю на свёрнутый блок («Все цены» у «Рефлекс») — раскрываем */
+  /* Переход по якорю в свёрнутый справочник цен (#prices-all, #prices-reflex) — раскрываем */
   const openTarget = () => {
-    const el = location.hash ? document.getElementById(location.hash.slice(1)) : null
-    if (el instanceof HTMLDetailsElement) el.open = true
+    const el = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null
+    const details = el instanceof HTMLDetailsElement ? el : el?.closest('details')
+    if (details) details.open = true
   }
   window.addEventListener('hashchange', openTarget)
   openTarget()
@@ -536,8 +538,6 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
   }
   .hd-serie__link { align-self: flex-start; margin-top: 1rem; }
 
-  .hd-note { margin: 2rem 0 0; max-width: 46rem; }
-
   /* ── Москва: сетка заметок под линейками ── */
   .hd-notes { display: grid; gap: 2.5rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .hd-notes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -546,8 +546,42 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
   .hd-note-item .h-body { margin-top: 0.75rem; font-size: 0.9375rem; }
   .hd-note-item__link { display: inline-block; margin-top: 0.875rem; font-size: 0.9375rem; }
 
-  /* ── Цены ── */
-  .hd-prices { display: grid; gap: clamp(3rem, 5vw, 4rem); }
+  /* ── Цены: калькулятор (HiddenPriceBuilder) и под ним — справочник
+     «Все цены таблицей», свёрнутый: строка-переключатель под линейкой ── */
+  .hd-all { margin-top: clamp(2.5rem, 5vw, 3.5rem); border-top: 0.0625rem solid var(--h-rule); border-bottom: 0.0625rem solid var(--h-rule); }
+  .hd-all__summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    padding-block: 1.25rem;
+    list-style: none;
+    cursor: pointer;
+  }
+  .hd-all__summary::-webkit-details-marker { display: none; }
+  .hd-all__summary > span:first-child { font-family: var(--h-font); font-size: 1.125rem; font-weight: 600; color: var(--h-ink); }
+  .hd-all__summary > .h-meta { grid-column: 1; }
+  /* Шеврон — справа, поворачивается при раскрытии */
+  .hd-all__summary::after {
+    content: '';
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-right: 0.25rem;
+    border-right: 0.125rem solid currentColor;
+    border-bottom: 0.125rem solid currentColor;
+    rotate: 45deg;
+    translate: 0 -0.125rem;
+    transition: rotate 200ms var(--ease-out);
+  }
+  .hd-all[open] .hd-all__summary::after { rotate: 225deg; translate: 0 0.125rem; }
+  .hd-all__summary:hover > span:first-child { color: var(--h-signal); }
+  .hd-all__summary:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.25rem; }
+  .hd-all .hd-prices { padding: 0.5rem 0 2rem; }
+  @media (prefers-reduced-motion: reduce) { .hd-all__summary::after { transition: none; } }
+
+  .hd-prices { display: grid; gap: clamp(2.5rem, 5vw, 3.5rem); }
   .hd-subhead {
     margin: 0 0 1.25rem;
     font-family: var(--h-font);
@@ -557,39 +591,6 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     color: var(--h-ink);
   }
   .hd-prices__lead { margin: -0.5rem 0 1.5rem; max-width: 40rem; font-size: 0.9375rem; }
-
-  /* Длинные таблицы («Рефлекс», нестандартная высота) на телефоне свёрнуты
-     под заголовок — скрипт ниже; на компьютере заголовок не кликается */
-  summary.hd-subhead { list-style: none; pointer-events: none; }
-  summary.hd-subhead::-webkit-details-marker { display: none; }
-  @media (max-width: 43.6875rem) {
-    summary.hd-subhead {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      margin: 0;
-      padding-block: 1rem;
-      border-top: 0.0625rem solid var(--h-rule);
-      pointer-events: auto;
-      cursor: pointer;
-    }
-    summary.hd-subhead::after {
-      content: '';
-      flex: none;
-      width: 0.5rem;
-      height: 0.5rem;
-      border-right: 0.125rem solid currentColor;
-      border-bottom: 0.125rem solid currentColor;
-      rotate: 45deg;
-      translate: 0 -0.125rem;
-      transition: rotate 200ms var(--ease-out);
-    }
-    details[open] > summary.hd-subhead { margin-bottom: 1rem; }
-    details[open] > summary.hd-subhead::after { rotate: 225deg; translate: 0 0.125rem; }
-    .hd-prices { gap: 0; }
-    .hd-prices__block:first-child { margin-bottom: 2.5rem; }
-  }
   .hd-heights { display: grid; gap: 2.5rem var(--h-gutter); }
   @media (min-width: 62.5rem) { .hd-heights { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 

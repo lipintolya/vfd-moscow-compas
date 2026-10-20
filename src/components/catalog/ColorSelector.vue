@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { HIDDEN_EDGES } from '../../data/skrytye-dveri-products'
 
 interface FrameColor {
   id:          'black' | 'silver' | 'gold'
@@ -11,35 +12,11 @@ interface FrameColor {
   isGradient:  boolean
 }
 
-const FRAME_COLORS: FrameColor[] = [
-  {
-    id:           'black',
-    label:        'Кромка чёрная',
-    badge:        'Чёрный анод',
-    mainHex:      '#1a1a1a',
-    highlightHex: '#363636',
-    shadowHex:    '#0a0a0a',
-    isGradient:   false,
-  },
-  {
-    id:           'silver',
-    label:        'Кромка серебро',
-    badge:        'Натуральный алюминий',
-    mainHex:      'var(--color-slate-400)',
-    highlightHex: 'var(--color-slate-200)',
-    shadowHex:    'var(--color-slate-500)',
-    isGradient:   true,
-  },
-  {
-    id:           'gold',
-    label:        'Кромка золото',
-    badge:        'Золотой анод',
-    mainHex:      '#c5a84a',
-    highlightHex: '#e8c96e',
-    shadowHex:    '#9e8236',
-    isGradient:   true,
-  },
-]
+/* Кромки — из данных скрытых дверей (тот же источник, что у калькулятора цены) */
+const FRAME_COLORS: FrameColor[] = (Object.keys(HIDDEN_EDGES) as FrameColor['id'][]).map((id) => {
+  const e = HIDDEN_EDGES[id]
+  return { id, label: `Кромка ${e.name.toLowerCase()}`, badge: e.material, mainHex: e.main, highlightHex: e.highlight, shadowHex: e.shadow, isGradient: e.gradient }
+})
 
 const activeId = ref<'black' | 'silver' | 'gold'>('black')
 const current  = computed(() => FRAME_COLORS.find(c => c.id === activeId.value)!)

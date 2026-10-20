@@ -8,11 +8,13 @@ import { SITE } from '../config/site'
 import { companyLegalInfo } from '../lib/contacts-data'
 import { MEASURE_TERMS, INSTALL_TERMS, rub } from './services'
 import {
+  CUSTOM_HEIGHT_TIERS, HIDDEN_EDGES,
   DOOR_HEIGHT, CUSTOM_LEAD_TIME, CUSTOM_MAX_HEIGHT, REFLEX_MAX_HEIGHT,
   SECRET_MIN_KIT_PRICE, SECRET_REVERS_MIN_KIT_PRICE, REFLEX_MIN_KIT_PRICE,
 } from './skrytye-dveri-products'
 
-const EDGE_COLORS = ['чёрная', 'серебро', 'золото']
+/** Цвета кромки — из данных серии (те же названия, что в калькуляторе цены) */
+const EDGE_COLORS = Object.values(HIDDEN_EDGES).map((e) => e.name.toLowerCase())
 
 /* Факты под первым экраном */
 export const HERO_FACTS = [
@@ -67,7 +69,9 @@ export const SEGMENTS = [
 export const HIDDEN_DOORS_FAQ = [
   {
     q: `Сколько стоят скрытые двери ${SITE.city.in}?`,
-    a: `Комплект с алюминиевым коробом: «Секрет» — от ${rub(SECRET_MIN_KIT_PRICE)}, «Секрет Реверс» — от ${rub(SECRET_REVERS_MIN_KIT_PRICE)}, зеркальная «Рефлекс» — от ${rub(REFLEX_MIN_KIT_PRICE)}. ${INSTALL_TERMS}. Точную смету считаем после замера.`,
+    a: `Комплект с алюминиевым коробом: «Секрет» — от ${rub(SECRET_MIN_KIT_PRICE)}, «Секрет Реверс» — от ${rub(SECRET_REVERS_MIN_KIT_PRICE)}, зеркальная «Рефлекс» — от ${rub(REFLEX_MIN_KIT_PRICE)}. ` +
+      `Цена зависит от кромки, стороны открывания, короба и высоты: за нестандартную высоту — надбавка от ${CUSTOM_HEIGHT_TIERS[0]!.pct} до ${CUSTOM_HEIGHT_TIERS[CUSTOM_HEIGHT_TIERS.length - 1]!.pct}. ` +
+      `${INSTALL_TERMS}. Точную смету считаем после замера.`,
   },
   {
     q: 'Когда ставить скрытую дверь в новостройке?',

@@ -1,0 +1,378 @@
+---
+/**
+ * Калькулятор цены скрытой двери (/catalog/skrytye-dveri/, блок «Цены»):
+ * слева выбор — серия, открывание («Рефлекс»), кромка, короб, высота,
+ * зеркало («Рефлекс»); справа — цена комплекта и из чего она сложилась,
+ * примечания и «Обсудить в WhatsApp» с готовым текстом выбора.
+ *
+ * Цены и правила — src/lib/hidden-door-price.ts поверх прайса
+ * src/data/skrytye-dveri-products.ts (тесты сверяют с таблицами прайса).
+ * Сервер рисует выбор по умолчанию — цена есть в HTML без JS (для
+ * поисковиков и без скриптов); скрипт только пересчитывает. Выбор — в
+ * адресе (?series=…), им можно поделиться; ссылки [data-hd-series] на
+ * странице (карточки серий) выбирают серию без перезагрузки.
+ *
+ * Выбор — нативные радиокнопки в fieldset: стрелки и Tab, экранные
+ * читалки; недоступное (Лайт у золота, высота выше предела «Рефлекс») —
+ * disabled с пояснением. Итог для экранных читалок — aria-live.
+ */
+import {
+  HIDDEN_SERIES, HIDDEN_EDGES, CUSTOM_HEIGHT_TIERS, REFLEX_HEIGHT_TIERS, DOOR_HEIGHT,
+  REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
+  type HiddenSeries, type SecretEdgeColor,
+} from '../../data/skrytye-dveri-products'
+import { DEFAULT_CONFIG, BOX_LABEL, quote, describe, notesOf, liteAvailable, heightLabel, managerMessage, type HiddenBox } from '../../lib/hidden-door-price'
+import { rub } from '../../data/services'
+import { PHONE } from '../../config/site'
+import { whatsappWithText } from '../../lib/messengers'
+import { typograph } from '../../lib/typograph'
+import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
+
+const c = DEFAULT_CONFIG
+const q = quote(c)
+const seriesKeys = Object.keys(HIDDEN_SERIES) as HiddenSeries[]
+const edgeKeys = Object.keys(HIDDEN_EDGES) as SecretEdgeColor[]
+const boxKeys = Object.keys(BOX_LABEL) as HiddenBox[]
+/* Высоты: ступени «Секрет» (их больше); подпись ступени у «Рефлекс» своя,
+   ступени выше её предела — недоступны */
+const heights = CUSTOM_HEIGHT_TIERS.map((t) => ({
+  from: t.from,
+  pct: t.pct,
+  range: t.range,
+  reflexRange: REFLEX_HEIGHT_TIERS.find((r) => r.from === t.from)?.range ?? '',
+}))
+---
+
+<div class="hdp" data-hdp>
+  <form class="hdp__form" data-hdp-form aria-label="Выбор скрытой двери">
+    <fieldset class="hdp__group">
+      <legend class="hdp__legend">Серия</legend>
+      <div class="hdp__chips hdp__chips--series">
+        {seriesKeys.map((k) => (
+          <label class="hdp__chip">
+            <input class="hdp__radio" type="radio" name="series" value={k} checked={k === c.series} />
+            <span class="hdp__face"><span class="hdp__name">{HIDDEN_SERIES[k].name}</span><span class="hdp__sub">{HIDDEN_SERIES[k].opening}</span></span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="hdp__group" data-hdp-only="reflex" hidden={c.series !== 'reflex'}>
+      <legend class="hdp__legend">Открывание</legend>
+      <div class="hdp__chips">
+        <label class="hdp__chip"><input class="hdp__radio" type="radio" name="opening" value="direct" checked={!c.reverse} /><span class="hdp__face"><span class="hdp__name">На себя</span></span></label>
+        <label class="hdp__chip"><input class="hdp__radio" type="radio" name="opening" value="reverse" checked={c.reverse} /><span class="hdp__face"><span class="hdp__name">От себя</span></span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="hdp__group">
+      <legend class="hdp__legend">Кромка</legend>
+      <div class="hdp__chips">
+        {edgeKeys.map((k) => (
+          <label class="hdp__chip">
+            <input class="hdp__radio" type="radio" name="edge" value={k} checked={k === c.edge} />
+            <span class="hdp__face hdp__face--row">
+              <span class="hdp__swatch" style={`--sw: ${HIDDEN_EDGES[k].main}`} aria-hidden="true" />
+              <span class="hdp__name">{HIDDEN_EDGES[k].name}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="hdp__group">
+      <legend class="hdp__legend">Короб <a class="hdp__more" href="#box">Чем отличаются</a></legend>
+      <div class="hdp__chips">
+        {boxKeys.map((k) => (
+          <label class="hdp__chip">
+            <input class="hdp__radio" type="radio" name="box" value={k} checked={k === c.box} disabled={k === 'lite' && !liteAvailable(c)} />
+            <span class="hdp__face"><span class="hdp__name">{BOX_LABEL[k]}</span></span>
+          </label>
+        ))}
+      </div>
+      <p class="hdp__hint" data-hdp-lite-hint hidden={liteAvailable(c)}>Для кромки золото короб Лайт не&nbsp;делают.</p>
+    </fieldset>
+
+    <fieldset class="hdp__group">
+      <legend class="hdp__legend">Высота</legend>
+      <div class="hdp__chips hdp__chips--heights">
+        <label class="hdp__chip">
+          <input class="hdp__radio" type="radio" name="height" value="std" checked={c.height == null} />
+          <span class="hdp__face"><span class="hdp__name">{DOOR_HEIGHT}&nbsp;мм</span><span class="hdp__sub">Стандарт</span></span>
+        </label>
+        {heights.map((h) => (
+          <label class="hdp__chip">
+            <input class="hdp__radio" type="radio" name="height" value={h.from} checked={c.height === h.from} data-range={h.range} data-reflex-range={h.reflexRange} />
+            <span class="hdp__face"><span class="hdp__name" data-hdp-range>{h.range}&nbsp;мм</span><span class="hdp__sub">{h.pct}</span></span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+
+    <fieldset class="hdp__group" data-hdp-only="reflex" hidden={c.series !== 'reflex'}>
+      <legend class="hdp__legend">Зеркало</legend>
+      <div class="hdp__chips">
+        <label class="hdp__chip"><input class="hdp__radio" type="radio" name="mirror" value="one" checked={!c.twoSided} /><span class="hdp__face"><span class="hdp__name">С одной стороны</span></span></label>
+        <label class="hdp__chip"><input class="hdp__radio" type="radio" name="mirror" value="both" checked={c.twoSided} /><span class="hdp__face"><span class="hdp__name">С двух сторон</span><span class="hdp__sub">+{rub(REFLEX_TWO_SIDED_MIRROR_SURCHARGE)}</span></span></label>
+      </div>
+    </fieldset>
+
+    {/* Телефон: итог — после всех групп выбора; пока листаешь выбор, цена
+         видна в плашке у нижнего края экрана, нажатие — к расчёту */}
+    <a class="hdp__bar" href="#hdp-result" aria-label="Перейти к расчёту цены">
+      <span class="hdp__bar-label">Комплект</span>
+      <span class="hdp__bar-total" data-hdp-bar-total>{rub(q.total)}</span>
+      <span class="hdp__bar-more">Расчёт<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+  </form>
+
+  <aside id="hdp-result" class="hdp__result" aria-label="Цена выбранного комплекта">
+    <p class="h-meta hdp__caption">Комплект с&nbsp;коробом</p>
+    <p class="hdp__total" data-hdp-total>{rub(q.total)}</p>
+    <p class="hdp__summary" data-hdp-summary>{typograph(describe(c))}</p>
+    <p class="sr-only" aria-live="polite" data-hdp-status></p>
+
+    <dl class="hdp__lines">
+      <div><dt>Полотно в&nbsp;финиш-грунте</dt><dd data-hdp-blade>{rub(q.blade)}</dd></div>
+      <div><dt>Короб <span data-hdp-box-label>{BOX_LABEL[c.box]}</span>, ответная планка, две скрытые петли</dt><dd data-hdp-box>{rub(q.box)}</dd></div>
+      <div data-hdp-line="height" hidden={!q.heightExtra}><dt>Высота <span data-hdp-height-label>{heightLabel(c)}</span>, <span data-hdp-pct>{q.tier?.pct}</span></dt><dd data-hdp-height>+{rub(q.heightExtra)}</dd></div>
+      <div data-hdp-line="mirror" hidden={!q.mirrorExtra}><dt>Зеркало с&nbsp;двух сторон</dt><dd>+{rub(REFLEX_TWO_SIDED_MIRROR_SURCHARGE)}</dd></div>
+    </dl>
+
+    <ul class="hdp__notes" role="list" data-hdp-notes>
+      {notesOf(c).map((n) => <li>{typograph(n)}</li>)}
+    </ul>
+
+    <div class="hdp__actions">
+      <a class="h-btn h-btn--signal hdp__wa" data-hdp-wa href={whatsappWithText(managerMessage(c))} target="_blank" rel="noopener">
+        <WhatsAppIcon tone="dark" />Обсудить в&nbsp;WhatsApp
+      </a>
+      <a class="h-btn h-btn--quiet" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+    </div>
+    <p class="h-meta hdp__foot">Ручка, стопор и&nbsp;завёртка WC&nbsp;— отдельно.</p>
+  </aside>
+</div>
+
+<script>
+  import { quote, describe, notesOf, normalize, liteAvailable, heightLabel, configToParams, paramsToConfig, managerMessage, BOX_LABEL, type HiddenConfig } from '../../lib/hidden-door-price'
+  import { rub } from '../../data/services'
+  import { whatsappWithText } from '../../lib/messengers'
+  import { typograph } from '../../lib/typograph'
+
+  const root = document.querySelector<HTMLElement>('[data-hdp]')
+  const form = root?.querySelector<HTMLFormElement>('[data-hdp-form]')
+  if (root && form) {
+    const $ = <T extends Element = HTMLElement>(sel: string) => root.querySelector<T>(sel)!
+    const radios = (name: string) => [...form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`)]
+    const value = (name: string) => radios(name).find((r) => r.checked)?.value ?? ''
+
+    const read = (): HiddenConfig => normalize({
+      series: value('series') as HiddenConfig['series'],
+      reverse: value('opening') === 'reverse',
+      edge: value('edge') as HiddenConfig['edge'],
+      box: value('box') as HiddenConfig['box'],
+      height: value('height') === 'std' ? null : Number(value('height')),
+      twoSided: value('mirror') === 'both',
+    })
+
+    /* Форма показывает выбор после normalize: недоступное — выключено */
+    const write = (c: HiddenConfig) => {
+      const check = (name: string, v: string) => radios(name).forEach((r) => { r.checked = r.value === v })
+      check('series', c.series)
+      check('opening', c.reverse ? 'reverse' : 'direct')
+      check('edge', c.edge)
+      check('mirror', c.twoSided ? 'both' : 'one')
+      const lite = liteAvailable(c)
+      radios('box').forEach((r) => { if (r.value === 'lite') r.disabled = !lite })
+      $('[data-hdp-lite-hint]').hidden = lite
+      check('box', c.box)
+      const reflex = c.series === 'reflex'
+      radios('height').forEach((r) => {
+        if (r.value === 'std') return
+        const range = reflex ? r.dataset.reflexRange : r.dataset.range
+        r.disabled = !range
+        r.closest('label')!.hidden = !range
+        r.closest('label')!.querySelector('[data-hdp-range]')!.textContent = `${range || r.dataset.range}\u00a0мм`
+      })
+      check('height', c.height == null ? 'std' : String(c.height))
+      root.querySelectorAll<HTMLElement>('[data-hdp-only="reflex"]').forEach((el) => { el.hidden = !reflex })
+    }
+
+    const render = (c: HiddenConfig) => {
+      const q = quote(c)
+      const text = describe(c)
+      $('[data-hdp-total]').textContent = rub(q.total)
+      $('[data-hdp-bar-total]').textContent = rub(q.total)
+      $('[data-hdp-summary]').textContent = typograph(text)
+      $('[data-hdp-blade]').textContent = rub(q.blade)
+      $('[data-hdp-box]').textContent = rub(q.box)
+      $('[data-hdp-box-label]').textContent = BOX_LABEL[c.box]
+      $('[data-hdp-line="height"]').hidden = !q.heightExtra
+      $('[data-hdp-height-label]').textContent = heightLabel(c)
+      $('[data-hdp-pct]').textContent = q.tier?.pct ?? ''
+      $('[data-hdp-height]').textContent = `+${rub(q.heightExtra)}`
+      $('[data-hdp-line="mirror"]').hidden = !q.mirrorExtra
+      $('[data-hdp-notes]').replaceChildren(...notesOf(c).map((n) => Object.assign(document.createElement('li'), { textContent: typograph(n) })))
+      $<HTMLAnchorElement>('[data-hdp-wa]').href = whatsappWithText(managerMessage(c))
+      $('[data-hdp-status]').textContent = `${text}: ${rub(q.total)}`
+    }
+
+    const syncUrl = (c: HiddenConfig) => {
+      const url = new URL(location.href)
+      const params = configToParams(c)
+      for (const k of [...url.searchParams.keys()]) url.searchParams.delete(k)
+      params.forEach((v, k) => url.searchParams.set(k, v))
+      history.replaceState(history.state, '', url)
+    }
+
+    const apply = (c: HiddenConfig, url = true) => { write(c); render(c); if (url) syncUrl(c) }
+
+    form.addEventListener('change', () => apply(read()))
+    // Выбор из адреса; без параметров — то, что нарисовал сервер
+    if (location.search) apply(paramsToConfig(new URLSearchParams(location.search)), false)
+
+    /* Ссылки «Рассчитать цену» у карточек серий: серия — без перезагрузки */
+    document.querySelectorAll<HTMLAnchorElement>('[data-hd-series]').forEach((a) => {
+      a.addEventListener('click', () => apply(normalize({ ...read(), series: a.dataset.hdSeries as HiddenConfig['series'] })))
+    })
+  }
+</script>
+
+<style>
+  /* Выбор слева, итог справа и «липнет» при прокрутке выбора (ПК);
+     уже — итог под выбором */
+  .hdp { display: grid; gap: clamp(2rem, 4vw, 3rem) var(--h-gutter); align-items: start; }
+  @media (min-width: 62.5rem) {
+    .hdp { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .hdp__form { grid-column: 1 / span 7; }
+    .hdp__result { grid-column: 8 / span 5; position: sticky; top: calc(var(--header-height, 4.5rem) + 1.5rem); }
+  }
+
+  /* ── Выбор: группа — подпись над линейкой, варианты плитками ── */
+  .hdp__form { display: grid; gap: clamp(1.5rem, 3vw, 2rem); }
+  .hdp__group { min-width: 0; margin: 0; padding: 0; border: 0; }
+  .hdp__group[hidden] { display: none; }
+  .hdp__legend {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 0.875rem;
+    padding: 0 0 0.625rem;
+    border-bottom: 0.0625rem solid var(--h-rule);
+    font-family: var(--h-font);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--h-ink);
+  }
+  .hdp__more { margin-left: auto; font-size: 0.875rem; font-weight: 500; color: var(--h-soft); text-decoration: underline; text-decoration-color: var(--color-slate-300); text-underline-offset: 0.25em; }
+  .hdp__more:hover { color: var(--h-ink); text-decoration-color: var(--h-signal); }
+
+  /* Плитки — столько колонок, сколько вариантов; на узком — по две */
+  .hdp__chips { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0.5rem; }
+  /* Высоты — сеткой (их пять): колонка не уже 8,5 rem, на телефоне — по две */
+  .hdp__chips--heights { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); }
+  /* Серии на узком — столбиком: в строку названия с подписью не помещаются */
+  @media (max-width: 43.6875rem) {
+    .hdp__chips--series { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: minmax(0, 1fr); }
+  }
+  .hdp__chip { position: relative; display: block; min-width: 0; cursor: pointer; }
+  .hdp__chip[hidden] { display: none; }
+  .hdp__radio { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: inherit; }
+  .hdp__face {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.125rem;
+    height: 100%;
+    min-height: 3.25rem;
+    padding: 0.625rem 0.875rem;
+    border: 0.0625rem solid var(--color-slate-300);
+    border-radius: 0.875rem;
+    background: var(--h-paper);
+    transition: border-color 150ms var(--ease-out), background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+  }
+  .hdp__face--row { flex-direction: row; align-items: center; justify-content: flex-start; gap: 0.625rem; }
+  .hdp__name { font-size: 0.9375rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); }
+  .hdp__sub { font-size: 0.8125rem; line-height: 1.3; color: var(--h-muted); font-variant-numeric: tabular-nums; }
+  .hdp__swatch { flex: none; width: 1.125rem; height: 1.125rem; border-radius: 50%; background: var(--sw); box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--h-ink) 18%, transparent); }
+
+  .hdp__chip:hover .hdp__face { border-color: var(--h-ink); }
+  .hdp__radio:checked + .hdp__face { border-color: var(--h-ink); background: var(--h-ink); }
+  .hdp__radio:checked + .hdp__face .hdp__name { color: var(--color-white); }
+  .hdp__radio:checked + .hdp__face .hdp__sub { color: var(--color-slate-300); }
+  .hdp__radio:checked + .hdp__face .hdp__swatch { box-shadow: 0 0 0 0.125rem var(--color-white); }
+  .hdp__radio:focus-visible + .hdp__face { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.1875rem; }
+  .hdp__radio:disabled { cursor: not-allowed; }
+  .hdp__radio:disabled + .hdp__face { border-style: dashed; background: none; }
+  .hdp__radio:disabled + .hdp__face .hdp__name { color: var(--h-muted); }
+  .hdp__chip:has(.hdp__radio:disabled):hover .hdp__face { border-color: var(--color-slate-300); }
+  .hdp__hint { margin: 0.625rem 0 0; font-size: 0.875rem; color: var(--h-soft); }
+
+  /* ── Телефон: плашка с ценой у нижнего края, пока виден выбор ── */
+  /* Рядом с кнопкой «Наверх» (BackToTop.astro: круг 2,75 rem, 1 rem от
+     края, 1,25 rem от низа): та же нижняя линия и высота, справа — место
+     под кнопку */
+  .hdp__bar {
+    position: sticky;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom, 0rem));
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    margin-right: 3.25rem;
+    padding: 0.375rem 1rem 0.375rem 1.25rem;
+    border-radius: 999rem;
+    background: var(--h-ink);
+    color: var(--color-white);
+    text-decoration: none;
+    box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--color-slate-900) 28%, transparent);
+  }
+  .hdp__bar-label { font-size: 0.8125rem; color: var(--color-slate-300); }
+  .hdp__bar-total { font-size: 1.125rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .hdp__bar-more { display: inline-flex; align-items: center; gap: 0.25rem; margin-left: auto; font-size: 0.875rem; font-weight: 600; }
+  .hdp__bar { min-width: 0; }
+  /* Узкий телефон: без подписи «Комплект» — цена и «Расчёт» помещаются
+     рядом с кнопкой «Наверх» */
+  @media (max-width: 22.4375rem) { .hdp__bar-label { display: none; } }
+  .hdp__bar:focus-visible { outline: 0.1875rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
+  @media (min-width: 62.5rem) { .hdp__bar { display: none; } }
+
+  /* ── Итог: белая плитка на сером фоне секции ── */
+  .hdp__result {
+    scroll-margin-top: calc(var(--header-height, 4.5rem) + 1rem);
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.25rem, 2.5vw, 2rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-paper);
+  }
+  .hdp__caption { margin: 0; }
+  .hdp__total {
+    margin: -0.5rem 0 0;
+    font-family: var(--h-font);
+    font-size: clamp(2.25rem, 4vw, 3rem);
+    font-weight: var(--h-weight-display);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--h-ink);
+  }
+  .hdp__summary { margin: 0; font-size: 0.9375rem; line-height: 1.5; color: var(--h-soft); text-wrap: pretty; }
+  .hdp__lines { margin: 0; border-top: 0.0625rem solid var(--h-rule); }
+  .hdp__lines > div { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.625rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
+  .hdp__lines > div[hidden] { display: none; }
+  .hdp__lines dt { font-size: 0.875rem; line-height: 1.4; color: var(--h-soft); }
+  .hdp__lines dd { margin: 0; font-size: 0.9375rem; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--h-ink); }
+  .hdp__notes { display: grid; gap: 0.375rem; margin: 0; padding: 0; list-style: none; }
+  .hdp__notes li { position: relative; padding-left: 1rem; font-size: 0.875rem; line-height: 1.45; color: var(--h-soft); }
+  .hdp__notes li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--color-slate-300); }
+  .hdp__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 0.25rem; }
+  .hdp__actions > * { flex: 1 1 auto; }
+  .hdp__wa { gap: 0.5rem; }
+  .hdp__wa :global(img) { width: 1.25rem; height: 1.25rem; }
+  .hdp__foot { margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) { .hdp__face { transition: none; } }
+</style>
