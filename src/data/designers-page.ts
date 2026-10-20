@@ -100,13 +100,13 @@ export const DESIGNER_BENEFITS = {
   approach: {
     title: 'Индивидуальный подход',
     text:  'Для каждого проекта подбираем свои решения — от стандартных моделей до полностью нестандартных.',
-    /* Фото из медиатеки салона, без знаков — то же, что у плитки «Перегородки» */
+    /* Фото медиатеки салона, без знаков. Не то же, что у плитки «Перегородки» */
     photo: {
-      src:    DIRECTION_PHOTOS.partitions.src,
-      srcset: `${DIRECTION_PHOTOS.partitions.src} 1672w`,
-      width:  1672,
-      height: 941,
-      alt:    'Столовая за раздвижными перегородками в чёрном профиле — пример нестандартного решения',
+      src:    '/media/designers/approach-glass-partitions.webp',
+      srcset: '/media/designers/approach-glass-partitions.webp 1200w',
+      width:  1200,
+      height: 1000,
+      alt:    'Гостиная и спальня, разделённые раздвижными стеклянными перегородками в тёмном профиле — пример нестандартного решения',
     },
   },
   help: {
