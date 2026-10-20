@@ -28,7 +28,7 @@ import VisitBand from '../../components/home/VisitBand.astro'
 import '../../styles/home.css'
 
 import {
-  IMAGES, HERO_IMAGES, INFO_IMAGES, BOX_PRO_IMAGE, BOX_LITE_IMAGE, FACTS,
+  HIDDEN_STATUS, IMAGES, HERO_IMAGES, INFO_IMAGES, BOX_PRO_IMAGE, BOX_LITE_IMAGE, FACTS,
   SECRET_SIZES, SECRET_REVERS_SIZES, DOOR_HEIGHT,
   SECRET_PRICES, SECRET_MIN_BLADE_PRICE, SECRET_MIN_KIT_PRICE,
   SECRET_REVERS_MIN_BLADE_PRICE, SECRET_REVERS_MIN_KIT_PRICE,
@@ -39,7 +39,7 @@ import {
 } from '../../data/skrytye-dveri-products'
 import { HERO_FACTS, MOSCOW_NOTES, SEGMENTS, HIDDEN_DOORS_FAQ } from '../../data/hidden-doors-page'
 import { getWorks } from '../../lib/works'
-import { STATUS_LABEL, type Status } from '../../data/in-salon'
+import { MODEL_STATUS_LABEL, type ModelStatus } from '../../lib/made-to-order'
 import { rub } from '../../data/services'
 import { productSchema } from '../../lib/product-schema'
 import { localBusinessSchema } from '../../lib/local-business-schema'
@@ -51,12 +51,12 @@ const opening = (reverse: boolean) => (reverse ? 'от себя' : 'на себ�
 
 /* ── Серии: карточки наверху страницы ── */
 const series: {
-  id: string; name: string; type: string; status: Status; text: string
+  id: string; name: string; type: string; status: ModelStatus; text: string
   image: string; alt: string; specs: [string, string][]
   kit: number; blade: number; href: string
 }[] = [
   {
-    id: 'sekret', name: '«Секрет»', type: 'Открывается на себя', status: 'stock',
+    id: 'sekret', name: '«Секрет»', type: 'Открывается на себя', status: HIDDEN_STATUS.sekret,
     text: 'Классический скрытый монтаж. Полотно в грунте — под покраску, штукатурку или обои в цвет стены.',
     image: IMAGES.invisible, alt: 'Скрытая дверь «Секрет» вровень со стеной',
     specs: [
@@ -68,7 +68,7 @@ const series: {
     blade: SECRET_MIN_BLADE_PRICE, href: '#prices',
   },
   {
-    id: 'revers', name: '«Секрет Реверс»', type: 'Открывается от себя', status: 'stock',
+    id: 'revers', name: '«Секрет Реверс»', type: 'Открывается от себя', status: HIDDEN_STATUS.revers,
     text: 'Полотно уходит в соседнее помещение — открытая дверь не занимает место в комнате.',
     image: IMAGES.invisibleRev, alt: 'Скрытая дверь «Секрет Реверс» с обратным открыванием',
     specs: [
@@ -80,7 +80,7 @@ const series: {
     blade: SECRET_REVERS_MIN_BLADE_PRICE, href: '#prices',
   },
   {
-    id: 'reflex', name: '«Рефлекс»', type: 'Зеркало во всю высоту', status: 'new',
+    id: 'reflex', name: '«Рефлекс»', type: 'Зеркало во всю высоту', status: HIDDEN_STATUS.reflex,
     text: 'Тот же монтаж вровень со стеной, но полотно — зеркало: прихожая выглядит больше и светлее.',
     image: REFLEX_IMAGE, alt: 'Скрытая дверь с зеркалом «Рефлекс»',
     specs: [
@@ -208,7 +208,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
               <span class="h-media hd-serie__media">
                 <img src={s.image} alt={s.alt} width="900" height="1125" loading="lazy" decoding="async" />
               </span>
-              <span class="h-status h-meta hd-serie__status" data-status={s.status}>{STATUS_LABEL[s.status]}</span>
+              <span class="h-status h-meta hd-serie__status" data-status={s.status}>{MODEL_STATUS_LABEL[s.status]}</span>
               <h3 class="hd-serie__name">{s.name}</h3>
               <p class="h-meta hd-serie__type">{s.type}</p>
               <p class="h-body hd-serie__text">{typograph(s.text)}</p>

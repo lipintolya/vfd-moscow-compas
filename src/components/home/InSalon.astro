@@ -1,9 +1,11 @@
 ---
 /**
- * «Новинки и двери в наличии» — витрина. Данные — src/data/in-salon.ts.
+ * «Новинки и двери в наличии» — витрина. Данные — src/data/in-salon.ts;
+ * статусы, «На складе» и адрес модели — из каталога (карточки из
+ * index.astro + made-to-order.ts), не из текста блока.
  *
- * Компьютер: слева сцена с фото, справа позиции под линейками (статус,
- * название, описание — у всех сразу: раскрытие при наведении сдвигало бы
+ * Компьютер: слева сцена с фото, справа позиции под линейками (статусы,
+ * название, описание, что на складе — у всех сразу: раскрытие при наведении сдвигало бы
  * строки под курсором, и он переключал бы соседнюю). Наведение или фокус
  * открывают позицию на сцене — фото меняется сразу, без анимации (так
  * надёжнее всего); над активной позицией прорисовывается красный отрезок,
@@ -14,23 +16,46 @@
  * позиции своё фото, сцены нет.
  */
 import { PHONE } from '../../config/site'
-import { IN_SALON, STATUS_LABEL, type InSalonItem } from '../../data/in-salon'
-import { typograph } from '../../lib/typograph'
+import { IN_SALON, type InSalonItem } from '../../data/in-salon'
+import { isInStock, MODEL_STATUS_LABEL, type ModelStatus } from '../../lib/made-to-order'
+import { listRu, typograph } from '../../lib/typograph'
+import type { CatalogCardItem } from '../catalog/types'
 
 interface Props {
-  /** Адрес страницы модели по id из каталога (index.astro) */
-  modelHref: (id: string) => string | null
+  /** Карточки каталога (index.astro) — статусы, склад и адрес модели */
+  cards: Pick<CatalogCardItem, 'id' | 'slug' | 'name' | 'colorNames' | 'isNew'>[]
 }
-const { modelHref } = Astro.props
+const { cards } = Astro.props
 
-const resolve = (item: InSalonItem) => ({
-  ...item,
-  title: typograph(item.title),
-  text: typograph(item.text),
-  href: item.modelId ? modelHref(item.modelId) : item.href ?? null,
-})
-// Модель пропала из каталога — позицию не показываем, а не ведём в никуда
-const items = IN_SALON.map(resolve).filter((r): r is typeof r & { href: string } => !!r.href)
+/* Наличие важнее новизны — первым, как на карточке каталога */
+const ORDER: ModelStatus[] = ['stock', 'new', 'order']
+
+const resolve = (item: InSalonItem) => {
+  const card = item.modelId ? cards.find((c) => c.id === item.modelId) : undefined
+  // Модель пропала из каталога — позицию не показываем, а не ведём в никуда
+  if (item.modelId && !card) return null
+  const stockColors = card ? card.colorNames.filter((n) => isInStock(card.id, n)) : []
+  const statuses = card
+    ? ORDER.filter((s) => (s === 'stock' && stockColors.length > 0) || (s === 'new' && card.isNew))
+    : ORDER.filter((s) => item.statuses?.includes(s))
+  // Позиция шире модели (серия) — на складе называем саму модель
+  const stock = card
+    ? stockColors.length ? `${item.href ? `${card.name}, ` : ''}${listRu(stockColors)}` : null
+    : item.stock ?? null
+  return {
+    ...item,
+    title: typograph(item.title),
+    text: typograph(item.text),
+    href: item.href ?? `/models/${card!.slug}/`,
+    statuses,
+    stock: stock && typograph(stock),
+  }
+}
+const items = IN_SALON.map(resolve).filter((r) => r !== null)
+
+/* Ширина фото на экране — по ней браузер берёт копию из srcset */
+const STAGE_SIZES = '(min-width: 80rem) 44rem, 58vw'
+const CARD_SIZES = '(min-width: 43.75rem) 46vw, 78vw'
 
 const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 ---
@@ -50,6 +75,8 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           <span class:list={['stage__slide', { 'is-on': i === 0 }]}>
             <img
               src={it.image.src}
+              srcset={it.image.srcset}
+              sizes={STAGE_SIZES}
               alt=""
               width={it.image.width}
               height={it.image.height}
@@ -57,7 +84,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
               loading="lazy"
               decoding="async"
             />
-            <span class="h-status h-meta h-status--photo stage__chip" data-status={it.status}>{STATUS_LABEL[it.status]}</span>
+            <span class="chips stage__chips">
+              {it.statuses.map((st) => <span class="h-status h-meta h-status--photo" data-status={st}>{MODEL_STATUS_LABEL[st]}</span>)}
+            </span>
           </span>
         ))}
       </a>
@@ -70,6 +99,8 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
                 <span class="h-media item__media">
                   <img
                     src={it.image.src}
+                    srcset={it.image.srcset}
+                    sizes={CARD_SIZES}
                     alt={it.image.alt}
                     width={it.image.width}
                     height={it.image.height}
@@ -79,11 +110,16 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
                   />
                 </span>
                 <span class="item__head">
-                  <span class="h-status h-meta" data-status={it.status}>{STATUS_LABEL[it.status]}</span>
+                  {it.statuses.length > 0 && (
+                    <span class="chips">
+                      {it.statuses.map((st) => <span class="h-status h-meta" data-status={st}>{MODEL_STATUS_LABEL[st]}</span>)}
+                    </span>
+                  )}
                   <span class="item__title">{it.title}</span>
                 </span>
                 <span class="h-arrow item__arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
                 <span class="h-body item__text">{it.text}</span>
+                {it.stock && <span class="h-meta item__stock">На складе: {it.stock}</span>}
               </a>
             </li>
           ))}
@@ -155,7 +191,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   .stage__slide { position: absolute; inset: 0; visibility: hidden; }
   .stage__slide.is-on { visibility: visible; }
   .stage__slide img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .stage__chip { position: absolute; left: clamp(0.875rem, 1.6vw, 1.25rem); bottom: clamp(0.875rem, 1.6vw, 1.25rem); }
+  .stage__chips { position: absolute; left: clamp(0.875rem, 1.6vw, 1.25rem); bottom: clamp(0.875rem, 1.6vw, 1.25rem); }
+  /* Статусы рядом: позиция бывает и новинкой, и в наличии */
+  .chips { display: flex; flex-wrap: wrap; gap: 0.375rem; }
 
   /* ── Список ── */
   .side { display: flex; flex-direction: column; min-width: 0; }
@@ -164,6 +202,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
   .side__phone { white-space: nowrap; }
   .item__link { color: inherit; text-decoration: none; }
   .item__text { display: block; }
+  .item__stock { display: block; color: var(--h-soft); }
   .item__title {
     font-family: var(--h-font);
     font-weight: 600;
@@ -216,6 +255,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     .item.is-active .item__arrow { opacity: 1; }
     .item__link:hover .item__arrow { background: var(--h-signal); transform: rotate(45deg); }
     .item__text { grid-column: 1; margin-top: 0.5rem; max-width: 26rem; font-size: 0.9375rem; line-height: 1.5; }
+    .item__stock { grid-column: 1; margin-top: 0.375rem; }
   }
 
   /* ── Планшет и телефон: карточки с фото (телефон — лента вбок) ── */
@@ -227,6 +267,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     .item__title { font-size: 1.3125rem; line-height: 1.25; }
     .item__arrow { display: none; }
     .item__text { margin-top: 0.375rem; font-size: 0.9375rem; }
+    .item__stock { margin-top: 0.5rem; }
     .side__note { margin-top: 0; }
   }
 

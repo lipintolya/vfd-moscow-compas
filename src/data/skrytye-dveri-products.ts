@@ -2,8 +2,18 @@
    Данные скрытых дверей «Секрет» / «Секрет Реверс»
    Только РРЦ — закупочные цены на сайте не публикуются
    ============================================================ */
+import type { ModelStatus } from '../lib/made-to-order'
+
 const CDN      = '/media/catalog-vfd/invisible/'
 const INFO_CDN  = `${CDN}invisible_info/`
+
+/** Статус серии — карточки на /catalog/skrytye-dveri/ и блок
+    «Новинки и двери в наличии» на главной (src/data/in-salon.ts) */
+export const HIDDEN_STATUS = {
+  sekret: 'stock',
+  revers: 'stock',
+  reflex: 'new',
+} as const satisfies Record<string, ModelStatus>
 
 // ── Информационные изображения ─────────────────────────────────
 export const INFO_IMAGES = {
