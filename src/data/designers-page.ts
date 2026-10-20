@@ -100,13 +100,13 @@ export const DESIGNER_BENEFITS = {
   approach: {
     title: 'Индивидуальный подход',
     text:  'Для каждого проекта подбираем свои решения — от стандартных моделей до полностью нестандартных.',
-    /* Кадр из галереи визуализаций (renderGallery, № 4) */
+    /* Фото из медиатеки салона, без знаков — то же, что у плитки «Перегородки» */
     photo: {
-      src:    '/renders/alum-covers/4-preview.webp',
-      srcset: '/renders/alum-covers/4-preview.webp 900w, /renders/alum-covers/4.webp 1920w',
-      width:  900,
-      height: 674,
-      alt:    'Гардеробная за стеклянной перегородкой в чёрном профиле — пример нестандартного решения',
+      src:    DIRECTION_PHOTOS.partitions.src,
+      srcset: `${DIRECTION_PHOTOS.partitions.src} 1672w`,
+      width:  1672,
+      height: 941,
+      alt:    'Столовая за раздвижными перегородками в чёрном профиле — пример нестандартного решения',
     },
   },
   help: {
