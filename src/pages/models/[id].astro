@@ -2,6 +2,7 @@
 import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { sellerRef } from '../../lib/local-business-schema'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import ProductColorPicker from '../../components/catalog/ProductColorPicker.vue'
 import PlinthSection from '../../components/catalog/PlinthSection.astro'
@@ -115,7 +116,7 @@ const structuredData = [{
           '@type':                  'Offer',
           priceCurrency:            'RUB',
           availability:             'https://schema.org/InStoreOnly',
-          seller:                   { '@type': 'Organization', name: 'Салон дверей ВФД' },
+          seller:                   sellerRef(),
           price:                    minPrice,
           priceValidUntil:          new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           hasMerchantReturnPolicy:  merchantPolicy.returnPolicy,

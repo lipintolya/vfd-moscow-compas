@@ -150,6 +150,7 @@ const finish = finishLabel(profile.id, glass.id)
 
 <script>
   import { upperFirst } from '../../lib/typograph'
+  import { ALUM_URL_PARAMS } from '../../data/alum-partitions'
 
   const root = document.querySelector<HTMLElement>('[data-oa-builder]')
   const form = root?.querySelector<HTMLFormElement>('[data-oa-form]')
@@ -196,9 +197,7 @@ const finish = finishLabel(profile.id, glass.id)
     /* Сочетание — в адрес страницы, чтобы им можно было поделиться */
     const syncUrl = () => {
       const url = new URL(location.href)
-      url.searchParams.set('layout', checked('layout').value)
-      url.searchParams.set('profile', checked('profile').value)
-      url.searchParams.set('glass', checked('glass').value)
+      for (const name of ALUM_URL_PARAMS) url.searchParams.set(name, checked(name).value)
       history.replaceState(history.state, '', url)
       return url
     }
@@ -212,8 +211,9 @@ const finish = finishLabel(profile.id, glass.id)
     }
 
     const params = new URL(location.href).searchParams
-    if (params.has('layout') || params.has('profile') || params.has('glass')) {
-      select(params.get('layout'), params.get('profile'), params.get('glass'))
+    if (ALUM_URL_PARAMS.some((name) => params.has(name))) {
+      const [layout, profile, glass] = ALUM_URL_PARAMS.map((name) => params.get(name))
+      select(layout, profile, glass)
     }
 
     form.addEventListener('change', () => { apply(); syncUrl() })

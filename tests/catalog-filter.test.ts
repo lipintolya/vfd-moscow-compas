@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   filterCards, sortCards, facetCounts, coatingRank, NO_FILTERS, PRICE_BUCKETS,
-  parseFilterParams, filterParamsString,
+  parseFilterParams, filterParamsString, CATALOG_URL_PARAMS,
 } from '../src/lib/catalog-filter'
 import { modelStatus } from '../src/lib/made-to-order'
 import type { CatalogCardItem } from '../src/components/catalog/types'
@@ -91,4 +91,10 @@ test('статус на карточке: наличие важнее новиз
   assert.equal(modelStatus({ id: 'x', seriesSlug: 'emalex', isNew: true }, 'Белый'), 'new')
   assert.equal(modelStatus({ id: 'x', seriesSlug: 'urban-drevesnyy', isNew: false }, 'Шервуд бурбон'), 'order')
   assert.equal(modelStatus({ id: 'x', seriesSlug: 'emalex', isNew: false }, 'Белый'), null)
+})
+
+test('CATALOG_URL_PARAMS — ровно те параметры, что пишут фильтры (robots.txt Clean-param)', () => {
+  const all = f({ coating: 'emal', series: ['a'], colors: ['white'], prices: [PRICE_BUCKETS[0]!.slug], glass: ['with'] })
+  const written = [...new URLSearchParams(filterParamsString(all)).keys()]
+  assert.deepEqual([...written].sort(), [...CATALOG_URL_PARAMS].sort())
 })

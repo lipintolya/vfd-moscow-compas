@@ -25,7 +25,7 @@ const {
 } = Astro.props
 ---
 
-<nav id="pt-snav" class="snav" aria-label="Разделы страницы" aria-hidden="true">
+<nav id="pt-snav" class="snav" aria-label="Разделы страницы" inert>
   <div class="container">
     <div class="snav__bar">
       <ul class="snav__list" role="list">
@@ -142,7 +142,7 @@ const {
       if (dismissed) return
       const show = window.scrollY > 380
       nav.classList.toggle('snav--visible', show)
-      nav.setAttribute('aria-hidden', show ? 'false' : 'true')
+      nav.inert = !show  // скрытая плашка — вне Tab и экранных читалок
     }
     window.addEventListener('scroll', onScroll, { passive: true })
 
@@ -152,7 +152,7 @@ const {
         dismissed = true
         sessionStorage.setItem('pt-snav-dismissed', '1')
         nav.classList.remove('snav--visible')
-        nav.setAttribute('aria-hidden', 'true')
+        nav.inert = true
       })
     }
 

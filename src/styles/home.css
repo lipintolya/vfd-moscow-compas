@@ -77,6 +77,9 @@
      иначе сливаются с фоном */
   --h-rule: var(--color-slate-300);
   --h-media-bg: var(--color-slate-200);
+  /* Мелкий приглушённый текст — тоже на ступень темнее: slate-500 на
+     slate-100 даёт контраст 4,3 при норме 4,5 (WCAG AA); так — 4,8 */
+  --h-muted: color-mix(in oklab, var(--color-slate-500), var(--color-slate-600) 30%);
   background: var(--h-wall);
 }
 .h-sec--tight-top { padding-top: 0; }

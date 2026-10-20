@@ -12,15 +12,18 @@
  * нет домена-заглушки, домен сайта совпадает с доменом сервера. Не прошло —
  * ничего не отправляется.
  *
- * После выкладки изменившиеся страницы карты сайта уходят в IndexNow
- * (Яндекс, Bing) — переобход сразу, а не по графику поисковика. Что
- * изменилось — по хэшам страниц прошлой выкладки (deploy/indexnow-state.json,
- * вне Git); первый раз уходят все.
+ * Что изменилось — по хэшам СОДЕРЖИМОГО страниц (текст, title, description,
+ * разметка, картинки — без имён файлов стилей и скриптов; pageContent в
+ * scripts/lib/indexnow.mjs) против прошлой выкладки (deploy/indexnow-state.json,
+ * вне Git: хэш и дата его последней смены). До выкладки эта дата становится
+ * <lastmod> страницы в карте сайта; после — изменившиеся страницы уходят в
+ * IndexNow (Яндекс, Bing): переобход сразу, а не по графику поисковика.
+ * Первый раз (и после смены формата состояния) — все страницы.
  */
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { htmlHashes, changedUrls, sitemapUrls, submitIndexNow } from './lib/indexnow.mjs'
+import { contentHashes, changedUrls, nextState, readState, sitemapUrls, submitIndexNow, withLastmod } from './lib/indexnow.mjs'
 
 const ROOT = path.resolve(import.meta.dirname, '..')
 const DIST = path.join(ROOT, 'dist')
@@ -69,6 +72,16 @@ const placeholder = pages.find((f) => readFileSync(f, 'utf8').includes('domain-p
 if (placeholder) fail(`домен-заглушка в ${path.relative(DIST, placeholder)}`)
 console.log(`\n✓ Сборка проверена: ${pages.length} страниц, карта сайта и robots.txt — ${server.domain}`)
 
+/* ── Даты изменения страниц → <lastmod> в карте сайта (до выкладки) ── */
+const STATE_FILE = path.join(ROOT, 'deploy/indexnow-state.json')
+const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' }) // ГГГГ-ММ-ДД
+const prevState = readState(existsSync(STATE_FILE) ? JSON.parse(readFileSync(STATE_FILE, 'utf8')) : null)
+const state = nextState(prevState, contentHashes(DIST), today)
+for (const f of readdirSync(DIST).filter((n) => /^sitemap-\d+\.xml$/.test(n))) {
+  const file = path.join(DIST, f)
+  writeFileSync(file, withLastmod(readFileSync(file, 'utf8'), siteUrl, state))
+}
+
 /* ── Выкладка: страницы, затем фото Strapi ── */
 /* Без --chmod: его не знает openrsync из macOS; права файлов переносятся
    как есть (644/755) — nginx их читает */
@@ -77,16 +90,13 @@ run('rsync', [...rsync, '--exclude', '/uploads/', 'dist/', `${server.host}:${ser
 run('rsync', [...rsync, '--exclude', '.gitkeep', 'cms/public/uploads/', `${server.host}:${server.webRoot}/uploads/`])
 console.log(`\n✓ Выложено: https://${server.domain}`)
 
-/* ── IndexNow: изменившиеся страницы — Яндексу и Bing ── */
-const STATE_FILE = path.join(ROOT, 'deploy/indexnow-state.json')
+/* ── IndexNow: страницы с изменившимся содержимым — Яндексу и Bing ── */
 const indexNowKey = readFileSync(path.join(ROOT, 'src/config/site.ts'), 'utf8').match(/indexNowKey: '([0-9a-f]+)'/)?.[1]
-const hashes = htmlHashes(DIST)
-const prevHashes = existsSync(STATE_FILE) ? JSON.parse(readFileSync(STATE_FILE, 'utf8')) : null
-const toSubmit = changedUrls(siteUrl, prevHashes, hashes, sitemapUrls(DIST))
+const toSubmit = changedUrls(siteUrl, prevState, state, sitemapUrls(DIST))
 if (!indexNowKey) console.warn('IndexNow: нет SITE.indexNowKey — поисковикам не сообщено')
 else if (!toSubmit.length) console.log('IndexNow: изменившихся страниц нет')
 else {
   const results = await submitIndexNow(siteUrl, indexNowKey, toSubmit)
   console.log(`IndexNow: ${toSubmit.length} стр. → ${results.join(', ')}`)
 }
-writeFileSync(STATE_FILE, JSON.stringify(hashes))
+writeFileSync(STATE_FILE, JSON.stringify(state))

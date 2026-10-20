@@ -81,6 +81,10 @@ export function facetCounts(cards: readonly CatalogCardItem[], f: CatalogFilterS
 }
 
 /* ── Фильтры в адресе: ?coating=emal&series=skinel,winter&color=white&price=do-10000&glass=with ── */
+/** Все параметры фильтров в адресе — robots.txt склеивает их для Яндекса
+    (Clean-param) с адресом страницы; тест сверяет с filterParamsString */
+export const CATALOG_URL_PARAMS = ['coating', 'series', 'color', 'price', 'glass'] as const
+
 const list = (value: string | null) => (value ? value.split(',').map((v) => v.trim()).filter(Boolean) : [])
 
 /** familyOfColor — группа по точному названию цвета: старые ссылки вели на ?color=<название> */

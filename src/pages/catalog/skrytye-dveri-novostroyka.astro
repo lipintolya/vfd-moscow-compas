@@ -7,6 +7,7 @@
  * и на реальных ЖК Москвы, где двери уже установлены.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import { sellerRef } from '../../lib/local-business-schema'
 import { brandTitle } from '../../lib/seo-title'
 import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
 import { relatedArticle as relatedArticleFor } from '../../lib/articles'
@@ -93,7 +94,7 @@ const structuredData = canonicalUrl ? [
       priceCurrency: 'RUB',
       price: SECRET_MIN_KIT_PRICE,
       availability: 'https://schema.org/InStock',
-      seller: { '@type': 'Organization', name: 'Салон дверей ВФД' },
+      seller: sellerRef(),
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
     },
   },

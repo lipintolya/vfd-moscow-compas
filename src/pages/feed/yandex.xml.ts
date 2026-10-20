@@ -134,7 +134,7 @@ export const GET: APIRoute = async ({ site }) => {
     '<?xml version="1.0" encoding="UTF-8"?>',
     `<yml_catalog date="${feedDate()}">`,
     '  <shop>',
-    '    <name>Салон дверей ВФД</name>',
+    `    <name>${xml(SITE.studioName)}</name>`,
     `    <company>${xml(companyLegalInfo.shortName)}</company>`,
     `    <url>${xml(base.href)}</url>`,
     '    <currencies>',

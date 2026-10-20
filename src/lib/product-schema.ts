@@ -5,7 +5,7 @@
  */
 import { SITE } from '../config/site'
 import { merchantPolicy } from './contacts-data'
-import { LOCAL_BUSINESS_ID } from './local-business-schema'
+import { sellerRef } from './local-business-schema'
 
 const areaServed = [
   { '@type': 'City', name: SITE.city.name },
@@ -35,7 +35,7 @@ export function productSchema(p: {
       highPrice: p.high,
       ...(p.inStock && { availability: 'https://schema.org/InStock' }),
       areaServed,
-      seller: { '@id': LOCAL_BUSINESS_ID },
+      seller: sellerRef(),
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
     },
   }

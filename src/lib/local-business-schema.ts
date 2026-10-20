@@ -13,6 +13,11 @@ import { MAP_URL } from './map-links'
 
 export const LOCAL_BUSINESS_ID = `${SITE.url}/#localbusiness`
 
+/** Продавец в Product/Offer — ссылка на тот же узел, что Store на страницах
+    (@id), с типом и названием: поисковик связывает товар с салоном, даже
+    если на странице нет полной разметки салона */
+export const sellerRef = () => ({ '@type': 'Store', '@id': LOCAL_BUSINESS_ID, name: SITE.studioName })
+
 /** Карточки организации на картах — sameAs */
 const MAP_PROFILES: string[] = [SITE.yandexMaps]
 

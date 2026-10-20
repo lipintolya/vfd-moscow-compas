@@ -5,6 +5,7 @@
  * характеристики + живая сетка моделей серии (Supabase, через catalog-data).
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { sellerRef } from '../../../lib/local-business-schema'
 import { brandTitle } from '../../../lib/seo-title'
 import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import CatalogGrid from '../../../components/catalog/CatalogGrid.vue'
@@ -124,7 +125,7 @@ const structuredData = canonicalUrl ? [
                 price:                   card.price,
                 priceCurrency:           'RUB',
                 availability:            'https://schema.org/InStoreOnly',
-                seller:                  { '@type': 'Organization', name: 'Салон дверей ВФД' },
+                seller:                  sellerRef(),
                 hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
               },
             }

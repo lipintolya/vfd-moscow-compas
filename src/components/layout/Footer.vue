@@ -240,7 +240,7 @@ onUnmounted(() => {
           <div>
             <a href="/" class="flex items-center gap-2 mb-4 w-fit" :aria-label="`${SITE.name} в ${SITE.address.mall} — главная`">
               <span class="text-lg font-semibold text-white tracking-wide">VFD</span>
-              <span class="text-xs text-white/40 uppercase tracking-widest">{{ SITE.studioName }}</span>
+              <span class="text-xs text-white/55 uppercase tracking-widest">{{ SITE.studioName }}</span>
             </a>
             <p class="text-sm leading-relaxed text-white/60 max-w-xs">
               {{ SITE.studioName }} — шоу-рум Владимирской фабрики дверей
@@ -254,7 +254,7 @@ onUnmounted(() => {
               class="mt-5 inline-flex items-center gap-2.5 text-sm text-white/60 hover:text-white transition-colors duration-200"
             >
               <img src="/icons/telegram-white.png" alt="" class="w-6 h-6" width="24" height="24" loading="lazy" />
-              <span>Telegram-канал <span class="text-white/40">{{ SITE.social.telegramHandle }}</span></span>
+              <span>Telegram-канал <span class="text-white/55">{{ SITE.social.telegramHandle }}</span></span>
             </a>
           </div>
 
@@ -305,7 +305,7 @@ onUnmounted(() => {
                 >
                   {{ p.label }}
                 </a>
-                <span class="block text-white/40">{{ p.title }}</span>
+                <span class="block text-white/55">{{ p.title }}</span>
                 <span v-if="'whatsapp' in p && p.whatsapp" class="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
                   <a
                     :href="WHATSAPP_URL"
@@ -351,7 +351,7 @@ onUnmounted(() => {
                   {{ CONTACTS.email }}
                 </a>
               </li>
-              <li class="text-white/40 leading-relaxed">
+              <li class="text-white/55 leading-relaxed">
                 {{ CONTACTS.address }}
               </li>
             </ul>
@@ -390,7 +390,7 @@ onUnmounted(() => {
               class="absolute inset-0 w-full h-full object-cover"
               aria-hidden="true"
             />
-            <span class="absolute right-2 bottom-1.5 text-[0.625rem] text-white/40 pointer-events-none">© участники OpenStreetMap</span>
+            <span class="absolute right-2 bottom-1.5 text-[0.625rem] text-white/55 pointer-events-none">© участники OpenStreetMap</span>
             <a
               :href="MAP_LINK"
               target="_blank"
@@ -405,7 +405,7 @@ onUnmounted(() => {
              в модалку: там тот же текст остаётся полностью, но для защиты
              от претензий по ст. 437 ГК РФ дисклеймер должен быть явно виден
              на странице, а не только доступен по дополнительному действию. -->
-        <p class="mt-8 pt-6 border-t border-white/10 text-xs leading-relaxed text-white/35">
+        <p class="mt-8 pt-6 border-t border-white/10 text-xs leading-relaxed text-white/50">
           Информация и цены на сайте носят справочный характер и не являются публичной офертой
           (ст. 437 ГК РФ). Актуальную стоимость и наличие уточняйте в салоне или у менеджера.
         </p>
@@ -414,7 +414,7 @@ onUnmounted(() => {
         <div class="mt-4
                     flex flex-col sm:flex-row gap-3
                     sm:items-center sm:justify-between
-                    text-xs text-white/40">
+                    text-xs text-white/55">
           <span>
             © {{ year }} VFD. Все права защищены.
             <a href="/privacy/" class="text-white/60 hover:text-white transition-colors duration-200 ml-3">
@@ -457,7 +457,7 @@ onUnmounted(() => {
           <button
             ref="legalTriggerEl"
             type="button"
-            class="text-xs text-white/30 hover:text-white/60 transition-colors duration-200 underline underline-offset-2"
+            class="text-xs text-white/50 hover:text-white/60 transition-colors duration-200 underline underline-offset-2"
             aria-haspopup="dialog"
             :aria-expanded="isModalOpen"
             @click="openModal"
@@ -608,7 +608,7 @@ onUnmounted(() => {
                   ]"
                 >
                   <dt class="m-0 text-xs text-white/50">
-                    {{ v.label }} <span class="font-mono text-white/30">{{ v.abbr }}</span>
+                    {{ v.label }} <span class="font-mono text-white/50">{{ v.abbr }}</span>
                   </dt>
                   <dd class="m-0 mt-1 flex items-baseline gap-2">
                     <span class="font-mono text-xl font-medium tabular-nums text-white">{{ v.value }}</span>
@@ -616,13 +616,13 @@ onUnmounted(() => {
                   </dd>
                 </div>
               </dl>
-              <p class="m-0 border-t border-white/8 px-4 py-2.5 text-[0.6875rem] leading-snug text-white/40">
+              <p class="m-0 border-t border-white/8 px-4 py-2.5 text-[0.6875rem] leading-snug text-white/55">
                 Core Web Vitals этой страницы, измерены в вашем браузере прямо сейчас.
               </p>
             </div>
 
             <!-- Стек этого сайта -->
-            <p class="m-0 mt-6 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/40">Стек этого сайта</p>
+            <p class="m-0 mt-6 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/55">Стек этого сайта</p>
             <ul class="m-0 mt-2.5 flex list-none flex-wrap gap-1.5 p-0" role="list">
               <li
                 v-for="tech in DEV_STACK"
@@ -643,7 +643,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Направления -->
-            <p class="m-0 mt-6 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/40">Что разрабатываю</p>
+            <p class="m-0 mt-6 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-white/55">Что разрабатываю</p>
             <ul class="m-0 mt-2 list-none p-0" role="list">
               <li
                 v-for="item in DEV_SERVICES"

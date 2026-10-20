@@ -452,3 +452,8 @@ export const ALUM_FAQ = [
     a: `Срок изготовления на фабрике — ${ALUM_FACTS.leadTime}. Стоимость и точный срок рассчитаем по размерам вашего проёма.`,
   },
 ]
+
+/** Сочетание в конструкторе — параметры адреса (?layout=&profile=&glass=), по
+    порядку как у select() в AlumBuilder.astro; robots.txt склеивает их для
+    Яндекса (Clean-param) с адресом страницы */
+export const ALUM_URL_PARAMS = ['layout', 'profile', 'glass'] as const

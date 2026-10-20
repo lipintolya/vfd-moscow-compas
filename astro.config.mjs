@@ -121,11 +121,11 @@ async function fetchModelImages() {
    из SITE.url — src/pages/robots.txt.ts, sitemap.xml.ts). */
 const SITE_URL = 'https://dveriziz.ru'
 
-/* Страницы вне сайтмапа: /privacy/ — служебная; /reviews/ —
-   пока пустой и закрыт noindex (SITE.features в src/config/site.ts);
-   /catalog/skrytye-dveri/raboty/ — noindex, пока пуст INVISIBLE_WORKS.
+/* Страницы вне сайтмапа: /privacy/, /consent/ — служебные (закрыты в
+   robots.txt); /catalog/skrytye-dveri/raboty/ — noindex, пока пуст INVISIBLE_WORKS;
+   /promo-archive/ — архив акций, закрыт noindex всегда.
    Включили раздел там — уберите его отсюда. */
-const SITEMAP_EXCLUDE = ['/privacy/', '/consent/', '/catalog/skrytye-dveri/raboty/']
+const SITEMAP_EXCLUDE = ['/privacy/', '/consent/', '/catalog/skrytye-dveri/raboty/', '/promo-archive/']
 
 const modelImages = await fetchModelImages()
 

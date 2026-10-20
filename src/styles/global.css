@@ -137,6 +137,24 @@
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
+/* Запасной шрифт на время загрузки Manrope (font-display: swap) — Arial,
+   подогнанный под метрики Manrope: строки не меняют ширину и высоту при
+   подмене, страница не прыгает (CLS). Без него браузер брал system-ui —
+   на Mac это SF Pro, он шире: на /catalog/plintus/ переносились крошки
+   и сдвигали всю страницу (CLS 0,21).
+   Ширина — замер русского текста Manrope / Arial: 400 — 1,005, 500 — 1,021
+   (берём среднее 1,01); высоты — из Manrope (upm 2000: ascent 2132,
+   descent 600, lineGap 0), поделённые на size-adjust. Нет Arial (Android) —
+   этот шрифт пропускается, дальше по списку как раньше. */
+@font-face {
+  font-family: 'Manrope Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans');
+  size-adjust: 101%;
+  ascent-override: 105.5%;
+  descent-override: 29.7%;
+  line-gap-override: 0%;
+}
+
 /* Шрифтовая пара: Rubik (display) — заголовки h1-h6,
    Manrope — весь остальной текст. Диапазон весов 400-900 — сайт не
    использует заголовки легче font-medium(500) (у Rubik есть 300, но он
@@ -176,7 +194,7 @@
   --color-bg:           #ffffff;
 
   /* Typography */
-  --font-sans:    'Manrope Variable', 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  --font-sans:    'Manrope Variable', 'Manrope', 'Manrope Fallback', 'Segoe UI', system-ui, sans-serif;
   --font-display: 'Rubik Variable', 'Rubik', 'Segoe UI', sans-serif;
 
   /* Radius */
