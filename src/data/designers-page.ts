@@ -155,7 +155,8 @@ export const DESIGNER_RANGE_MORE = [
   { label: 'Видео о дверях',                  href: '/video/' },
 ]
 
-/* Материалы для проектирования — ресурсы фабрики (открываются на её сайте) */
+/* Материалы для проектирования — файлы фабрики: 3D-модели и PDF. Открываются
+   в новой вкладке (страница DESIGNERS: блок «Материалы для проектирования») */
 export const DESIGNER_RESOURCES = [
   { kind: '3D',  title: '3D-модели алюминиевых дверей',         href: 'https://3ddd.ru/3dmodels?query=alumdoor&order=relevance' },
   { kind: 'PDF', title: 'Каталог алюминиевых дверей',           href: 'https://crm.vfd.ru/docs/pub/7c3fe99768a64437fc6c2a0371c7414f/default/?&' },
