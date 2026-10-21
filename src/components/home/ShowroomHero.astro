@@ -17,11 +17,13 @@
 import { SITE, PHONE } from '../../config/site'
 import { HERO_SLIDES, type HeroWay } from '../../data/hero-image'
 import { pluralRu } from '../../lib/plural'
+import { responsivePhoto } from '../../lib/responsive-photo'
 import { MAP_URL } from '../../lib/map-links'
 import { BOOK_MESSAGE, WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
 import MaxIcon from '../ui/MaxIcon.vue'
+const facade = responsivePhoto(SITE.address.photo)
 
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
 const SLIDE_MS = 6000
@@ -156,7 +158,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </li>
       <li>
         <a href={MAP_URL} target="_blank" rel="noopener" class="h-tile h-tile--photo tile tile--place" aria-label={`${SITE.address.full} — открыть на Яндекс Картах`}>
-          <img src={SITE.address.photo} alt={`${SITE.address.mallFull}, ${SITE.address.street} — ${SITE.studioName} ${SITE.address.floorIn}`} loading="lazy" decoding="async" />
+          <img src={facade.src} srcset={facade.srcset} sizes="(max-width: 639px) 90vw, 33vw" alt={`${SITE.address.mallFull}, ${SITE.address.street} — ${SITE.studioName} ${SITE.address.floorIn}`} loading="lazy" decoding="async" />
           <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
           <span class="h-tile__title">{SITE.address.mall}, {SITE.address.floor}</span>
           <span class="h-cap place__street">{SITE.address.street}</span>

@@ -55,12 +55,14 @@ export function countUp(elements: Iterable<HTMLElement>, ms = 1400) {
       run(el, Number(el.dataset.count), el.dataset.final ?? '')
     }
   }, { rootMargin: '0px 0px -10% 0px' })
-  for (const el of elements) {
-    const to = Number(el.dataset.count)
-    if (!Number.isFinite(to) || to <= 0) continue
+  /* Сначала читаем все ширины, потом пишем: чтение после записи в том же
+     кадре заставляет браузер пересчитать вёрстку заново (forced reflow) */
+  const items = [...elements].filter((el) => Number.isFinite(Number(el.dataset.count)) && Number(el.dataset.count) > 0)
+  const widths = items.map((el) => el.getBoundingClientRect().width)
+  items.forEach((el, i) => {
     el.dataset.final = el.textContent ?? ''
-    el.style.minWidth = `${el.getBoundingClientRect().width}px`
+    el.style.minWidth = `${widths[i]}px`
     el.textContent = countFormatter(el.dataset.final)(0)
     io.observe(el)
-  }
+  })
 }

@@ -191,8 +191,10 @@ const L = map.layers
      возврат назад — показываем сразу, без анимации. Дальше один раз по
      IntersectionObserver. Сам сценарий — CSS-переходы с задержками. */
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
-    document.querySelectorAll<HTMLElement>('[data-map]').forEach((map) => {
-      if (map.getBoundingClientRect().top < innerHeight * 0.7) return
+    /* Сначала все измерения, потом все записи — см. countUp в count-up.ts */
+    const maps = [...document.querySelectorAll<HTMLElement>('[data-map]')]
+    const below = maps.filter((map) => map.getBoundingClientRect().top >= innerHeight * 0.7)
+    below.forEach((map) => {
       map.dataset.map = 'hidden'
       const io = new IntersectionObserver(([e]) => {
         if (!e?.isIntersecting) return

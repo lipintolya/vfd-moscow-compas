@@ -1,0 +1,16 @@
+{
+  "/media/vfd.moscow.compass/hero.block/about.compas.hall/1138447691-6.webp": {
+    "width": 1280,
+    "height": 958,
+    "copies": [
+      {
+        "width": 640,
+        "src": "/renders/responsive/1138447691-6-640-acf4a932.webp"
+      },
+      {
+        "width": 960,
+        "src": "/renders/responsive/1138447691-6-960-acf4a932.webp"
+      }
+    ]
+  }
+}
