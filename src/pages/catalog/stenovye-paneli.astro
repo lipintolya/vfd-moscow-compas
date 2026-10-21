@@ -25,6 +25,8 @@ import StepsRow from '../../components/home/StepsRow.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import VisitBand from '../../components/home/VisitBand.astro'
 import WhatsAppIcon from '../../components/ui/WhatsAppIcon.vue'
+import TelegramIcon from '../../components/ui/TelegramIcon.vue'
+import MaxIcon from '../../components/ui/MaxIcon.vue'
 import '../../styles/home.css'
 
 import {
@@ -36,7 +38,7 @@ import { getWorks } from '../../lib/works'
 import { WORK_VIDEOS } from '../../data/videos'
 import { localBusinessSchema, sellerRef } from '../../lib/local-business-schema'
 import { AREA_SERVED } from '../../lib/product-schema'
-import { whatsappWithText } from '../../lib/messengers'
+import { whatsappWithText, telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
 import { typograph } from '../../lib/typograph'
 import { PHONE, SITE } from '../../config/site'
 
@@ -70,6 +72,9 @@ if (waiting.length) {
 }
 
 const whatsapp = whatsappWithText(page.message)
+/* MAX не принимает текст в ссылке — сообщение копируется по клику (copy-on-click.ts) */
+const telegram = TELEGRAM_CHAT ? telegramWithText(page.message) : ''
+const maxCopy = maxWithText(page.message)
 
 /* sizes — по ширине кадра в сетке (кадр 4:5 шире фото 3:4, cover режет по высоте) */
 /* Кадр — 6 из 12 колонок контейнера: 80rem → ~37.5rem, от 1920 px (контейнер 96rem) → ~45.5rem */
@@ -243,9 +248,19 @@ const structuredData = [
           <p class="h-body">{typograph(PANEL_PRICE.rails)}</p>
           <div class="wp-price__actions">
             <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать проект</a>
-            <a href={whatsapp} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener">
+            <a href={whatsapp} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" aria-label="Написать в WhatsApp">
               <WhatsAppIcon class="wp-wa__ico" />WhatsApp
             </a>
+            {telegram && (
+              <a href={telegram} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+                <TelegramIcon class="wp-wa__ico" />Telegram
+              </a>
+            )}
+            {MAX_CHAT && (
+              <a href={maxChatUrl()} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" data-copy-text={maxCopy} aria-label="Написать в MAX (текст скопируется)">
+                <MaxIcon class="wp-wa__ico" />MAX
+              </a>
+            )}
           </div>
           <a class="wp-price__phone" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
         </aside>
@@ -360,7 +375,8 @@ const structuredData = [
     border-radius: var(--h-tile-radius);
     background: var(--h-wall);
   }
-  .wp-price__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  /* Действия столбиком на всю ширину карточки: звонок, затем три мессенджера */
+  .wp-price__actions { display: grid; gap: 0.625rem; }
   /* Номер — тёмным: серый мелкий текст на сером фоне не проходит контраст WCAG */
   .wp-price__phone { justify-self: start; color: var(--h-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
   .wp-price__phone:hover { color: var(--h-signal); }
