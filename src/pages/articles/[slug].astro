@@ -64,7 +64,9 @@ const authorLink = author.external
 const summary = data.summary ?? []
 const faq = data.faq ?? []
 const cover = data.cover
-const COVER_SIZES = '(min-width: 80rem) 76rem, 100vw'
+/* Обложка на ПК — колонки 1–10 из 12 (см. .post-cover-wrap): ~63rem в
+   контейнере 76rem; на планшете и телефоне — во всю ширину */
+const COVER_SIZES = '(min-width: 80rem) 63rem, (min-width: 62.5rem) 82vw, 100vw'
 
 /* Серии каталога по теме — все серии покрытий статьи и отдельно
    названные серии; из живого каталога: цены и состав серий совпадают
@@ -205,7 +207,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </header>
 
       {cover && (
-        <div class="container">
+        <div class="container post-cover-wrap">
           <figure class="h-media post-cover">
             <button type="button" data-zoom={data.coverImage} data-zoom-caption={data.coverImageAlt ?? data.title} aria-label="Открыть обложку на весь экран">
               <img
@@ -345,6 +347,13 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 
   /* ── Обложка — 16:9 без обрезки (на ней может быть надпись) ── */
   .post-cover { margin: 0; aspect-ratio: 16 / 9; border-radius: 1.75rem; }
+  /* На ПК — колонки 1–10 из 12: слева по заголовку, справа по колонке
+     текста (4 / span 7). Во всю ширину контейнера обложка 1920 px на
+     ретине растягивалась и выглядела мыльной */
+  @media (min-width: 62.5rem) {
+    .post-cover-wrap { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--h-gutter); }
+    .post-cover { grid-column: 1 / span 10; }
+  }
   /* Обложка — кнопка «открыть во весь экран» (ArticleLightbox) */
   .post-cover > button { height: 100%; }
   @media (max-width: 47.9375rem) { .post-cover { border-radius: 1.25rem; } }

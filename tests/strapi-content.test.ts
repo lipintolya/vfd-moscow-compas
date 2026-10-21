@@ -81,7 +81,9 @@ test('статья из Strapi → данные сайта', () => {
   assert.doesNotMatch(a.data.description, /\{/)
   assert.equal(a.data.publishDate, '2026-09-01')
   assert.equal(a.data.coverImage, '/uploads/c.webp')
-  assert.equal(a.data.cover.src, '/uploads/medium_c.webp')  // копия не шире 1280
+  // Обложка статьи — до 1920: на ПК с ретиной копия 1280 растягивалась почти вдвое
+  assert.equal(a.data.cover.src, '/uploads/c.webp')
+  assert.match(a.data.cover.srcset ?? '', /\/uploads\/c\.webp \d+w$/)
   assert.deepEqual(a.data.relatedCoatings, ['emal'])
   assert.deepEqual(a.data.relatedSeriesSlugs, ['urban'])
   assert.deepEqual(a.data.headings, [{ depth: 2, slug: 'раздел', text: 'Раздел' }])

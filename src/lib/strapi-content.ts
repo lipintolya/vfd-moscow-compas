@@ -168,7 +168,9 @@ export function toArticle(raw: StrapiArticle) {
       updatedDate: raw.updatedDate ?? undefined,
       coverImage: strapiImage(raw.cover, 1920).src,
       coverImageAlt: coverAlt,
-      cover: { ...strapiImage(raw.cover, 1280), alt: coverAlt },
+      /* До 1920: на ПК обложка статьи ~1000 px CSS, с ретиной нужен оригинал —
+         с потолком 1280 браузер растягивал копию почти вдвое */
+      cover: { ...strapiImage(raw.cover, 1920), alt: coverAlt },
       faq: raw.faq?.length ? raw.faq.map((f) => ({ q: fill(f.q), a: fill(f.a) })) : undefined,
       relatedSeriesSlugs: seo.series?.length ? seo.series.map((s) => s.series) : undefined,
       relatedCoatings: seo.coatings?.length ? seo.coatings.map((c) => {
