@@ -37,6 +37,7 @@
     "gen:partitions-hero": "node scripts/gen-partitions-hero.mjs",
     "gen:partitions-swatches": "node scripts/gen-partitions-color-swatches.mjs",
     "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",
+    "gen:plintus-lines": "node scripts/gen-plintus-lines.mjs",
     "gen:renders": "node scripts/gen-render-gallery.mjs",
     "gen:responsive": "node scripts/gen-responsive.mjs",
     "gen:series-covers": "node scripts/gen-series-covers.mjs",

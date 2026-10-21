@@ -1,0 +1,127 @@
+---
+/**
+ * Направление плинтуса на /catalog/plintus/ (src/data/plintus-lines.ts):
+ * заголовок, пояснение, характеристики и «Узнать цену» в мессенджерах;
+ * справа баннер 16:9 (если есть); ниже — позиции квадратными карточками,
+ * по нажатию фото открывается крупно (lightbox, общий на сайт).
+ */
+import type { PlintusLine } from '../../data/plintus-lines'
+import { whatsappWithText, telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
+import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
+import TelegramIcon from '../ui/TelegramIcon.vue'
+import MaxIcon from '../ui/MaxIcon.vue'
+import { typograph } from '../../lib/typograph'
+
+interface Props { line: PlintusLine; wall?: boolean }
+const { line, wall = false } = Astro.props
+const large = JSON.stringify(line.items.map((i) => ({ src: i.image.large, alt: i.image.alt })))
+---
+
+<section id={line.id} class:list={['h-sec', { 'h-sec--wall': wall }]} aria-labelledby={`${line.id}-title`}>
+  <div class="container">
+    <div class:list={['pll', { 'pll--banner': line.banner }]}>
+      <div class="pll__text">
+        <h2 id={`${line.id}-title`} class="h-h2">{typograph(line.title)}</h2>
+        <p class="h-lead pll__lead">{typograph(line.lead)}</p>
+        <ul class="pll__facts" role="list">
+          {line.facts.map((f) => <li class="h-body">{typograph(f)}</li>)}
+        </ul>
+        <div class="pll__actions">
+          <a class="h-btn h-btn--signal pll__btn" href={whatsappWithText(line.request)} target="_blank" rel="noopener" aria-label="Узнать цену в WhatsApp">
+            <WhatsAppIcon class="pll__ico" tone="dark" />Узнать цену
+          </a>
+          {TELEGRAM_CHAT && (
+            <a class="h-btn h-btn--quiet pll__btn" href={telegramWithText(line.request)} target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+              <TelegramIcon class="pll__ico" />Telegram
+            </a>
+          )}
+          {MAX_CHAT && (
+            <a class="h-btn h-btn--quiet pll__btn" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(line.request)} aria-label="Написать в MAX (текст скопируется)">
+              <MaxIcon class="pll__ico" />MAX
+            </a>
+          )}
+        </div>
+      </div>
+      {line.banner && (
+        <figure class="h-media pll__banner">
+          <img src={line.banner.src} srcset={line.banner.srcset} sizes="(min-width: 80rem) 44rem, (min-width: 62.5rem) 56vw, 100vw" alt={line.banner.alt} width={line.banner.width} height={line.banner.height} loading="lazy" decoding="async" />
+        </figure>
+      )}
+    </div>
+
+    <ul class="pll__items" role="list" data-lightbox data-lightbox-images={large}>
+      {line.items.map((item, i) => (
+        <li>
+          <button type="button" class="pll__item" data-lightbox-index={i} aria-label={`Открыть фото: ${item.image.alt}`}>
+            <span class="h-media pll__photo">
+              <img src={item.image.src} srcset={item.image.srcset} sizes="(min-width: 62.5rem) 12rem, (min-width: 43.75rem) 24vw, 32vw" alt={item.image.alt} width={item.image.width} height={item.image.height} loading="lazy" decoding="async" />
+            </span>
+            <span class="pll__caption">{typograph(item.text)}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<script>
+  import { initLightboxGroups } from '../../lib/lightbox'
+  initLightboxGroups()
+</script>
+
+<style>
+  .pll { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
+  @media (min-width: 62.5rem) {
+    .pll { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .pll__text { grid-column: 1 / span 6; }
+    .pll--banner .pll__text { grid-column: 1 / span 5; }
+    .pll__banner { grid-column: 6 / span 7; }
+  }
+  .pll__lead { margin-top: 1rem; }
+  .pll__facts { display: grid; gap: 0.5rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
+  .pll__facts li { position: relative; padding-left: 1.25rem; color: var(--h-soft); }
+  .pll__facts li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.5rem;
+    height: 0.125rem;
+    background: var(--h-signal);
+  }
+  .pll__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.5rem; }
+  .pll__btn { gap: 0.5rem; }
+  .pll__btn :global(.pll__ico) { width: 1.25rem; height: 1.25rem; }
+  @media (max-width: 43.6875rem) {
+    .pll__actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .pll__actions > :first-child { grid-column: 1 / -1; }
+  }
+  .pll__banner { margin: 0; aspect-ratio: 16 / 9; border-radius: var(--h-tile-radius); }
+
+  /* Позиции — квадратные карточки: телефон 3 в ряд, планшет 4, ПК 6 */
+  .pll__items {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem 0.75rem;
+    margin: clamp(2rem, 4vw, 3rem) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 43.75rem) { .pll__items { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem var(--h-gutter); } }
+  @media (min-width: 62.5rem) { .pll__items { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+  .pll__item {
+    display: grid;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: zoom-in;
+  }
+  .pll__photo { aspect-ratio: 1; border-radius: 0.875rem; }
+  .pll__photo img { transition: transform 600ms var(--ease-out); }
+  .pll__item:hover .pll__photo img { transform: scale(1.04); }
+  .pll__caption { font-size: 0.9375rem; line-height: 1.35; color: var(--h-ink); }
+  @media (prefers-reduced-motion: reduce) { .pll__photo img { transition: none; } }
+</style>

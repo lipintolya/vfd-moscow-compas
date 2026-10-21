@@ -16,6 +16,7 @@ import { FROM_PRICE_PLINTUS, FROM_PRICE_REYKI, FROM_PRICE_FRAMUGA_KIT } from '..
 import { HIDDEN_DOORS_FAQ } from '../data/hidden-doors-page'
 import { DECOR_FAQ } from '../data/decor-page'
 import { PLINTUS_FAQ, THICKNESS_RANGE, HEIGHT_RANGE, PROFILES_COUNT } from '../data/plintus'
+import { PLINTUS_LINES_FAQ } from '../data/plintus-lines'
 import { DESIGNERS_FAQ } from '../data/designers-page'
 import { WALL_PANELS_PAGE, PANEL_FAQ } from '../data/wall-panels-page'
 import { pluralRu } from '../lib/plural'
@@ -40,7 +41,7 @@ export const GET: APIRoute = async () => {
     ['Каталог межкомнатных дверей', '/catalog/', 'серии, покрытия, цвета и цены'],
     ['Скрытые двери', '/catalog/skrytye-dveri/', 'двери скрытого монтажа, размеры и цены'],
     ['Стеновые панели', WALL_PANELS_PAGE.path, `изготовление на заказ: натуральный шпон и покрытия дверей ${SITE.name}, двери заподлицо с панелями`],
-    ['Напольный плинтус из МДФ', '/catalog/plintus/', 'профили, размеры и покраска по RAL и NCS, цена по запросу'],
+    ['Плинтус', '/catalog/plintus/', 'напольный из МДФ, с LED-подсветкой, скрытый, микроплинтус и шпонированный; покраска по RAL и NCS, цена по запросу'],
     ['Алюминиевые перегородки', '/partitions/', 'раздвижные и стационарные системы со стеклом'],
     [ALUM_PAGE.name, ALUM_PAGE.path, `раздвижные алюминиевые перегородки: ${ALUM_LAYOUT_COUNT}, ${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height}`],
     ['Дизайнерам и архитекторам', '/designers/', 'сотрудничество и шоурум для встреч с заказчиками'],
@@ -65,7 +66,7 @@ export const GET: APIRoute = async () => {
     `- Скрытые двери «Секрет», «Секрет Реверс», «Рефлекс»: комплект с алюминиевым коробом от ${rub(SECRET_MIN_KIT_PRICE)} (${SITE.url}/catalog/skrytye-dveri/). Калькулятор цены по кромке, открыванию, коробу, высоте и зеркалу.`,
     `- Стеновые панели на заказ (${abs(WALL_PANELS_PAGE.path)}): изготавливает ${SITE.studioName} — из натурального шпона и в покрытиях дверей ${SITE.name}, двери встраиваются заподлицо с панелями. Стоимость — расчёт по проекту после замера.`,
     `- Декор: плинтус от ${rub(FROM_PRICE_PLINTUS)}, рейки от ${rub(FROM_PRICE_REYKI)} за комплект, фальшфрамуга от ${rub(FROM_PRICE_FRAMUGA_KIT)} (${SITE.url}/catalog/decor/).`,
-    `- Напольный плинтус из МДФ: ${PROFILES_COUNT}, толщина ${THICKNESS_RANGE}, высота ${HEIGHT_RANGE}, покраска по RAL и NCS; цена по запросу (${SITE.url}/catalog/plintus/).`,
+    `- Плинтус: напольный из МДФ — ${PROFILES_COUNT}, толщина ${THICKNESS_RANGE}, высота ${HEIGHT_RANGE}, те же профили с LED-подсветкой; скрытый алюминиевый (60 и 80 мм), микроплинтус, шпонированный; покраска по RAL и NCS; цена по запросу (${SITE.url}/catalog/plintus/).`,
     `- Алюминиевые раздвижные перегородки: ${ALUM_LAYOUT_COUNT}, ${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height} (${SITE.url}/partitions/ и ${SITE.url}/partitions/alum/). Цены — после расчёта по проёму.`,
     `- ${plain(MEASURE_TERMS)}.`,
     `- ${plain(INSTALL_TERMS)}; устанавливает собственная бригада салона.`,
@@ -80,7 +81,7 @@ export const GET: APIRoute = async () => {
   const faqBlocks: [string, { q: string; a: string }[]][] = [
     ['Скрытые двери — частые вопросы', HIDDEN_DOORS_FAQ],
     ['Декор — частые вопросы', DECOR_FAQ],
-    ['Плинтус — частые вопросы', PLINTUS_FAQ],
+    ['Плинтус — частые вопросы', [...PLINTUS_FAQ, ...PLINTUS_LINES_FAQ]],
     ['Стеновые панели — частые вопросы', PANEL_FAQ],
     ['Дизайнерам — частые вопросы', DESIGNERS_FAQ],
   ]

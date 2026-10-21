@@ -97,6 +97,8 @@ function openInterior(item: PlintusItem) {
           <img
             class="pl-card__img"
             :src="item.photo"
+            :srcset="item.photoSrcset"
+            sizes="(min-width: 62.5rem) 18rem, (min-width: 43.75rem) 30vw, 46vw"
             :alt="photoAlt(item)"
             width="1000"
             height="1000"

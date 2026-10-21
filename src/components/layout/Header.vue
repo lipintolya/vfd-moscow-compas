@@ -93,7 +93,7 @@ const CATALOG_DROPDOWN = [
   { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери', desc: 'Скрытый монтаж' },
   { href: '/catalog/stenovye-paneli/', label: 'Стеновые панели', desc: 'Шпон и покрытия дверей' },
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
-  { href: '/catalog/plintus/',       label: 'Напольный плинтус', desc: 'Цвета и профили из МДФ' },
+  { href: '/catalog/plintus/',       label: 'Плинтус', desc: 'Напольный, скрытый, с подсветкой' },
 ] as const
 
 const PARTITIONS_DROPDOWN = [

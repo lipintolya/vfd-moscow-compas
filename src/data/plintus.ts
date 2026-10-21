@@ -11,6 +11,7 @@
 import { SITE } from '../config/site'
 import { pluralRu } from '../lib/plural'
 import { listRu } from '../lib/typograph'
+import lineImages from './plintus-lines-images.json'
 
 export type PlintusProfile = 'cornice' | 'straight'
 
@@ -19,6 +20,8 @@ export interface PlintusItem {
   num: number
   /** Фото 1000×1000 — public/media/plintus/ */
   photo: string
+  /** srcset карточки: копия 480 px (npm run gen:plintus-lines) и оригинал 1000 px */
+  photoSrcset: string
   /** Цвет и профиль на фото: подпись карточки и текст запроса в мессенджер */
   text: string
   /** Фигурный верх («с карнизом») или ровный срез («прямой профиль») — фильтр */
@@ -74,11 +77,17 @@ const ROWS: [string, PlintusProfile, number, number?][] = [
   ['Фиолетовый, с карнизом', 'cornice', 10, 110],
 ]
 
+function floorSrcset(n: string): string {
+  if (!(`floor-${n}` in lineImages)) throw new Error(`Плинтус: нет копии floor-${n} — npm run gen:plintus-lines`)
+  return `/renders/plintus/floor-${n}-480.webp 480w, /media/plintus/plintus-${n}.webp 1000w`
+}
+
 export const PLINTUS: PlintusItem[] = ROWS.map(([text, profile, thicknessFrom, heightFrom = PLINTUS_SPEC.height.min], i) => {
   const n = pad(i + 1)
   return {
     num: i + 1,
     photo: `/media/plintus/plintus-${n}.webp`,
+    photoSrcset: floorSrcset(n),
     text,
     profile,
     thicknessFrom,
@@ -105,14 +114,14 @@ export const itemSizes = (i: PlintusItem) => `Толщина от ${mm(i.thickne
 export const itemName = (i: PlintusItem) => `профиль № ${i.num}`
 
 export const PLINTUS_PAGE = {
-  title: `Напольный плинтус МДФ ${SITE.city.in} — ${PROFILES_COUNT}`,
+  title: `Плинтус ${SITE.city.in}: напольный, скрытый, с подсветкой`,
   description:
-    `Напольный плинтус из МДФ: ${PROFILES_COUNT}, толщина ${THICKNESS_RANGE}, высота ${HEIGHT_RANGE}. ` +
-    'Белый под покраску, белая эмаль или любой цвет RAL и NCS. Цена — по запросу.',
-  h1: `Напольный плинтус из МДФ ${SITE.city.in}`,
+    `Плинтус ${SITE.city.in}: напольный из МДФ (${PROFILES_COUNT}), с LED-подсветкой, скрытый, ` +
+    'микроплинтус и шпонированный. Любой цвет RAL и NCS, цена по запросу.',
+  h1: `Плинтус ${SITE.city.in}: напольный, скрытый, с подсветкой`,
   lead:
-    `${PROFILES_COUNT} толщиной ${THICKNESS_RANGE} и высотой ${HEIGHT_RANGE}. ` +
-    'Любой профиль делают белым под покраску, в белой эмали или в цвет по RAL и NCS — цвет на фото только пример.',
+    `${PROFILES_COUNT} напольного плинтуса из МДФ и те же профили с LED-подсветкой, а ещё скрытый алюминиевый плинтус, ` +
+    'микроплинтус и шпонированный. Красим в любой цвет по RAL и NCS — цвет на фото только пример.',
   hero: { src: PLINTUS[0]!.interior[1]!, alt: 'Белый напольный плинтус из МДФ с карнизом в интерьере' },
 }
 

@@ -12,6 +12,9 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import QuoteCta from '../../components/ui/QuoteCta.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import PlinthGrid from '../../components/catalog/PlinthGrid.vue'
+import PlintusLine from '../../components/catalog/PlintusLine.astro'
+import SectionNav from '../../components/partitions/SectionNav.astro'
+import { PLINTUS_LINES, PLINTUS_LINES_FAQ } from '../../data/plintus-lines'
 import { PLINTUS, PLINTUS_FAQ, PLINTUS_PAGE, PLINTUS_SPEC_ROWS, PLINTUS_TIPS } from '../../data/plintus'
 import { whatsappWithText } from '../../lib/messengers'
 import { localBusinessSchema } from '../../lib/local-business-schema'
@@ -20,11 +23,17 @@ import { typograph } from '../../lib/typograph'
 import '../../styles/home.css'
 
 const { hero } = PLINTUS_PAGE
+const faq = [...PLINTUS_FAQ, ...PLINTUS_LINES_FAQ]
+const navItems = [
+  { id: 'plintus-profiles', label: 'Напольный' },
+  ...PLINTUS_LINES.map((l) => ({ id: l.id, label: l.nav })),
+  { id: 'plintus-faq', label: 'Вопросы' },
+]
 
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: PLINTUS_FAQ.map((f) => ({
+  mainEntity: faq.map((f) => ({
     '@type': 'Question',
     name: f.q,
     acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -40,9 +49,11 @@ const faqSchema = {
   preloadImage={hero.src}
   structuredData={[localBusinessSchema({ url: SITE.url }), faqSchema]}
 >
+  <SectionNav items={navItems} />
+
   <div class="breadcrumb-bar">
     <div class="container">
-      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Декор', href: '/catalog/decor/' }, { label: 'Напольный плинтус' }]} />
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Декор', href: '/catalog/decor/' }, { label: 'Плинтус' }]} />
     </div>
   </div>
 
@@ -72,8 +83,8 @@ const faqSchema = {
     <section class="h-sec h-sec--tight-top" aria-labelledby="plintus-profiles">
       <div class="container">
         <header class="h-head pl-head">
-          <h2 id="plintus-profiles" class="h-h2">Профили и цвета</h2>
-          <p class="h-body pl-head__note">Нажмите на фото, чтобы посмотреть профиль в интерьере.</p>
+          <h2 id="plintus-profiles" class="h-h2">Напольный плинтус из МДФ</h2>
+          <p class="h-body pl-head__note">Профили и цвета — нажмите на фото, чтобы посмотреть профиль в интерьере.</p>
         </header>
         <PlinthGrid items={PLINTUS} client:visible />
       </div>
@@ -106,10 +117,12 @@ const faqSchema = {
       </div>
     </section>
 
-    <section class="h-sec h-sec--tight-top" aria-labelledby="plintus-faq">
+    {PLINTUS_LINES.map((line, i) => <PlintusLine line={line} wall={i % 2 === 0} />)}
+
+    <section id="plintus-faq" class="h-sec" aria-labelledby="plintus-faq-title">
       <div class="container h-faq">
-        <h2 id="plintus-faq" class="h-h2">Частые вопросы о напольном плинтусе</h2>
-        <FaqAccordion items={PLINTUS_FAQ} title={false} />
+        <h2 id="plintus-faq-title" class="h-h2">Частые вопросы о плинтусе</h2>
+        <FaqAccordion items={faq} title={false} />
       </div>
     </section>
 

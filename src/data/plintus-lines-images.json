@@ -1,0 +1,514 @@
+{
+  "hidden-1": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "hidden-2": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "hidden-3": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "hidden-4": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "hidden-5": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "hidden-6": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "hidden-banner": {
+    "widths": [
+      960,
+      1600
+    ],
+    "width": 1600,
+    "height": 900
+  },
+  "led-01": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-02": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-03": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-04": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-05": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-06": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-07": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-08": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-09": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-10": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-11": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-12": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-13": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-14": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-15": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-16": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-17": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-18": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-19": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-20": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-21": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-22": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-23": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-24": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "led-banner": {
+    "widths": [
+      960,
+      1600
+    ],
+    "width": 1600,
+    "height": 900
+  },
+  "micro-1": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "micro-2": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "micro-3": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "micro-4": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "micro-5": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "micro-6": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "veneer-1": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "veneer-2": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "veneer-3": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "veneer-4": {
+    "widths": [
+      400,
+      800
+    ],
+    "width": 800,
+    "height": 800
+  },
+  "veneer-banner": {
+    "widths": [
+      960,
+      1280
+    ],
+    "width": 1280,
+    "height": 720
+  },
+  "floor-01": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-02": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-03": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-04": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-05": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-06": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-07": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-08": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-09": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-10": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-11": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-12": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-13": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-14": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-15": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-16": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-17": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-18": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-19": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-20": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-21": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-22": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-23": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  },
+  "floor-24": {
+    "widths": [
+      480
+    ],
+    "width": 480,
+    "height": 480
+  }
+}
