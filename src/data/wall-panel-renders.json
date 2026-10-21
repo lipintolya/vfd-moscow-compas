@@ -1,1 +1,31 @@
-{}
+{
+  "hero": {
+    "hash": "8c44f6aa",
+    "widths": [
+      640,
+      960,
+      1440
+    ],
+    "width": 1440,
+    "height": 960
+  },
+  "home": {
+    "hash": "8c44f6aa",
+    "widths": [
+      640,
+      960,
+      1440
+    ],
+    "width": 1440,
+    "height": 960
+  },
+  "living": {
+    "hash": "90c9fe59",
+    "widths": [
+      640,
+      736
+    ],
+    "width": 736,
+    "height": 1127
+  }
+}

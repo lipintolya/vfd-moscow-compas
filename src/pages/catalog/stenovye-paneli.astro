@@ -8,8 +8,9 @@
  *
  * Секции — по группам запросов: материал → помещения → двери в панелях
  * (главное отличие) → работы и видео → цена → как заказать → вопросы.
- * Первый экран — вертикальный кадр справа: фото с объектов портретные,
- * широкий кадр LandingHero из них вышел бы мыльным.
+ * Первый экран — текст и кадр 3:2 по 6 колонок (кадр ~600 px CSS): рендер
+ * 1536 px чёткий и на ретине; во всю ширину (LandingHero) он вышел бы
+ * мыльным. Уже 6 колонок текст нельзя — «от производителя» в H1 не влезает.
  * JSON-LD: LocalBusiness, Service (цен за м² нет — без Offer), FAQPage;
  * BreadcrumbList отдают сами хлебные крошки.
  */
@@ -71,7 +72,8 @@ if (waiting.length) {
 const whatsapp = whatsappWithText(page.message)
 
 /* sizes — по ширине кадра в сетке (кадр 4:5 шире фото 3:4, cover режет по высоте) */
-const HERO_SIZES = '(min-width: 80rem) 31rem, (min-width: 62.5rem) 40vw, (min-width: 30rem) 28rem, 100vw'
+/* Кадр — 6 из 12 колонок контейнера: 80rem → ~37.5rem, от 1920 px (контейнер 96rem) → ~45.5rem */
+const HERO_SIZES = '(min-width: 120rem) 45.5rem, (min-width: 80rem) 37.5rem, (min-width: 62.5rem) 48vw, 100vw'
 const CARD_SIZES = '(min-width: 56.25rem) 25rem, (min-width: 43.75rem) 45vw, 82vw'
 const PAIR_SIZES = '(min-width: 62.5rem) 22rem, 45vw'
 
@@ -265,16 +267,18 @@ const structuredData = [
 
 <style>
   /* ── Первый экран ── */
-  .wp-hero { padding-block: clamp(1rem, 2vw, 1.5rem) clamp(3rem, 6vw, 5rem); }
+  /* Снизу без поля: отступ задаёт следующая секция (.h-sec) — иначе на телефоне
+     два поля складывались в пустоту ~110 px */
+  .wp-hero { padding-block: clamp(1rem, 2vw, 1.5rem) 0; }
   .wp-hero__grid { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
   .wp-hero__lead { margin-top: 1.25rem; }
   .wp-hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
   /* Кадр — элемент PanelFigure: стили страницы до него доходят через :global */
-  .wp-hero__grid > :global(.wp-hero__media) { width: 100%; max-width: 28rem; }
+  .wp-hero__grid > :global(.wp-hero__media) { width: 100%; }
   @media (min-width: 62.5rem) {
     .wp-hero__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
     .wp-hero__text { grid-column: 1 / span 6; }
-    .wp-hero__grid > :global(.wp-hero__media) { grid-column: 8 / span 5; max-width: none; }
+    .wp-hero__grid > :global(.wp-hero__media) { grid-column: 7 / span 6; }
   }
 
   .wp-wa { gap: 0.5rem; }

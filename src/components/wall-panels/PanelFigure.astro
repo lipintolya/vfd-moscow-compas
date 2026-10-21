@@ -30,7 +30,7 @@ const { visual, shown, sizes, caption, eager = false, workLink = true, class: cl
 const work = workLink ? shown?.work : undefined
 const ratio = visual.ratio.replace(':', ' / ')
 /* Ширина рендера, которой хватит кадру на ПК и retina */
-const minWidth = visual.ratio === '16:10' ? 1600 : 1200
+const minWidth = visual.ratio === '4:5' ? 1200 : 1600
 const isDev = import.meta.env.DEV
 ---
 
