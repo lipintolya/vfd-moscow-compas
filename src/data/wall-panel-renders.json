@@ -27,5 +27,15 @@
     ],
     "width": 736,
     "height": 1127
+  },
+  "office": {
+    "hash": "7a2c3e81",
+    "widths": [
+      640,
+      960,
+      1110
+    ],
+    "width": 1110,
+    "height": 1060
   }
 }

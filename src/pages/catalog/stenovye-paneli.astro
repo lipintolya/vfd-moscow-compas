@@ -150,7 +150,7 @@ const structuredData = [
     </section>
 
     <section id="wp-materials" class="h-sec" aria-labelledby="wp-materials-title">
-      <div class="container">
+      <div class="container wp-materials">
         <header class="h-head">
           <h2 id="wp-materials-title" class="h-h2">{typograph(PANEL_SECTIONS.materials.title)}</h2>
           <p class="h-lead">{typograph(PANEL_SECTIONS.materials.lead)}</p>
@@ -309,6 +309,16 @@ const structuredData = [
   .wp-card--tile .wp-card__title { margin-top: 0; }
   .wp-card__text { margin-top: 0.625rem; }
   .wp-card__link { align-self: flex-start; margin-top: 0.875rem; }
+
+  /* Материалы — две карточки: на ПК заголовок слева (4 колонки), карточки
+     справа (8 колонок) в том же размере, что у помещений — без пустой
+     третьей колонки */
+  @media (min-width: 62.5rem) {
+    .wp-materials { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--h-gutter); align-items: start; }
+    .wp-materials > .h-head { display: block; grid-column: 1 / span 4; margin: 0; }
+    .wp-materials > .h-head .h-lead { margin-top: 1.25rem; }
+    .wp-materials > .wp-cards { grid-column: 5 / span 8; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
 
   /* ── Двери в панелях ── */
   .wp-doors { display: grid; gap: 2.5rem var(--h-gutter); align-items: center; }
