@@ -594,7 +594,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Главный аргумент: этот сайт -->
-            <p class="m-0 mt-6 text-[0.9375rem] leading-relaxed text-white/80">
+            <p class="m-0 mt-6 text-step-1 leading-relaxed text-white/80">
               Этот сайт — моя работа. Вот как он загрузился у вас:
             </p>
 
