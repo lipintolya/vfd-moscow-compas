@@ -119,8 +119,9 @@ export const REYKI_ROWS: PriceRow[] = [
 ]
 
 // ── Цены «от» и «до» — для первого экрана, описания и разметки Product ──
-const prices = (rows: PriceRow[]) => rows.filter((r) => !r.part).flatMap((r) => Object.values(r.prices) as number[])
-export const priceRange = (rows: PriceRow[]) => ({ low: Math.min(...prices(rows)), high: Math.max(...prices(rows)) })
+/** Цены всех вариантов (строка × материал), без расходников */
+export const offerPrices = (rows: PriceRow[]) => rows.filter((r) => !r.part).flatMap((r) => Object.values(r.prices) as number[])
+export const priceRange = (rows: PriceRow[]) => ({ low: Math.min(...offerPrices(rows)), high: Math.max(...offerPrices(rows)) })
 
 const FRAMUGA_KIT = FRAMUGA_ROWS.find((r) => r.kit)!
 export const FROM_PRICE_FRAMUGA_KIT = priceRange([FRAMUGA_KIT]).low

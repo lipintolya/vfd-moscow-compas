@@ -1,7 +1,16 @@
 /**
  * Product + AggregateOffer (schema.org) для разделов с диапазоном цен:
- * скрытые двери, декор. Продавец — салон (LocalBusiness по @id), регион —
- * Москва и область, условия возврата — merchantPolicy. Картинка — абсолютный URL.
+ * скрытые двери (раздел и посадочные), декор. Продавец — салон (LocalBusiness
+ * по @id), регион — Москва и область, условия возврата — merchantPolicy.
+ * Картинка — абсолютный URL.
+ *
+ * Цены — списком всех вариантов из прайса: «от», «до» и offerCount (число
+ * вариантов) считаются из одного списка и не расходятся.
+ *
+ * Не заполняем (Search Console называет их «незначительными»):
+ * review / aggregateRating — отзывов о самих товарах нет, а отзывы о салоне
+ * Google на товарах ставить запрещает; shippingDetails — тариф доставки
+ * салон пока не публикует (см. merchantPolicy).
  */
 import { SITE } from '../config/site'
 import { merchantPolicy } from './contacts-data'
@@ -16,11 +25,12 @@ export function productSchema(p: {
   name: string
   description: string
   image: string
-  low: number
-  high: number
+  /** Цены всех вариантов из прайса (комплекты, материалы, размеры) */
+  prices: number[]
   /** Есть в наличии — у товаров под заказ не указываем */
   inStock?: boolean
 }) {
+  if (!p.prices.length) throw new Error(`Product «${p.name}»: нет цен для разметки`)
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -31,8 +41,9 @@ export function productSchema(p: {
     offers: {
       '@type': 'AggregateOffer',
       priceCurrency: 'RUB',
-      lowPrice: p.low,
-      highPrice: p.high,
+      lowPrice: Math.min(...p.prices),
+      highPrice: Math.max(...p.prices),
+      offerCount: p.prices.length,
       ...(p.inStock && { availability: 'https://schema.org/InStock' }),
       areaServed,
       seller: sellerRef(),

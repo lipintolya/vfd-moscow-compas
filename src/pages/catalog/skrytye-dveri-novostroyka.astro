@@ -7,7 +7,7 @@
  * и на реальных ЖК Москвы, где двери уже установлены.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
-import { sellerRef } from '../../lib/local-business-schema'
+import { productSchema } from '../../lib/product-schema'
 import { brandTitle } from '../../lib/seo-title'
 import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
 import { relatedArticle as relatedArticleFor } from '../../lib/articles'
@@ -15,11 +15,10 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import SectionHeading from '../../components/partitions/SectionHeading.astro'
 import { INVISIBLE_WORKS } from '../../data/skrytye-dveri-works'
-import { merchantPolicy } from '../../lib/contacts-data'
 import {
   IMAGES,
   SECRET_MIN_BLADE_PRICE,
-  SECRET_MIN_KIT_PRICE,
+  SECRET_MIN_KIT_PRICE, SECRET_KIT_OFFERS,
 } from '../../data/skrytye-dveri-products'
 import { PHONE as SITE_PHONE } from '../../config/site'
 
@@ -82,22 +81,13 @@ const structuredData = canonicalUrl ? [
       acceptedAnswer: { '@type': 'Answer', text: f.a },
     })),
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
+  productSchema({
     name: 'Скрытые двери в новостройку — серия «Секрет»',
     description: 'Двери скрытого монтажа для новостроек: устанавливаются на этапе черновой отделки, полотно заподлицо со стеной без наличников.',
-    brand: { '@type': 'Brand', name: 'ВФД' },
     image: IMAGES.invisible,
-    offers: {
-      '@type': 'Offer',
-      priceCurrency: 'RUB',
-      price: SECRET_MIN_KIT_PRICE,
-      availability: 'https://schema.org/InStock',
-      seller: sellerRef(),
-      hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
-    },
-  },
+    prices: SECRET_KIT_OFFERS,
+    inStock: true,
+  }),
 ] : undefined
 
 /* Статья по теме — та, что назвала эту страницу в relatedPages */

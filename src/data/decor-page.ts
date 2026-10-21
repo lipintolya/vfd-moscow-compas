@@ -8,14 +8,7 @@ import { SITE } from '../config/site'
 import { rub } from './services'
 import { listRu, upperFirst } from '../lib/typograph'
 import { PROFILES_COUNT } from './plintus'
-import {
-  IMAGES, REYKI_IMAGES, MATERIAL_LABELS,
-  FRAMUGA_MATERIALS, FRAMUGA_ROWS, PLINTUS_MATERIALS, PLINTUS_ROWS, REYKI_MATERIALS, REYKI_ROWS,
-  PLINTUS_HEIGHTS, PLINTUS_LENGTH, REYKI_LENGTH, REYKI_KIT_PCS,
-  FROM_PRICE_FRAMUGA_KIT, FROM_PRICE_PLINTUS, FROM_PRICE_REYKI,
-  priceRange,
-  type DecorImage, type Material, type PriceRow,
-} from './decor-products'
+import { IMAGES, REYKI_IMAGES, MATERIAL_LABELS, FRAMUGA_MATERIALS, FRAMUGA_ROWS, PLINTUS_MATERIALS, PLINTUS_ROWS, REYKI_MATERIALS, REYKI_ROWS, PLINTUS_HEIGHTS, PLINTUS_LENGTH, REYKI_LENGTH, REYKI_KIT_PCS, FROM_PRICE_FRAMUGA_KIT, FROM_PRICE_PLINTUS, FROM_PRICE_REYKI, type DecorImage, type Material, type PriceRow, offerPrices } from './decor-products'
 
 export type DecorId = 'framuga' | 'plintus' | 'reyki'
 
@@ -119,7 +112,7 @@ export const DECOR_PAGE = {
 
 /** Product на каждую категорию — диапазон цен из таблицы */
 export const decorProducts = () =>
-  DECOR_CATEGORIES.map((c) => ({ name: c.productName, description: c.lead, image: c.images[0]!.large, ...priceRange(c.rows) }))
+  DECOR_CATEGORIES.map((c) => ({ name: c.productName, description: c.lead, image: c.images[0]!.large, prices: offerPrices(c.rows) }))
 
 const reykiTypes = listRu(REYKI_ROWS.map((r) => lower(r.name)))
 const plinthOnly = PLINTUS_MATERIALS.filter((m) => !FRAMUGA_MATERIALS.includes(m))

@@ -37,7 +37,7 @@ import {
   SECRET_STOCK_HEIGHTS, SECRET_STOCK_CUSTOM_HEIGHTS,
   REFLEX_IMAGE, REFLEX_OPENING_DIAGRAM, REFLEX_PRICES, REFLEX_MIN_BLADE_PRICE,
   REFLEX_MIN_KIT_PRICE, REFLEX_REVERS_MIN_KIT_PRICE, REFLEX_HEIGHT_TIERS, REFLEX_MAX_HEIGHT,
-  REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
+  REFLEX_TWO_SIDED_MIRROR_SURCHARGE, SECRET_KIT_OFFERS, REFLEX_KIT_OFFERS,
 } from '../../data/skrytye-dveri-products'
 import { HERO_FACTS, MOSCOW_NOTES, SEGMENTS, HIDDEN_DOORS_FAQ } from '../../data/hidden-doors-page'
 import { getWorks } from '../../lib/works'
@@ -139,19 +139,19 @@ const description =
   `Скрытые двери ${SITE.city.in}: «Секрет», «Секрет Реверс» и зеркальная «Рефлекс». ` +
   `Комплект с коробом от ${rub(SECRET_MIN_KIT_PRICE)}, высота до ${CUSTOM_MAX_HEIGHT} мм, замер и монтаж.`
 
-const product = (name: string, description: string, image: string, low: number, high: number) =>
-  productSchema({ name, description, image, low, high, inStock: true })
+const product = (name: string, description: string, image: string, prices: number[]) =>
+  productSchema({ name, description, image, prices, inStock: true })
 const structuredData = [
   localBusinessSchema({ url: SITE.url }),
   product(
     'Скрытые двери «Секрет» и «Секрет Реверс»',
     'Двери скрытого монтажа: полотно вровень со стеной, алюминиевый короб, скрытые петли. Под покраску, штукатурку, обои. Кромка: чёрная, серебро, золото.',
-    IMAGES.invisible, SECRET_MIN_KIT_PRICE, Math.max(...SECRET_PRICES.map((r) => r.kitStandardPrice)),
+    IMAGES.invisible, SECRET_KIT_OFFERS,
   ),
   product(
     'Скрытая дверь с зеркалом «Рефлекс»',
     `Скрытая дверь с зеркальным полотном во всю высоту, монтаж вровень со стеной, изготовление по размеру до ${REFLEX_MAX_HEIGHT} мм.`,
-    REFLEX_IMAGE, REFLEX_MIN_KIT_PRICE, Math.max(...REFLEX_PRICES.map((r) => r.kitStandardPrice)) + REFLEX_TWO_SIDED_MIRROR_SURCHARGE,
+    REFLEX_IMAGE, REFLEX_KIT_OFFERS,
   ),
   {
     '@context': 'https://schema.org',

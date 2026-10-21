@@ -207,3 +207,11 @@ export const FACTS = [
   { value: HIDDEN_SPECS.installDays,        label: 'срок монтажа нашей бригадой'       },
   { value: '2,5 пог. м','label': 'алюминиевого профиля в коробе'   },
 ] as const
+
+// ── Варианты комплектов для разметки Product (offerCount, «от»–«до») ──
+const kitPrices = (r: { kitStandardPrice: number; kitLitePrice: number | null }) =>
+  [r.kitStandardPrice, ...(r.kitLitePrice != null ? [r.kitLitePrice] : [])]
+/** «Секрет» и «Секрет Реверс»: кромка × открывание × короб (Стандарт, Лайт) */
+export const SECRET_KIT_OFFERS = SECRET_PRICES.flatMap(kitPrices)
+/** «Рефлекс»: кромка × открывание × короб × зеркало с одной или двух сторон */
+export const REFLEX_KIT_OFFERS = REFLEX_PRICES.flatMap(kitPrices).flatMap((p) => [p, p + REFLEX_TWO_SIDED_MIRROR_SURCHARGE])
