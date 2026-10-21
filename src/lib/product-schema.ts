@@ -16,7 +16,8 @@ import { SITE } from '../config/site'
 import { merchantPolicy } from './contacts-data'
 import { sellerRef } from './local-business-schema'
 
-const areaServed = [
+/** Где работает салон — и для товаров, и для услуг (Service) */
+export const AREA_SERVED = [
   { '@type': 'City', name: SITE.city.name },
   { '@type': 'AdministrativeArea', name: 'Московская область' },
 ]
@@ -45,7 +46,7 @@ export function productSchema(p: {
       highPrice: Math.max(...p.prices),
       offerCount: p.prices.length,
       ...(p.inStock && { availability: 'https://schema.org/InStock' }),
-      areaServed,
+      areaServed: AREA_SERVED,
       seller: sellerRef(),
       hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
     },

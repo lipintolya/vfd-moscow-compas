@@ -42,6 +42,11 @@ test('работа из Strapi → вид сайта', () => {
   assert.deepEqual(w.features, ['Заподлицо'])
   assert.deepEqual(w.images, ['/uploads/xlarge_w1.jpg', '/uploads/xlarge_w2.jpg'])
   assert.equal(w.cover.src, '/uploads/medium_w1.jpg')
+  // Каждое фото — с копиями Strapi и подписью из медиатеки
+  assert.equal(w.photos.length, 2)
+  assert.equal(w.photos[1]!.src, '/uploads/xlarge_w2.jpg')
+  assert.equal(w.photos[1]!.srcset, '/uploads/medium_w2.jpg 960w, /uploads/xlarge_w2.jpg 1920w')
+  assert.equal(w.photos[1]!.alt, 'Фото 2')
   assert.deepEqual(w.relatedLink, { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери в каталоге' })
 })
 

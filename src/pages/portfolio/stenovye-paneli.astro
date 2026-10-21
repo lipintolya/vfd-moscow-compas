@@ -44,7 +44,10 @@ const breadcrumbSchema = {
       <div class="container">
         <header class="pfh__head">
           <h1 id="walls-title" class="h-h1 pfh__title">Двери в стеновых панелях</h1>
-          <p class="h-lead pfh__lead">{typograph(lead)}</p>
+          <div class="pfh__lead">
+            <p class="h-lead">{typograph(lead)}</p>
+            <a class="h-link pfh__more" href="/catalog/stenovye-paneli/">Стеновые панели на заказ: материалы и цена</a>
+          </div>
         </header>
 
         {works.length > 0 ? (
@@ -88,6 +91,8 @@ const breadcrumbSchema = {
     .pfh__title { grid-column: 1 / span 7; }
     .pfh__lead { grid-column: 9 / span 4; }
   }
+
+  .pfh__more { display: inline-block; margin-top: 1rem; }
 
   .works {
     display: grid;

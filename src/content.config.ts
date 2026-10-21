@@ -109,6 +109,9 @@ const promos = defineCollection({
   }),
 })
 
+/* Картинка сайта (SiteImage, src/lib/strapi.ts): копии Strapi + подпись */
+const siteImage = z.object({ src: z.string(), srcset: z.string().optional(), width: z.number().optional(), height: z.number().optional(), alt: z.string() })
+
 /* Портфолио — из Strapi (раздел «Портфолио»); id записи = адрес страницы
    (slug). Порядок — по дате, новые сверху */
 const works = defineCollection({
@@ -122,7 +125,9 @@ const works = defineCollection({
     doorCount: z.number().int().positive().optional(),
     features: z.array(z.string()).optional(), tags: z.array(z.string()).optional(),
     images: z.array(z.string()).min(1), alts: z.array(z.string()), metaTitle: z.string().optional(),
-    cover: z.object({ src: z.string(), srcset: z.string().optional(), width: z.number().optional(), height: z.number().optional(), alt: z.string() }),
+    /* Схема без поля — Astro молча отбросит его из записи */
+    photos: z.array(siteImage).min(1),
+    cover: siteImage,
     relatedLink: z.object({ href: z.string(), label: z.string() }).optional(),
   }),
 })

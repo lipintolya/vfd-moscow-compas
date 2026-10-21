@@ -1,0 +1,358 @@
+---
+/**
+ * Стеновые панели (/catalog/stenovye-paneli/): изготовление Студии
+ * Зизевского — натуральный шпон и покрытия дверей ВФД, двери заподлицо
+ * с панелями. Тексты, места под изображения и вопросы —
+ * src/data/wall-panels-page.ts; что показать на месте (рендер или фото с
+ * объекта) — src/lib/wall-panels.ts; на странице только разметка.
+ *
+ * Секции — по группам запросов: материал → помещения → двери в панелях
+ * (главное отличие) → работы и видео → цена → как заказать → вопросы.
+ * Первый экран — вертикальный кадр справа: фото с объектов портретные,
+ * широкий кадр LandingHero из них вышел бы мыльным.
+ * JSON-LD: LocalBusiness, Service (цен за м² нет — без Offer), FAQPage;
+ * BreadcrumbList отдают сами хлебные крошки.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import SectionNav from '../../components/partitions/SectionNav.astro'
+import PanelFigure from '../../components/wall-panels/PanelFigure.astro'
+import WorkCard from '../../components/portfolio/WorkCard.astro'
+import Videos from '../../components/home/Videos.astro'
+import StepsRow from '../../components/home/StepsRow.astro'
+import FaqAccordion from '../../components/ui/FaqAccordion.astro'
+import VisitBand from '../../components/home/VisitBand.astro'
+import WhatsAppIcon from '../../components/ui/WhatsAppIcon.vue'
+import '../../styles/home.css'
+
+import {
+  WALL_PANELS_PAGE, PANEL_SECTIONS, PANEL_MATERIALS, PANEL_ROOMS, PANEL_DOORS, PANEL_PRICE,
+  PANEL_STEPS, PANEL_FAQ, PANEL_WORKS_TAG, PANEL_VIDEO_IDS,
+} from '../../data/wall-panels-page'
+import { shownVisual, missingRenders } from '../../lib/wall-panels'
+import { getWorks } from '../../lib/works'
+import { WORK_VIDEOS } from '../../data/videos'
+import { localBusinessSchema, sellerRef } from '../../lib/local-business-schema'
+import { AREA_SERVED } from '../../lib/product-schema'
+import { whatsappWithText } from '../../lib/messengers'
+import { typograph } from '../../lib/typograph'
+import { PHONE, SITE } from '../../config/site'
+
+const page = WALL_PANELS_PAGE
+const pageUrl = new URL(page.path, SITE.url).href
+
+const allWorks = await getWorks()
+const show = (v: Parameters<typeof shownVisual>[0]) => shownVisual(v, allWorks)
+
+const hero = show(page.hero)
+if (!hero) throw new Error('Стеновые панели: на первом экране нет ни рендера, ни фото работы — src/data/wall-panels-page.ts')
+/* Карточка без изображения: в режиме разработки PanelFigure рисует рамку
+   под рендер, на сайте карточка становится текстовой плиткой */
+const textTile = (shown: unknown) => !shown && !import.meta.env.DEV
+const materials = PANEL_MATERIALS.map((m) => { const shown = show(m.visual); return { ...m, shown, tile: textTile(shown) } })
+const rooms = PANEL_ROOMS.map((r) => { const shown = show(r.visual); return { ...r, shown, tile: textTile(shown) } })
+const doorVisuals = PANEL_DOORS.visuals.map((d) => ({ ...d, shown: show(d.visual) }))
+
+/* Работы: раздел «Стеновые панели» и работы с этой меткой (скрытые двери в панелях) */
+const works = allWorks.filter((w) => w.category === 'walls' || w.tags?.includes(PANEL_WORKS_TAG)).slice(0, 6)
+
+const videos = PANEL_VIDEO_IDS.map((id) => {
+  const v = WORK_VIDEOS.find((x) => x.id === id)
+  if (!v) throw new Error(`Стеновые панели: ролика «${id}» нет в WORK_VIDEOS (src/data/videos.ts)`)
+  return v
+})
+
+const waiting = missingRenders()
+if (waiting.length) {
+  console.warn(`[wall-panels] ждут рендер: ${waiting.map((v) => v.slot).join(', ')} — assets/wall-panels/<место>.jpg, затем npm run gen:wall-panels`)
+}
+
+const whatsapp = whatsappWithText(page.message)
+
+/* sizes — по ширине кадра в сетке (кадр 4:5 шире фото 3:4, cover режет по высоте) */
+const HERO_SIZES = '(min-width: 80rem) 31rem, (min-width: 62.5rem) 40vw, (min-width: 30rem) 28rem, 100vw'
+const CARD_SIZES = '(min-width: 56.25rem) 25rem, (min-width: 43.75rem) 45vw, 82vw'
+const PAIR_SIZES = '(min-width: 62.5rem) 22rem, 45vw'
+
+const navItems = [
+  { id: 'wp-materials', label: 'Материалы' },
+  { id: 'wp-rooms', label: 'Помещения' },
+  { id: 'wp-doors', label: 'Двери в панелях' },
+  ...(works.length ? [{ id: 'wp-works', label: 'Работы' }] : []),
+  { id: 'wp-price', label: 'Цена' },
+  { id: 'wp-faq', label: 'Вопросы' },
+]
+
+const structuredData = [
+  localBusinessSchema({ url: SITE.url }),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${pageUrl}#service`,
+    name: page.h1,
+    serviceType: 'Изготовление и монтаж стеновых панелей',
+    description: page.description,
+    url: pageUrl,
+    image: hero.image.src,
+    provider: sellerRef(),
+    areaServed: AREA_SERVED,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: PANEL_FAQ.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+]
+---
+
+<BaseLayout
+  title={brandTitle(page.title)}
+  description={page.description}
+  canonical={pageUrl}
+  ogImage={hero.image.src}
+  ogImageMeta={hero.image.width && hero.image.height ? { width: hero.image.width, height: hero.image.height, alt: hero.image.alt } : undefined}
+  preloadImage={hero.image.src}
+  preloadImageSrcset={hero.image.srcset}
+  preloadImageSizes={HERO_SIZES}
+  structuredData={structuredData}
+>
+  <SectionNav items={navItems} />
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Каталог', href: '/catalog/' }, { label: 'Стеновые панели' }]} />
+    </div>
+  </div>
+
+  <div class="home">
+    {/* Первый экран: заголовок, пояснение и два действия слева, кадр с объекта справа */}
+    <section class="wp-hero" aria-labelledby="wp-title">
+      <div class="container wp-hero__grid">
+        <div class="wp-hero__text">
+          <h1 id="wp-title" class="h-h1">{typograph(page.h1)}</h1>
+          <p class="h-lead wp-hero__lead">{typograph(page.lead)}</p>
+          <div class="wp-hero__actions">
+            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal h-btn--phone-wide">Обсудить проект</a>
+            <a href={whatsapp} class="h-btn h-btn--quiet h-btn--phone-wide wp-wa" target="_blank" rel="noopener">
+              <WhatsAppIcon class="wp-wa__ico" />Написать в WhatsApp
+            </a>
+          </div>
+        </div>
+        <PanelFigure class="wp-hero__media" visual={page.hero} shown={hero} sizes={HERO_SIZES} eager />
+      </div>
+    </section>
+
+    <section id="wp-materials" class="h-sec" aria-labelledby="wp-materials-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="wp-materials-title" class="h-h2">{typograph(PANEL_SECTIONS.materials.title)}</h2>
+          <p class="h-lead">{typograph(PANEL_SECTIONS.materials.lead)}</p>
+        </header>
+        <ul class="wp-cards h-rail" role="list">
+          {materials.map((m) => (
+            <li class:list={['wp-card', { 'wp-card--tile': m.tile }]}>
+              <PanelFigure visual={m.visual} shown={m.shown} sizes={CARD_SIZES} />
+              <h3 class="h-h3 wp-card__title">{typograph(m.title)}</h3>
+              <p class="h-body wp-card__text">{typograph(m.text)}</p>
+              {'link' in m && m.link && <a class="h-link wp-card__link" href={m.link.href}>{m.link.label}</a>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section id="wp-rooms" class="h-sec h-sec--wall" aria-labelledby="wp-rooms-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="wp-rooms-title" class="h-h2">{typograph(PANEL_SECTIONS.rooms.title)}</h2>
+          <p class="h-lead">{typograph(PANEL_SECTIONS.rooms.lead)}</p>
+        </header>
+        <ul class="wp-cards h-rail" role="list">
+          {rooms.map((r) => (
+            <li class:list={['wp-card', { 'wp-card--tile': r.tile }]}>
+              <PanelFigure visual={r.visual} shown={r.shown} sizes={CARD_SIZES} />
+              <h3 class="h-h3 wp-card__title">{typograph(r.title)}</h3>
+              <p class="h-body wp-card__text">{typograph(r.text)}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    {/* Главное отличие: двери и панели одним проектом — две стороны одной двери */}
+    <section id="wp-doors" class="h-sec" aria-labelledby="wp-doors-title">
+      <div class="container wp-doors">
+        <div class="wp-doors__text">
+          <h2 id="wp-doors-title" class="h-h2">{typograph(PANEL_DOORS.title)}</h2>
+          <p class="h-lead wp-doors__lead">{typograph(PANEL_DOORS.lead)}</p>
+          <ul class="wp-points" role="list">
+            {PANEL_DOORS.points.map((p) => <li class="h-body">{typograph(p)}</li>)}
+          </ul>
+          <p class="wp-doors__links">
+            {PANEL_DOORS.links.map((l) => <a class="h-link" href={l.href}>{l.label}</a>)}
+          </p>
+        </div>
+        <div class="wp-doors__pair">
+          {doorVisuals.map((d) => <PanelFigure visual={d.visual} shown={d.shown} sizes={PAIR_SIZES} caption={d.caption} workLink={false} />)}
+        </div>
+      </div>
+    </section>
+
+    {works.length > 0 && (
+      <section id="wp-works" class="h-sec h-sec--wall" aria-labelledby="wp-works-title">
+        <div class="container">
+          <header class="h-head">
+            <h2 id="wp-works-title" class="h-h2">{typograph(PANEL_SECTIONS.works.title)}</h2>
+            <p class="h-lead">{typograph(PANEL_SECTIONS.works.lead)}</p>
+          </header>
+          <ul class="wp-works h-rail" role="list">
+            {works.map((w) => <li><WorkCard work={w} /></li>)}
+          </ul>
+          <a class="h-btn h-btn--quiet h-btn--phone-wide wp-works__all" href="/portfolio/stenovye-paneli/">{PANEL_SECTIONS.works.all}</a>
+        </div>
+      </section>
+    )}
+
+    <Videos
+      id="wp-video"
+      videos={videos}
+      heading={PANEL_SECTIONS.video.title}
+      lead={PANEL_SECTIONS.video.lead}
+      allHref={null}
+      tightTop={false}
+      cols={4}
+    />
+
+    <section id="wp-price" class="h-sec h-sec--tight-top" aria-labelledby="wp-price-title">
+      <div class="container wp-price">
+        <div>
+          <h2 id="wp-price-title" class="h-h2">{typograph(PANEL_PRICE.title)}</h2>
+          <p class="h-lead wp-price__lead">{typograph(PANEL_PRICE.lead)}</p>
+          <ul class="wp-points" role="list">
+            {PANEL_PRICE.factors.map((f) => <li class="h-body">{typograph(f)}</li>)}
+          </ul>
+        </div>
+        <aside class="wp-price__card" aria-label="Расчёт стоимости">
+          <p class="h-body">{typograph(PANEL_PRICE.rails)}</p>
+          <div class="wp-price__actions">
+            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать проект</a>
+            <a href={whatsapp} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener">
+              <WhatsAppIcon class="wp-wa__ico" />WhatsApp
+            </a>
+          </div>
+          <a class="wp-price__phone" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+        </aside>
+      </div>
+    </section>
+
+    <StepsRow id="wp-steps" steps={PANEL_STEPS} title={PANEL_SECTIONS.steps.title} lead={PANEL_SECTIONS.steps.lead} />
+
+    <section id="wp-faq" class="h-sec h-sec--wall" aria-labelledby="wp-faq-title">
+      <div class="container h-faq">
+        <h2 id="wp-faq-title" class="h-h2">{typograph(PANEL_SECTIONS.faq.title)}</h2>
+        <FaqAccordion items={PANEL_FAQ} title={false} />
+      </div>
+    </section>
+
+    <VisitBand lead={page.visit} />
+  </div>
+</BaseLayout>
+
+<style>
+  /* ── Первый экран ── */
+  .wp-hero { padding-block: clamp(1rem, 2vw, 1.5rem) clamp(3rem, 6vw, 5rem); }
+  .wp-hero__grid { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
+  .wp-hero__lead { margin-top: 1.25rem; }
+  .wp-hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+  /* Кадр — элемент PanelFigure: стили страницы до него доходят через :global */
+  .wp-hero__grid > :global(.wp-hero__media) { width: 100%; max-width: 28rem; }
+  @media (min-width: 62.5rem) {
+    .wp-hero__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .wp-hero__text { grid-column: 1 / span 6; }
+    .wp-hero__grid > :global(.wp-hero__media) { grid-column: 8 / span 5; max-width: none; }
+  }
+
+  .wp-wa { gap: 0.5rem; }
+  .wp-wa :global(.wp-wa__ico) { width: 1.25rem; height: 1.25rem; }
+
+  /* ── Карточки материалов и помещений ── */
+  .wp-cards {
+    display: grid;
+    gap: 3rem var(--h-gutter);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 43.75rem) { .wp-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 56.25rem) { .wp-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .wp-card { display: flex; flex-direction: column; }
+  .wp-card__title { margin-top: 1.25rem; }
+  /* Текстовая плитка — карточка, у которой ещё нет рендера (только на
+     сайте): тянется на высоту ряда, текст внизу, как подпись у фото-плиток */
+  .wp-card--tile {
+    justify-content: flex-end;
+    min-height: 16rem;
+    padding: clamp(1.25rem, 2.5vw, 1.75rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
+  }
+  .h-sec--wall .wp-card--tile { background: var(--h-paper); }
+  .wp-card--tile .wp-card__title { margin-top: 0; }
+  .wp-card__text { margin-top: 0.625rem; }
+  .wp-card__link { align-self: flex-start; margin-top: 0.875rem; }
+
+  /* ── Двери в панелях ── */
+  .wp-doors { display: grid; gap: 2.5rem var(--h-gutter); align-items: center; }
+  .wp-doors__lead { margin-top: 1.25rem; }
+  .wp-doors__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 1.75rem 0 0; }
+  .wp-doors__pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  @media (min-width: 62.5rem) {
+    .wp-doors { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .wp-doors__text { grid-column: 1 / span 5; }
+    .wp-doors__pair { grid-column: 7 / span 6; gap: var(--h-gutter); }
+  }
+
+  /* Пункты — короткие предложения под красной меткой */
+  .wp-points { display: grid; gap: 0.75rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+  .wp-points li { position: relative; padding-left: 1.25rem; }
+  .wp-points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 0.5rem;
+    height: 0.125rem;
+    background: var(--h-signal);
+  }
+
+  /* ── Работы ── */
+  .wp-works { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .wp-works { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 56.25rem) { .wp-works { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .wp-works__all { margin-top: 2.5rem; }
+
+  /* ── Цена ── */
+  .wp-price { display: grid; gap: 2.5rem var(--h-gutter); align-items: start; }
+  .wp-price__lead { margin-top: 1.25rem; }
+  .wp-price__card {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.5rem, 3vw, 2rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
+  }
+  .wp-price__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  /* Номер — тёмным: серый мелкий текст на сером фоне не проходит контраст WCAG */
+  .wp-price__phone { justify-self: start; color: var(--h-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .wp-price__phone:hover { color: var(--h-signal); }
+  @media (min-width: 62.5rem) {
+    .wp-price { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .wp-price > :first-child { grid-column: 1 / span 7; }
+    .wp-price__card { grid-column: 9 / span 4; margin-top: 0.5rem; }
+  }
+</style>

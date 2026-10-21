@@ -1,0 +1,100 @@
+---
+/**
+ * Изображение места на странице «Стеновые панели»: рендер или фото с
+ * объекта (src/lib/wall-panels.ts → shownVisual). У фото с объекта —
+ * подпись со ссылкой на работу в портфолио. Места без изображения: в
+ * режиме разработки — рамка с именем файла рендера, на сайте — ничего
+ * (карточка остаётся текстовой).
+ *
+ * Пропорция кадра — у места (4:5 или 16:10); картинка заполняет кадр
+ * (object-fit: cover из .h-media). Первый экран — eager: LCP страницы.
+ */
+import type { PanelVisual } from '../../data/wall-panels-page'
+import type { ShownVisual } from '../../lib/wall-panels'
+import { typograph } from '../../lib/typograph'
+
+interface Props {
+  visual: PanelVisual
+  shown: ShownVisual | null
+  /** sizes картинки — по ширине кадра в сетке */
+  sizes: string
+  /** Подпись под кадром; у фото с объекта к ней добавится ссылка на работу */
+  caption?: string
+  /** Первый экран: грузить сразу, с высоким приоритетом */
+  eager?: boolean
+  /** Ссылка «Объект: …» на работу под фото с объекта; в паре кадров одной работы — не нужна */
+  workLink?: boolean
+  class?: string
+}
+const { visual, shown, sizes, caption, eager = false, workLink = true, class: cls } = Astro.props
+const work = workLink ? shown?.work : undefined
+const ratio = visual.ratio.replace(':', ' / ')
+/* Ширина рендера, которой хватит кадру на ПК и retina */
+const minWidth = visual.ratio === '16:10' ? 1600 : 1200
+const isDev = import.meta.env.DEV
+---
+
+{shown ? (
+  <figure class:list={['pf', cls]}>
+    <span class="h-media pf__media" style={`aspect-ratio: ${ratio}`}>
+      <img
+        src={shown.image.src}
+        srcset={shown.image.srcset}
+        sizes={sizes}
+        alt={shown.image.alt}
+        width={shown.image.width}
+        height={shown.image.height}
+        loading={eager ? 'eager' : 'lazy'}
+        fetchpriority={eager ? 'high' : undefined}
+        decoding="async"
+      />
+    </span>
+    {(caption || work) && (
+      <figcaption class="h-meta pf__cap">
+        {caption && <span>{typograph(caption)}</span>}
+        {work && <a class="pf__work" href={`/portfolio/${work.id}/`}>Объект: {typograph(work.title)}</a>}
+      </figcaption>
+    )}
+  </figure>
+) : isDev ? (
+  <div class:list={['pf pf--slot', cls]} style={`aspect-ratio: ${ratio}`}>
+    <strong>Место для рендера</strong>
+    <code>assets/wall-panels/{visual.slot}.jpg</code>
+    <span>{visual.ratio}, от {minWidth} px по ширине → npm run gen:wall-panels</span>
+  </div>
+) : null}
+
+<style>
+  .pf { margin: 0; }
+  .pf__media { position: relative; }
+  .pf__cap {
+    display: grid;
+    gap: 0.25rem;
+    margin-top: 0.75rem;
+  }
+  .pf__work {
+    color: var(--h-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--h-rule);
+    text-underline-offset: 0.2em;
+    transition: color 200ms var(--ease-out), text-decoration-color 200ms var(--ease-out);
+  }
+  .pf__work:hover { color: var(--h-signal); text-decoration-color: currentColor; }
+
+  /* Только в режиме разработки: где ждём рендер */
+  .pf--slot {
+    display: grid;
+    place-content: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border: 0.125rem dashed var(--color-slate-300);
+    border-radius: var(--h-radius);
+    background: var(--h-wall);
+    color: var(--h-muted);
+    font-size: 0.875rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+  .pf--slot strong { color: var(--h-ink); font-size: 1rem; }
+  .pf--slot code { color: var(--h-ink); font-size: 0.8125rem; word-break: break-all; }
+</style>

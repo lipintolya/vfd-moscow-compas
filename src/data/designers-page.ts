@@ -150,6 +150,7 @@ export const DESIGNER_RANGE = [
   { title: 'Алюминиевые перегородки', text: 'Раздвижные и стационарные конструкции со стеклом',           href: '/partitions/',            photo: DIRECTION_PHOTOS.partitions, position: '50% 50%' },
 ]
 export const DESIGNER_RANGE_MORE = [
+  { label: 'Стеновые панели',                 href: '/catalog/stenovye-paneli/' },
   { label: 'Декор: плинтус, фрамуги, рейки', href: '/catalog/decor/' },
   { label: 'Двери Эмалекс',                   href: '/catalog/dveri-emaleks/' },
   { label: 'Двери ПЭТ',                       href: '/catalog/dveri-pet/' },

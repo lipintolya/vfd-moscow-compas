@@ -66,6 +66,8 @@ export interface PortfolioWork {
   tags?:       string[]     // ['Загородный дом', 'ПЭТ', 'Внешние петли']
   images:      string[]     // полноразмерные (копии Strapi до 1920 px); images[0] — обложка
   alts:        string[]     // «Что на фото» к images — из медиатеки Strapi
+  /** Те же фото с копиями Strapi (src + srcset) и подписью — крупный кадр работы на других страницах */
+  photos:      SiteImage[]
   /** <title> страницы работы; без него — название и место объекта */
   metaTitle?:  string
   /** Обложка для карточек — копия Strapi под карточку + srcset */

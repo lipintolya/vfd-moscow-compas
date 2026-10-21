@@ -42,6 +42,7 @@
     "gen:series-covers": "node scripts/gen-series-covers.mjs",
     "gen:video-covers": "node scripts/gen-video-covers.mjs",
     "gen:visit-map": "node scripts/gen-visit-map.mjs",
+    "gen:wall-panels": "node scripts/gen-wall-panels.mjs",
     "video:optimize": "node scripts/optimize-video.mjs",
     "deploy": "node scripts/deploy-site.mjs",
     "indexnow": "node scripts/indexnow.mjs",

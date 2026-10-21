@@ -265,8 +265,9 @@ export default defineConfig({
         if (/\/catalog\/(belye|seryye|bezhevye|shokolad-mokko)-dveri\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
-        // Напольный плинтус — страница каталога под поиск (src/pages/catalog/plintus.astro)
-        if (/\/catalog\/plintus\/?$/.test(u)) {
+        // Напольный плинтус и стеновые панели — страницы каталога под поиск
+        // (src/pages/catalog/plintus.astro, stenovye-paneli.astro)
+        if (/\/catalog\/(plintus|stenovye-paneli)\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         // Стилевые SEO-лендинги — см. src/data/style-categories.ts.

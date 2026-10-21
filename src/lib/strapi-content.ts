@@ -96,6 +96,9 @@ export function toWork(raw: StrapiWork): PortfolioWork {
     images: raw.images.map((img) => strapiImage(img, 1920).src),
     /* «Что на фото» — из медиатеки; без него — название и номер */
     alts: raw.images.map((img, i) => img.alternativeText || `${raw.title} — фото ${i + 1}`),
+    /* Те же фото с копиями Strapi (src + srcset) — для страниц, которые
+       показывают кадр работы крупно (например, /catalog/stenovye-paneli/) */
+    photos: raw.images.map((img, i) => ({ ...strapiImage(img, 1920), alt: img.alternativeText || `${raw.title} — фото ${i + 1}` })),
     metaTitle: opt(raw.metaTitle),
     cover: strapiImage(raw.images[0]!, 960),
     relatedLink: link && { href: link.href, label: raw.catalogLink?.label || link.label },
