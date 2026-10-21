@@ -15,6 +15,7 @@ import '../styles/home.css'
 import { VIDEOS } from '../data/videos'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
 import { PHONE, SITE } from '../config/site'
+import { YOUTUBE_ICON } from '../lib/messenger-icons'
 
 const title = brandTitle('Видео о дверях и фурнитуре')
 const description =
@@ -43,6 +44,10 @@ const breadcrumbItems = [
             и&nbsp;фурнитуру ВФД вживую и&nbsp;рассказывает, на&nbsp;что обратить
             внимание при выборе.
           </p>
+          <a href={SITE.social.youtube} target="_blank" rel="noopener" class="h-btn h-btn--quiet vpage__yt">
+            <img src={YOUTUBE_ICON} alt="" width="24" height="17" />
+            Смотреть на YouTube
+          </a>
         </header>
 
         <VideoList videos={VIDEOS} />
@@ -81,4 +86,6 @@ const breadcrumbItems = [
     color: var(--h-ink);
   }
   .vpage__cta { padding-bottom: var(--h-sec); }
+  .vpage__yt { justify-self: start; gap: 0.625rem; }
+  .vpage__yt img { width: 1.5rem; height: auto; }
 </style>

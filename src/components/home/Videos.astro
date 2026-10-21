@@ -9,6 +9,7 @@
  * Тот же блок — в статьях и в разделе статей.
  */
 import { SITE } from '../../config/site'
+import { YOUTUBE_ICON } from '../../lib/messenger-icons'
 import { VIDEOS, HOME_VIDEOS, type Video } from '../../data/videos'
 import VideoList from '../video/VideoList.astro'
 import VideoPlayer from '../video/VideoPlayer.astro'
@@ -47,12 +48,18 @@ const headingId = `${id}-heading`
       <h2 id={headingId} class="h-h2">{heading}</h2>
       <div>
         <p class="h-lead">{lead}</p>
-        {allHref && (
-          <a href={allHref} class="h-pill h-pill--line video-head__all">
-            Все видео
-            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="video-head__links">
+          {allHref && (
+            <a href={allHref} class="h-pill h-pill--line">
+              Все видео
+              <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          )}
+          <a href={SITE.social.youtube} target="_blank" rel="noopener" class="h-pill h-pill--line video-head__yt" aria-label={`YouTube-канал ${SITE.social.youtubeHandle}`}>
+            <img src={YOUTUBE_ICON} alt="" width="20" height="14" />
+            YouTube-канал
           </a>
-        )}
+        </div>
       </div>
     </header>
 
@@ -63,5 +70,6 @@ const headingId = `${id}-heading`
 </section>
 
 <style>
-  .video-head__all { margin-top: 1.25rem; }
+  .video-head__links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+  .video-head__yt img { width: 1.25rem; height: auto; }
 </style>

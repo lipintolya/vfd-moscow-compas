@@ -104,7 +104,7 @@ export function localBusinessSchema(overrides: Record<string, unknown> = {}) {
     } : {}),
     /* Карточка на Яндекс Картах — карта организации для поисковиков */
     hasMap: MAP_URL,
-    sameAs: [SITE.social.telegram, ...MAP_PROFILES],
+    sameAs: [SITE.social.telegram, SITE.social.youtube, ...MAP_PROFILES],
     ...overrides,
   }
 }

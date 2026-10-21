@@ -18,6 +18,7 @@ import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-sc
 import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ } from '../data/contacts-page'
 import { PRICES_DATE_LABEL } from '../data/services'
 import { SITE, PHONE } from '../config/site'
+import { YOUTUBE_ICON } from '../lib/messenger-icons'
 import { WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../lib/messengers'
 import WhatsAppIcon from '../components/ui/WhatsAppIcon.vue'
 import TelegramIcon from '../components/ui/TelegramIcon.vue'
@@ -138,7 +139,9 @@ const breadcrumbItems = [
         {/* Канал — читать, не писать: отдельной строкой под плитками */}
         <p class="h-body ct-channel">
           Новинки, работы и&nbsp;акции салона&nbsp;— в&nbsp;Telegram-канале{' '}
-          <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-link">{SITE.social.telegramHandle}</a>
+          <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-link">{SITE.social.telegramHandle}</a>,
+          видео&nbsp;— на&nbsp;YouTube-канале{' '}
+          <a href={SITE.social.youtube} target="_blank" rel="noopener" class="h-link ct-yt"><img src={YOUTUBE_ICON} alt="" width="20" height="14" class="ct-yt__ico" />{SITE.social.youtubeHandle}</a>
         </p>
         {HAS_EMAIL && (
           <p class="h-body ct-channel">
@@ -400,4 +403,6 @@ const breadcrumbItems = [
   .ct-benefit__mark { margin-left: 0.125em; color: var(--h-signal); text-decoration: none; }
   .ct-note { margin: clamp(2rem, 4vw, 3rem) 0 0; max-width: 40rem; }
 
+  .ct-yt { white-space: nowrap; }
+  .ct-yt__ico { display: inline-block; width: 1.25rem; height: auto; margin-right: 0.375rem; vertical-align: -0.125em; }
 </style>

@@ -488,6 +488,14 @@ onUnmounted(() => {
                       </a>
                     </dd>
                   </div>
+                  <div>
+                    <dt>YouTube</dt>
+                    <dd>
+                      <a :href="SITE.social.youtube" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
+                        {{ SITE.social.youtubeHandle }}
+                      </a>
+                    </dd>
+                  </div>
                   <div v-if="HAS_EMAIL">
                     <dt>Email</dt>
                     <dd><a :href="`mailto:${CONTACTS.email}`" class="hdr-pop__link">{{ CONTACTS.email }}</a></dd>

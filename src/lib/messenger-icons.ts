@@ -15,3 +15,6 @@ export const MESSENGER_ICONS = {
   telegram: { onLight: icon('telegram-black.png'), onDark: icon('telegram-white.png') },
   max:      { onLight: icon('max-dark.svg'),       onDark: icon('max-white.svg') },
 } as const
+
+/** Официальный знак YouTube — красный, один на светлом и тёмном фоне */
+export const YOUTUBE_ICON = icon('youtube.svg')

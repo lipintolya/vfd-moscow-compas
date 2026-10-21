@@ -65,6 +65,7 @@ export const companyLegalInfo = {
   // Telegram-канал салона (читать); написать — WhatsApp и личный Telegram, src/lib/messengers.ts
   socialMedia: [
     { name: 'Telegram', label: 'Telegram-канал', url: SITE.social.telegram, icon: '/media/catalog-vfd/icons/tg_logo.svg' },
+    { name: 'YouTube', label: 'YouTube-канал', url: SITE.social.youtube, icon: '/icons/youtube.svg' },
   ],
 
   // Дополнительная информация

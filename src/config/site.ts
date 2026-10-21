@@ -115,6 +115,9 @@ export const SITE = {
   social: {
     telegram: 'https://t.me/zizekos_studio',
     telegramHandle: '@zizekos_studio',
+    /** YouTube-канал салона — видео о дверях, фурнитуре и работах */
+    youtube: 'https://www.youtube.com/@%D0%94%D0%B2%D0%B5%D1%80%D0%B8%D0%A1%D1%82%D1%83%D0%B4%D0%B8%D0%B8%D0%97%D0%B8%D0%B7%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%B3%D0%BE',
+    youtubeHandle: '@ДвериСтудииЗизевского',
     /** Личный Telegram Константина — написать (src/lib/messengers.ts);
         канал выше — только читать */
     telegramChat: 'zizekos',

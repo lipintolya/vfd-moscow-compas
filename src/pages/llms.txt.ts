@@ -59,6 +59,8 @@ export const GET: APIRoute = async () => {
     `- ${companyLegalInfo.workingHours.shortDisplay}`,
     `- Телефон: ${SITE.phones.map((p) => p.label).join(', ')}`,
     `- Сайт: ${SITE.url}`,
+    `- YouTube-канал: ${SITE.social.youtube}`,
+    `- Telegram-канал: ${SITE.social.telegram}`,
     '',
     '## Что продаём и по каким ценам',
     '',
