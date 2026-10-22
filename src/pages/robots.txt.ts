@@ -4,7 +4,12 @@
    Clean-param (Яндекс; Google его не читает и склеивает по canonical) —
    метки рекламы и фильтры в адресе: ?series=…, ?utm_source=… не плодят
    дубли страниц в индексе. Параметры фильтров — из констант, которые
-   читают и пишут сами фильтры. */
+   читают и пишут сами фильтры.
+
+   Служебные страницы (/privacy/, /consent/, /akcii/ без акций…) закрыты
+   только meta noindex — не Disallow: запрет в robots.txt не даёт поисковику
+   зайти и увидеть noindex, и Google индексирует адрес без содержимого
+   («Проиндексировано, несмотря на блокировку в файле robots.txt»). */
 import type { APIRoute } from 'astro'
 import { SITE } from '../config/site'
 import { CATALOG_URL_PARAMS } from '../lib/catalog-filter'
@@ -20,8 +25,6 @@ export const GET: APIRoute = () =>
     [
       'User-agent: *',
       'Allow: /',
-      'Disallow: /privacy',
-      'Disallow: /consent',
       '',
       clean(TRACKING_PARAMS),
       clean(CATALOG_URL_PARAMS, '/catalog/'),
