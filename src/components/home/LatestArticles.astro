@@ -7,14 +7,14 @@
  * та же, что в разделе. Статья из блока-новинки над лентой здесь не повторяется.
  */
 import ArticleCard from '../articles/ArticleCard.astro'
-import { getArticles, getSpotlight } from '../../lib/articles'
+import { getArticles, getSpotlights } from '../../lib/articles'
 import { ARTICLES_SECTION } from '../../data/article-kinds'
 import { typograph } from '../../lib/typograph'
 
 const HOME_POSTS = 3
-/* Статья из блока-новинки (Spotlight) стоит прямо над лентой — не повторяем */
-const spotlight = await getSpotlight()
-const posts = (await getArticles()).filter((a) => a.id !== spotlight?.id).slice(0, HOME_POSTS)
+/* Статьи из блока-новинок (Spotlight) стоят прямо над лентой — не повторяем */
+const spotlightIds = new Set((await getSpotlights()).map((a) => a.id))
+const posts = (await getArticles()).filter((a) => !spotlightIds.has(a.id)).slice(0, HOME_POSTS)
 ---
 
 {posts.length > 0 && (

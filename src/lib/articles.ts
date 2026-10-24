@@ -26,8 +26,12 @@ export function getArticles(): Promise<Article[]> {
 export const articleHref = (id: string) => `/articles/${id}/`
 
 /** Блок-новинка на главной — самая свежая статья с spotlight */
-export async function getSpotlight(): Promise<Article | undefined> {
-  return (await getArticles()).find((a) => a.data.spotlight)
+/** Сколько новинок (статей с «Показ на главной») показывать на главной */
+export const SPOTLIGHT_LIMIT = 2
+
+/** Новинки для главной — самые свежие статьи с полем spotlight */
+export async function getSpotlights(): Promise<Article[]> {
+  return (await getArticles()).filter((a) => a.data.spotlight).slice(0, SPOTLIGHT_LIMIT)
 }
 
 export const formatArticleDate = (d: Date) =>

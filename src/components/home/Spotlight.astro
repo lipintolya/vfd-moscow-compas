@@ -1,35 +1,41 @@
 ---
 /**
- * Блок-новинка на главной — перед «Статьями и публикациями». Всё — из
- * статьи с полем spotlight (src/content.config.ts): плашка, заголовок,
- * лид, 2–4 факта, вертикальное фото (ссылка на статью) и ролик с кнопкой
- * «плей» без автозапуска. Ролика нет — второй плиткой первое фото из
- * галереи статьи (тоже ссылка на статью). Нет такой статьи — нет блока. Новая новинка —
- * новая статья со spotlight, компонент не меняется.
+ * Блоки-новинки на главной — перед «Статьями и публикациями», до
+ * SPOTLIGHT_LIMIT самых свежих статей с полем spotlight (src/lib/articles.ts).
+ * У каждой: плашка, заголовок, лид, 2–4 факта, вертикальное фото (ссылка на
+ * статью) и ролик с кнопкой «плей» без автозапуска. Ролика нет — второй
+ * плиткой первое фото из галереи статьи (тоже ссылка на статью). Вторая
+ * новинка — зеркально (фото слева), без верхнего поля: блоки идут подряд.
+ * Новая новинка — новая статья со spotlight, компонент не меняется.
  */
 import InlineVideo from '../articles/InlineVideo.astro'
-import { getSpotlight, articleHref, articleAuthor } from '../../lib/articles'
+import { getSpotlights, articleHref, articleAuthor } from '../../lib/articles'
 import { KIND_LABEL } from '../../data/article-kinds'
 import { typograph } from '../../lib/typograph'
 
-const article = await getSpotlight()
-const spot = article?.data.spotlight
-const href = article ? articleHref(article.id) : ''
-const author = article ? articleAuthor(article) : undefined
 type GalleryBlock = { type: 'gallery'; photos: { image: { src: string; srcset?: string; alt: string } }[] }
-const gallery = article?.data.blocks.find((b): b is GalleryBlock & typeof b => b.type === 'gallery') as GalleryBlock | undefined
-const secondPhoto = !spot?.video ? gallery?.photos[0]?.image : undefined
+const items = (await getSpotlights()).map((article) => {
+  const spot = article.data.spotlight!
+  const gallery = article.data.blocks.find((b) => b.type === 'gallery') as unknown as GalleryBlock | undefined
+  return {
+    article,
+    spot,
+    href: articleHref(article.id),
+    author: articleAuthor(article),
+    secondPhoto: !spot.video ? gallery?.photos[0]?.image : undefined,
+  }
+})
 ---
 
-{article && spot && (
-  <section class="h-sec spot" aria-labelledby="spot-heading">
+{items.map(({ article, spot, href, author, secondPhoto }, i) => (
+  <section class:list={['h-sec spot', { 'h-sec--tight-top spot--flip': i % 2 === 1 }]} aria-labelledby={`spot-${i}-heading`}>
     <div class="container spot__grid">
       <div class="spot__text">
         <p class="spot__meta">
           <span class="h-status h-meta" data-status="new">{spot.label}</span>
           <span class="h-meta">{KIND_LABEL[article.data.kind]}{author && ` ${author.name}`}</span>
         </p>
-        <h2 id="spot-heading" class="h-h2 spot__title">
+        <h2 id={`spot-${i}-heading`} class="h-h2 spot__title">
           <a href={href}>{typograph(article.data.title)}</a>
         </h2>
         <p class="h-lead spot__lead">{typograph(spot.lead ?? article.data.description)}</p>
@@ -58,7 +64,7 @@ const secondPhoto = !spot?.video ? gallery?.photos[0]?.image : undefined
       </div>
     </div>
   </section>
-)}
+))}
 
 <style>
   .spot__grid { display: grid; gap: clamp(1.75rem, 4vw, 3rem); }
@@ -66,6 +72,9 @@ const secondPhoto = !spot?.video ? gallery?.photos[0]?.image : undefined
     .spot__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: center; }
     .spot__text  { grid-column: 1 / span 5; }
     .spot__media { grid-column: 7 / span 6; }
+    /* Вторая новинка — зеркально: фото слева, текст справа */
+    .spot--flip .spot__media { grid-column: 1 / span 6; grid-row: 1; }
+    .spot--flip .spot__text  { grid-column: 8 / span 5; grid-row: 1; }
   }
 
   .spot__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.875rem; margin: 0; color: var(--h-muted); }
