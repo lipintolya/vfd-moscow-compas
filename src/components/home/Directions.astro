@@ -14,6 +14,15 @@ import { DIRECTION_PHOTOS } from '../../data/direction-photos'
 import { PANEL_HOME_TILE, WALL_PANELS_PAGE } from '../../data/wall-panels-page'
 import { shownVisual } from '../../lib/wall-panels'
 import { getWorks } from '../../lib/works'
+import { DOOR_CATEGORIES } from '../../data/door-categories'
+import { COLOR_CATEGORIES } from '../../data/color-categories'
+import { STYLE_CATEGORIES } from '../../data/style-categories'
+
+/* Подборки каталога — ссылки с главной на посадочные страницы (покрытие,
+   цвет, стиль) со словами из запросов: «Двери эмаль», «Белые двери»…
+   Список — из тех же данных, что и страницы: новая подборка появится сама */
+const collections = [...DOOR_CATEGORIES, ...COLOR_CATEGORIES, ...STYLE_CATEGORIES]
+  .map((c) => ({ href: `/catalog/${c.slug}/`, label: c.h1.replace(/ в Москве$/, '') }))
 
 const wallsPhoto = shownVisual(PANEL_HOME_TILE.visual, await getWorks())
 if (!wallsPhoto) throw new Error('Главная: у плитки «Стеновые панели» нет ни рендера, ни фото работы — src/data/wall-panels-page.ts')
@@ -91,6 +100,10 @@ const items = [
         </li>
       ))}
     </ul>
+
+    <nav class="dir-links" aria-label="Подборки каталога">
+      {collections.map((c) => <a href={c.href} class="h-pill h-pill--line">{c.label}</a>)}
+    </nav>
   </div>
 </section>
 
@@ -159,5 +172,19 @@ const items = [
     .bento::-webkit-scrollbar { display: none; }
     .bento__cell, .bento__cell--interior, .bento__cell--walls { min-height: 21rem; scroll-snap-align: start; }
     .bento__cell--interior .h-tile__title { font-size: clamp(1.375rem, 2.2vw, 1.75rem); }
+  }
+
+  /* Подборки: на ПК — переносом строк, на телефоне — лентой вбок */
+  .dir-links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: clamp(1.25rem, 2.5vw, 1.75rem); }
+  @media (max-width: 39.9375rem) {
+    .dir-links {
+      flex-wrap: nowrap;
+      margin-inline: calc(-1 * var(--h-pad));
+      padding-inline: var(--h-pad);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .dir-links::-webkit-scrollbar { display: none; }
+    .dir-links > a { flex: none; }
   }
 </style>

@@ -23,6 +23,9 @@ import { howToSchema } from '../data/how-it-works'
 import { getCatalogCards } from '../lib/catalog-data'
 import { localBusinessSchema as buildLocalBusiness, websiteSchema } from '../lib/local-business-schema'
 import { PHONE, SITE } from '../config/site'
+import { brandTitle } from '../lib/seo-title'
+import { rub } from '../data/services'
+import { pluralRu } from '../lib/plural'
 import { getCollection } from 'astro:content'
 
 const faqItems = faqs.map(f => ({ q: f.question, a: f.answer }))
@@ -33,6 +36,16 @@ const promos = (await getCollection('promos')).map((e) => e.data)
 /* Каталог — блоку «Новинки и двери в наличии» (src/data/in-salon.ts):
    статусы, цвет на складе и адрес страницы модели */
 const { cards: catalogCards } = await getCatalogCards()
+/* Мета главной — под запросы «салон / магазин дверей в Москве»; «купить
+   межкомнатные двери» ведёт каталог (/catalog/). Название студии — в конце
+   заголовка и в названии сайта (WebSite, og:site_name): брендовый запрос
+   не теряется. Число моделей и цена «от» — из каталога */
+const modelPrices = catalogCards.map((c) => c.price).filter((p): p is number => typeof p === 'number' && p > 0)
+const modelsCount = `${catalogCards.length} ${pluralRu(catalogCards.length, ['модель', 'модели', 'моделей'])}`
+const homeTitle = brandTitle(`Салон дверей ${SITE.city.in}: межкомнатные и скрытые двери ${SITE.name}`)
+const homeDescription =
+  `Межкомнатные и скрытые двери ${SITE.name} ${SITE.city.in}: ${modelsCount} от ${rub(Math.min(...modelPrices))} за полотно. ` +
+  `Салон в ${SITE.address.mall} — образцы вживую, замер и установка.`
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -51,8 +64,8 @@ const localBusinessSchema = buildLocalBusiness()
 ---
 
 <BaseLayout
-  title={`${SITE.studioName} — межкомнатные и скрытые двери ${SITE.name} ${SITE.city.in}`}
-  description={`${SITE.studioName} — официальный дилер ${SITE.manufacturerOf} ${SITE.city.in}. Шоурум в ${SITE.address.mall}: межкомнатные и скрытые двери, перегородки, замер и монтаж.`}
+  title={homeTitle}
+  description={homeDescription}
   structuredData={[websiteSchema(), localBusinessSchema, faqSchema, howToSchema]}
   preloadImage={HERO_COVER_IMAGE}
   ogImage={HERO_COVER_IMAGE}

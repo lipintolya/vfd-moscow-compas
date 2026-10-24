@@ -62,7 +62,9 @@ const matchedCards = colorFilter
   ? cards
       .filter(c => colorFilter.coatingSlugs.includes(c.coatingSlug) && c.colorNames.some(matchesColor))
       .map(withMatchedColorFirst)
-  : cards.filter(c => category.seriesSlugs.includes(c.seriesSlug))
+  : category.glass
+    ? cards.filter(c => c.hasGlass)
+    : cards.filter(c => category.seriesSlugs.includes(c.seriesSlug))
 
 /* Фильтры — только из уже отобранной подборки. */
 const allSeries = [...new Map(
