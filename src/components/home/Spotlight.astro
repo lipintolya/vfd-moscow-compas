@@ -3,7 +3,8 @@
  * Блок-новинка на главной — перед «Статьями и публикациями». Всё — из
  * статьи с полем spotlight (src/content.config.ts): плашка, заголовок,
  * лид, 2–4 факта, вертикальное фото (ссылка на статью) и ролик с кнопкой
- * «плей» без автозапуска. Нет такой статьи — нет блока. Новая новинка —
+ * «плей» без автозапуска. Ролика нет — второй плиткой первое фото из
+ * галереи статьи (тоже ссылка на статью). Нет такой статьи — нет блока. Новая новинка —
  * новая статья со spotlight, компонент не меняется.
  */
 import InlineVideo from '../articles/InlineVideo.astro'
@@ -15,6 +16,9 @@ const article = await getSpotlight()
 const spot = article?.data.spotlight
 const href = article ? articleHref(article.id) : ''
 const author = article ? articleAuthor(article) : undefined
+type GalleryBlock = { type: 'gallery'; photos: { image: { src: string; srcset?: string; alt: string } }[] }
+const gallery = article?.data.blocks.find((b): b is GalleryBlock & typeof b => b.type === 'gallery') as GalleryBlock | undefined
+const secondPhoto = !spot?.video ? gallery?.photos[0]?.image : undefined
 ---
 
 {article && spot && (
@@ -37,10 +41,15 @@ const author = article ? articleAuthor(article) : undefined
         <a href={href} class="h-btn h-btn--ink spot__cta">Читать публикацию</a>
       </div>
 
-      <div class="spot__media">
+      <div class:list={['spot__media', { 'spot__media--photos': secondPhoto }]}>
         <a href={href} class="h-media spot__tile" aria-label={`Читать: ${article.data.title}`}>
           <img src={spot.image} srcset={spot.imageSrcset} sizes="(min-width: 62.5rem) 25vw, 46vw" alt={spot.imageAlt} loading="lazy" decoding="async" />
         </a>
+        {secondPhoto && (
+          <a href={href} class="h-media spot__tile" aria-label={`Читать: ${article.data.title}`}>
+            <img src={secondPhoto.src} srcset={secondPhoto.srcset} sizes="(min-width: 62.5rem) 25vw, 46vw" alt={secondPhoto.alt} loading="lazy" decoding="async" />
+          </a>
+        )}
         {spot.video && spot.poster && (
           <div class="spot__tile spot__tile--video">
             <InlineVideo src={spot.video} poster={spot.poster} title={spot.videoTitle ?? article.data.title} />
@@ -82,6 +91,9 @@ const author = article ? articleAuthor(article) : undefined
   /* Фото и ролик рядом, одной высоты — вертикальные 9:16 */
   .spot__media { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--h-tile-gap); }
   .spot__tile { aspect-ratio: 9 / 16; border-radius: var(--h-tile-radius); }
+  /* Два фото без ролика — пропорция фото 4:5: кадр целиком, подписи
+     инфографики не обрезаются (9:16 — под вертикальный ролик) */
+  .spot__media--photos .spot__tile { aspect-ratio: 4 / 5; }
   .spot__tile--video :global(.ivideo) { margin: 0; height: 100%; }
   .spot__tile--video :global(.ivideo__frame) { height: 100%; aspect-ratio: auto; border-radius: var(--h-tile-radius); }
 </style>
