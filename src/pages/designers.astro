@@ -22,7 +22,7 @@ import VisitBand from '../components/home/VisitBand.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import {
   DESIGNERS_HERO, DESIGNERS_INTRO, DESIGNER_BENEFITS, DESIGNERS_SHOWROOM, DESIGNER_STEPS,
-  DESIGNER_RANGE, DESIGNER_RANGE_MORE, DESIGNER_RESOURCES, DESIGNER_RESOURCES_LEAD, DESIGNER_RENDERS, DESIGNER_RENDERS_FEATURED,
+  DESIGNER_RANGE, DESIGNER_RANGE_MORE, DESIGNER_SOLUTIONS, DESIGNER_RESOURCES, DESIGNER_RESOURCES_LEAD, DESIGNER_RENDERS, DESIGNER_RENDERS_FEATURED,
   DESIGNERS_FAQ, RESOURCE_ACTION, resourceMeta, type ResourceType,
 } from '../data/designers-page'
 import { SITE, PHONE } from '../config/site'
@@ -33,10 +33,10 @@ import '../styles/home.css'
 
 const CALL = `tel:${PHONE.raw}`
 const pageUrl = new URL('/designers/', SITE.url).href
-const title = brandTitle(`Дизайнерам и архитекторам — шоурум ${SITE.name} ${SITE.city.in}`)
+const title = brandTitle(`Двери для дизайнеров и архитекторов ${SITE.city.in} — ${SITE.name}`)
 const description =
-  `Для дизайнеров и архитекторов: двери до 3 м под заказ, скрытые двери в наличии, ` +
-  `образцы и шоурум в ${SITE.address.mall} для встреч с заказчиками. Бонусы партнёрам.`
+  `Дизайнерам и архитекторам ${SITE.city.in}: двери до 3 м, скрытые под покраску, стеновые панели, ` +
+  `плинтус по RAL и NCS, перегородки. Шоурум в ${SITE.address.mall}, бонусы.`
 const heroCover = DESIGNERS_HERO.images[0]!
 const ogImage = new URL(heroCover.wide.srcset.split(', ').at(-1)!.split(' ')[0]!, SITE.url).href
 
@@ -295,6 +295,26 @@ const breadcrumbItems = [
         <ul class="ds-more" role="list" aria-label="Ещё разделы">
           {DESIGNER_RANGE_MORE.map((m) => (
             <li><a href={m.href} class="h-pill h-pill--line">{m.label}</a></li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    {/* Что подбираем под дизайн-проект — запросы дизайнеров, у каждого
+         пункта — ссылка на раздел */}
+    <section class="h-sec" aria-labelledby="ds-solutions-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ds-solutions-title" class="h-h2">{typograph(DESIGNER_SOLUTIONS.title)}</h2>
+          <p class="h-lead">{typograph(DESIGNER_SOLUTIONS.lead)}</p>
+        </header>
+        <ul class="ds-sol" role="list">
+          {DESIGNER_SOLUTIONS.items.map((s) => (
+            <li class="ds-sol__item">
+              <h3 class="h-h3 ds-sol__title">{typograph(s.title)}</h3>
+              <p class="h-body ds-sol__text">{typograph(s.text)}</p>
+              <a href={s.href} class="h-link ds-sol__link">Подробнее</a>
+            </li>
           ))}
         </ul>
       </div>
@@ -932,4 +952,12 @@ const breadcrumbItems = [
     .ds-range__media img, .ds-renders__item > img { transition: none; }
     .ds-range__card:hover .ds-range__media img, .ds-renders__item:hover > img { transform: none; }
   }
+
+  /* Что подбираем под дизайн-проект: пункты под линейками, 3 колонки на ПК */
+  .ds-sol { display: grid; gap: 2rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .ds-sol { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .ds-sol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .ds-sol__item { display: flex; flex-direction: column; padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
+  .ds-sol__text { margin-top: 0.625rem; color: var(--h-soft); }
+  .ds-sol__link { align-self: flex-start; margin-top: auto; padding-top: 0.875rem; }
 </style>

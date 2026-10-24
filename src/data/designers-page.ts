@@ -14,6 +14,11 @@ import { DOOR_SIZES } from './door-sizes'
 import { SECRET_STOCK_HEIGHTS } from './skrytye-dveri-products'
 import hero from './designers-hero.json'
 import { DIRECTION_PHOTOS } from './direction-photos'
+import { CUSTOM_MAX_HEIGHT } from './skrytye-dveri-products'
+import { PLINTUS_PAGE, PROFILES_COUNT, HEIGHT_RANGE } from './plintus'
+import { IMAGES as DECOR_IMAGES, HERO_IMAGE as DECOR_HERO } from './decor-products'
+import { PANEL_HOME_TILE } from './wall-panels-page'
+import { renderOf } from '../lib/wall-panels'
 import { VFD } from './vfd-factory'
 
 const hours = companyLegalInfo.workingHours.shortDisplay
@@ -148,15 +153,59 @@ export const DESIGNER_RANGE = [
   { title: 'Межкомнатные двери',      text: 'Эмаль, Эмалекс, ПЭТ, экошпон — серии и цвета каталога',       href: '/catalog/',              photo: DIRECTION_PHOTOS.interior,   position: '72% 50%' },
   { title: 'Скрытые двери',           text: `Заподлицо со стеной; в наличии ${stockList}`,                  href: '/catalog/skrytye-dveri/', photo: DIRECTION_PHOTOS.hidden,     position: '56% 50%' },
   { title: 'Алюминиевые перегородки', text: 'Раздвижные и стационарные конструкции со стеклом',           href: '/partitions/',            photo: DIRECTION_PHOTOS.partitions, position: '50% 50%' },
+  { title: 'Стеновые панели',          text: 'Натуральный шпон и покрытия дверей ВФД, двери заподлицо с панелями', href: '/catalog/stenovye-paneli/', photo: { src: renderOf(PANEL_HOME_TILE.visual)?.src ?? DIRECTION_PHOTOS.hidden.src, alt: PANEL_HOME_TILE.visual.alt }, position: '50% 55%' },
+  { title: 'Плинтус по RAL и NCS',     text: `Напольный из МДФ — ${PROFILES_COUNT}, скрытый, с подсветкой, микроплинтус`, href: '/catalog/plintus/', photo: { src: PLINTUS_PAGE.hero.src, alt: PLINTUS_PAGE.hero.alt }, position: '50% 65%' },
+  { title: 'Фальшфрамуга и декор',     text: 'Фальшфрамуга с компланарным коробом, рейки и плинтус в покрытиях дверей', href: '/catalog/decor/', photo: { src: DECOR_IMAGES.hero.src, alt: DECOR_HERO.alt }, position: '50% 50%' },
 ]
 export const DESIGNER_RANGE_MORE = [
-  { label: 'Стеновые панели',                 href: '/catalog/stenovye-paneli/' },
-  { label: 'Декор: плинтус, фрамуги, рейки', href: '/catalog/decor/' },
+  { label: 'Скрытые двери под покраску',      href: '/catalog/skrytye-dveri-dizayn-proekt/' },
+  { label: 'Перегородки ALUM',                href: '/partitions/alum/' },
+  { label: 'Двери со стеклом',                href: '/catalog/dveri-so-steklom/' },
   { label: 'Двери Эмалекс',                   href: '/catalog/dveri-emaleks/' },
   { label: 'Двери ПЭТ',                       href: '/catalog/dveri-pet/' },
   { label: 'Все серии',                       href: '/catalog/series/' },
   { label: 'Видео о дверях',                  href: '/video/' },
 ]
+
+/* Что подбираем под дизайн-проект — запросы дизайнеров (скрытые двери под
+   покраску, нестандартная высота, стеновые панели, плинтус по RAL/NCS,
+   перегородки, фальшфрамуга). Факты и числа — из данных разделов */
+export const DESIGNER_SOLUTIONS = {
+  title: `Двери, панели и плинтус под дизайн-проект ${SITE.city.in}`,
+  lead: 'Подбираем всё, что стоит в проёме и вдоль стены, в одной стилистике — и показываем вживую в шоуруме.',
+  items: [
+    {
+      title: 'Скрытые двери под покраску',
+      text: `Полотно красят в цвет стены по проекту, короб уходит под отделку. Высота до ${CUSTOM_MAX_HEIGHT} мм, в наличии ${stockList}.`,
+      href: '/catalog/skrytye-dveri-dizayn-proekt/',
+    },
+    {
+      title: 'Двери нестандартной высоты',
+      text: 'Межкомнатные двери до 3 метров — под высокие потолки и проёмы проекта. Размеры и сроки серии подскажем при расчёте.',
+      href: '/catalog/',
+    },
+    {
+      title: 'Стеновые панели в цвет дверей',
+      text: 'Изготавливаем панели из натурального шпона и в покрытиях дверей ВФД: стена и полотна в одном оттенке, скрытые двери заподлицо с панелями.',
+      href: '/catalog/stenovye-paneli/',
+    },
+    {
+      title: 'Плинтус по RAL и NCS',
+      text: `Напольный плинтус из МДФ — ${PROFILES_COUNT}, высота ${HEIGHT_RANGE}, красим по палитре RAL и NCS. Есть скрытый плинтус, микроплинтус и плинтус с подсветкой.`,
+      href: '/catalog/plintus/',
+    },
+    {
+      title: 'Алюминиевые перегородки',
+      text: 'Раздвижные, распашные и стационарные перегородки со стеклом: подберём профиль, стекло и раскладку под проём.',
+      href: '/partitions/',
+    },
+    {
+      title: 'Фальшфрамуга и декор',
+      text: 'Фальшфрамуга с компланарным коробом поднимает дверь до потолка, рейки и плинтус — в тех же покрытиях, что и двери.',
+      href: '/catalog/decor/',
+    },
+  ],
+}
 
 /* Материалы для проектирования. Что за ссылкой — проверено по самим
    страницам (2026-10-20): каталог — страница скачивания одного PDF;
@@ -234,6 +283,18 @@ export const DESIGNERS_FAQ = [
   {
     q: 'Есть ли скрытые двери в наличии?',
     a: `Да, двери скрытого монтажа популярных размеров — ${stockList} — стараемся держать в наличии, чтобы не ждать производства.`,
+  },
+  {
+    q: 'Делаете скрытые двери под покраску для дизайн-проекта?',
+    a: `Да. Полотно скрытой двери красят в цвет стены по проекту, высота — до ${CUSTOM_MAX_HEIGHT} мм. Популярные размеры (${stockList}) есть в наличии.`,
+  },
+  {
+    q: 'Можно сделать плинтус в цвет по RAL или NCS?',
+    a: `Да. Напольный плинтус из МДФ (${PROFILES_COUNT}, высота ${HEIGHT_RANGE}) красим по палитре RAL или NCS. Под проект есть и скрытый плинтус, микроплинтус, плинтус с подсветкой.`,
+  },
+  {
+    q: 'Есть ли стеновые панели в цвет дверей?',
+    a: 'Да. Изготавливаем стеновые панели из натурального шпона и в покрытиях дверей ВФД, двери встраиваем заподлицо с панелями. Стоимость считаем по проекту.',
   },
   {
     q: 'Где взять 3D-модели и чертежи?',
