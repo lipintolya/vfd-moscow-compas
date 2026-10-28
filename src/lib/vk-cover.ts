@@ -6,6 +6,7 @@
  */
 import sharp from 'sharp'
 import { readFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import path from 'node:path'
 import type { ModelEntry } from './model-entries'
 
@@ -21,9 +22,23 @@ export function coverSource(e: ModelEntry): string | undefined {
   return photo?.startsWith('/media/') ? photo : undefined
 }
 
+/** Файл исходника на диске (адрес в фиде закодирован: пробелы — %20) */
+const sourceFile = (photo: string) => path.join(process.cwd(), 'public', decodeURI(photo))
+
+/**
+ * Короткий хеш обложки: фото + настройки композиции. В адресе обложки он
+ * меняется вместе с картинкой, поэтому площадка скачивает её заново, а не
+ * показывает старую копию из прошлого импорта.
+ */
+export async function coverKey(photo: string): Promise<string> {
+  const hash = createHash('sha1')
+    .update(await readFile(sourceFile(photo)))
+    .update(`${COVER_SIZE}|${COVER_BG}|${DOOR_FILL}`)
+  return hash.digest('hex').slice(0, 10)
+}
+
 export async function composeCover(photo: string): Promise<Uint8Array> {
-  // Адрес в фиде закодирован (пробелы — %20), на диске имя обычное
-  const file = await readFile(path.join(process.cwd(), 'public', decodeURI(photo)))
+  const file = await readFile(sourceFile(photo))
   const door = await sharp(file)
     .resize({ height: Math.round(COVER_SIZE * DOOR_FILL), fit: 'inside' })
     .png()

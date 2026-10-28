@@ -22,7 +22,7 @@ import {
   feedOffers, assertUniqueIds, categoriesXml,
 } from '../../lib/feed-common'
 import type { ModelEntry } from '../../lib/model-entries'
-import { coverSource } from '../../lib/vk-cover'
+import { coverSource, coverKey } from '../../lib/vk-cover'
 
 /* Ограничения VK Маркета (справка «Импорт товаров») */
 const MAX_OFFERS = 15_000
@@ -31,17 +31,17 @@ const MAX_OFFERS = 15_000
 const PRICE_BASIS = 'за полотно, без коробки и наличников'
 
 /** Первое фото — обложка на квадрате с графитом (/feed/vk-covers/…), дальше — фото цветов */
-function pictureLines(e: ModelEntry, site: URL): string[] {
+function pictureLines(e: ModelEntry, site: URL, key: string | undefined): string[] {
   const cover = coverSource(e)
   const rest = [...new Set(e.colors.map(c => c.photo))].filter(src => src !== cover)
   const urls = [
-    ...(cover ? [new URL(`/feed/vk-covers/${offerId(e.model.id)}.jpg`, site).href] : []),
+    ...(cover && key ? [new URL(`/feed/vk-covers/${offerId(e.model.id)}-${key}.jpg`, site).href] : []),
     ...rest.map(src => new URL(src, site).href),
   ].slice(0, MAX_PICTURES)
   return urls.map(href => `        <picture>${xml(href)}</picture>`)
 }
 
-function offerXml(e: ModelEntry, site: URL): string {
+function offerXml(e: ModelEntry, site: URL, key: string | undefined): string {
   const spec     = getSeriesSpec(e.seriesSlug, e.coatingSlug)
   const trim     = describeTrim(e.model.trim)
   const params: [string, string, string?][] = [
@@ -60,7 +60,7 @@ function offerXml(e: ModelEntry, site: URL): string {
     `        <price>${Math.round(e.minPrice!)}</price>`,
     `        <currencyId>RUR</currencyId>`,
     `        <categoryId>${COATING_CATEGORY_IDS[e.coatingSlug] ?? ROOT_CATEGORY_ID}</categoryId>`,
-    ...pictureLines(e, site),
+    ...pictureLines(e, site, key),
     `        <description>${xml(productDescription(e))}</description>`,
     ...params.map(([name, value, unit]) =>
       `        <param name="${xml(name)}"${unit ? ` unit="${xml(unit)}"` : ''}>${xml(value)}</param>`),
@@ -84,6 +84,12 @@ export const GET: APIRoute = async ({ site }) => {
   }
   assertUniqueIds(offers, 'feed/vk.xml')
 
+  /* Хеш обложки — по каждому товару (см. lib/vk-cover.ts) */
+  const keys = new Map(await Promise.all(offers.map(async e => {
+    const src = coverSource(e)
+    return [e.model.id, src ? await coverKey(src) : undefined] as const
+  })))
+
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     `<yml_catalog date="${feedDate()}">`,
@@ -98,7 +104,7 @@ export const GET: APIRoute = async ({ site }) => {
     ...categoriesXml(offers, coatingInline),
     '    </categories>',
     '    <offers>',
-    ...offers.map(e => offerXml(e, base)),
+    ...offers.map(e => offerXml(e, base, keys.get(e.model.id))),
     '    </offers>',
     '  </shop>',
     '</yml_catalog>',
