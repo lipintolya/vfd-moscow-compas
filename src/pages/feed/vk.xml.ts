@@ -22,6 +22,7 @@ import {
   feedOffers, assertUniqueIds, categoriesXml,
 } from '../../lib/feed-common'
 import type { ModelEntry } from '../../lib/model-entries'
+import { coverSource } from '../../lib/vk-cover'
 
 /* Ограничения VK Маркета (справка «Импорт товаров») */
 const MAX_OFFERS = 15_000
@@ -29,10 +30,20 @@ const MAX_OFFERS = 15_000
 /* Цена в каталоге — за полотно: сказано в параметре, а не только в описании */
 const PRICE_BASIS = 'за полотно, без коробки и наличников'
 
+/** Первое фото — обложка на квадрате с графитом (/feed/vk-covers/…), дальше — фото цветов */
+function pictureLines(e: ModelEntry, site: URL): string[] {
+  const cover = coverSource(e)
+  const rest = [...new Set(e.colors.map(c => c.photo))].filter(src => src !== cover)
+  const urls = [
+    ...(cover ? [new URL(`/feed/vk-covers/${offerId(e.model.id)}.jpg`, site).href] : []),
+    ...rest.map(src => new URL(src, site).href),
+  ].slice(0, MAX_PICTURES)
+  return urls.map(href => `        <picture>${xml(href)}</picture>`)
+}
+
 function offerXml(e: ModelEntry, site: URL): string {
   const spec     = getSeriesSpec(e.seriesSlug, e.coatingSlug)
   const trim     = describeTrim(e.model.trim)
-  const pictures = [...new Set(e.colors.map(c => c.photo))].slice(0, MAX_PICTURES)
   const params: [string, string, string?][] = [
     ['Серия', e.seriesName],
     ['Покрытие', e.coatingName],
@@ -49,7 +60,7 @@ function offerXml(e: ModelEntry, site: URL): string {
     `        <price>${Math.round(e.minPrice!)}</price>`,
     `        <currencyId>RUR</currencyId>`,
     `        <categoryId>${COATING_CATEGORY_IDS[e.coatingSlug] ?? ROOT_CATEGORY_ID}</categoryId>`,
-    ...pictures.map(src => `        <picture>${xml(new URL(src, site).href)}</picture>`),
+    ...pictureLines(e, site),
     `        <description>${xml(productDescription(e))}</description>`,
     ...params.map(([name, value, unit]) =>
       `        <param name="${xml(name)}"${unit ? ` unit="${xml(unit)}"` : ''}>${xml(value)}</param>`),
