@@ -1,16 +1,14 @@
 ---
 /**
- * Карточка модели входной двери: дверь в рост (левая половина фото —
- * вид снаружи; при наведении кадр сдвигается на вид изнутри), название,
- * сталь и толщина, число вариантов отделки, цена «от» и две кнопки
- * связи с менеджером (Telegram, MAX). Вся карточка — ссылка на страницу модели (растянутая ссылка
- * на названии), кнопка цены лежит поверх неё.
+ * Карточка модели входной двери: дверь в рост (левая половина фото — вид
+ * снаружи; при наведении на компьютере кадр сдвигается на вид изнутри),
+ * название, сталь и толщина, число вариантов отделки и цена «от». Вся
+ * карточка — ссылка на страницу модели (растянутая ссылка на названии).
+ * Кнопок связи на карточке нет: они на странице модели и в блоке
+ * «Не нашли нужную отделку» — иначе их десятки одинаковых.
  */
 import { fromPrice } from '../../data/entrance-doors'
 import type { EntranceDoor } from '../../data/entrance-doors'
-import { telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
-import TelegramIcon from '../ui/TelegramIcon.vue'
-import MaxIcon from '../ui/MaxIcon.vue'
 import { typograph } from '../../lib/typograph'
 import { pluralRu } from '../../lib/plural'
 
@@ -25,22 +23,8 @@ const n = door.variants.length
     {n > 1 && <span class="dcard__count">{n} {pluralRu(n, ['вариант', 'варианта', 'вариантов'])} отделки</span>}
   </div>
   <h3 class="dcard__name"><a class="dcard__link" href={door.href}>{typograph(door.name)}</a></h3>
-  <p class="dcard__chips">{door.chips.slice(0, 2).join(', ')}</p>
-  <div class="dcard__foot">
-    <p class="dcard__price">{fromPrice(door)}</p>
-    <span class="dcard__asks">
-      {TELEGRAM_CHAT && (
-        <a class="dcard__ask" href={telegramWithText(door.request)} target="_blank" rel="noopener" aria-label={`Написать менеджеру про ${door.title} в Telegram`} title="Написать в Telegram">
-          <TelegramIcon class="dcard__ico" tone="dark" />
-        </a>
-      )}
-      {MAX_CHAT && (
-        <a class="dcard__ask" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(door.request)} aria-label={`Написать менеджеру про ${door.title} в MAX (текст скопируется)`} title="Написать в MAX">
-          <MaxIcon class="dcard__ico" tone="dark" />
-        </a>
-      )}
-    </span>
-  </div>
+  <p class="dcard__chips">{door.chips.slice(0, 2).map((c, i, a) => <><span>{i < a.length - 1 ? `${c},` : c}</span>{' '}</>)}</p>
+  <p class="dcard__price">{fromPrice(door)}</p>
 </article>
 
 <style>
@@ -76,23 +60,9 @@ const n = door.variants.length
   .dcard__link:focus-visible { outline: none; }
   .dcard:has(.dcard__link:focus-visible) .dcard__photo { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   .dcard__chips { margin: 0; font-size: 0.875rem; line-height: 1.35; color: var(--h-soft); }
-  .dcard__foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.625rem; }
-  .dcard__price { margin: 0; font-size: 1.125rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
-  .dcard__asks { display: inline-flex; gap: 0.375rem; }
-  .dcard__ask {
-    position: relative; /* над растянутой ссылкой карточки */
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 999rem;
-    background: var(--h-ink);
-    transition: background-color 200ms var(--ease-out);
-  }
-  .dcard__ask:hover { background: var(--color-slate-700); }
-  .dcard__ask :global(.dcard__ico) { width: 1.125rem; height: 1.125rem; }
+  /* Признаки не рвём посреди («Толщина 115 / мм»): переносится целиком */
+  .dcard__chips span { display: inline-block; white-space: nowrap; }
+  .dcard__price { margin: 0.375rem 0 0; font-size: 1.1875rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
   @media (prefers-reduced-motion: reduce) { .dcard__photo img { transition: none; } }
   /* На телефоне подписи плотнее: две карточки в ряд */
   @media (max-width: 43.6875rem) {

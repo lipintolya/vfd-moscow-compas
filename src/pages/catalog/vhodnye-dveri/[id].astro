@@ -110,8 +110,11 @@ const faqSchema = {
         </div>
 
         <aside class="edm__panel">
-          <p class="edm__kind"><a href={`/catalog/vhodnye-dveri/#doors-${group.id}`}>{group.nav}</a></p>
-          <h1 id="door-title" class="h-h1 edm__title">{typograph(door.title)}</h1>
+          <div class="edm__head">
+            <p class="edm__kind"><a href={`/catalog/vhodnye-dveri/#doors-${group.id}`}>{group.nav}</a></p>
+            <h1 id="door-title" class="h-h1 edm__title">{typograph(door.title)}</h1>
+            <p class="edm__from-m">{fromPrice(door)}</p>
+          </div>
           <dl class="edm__facts">
             {door.facts.map((f) => (
               <div class="edm__fact"><dt>{f.label}</dt><dd>{typograph(f.value)}</dd></div>
@@ -230,6 +233,19 @@ const faqSchema = {
   .edm__thumb:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   .edm__more { margin: 0.75rem 0 0; font-size: 0.875rem; color: var(--h-muted); }
 
+  /* Телефон: название и цена — над фото, характеристики и кнопки — под ним (display: contents
+     разбирает панель на части, порядок задаёт order) */
+  .edm__panel { display: contents; }
+  .edm__head { order: 1; }
+  .edm__gallery { order: 2; }
+  .edm__facts { order: 3; }
+  .edm__buy { order: 4; }
+  .edm__from-m { margin: 0.5rem 0 0; font-size: 1.625rem; font-weight: 600; line-height: 1.1; color: var(--h-ink); font-variant-numeric: tabular-nums; }
+  @media (min-width: 62.5rem) {
+    .edm__panel { display: block; }
+    .edm__head, .edm__gallery, .edm__facts, .edm__buy { order: 0; }
+    .edm__from-m { display: none; }
+  }
   .edm__kind { margin: 0 0 0.5rem; font-size: 0.875rem; }
   .edm__kind a { color: var(--h-muted); text-decoration: none; }
   .edm__kind a:hover { color: var(--h-signal); }
@@ -240,6 +256,8 @@ const faqSchema = {
   .edm__fact dd { margin: 0.125rem 0 0; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; color: var(--h-ink); }
   .edm__buy { display: grid; gap: 1rem; margin-top: 1.5rem; padding: 1.25rem; border-radius: var(--h-radius); background: var(--h-wall); }
   .edm__buy :global(.dreq__btn) { padding-inline: 1rem; }
+  /* На телефоне цена уже стоит под названием */
+  @media (max-width: 62.4375rem) { .edm__from { display: none; } }
   .edm__from { margin: 0; font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 600; line-height: 1.1; color: var(--h-ink); font-variant-numeric: tabular-nums; }
   .edm__price-note { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
 

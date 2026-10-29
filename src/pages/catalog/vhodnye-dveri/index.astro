@@ -31,6 +31,8 @@ const total = ENTRANCE_DOORS.length
 const faq = [...ENTRANCE_FAQ, ...GUIDE_FAQ]
 /* Сколько моделей группы видно сразу (два ряда по четыре); остальные — по кнопке */
 const SHOWN = 8
+/* На телефоне — два ряда по две: страница не превращается в километровую ленту */
+const SHOWN_PHONE = 4
 const searchOf = (d: (typeof ENTRANCE_DOORS)[number]) => [d.name, ...d.variants.map((v) => v.name)].join(' ').toLowerCase()
 
 const faqSchema = {
@@ -91,8 +93,11 @@ const listSchema = {
 
     <PickDoor />
 
-    <div class="edcat">
-    <div id="doors-pick" class="edb container" role="search">
+    <div id="doors-pick" class="edcat">
+      <p class="edreset container" data-reset hidden>
+        <button type="button" class="h-btn h-btn--quiet">Показаны не все модели — показать все</button>
+      </p>
+    <div class="edb container" role="search">
       <div class="edb__in">
         <div class="edb__chips" role="group" aria-label="Тип двери">
           <button type="button" class="edb__chip" data-filter="all" aria-pressed="true">Все <span>{total}</span></button>
@@ -120,10 +125,10 @@ const listSchema = {
             <p class="edg-head__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}, от&nbsp;{rub(g.from)}</p>
           </header>
           <ul class="edg" role="list">
-            {g.doors.map((d, i) => <li data-search={searchOf(d)} data-extra={i >= SHOWN ? '' : undefined}><DoorCard door={d} /></li>)}
+            {g.doors.map((d, i) => <li data-search={searchOf(d)} data-xd={i >= SHOWN ? '' : undefined} data-xp={i >= SHOWN_PHONE ? '' : undefined}><DoorCard door={d} /></li>)}
           </ul>
-          {g.doors.length > SHOWN && (
-            <p class="edg-more"><button type="button" class="h-btn h-btn--quiet" data-more aria-expanded="false">Показать все {g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}</button></p>
+          {g.doors.length > SHOWN_PHONE && (
+            <p class="edg-more" data-short={g.doors.length <= SHOWN ? '' : undefined}><button type="button" class="h-btn h-btn--quiet" data-more aria-expanded="false">Показать все {g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}</button></p>
           )}
         </div>
       </section>
@@ -169,6 +174,7 @@ const listSchema = {
   const empty = document.getElementById('doors-empty')!
   const status = document.getElementById('edb-status')!
   const page = document.querySelector<HTMLElement>('.home')!
+  const reset = document.querySelector<HTMLElement>('[data-reset]')!
   let group = 'all'
 
   function apply() {
@@ -181,6 +187,7 @@ const listSchema = {
       if (ok) shown++
     }
     page.classList.toggle('is-filtering', group !== 'all' || !!q)
+    reset.hidden = group === 'all' && !q
     for (const s of sections) s.hidden = !s.querySelector('li[data-search]:not([hidden])')
     empty.hidden = shown > 0
     status.textContent = `Найдено моделей: ${shown}`
@@ -203,6 +210,10 @@ const listSchema = {
       if (first && first.getBoundingClientRect().top < 0) first.scrollIntoView({ block: 'start' })
     })
   }
+  reset.querySelector('button')!.addEventListener('click', () => {
+    input.value = ''
+    setGroup('all', false)
+  })
   document.addEventListener('doors:filter', (e) => setGroup((e as CustomEvent<{ group: string }>).detail.group, true))
   input.addEventListener('input', apply)
 
@@ -268,6 +279,11 @@ const listSchema = {
   }
 
   /* Панель выбора: липнет под шапкой */
+  /* Панель выбора — только на компьютере; на телефоне фильтрует подбор и «Показать модели» */
+  .edb { display: none; }
+  @media (min-width: 62.5rem) { .edb { display: block; } }
+  .edreset { margin: 1.5rem auto 0; }
+  .edreset[hidden] { display: none; }
   /* Липкая панель по ширине контейнера — ровно как блоки страницы */
   .edb { position: sticky; top: calc(var(--header-height) + 0.5rem); z-index: 5; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
   .edb__in {
@@ -332,8 +348,11 @@ const listSchema = {
   .edg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem 0.875rem; margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .edg { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.25rem 1.75rem; } }
   @media (min-width: 62.5rem) { .edg { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3.5rem 2rem; } }
-  .edg li[data-extra] { display: none; }
-  .edg.is-open li[data-extra], :global(.is-filtering) .edg li[data-extra] { display: block; }
+  /* Что скрыто до «Показать все»: на телефоне всё с пятой модели, на компьютере — с девятой */
+  .edg li[data-xp] { display: none; }
+  @media (min-width: 43.75rem) { .edg li[data-xp] { display: block; } .edg li[data-xd] { display: none; } }
+  .edg.is-open li, :global(.is-filtering) .edg li { display: block; }
+  @media (min-width: 43.75rem) { .edg-more[data-short] { display: none; } }
   .edg-more { display: flex; justify-content: center; margin: clamp(2.5rem, 5vw, 3.5rem) 0 0; }
   :global(.is-filtering) .edg-more { display: none; }
 
