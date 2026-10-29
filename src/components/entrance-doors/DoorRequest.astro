@@ -1,7 +1,7 @@
 ---
 /**
- * «Узнать цену» входной двери: Telegram и MAX с готовым текстом, кнопки
- * графитовые (цены на сайте нет — её называет менеджер). data-ask — крючки
+ * Связь по входной двери: Telegram и MAX с готовым текстом, кнопки
+ * графитовые (цена «от» на странице есть, точную сумму называет менеджер). data-ask — крючки
  * для страницы модели: при выборе отделки скрипт подменяет ссылку Telegram
  * и текст для MAX, чтобы менеджер получил название отделки.
  */
@@ -15,13 +15,13 @@ const { text } = Astro.props
 
 <div class="dreq">
   {TELEGRAM_CHAT && (
-    <a class="h-btn h-btn--ink dreq__btn" data-ask="tg" href={telegramWithText(text)} target="_blank" rel="noopener" aria-label={`Узнать цену в Telegram: @${TELEGRAM_CHAT}`}>
-      <TelegramIcon class="dreq__ico" tone="dark" />Цена в Telegram
+    <a class="h-btn h-btn--ink dreq__btn" data-ask="tg" href={telegramWithText(text)} target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+      <TelegramIcon class="dreq__ico" tone="dark" />Написать в Telegram
     </a>
   )}
   {MAX_CHAT && (
-    <a class="h-btn h-btn--ink dreq__btn" data-ask="max" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(text)} aria-label="Узнать цену в MAX (текст скопируется)">
-      <MaxIcon class="dreq__ico" tone="dark" />Цена в MAX
+    <a class="h-btn h-btn--ink dreq__btn" data-ask="max" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(text)} aria-label="Написать в MAX (текст скопируется)">
+      <MaxIcon class="dreq__ico" tone="dark" />Написать в MAX
     </a>
   )}
 </div>
@@ -31,6 +31,6 @@ const { text } = Astro.props
   .dreq__btn { gap: 0.5rem; }
   .dreq__btn :global(.dreq__ico) { width: 1.25rem; height: 1.25rem; }
   @media (max-width: 43.6875rem) {
-    .dreq { display: grid; grid-template-columns: 1fr 1fr; }
+    .dreq { display: grid; grid-template-columns: 1fr; }
   }
 </style>

@@ -3,7 +3,7 @@
  * Страница модели входной двери (/catalog/vhodnye-dveri/<id>/): слева крупное
  * фото «снаружи и изнутри» и ряд вариантов отделки — выбор меняет фото, подпись
  * и текст сообщения менеджеру (в нём название отделки); справа главные
- * параметры и «Узнать цену» в мессенджерах. Ниже — полная таблица
+ * параметры, цена «от» и кнопки связи (Telegram, MAX). Ниже — полная таблица
  * характеристик, соседние модели, вопросы. Данные — src/data/entrance-doors.ts.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
@@ -12,12 +12,13 @@ import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
 import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
-import { ENTRANCE_DOORS, ENTRANCE_FAQ, DOOR_GROUPS, doorsOfGroup, doorTitle, doorDescription } from '../../../data/entrance-doors'
+import { ENTRANCE_DOORS, ENTRANCE_FAQ, DOOR_GROUPS, doorsOfGroup, doorTitle, doorDescription, fromPrice } from '../../../data/entrance-doors'
 import type { EntranceDoor } from '../../../data/entrance-doors'
-import { productSchemaNoPrice } from '../../../lib/product-schema'
+import { productSchemaFrom } from '../../../lib/product-schema'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { telegramWithText, maxWithText } from '../../../lib/messengers'
 import { SITE } from '../../../config/site'
+import { rub } from '../../../data/services'
 import { typograph } from '../../../lib/typograph'
 import '../../../styles/home.css'
 
@@ -36,7 +37,7 @@ const at = same.findIndex((d) => d.id === door.id)
 const related = [1, 2, 3, 4].map((n) => same[(at + n) % same.length]!).filter((d, i, a) => d.id !== door.id && a.indexOf(d) === i)
 const large = JSON.stringify(door.variants.map((v) => ({ src: v.image.large, alt: v.image.alt })))
 /* Текст менеджеру — с названием выбранной отделки */
-const askText = (name: string) => `Хочу узнать цену на входную дверь «${door.name}», отделка: ${name}.`
+const askText = (name: string) => `Интересует входная дверь «${door.name}», отделка: ${name}. Подскажите, пожалуйста, цену и сроки.`
 const asks = JSON.stringify(door.variants.map((v) => ({ tg: telegramWithText(askText(v.name)), max: maxWithText(askText(v.name)) })))
 const first = door.variants[0]!
 const faq = ENTRANCE_FAQ.slice(0, 3)
@@ -55,7 +56,7 @@ const faqSchema = {
   preloadImage={door.cover.src}
   structuredData={[
     localBusinessSchema({ url: SITE.url }),
-    productSchemaNoPrice({ name: door.title, description, image: door.cover.large, url: door.href }),
+    productSchemaFrom({ name: door.title, description, image: door.cover.large, url: door.href, from: door.from }),
     faqSchema,
   ]}
 >
@@ -82,7 +83,7 @@ const faqSchema = {
 
           {multi && (
             <div class="edm__finish">
-              <p class="edm__finish-name" data-finish aria-live="polite">Отделка: <b>{typograph(first.name)}</b></p>
+              <p class="edm__finish-name" data-finish aria-live="polite"><span>Отделка: <b>{typograph(first.name)}</b></span><span data-finish-price>{rub(first.price)}</span></p>
               <ul class="edm__thumbs" role="list" aria-label="Варианты отделки">
                 {door.variants.map((v, i) => (
                   <li>
@@ -94,6 +95,7 @@ const faqSchema = {
                       data-srcset={v.image.srcset}
                       data-alt={v.image.alt}
                       data-name={v.name}
+                      data-price={rub(v.price)}
                       aria-pressed={i === 0 ? 'true' : 'false'}
                       aria-label={`Отделка: ${v.name}`}
                     >
@@ -118,14 +120,15 @@ const faqSchema = {
             <div class="edm__fact"><dt>Открывание</dt><dd>{door.opening}</dd></div>
           </dl>
           <div class="edm__buy">
-            <p class="edm__price">Цена по запросу <span>— зависит от отделки и комплектации, менеджер назовёт её в Telegram или MAX.</span></p>
+            <p class="edm__from">{fromPrice(door)}</p>
+            <p class="edm__price-note">«От» — минимальная цена модели по каталогу завода{multi ? '; цена выбранной отделки — под фото' : ''}. Итог зависит от замков и комплектации — точную сумму подтвердит менеджер.</p>
             <DoorRequest text={askText(first.name)} />
           </div>
         </aside>
       </div>
     </section>
 
-    <section class="h-sec h-sec--tight-top" aria-labelledby="door-spec">
+    <section class="h-sec h-sec--wall" aria-labelledby="door-spec">
       <div class="container">
         <h2 id="door-spec" class="h-h2 edm__h2">Характеристики</h2>
         <p class="h-body edm__note">Отделка снаружи и изнутри зависит от выбранного варианта, остальное — общее для модели.</p>
@@ -138,7 +141,7 @@ const faqSchema = {
     </section>
 
     {related.length > 0 && (
-      <section class="h-sec h-sec--tight-top" aria-labelledby="door-related">
+      <section class="h-sec" aria-labelledby="door-related">
         <div class="container">
           <h2 id="door-related" class="h-h2 edm__h2">Другие модели: {group.nav.toLowerCase()}</h2>
           <ul class="edr" role="list">
@@ -149,7 +152,7 @@ const faqSchema = {
       </section>
     )}
 
-    <section class="h-sec" aria-labelledby="door-faq-title">
+    <section class="h-sec h-sec--wall" aria-labelledby="door-faq-title">
       <div class="container h-faq">
         <h2 id="door-faq-title" class="h-h2">Частые вопросы</h2>
         <FaqAccordion items={faq} title={false} />
@@ -169,6 +172,7 @@ const faqSchema = {
     const main = gallery.querySelector<HTMLButtonElement>('[data-main]')!
     const img = main.querySelector('img')!
     const label = gallery.querySelector<HTMLElement>('[data-finish] b')
+    const priceEl = gallery.querySelector<HTMLElement>('[data-finish-price]')
     const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>('[data-thumb]')]
     const link = (k: string) => gallery.querySelector<HTMLAnchorElement>(`[data-ask="${k}"]`)
 
@@ -178,6 +182,7 @@ const faqSchema = {
       img.alt = t.dataset.alt!
       main.dataset.lightboxIndex = String(i)
       if (label) label.textContent = t.dataset.name!
+      if (priceEl) priceEl.textContent = t.dataset.price!
       thumbs.forEach((x) => x.setAttribute('aria-pressed', String(x === t)))
       const a = asks[i]
       if (!a) return
@@ -214,8 +219,9 @@ const faqSchema = {
   .edm__sides span { text-align: center; }
 
   .edm__finish { margin-top: 1.5rem; }
-  .edm__finish-name { margin: 0 0 0.75rem; color: var(--h-soft); }
+  .edm__finish-name { display: flex; flex-wrap: wrap; gap: 0.125rem 0.75rem; margin: 0 0 0.75rem; color: var(--h-soft); }
   .edm__finish-name b { color: var(--h-ink); font-weight: 600; }
+  .edm__finish-name [data-finish-price] { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
   .edm__thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .edm__thumbs { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
   .edm__thumb { display: block; width: 100%; padding: 0; border: 0.125rem solid transparent; border-radius: 0.625rem; aspect-ratio: 1000 / 868; cursor: pointer; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; transition: border-color 200ms var(--ease-out); }
@@ -234,8 +240,8 @@ const faqSchema = {
   .edm__fact dd { margin: 0.125rem 0 0; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; color: var(--h-ink); }
   .edm__buy { display: grid; gap: 1rem; margin-top: 1.5rem; padding: 1.25rem; border-radius: var(--h-radius); background: var(--h-wall); }
   .edm__buy :global(.dreq__btn) { padding-inline: 1rem; }
-  .edm__price { margin: 0; font-weight: 600; color: var(--h-ink); }
-  .edm__price span { font-weight: 400; color: var(--h-soft); }
+  .edm__from { margin: 0; font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 600; line-height: 1.1; color: var(--h-ink); font-variant-numeric: tabular-nums; }
+  .edm__price-note { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
 
   .edm__h2 { margin: 0; }
   .edm__note { margin: 0.75rem 0 0; max-width: 44rem; color: var(--h-soft); }

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
 import {
   ENTRANCE_DOORS, ENTRANCE_PAGE, ENTRANCE_FAQ, DOOR_GROUPS, doorTitle, doorDescription, VARIANTS_SHOWN,
+  ENTRANCE_MIN_PRICE, doorsOfGroup, fromPrice,
 } from '../src/data/entrance-doors'
 import { TITLE_MAX, DESCRIPTION_MAX } from '../src/lib/product-text'
 import { brandTitle } from '../src/lib/seo-title'
@@ -23,13 +24,24 @@ test('входные двери: название завода нигде не �
   for (const t of texts) assert.doesNotMatch(t, BRAND, t)
 })
 
-test('входные двери: цен на сайте нет — только «по запросу»', () => {
-  const texts = [
-    ENTRANCE_PAGE.description, ENTRANCE_PAGE.lead,
-    ...ENTRANCE_FAQ.map((f) => f.a),
-    ...ENTRANCE_DOORS.flatMap((d) => [doorDescription(d), ...d.specs.map((s) => s.value), ...d.variants.map((v) => v.name)]),
-  ]
-  for (const t of texts) assert.doesNotMatch(t, /\d[\d\s]*\s?(₽|руб)/i, t)
+test('входные двери: цена «от» у каждой модели и не выше цены любой показанной отделки', () => {
+  for (const d of ENTRANCE_DOORS) {
+    assert.ok(d.from >= 20_000 && d.from <= 200_000, `${d.id}: ${d.from}`)
+    for (const v of d.variants) assert.ok(v.price >= d.from, `${d.id}: «${v.name}» ${v.price} < «от» ${d.from}`)
+  }
+  assert.equal(ENTRANCE_MIN_PRICE, Math.min(...ENTRANCE_DOORS.map((d) => d.from)))
+  // в группе — от дешёвых к дорогим
+  for (const g of DOOR_GROUPS) {
+    const p = doorsOfGroup(g.id).map((d) => d.from)
+    assert.deepEqual(p, [...p].sort((x, y) => x - y), g.id)
+  }
+})
+
+test('входные двери: в текстах цена только «от», без «по запросу»', () => {
+  const texts = [ENTRANCE_PAGE.title, ENTRANCE_PAGE.description, ENTRANCE_PAGE.lead, ...ENTRANCE_FAQ.map((f) => f.a), ...ENTRANCE_DOORS.map((d) => doorTitle(d)), ...ENTRANCE_DOORS.map((d) => doorDescription(d))]
+  for (const t of texts) assert.doesNotMatch(t, /по запросу|узнать цену/i, t)
+  assert.match(ENTRANCE_PAGE.title, /цены от/)
+  for (const d of ENTRANCE_DOORS) assert.match(fromPrice(d), /^от\u00a0[\d\u00a0\s]+₽$/)
 })
 
 test('входные двери: заголовки и описания — в лимитах поисковика и без повторов', () => {

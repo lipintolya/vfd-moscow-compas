@@ -4,7 +4,7 @@
  * тремя дверями в рост, под ним — панель выбора (группы + поиск по названию
  * и отделке, липкая при прокрутке) и модели по группам: для квартиры,
  * с терморазрывом, с электронным замком, со стеклопакетом. Карточка — дверь
- * в рост, число вариантов отделки, «Узнать цену» в Telegram и MAX. У каждой модели
+ * в рост, число вариантов отделки, цена «от» и кнопки Telegram и MAX. У каждой модели
  * своя страница ([id].astro). Цен нет — менеджер называет их в мессенджерах.
  * Данные и тексты — src/data/entrance-doors.ts.
  */
@@ -14,16 +14,19 @@ import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
 import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
-import { DOOR_GROUPS, doorsOfGroup, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS, ENTRANCE_SHOWCASE } from '../../../data/entrance-doors'
+import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS, ENTRANCE_SHOWCASE } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
+import { rub } from '../../../data/services'
 import { typograph } from '../../../lib/typograph'
 import { pluralRu } from '../../../lib/plural'
 import '../../../styles/home.css'
 
 const { hero } = ENTRANCE_PAGE
-const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id) })).filter((g) => g.doors.length)
+const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
+/* Сколько моделей группы видно сразу (два ряда по четыре); остальные — по кнопке */
+const SHOWN = 8
 const searchOf = (d: (typeof ENTRANCE_DOORS)[number]) => [d.name, ...d.variants.map((v) => v.name)].join(' ').toLowerCase()
 
 const faqSchema = {
@@ -99,16 +102,22 @@ const listSchema = {
 
     <p id="edb-status" class="sr-only" role="status" aria-live="polite"></p>
 
-    {groups.map((g) => (
-      <section id={`doors-${g.id}`} class="h-sec edg-sec" data-section={g.id} aria-labelledby={`doors-${g.id}-title`}>
+    {groups.map((g, gi) => (
+      <section id={`doors-${g.id}`} class:list={['h-sec', 'edg-sec', { 'h-sec--wall': gi % 2 === 1 }]} data-section={g.id} aria-labelledby={`doors-${g.id}-title`}>
         <div class="container">
           <header class="edg-head">
-            <h2 id={`doors-${g.id}-title`} class="h-h2">{typograph(g.title)}</h2>
-            <p class="h-body edg-head__note">{typograph(g.lead)}</p>
+            <div class="edg-head__text">
+              <h2 id={`doors-${g.id}-title`} class="h-h2">{typograph(g.title)}</h2>
+              <p class="h-body edg-head__note">{typograph(g.lead)}</p>
+            </div>
+            <p class="edg-head__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}, от&nbsp;{rub(g.from)}</p>
           </header>
           <ul class="edg" role="list">
-            {g.doors.map((d) => <li data-search={searchOf(d)}><DoorCard door={d} /></li>)}
+            {g.doors.map((d, i) => <li data-search={searchOf(d)} data-extra={i >= SHOWN ? '' : undefined}><DoorCard door={d} /></li>)}
           </ul>
+          {g.doors.length > SHOWN && (
+            <p class="edg-more"><button type="button" class="h-btn h-btn--quiet" data-more aria-expanded="false">Показать все {g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}</button></p>
+          )}
         </div>
       </section>
     ))}
@@ -116,7 +125,7 @@ const listSchema = {
     <section id="doors-empty" class="h-sec edg-sec" hidden aria-live="polite">
       <div class="container">
         <p class="h-lead">По запросу ничего не нашлось. Сбросьте поиск или напишите менеджеру — подберём дверь по вашему описанию.</p>
-        <DoorRequest text="Хочу подобрать входную дверь." />
+        <DoorRequest text="Подберите, пожалуйста, входную дверь по моему описанию." />
       </div>
     </section>
 
@@ -125,9 +134,9 @@ const listSchema = {
         <div class="edc">
           <div>
             <h2 id="doors-help" class="h-h2 edc__title">Не нашли нужную отделку?</h2>
-            <p class="h-body edc__text">У каждой модели десятки вариантов цвета и рисунка панели — на сайте самые ходовые. Напишите, что хотите, менеджер пришлёт фото и назовёт цену.</p>
+            <p class="h-body edc__text">У каждой модели десятки вариантов цвета и рисунка панели — на сайте самые ходовые. Напишите, что хотите, — менеджер пришлёт фото и назовёт точную цену.</p>
           </div>
-          <DoorRequest text="Хочу подобрать входную дверь. Отделка: " />
+          <DoorRequest text="Подберите, пожалуйста, входную дверь. Нужная отделка: " />
         </div>
       </div>
     </section>
@@ -149,6 +158,7 @@ const listSchema = {
   const items = [...document.querySelectorAll<HTMLElement>('li[data-search]')]
   const empty = document.getElementById('doors-empty')!
   const status = document.getElementById('edb-status')!
+  const page = document.querySelector<HTMLElement>('.home')!
   let group = 'all'
 
   function apply() {
@@ -160,6 +170,7 @@ const listSchema = {
       li.hidden = !ok
       if (ok) shown++
     }
+    page.classList.toggle('is-filtering', group !== 'all' || !!q)
     for (const s of sections) s.hidden = !s.querySelector('li[data-search]:not([hidden])')
     empty.hidden = shown > 0
     status.textContent = `Найдено моделей: ${shown}`
@@ -176,6 +187,13 @@ const listSchema = {
     })
   }
   input.addEventListener('input', apply)
+
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-more]')) {
+    btn.addEventListener('click', () => {
+      btn.closest('section')!.querySelector('.edg')!.classList.add('is-open')
+      btn.closest('.edg-more')!.remove()
+    })
+  }
 </script>
 
 <style>
@@ -276,16 +294,23 @@ const listSchema = {
     .edb__chips { margin-inline: 0; padding-inline: 0; flex-wrap: wrap; overflow: visible; }
   }
 
-  .edg-sec { padding-block: clamp(2rem, 4vw, 3.5rem) 0; }
-  .edg-sec[hidden], .edg li[hidden] { display: none; }
-  .edg-head { display: grid; gap: 0.5rem; margin-bottom: clamp(1.25rem, 3vw, 2rem); }
+  /* Группы — отдельные полосы с воздухом: заголовок, пояснение и счётчик, ниже модели */
+  .edg-sec[hidden], .edg li[hidden] { display: none !important; }
+  .edg-head { display: grid; gap: 0.75rem 2rem; margin-bottom: clamp(2rem, 4vw, 3rem); }
+  .edg-head__text { display: grid; gap: 0.75rem; max-width: 44rem; }
   .edg-head :global(h2), .edg-head__note { margin: 0; }
-  .edg-head__note { max-width: 44rem; color: var(--h-soft); }
+  .edg-head__note { color: var(--h-soft); }
+  .edg-head__meta { margin: 0; align-self: end; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
+  @media (min-width: 62.5rem) { .edg-head { grid-template-columns: minmax(0, 1fr) auto; align-items: end; } }
 
-  /* Модели: телефон 2 в ряд, планшет 3, ПК 4 */
-  .edg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 0.75rem; margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .edg { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.25rem var(--h-gutter); } }
-  @media (min-width: 62.5rem) { .edg { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  /* Модели: телефон 2 в ряд, планшет 3, ПК 4; после первых двух рядов — «Показать все» */
+  .edg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem 0.875rem; margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .edg { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.25rem 1.75rem; } }
+  @media (min-width: 62.5rem) { .edg { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3.5rem 2rem; } }
+  .edg li[data-extra] { display: none; }
+  .edg.is-open li[data-extra], :global(.is-filtering) .edg li[data-extra] { display: block; }
+  .edg-more { display: flex; justify-content: center; margin: clamp(2.5rem, 5vw, 3.5rem) 0 0; }
+  :global(.is-filtering) .edg-more { display: none; }
 
   .edc {
     display: grid;

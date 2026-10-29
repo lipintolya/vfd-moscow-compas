@@ -2,10 +2,11 @@
 /**
  * Карточка модели входной двери: дверь в рост (левая половина фото —
  * вид снаружи; при наведении кадр сдвигается на вид изнутри), название,
- * сталь и толщина, число вариантов отделки и кнопка «Узнать цену» прямо
- * на карточке. Вся карточка — ссылка на страницу модели (растянутая ссылка
+ * сталь и толщина, число вариантов отделки, цена «от» и две кнопки
+ * связи с менеджером (Telegram, MAX). Вся карточка — ссылка на страницу модели (растянутая ссылка
  * на названии), кнопка цены лежит поверх неё.
  */
+import { fromPrice } from '../../data/entrance-doors'
 import type { EntranceDoor } from '../../data/entrance-doors'
 import { telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
 import TelegramIcon from '../ui/TelegramIcon.vue'
@@ -26,15 +27,15 @@ const n = door.variants.length
   <h3 class="dcard__name"><a class="dcard__link" href={door.href}>{typograph(door.name)}</a></h3>
   <p class="dcard__chips">{door.chips.slice(0, 2).join(', ')}</p>
   <div class="dcard__foot">
-    <span class="dcard__price">Цена по запросу</span>
+    <p class="dcard__price">{fromPrice(door)}</p>
     <span class="dcard__asks">
       {TELEGRAM_CHAT && (
-        <a class="dcard__ask" href={telegramWithText(door.request)} target="_blank" rel="noopener" aria-label={`Узнать цену на ${door.title} в Telegram`}>
-          <TelegramIcon class="dcard__ico" tone="dark" />Узнать цену
+        <a class="dcard__ask" href={telegramWithText(door.request)} target="_blank" rel="noopener" aria-label={`Написать менеджеру про ${door.title} в Telegram`} title="Написать в Telegram">
+          <TelegramIcon class="dcard__ico" tone="dark" />
         </a>
       )}
       {MAX_CHAT && (
-        <a class="dcard__ask dcard__ask--icon" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(door.request)} aria-label={`Узнать цену на ${door.title} в MAX (текст скопируется)`}>
+        <a class="dcard__ask" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(door.request)} aria-label={`Написать менеджеру про ${door.title} в MAX (текст скопируется)`} title="Написать в MAX">
           <MaxIcon class="dcard__ico" tone="dark" />
         </a>
       )}
@@ -75,36 +76,27 @@ const n = door.variants.length
   .dcard__link:focus-visible { outline: none; }
   .dcard:has(.dcard__link:focus-visible) .dcard__photo { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   .dcard__chips { margin: 0; font-size: 0.875rem; line-height: 1.35; color: var(--h-soft); }
-  .dcard__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
-  .dcard__price { font-size: 0.875rem; color: var(--h-muted); }
+  .dcard__foot { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.625rem; }
+  .dcard__price { margin: 0; font-size: 1.125rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
+  .dcard__asks { display: inline-flex; gap: 0.375rem; }
   .dcard__ask {
     position: relative; /* над растянутой ссылкой карточки */
     z-index: 1;
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    min-height: 2.25rem;
-    padding: 0 0.875rem 0 0.625rem;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: 999rem;
     background: var(--h-ink);
-    color: var(--color-white);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    text-decoration: none;
     transition: background-color 200ms var(--ease-out);
   }
   .dcard__ask:hover { background: var(--color-slate-700); }
-  .dcard__ask--icon { padding: 0; width: 2.25rem; justify-content: center; }
-  .dcard__asks { display: inline-flex; gap: 0.375rem; }
   .dcard__ask :global(.dcard__ico) { width: 1.125rem; height: 1.125rem; }
   @media (prefers-reduced-motion: reduce) { .dcard__photo img { transition: none; } }
   /* На телефоне подписи плотнее: две карточки в ряд */
   @media (max-width: 43.6875rem) {
     .dcard__name { font-size: 1rem; }
     .dcard__count { font-size: 0.6875rem; padding: 0.1875rem 0.5rem; left: 0.5rem; bottom: 0.5rem; }
-    .dcard__foot { flex-direction: column; align-items: stretch; }
-    .dcard__price { display: none; }
-    .dcard__asks { display: grid; grid-template-columns: 1fr 2.25rem; }
-    .dcard__ask { justify-content: center; }
   }
 </style>

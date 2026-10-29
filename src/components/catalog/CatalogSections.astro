@@ -5,7 +5,8 @@
  * Человек, пришедший за входной дверью или панелью, находит её сразу, не
  * открывая меню. Новый раздел — строка в items.
  */
-import { ENTRANCE_DOORS, ENTRANCE_PAGE } from '../../data/entrance-doors'
+import { ENTRANCE_DOORS, ENTRANCE_PAGE, ENTRANCE_MIN_PRICE } from '../../data/entrance-doors'
+import { rub } from '../../data/services'
 import { DIRECTION_PHOTOS } from '../../data/direction-photos'
 import { PANEL_HOME_TILE, WALL_PANELS_PAGE } from '../../data/wall-panels-page'
 import { PLINTUS_PAGE } from '../../data/plintus'
@@ -20,7 +21,7 @@ const hero = ENTRANCE_PAGE.hero
 const items = [
   {
     title: 'Входные двери',
-    note: `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}, цена по запросу`,
+    note: `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}, от ${rub(ENTRANCE_MIN_PRICE)}`,
     href: '/catalog/vhodnye-dveri/',
     src: hero.src, srcset: hero.srcset, alt: hero.alt, position: '25% 0%', fit: 'door',
   },

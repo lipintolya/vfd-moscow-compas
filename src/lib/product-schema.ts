@@ -54,10 +54,13 @@ export function productSchema(p: {
 }
 
 /**
- * Product без цены — для моделей, цену которых салон называет по запросу
- * (входные двери): offers нет, только описание, фото и бренд-продавец.
+ * Product с ценой «от» — для моделей, у которых цена зависит от отделки
+ * (входные двери): AggregateOffer с lowPrice (минимальная цена модели по
+ * каталогу завода), без highPrice и offerCount — полного списка вариантов
+ * на странице нет. Бренд не указываем: двери не ВФД, название завода на сайт
+ * не выводится. Продавец и условия возврата — как у остальных товаров.
  */
-export function productSchemaNoPrice(p: { name: string; description: string; image: string; url: string }) {
+export function productSchemaFrom(p: { name: string; description: string; image: string; url: string; from: number }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -65,5 +68,13 @@ export function productSchemaNoPrice(p: { name: string; description: string; ima
     description: p.description,
     image: new URL(p.image, SITE.url).href,
     url: new URL(p.url, SITE.url).href,
+    offers: {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'RUB',
+      lowPrice: p.from,
+      areaServed: AREA_SERVED,
+      seller: sellerRef(),
+      hasMerchantReturnPolicy: merchantPolicy.returnPolicy,
+    },
   }
 }

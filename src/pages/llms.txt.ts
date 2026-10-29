@@ -17,7 +17,7 @@ import { HIDDEN_DOORS_FAQ } from '../data/hidden-doors-page'
 import { DECOR_FAQ } from '../data/decor-page'
 import { PLINTUS_FAQ, THICKNESS_RANGE, HEIGHT_RANGE, PROFILES_COUNT } from '../data/plintus'
 import { PLINTUS_LINES_FAQ } from '../data/plintus-lines'
-import { ENTRANCE_DOORS } from '../data/entrance-doors'
+import { ENTRANCE_DOORS, ENTRANCE_MIN_PRICE } from '../data/entrance-doors'
 import { DESIGNERS_FAQ } from '../data/designers-page'
 import { WALL_PANELS_PAGE, PANEL_FAQ } from '../data/wall-panels-page'
 import { pluralRu } from '../lib/plural'
@@ -42,7 +42,7 @@ export const GET: APIRoute = async () => {
     ['Каталог межкомнатных дверей', '/catalog/', 'серии, покрытия, цвета и цены'],
     ['Скрытые двери', '/catalog/skrytye-dveri/', 'двери скрытого монтажа, размеры и цены'],
     ['Стеновые панели', WALL_PANELS_PAGE.path, `изготовление на заказ: натуральный шпон и покрытия дверей ${SITE.name}, двери заподлицо с панелями`],
-    ['Входные двери', '/catalog/vhodnye-dveri/', `${ENTRANCE_DOORS.length} моделей стальных дверей: для квартиры, с терморазрывом, электронным замком и стеклопакетом; фото, характеристики, цена по запросу`],
+    ['Входные двери', '/catalog/vhodnye-dveri/', `${ENTRANCE_DOORS.length} моделей стальных дверей: для квартиры, с терморазрывом, электронным замком и стеклопакетом; фото, характеристики, цены от ${rub(ENTRANCE_MIN_PRICE)}`],
     ['Плинтус', '/catalog/plintus/', 'напольный из МДФ, с LED-подсветкой, скрытый, микроплинтус и шпонированный; покраска по RAL и NCS, цена по запросу'],
     ['Алюминиевые перегородки', '/partitions/', 'раздвижные и стационарные системы со стеклом'],
     [ALUM_PAGE.name, ALUM_PAGE.path, `раздвижные алюминиевые перегородки: ${ALUM_LAYOUT_COUNT}, ${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height}`],
@@ -71,7 +71,7 @@ export const GET: APIRoute = async () => {
     `- Скрытые двери «Секрет», «Секрет Реверс», «Рефлекс»: комплект с алюминиевым коробом от ${rub(SECRET_MIN_KIT_PRICE)} (${SITE.url}/catalog/skrytye-dveri/). Калькулятор цены по кромке, открыванию, коробу, высоте и зеркалу.`,
     `- Стеновые панели на заказ (${abs(WALL_PANELS_PAGE.path)}): изготавливает ${SITE.studioName} — из натурального шпона и в покрытиях дверей ${SITE.name}, двери встраиваются заподлицо с панелями. Стоимость — расчёт по проекту после замера.`,
     `- Декор: плинтус от ${rub(FROM_PRICE_PLINTUS)}, рейки от ${rub(FROM_PRICE_REYKI)} за комплект, фальшфрамуга от ${rub(FROM_PRICE_FRAMUGA_KIT)} (${SITE.url}/catalog/decor/).`,
-    `- Входные двери: ${ENTRANCE_DOORS.length} моделей (${SITE.url}/catalog/vhodnye-dveri/) — стальные, размеры полотна ${ENTRANCE_DOORS[0]!.sizes} мм, для квартиры и дома (терморазрыв, электронный замок, стеклопакет); у каждой модели своя страница с характеристиками и вариантами отделки. Цена — по запросу у менеджера.`,
+    `- Входные двери: ${ENTRANCE_DOORS.length} моделей (${SITE.url}/catalog/vhodnye-dveri/) — стальные, размеры полотна ${ENTRANCE_DOORS[0]!.sizes} мм, для квартиры и дома (терморазрыв, электронный замок, стеклопакет); у каждой модели своя страница с характеристиками и вариантами отделки. Цены от ${rub(ENTRANCE_MIN_PRICE)} (минимальная цена модели; цену выбранной отделки подтверждает менеджер).`,
     `- Плинтус: напольный из МДФ — ${PROFILES_COUNT}, толщина ${THICKNESS_RANGE}, высота ${HEIGHT_RANGE}, те же профили с LED-подсветкой; скрытый алюминиевый (60 и 80 мм), микроплинтус, шпонированный; покраска по RAL и NCS; цена по запросу (${SITE.url}/catalog/plintus/).`,
     `- Алюминиевые раздвижные перегородки: ${ALUM_LAYOUT_COUNT}, ${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height} (${SITE.url}/partitions/ и ${SITE.url}/partitions/alum/). Цены — после расчёта по проёму.`,
     `- ${plain(MEASURE_TERMS)}.`,

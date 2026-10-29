@@ -2,7 +2,8 @@
  * Входные двери — каталог /catalog/vhodnye-dveri/ и страницы моделей.
  * Ассортимент, фото и характеристики — от партнёра-завода (согласовано);
  * название завода на сайт не выводится, модели называются как в каталоге.
- * Цена — по запросу у менеджера (мессенджеры, телефон), цифр нет.
+ * Цены — «от» (минимум модели по каталогу завода) и цена каждой показанной
+ * отделки; точную сумму подтверждает менеджер (Telegram, MAX, телефон).
  *
  * Данные — entrance-doors-catalog.json (названия, характеристики по моделям,
  * подписи вариантов отделки), фото — assets/entrance-doors/ → npm run
@@ -13,13 +14,14 @@
 import catalog from './entrance-doors-catalog.json'
 import images from './entrance-doors-images.json'
 import { SITE } from '../config/site'
+import { rub } from './services'
 import { TITLE_MAX, DESCRIPTION_MAX, fitPhrase } from '../lib/product-text'
 
 /** Сколько вариантов отделки у модели показано (скрипт выгрузки берёт до стольких) */
 export const VARIANTS_SHOWN = 8
 
 export interface DoorImage { src: string; srcset: string; large: string; width: number; height: number; alt: string }
-export interface DoorVariant { name: string; image: DoorImage }
+export interface DoorVariant { name: string; image: DoorImage; /** Цена этой отделки по каталогу завода, ₽ */ price: number }
 
 /** Группы страницы: у двери одна, по самому важному признаку (порядок = приоритет) */
 export type DoorGroupId = 'glass' | 'smart' | 'thermo' | 'flat'
@@ -43,7 +45,9 @@ export interface EntranceDoor {
   opening: string
   variants: DoorVariant[]
   cover: DoorImage
-  /** Сообщение менеджеру с кнопки «Узнать цену» */
+  /** Минимальная цена модели в каталоге завода, ₽ — на сайте «от …» */
+  from: number
+  /** Сообщение менеджеру из кнопок связи */
   request: string
 }
 
@@ -65,8 +69,9 @@ interface Raw {
   name: string
   sizes: string | null
   opening: string | null
+  from: number
   specs: [string, string][]
-  variants: { name: string; file: string }[]
+  variants: { name: string; file: string; price: number }[]
 }
 
 function build(raw: Raw): EntranceDoor {
@@ -101,6 +106,7 @@ function build(raw: Raw): EntranceDoor {
   const title = `Входная дверь ${raw.name}`
   const variants = raw.variants.map((v) => ({
     name: v.name,
+    price: v.price,
     image: img(v.file, `${title}: ${v.name}, вид снаружи и изнутри — ${SITE.studioName}`),
   }))
   return {
@@ -117,11 +123,16 @@ function build(raw: Raw): EntranceDoor {
     opening: raw.opening,
     variants,
     cover: variants[0]!.image,
-    request: `Хочу узнать цену на входную дверь «${raw.name}».`,
+    from: raw.from,
+    request: `Интересует входная дверь «${raw.name}». Подскажите, пожалуйста, цену и сроки.`,
   }
 }
 
 export const ENTRANCE_DOORS: EntranceDoor[] = (catalog as Raw[]).map(build)
+
+/** «от 41 100 ₽» — цена модели; от — потому что отделка и комплектация меняют цену */
+export const fromPrice = (d: EntranceDoor) => `от${'\u00a0'}${rub(d.from)}`
+export const ENTRANCE_MIN_PRICE = Math.min(...ENTRANCE_DOORS.map((d) => d.from))
 
 export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: string }[] = [
   {
@@ -150,7 +161,9 @@ export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: s
   },
 ]
 
-export const doorsOfGroup = (id: DoorGroupId) => ENTRANCE_DOORS.filter((d) => d.group === id)
+/** Модели группы — от дешёвых к дорогим */
+export const doorsOfGroup = (id: DoorGroupId) => ENTRANCE_DOORS.filter((d) => d.group === id).sort((a, b) => a.from - b.from)
+export const groupFromPrice = (id: DoorGroupId) => Math.min(...doorsOfGroup(id).map((d) => d.from))
 export const doorById = (id: string) => ENTRANCE_DOORS.find((d) => d.id === id)
 
 /** Три двери первого экрана — разные по цвету: чёрная, белая, дерево */
@@ -164,10 +177,10 @@ const steels = ENTRANCE_DOORS.map((d) => Number(d.steel.replace(',', '.'))).filt
 
 export const ENTRANCE_PAGE = {
   /** Основа <title>, без «| Студия Зизевского» */
-  title: 'Входные двери в Москве: каталог, цены по запросу',
+  title: `Входные двери в Москве: каталог, цены от ${ENTRANCE_MIN_PRICE.toLocaleString('ru-RU')} ₽`,
   h1: 'Входные двери в Москве',
-  description: `Каталог входных дверей: ${ENTRANCE_DOORS.length} моделей для квартиры и дома — с терморазрывом, электронным замком, стеклопакетом. Цену называет менеджер. ТЦ «Компас».`,
-  lead: `${ENTRANCE_DOORS.length} моделей стальных входных дверей: фото снаружи и изнутри, характеристики и варианты отделки. Цены у каждой двери свои — зависят от отделки и комплектации, поэтому менеджер называет их по запросу.`,
+  description: `Каталог входных дверей: ${ENTRANCE_DOORS.length} моделей для квартиры и дома — с терморазрывом, электронным замком, стеклопакетом. Цены от ${rub(ENTRANCE_MIN_PRICE)}. ТЦ «Компас».`,
+  lead: `${ENTRANCE_DOORS.length} моделей стальных входных дверей: фото снаружи и изнутри, характеристики и варианты отделки. Цены — от ${rub(ENTRANCE_MIN_PRICE)}: точную назовём с учётом отделки и комплектации.`,
   hero: ENTRANCE_SHOWCASE[0]!.cover,
   /** Диапазон стали по каталогу: «1,5–1,8 мм» */
   steelRange: `${Math.min(...steels)}–${Math.max(...steels)}`.replace(/\./g, ','),
@@ -176,7 +189,7 @@ export const ENTRANCE_PAGE = {
 export const ENTRANCE_FAQ = [
   {
     q: 'Сколько стоит входная дверь?',
-    a: 'Цена зависит от модели, отделки снаружи и изнутри, замков и комплектации, поэтому на сайте её нет. Нажмите «Узнать цену» у нужной модели — менеджер ответит в Telegram или MAX, либо позвоните в салон.',
+    a: `Цены на сайте — «от»: это минимальная цена модели в каталоге завода, она начинается от ${rub(ENTRANCE_MIN_PRICE)}. Итог зависит от отделки снаружи и изнутри, замков и комплектации. Точную сумму для выбранной двери назовёт менеджер — в Telegram, MAX или по телефону салона.`,
   },
   {
     q: 'Какие размеры у входных дверей?',
@@ -192,7 +205,7 @@ export const ENTRANCE_FAQ = [
   },
   {
     q: 'Можно ли выбрать другую отделку?',
-    a: `Да. У каждой модели на странице показаны самые ходовые варианты отделки (до ${VARIANTS_SHOWN}), но их больше: цвета и рисунок панели с обеих сторон подбираются по каталогу. Напишите менеджеру, какую отделку хотите, — пришлёт фото.`,
+    a: `Да. У каждой модели на странице показаны самые ходовые варианты отделки (до ${VARIANTS_SHOWN}), но их больше: цвета и рисунок панели с обеих сторон подбираются по каталогу. Напишите менеджеру, какую отделку хотите, — пришлёт фото и назовёт цену.`,
   },
   {
     q: 'Что такое электронный замок и нужен ли он?',
@@ -207,12 +220,12 @@ export const ENTRANCE_FAQ = [
 /** Основа <title> модели (без «| Студия Зизевского»): части добавляются, пока влезают */
 export function doorTitle(d: EntranceDoor): string {
   const budget = TITLE_MAX - ` | ${SITE.studioName}`.length
-  return fitPhrase(d.title, [['в Москве', ' '], ['— цена по запросу', ' ']], budget)
+  return fitPhrase(d.title, [['в Москве', ' '], [`— ${fromPrice(d)}`, ' ']], budget)
 }
 
-/** <meta description> модели: что за дверь, размеры, как узнать цену */
+/** <meta description> модели: что за дверь, цена «от», размеры */
 export function doorDescription(d: EntranceDoor): string {
   const kind = DOOR_GROUPS.find((g) => g.id === d.group)!.nav.toLowerCase()
   const head = `${d.title} (${kind}): ${d.chips.join(', ').toLowerCase()}`
-  return fitPhrase(head, [[`размеры ${d.sizes} мм`, '; '], ['цену называет менеджер, ТЦ «Компас», Москва', '. ']], DESCRIPTION_MAX)
+  return fitPhrase(head, [[`цена ${fromPrice(d)}`, '; '], [`размеры ${d.sizes} мм`, '; '], ['ТЦ «Компас», Москва', '. ']], DESCRIPTION_MAX)
 }
