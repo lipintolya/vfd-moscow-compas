@@ -19,6 +19,7 @@ import { upperFirst } from '../../lib/typograph'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
 import MaxIcon from '../ui/MaxIcon.vue'
+import { VK_ICON } from '../../lib/messenger-icons'
 
 const props = defineProps<{ items: PlintusItem[] }>()
 
@@ -164,7 +165,7 @@ function openInterior(item: PlintusItem) {
                 :data-copy-text="textWithBody(requestBody(active))"
                 target="_blank"
                 rel="noopener noreferrer"
-              >ВКонтакте</a>
+              ><img :src="VK_ICON" alt="" class="pm__icon pm__icon--vk" width="20" height="20" />ВКонтакте</a>
             </li>
           </ul>
 
@@ -295,6 +296,7 @@ function openInterior(item: PlintusItem) {
 .pm__links { display: grid; gap: 0.5rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
 .pm__link { justify-content: center; width: 100%; min-height: 3rem; }
 .pm__icon { width: 1.25rem; height: 1.25rem; }
+.pm__icon--vk { border-radius: 0.3125rem; }
 .pm__link--main,
 .pm__link--main:hover { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
 .pm__link--main:hover { background: var(--color-slate-700); border-color: var(--color-slate-700); }

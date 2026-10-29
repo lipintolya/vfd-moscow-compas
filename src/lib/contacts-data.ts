@@ -66,6 +66,7 @@ export const companyLegalInfo = {
   socialMedia: [
     { name: 'Telegram', label: 'Telegram-канал', url: SITE.social.telegram, icon: '/media/catalog-vfd/icons/tg_logo.svg' },
     { name: 'YouTube', label: 'YouTube-канал', url: SITE.social.youtube, icon: '/icons/youtube.svg' },
+    ...(SITE.social.vk ? [{ name: 'ВКонтакте', label: 'Сообщество ВКонтакте', url: SITE.social.vk, icon: '/icons/vk.svg' }] : []),
   ],
 
   // Дополнительная информация

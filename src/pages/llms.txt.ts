@@ -60,6 +60,7 @@ export const GET: APIRoute = async () => {
     `- Телефон: ${SITE.phones.map((p) => p.label).join(', ')}`,
     `- Сайт: ${SITE.url}`,
     `- YouTube-канал: ${SITE.social.youtube}`,
+    ...(SITE.social.vk ? [`- ВКонтакте: ${SITE.social.vk}`] : []),
     `- Telegram-канал: ${SITE.social.telegram}`,
     '',
     '## Что продаём и по каким ценам',

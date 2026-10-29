@@ -18,7 +18,7 @@ import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-sc
 import { CONTACTS_INTRO, BENEFITS, CONTACTS_FAQ } from '../data/contacts-page'
 import { PRICES_DATE_LABEL } from '../data/services'
 import { SITE, PHONE } from '../config/site'
-import { YOUTUBE_ICON } from '../lib/messenger-icons'
+import { YOUTUBE_ICON, VK_ICON } from '../lib/messenger-icons'
 import { WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../lib/messengers'
 import WhatsAppIcon from '../components/ui/WhatsAppIcon.vue'
 import TelegramIcon from '../components/ui/TelegramIcon.vue'
@@ -142,6 +142,10 @@ const breadcrumbItems = [
           <a href={SITE.social.telegram} target="_blank" rel="noopener" class="h-link">{SITE.social.telegramHandle}</a>,
           видео&nbsp;— на&nbsp;YouTube-канале{' '}
           <a href={SITE.social.youtube} target="_blank" rel="noopener" class="h-link ct-yt"><img src={YOUTUBE_ICON} alt="" width="20" height="14" class="ct-yt__ico" />{SITE.social.youtubeHandle}</a>
+          {SITE.social.vk && (<>
+            {' '}и&nbsp;в&nbsp;сообществе ВКонтакте{' '}
+            <a href={SITE.social.vk} target="_blank" rel="noopener" class="h-link ct-yt"><img src={VK_ICON} alt="" width="20" height="20" class="ct-yt__ico ct-vk__ico" />{SITE.social.vkHandle}</a>
+          </>)}
         </p>
         {HAS_EMAIL && (
           <p class="h-body ct-channel">
@@ -405,4 +409,5 @@ const breadcrumbItems = [
 
   .ct-yt { white-space: nowrap; }
   .ct-yt__ico { display: inline-block; width: 1.25rem; height: auto; margin-right: 0.375rem; vertical-align: -0.125em; }
+  .ct-vk__ico { height: 1.25rem; border-radius: 0.3125rem; }
 </style>

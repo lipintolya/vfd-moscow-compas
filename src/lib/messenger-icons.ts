@@ -18,3 +18,6 @@ export const MESSENGER_ICONS = {
 
 /** Официальный знак YouTube — красный, один на светлом и тёмном фоне */
 export const YOUTUBE_ICON = icon('youtube.svg')
+
+/** Официальный знак ВКонтакте — синий квадрат, один на светлом и тёмном фоне */
+export const VK_ICON = icon('vk.svg')

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MESSENGER_ICONS, YOUTUBE_ICON } from '../../lib/messenger-icons'
+import { MESSENGER_ICONS, YOUTUBE_ICON, VK_ICON } from '../../lib/messenger-icons'
 import { ref, onMounted, onUnmounted, useTemplateRef } from 'vue'
 import { companyLegalInfo, HAS_EMAIL } from '../../lib/contacts-data'
 import { useScrollLock } from '../../lib/scroll-lock'
@@ -267,6 +267,17 @@ onUnmounted(() => {
             >
               <img :src="YOUTUBE_ICON" alt="" class="w-6 h-auto" width="24" height="17" loading="lazy" />
               <span>YouTube-канал <span class="text-white/55">{{ SITE.social.youtubeHandle }}</span></span>
+            </a>
+            <!-- Сообщество ВКонтакте -->
+            <a
+              v-if="SITE.social.vk"
+              :href="SITE.social.vk"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="mt-3 flex w-fit items-center gap-2.5 text-sm text-white/60 hover:text-white transition-colors duration-200"
+            >
+              <img :src="VK_ICON" alt="" class="w-6 h-6 rounded-md" width="24" height="24" loading="lazy" />
+              <span>ВКонтакте <span class="text-white/55">{{ SITE.social.vkHandle }}</span></span>
             </a>
           </div>
 
