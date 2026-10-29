@@ -1,0 +1,242 @@
+---
+/**
+ * «На что смотреть при выборе»: схема двери (SVG, наша графика) с точками на
+ * узлах и список критериев рядом. Узел или строка — открывает критерий: что
+ * это, и что выбрать в квартиру и в частный дом; на схеме подсвечиваются
+ * нужные части. Тексты, части и точки — src/data/entrance-guide.ts
+ * (GUIDE_CRITERIA); подписи размеров — из каталога. Без скрипта все
+ * критерии раскрыты и читаются списком; со скриптом открыт один.
+ *
+ * Схему можно заменить рендером разреза (guide-anatomy) — точки задаются
+ * в процентах рисунка.
+ */
+import { GUIDE, GUIDE_CRITERIA, LEVEL_LABEL } from '../../data/entrance-guide'
+import { typograph } from '../../lib/typograph'
+
+const FIRST = GUIDE_CRITERIA.find((c) => c.key === 'thermo') ?? GUIDE_CRITERIA[0]!
+const PLACES = [['flat', 'Квартира'], ['house', 'Частный дом']] as const
+---
+
+<div class="dx" data-explorer data-active={FIRST.key} data-parts={FIRST.parts.join(' ')}>
+  <div class="dx__fig">
+    <div class="dx__stage">
+      <svg class="dx__svg" viewBox="0 0 320 600" aria-hidden="true" focusable="false">
+        <!-- Короб и порог -->
+        <rect class="d-frame" x="40" y="20" width="240" height="508" rx="3" />
+        <rect class="d-open" x="62" y="42" width="196" height="486" />
+        <rect class="d-threshold" x="40" y="528" width="240" height="12" rx="1.5" />
+        <!-- Контуры уплотнения -->
+        <rect class="d-seal" x="66" y="46" width="188" height="478" rx="2" />
+        <!-- Полотно -->
+        <rect class="d-leaf" x="72" y="52" width="176" height="468" rx="2" />
+        <line class="d-edge" x1="248" y1="52" x2="248" y2="520" />
+        <!-- Филёнки -->
+        <g class="d-panels d-finish">
+          <rect x="92" y="74" width="120" height="120" rx="2" />
+          <rect x="92" y="210" width="120" height="84" rx="2" />
+          <rect x="92" y="310" width="120" height="140" rx="2" />
+        </g>
+        <!-- Замки и ручка -->
+        <g class="d-locks">
+          <rect x="222" y="330" width="18" height="26" rx="9" />
+          <rect x="222" y="380" width="18" height="26" rx="3" />
+          <line x1="222" y1="368" x2="190" y2="368" />
+        </g>
+        <!-- Петли -->
+        <g class="d-hinges">
+          <rect x="64" y="96" width="10" height="22" rx="2" />
+          <rect x="64" y="276" width="10" height="22" rx="2" />
+          <rect x="64" y="456" width="10" height="22" rx="2" />
+        </g>
+        <!-- Размеры по каталогу -->
+        <g class="d-dims">
+          <line x1="40" y1="574" x2="280" y2="574" />
+          <line x1="40" y1="568" x2="40" y2="580" />
+          <line x1="280" y1="568" x2="280" y2="580" />
+          <text x="160" y="590" text-anchor="middle">{GUIDE.doorWidth} мм</text>
+          <line x1="304" y1="20" x2="304" y2="540" />
+          <line x1="298" y1="20" x2="310" y2="20" />
+          <line x1="298" y1="540" x2="310" y2="540" />
+          <text x="0" y="0" text-anchor="middle" transform="translate(318 280) rotate(90)">{GUIDE.doorHeight} мм</text>
+        </g>
+      </svg>
+      {GUIDE_CRITERIA.flatMap((c) => c.spots.map(([x, y], i) => (
+        <button type="button" class="dx__spot" data-spot={c.key} style={`left:${x}%;top:${y}%`} aria-label={`${c.title}: показать`} aria-pressed={c.key === FIRST.key ? 'true' : 'false'} tabindex={i === 0 ? undefined : -1}></button>
+      )))}
+    </div>
+  </div>
+
+  <ul class="dx__list" role="list">
+    {GUIDE_CRITERIA.map((c) => (
+      <li class="dx__row" data-crit={c.key} data-parts={c.parts.join(' ')} data-open={c.key === FIRST.key ? '' : undefined}>
+        <h3 class="dx__h">
+          <button type="button" class="dx__btn" aria-expanded={c.key === FIRST.key ? 'true' : 'false'} aria-controls={`dx-${c.key}`}>
+            <span class="dx__name">{c.title}</span>
+            <span class="dx__what">{typograph(c.what)}</span>
+            <span class="dx__chev" aria-hidden="true"></span>
+          </button>
+        </h3>
+        <div class="dx__body" id={`dx-${c.key}`}>
+          <div class="dx__inner">
+            <p class="dx__text">{typograph(c.text)}</p>
+            <div class="dx__pick">
+              {PLACES.map(([place, label]) => (
+                <div class={`dx__v dx__v--${c[place].level}`}>
+                  <span class="dx__who">{label} · {LEVEL_LABEL[c[place].level].toLowerCase()}</span>
+                  <strong class="dx__verdict">{typograph(c[place].verdict)}</strong>
+                  <p class="dx__note">{typograph(c[place].note)}</p>
+                </div>
+              ))}
+            </div>
+            <button type="button" class="dx__show" data-show>Показать на схеме</button>
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-explorer]')
+  if (root) {
+    root.classList.add('is-ready')
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-crit]')]
+    const spots = [...root.querySelectorAll<HTMLButtonElement>('[data-spot]')]
+    const narrow = () => matchMedia('(max-width: 62.4375rem)').matches
+
+    function select(key: string, fromSpot: boolean) {
+      const row = rows.find((r) => r.dataset.crit === key)
+      if (!row) return
+      root!.dataset.active = key
+      root!.dataset.parts = row.dataset.parts
+      for (const r of rows) {
+        const open = r === row
+        r.toggleAttribute('data-open', open)
+        r.querySelector('.dx__btn')!.setAttribute('aria-expanded', String(open))
+      }
+      for (const s of spots) s.setAttribute('aria-pressed', String(s.dataset.spot === key))
+      /* Нажали на схему на телефоне — список ниже схемы: подводим его к экрану */
+      if (fromSpot && narrow()) row.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+    }
+    for (const r of rows) r.querySelector('.dx__btn')!.addEventListener('click', () => select(r.dataset.crit!, false))
+    for (const s of spots) s.addEventListener('click', () => select(s.dataset.spot!, true))
+    /* Телефон: схема стоит над списком — кнопка в разборе возвращает к ней */
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-show]')) {
+      b.addEventListener('click', () => root.querySelector('.dx__fig')!.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
+    }
+  }
+</script>
+
+<style>
+  .dx { display: grid; gap: 2rem var(--h-gutter); align-items: start; }
+  @media (min-width: 62.5rem) {
+    .dx { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 3rem var(--h-gutter); }
+    .dx__fig { position: sticky; top: calc(var(--header-height) + 1.5rem); }
+  }
+
+  /* Схема: белая дверь на серой подложке, точки — кнопки поверх рисунка */
+  .dx__fig { display: grid; place-items: center; padding: clamp(1rem, 3vw, 2rem); border-radius: var(--h-tile-radius); background: var(--h-wall); }
+  .dx__stage { position: relative; width: min(100%, 17rem); aspect-ratio: 320 / 600; }
+  @media (min-width: 62.5rem) { .dx__stage { width: min(100%, 19rem); } }
+  .dx__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .dx__svg * { transition: stroke 250ms var(--ease-out), fill 250ms var(--ease-out), stroke-width 250ms var(--ease-out); }
+  .dx__svg { --line: var(--color-slate-900); --hot: var(--h-signal); fill: none; stroke: var(--line); stroke-width: 1.5; stroke-linecap: round; }
+  .d-frame { fill: var(--color-white); stroke-width: 2; }
+  .d-open { fill: var(--color-slate-100); }
+  .d-leaf { fill: var(--color-white); stroke-width: 2; }
+  .d-seal { stroke-dasharray: 4 4; stroke: var(--color-slate-500); }
+  .d-edge { stroke: var(--line); stroke-width: 2; }
+  .d-panels rect { stroke: var(--color-slate-400); fill: var(--color-slate-100); }
+  .d-locks rect { fill: var(--color-white); }
+  .d-locks line { stroke-width: 4; }
+  .d-hinges rect { fill: var(--color-slate-900); }
+  .d-threshold { fill: var(--color-slate-900); }
+  .d-dims line { stroke: var(--color-slate-400); stroke-width: 1; }
+  .d-dims text { fill: var(--color-slate-500); stroke: none; font-size: 13px; font-family: var(--h-font); font-variant-numeric: tabular-nums; }
+
+  /* Подсветка выбранного узла — акцентным красным сайта */
+  .dx[data-parts~='frame'] .d-frame, .dx[data-parts~='leaf'] .d-leaf, .dx[data-parts~='edge'] .d-edge,
+  .dx[data-parts~='seal'] .d-seal, .dx[data-parts~='locks'] .d-locks rect, .dx[data-parts~='locks'] .d-locks line,
+  .dx[data-parts~='dims'] .d-dims line { stroke: var(--hot); stroke-width: 3; }
+  .dx[data-parts~='seal'] .d-seal { stroke-dasharray: none; }
+  .dx[data-parts~='edge'] .d-edge { stroke-width: 5; }
+  .dx[data-parts~='dims'] .d-dims line { stroke-width: 2; }
+  .dx[data-parts~='dims'] .d-dims text { fill: var(--hot); }
+  .dx[data-parts~='hinges'] .d-hinges rect, .dx[data-parts~='threshold'] .d-threshold { fill: var(--hot); stroke: var(--hot); }
+  .dx[data-parts~='panels'] .d-panels rect { fill: color-mix(in srgb, var(--hot) 14%, white); stroke: var(--hot); }
+  .dx[data-parts~='finish'] .d-panels rect { stroke: var(--hot); }
+  .dx[data-parts~='frame'] .d-open { fill: color-mix(in srgb, var(--hot) 8%, white); }
+
+  .dx__spot {
+    position: absolute;
+    width: 0.875rem;
+    height: 0.875rem;
+    margin: -0.4375rem 0 0 -0.4375rem;
+    padding: 0;
+    border: 0.125rem solid var(--color-white);
+    border-radius: 50%;
+    background: var(--color-slate-500);
+    box-shadow: 0 0 0 0.0625rem var(--color-slate-500);
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+  .dx__spot::after { content: ''; position: absolute; inset: -0.5rem; } /* зона нажатия ≥ 44 px */
+  .dx__spot:hover { transform: scale(1.3); background: var(--color-slate-900); box-shadow: 0 0 0 0.0625rem var(--color-slate-900); }
+  .dx__spot[aria-pressed='true'] { transform: scale(1.35); background: var(--h-signal); box-shadow: 0 0 0 0.0625rem var(--h-signal), 0 0 0 0.375rem color-mix(in srgb, var(--h-signal) 22%, transparent); }
+  .dx__spot:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.25rem; }
+  :global(.dx:not(.is-ready)) .dx__spot { display: none; }
+
+  /* Список критериев: названия, под выбранным — разбор */
+  .dx__list { margin: 0; padding: 0; list-style: none; border-top: 0.0625rem solid var(--h-rule); }
+  .dx__row { position: relative; border-bottom: 0.0625rem solid var(--h-rule); }
+  /* Красный отрезок над открытым критерием — тот же знак, что у шагов на сайте */
+  .dx__row::before { content: ''; position: absolute; top: -0.0625rem; left: 0; width: 2rem; height: 0.125rem; background: var(--h-signal); transform: scaleX(0); transform-origin: left; transition: transform 300ms var(--ease-out); }
+  .dx__row[data-open]::before { transform: none; }
+  .dx__h { margin: 0; }
+  .dx__btn {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1.25rem;
+    gap: 0.125rem 1rem;
+    align-items: center;
+    width: 100%;
+    padding: 1.125rem 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .dx__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: -0.1875rem; border-radius: 0.375rem; }
+  .dx__name { grid-column: 1; font-size: 1.1875rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); }
+  .dx__what { grid-column: 1; font-size: 0.9375rem; line-height: 1.4; color: var(--h-muted); }
+  .dx__chev { grid-column: 2; grid-row: 1 / span 2; position: relative; width: 1rem; height: 1rem; justify-self: end; }
+  .dx__chev::before, .dx__chev::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 0.125rem; margin-top: -0.0625rem; background: var(--h-ink); transition: transform 250ms var(--ease-out); }
+  .dx__chev::after { transform: rotate(90deg); }
+  .dx__row[data-open] .dx__chev::after { transform: rotate(0); }
+  .dx__btn:hover .dx__name { text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.2em; }
+
+  /* Раскрытие — плавное, без скрипта всё раскрыто */
+  .dx__body { display: grid; grid-template-rows: 1fr; }
+  .dx__inner { min-height: 0; overflow: hidden; }
+  :global(.dx.is-ready) .dx__body { grid-template-rows: 0fr; transition: grid-template-rows 320ms var(--ease-out); }
+  :global(.dx.is-ready) .dx__row[data-open] .dx__body { grid-template-rows: 1fr; }
+  .dx__text { margin: 0; max-width: 40rem; color: var(--h-soft); }
+  .dx__pick { display: grid; gap: 1rem var(--h-gutter); margin: 1.25rem 0 1.5rem; }
+  @media (min-width: 43.75rem) { .dx__pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .dx__v { display: grid; gap: 0.25rem; align-content: start; padding-left: 1rem; border-left: 0.1875rem solid var(--color-slate-900); }
+  .dx__v--good { border-left-color: var(--color-slate-500); }
+  .dx__v--skip { border-left-color: var(--color-slate-300); border-left-style: dotted; }
+  .dx__who { font-size: 0.8125rem; font-weight: 600; color: var(--h-muted); }
+  .dx__verdict { font-size: 1.0625rem; font-weight: 600; line-height: 1.3; color: var(--h-ink); }
+  .dx__v--skip .dx__verdict { color: var(--h-muted); }
+  .dx__show { margin: 0 0 1.25rem; padding: 0.5rem 0; border: 0; background: none; color: var(--h-soft); font: inherit; font-size: 0.9375rem; font-weight: 600; text-decoration: underline; text-decoration-color: var(--h-rule); text-underline-offset: 0.2em; cursor: pointer; }
+  .dx__show:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  @media (min-width: 62.5rem) { .dx__show { display: none; } }
+  :global(.dx:not(.is-ready)) .dx__show { display: none; }
+  .dx__note { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dx__svg *, .dx__spot, .dx__row::before, .dx__chev::before, .dx__chev::after, :global(.dx.is-ready) .dx__body { transition: none; }
+  }
+</style>

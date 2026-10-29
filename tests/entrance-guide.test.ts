@@ -40,6 +40,14 @@ test('путеводитель: у каждого критерия — суть,
       assert.ok(v.note.length > 20, c.title)
     }
   }
+  // схема: у каждого критерия — уникальный ключ, части схемы и хотя бы одна точка внутри рисунка
+  const keys = GUIDE_CRITERIA.map((c) => c.key)
+  assert.equal(new Set(keys).size, keys.length)
+  const known = ['leaf', 'edge', 'frame', 'seal', 'locks', 'hinges', 'finish', 'threshold', 'dims', 'panels']
+  for (const c of GUIDE_CRITERIA) {
+    assert.ok(c.parts.length > 0 && c.parts.every((p) => known.includes(p)), c.title)
+    assert.ok(c.spots.length > 0 && c.spots.every(([x, y]) => x >= 0 && x <= 100 && y >= 0 && y <= 100), c.title)
+  }
   // терморазрыв — главное различие: для дома нужен, для квартиры нет
   const thermo = GUIDE_CRITERIA.find((c) => c.title === 'Терморазрыв')!
   assert.equal(thermo.house.level, 'must')

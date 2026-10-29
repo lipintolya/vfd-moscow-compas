@@ -173,7 +173,12 @@ export interface GuideVerdict {
 
 export interface GuideCriterion {
   title: string
-  icon: 'steel' | 'layers' | 'snow' | 'seal' | 'lock' | 'hinge' | 'paint' | 'size' | 'sound'
+  /** Ключ узла двери на схеме (DoorExplorer) */
+  key: string
+  /** Какие части схемы подсвечиваются (классы d-* в DoorExplorer.astro) */
+  parts: string[]
+  /** Точки на схеме двери, % ширины и высоты рисунка (viewBox 320×600) */
+  spots: [number, number][]
   /** Одной строкой: что это */
   what: string
   /** Развёрнутый текст — внутри «Подробнее» */
@@ -185,7 +190,9 @@ export interface GuideCriterion {
 export const GUIDE_CRITERIA: GuideCriterion[] = [
   {
     title: 'Сталь',
-    icon: 'steel',
+    key: 'steel',
+    parts: ['leaf'],
+    spots: [[72.5, 11.7]],
     what: `Толщина металла полотна: от ${steelRange} мм`,
     text: 'Чем толще лист, тем жёстче полотно: оно меньше ведёт со временем и лучше держит удар.',
     flat: { level: 'good', verdict: '1,5 мм хватает', note: 'При хороших замках и петлях тонкое полотно не слабое место.' },
@@ -193,7 +200,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Толщина и утепление',
-    icon: 'layers',
+    key: 'layers',
+    parts: ['edge'],
+    spots: [[77.5, 41.7]],
     what: `Полотно с коробом ${range(thickness)} мм, внутри минеральная вата`,
     text: 'У всех моделей внутри минеральная вата, у части — ещё слой пенополистирола. Утеплитель гасит шум и не даёт холоду пройти через полотно.',
     flat: { level: 'good', verdict: 'Любое утепление', note: 'От подъезда нужны тишина и тёплая прихожая — толщина не критична.' },
@@ -201,7 +210,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Терморазрыв',
-    icon: 'snow',
+    key: 'thermo',
+    parts: ['frame'],
+    spots: [[15.9, 31.7]],
     what: `Вставка из полиамида между листами металла, у ${models(withThermo)}`,
     text: 'Без неё сталь работает как мост для холода: на двери появляются иней, наледь и конденсат. С терморазрывом наружный лист остаётся холодным, а внутренний — тёплым.',
     flat: { level: 'skip', verdict: 'Не нужен', note: 'Дверь стоит внутри отапливаемого подъезда — мороза нет.' },
@@ -209,7 +220,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Уплотнение',
-    icon: 'seal',
+    key: 'seal',
+    parts: ['seal'],
+    spots: [[50, 7.7]],
     what: `Три контура по периметру, у ${models(magnetic)} часть магнитная`,
     text: 'Магнитный уплотнитель притягивает полотно к коробу и убирает сквозняки по периметру.',
     flat: { level: 'good', verdict: 'Три контура', note: 'Магнитный — для тишины и защиты от запахов с лестницы.' },
@@ -217,7 +230,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Замки',
-    icon: 'lock',
+    key: 'locks',
+    parts: ['locks'],
+    spots: [[72.5, 56.8], [72.5, 65.2]],
     what: `Цилиндровые у ${models(cylinder)}, сувальдные у ${models(sulvald)}, 3–4 класс`,
     text: `Цилиндровые замки удобно менять — меняется личинка. Сувальдные не боятся пыли и перепадов температуры. Четвёртый класс, высший в каталоге, у ${models(lock4)}. В большинстве дверей два замка разных типов: слабые места у них разные.`,
     flat: { level: 'must', verdict: 'Цилиндровый и сувальдный, 4-й класс', note: 'Оптимальное сочетание для квартиры.' },
@@ -225,7 +240,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Петли и ригели',
-    icon: 'hinge',
+    key: 'hinges',
+    parts: ['hinges'],
+    spots: [[21.9, 17.7], [21.9, 47.7], [21.9, 77.7]],
     what: 'Скрытые петли на подшипниках, противосъёмные ригели',
     text: 'Ригели — стальные штыри, которые при закрытой двери входят в короб: даже если выбить петли, полотно не снять.',
     flat: { level: 'must', verdict: 'Три петли и два ригеля', note: 'Стандарт, на который стоит ориентироваться.' },
@@ -233,7 +250,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Отделка и порог',
-    icon: 'paint',
+    key: 'finish',
+    parts: ['finish', 'threshold'],
+    spots: [[50, 25], [50, 89]],
     what: `Нержавеющий порог в комплекте у ${models(threshold)}`,
     text: 'Отделка снаружи видна первой и первой стареет. Для улицы спрашивайте, рассчитана ли она на мороз, влагу и солнце. Порог из нержавейки не гниёт и не ржавеет от талой воды.',
     flat: { level: 'good', verdict: 'Любой цвет под интерьер', note: 'Подбирайте под стены и лестничную клетку.' },
@@ -241,7 +260,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Размеры и открывание',
-    icon: 'size',
+    key: 'size',
+    parts: ['dims'],
+    spots: [[82, 95.7], [93.8, 46.7]],
     what: `Полотна ${ENTRANCE_DOORS[0]!.sizes} мм, левое или правое`,
     text: `Короб с наличниками обычно шире полотна${boxExtra ? ` на ${boxExtra} мм` : ''}. Проём измеряйте в нескольких местах: стены редко идеально ровные.`,
     flat: { level: 'must', verdict: 'Проверить потолок и открывание', note: 'Дверь не должна упираться в стену прихожей.' },
@@ -249,7 +270,9 @@ export const GUIDE_CRITERIA: GuideCriterion[] = [
   },
   {
     title: 'Шум',
-    icon: 'sound',
+    key: 'sound',
+    parts: ['panels'],
+    spots: [[50, 80]],
     what: `Акустический материал у ${models(acoustic)}`,
     text: 'Шумо- и вибропоглощающий материал на полотне и коробе заметно глушит лестничную клетку и улицу.',
     flat: { level: 'good', verdict: 'Если рядом лифт и лестница', note: 'Стоящее дополнение для многоквартирного дома.' },
@@ -312,14 +335,19 @@ export const GUIDE_FAQ: { q: string; a: string }[] = [
   },
 ]
 
+/** Ширина и высота полотна из каталога, мм: «960×2050, 880×2050» → 960 и 2050 */
+const [DOOR_W, DOOR_H] = (ENTRANCE_DOORS[0]!.sizes.match(/(\d+)×(\d+)/) ?? []).slice(1)
+
 export const GUIDE = {
+  doorWidth: DOOR_W,
+  doorHeight: DOOR_H,
   title: 'Как выбрать входную дверь: квартира, дом или дача',
   lead: 'Главное решает место: квартирная дверь живёт в тепле, а дверь частного дома — на улице, где её проверяют мороз, влага и солнце. Ниже — по порядку, на что смотреть и чем отличаются виды дверей.',
   house: visualOf('guide-house'),
   anatomy: visualOf('guide-anatomy'),
   kindsTitle: 'Какие бывают входные двери',
   criteriaTitle: 'На что смотреть при выборе',
-  criteriaLead: 'Для каждого критерия — что это и что выбрать в квартиру и в частный дом.',
+  criteriaLead: 'Нажмите на узел двери или на строку списка — покажем, что это и что выбрать в квартиру и в частный дом.',
   partsTitle: 'Из чего состоит входная дверь',
   stepsTitle: 'Как выбрать — по шагам',
   stepsLead: 'От вопроса «где стоит дверь» до заказа — четыре шага.',
