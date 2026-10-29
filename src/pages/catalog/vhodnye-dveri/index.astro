@@ -1,11 +1,11 @@
 ---
 /**
  * Каталог входных дверей (/catalog/vhodnye-dveri/): тёмный первый экран с
- * тремя дверями в рост, под ним — панель выбора (группы + поиск по названию
- * и отделке, липкая при прокрутке) и модели по группам: для квартиры,
- * с терморазрывом, с электронным замком, со стеклопакетом. Карточка — дверь
- * в рост, число вариантов отделки, цена «от» и кнопки Telegram и MAX. У каждой модели
- * своя страница ([id].astro). Цен нет — менеджер называет их в мессенджерах.
+ * тремя дверями в рост, «Подберём за минуту» и модели по группам — для
+ * квартиры, с терморазрывом, с электронным замком, со стеклопакетом, внизу —
+ * путеводитель по выбору. Карточка — дверь в рост, число вариантов отделки и
+ * цена «от». У каждой модели своя страница ([id].astro). Фильтр — только из
+ * подбора и путеводителя (событие doors:filter), отдельной панели нет.
  * Данные и тексты — src/data/entrance-doors.ts.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
@@ -33,7 +33,6 @@ const faq = [...ENTRANCE_FAQ, ...GUIDE_FAQ]
 const SHOWN = 8
 /* На телефоне — два ряда по две: страница не превращается в километровую ленту */
 const SHOWN_PHONE = 4
-const searchOf = (d: (typeof ENTRANCE_DOORS)[number]) => [d.name, ...d.variants.map((v) => v.name)].join(' ').toLowerCase()
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -95,23 +94,8 @@ const listSchema = {
 
     <div id="doors-pick" class="edcat">
       <p class="edreset container" data-reset hidden>
-        <button type="button" class="h-btn h-btn--quiet">Показаны не все модели — показать все</button>
+        <button type="button" class="h-btn h-btn--quiet">Показать все модели</button>
       </p>
-    <div class="edb container" role="search">
-      <div class="edb__in">
-        <div class="edb__chips" role="group" aria-label="Тип двери">
-          <button type="button" class="edb__chip" data-filter="all" aria-pressed="true">Все <span>{total}</span></button>
-          {groups.map((g) => (
-            <button type="button" class="edb__chip" data-filter={g.id} aria-pressed="false">{g.nav} <span>{g.doors.length}</span></button>
-          ))}
-        </div>
-        <label class="edb__search">
-          <span class="sr-only">Найти модель или отделку</span>
-          <input type="search" class="edb__input" placeholder="Название или цвет: «белый», «дуб»…" autocomplete="off" enterkeyhint="search" />
-        </label>
-      </div>
-    </div>
-
     <p id="edb-status" class="sr-only" role="status" aria-live="polite"></p>
 
     {groups.map((g, gi) => (
@@ -125,7 +109,7 @@ const listSchema = {
             <p class="edg-head__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}, от&nbsp;{rub(g.from)}</p>
           </header>
           <ul class="edg" role="list">
-            {g.doors.map((d, i) => <li data-search={searchOf(d)} data-xd={i >= SHOWN ? '' : undefined} data-xp={i >= SHOWN_PHONE ? '' : undefined}><DoorCard door={d} /></li>)}
+            {g.doors.map((d, i) => <li data-door-li data-xd={i >= SHOWN ? '' : undefined} data-xp={i >= SHOWN_PHONE ? '' : undefined}><DoorCard door={d} /></li>)}
           </ul>
           {g.doors.length > SHOWN_PHONE && (
             <p class="edg-more" data-short={g.doors.length <= SHOWN ? '' : undefined}><button type="button" class="h-btn h-btn--quiet" data-more aria-expanded="false">Показать все {g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}</button></p>
@@ -134,12 +118,6 @@ const listSchema = {
       </section>
     ))}
 
-    <section id="doors-empty" class="h-sec edg-sec" hidden aria-live="polite">
-      <div class="container">
-        <p class="h-lead">По запросу ничего не нашлось. Сбросьте поиск или напишите менеджеру — подберём дверь по вашему описанию.</p>
-        <DoorRequest text="Подберите, пожалуйста, входную дверь по моему описанию." />
-      </div>
-    </section>
     </div>
 
     <EntranceGuide />
@@ -166,56 +144,31 @@ const listSchema = {
 </BaseLayout>
 
 <script>
-  const root = document.querySelector<HTMLElement>('.edb')!
-  const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')]
-  const input = root.querySelector<HTMLInputElement>('.edb__input')!
+  /* Фильтр каталога: его включают блок «Подберём за минуту» и кнопки «Показать модели»
+     в путеводителе (событие doors:filter); «показать все» над списком выключает. */
   const sections = [...document.querySelectorAll<HTMLElement>('[data-section]')]
-  const items = [...document.querySelectorAll<HTMLElement>('li[data-search]')]
-  const empty = document.getElementById('doors-empty')!
+  const items = [...document.querySelectorAll<HTMLElement>('li[data-door-li]')]
   const status = document.getElementById('edb-status')!
   const page = document.querySelector<HTMLElement>('.home')!
   const reset = document.querySelector<HTMLElement>('[data-reset]')!
-  let group = 'all'
 
-  function apply() {
-    const q = input.value.trim().toLowerCase()
+  function setGroup(group: string, scroll: boolean) {
     let shown = 0
     for (const li of items) {
-      const card = li.firstElementChild as HTMLElement
-      const ok = (group === 'all' || card.dataset.group === group) && (!q || (li.dataset.search ?? '').includes(q))
+      const ok = group === 'all' || (li.firstElementChild as HTMLElement).dataset.group === group
       li.hidden = !ok
       if (ok) shown++
     }
-    page.classList.toggle('is-filtering', group !== 'all' || !!q)
-    reset.hidden = group === 'all' && !q
-    for (const s of sections) s.hidden = !s.querySelector('li[data-search]:not([hidden])')
-    empty.hidden = shown > 0
+    for (const s of sections) s.hidden = !s.querySelector('li[data-door-li]:not([hidden])')
+    page.classList.toggle('is-filtering', group !== 'all')
+    reset.hidden = group === 'all'
     status.textContent = `Найдено моделей: ${shown}`
-  }
-
-  function setGroup(id: string, scroll: boolean) {
-    group = id
-    for (const x of chips) x.setAttribute('aria-pressed', String(x.dataset.filter === id))
-    apply()
     if (!scroll) return
-    /* К началу списка (под липкой панелью) — откуда бы ни нажали: из подбора или из путеводителя */
-    const first = sections.find((s) => !s.hidden)
-    first?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+    /* К кнопке сброса: она стоит прямо над первой группой, видно и что включено, и как выключить */
+    reset.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
   }
-  for (const c of chips) {
-    c.addEventListener('click', () => {
-      setGroup(c.dataset.filter ?? 'all', false)
-      /* Липкая панель не должна закрывать заголовок — прокручиваем к началу списка, если ушли ниже */
-      const first = sections.find((s) => !s.hidden)
-      if (first && first.getBoundingClientRect().top < 0) first.scrollIntoView({ block: 'start' })
-    })
-  }
-  reset.querySelector('button')!.addEventListener('click', () => {
-    input.value = ''
-    setGroup('all', false)
-  })
+  reset.querySelector('button')!.addEventListener('click', () => setGroup('all', false))
   document.addEventListener('doors:filter', (e) => setGroup((e as CustomEvent<{ group: string }>).detail.group, true))
-  input.addEventListener('input', apply)
 
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-more]')) {
     btn.addEventListener('click', () => {
@@ -279,62 +232,8 @@ const listSchema = {
   }
 
   /* Панель выбора: липнет под шапкой */
-  /* Панель выбора — только на компьютере; на телефоне фильтрует подбор и «Показать модели» */
-  .edb { display: none; }
-  @media (min-width: 62.5rem) { .edb { display: block; } }
   .edreset { margin: 1.5rem auto 0; }
   .edreset[hidden] { display: none; }
-  /* Липкая панель по ширине контейнера — ровно как блоки страницы */
-  .edb { position: sticky; top: calc(var(--header-height) + 0.5rem); z-index: 5; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
-  .edb__in {
-    display: grid;
-    gap: 0.625rem 1rem;
-    padding: 0.625rem 0.75rem;
-    border-radius: var(--h-radius);
-    background: color-mix(in srgb, var(--color-white) 94%, transparent);
-    backdrop-filter: blur(0.75rem);
-    box-shadow: 0 0.125rem 0.75rem color-mix(in srgb, var(--color-slate-900) 10%, transparent);
-  }
-  .edb__chips { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; }
-  .edb__chips::-webkit-scrollbar { display: none; }
-  .edb__chip {
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    min-height: 2.5rem;
-    padding: 0 0.875rem;
-    border: 0.0625rem solid var(--color-slate-300);
-    border-radius: 999rem;
-    background: none;
-    color: var(--h-ink);
-    font: inherit;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out);
-  }
-  .edb__chip span { color: var(--h-muted); font-variant-numeric: tabular-nums; font-weight: 500; }
-  .edb__chip:hover { border-color: var(--h-ink); }
-  .edb__chip[aria-pressed='true'] { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
-  .edb__chip[aria-pressed='true'] span { color: color-mix(in srgb, var(--color-white) 70%, transparent); }
-  .edb__input {
-    width: 100%;
-    min-height: 2.5rem;
-    padding: 0 1rem;
-    border: 0.0625rem solid var(--color-slate-300);
-    border-radius: 999rem;
-    background: var(--color-white);
-    color: var(--h-ink);
-    font: inherit;
-    font-size: 1rem; /* 16 px — iOS не приближает страницу при фокусе */
-  }
-  .edb__input:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
-  @media (min-width: 62.5rem) {
-    .edb__in { grid-template-columns: minmax(0, 1fr) 20rem; align-items: center; }
-    .edb__chips { flex-wrap: wrap; overflow: visible; }
-  }
-
   /* Группы — отдельные полосы с воздухом: заголовок, пояснение и счётчик, ниже модели */
   .edg-sec[hidden], .edg li[hidden] { display: none !important; }
   .edg-head { display: grid; gap: 0.75rem 2rem; margin-bottom: clamp(2rem, 4vw, 3rem); }
