@@ -16,7 +16,7 @@ import { ENTRANCE_DOORS, ENTRANCE_FAQ, DOOR_GROUPS, doorsOfGroup, doorTitle, doo
 import type { EntranceDoor } from '../../../data/entrance-doors'
 import { productSchemaNoPrice } from '../../../lib/product-schema'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
-import { whatsappWithText, telegramWithText, maxWithText } from '../../../lib/messengers'
+import { telegramWithText, maxWithText } from '../../../lib/messengers'
 import { SITE } from '../../../config/site'
 import { typograph } from '../../../lib/typograph'
 import '../../../styles/home.css'
@@ -37,7 +37,7 @@ const related = [1, 2, 3, 4].map((n) => same[(at + n) % same.length]!).filter((d
 const large = JSON.stringify(door.variants.map((v) => ({ src: v.image.large, alt: v.image.alt })))
 /* Текст менеджеру — с названием выбранной отделки */
 const askText = (name: string) => `Хочу узнать цену на входную дверь «${door.name}», отделка: ${name}.`
-const asks = JSON.stringify(door.variants.map((v) => ({ wa: whatsappWithText(askText(v.name)), tg: telegramWithText(askText(v.name)), max: maxWithText(askText(v.name)) })))
+const asks = JSON.stringify(door.variants.map((v) => ({ tg: telegramWithText(askText(v.name)), max: maxWithText(askText(v.name)) })))
 const first = door.variants[0]!
 const faq = ENTRANCE_FAQ.slice(0, 3)
 const faqSchema = {
@@ -118,7 +118,7 @@ const faqSchema = {
             <div class="edm__fact"><dt>Открывание</dt><dd>{door.opening}</dd></div>
           </dl>
           <div class="edm__buy">
-            <p class="edm__price">Цена по запросу <span>— зависит от отделки и комплектации, менеджер назовёт её в чате.</span></p>
+            <p class="edm__price">Цена по запросу <span>— зависит от отделки и комплектации, менеджер назовёт её в Telegram или MAX.</span></p>
             <DoorRequest text={askText(first.name)} />
           </div>
         </aside>
@@ -165,7 +165,7 @@ const faqSchema = {
   /* Выбор отделки: меняем фото, подпись, номер для «Увеличить» и тексты кнопок связи */
   const gallery = document.querySelector<HTMLElement>('[data-gallery]')
   if (gallery) {
-    const asks: { wa: string; tg: string; max: string }[] = JSON.parse(gallery.dataset.asks ?? '[]')
+    const asks: { tg: string; max: string }[] = JSON.parse(gallery.dataset.asks ?? '[]')
     const main = gallery.querySelector<HTMLButtonElement>('[data-main]')!
     const img = main.querySelector('img')!
     const label = gallery.querySelector<HTMLElement>('[data-finish] b')
@@ -181,8 +181,7 @@ const faqSchema = {
       thumbs.forEach((x) => x.setAttribute('aria-pressed', String(x === t)))
       const a = asks[i]
       if (!a) return
-      const wa = link('wa'), tg = link('tg'), max = link('max')
-      if (wa) wa.href = a.wa
+      const tg = link('tg'), max = link('max')
       if (tg) tg.href = a.tg
       if (max) max.dataset.copyText = a.max
     }))
