@@ -33,6 +33,10 @@ export interface EntranceDoor {
   group: DoorGroupId
   /** Короткие признаки для карточки */
   chips: string[]
+  /** Главные параметры — четыре строки у фото на странице модели */
+  facts: { label: string; value: string }[]
+  /** Сталь, мм — число с запятой, как у завода («1,5») */
+  steel: string
   /** Строки таблицы характеристик */
   specs: { label: string; value: string }[]
   sizes: string
@@ -43,14 +47,14 @@ export interface EntranceDoor {
   request: string
 }
 
-const table = images as Record<string, { widths: number[]; width: number; height: number }>
+const table = images as Record<string, { hash: string; widths: number[]; width: number; height: number }>
 const clean = (s: string) => s.replace(/[ \s]+/g, ' ').trim()
 
 function img(file: string, alt: string): DoorImage {
   const name = file.replace('.webp', '')
   const m = table[name]
   if (!m) throw new Error(`Входные двери: нет фото «${file}» — assets/entrance-doors/${file}, затем npm run gen:entrance-doors`)
-  const at = (w: number) => `/renders/entrance-doors/${name}-${w}.webp`
+  const at = (w: number) => `/renders/entrance-doors/${name}-${m.hash}-${w}.webp`
   return { src: at(m.widths[0]!), srcset: m.widths.map((w) => `${at(w)} ${w}w`).join(', '), large: at(m.widths.at(-1)!), width: m.width, height: m.height, alt }
 }
 
@@ -77,6 +81,15 @@ function build(raw: Raw): EntranceDoor {
 
   const steel = rowOf(specs, 'Конструкция')?.match(/Сталь ([\d,]+) мм/)?.[1]
   const thick = rowOf(specs, 'Толщина, вес')?.match(/Толщина двери (\d+) мм/)?.[1]
+  const lockType = lock.match(/^(Сувальдный|Цилиндровый|Электронный|Двухсистемный)/i)?.[1]
+  const lockClass = lock.match(/(\d)-го/)?.[1]
+  const seals = rowOf(specs, 'Контуры уплотнения')?.match(/^(\d+)/)?.[1]
+  const facts = [
+    steel && { label: 'Сталь', value: `${steel} мм` },
+    thick && { label: 'Толщина двери', value: `${thick} мм` },
+    lockType && { label: 'Основной замок', value: `${lockType.toLowerCase()}${lockClass ? `, ${lockClass}-й класс` : ''}` },
+    seals && { label: 'Уплотнение', value: `${seals} ${seals === '1' ? 'контур' : 'контура'}` },
+  ].filter((f): f is { label: string; value: string } => !!f)
   const chips = [
     steel && `Сталь ${steel} мм`,
     thick && `Толщина ${thick} мм`,
@@ -97,6 +110,8 @@ function build(raw: Raw): EntranceDoor {
     href: `/catalog/vhodnye-dveri/${raw.id}/`,
     group,
     chips,
+    facts,
+    steel: steel ?? '',
     specs,
     sizes: raw.sizes.replace(/х/g, '×').replace(/,\s*/g, ', '),
     opening: raw.opening,
@@ -138,13 +153,24 @@ export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: s
 export const doorsOfGroup = (id: DoorGroupId) => ENTRANCE_DOORS.filter((d) => d.group === id)
 export const doorById = (id: string) => ENTRANCE_DOORS.find((d) => d.id === id)
 
+/** Три двери первого экрана — разные по цвету: чёрная, белая, дерево */
+export const SHOWCASE_IDS = ['alyaska-layt', 'versal', 'karmina']
+export const ENTRANCE_SHOWCASE = SHOWCASE_IDS.map((id) => {
+  const d = ENTRANCE_DOORS.find((x) => x.id === id)
+  if (!d) throw new Error(`Входные двери: нет модели «${id}» для первого экрана`)
+  return d
+})
+const steels = ENTRANCE_DOORS.map((d) => Number(d.steel.replace(',', '.'))).filter(Boolean)
+
 export const ENTRANCE_PAGE = {
   /** Основа <title>, без «| Студия Зизевского» */
   title: 'Входные двери в Москве: каталог, цены по запросу',
   h1: 'Входные двери в Москве',
   description: `Каталог входных дверей: ${ENTRANCE_DOORS.length} моделей для квартиры и дома — с терморазрывом, электронным замком, стеклопакетом. Цену называет менеджер. ТЦ «Компас».`,
   lead: `${ENTRANCE_DOORS.length} моделей стальных входных дверей: фото снаружи и изнутри, характеристики и варианты отделки. Цены у каждой двери свои — зависят от отделки и комплектации, поэтому менеджер называет их по запросу.`,
-  hero: ENTRANCE_DOORS[0]!.cover,
+  hero: ENTRANCE_SHOWCASE[0]!.cover,
+  /** Диапазон стали по каталогу: «1,5–1,8 мм» */
+  steelRange: `${Math.min(...steels)}–${Math.max(...steels)}`.replace(/\./g, ','),
 }
 
 export const ENTRANCE_FAQ = [

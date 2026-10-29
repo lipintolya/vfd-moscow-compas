@@ -1,8 +1,10 @@
 ---
 /**
- * Страница модели входной двери (/catalog/vhodnye-dveri/<id>/): фото и
- * варианты отделки (lightbox), характеристики таблицей, «Узнать цену» в
- * мессенджерах, другие модели той же группы. Данные — src/data/entrance-doors.ts.
+ * Страница модели входной двери (/catalog/vhodnye-dveri/<id>/): слева крупное
+ * фото «снаружи и изнутри» и ряд вариантов отделки — выбор меняет фото, подпись
+ * и текст сообщения менеджеру (в нём название отделки); справа главные
+ * параметры и «Узнать цену» в мессенджерах. Ниже — полная таблица
+ * характеристик, соседние модели, вопросы. Данные — src/data/entrance-doors.ts.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../../lib/seo-title'
@@ -14,6 +16,7 @@ import { ENTRANCE_DOORS, ENTRANCE_FAQ, DOOR_GROUPS, doorsOfGroup, doorTitle, doo
 import type { EntranceDoor } from '../../../data/entrance-doors'
 import { productSchemaNoPrice } from '../../../lib/product-schema'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
+import { whatsappWithText, telegramWithText, maxWithText } from '../../../lib/messengers'
 import { SITE } from '../../../config/site'
 import { typograph } from '../../../lib/typograph'
 import '../../../styles/home.css'
@@ -26,24 +29,22 @@ const { door } = Astro.props
 
 const group = DOOR_GROUPS.find((g) => g.id === door.group)!
 const description = doorDescription(door)
+const multi = door.variants.length > 1
 /* Соседние модели той же группы — по кругу, чтобы у каждой были ссылки */
 const same = doorsOfGroup(door.group)
 const at = same.findIndex((d) => d.id === door.id)
 const related = [1, 2, 3, 4].map((n) => same[(at + n) % same.length]!).filter((d, i, a) => d.id !== door.id && a.indexOf(d) === i)
 const large = JSON.stringify(door.variants.map((v) => ({ src: v.image.large, alt: v.image.alt })))
+/* Текст менеджеру — с названием выбранной отделки */
+const askText = (name: string) => `Хочу узнать цену на входную дверь «${door.name}», отделка: ${name}.`
+const asks = JSON.stringify(door.variants.map((v) => ({ wa: whatsappWithText(askText(v.name)), tg: telegramWithText(askText(v.name)), max: maxWithText(askText(v.name)) })))
+const first = door.variants[0]!
 const faq = ENTRANCE_FAQ.slice(0, 3)
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 }
-const lock = door.specs.find((r) => r.label === 'Основной замок')?.value
-const lead = `${door.chips.join(', ')}.${lock ? ` Основной замок: ${lock}.` : ''} На фото — дверь снаружи и изнутри.`
-const facts = [
-  { label: 'Размеры полотна', value: `${door.sizes} мм` },
-  { label: 'Открывание', value: door.opening },
-  { label: 'Цена', value: 'по запросу' },
-]
 ---
 
 <BaseLayout
@@ -70,47 +71,59 @@ const facts = [
   </div>
 
   <div class="home">
-    <div data-lightbox data-lightbox-images={large}>
-      <section class="edm" aria-labelledby="door-title">
-        <div class="container edm__grid">
-          <button type="button" class="h-media edm__photo" data-lightbox-index="0" aria-label={`Открыть фото: ${door.cover.alt}`}>
-            <img src={door.cover.src} srcset={door.cover.srcset} sizes="(min-width: 62.5rem) 55vw, 100vw" alt={door.cover.alt} width={door.cover.width} height={door.cover.height} fetchpriority="high" decoding="async" />
+    <section class="edm" aria-labelledby="door-title">
+      <div class="container edm__grid" data-gallery data-lightbox data-lightbox-images={large} data-asks={asks}>
+        <div class="edm__gallery">
+          <button type="button" class="h-media edm__main" data-lightbox-index="0" data-main aria-label="Открыть фото крупно">
+            <img src={first.image.src} srcset={first.image.srcset} sizes="(min-width: 62.5rem) 46vw, 100vw" alt={first.image.alt} width={first.image.width} height={first.image.height} fetchpriority="high" decoding="async" />
+            <span class="edm__zoom" aria-hidden="true">Увеличить</span>
           </button>
-          <div class="edm__text">
-            <p class="h-meta edm__kind"><a href={`/catalog/vhodnye-dveri/#doors-${group.id}`}>{group.nav}</a></p>
-            <h1 id="door-title" class="h-h1 edm__title">{typograph(door.title)}</h1>
-            <p class="h-lead edm__lead">{typograph(lead)}</p>
-            <dl class="edm__facts">
-              {facts.map((f) => (
-                <div class="edm__fact"><dt>{f.label}</dt><dd>{typograph(f.value)}</dd></div>
-              ))}
-            </dl>
-            <DoorRequest text={door.request} />
-          </div>
-        </div>
-      </section>
+          <p class="edm__sides" aria-hidden="true"><span>Снаружи</span><span>Изнутри</span></p>
 
-      {door.variants.length > 1 && (
-        <section class="h-sec h-sec--tight-top" aria-labelledby="door-variants">
-          <div class="container">
-            <h2 id="door-variants" class="h-h2 edm__h2">Варианты отделки</h2>
-            <p class="h-body edm__note">Нажмите на фото, чтобы рассмотреть крупно. Других цветов и рисунков панели больше — напишите менеджеру.</p>
-            <ul class="edm__variants" role="list">
-              {door.variants.map((v, i) => (
-                <li>
-                  <button type="button" class="edm__variant" data-lightbox-index={i} aria-label={`Открыть фото: ${v.name}`}>
-                    <span class="h-media edm__vphoto">
-                      <img src={v.image.src} srcset={v.image.srcset} sizes="(min-width: 62.5rem) 22rem, (min-width: 43.75rem) 30vw, 46vw" alt={v.image.alt} width={v.image.width} height={v.image.height} loading="lazy" decoding="async" />
-                    </span>
-                    <span class="edm__vname">{typograph(v.name)}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+          {multi && (
+            <div class="edm__finish">
+              <p class="edm__finish-name" data-finish aria-live="polite">Отделка: <b>{typograph(first.name)}</b></p>
+              <ul class="edm__thumbs" role="list" aria-label="Варианты отделки">
+                {door.variants.map((v, i) => (
+                  <li>
+                    <button
+                      type="button"
+                      class="h-media edm__thumb"
+                      data-thumb={i}
+                      data-src={v.image.src}
+                      data-srcset={v.image.srcset}
+                      data-alt={v.image.alt}
+                      data-name={v.name}
+                      aria-pressed={i === 0 ? 'true' : 'false'}
+                      aria-label={`Отделка: ${v.name}`}
+                    >
+                      <img src={v.image.src} srcset={v.image.srcset} sizes="6rem" alt="" role="presentation" width={v.image.width} height={v.image.height} loading={i < 4 ? 'eager' : 'lazy'} decoding="async" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <p class="edm__more">Других цветов и рисунков панели больше — напишите менеджеру.</p>
+            </div>
+          )}
+        </div>
+
+        <aside class="edm__panel">
+          <p class="edm__kind"><a href={`/catalog/vhodnye-dveri/#doors-${group.id}`}>{group.nav}</a></p>
+          <h1 id="door-title" class="h-h1 edm__title">{typograph(door.title)}</h1>
+          <dl class="edm__facts">
+            {door.facts.map((f) => (
+              <div class="edm__fact"><dt>{f.label}</dt><dd>{typograph(f.value)}</dd></div>
+            ))}
+            <div class="edm__fact"><dt>Размеры полотна</dt><dd>{door.sizes} мм</dd></div>
+            <div class="edm__fact"><dt>Открывание</dt><dd>{door.opening}</dd></div>
+          </dl>
+          <div class="edm__buy">
+            <p class="edm__price">Цена по запросу <span>— зависит от отделки и комплектации, менеджер назовёт её в чате.</span></p>
+            <DoorRequest text={askText(first.name)} />
           </div>
-        </section>
-      )}
-    </div>
+        </aside>
+      </div>
+    </section>
 
     <section class="h-sec h-sec--tight-top" aria-labelledby="door-spec">
       <div class="container">
@@ -121,14 +134,6 @@ const facts = [
             <div class="edm__row"><dt>{row.label}</dt><dd>{typograph(row.value)}</dd></div>
           ))}
         </dl>
-      </div>
-    </section>
-
-    <section class="h-sec h-sec--tight-top" aria-label="Запрос цены">
-      <div class="container edm__ask">
-        <h2 class="h-h2 edm__h2">Узнать цену на «{door.name}»</h2>
-        <p class="h-body edm__note">Цена зависит от отделки и комплектации. Напишите менеджеру — ответит с ценой и пришлёт фото нужных вариантов.</p>
-        <DoorRequest text={door.request} />
       </div>
     </section>
 
@@ -156,48 +161,92 @@ const facts = [
 <script>
   import { initLightboxGroups } from '../../../lib/lightbox'
   initLightboxGroups()
+
+  /* Выбор отделки: меняем фото, подпись, номер для «Увеличить» и тексты кнопок связи */
+  const gallery = document.querySelector<HTMLElement>('[data-gallery]')
+  if (gallery) {
+    const asks: { wa: string; tg: string; max: string }[] = JSON.parse(gallery.dataset.asks ?? '[]')
+    const main = gallery.querySelector<HTMLButtonElement>('[data-main]')!
+    const img = main.querySelector('img')!
+    const label = gallery.querySelector<HTMLElement>('[data-finish] b')
+    const thumbs = [...gallery.querySelectorAll<HTMLButtonElement>('[data-thumb]')]
+    const link = (k: string) => gallery.querySelector<HTMLAnchorElement>(`[data-ask="${k}"]`)
+
+    thumbs.forEach((t, i) => t.addEventListener('click', () => {
+      img.src = t.dataset.src!
+      img.srcset = t.dataset.srcset!
+      img.alt = t.dataset.alt!
+      main.dataset.lightboxIndex = String(i)
+      if (label) label.textContent = t.dataset.name!
+      thumbs.forEach((x) => x.setAttribute('aria-pressed', String(x === t)))
+      const a = asks[i]
+      if (!a) return
+      const wa = link('wa'), tg = link('tg'), max = link('max')
+      if (wa) wa.href = a.wa
+      if (tg) tg.href = a.tg
+      if (max) max.dataset.copyText = a.max
+    }))
+  }
 </script>
 
 <style>
   .edm { padding: clamp(1rem, 2vw, 1.5rem) 0 clamp(2.5rem, 5vw, 4rem); }
-  .edm__grid { display: grid; gap: 1.5rem var(--h-gutter); align-items: center; }
-  .edm__photo { display: block; width: 100%; padding: 0; border: 0; aspect-ratio: 5 / 4; border-radius: var(--h-tile-radius); cursor: zoom-in; }
-  .edm__kind { margin: 0 0 0.5rem; }
-  .edm__kind a { color: inherit; }
-  .edm__title { margin: 0; }
-  .edm__lead { margin: 1rem 0 0; }
-  .edm__facts { margin: 1.25rem 0 1.5rem; border-top: 0.0625rem solid var(--h-rule); }
-  .edm__fact { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; padding: 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
-  .edm__fact dt { color: var(--h-muted); }
-  .edm__fact dd { margin: 0; color: var(--h-ink); }
+  .edm__grid { display: grid; gap: 1.75rem var(--h-gutter); align-items: start; }
   @media (min-width: 62.5rem) {
     .edm__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .edm__photo { grid-column: 1 / span 7; }
-    .edm__text { grid-column: 8 / span 5; }
+    .edm__gallery { grid-column: 1 / span 6; }
+    .edm__panel { grid-column: 8 / span 5; position: sticky; top: calc(var(--header-height) + 1rem); }
   }
+
+  .edm__main { position: relative; display: block; width: 100%; padding: 0; border: 0; aspect-ratio: 1000 / 868; border-radius: var(--h-tile-radius); cursor: zoom-in; }
+  .edm__zoom {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999rem;
+    background: color-mix(in srgb, var(--color-white) 92%, transparent);
+    color: var(--h-ink);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+  /* Подписи под половинами кадра */
+  .edm__sides { display: grid; grid-template-columns: 1fr 1fr; margin: 0.5rem 0 0; font-size: 0.8125rem; color: var(--h-muted); }
+  .edm__sides span { text-align: center; }
+
+  .edm__finish { margin-top: 1.5rem; }
+  .edm__finish-name { margin: 0 0 0.75rem; color: var(--h-soft); }
+  .edm__finish-name b { color: var(--h-ink); font-weight: 600; }
+  .edm__thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .edm__thumbs { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
+  .edm__thumb { display: block; width: 100%; padding: 0; border: 0.125rem solid transparent; border-radius: 0.625rem; aspect-ratio: 1000 / 868; cursor: pointer; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; transition: border-color 200ms var(--ease-out); }
+  .edm__thumb:hover { border-color: var(--color-slate-400); }
+  .edm__thumb[aria-pressed='true'] { border-color: var(--h-signal); outline-color: transparent; }
+  .edm__thumb:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  .edm__more { margin: 0.75rem 0 0; font-size: 0.875rem; color: var(--h-muted); }
+
+  .edm__kind { margin: 0 0 0.5rem; font-size: 0.875rem; }
+  .edm__kind a { color: var(--h-muted); text-decoration: none; }
+  .edm__kind a:hover { color: var(--h-signal); }
+  .edm__title { margin: 0; }
+  .edm__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--h-gutter); margin: 1.5rem 0 0; border-top: 0.0625rem solid var(--h-rule); }
+  .edm__fact { padding: 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
+  .edm__fact dt { font-size: 0.8125rem; color: var(--h-muted); }
+  .edm__fact dd { margin: 0.125rem 0 0; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; color: var(--h-ink); }
+  .edm__buy { display: grid; gap: 1rem; margin-top: 1.5rem; padding: 1.25rem; border-radius: var(--h-radius); background: var(--h-wall); }
+  .edm__buy :global(.dreq__btn) { padding-inline: 1rem; }
+  .edm__price { margin: 0; font-weight: 600; color: var(--h-ink); }
+  .edm__price span { font-weight: 400; color: var(--h-soft); }
 
   .edm__h2 { margin: 0; }
   .edm__note { margin: 0.75rem 0 0; max-width: 44rem; color: var(--h-soft); }
-  .edm__ask { display: grid; gap: 1rem; justify-items: start; }
-  .edm__ask .edm__note { margin: 0; }
-
-  .edm__variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem 0.75rem; margin: clamp(1.5rem, 3vw, 2rem) 0 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .edm__variants { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem var(--h-gutter); } }
-  @media (min-width: 62.5rem) { .edm__variants { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-  .edm__variant { display: grid; gap: 0.5rem; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: zoom-in; }
-  .edm__vphoto { aspect-ratio: 5 / 4; border-radius: var(--h-tile-radius); }
-  .edm__vphoto img { transition: transform 600ms var(--ease-out); }
-  .edm__variant:hover .edm__vphoto img { transform: scale(1.03); }
-  .edm__vname { font-size: 0.9375rem; line-height: 1.35; color: var(--h-ink); }
-
   .edm__spec { margin: clamp(1.25rem, 3vw, 1.75rem) 0 0; border-top: 0.0625rem solid var(--h-rule); }
   .edm__row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; padding: 0.875rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
   .edm__row dt { color: var(--h-muted); }
   .edm__row dd { margin: 0; color: var(--h-ink); }
-  @media (max-width: 43.6875rem) { .edm__row, .edm__fact { grid-template-columns: 1fr; gap: 0.25rem; } }
+  @media (max-width: 43.6875rem) { .edm__row { grid-template-columns: 1fr; gap: 0.25rem; } }
 
-  .edr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 0.75rem; margin: clamp(1.5rem, 3vw, 2rem) 0 0; padding: 0; list-style: none; }
-  @media (min-width: 62.5rem) { .edr { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem var(--h-gutter); } }
+  .edr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 0.75rem; margin: clamp(1.5rem, 3vw, 2rem) 0 0; padding: 0; list-style: none; }
+  @media (min-width: 62.5rem) { .edr { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.25rem var(--h-gutter); } }
   .edr__all { margin: 2rem 0 0; }
-  @media (prefers-reduced-motion: reduce) { .edm__vphoto img { transition: none; } }
 </style>

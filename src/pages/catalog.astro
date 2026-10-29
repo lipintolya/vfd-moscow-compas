@@ -12,6 +12,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro'
 import Breadcrumbs from '../components/ui/Breadcrumbs.astro'
 import CatalogClient from '../components/catalog/CatalogClient.vue'
+import CatalogSections from '../components/catalog/CatalogSections.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import { getCatalogCards, getSeriesCardsData } from '../lib/catalog-data'
@@ -155,6 +156,8 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
             {typograph(`${modelsCount} фабрики ${SITE.name} — от ${rub(minPrice)} за полотно. Образцы всех покрытий стоят в салоне в ${SITE.address.mall}: цвета и фактуры можно сравнить вживую. Замер и монтаж по Москве и области.`)}
           </p>
         </header>
+
+        <CatalogSections />
 
         <CatalogClient
           client:idle

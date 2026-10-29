@@ -2,6 +2,8 @@
 /**
  * «Узнать цену» входной двери: WhatsApp, Telegram и MAX с готовым текстом
  * (цены на сайте нет — её называет менеджер), как у направлений плинтуса.
+ * data-ask — крючки для страницы модели: при выборе отделки скрипт подменяет
+ * ссылки (и текст для MAX), чтобы менеджер получил название отделки.
  */
 import { whatsappWithText, telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
@@ -13,16 +15,16 @@ const { text } = Astro.props
 ---
 
 <div class="dreq">
-  <a class="h-btn h-btn--signal dreq__btn" href={whatsappWithText(text)} target="_blank" rel="noopener" aria-label="Узнать цену в WhatsApp">
+  <a class="h-btn h-btn--signal dreq__btn" data-ask="wa" href={whatsappWithText(text)} target="_blank" rel="noopener" aria-label="Узнать цену в WhatsApp">
     <WhatsAppIcon class="dreq__ico" tone="dark" />Узнать цену
   </a>
   {TELEGRAM_CHAT && (
-    <a class="h-btn h-btn--quiet dreq__btn" href={telegramWithText(text)} target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+    <a class="h-btn h-btn--quiet dreq__btn" data-ask="tg" href={telegramWithText(text)} target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
       <TelegramIcon class="dreq__ico" />Telegram
     </a>
   )}
   {MAX_CHAT && (
-    <a class="h-btn h-btn--quiet dreq__btn" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(text)} aria-label="Написать в MAX (текст скопируется)">
+    <a class="h-btn h-btn--quiet dreq__btn" data-ask="max" href={maxChatUrl()} target="_blank" rel="noopener" data-copy-text={maxWithText(text)} aria-label="Написать в MAX (текст скопируется)">
       <MaxIcon class="dreq__ico" />MAX
     </a>
   )}

@@ -1,27 +1,30 @@
 ---
 /**
- * Каталог входных дверей (/catalog/vhodnye-dveri/): модели по группам —
- * для квартиры, с терморазрывом, с электронным замком, со стеклопакетом.
- * Данные и тексты — src/data/entrance-doors.ts; у каждой модели своя страница
- * ([id].astro). Цен нет: «Цена по запросу», менеджер называет её в мессенджерах.
+ * Каталог входных дверей (/catalog/vhodnye-dveri/): тёмный первый экран с
+ * тремя дверями в рост, под ним — панель выбора (группы + поиск по названию
+ * и отделке, липкая при прокрутке) и модели по группам: для квартиры,
+ * с терморазрывом, с электронным замком, со стеклопакетом. Карточка — дверь
+ * в рост, число вариантов отделки, «Узнать цену» в WhatsApp. У каждой модели
+ * своя страница ([id].astro). Цен нет — менеджер называет их в мессенджерах.
+ * Данные и тексты — src/data/entrance-doors.ts.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../../lib/seo-title'
 import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
-import QuoteCta from '../../../components/ui/QuoteCta.astro'
 import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
-import SectionNav from '../../../components/partitions/SectionNav.astro'
 import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
-import { DOOR_GROUPS, doorsOfGroup, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
-import { whatsappWithText } from '../../../lib/messengers'
+import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
+import { DOOR_GROUPS, doorsOfGroup, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS, ENTRANCE_SHOWCASE } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
 import { typograph } from '../../../lib/typograph'
+import { pluralRu } from '../../../lib/plural'
 import '../../../styles/home.css'
 
 const { hero } = ENTRANCE_PAGE
 const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id) })).filter((g) => g.doors.length)
-const navItems = [...groups.map((g) => ({ id: `doors-${g.id}`, label: g.nav })), { id: 'doors-faq', label: 'Вопросы' }]
+const total = ENTRANCE_DOORS.length
+const searchOf = (d: (typeof ENTRANCE_DOORS)[number]) => [d.name, ...d.variants.map((v) => v.name)].join(' ').toLowerCase()
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -32,7 +35,7 @@ const listSchema = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
   name: ENTRANCE_PAGE.h1,
-  numberOfItems: ENTRANCE_DOORS.length,
+  numberOfItems: total,
   itemListElement: ENTRANCE_DOORS.map((d, i) => ({ '@type': 'ListItem', position: i + 1, name: d.title, url: new URL(d.href, SITE.url).href })),
 }
 ---
@@ -45,8 +48,6 @@ const listSchema = {
   preloadImage={hero.src}
   structuredData={[localBusinessSchema({ url: SITE.url }), listSchema, faqSchema]}
 >
-  <SectionNav items={navItems} />
-
   <div class="breadcrumb-bar">
     <div class="container">
       <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Каталог', href: '/catalog/' }, { label: 'Входные двери' }]} />
@@ -55,32 +56,81 @@ const listSchema = {
 
   <div class="home">
     <section class="edh" aria-labelledby="doors-title">
-      <div class="container edh__grid">
-        <div class="edh__text">
-          <h1 id="doors-title" class="h-h1 edh__title">{typograph(ENTRANCE_PAGE.h1)}</h1>
-          <p class="h-lead edh__lead">{typograph(ENTRANCE_PAGE.lead)}</p>
-          <div class="edh__actions">
-            <a class="h-btn h-btn--ink h-btn--phone-wide" href={`#doors-${groups[0]!.id}`}>Смотреть модели</a>
-            <a class="h-btn h-btn--quiet h-btn--phone-wide" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+      <div class="container">
+        <div class="edh__panel">
+          <div class="edh__text">
+            <h1 id="doors-title" class="h-h1 edh__title">{typograph(ENTRANCE_PAGE.h1)}</h1>
+            <p class="h-lead edh__lead">{typograph(ENTRANCE_PAGE.lead)}</p>
+            <div class="edh__actions">
+              <a class="h-btn edh__go h-btn--phone-wide" href="#doors-pick">Выбрать модель</a>
+              <a class="h-btn edh__call h-btn--phone-wide" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+            </div>
           </div>
+          <ul class="edh__doors" role="list">
+            {ENTRANCE_SHOWCASE.map((d, i) => (
+              <li class={`edh__door edh__door--${i + 1}`}>
+                <a href={d.href} class="edh__link" aria-label={`${d.title}: смотреть`}>
+                  <span class="edh__img">
+                    <img src={d.cover.src} srcset={d.cover.srcset} sizes="(min-width: 62.5rem) 12rem, 28vw" alt={d.cover.alt} width={d.cover.width} height={d.cover.height} fetchpriority={i === 0 ? 'high' : undefined} decoding="async" />
+                  </span>
+                  <span class="edh__cap">{d.name}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
-        <img class="edh__img" src={hero.src} srcset={hero.srcset} sizes="(min-width: 62.5rem) 40vw, 100vw" alt={hero.alt} width={hero.width} height={hero.height} fetchpriority="high" decoding="async" />
       </div>
     </section>
 
+    <div id="doors-pick" class="edb" role="search">
+      <div class="container edb__in">
+        <div class="edb__chips" role="group" aria-label="Тип двери">
+          <button type="button" class="edb__chip" data-filter="all" aria-pressed="true">Все <span>{total}</span></button>
+          {groups.map((g) => (
+            <button type="button" class="edb__chip" data-filter={g.id} aria-pressed="false">{g.nav} <span>{g.doors.length}</span></button>
+          ))}
+        </div>
+        <label class="edb__search">
+          <span class="sr-only">Найти модель или отделку</span>
+          <input type="search" class="edb__input" placeholder="Название или цвет: «белый», «дуб»…" autocomplete="off" enterkeyhint="search" />
+        </label>
+      </div>
+    </div>
+
+    <p id="edb-status" class="sr-only" role="status" aria-live="polite"></p>
+
     {groups.map((g) => (
-      <section id={`doors-${g.id}`} class="h-sec h-sec--tight-top" aria-labelledby={`doors-${g.id}-title`}>
+      <section id={`doors-${g.id}`} class="h-sec edg-sec" data-section={g.id} aria-labelledby={`doors-${g.id}-title`}>
         <div class="container">
-          <header class="h-head edg-head">
+          <header class="edg-head">
             <h2 id={`doors-${g.id}-title`} class="h-h2">{typograph(g.title)}</h2>
             <p class="h-body edg-head__note">{typograph(g.lead)}</p>
           </header>
           <ul class="edg" role="list">
-            {g.doors.map((d) => <li><DoorCard door={d} /></li>)}
+            {g.doors.map((d) => <li data-search={searchOf(d)}><DoorCard door={d} /></li>)}
           </ul>
         </div>
       </section>
     ))}
+
+    <section id="doors-empty" class="h-sec edg-sec" hidden aria-live="polite">
+      <div class="container">
+        <p class="h-lead">По запросу ничего не нашлось. Сбросьте поиск или напишите менеджеру — подберём дверь по вашему описанию.</p>
+        <DoorRequest text="Хочу подобрать входную дверь." />
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--tight-top" aria-labelledby="doors-help">
+      <div class="container">
+        <div class="edc">
+          <div>
+            <h2 id="doors-help" class="h-h2 edc__title">Не нашли нужную отделку?</h2>
+            <p class="h-body edc__text">У каждой модели десятки вариантов цвета и рисунка панели — на сайте самые ходовые. Напишите, что хотите, менеджер пришлёт фото и назовёт цену.</p>
+          </div>
+          <DoorRequest text="Хочу подобрать входную дверь. Отделка: " />
+        </div>
+      </div>
+    </section>
 
     <section id="doors-faq" class="h-sec" aria-labelledby="doors-faq-title">
       <div class="container h-faq">
@@ -88,43 +138,165 @@ const listSchema = {
         <FaqAccordion items={ENTRANCE_FAQ} title={false} />
       </div>
     </section>
-
-    <section class="h-sec h-sec--tight-top" aria-label="Запрос цены">
-      <div class="container">
-        <QuoteCta
-          image={hero.large}
-          title="Нужна цена на входную дверь?"
-          description="Выберите модель по фото и напишите менеджеру — ответит с ценой и вариантами отделки"
-          primaryHref={whatsappWithText('Хочу узнать цену на входную дверь.')}
-          primaryLabel="Написать в WhatsApp"
-          primaryExternal={true}
-          secondaryHref="/contacts/"
-          secondaryLabel="Как нас найти"
-        />
-      </div>
-    </section>
   </div>
 </BaseLayout>
 
-<style>
-  .edh { padding: clamp(1rem, 2vw, 1.5rem) 0 clamp(2.5rem, 5vw, 4rem); }
-  .edh__grid { display: grid; gap: 1.5rem var(--h-gutter); align-items: center; }
-  .edh__title { margin: 0; }
-  .edh__lead { margin: 1rem 0 0; }
-  .edh__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
-  .edh__img { display: block; width: 100%; height: auto; border-radius: var(--h-tile-radius); background: var(--h-media-bg); }
-  @media (min-width: 62.5rem) {
-    .edh__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .edh__text { grid-column: 1 / span 6; }
-    .edh__img { grid-column: 8 / span 5; }
+<script>
+  const root = document.querySelector<HTMLElement>('.edb')!
+  const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-filter]')]
+  const input = root.querySelector<HTMLInputElement>('.edb__input')!
+  const sections = [...document.querySelectorAll<HTMLElement>('[data-section]')]
+  const items = [...document.querySelectorAll<HTMLElement>('li[data-search]')]
+  const empty = document.getElementById('doors-empty')!
+  const status = document.getElementById('edb-status')!
+  let group = 'all'
+
+  function apply() {
+    const q = input.value.trim().toLowerCase()
+    let shown = 0
+    for (const li of items) {
+      const card = li.firstElementChild as HTMLElement
+      const ok = (group === 'all' || card.dataset.group === group) && (!q || (li.dataset.search ?? '').includes(q))
+      li.hidden = !ok
+      if (ok) shown++
+    }
+    for (const s of sections) s.hidden = !s.querySelector('li[data-search]:not([hidden])')
+    empty.hidden = shown > 0
+    status.textContent = `Найдено моделей: ${shown}`
   }
 
-  .edg-head { display: grid; gap: 0.75rem var(--h-gutter); margin-bottom: clamp(1.5rem, 3vw, 2rem); }
+  for (const c of chips) {
+    c.addEventListener('click', () => {
+      group = c.dataset.filter ?? 'all'
+      for (const x of chips) x.setAttribute('aria-pressed', String(x === c))
+      apply()
+      /* Липкая панель не должна закрывать заголовок — прокручиваем к началу списка, если ушли ниже */
+      const first = sections.find((s) => !s.hidden)
+      if (first && first.getBoundingClientRect().top < 0) first.scrollIntoView({ block: 'start' })
+    })
+  }
+  input.addEventListener('input', apply)
+</script>
+
+<style>
+  /* Первый экран: графитовая панель, текст слева, три двери в рост справа */
+  .edh { padding: clamp(1rem, 2vw, 1.5rem) 0 0; }
+  .edh__panel {
+    display: grid;
+    gap: 2rem var(--h-gutter);
+    align-items: end;
+    padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.25rem, 4vw, 3.5rem) 0;
+    border-radius: var(--h-tile-radius);
+    background: var(--color-graphite);
+    color: var(--color-white);
+    overflow: hidden;
+  }
+  .edh__text { align-self: center; padding-bottom: clamp(0rem, 3vw, 3rem); }
+  .edh__title { margin: 0; color: inherit; }
+  .edh__lead { margin: 1rem 0 0; max-width: 34rem; color: color-mix(in srgb, var(--color-white) 78%, transparent); }
+  .edh__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+  .edh__go { background: var(--color-white); color: var(--h-ink); }
+  .edh__go:hover { background: var(--color-slate-200); }
+  .edh__call { border-color: color-mix(in srgb, var(--color-white) 35%, transparent); background: none; color: var(--color-white); }
+  .edh__call:hover { border-color: var(--color-white); color: var(--color-white); }
+
+  /* Двери стоят на одной линии пола, разной высоты; левая половина кадра — дверь снаружи */
+  .edh__doors {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.5rem, 2vw, 1.25rem);
+    align-items: end;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .edh__door--1 { --k: 0.9; }
+  .edh__door--2 { --k: 1; }
+  .edh__door--3 { --k: 0.82; }
+  .edh__link { display: grid; gap: 0.5rem; color: inherit; text-decoration: none; }
+  .edh__img { display: block; aspect-ratio: 5 / 8; overflow: hidden; border-radius: 0.625rem 0.625rem 0 0; background: var(--color-graphite-card); transform-origin: bottom; transform: scale(var(--k)); }
+  .edh__img img { display: block; width: 200%; max-width: none; height: 100%; object-fit: cover; object-position: 0 0; }
+  .edh__cap { padding-bottom: 0.875rem; font-size: 0.8125rem; font-weight: 600; text-align: center; color: color-mix(in srgb, var(--color-white) 80%, transparent); }
+  .edh__link:hover .edh__cap, .edh__link:focus-visible .edh__cap { color: var(--color-white); }
+  .edh__link:focus-visible { outline: 0.1875rem solid var(--color-white); outline-offset: 0.125rem; }
+  @media (min-width: 62.5rem) {
+    .edh__panel { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .edh__text { grid-column: 1 / span 5; }
+    .edh__doors { grid-column: 6 / span 7; }
+  }
+
+  /* Панель выбора: липнет под шапкой */
+  .edb { position: sticky; top: calc(var(--header-height) + 0.5rem); z-index: 5; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
+  .edb__in {
+    display: grid;
+    gap: 0.625rem 1rem;
+    padding-block: 0.625rem;
+    border-radius: var(--h-radius);
+    background: color-mix(in srgb, var(--color-white) 94%, transparent);
+    backdrop-filter: blur(0.75rem);
+    box-shadow: 0 0.125rem 0.75rem color-mix(in srgb, var(--color-slate-900) 10%, transparent);
+  }
+  .edb__chips { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--h-pad) * -1); padding-inline: var(--h-pad); }
+  .edb__chips::-webkit-scrollbar { display: none; }
+  .edb__chip {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.5rem;
+    padding: 0 0.875rem;
+    border: 0.0625rem solid var(--color-slate-300);
+    border-radius: 999rem;
+    background: none;
+    color: var(--h-ink);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out);
+  }
+  .edb__chip span { color: var(--h-muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+  .edb__chip:hover { border-color: var(--h-ink); }
+  .edb__chip[aria-pressed='true'] { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
+  .edb__chip[aria-pressed='true'] span { color: color-mix(in srgb, var(--color-white) 70%, transparent); }
+  .edb__input {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border: 0.0625rem solid var(--color-slate-300);
+    border-radius: 999rem;
+    background: var(--color-white);
+    color: var(--h-ink);
+    font: inherit;
+    font-size: 1rem; /* 16 px — iOS не приближает страницу при фокусе */
+  }
+  .edb__input:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  @media (min-width: 62.5rem) {
+    .edb__in { grid-template-columns: minmax(0, 1fr) 20rem; align-items: center; }
+    .edb__chips { margin-inline: 0; padding-inline: 0; flex-wrap: wrap; overflow: visible; }
+  }
+
+  .edg-sec { padding-block: clamp(2rem, 4vw, 3.5rem) 0; }
+  .edg-sec[hidden], .edg li[hidden] { display: none; }
+  .edg-head { display: grid; gap: 0.5rem; margin-bottom: clamp(1.25rem, 3vw, 2rem); }
   .edg-head :global(h2), .edg-head__note { margin: 0; }
   .edg-head__note { max-width: 44rem; color: var(--h-soft); }
 
   /* Модели: телефон 2 в ряд, планшет 3, ПК 4 */
-  .edg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 0.75rem; margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .edg { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem var(--h-gutter); } }
+  .edg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 0.75rem; margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .edg { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.25rem var(--h-gutter); } }
   @media (min-width: 62.5rem) { .edg { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  .edc {
+    display: grid;
+    gap: 1.5rem var(--h-gutter);
+    align-items: center;
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
+  }
+  .edc__title { margin: 0; }
+  .edc__text { margin: 0.5rem 0 0; max-width: 40rem; color: var(--h-soft); }
+  @media (min-width: 62.5rem) { .edc { grid-template-columns: minmax(0, 1fr) auto; } }
 </style>

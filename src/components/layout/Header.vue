@@ -921,8 +921,8 @@ onUnmounted(() => {
   .hdr-nav { display: flex; align-items: center; gap: 0.125rem; }
 }
 .hdr-dropwrap { position: relative; }
-/* 80–90rem: пунктов шесть — поля уже, чтобы «Контакты» не упирались в телефон */
-@media (min-width: 80rem) and (max-width: 89.9375rem) {
+/* пунктов шесть — поля уже, чтобы «Контакты» не упирались в телефон */
+@media (min-width: 80rem) {
   .hdr-nav .hdr-link { padding: 0 0.625rem; }
 }
 .hdr-link {

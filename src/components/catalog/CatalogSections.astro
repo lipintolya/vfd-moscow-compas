@@ -1,0 +1,81 @@
+---
+/**
+ * Другие разделы каталога — ряд фото-плиток над сеткой межкомнатных дверей
+ * на /catalog/: входные двери, скрытые, стеновые панели, декор и плинтус.
+ * Человек, пришедший за входной дверью или панелью, находит её сразу, не
+ * открывая меню. Новый раздел — строка в items.
+ */
+import { ENTRANCE_DOORS, ENTRANCE_PAGE } from '../../data/entrance-doors'
+import { DIRECTION_PHOTOS } from '../../data/direction-photos'
+import { PANEL_HOME_TILE, WALL_PANELS_PAGE } from '../../data/wall-panels-page'
+import { PLINTUS_PAGE } from '../../data/plintus'
+import { shownVisual } from '../../lib/wall-panels'
+import { getWorks } from '../../lib/works'
+import { pluralRu } from '../../lib/plural'
+
+const walls = shownVisual(PANEL_HOME_TILE.visual, await getWorks())
+if (!walls) throw new Error('Каталог: у плитки «Стеновые панели» нет ни рендера, ни фото работы')
+const hero = ENTRANCE_PAGE.hero
+
+const items = [
+  {
+    title: 'Входные двери',
+    note: `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}, цена по запросу`,
+    href: '/catalog/vhodnye-dveri/',
+    src: hero.src, srcset: hero.srcset, alt: hero.alt, position: '25% 0%', fit: 'door',
+  },
+  {
+    title: 'Скрытые двери',
+    note: 'Заподлицо со стеной, калькулятор цены',
+    href: '/catalog/skrytye-dveri/',
+    src: DIRECTION_PHOTOS.hidden.src, alt: DIRECTION_PHOTOS.hidden.alt, position: '56% 50%',
+  },
+  {
+    title: 'Стеновые панели',
+    note: 'Шпон и покрытия дверей',
+    href: WALL_PANELS_PAGE.path,
+    src: walls.image.src, srcset: walls.image.srcset, alt: walls.image.alt, position: '50% 55%',
+  },
+  {
+    title: 'Плинтус и декор',
+    note: 'Напольный, скрытый, с подсветкой',
+    href: '/catalog/plintus/',
+    src: PLINTUS_PAGE.hero.src, alt: PLINTUS_PAGE.hero.alt, position: '50% 100%',
+  },
+]
+---
+
+<nav class="cs" aria-label="Другие разделы каталога">
+  <ul class="cs__list" role="list">
+    {items.map((it) => (
+      <li>
+        <a class="cs__item" href={it.href}>
+          <span class="h-media cs__photo">
+            <img src={it.src} srcset={it.srcset} sizes="(min-width: 62.5rem) 14rem, 44vw" alt="" role="presentation" style={`object-position: ${it.position}`} loading="lazy" decoding="async" />
+          </span>
+          <span class="cs__text">
+            <span class="cs__title">{it.title}</span>
+            <span class="cs__note">{it.note}</span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .cs { margin: 0 0 clamp(1.5rem, 3vw, 2.25rem); }
+  .cs__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 62.5rem) { .cs__list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--h-tile-gap); } }
+  .cs__item { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.75rem; align-items: center; padding: 0.5rem; border: 0.0625rem solid var(--h-rule); border-radius: var(--h-radius); color: inherit; text-decoration: none; transition: border-color 200ms var(--ease-out); }
+  .cs__item:hover { border-color: var(--h-signal); }
+  .cs__photo { aspect-ratio: 1; border-radius: 0.625rem; }
+  .cs__text { display: grid; gap: 0.125rem; min-width: 0; }
+  .cs__title { font-size: 0.9375rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); }
+  .cs__note { font-size: 0.8125rem; line-height: 1.3; color: var(--h-muted); }
+  /* Телефон: плитка вертикально — фото сверху, подпись под ним */
+  @media (max-width: 43.6875rem) {
+    .cs__item { grid-template-columns: 1fr; gap: 0.5rem; padding: 0.5rem 0.5rem 0.75rem; }
+    .cs__photo { aspect-ratio: 4 / 3; }
+  }
+</style>
