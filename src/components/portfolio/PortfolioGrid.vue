@@ -99,7 +99,7 @@ const hrefOf = (key: WorkCategory) => CATEGORY_PAGES[key] ?? CATEGORY_HREF[key]
          пропорция 3:4 стабильна для всех карточек — ряд карточек читается
          как ряд дверных полотен, а не произвольная фотогалерея. -->
     <div ref="gridEl" class="pf-grid scroll-mt-24">
-      <a v-for="(work, index) in filtered" :key="work.id" :href="`/portfolio/${work.id}/`" class="pf-card group">
+      <a v-for="(work, index) in filtered" :key="work.id" :href="`/portfolio/${work.id}/`" class="pf-card group h-card">
         <span class="pf-card__frame">
           <img
             :src="work.cover.src"
@@ -111,12 +111,23 @@ const hrefOf = (key: WorkCategory) => CATEGORY_PAGES[key] ?? CATEGORY_HREF[key]
             decoding="async"
             class="pf-card__img"
           />
+          <span v-if="work.images.length > 1" class="h-photocount" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><rect x="5" y="2.5" width="9" height="9" rx="1.8" stroke="currentColor" stroke-width="1.5"/><path d="M3 5.5v6.2a1.8 1.8 0 0 0 1.8 1.8H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            {{ work.images.length }} фото
+          </span>
+          <span class="h-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
         </span>
         <span class="pf-card__caption">
           <span class="pf-card__title">{{ work.title }}</span>
           <span class="pf-card__meta">
             <span class="pf-card__cat">{{ CATEGORY_LABELS[work.category] }}</span>
             <span class="pf-card__date">{{ work.label }}</span>
+          </span>
+          <span class="h-more">
+            {{ work.images.length > 1 ? `Смотреть ${work.images.length} фото` : 'Смотреть работу' }}
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
         </span>
       </a>
