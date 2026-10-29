@@ -457,14 +457,6 @@ onUnmounted(() => {
                       <span class="hdr-pop__status" :class="{ 'is-open': isOpen }">{{ statusTitle }}. {{ statusDetail }}</span>
                     </dd>
                   </div>
-                  <div v-if="WHATSAPP">
-                    <dt>WhatsApp</dt>
-                    <dd>
-                      <a :href="WHATSAPP_URL" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
-                        Написать в чат
-                      </a>
-                    </dd>
-                  </div>
                   <div v-if="TELEGRAM_CHAT">
                     <dt>Telegram</dt>
                     <dd>
@@ -486,14 +478,6 @@ onUnmounted(() => {
                     <dd>
                       <a :href="SITE.social.telegram" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
                         {{ SITE.social.telegramHandle }}
-                      </a>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>YouTube</dt>
-                    <dd>
-                      <a :href="SITE.social.youtube" target="_blank" rel="noopener noreferrer" class="hdr-pop__link">
-                        {{ SITE.social.youtubeHandle }}
                       </a>
                     </dd>
                   </div>
@@ -1068,6 +1052,10 @@ onUnmounted(() => {
   right: 0;
   z-index: 50;
   width: 20rem;
+  /* Невысокие экраны (ноутбук 13″): панель не длиннее окна, остальное — прокруткой */
+  max-height: calc(100dvh - var(--header-height) - 1.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1rem;
   border-radius: 1.25rem;
   background: var(--hdr-bg);
