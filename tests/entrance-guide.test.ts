@@ -9,7 +9,7 @@ import { DOOR_GROUPS, ENTRANCE_DOORS } from '../src/data/entrance-doors'
 const texts = () => [
   GUIDE.title, GUIDE.lead, GUIDE.criteriaLead,
   ...GUIDE_KINDS.flatMap((k) => [k.title, k.fits, k.text, k.stats]),
-  ...GUIDE_CRITERIA.flatMap((c) => [c.title, c.text, c.flat, c.house]),
+  ...GUIDE_CRITERIA.flatMap((c) => [c.title, c.what, c.text, c.flat.verdict, c.flat.note, c.house.verdict, c.house.note]),
   ...GUIDE_PARTS.flatMap((p) => [p.title, p.text]),
   ...GUIDE_STEPS.flatMap((s) => [s.title, s.text]),
   ...GUIDE_MISTAKES.flatMap((m) => [m.title, m.text]),
@@ -29,11 +29,21 @@ test('путеводитель: виды дверей — по одному на
   for (const k of GUIDE_KINDS) assert.equal(k.fallback.group, k.id, k.title)
 })
 
-test('путеводитель: у каждого критерия есть совет для квартиры и для дома', () => {
+test('путеводитель: у каждого критерия — суть, совет и важность для квартиры и для дома', () => {
   assert.ok(GUIDE_CRITERIA.length >= 8)
   for (const c of GUIDE_CRITERIA) {
-    assert.ok(c.text.length > 60 && c.flat.length > 15 && c.house.length > 15, c.title)
+    assert.ok(c.what.length > 15 && c.text.length > 40, c.title)
+    for (const v of [c.flat, c.house]) {
+      assert.ok(['must', 'good', 'skip'].includes(v.level), c.title)
+      // в таблице совет — одна короткая строка, пояснение — отдельно
+      assert.ok(v.verdict.length >= 6 && v.verdict.length <= 45, `${c.title}: «${v.verdict}» ${v.verdict.length}`)
+      assert.ok(v.note.length > 20, c.title)
+    }
   }
+  // терморазрыв — главное различие: для дома нужен, для квартиры нет
+  const thermo = GUIDE_CRITERIA.find((c) => c.title === 'Терморазрыв')!
+  assert.equal(thermo.house.level, 'must')
+  assert.equal(thermo.flat.level, 'skip')
 })
 
 test('подбор: для каждой пары вопросов есть группа каталога и объяснение', () => {
