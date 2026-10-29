@@ -1,0 +1,203 @@
+---
+/**
+ * Страница модели входной двери (/catalog/vhodnye-dveri/<id>/): фото и
+ * варианты отделки (lightbox), характеристики таблицей, «Узнать цену» в
+ * мессенджерах, другие модели той же группы. Данные — src/data/entrance-doors.ts.
+ */
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../../lib/seo-title'
+import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
+import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
+import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
+import { ENTRANCE_DOORS, ENTRANCE_FAQ, DOOR_GROUPS, doorsOfGroup, doorTitle, doorDescription } from '../../../data/entrance-doors'
+import type { EntranceDoor } from '../../../data/entrance-doors'
+import { productSchemaNoPrice } from '../../../lib/product-schema'
+import { localBusinessSchema } from '../../../lib/local-business-schema'
+import { SITE } from '../../../config/site'
+import { typograph } from '../../../lib/typograph'
+import '../../../styles/home.css'
+
+export function getStaticPaths() {
+  return ENTRANCE_DOORS.map((door) => ({ params: { id: door.id }, props: { door } }))
+}
+interface Props { door: EntranceDoor }
+const { door } = Astro.props
+
+const group = DOOR_GROUPS.find((g) => g.id === door.group)!
+const description = doorDescription(door)
+/* Соседние модели той же группы — по кругу, чтобы у каждой были ссылки */
+const same = doorsOfGroup(door.group)
+const at = same.findIndex((d) => d.id === door.id)
+const related = [1, 2, 3, 4].map((n) => same[(at + n) % same.length]!).filter((d, i, a) => d.id !== door.id && a.indexOf(d) === i)
+const large = JSON.stringify(door.variants.map((v) => ({ src: v.image.large, alt: v.image.alt })))
+const faq = ENTRANCE_FAQ.slice(0, 3)
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+}
+const lock = door.specs.find((r) => r.label === 'Основной замок')?.value
+const lead = `${door.chips.join(', ')}.${lock ? ` Основной замок: ${lock}.` : ''} На фото — дверь снаружи и изнутри.`
+const facts = [
+  { label: 'Размеры полотна', value: `${door.sizes} мм` },
+  { label: 'Открывание', value: door.opening },
+  { label: 'Цена', value: 'по запросу' },
+]
+---
+
+<BaseLayout
+  title={brandTitle(doorTitle(door))}
+  description={description}
+  ogImage={door.cover.large}
+  ogImageMeta={{ width: door.cover.width, height: door.cover.height, alt: door.cover.alt }}
+  preloadImage={door.cover.src}
+  structuredData={[
+    localBusinessSchema({ url: SITE.url }),
+    productSchemaNoPrice({ name: door.title, description, image: door.cover.large, url: door.href }),
+    faqSchema,
+  ]}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={[
+        { label: 'Главная', href: '/' },
+        { label: 'Каталог', href: '/catalog/' },
+        { label: 'Входные двери', href: '/catalog/vhodnye-dveri/' },
+        { label: door.name },
+      ]} />
+    </div>
+  </div>
+
+  <div class="home">
+    <div data-lightbox data-lightbox-images={large}>
+      <section class="edm" aria-labelledby="door-title">
+        <div class="container edm__grid">
+          <button type="button" class="h-media edm__photo" data-lightbox-index="0" aria-label={`Открыть фото: ${door.cover.alt}`}>
+            <img src={door.cover.src} srcset={door.cover.srcset} sizes="(min-width: 62.5rem) 55vw, 100vw" alt={door.cover.alt} width={door.cover.width} height={door.cover.height} fetchpriority="high" decoding="async" />
+          </button>
+          <div class="edm__text">
+            <p class="h-meta edm__kind"><a href={`/catalog/vhodnye-dveri/#doors-${group.id}`}>{group.nav}</a></p>
+            <h1 id="door-title" class="h-h1 edm__title">{typograph(door.title)}</h1>
+            <p class="h-lead edm__lead">{typograph(lead)}</p>
+            <dl class="edm__facts">
+              {facts.map((f) => (
+                <div class="edm__fact"><dt>{f.label}</dt><dd>{typograph(f.value)}</dd></div>
+              ))}
+            </dl>
+            <DoorRequest text={door.request} />
+          </div>
+        </div>
+      </section>
+
+      {door.variants.length > 1 && (
+        <section class="h-sec h-sec--tight-top" aria-labelledby="door-variants">
+          <div class="container">
+            <h2 id="door-variants" class="h-h2 edm__h2">Варианты отделки</h2>
+            <p class="h-body edm__note">Нажмите на фото, чтобы рассмотреть крупно. Других цветов и рисунков панели больше — напишите менеджеру.</p>
+            <ul class="edm__variants" role="list">
+              {door.variants.map((v, i) => (
+                <li>
+                  <button type="button" class="edm__variant" data-lightbox-index={i} aria-label={`Открыть фото: ${v.name}`}>
+                    <span class="h-media edm__vphoto">
+                      <img src={v.image.src} srcset={v.image.srcset} sizes="(min-width: 62.5rem) 22rem, (min-width: 43.75rem) 30vw, 46vw" alt={v.image.alt} width={v.image.width} height={v.image.height} loading="lazy" decoding="async" />
+                    </span>
+                    <span class="edm__vname">{typograph(v.name)}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+    </div>
+
+    <section class="h-sec h-sec--tight-top" aria-labelledby="door-spec">
+      <div class="container">
+        <h2 id="door-spec" class="h-h2 edm__h2">Характеристики</h2>
+        <p class="h-body edm__note">Отделка снаружи и изнутри зависит от выбранного варианта, остальное — общее для модели.</p>
+        <dl class="edm__spec">
+          {door.specs.map((row) => (
+            <div class="edm__row"><dt>{row.label}</dt><dd>{typograph(row.value)}</dd></div>
+          ))}
+        </dl>
+      </div>
+    </section>
+
+    <section class="h-sec h-sec--tight-top" aria-label="Запрос цены">
+      <div class="container edm__ask">
+        <h2 class="h-h2 edm__h2">Узнать цену на «{door.name}»</h2>
+        <p class="h-body edm__note">Цена зависит от отделки и комплектации. Напишите менеджеру — ответит с ценой и пришлёт фото нужных вариантов.</p>
+        <DoorRequest text={door.request} />
+      </div>
+    </section>
+
+    {related.length > 0 && (
+      <section class="h-sec h-sec--tight-top" aria-labelledby="door-related">
+        <div class="container">
+          <h2 id="door-related" class="h-h2 edm__h2">Другие модели: {group.nav.toLowerCase()}</h2>
+          <ul class="edr" role="list">
+            {related.map((d) => <li><DoorCard door={d} /></li>)}
+          </ul>
+          <p class="edr__all"><a class="h-btn h-btn--quiet" href="/catalog/vhodnye-dveri/">Все входные двери</a></p>
+        </div>
+      </section>
+    )}
+
+    <section class="h-sec" aria-labelledby="door-faq-title">
+      <div class="container h-faq">
+        <h2 id="door-faq-title" class="h-h2">Частые вопросы</h2>
+        <FaqAccordion items={faq} title={false} />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initLightboxGroups } from '../../../lib/lightbox'
+  initLightboxGroups()
+</script>
+
+<style>
+  .edm { padding: clamp(1rem, 2vw, 1.5rem) 0 clamp(2.5rem, 5vw, 4rem); }
+  .edm__grid { display: grid; gap: 1.5rem var(--h-gutter); align-items: center; }
+  .edm__photo { display: block; width: 100%; padding: 0; border: 0; aspect-ratio: 5 / 4; border-radius: var(--h-tile-radius); cursor: zoom-in; }
+  .edm__kind { margin: 0 0 0.5rem; }
+  .edm__kind a { color: inherit; }
+  .edm__title { margin: 0; }
+  .edm__lead { margin: 1rem 0 0; }
+  .edm__facts { margin: 1.25rem 0 1.5rem; border-top: 0.0625rem solid var(--h-rule); }
+  .edm__fact { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; padding: 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
+  .edm__fact dt { color: var(--h-muted); }
+  .edm__fact dd { margin: 0; color: var(--h-ink); }
+  @media (min-width: 62.5rem) {
+    .edm__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .edm__photo { grid-column: 1 / span 7; }
+    .edm__text { grid-column: 8 / span 5; }
+  }
+
+  .edm__h2 { margin: 0; }
+  .edm__note { margin: 0.75rem 0 0; max-width: 44rem; color: var(--h-soft); }
+  .edm__ask { display: grid; gap: 1rem; justify-items: start; }
+  .edm__ask .edm__note { margin: 0; }
+
+  .edm__variants { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem 0.75rem; margin: clamp(1.5rem, 3vw, 2rem) 0 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .edm__variants { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem var(--h-gutter); } }
+  @media (min-width: 62.5rem) { .edm__variants { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .edm__variant { display: grid; gap: 0.5rem; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: zoom-in; }
+  .edm__vphoto { aspect-ratio: 5 / 4; border-radius: var(--h-tile-radius); }
+  .edm__vphoto img { transition: transform 600ms var(--ease-out); }
+  .edm__variant:hover .edm__vphoto img { transform: scale(1.03); }
+  .edm__vname { font-size: 0.9375rem; line-height: 1.35; color: var(--h-ink); }
+
+  .edm__spec { margin: clamp(1.25rem, 3vw, 1.75rem) 0 0; border-top: 0.0625rem solid var(--h-rule); }
+  .edm__row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; padding: 0.875rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
+  .edm__row dt { color: var(--h-muted); }
+  .edm__row dd { margin: 0; color: var(--h-ink); }
+  @media (max-width: 43.6875rem) { .edm__row, .edm__fact { grid-template-columns: 1fr; gap: 0.25rem; } }
+
+  .edr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem 0.75rem; margin: clamp(1.5rem, 3vw, 2rem) 0 0; padding: 0; list-style: none; }
+  @media (min-width: 62.5rem) { .edr { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem var(--h-gutter); } }
+  .edr__all { margin: 2rem 0 0; }
+  @media (prefers-reduced-motion: reduce) { .edm__vphoto img { transition: none; } }
+</style>

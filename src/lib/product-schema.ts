@@ -52,3 +52,18 @@ export function productSchema(p: {
     },
   }
 }
+
+/**
+ * Product без цены — для моделей, цену которых салон называет по запросу
+ * (входные двери): offers нет, только описание, фото и бренд-продавец.
+ */
+export function productSchemaNoPrice(p: { name: string; description: string; image: string; url: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.name,
+    description: p.description,
+    image: new URL(p.image, SITE.url).href,
+    url: new URL(p.url, SITE.url).href,
+  }
+}

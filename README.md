@@ -180,6 +180,7 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 | `npm run gen:about` / `gen:og-about` | фото «О нас» и картинка для соцсетей |
 | `npm run gen:decor` | облегчённые копии фото «Декора» (`/catalog/decor/`, плинтус на страницах моделей) |
 | `npm run gen:plintus-lines` | фото направлений плинтуса (`/catalog/plintus/`): с подсветкой, скрытый, микроплинтус, шпонированный — из `assets/plintus-lines/` |
+| `npm run gen:entrance-doors` | фото входных дверей (`/catalog/vhodnye-dveri/`) — из `assets/entrance-doors/` в `public/renders/entrance-doors/` |
 | `npm run gen:photos` | наборы фото из `assets/`: шоурум (`showroom/` — «О нас» и галерея «Контактов»), вход в салон (`salon/`), производство (`factory/`), слайдер основателя (`founder/`); в имени копии — хеш, старые копии удаляются |
 | `npm run gen:contacts` / `gen:mall` | фото контактов и ТЦ «Компас» |
 | `npm run gen:responsive` | уменьшенные копии фото, которые на телефоне показаны мельче оригинала: фасад ТЦ, плитки направлений (640 и 960 px, хеш в имени) |

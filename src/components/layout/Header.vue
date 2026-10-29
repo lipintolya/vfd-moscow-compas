@@ -91,6 +91,7 @@ const DESKTOP_NAV = NAV_LINKS.filter(l => l.href !== '/')
 const CATALOG_DROPDOWN = [
   { href: '/catalog/',               label: 'Все двери',      desc: 'Межкомнатные' },
   { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери', desc: 'Скрытый монтаж' },
+  { href: '/catalog/vhodnye-dveri/', label: 'Входные двери', desc: 'Стальные, с терморазрывом' },
   { href: '/catalog/stenovye-paneli/', label: 'Стеновые панели', desc: 'Шпон и покрытия дверей' },
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
   { href: '/catalog/plintus/',       label: 'Плинтус', desc: 'Напольный, скрытый, с подсветкой' },

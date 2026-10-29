@@ -267,8 +267,12 @@ export default defineConfig({
         }
         // Напольный плинтус и стеновые панели — страницы каталога под поиск
         // (src/pages/catalog/plintus.astro, stenovye-paneli.astro)
-        if (/\/catalog\/(plintus|stenovye-paneli)\/?$/.test(u)) {
+        if (/\/catalog\/(plintus|stenovye-paneli|vhodnye-dveri)\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
+        }
+        // Модели входных дверей — src/pages/catalog/vhodnye-dveri/[id].astro
+        if (/\/catalog\/vhodnye-dveri\/[a-z0-9-]+\/?$/.test(u)) {
+          return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.7 }
         }
         // Стилевые SEO-лендинги — см. src/data/style-categories.ts.
         if (/\/catalog\/(loft-dveri|minimalizm-dveri)\/?$/.test(u)) {
