@@ -85,8 +85,8 @@ const listSchema = {
       </div>
     </section>
 
-    <div id="doors-pick" class="edb" role="search">
-      <div class="container edb__in">
+    <div id="doors-pick" class="edb container" role="search">
+      <div class="edb__in">
         <div class="edb__chips" role="group" aria-label="Тип двери">
           <button type="button" class="edb__chip" data-filter="all" aria-pressed="true">Все <span>{total}</span></button>
           {groups.map((g) => (
@@ -244,17 +244,18 @@ const listSchema = {
   }
 
   /* Панель выбора: липнет под шапкой */
+  /* Липкая панель по ширине контейнера — ровно как блоки страницы */
   .edb { position: sticky; top: calc(var(--header-height) + 0.5rem); z-index: 5; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
   .edb__in {
     display: grid;
     gap: 0.625rem 1rem;
-    padding-block: 0.625rem;
+    padding: 0.625rem 0.75rem;
     border-radius: var(--h-radius);
     background: color-mix(in srgb, var(--color-white) 94%, transparent);
     backdrop-filter: blur(0.75rem);
     box-shadow: 0 0.125rem 0.75rem color-mix(in srgb, var(--color-slate-900) 10%, transparent);
   }
-  .edb__chips { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--h-pad) * -1); padding-inline: var(--h-pad); }
+  .edb__chips { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; }
   .edb__chips::-webkit-scrollbar { display: none; }
   .edb__chip {
     flex: none;
@@ -291,7 +292,7 @@ const listSchema = {
   .edb__input:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   @media (min-width: 62.5rem) {
     .edb__in { grid-template-columns: minmax(0, 1fr) 20rem; align-items: center; }
-    .edb__chips { margin-inline: 0; padding-inline: 0; flex-wrap: wrap; overflow: visible; }
+    .edb__chips { flex-wrap: wrap; overflow: visible; }
   }
 
   /* Группы — отдельные полосы с воздухом: заголовок, пояснение и счётчик, ниже модели */
