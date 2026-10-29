@@ -75,11 +75,9 @@ const brandIntro = (() => {
 
 /* desc — пояснение пункта в мобильном меню (у разделов с подменю —
    пояснения у его пунктов) */
-const ENTRANCE_HREF = '/catalog/vhodnye-dveri/'
 const NAV_LINKS = [
   { href: '/',            label: 'Главная',     desc: '' },
   { href: '/catalog/',    label: 'Каталог',     desc: '' },
-  { href: ENTRANCE_HREF, label: 'Входные двери', desc: 'Стальные, с терморазрывом' },
   { href: '/partitions/', label: 'Перегородки', desc: '' },
   { href: '/designers/',  label: 'Дизайнерам',  desc: 'Условия и материалы для проектов' },
   { href: '/about/',      label: 'О нас',       desc: `${SITE.studioName} и фабрика ${SITE.name}` },
@@ -92,6 +90,7 @@ const DESKTOP_NAV = NAV_LINKS.filter(l => l.href !== '/')
 
 const CATALOG_DROPDOWN = [
   { href: '/catalog/',               label: 'Все двери',      desc: 'Межкомнатные' },
+  { href: '/catalog/vhodnye-dveri/', label: 'Входные двери', desc: 'Стальные, с терморазрывом' },
   { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери', desc: 'Скрытый монтаж' },
   { href: '/catalog/stenovye-paneli/', label: 'Стеновые панели', desc: 'Шпон и покрытия дверей' },
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
@@ -112,9 +111,8 @@ const SUBMENU: Record<string, readonly { href: string; label: string; desc: stri
    раздела, строки — его пункты) и «Студия» — остальные страницы. «Главная»
    не выводится: на неё ведёт бренд в верхней строке меню. */
 const MOBILE_GROUPS = [
-  { title: 'Входные двери', items: [{ href: ENTRANCE_HREF, label: 'Каталог входных дверей', desc: 'Стальные, с терморазрывом, цена по запросу' }] },
   ...NAV_LINKS.filter((l) => SUBMENU[l.href]).map((l) => ({ title: l.label, items: SUBMENU[l.href]! })),
-  { title: 'Студия', items: NAV_LINKS.filter((l) => !SUBMENU[l.href] && l.href !== '/' && l.href !== ENTRANCE_HREF) },
+  { title: 'Студия', items: NAV_LINKS.filter((l) => !SUBMENU[l.href] && l.href !== '/') },
 ]
 
 
@@ -150,8 +148,7 @@ const isActive = (href: string) => currentPath.value === href
    и на вложенных страницах (/catalog/series/…, /models/…), перегородки —
    и на /partitions/alum/. */
 const isSection = (href: string) => {
-  if (href === ENTRANCE_HREF) return currentPath.value.startsWith(ENTRANCE_HREF)
-  if (href === '/catalog/') return (currentPath.value.startsWith('/catalog') && !currentPath.value.startsWith(ENTRANCE_HREF)) || currentPath.value.startsWith('/models')
+  if (href === '/catalog/') return currentPath.value.startsWith('/catalog') || currentPath.value.startsWith('/models')
   if (href === '/partitions/') return currentPath.value.startsWith('/partitions')
   return isActive(href)
 }
@@ -921,10 +918,6 @@ onUnmounted(() => {
   .hdr-nav { display: flex; align-items: center; gap: 0.125rem; }
 }
 .hdr-dropwrap { position: relative; }
-/* пунктов шесть — поля уже, чтобы «Контакты» не упирались в телефон */
-@media (min-width: 80rem) {
-  .hdr-nav .hdr-link { padding: 0 0.625rem; }
-}
 .hdr-link {
   position: relative;
   display: inline-flex;
