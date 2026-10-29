@@ -1,0 +1,209 @@
+---
+/**
+ * Путеводитель по выбору входной двери под каталогом на /catalog/vhodnye-dveri/:
+ * введение с рендером дома, виды дверей (с кнопкой «показать модели»),
+ * критерии для квартиры и для дома, из чего состоит дверь, шаги выбора и
+ * частые ошибки. Тексты и цифры — src/data/entrance-guide.ts (цифры из
+ * каталога); рендеры — RenderSlot.astro.
+ */
+import RenderSlot from './RenderSlot.astro'
+import { GUIDE, GUIDE_KINDS, GUIDE_CRITERIA, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES } from '../../data/entrance-guide'
+import { renderOf } from '../../lib/entrance-renders'
+import { typograph } from '../../lib/typograph'
+
+const hasHouse = !!renderOf(GUIDE.house)
+const hasAnatomy = !!renderOf(GUIDE.anatomy)
+---
+
+<div class="eg">
+  <section id="guide" class="h-sec" aria-labelledby="guide-title">
+    <div class="container egi" data-with-media={hasHouse || undefined}>
+      <div class="egi__text">
+        <h2 id="guide-title" class="h-h2">{typograph(GUIDE.title)}</h2>
+        <p class="h-lead egi__lead">{typograph(GUIDE.lead)}</p>
+        <nav class="egi__nav" aria-label="Разделы путеводителя">
+          <a class="h-pill h-pill--line" href="#guide-kinds">Виды дверей</a>
+          <a class="h-pill h-pill--line" href="#guide-criteria">Что учесть</a>
+          <a class="h-pill h-pill--line" href="#guide-parts">Из чего состоит дверь</a>
+          <a class="h-pill h-pill--line" href="#guide-steps">Шаги выбора</a>
+        </nav>
+      </div>
+      {hasHouse && <RenderSlot visual={GUIDE.house} sizes="(min-width: 62.5rem) 52vw, 100vw" class="egi__media" />}
+    </div>
+  </section>
+
+  <section id="guide-kinds" class="h-sec h-sec--wall" aria-labelledby="kinds-title">
+    <div class="container">
+      <h2 id="kinds-title" class="h-h2 eg__h2">{GUIDE.kindsTitle}</h2>
+      <ul class="egk" role="list">
+        {GUIDE_KINDS.map((k) => (
+          <li class="egk__item">
+            <RenderSlot visual={k.visual} fallback={k.fallback} sizes="(min-width: 62.5rem) 18rem, (min-width: 43.75rem) 30vw, 90vw" class="egk__media" />
+            <div class="egk__body">
+              <h3 class="egk__title">{k.title}</h3>
+              <p class="egk__fits">{k.fits}</p>
+              <p class="egk__text">{typograph(k.text)}</p>
+              <p class="egk__stats">{k.stats}</p>
+              <button type="button" class="h-btn h-btn--quiet egk__go" data-kind={k.id}>Показать модели</button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section id="guide-criteria" class="h-sec" aria-labelledby="criteria-title">
+    <div class="container">
+      <header class="eg__head">
+        <h2 id="criteria-title" class="h-h2">{GUIDE.criteriaTitle}</h2>
+        <p class="h-body eg__note">{typograph(GUIDE.criteriaLead)}</p>
+      </header>
+      <ul class="egc" role="list">
+        {GUIDE_CRITERIA.map((c) => (
+          <li class="egc__item">
+            <h3 class="egc__title">{c.title}</h3>
+            <p class="egc__text">{typograph(c.text)}</p>
+            <dl class="egc__pick">
+              <div><dt>Квартира</dt><dd>{typograph(c.flat)}</dd></div>
+              <div><dt>Частный дом</dt><dd>{typograph(c.house)}</dd></div>
+            </dl>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section id="guide-parts" class="h-sec h-sec--wall" aria-labelledby="parts-title">
+    <div class="container egp" data-with-media={hasAnatomy || undefined}>
+      {hasAnatomy && <RenderSlot visual={GUIDE.anatomy} sizes="(min-width: 62.5rem) 56vw, 100vw" class="egp__media" />}
+      <div class="egp__text">
+        <h2 id="parts-title" class="h-h2 eg__h2">{GUIDE.partsTitle}</h2>
+        <ul class="egp__list" role="list">
+          {GUIDE_PARTS.map((p) => (
+            <li><h3 class="egp__name">{p.title}</h3><p class="egp__desc">{typograph(p.text)}</p></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="guide-steps" class="h-sec" aria-labelledby="steps-title">
+    <div class="container">
+      <h2 id="steps-title" class="h-h2 eg__h2">{GUIDE.stepsTitle}</h2>
+      <ol class="egs" role="list">
+        {GUIDE_STEPS.map((s) => (
+          <li class="egs__item">
+            <h3 class="egs__title">{s.title}</h3>
+            <p class="egs__text">{typograph(s.text)}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="h-sec h-sec--wall" aria-labelledby="mistakes-title">
+    <div class="container">
+      <h2 id="mistakes-title" class="h-h2 eg__h2">{GUIDE.mistakesTitle}</h2>
+      <ul class="egm" role="list">
+        {GUIDE_MISTAKES.map((m) => (
+          <li class="egm__item">
+            <h3 class="egm__title">{m.title}</h3>
+            <p class="egm__text">{typograph(m.text)}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+  /* «Показать модели» у вида двери — фильтр каталога выше (слушает index.astro) */
+  for (const b of document.querySelectorAll<HTMLButtonElement>('[data-kind]')) {
+    b.addEventListener('click', () => document.dispatchEvent(new CustomEvent('doors:filter', { detail: { group: b.dataset.kind } })))
+  }
+</script>
+
+<style>
+  .eg__h2 { margin: 0 0 clamp(1.75rem, 4vw, 2.75rem); }
+  .eg__head { display: grid; gap: 0.75rem; margin-bottom: clamp(1.75rem, 4vw, 2.75rem); }
+  .eg__head :global(h2), .eg__note { margin: 0; }
+  .eg__note { max-width: 40rem; color: var(--h-soft); }
+
+  /* Введение: текст и рендер дома рядом; без рендера — текст на всю ширину колонки */
+  .egi { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
+  .egi__text { display: grid; gap: 1rem; max-width: 46rem; }
+  .egi__text :global(h2), .egi__lead { margin: 0; }
+  .egi__nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+  @media (min-width: 62.5rem) {
+    .egi[data-with-media] { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .egi[data-with-media] .egi__text { grid-column: 1 / span 5; }
+    .egi[data-with-media] :global(.egi__media) { grid-column: 7 / span 6; }
+  }
+
+  /* Виды: карточки с фото слева, на телефоне — одна под другой */
+  .egk { display: grid; gap: clamp(2rem, 4vw, 3rem) var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 62.5rem) { .egk { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .egk__item { display: grid; gap: 1.25rem 1.5rem; align-items: start; }
+  @media (min-width: 43.75rem) { .egk__item { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
+  @media (max-width: 43.6875rem) { .egk :global(.egk__media) { max-width: 16rem; } }
+  .egk__body { display: grid; gap: 0.625rem; justify-items: start; }
+  .egk__title { margin: 0; font-size: 1.375rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); }
+  .egk__fits { margin: 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-muted); }
+  .egk__text { margin: 0; color: var(--h-soft); }
+  .egk__stats { margin: 0; font-weight: 600; color: var(--h-ink); }
+  .egk__go { margin-top: 0.5rem; }
+
+  /* Критерии: три колонки, в каждой — суть и две строки выбора */
+  .egc { display: grid; gap: 2.5rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .egc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 75rem) { .egc { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .egc__item { display: grid; gap: 0.625rem; align-content: start; padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
+  .egc__title { margin: 0; font-size: 1.1875rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); }
+  .egc__text { margin: 0; color: var(--h-soft); }
+  .egc__pick { display: grid; gap: 0.5rem; margin: 0.5rem 0 0; }
+  .egc__pick > div { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; }
+  .egc__pick dt { font-size: 0.875rem; font-weight: 600; color: var(--h-muted); }
+  .egc__pick dd { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-ink); }
+
+  /* Из чего состоит: рендер разреза слева, список слева-направо; без рендера — две колонки */
+  .egp { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
+  .egp__list { display: grid; gap: 1.25rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .egp__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .egp__name { margin: 0 0 0.25rem; font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
+  .egp__desc { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
+  @media (min-width: 62.5rem) {
+    .egp[data-with-media] { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .egp[data-with-media] :global(.egp__media) { grid-column: 1 / span 7; }
+    .egp[data-with-media] .egp__text { grid-column: 8 / span 5; }
+    .egp[data-with-media] .egp__list { grid-template-columns: 1fr; }
+  }
+
+  /* Шаги — настоящая последовательность, номера уместны */
+  .egs { display: grid; gap: 1.75rem var(--h-gutter); margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  @media (min-width: 43.75rem) { .egs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 75rem) { .egs { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .egs__item { position: relative; counter-increment: step; display: grid; gap: 0.5rem; align-content: start; padding-top: 3.25rem; }
+  .egs__item::before {
+    content: counter(step);
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999rem;
+    background: var(--h-ink);
+    color: var(--color-white);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .egs__title { margin: 0; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; color: var(--h-ink); }
+  .egs__text { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
+
+  .egm { display: grid; gap: 1.5rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .egm { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .egm__item { padding: 1.5rem; border-radius: var(--h-radius); background: var(--color-white); }
+  .egm__title { margin: 0 0 0.5rem; font-size: 1.125rem; font-weight: 600; color: var(--h-ink); }
+  .egm__text { margin: 0; color: var(--h-soft); }
+</style>

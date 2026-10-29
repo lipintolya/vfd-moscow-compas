@@ -1,0 +1,117 @@
+---
+/**
+ * «Подберём за минуту»: два вопроса — где стоит дверь и что важно — и совет,
+ * какая группа каталога подходит (pickResult в src/data/entrance-guide.ts).
+ * Кнопка в ответе применяет фильтр каталога ниже (событие doors:filter).
+ * Без скрипта блок не нужен — страница работает и без него, поэтому
+ * весь блок скрыт, пока скрипт не включит его (hidden → снимается в script).
+ */
+import { PICK_PLACES, PICK_NEEDS, pickResult, groupSummary } from '../../data/entrance-guide'
+
+/* Ответ для каждой пары — готовый, скрипт только показывает нужный */
+const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
+  const r = pickResult(p.id, n.id)
+  return { place: p.id, need: n.id, group: r.group, why: r.why, ...groupSummary(r.group) }
+}))
+---
+
+<section class="pk" aria-labelledby="pk-title" hidden data-pick>
+  <div class="container">
+    <div class="pk__box">
+      <div class="pk__head">
+        <h2 id="pk-title" class="h-h3 pk__title">Подберём за минуту</h2>
+        <p class="pk__lead">Ответьте на два вопроса — покажем, с какой группы моделей начать.</p>
+      </div>
+      <div class="pk__q">
+        <p class="pk__label" id="pk-place">Где стоит дверь</p>
+        <div class="pk__opts" role="group" aria-labelledby="pk-place">
+          {PICK_PLACES.map((p) => <button type="button" class="pk__opt" data-place={p.id} aria-pressed="false">{p.label}</button>)}
+        </div>
+      </div>
+      <div class="pk__q">
+        <p class="pk__label" id="pk-need">Что важнее</p>
+        <div class="pk__opts" role="group" aria-labelledby="pk-need">
+          {PICK_NEEDS.map((n) => <button type="button" class="pk__opt" data-need={n.id} aria-pressed="false">{n.label}</button>)}
+        </div>
+      </div>
+      <div class="pk__res" data-result hidden aria-live="polite">
+        <p class="pk__why" data-why></p>
+        <button type="button" class="h-btn h-btn--ink pk__go" data-go></button>
+      </div>
+    </div>
+  </div>
+  <script is:inline type="application/json" id="pk-answers" set:html={JSON.stringify(answers)} />
+</section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-pick]')
+  if (root) {
+    root.hidden = false
+    const answers: { place: string; need: string; group: string; why: string; nav: string; models: string; from: string }[] =
+      JSON.parse(document.getElementById('pk-answers')!.textContent!)
+    const result = root.querySelector<HTMLElement>('[data-result]')!
+    const why = root.querySelector<HTMLElement>('[data-why]')!
+    const go = root.querySelector<HTMLButtonElement>('[data-go]')!
+    const state: { place?: string; need?: string } = {}
+    let group = ''
+
+    const toggle = (attr: 'place' | 'need') => {
+      for (const b of root.querySelectorAll<HTMLButtonElement>(`[data-${attr}]`)) {
+        b.addEventListener('click', () => {
+          state[attr] = b.dataset[attr]
+          for (const x of root.querySelectorAll<HTMLButtonElement>(`[data-${attr}]`)) x.setAttribute('aria-pressed', String(x === b))
+          const a = answers.find((x) => x.place === state.place && x.need === state.need)
+          result.hidden = !a
+          if (!a) return
+          group = a.group
+          why.textContent = a.why
+          go.textContent = `Показать: ${a.nav.toLowerCase()} — ${a.models}, от ${a.from}`
+        })
+      }
+    }
+    toggle('place')
+    toggle('need')
+    go.addEventListener('click', () => document.dispatchEvent(new CustomEvent('doors:filter', { detail: { group } })))
+  }
+</script>
+
+<style>
+  .pk { padding-top: clamp(1.5rem, 3vw, 2.5rem); }
+  .pk__box {
+    display: grid;
+    gap: 1.25rem 2rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 0.0625rem solid var(--h-rule);
+    border-radius: var(--h-tile-radius);
+  }
+  .pk__head { display: grid; gap: 0.25rem; }
+  .pk__title { margin: 0; }
+  .pk__lead { margin: 0; color: var(--h-soft); }
+  .pk__label { margin: 0 0 0.5rem; font-size: 0.875rem; color: var(--h-muted); }
+  .pk__opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pk__opt {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 0.0625rem solid var(--color-slate-300);
+    border-radius: 999rem;
+    background: none;
+    color: var(--h-ink);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .pk__opt:hover { border-color: var(--h-ink); }
+  .pk__opt[aria-pressed='true'] { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
+  .pk__opt:focus-visible, .pk__go:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  .pk__res { display: grid; gap: 0.75rem; justify-items: start; padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); animation: pk-in 360ms var(--ease-out); }
+  .pk__why { margin: 0; max-width: 42rem; color: var(--h-ink); }
+  .pk__go { height: auto; min-height: 3rem; padding-block: 0.625rem; text-align: left; }
+  @keyframes pk-in { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .pk__res { animation: none; } }
+  @media (min-width: 62.5rem) {
+    .pk__box { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr); align-items: start; }
+    .pk__res { grid-column: 1 / -1; }
+  }
+</style>

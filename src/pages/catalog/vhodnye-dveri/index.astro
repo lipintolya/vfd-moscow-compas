@@ -14,6 +14,9 @@ import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
 import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
+import PickDoor from '../../../components/entrance-doors/PickDoor.astro'
+import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astro'
+import { GUIDE_FAQ } from '../../../data/entrance-guide'
 import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS, ENTRANCE_SHOWCASE } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
@@ -25,6 +28,7 @@ import '../../../styles/home.css'
 const { hero } = ENTRANCE_PAGE
 const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
+const faq = [...ENTRANCE_FAQ, ...GUIDE_FAQ]
 /* Сколько моделей группы видно сразу (два ряда по четыре); остальные — по кнопке */
 const SHOWN = 8
 const searchOf = (d: (typeof ENTRANCE_DOORS)[number]) => [d.name, ...d.variants.map((v) => v.name)].join(' ').toLowerCase()
@@ -32,7 +36,7 @@ const searchOf = (d: (typeof ENTRANCE_DOORS)[number]) => [d.name, ...d.variants.
 const faqSchema = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: ENTRANCE_FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
 }
 const listSchema = {
   '@context': 'https://schema.org',
@@ -85,6 +89,9 @@ const listSchema = {
       </div>
     </section>
 
+    <PickDoor />
+
+    <div class="edcat">
     <div id="doors-pick" class="edb container" role="search">
       <div class="edb__in">
         <div class="edb__chips" role="group" aria-label="Тип двери">
@@ -128,6 +135,9 @@ const listSchema = {
         <DoorRequest text="Подберите, пожалуйста, входную дверь по моему описанию." />
       </div>
     </section>
+    </div>
+
+    <EntranceGuide />
 
     <section class="h-sec h-sec--tight-top" aria-labelledby="doors-help">
       <div class="container">
@@ -144,7 +154,7 @@ const listSchema = {
     <section id="doors-faq" class="h-sec" aria-labelledby="doors-faq-title">
       <div class="container h-faq">
         <h2 id="doors-faq-title" class="h-h2">Частые вопросы о входных дверях</h2>
-        <FaqAccordion items={ENTRANCE_FAQ} title={false} />
+        <FaqAccordion items={faq} title={false} />
       </div>
     </section>
   </div>
@@ -176,16 +186,24 @@ const listSchema = {
     status.textContent = `Найдено моделей: ${shown}`
   }
 
+  function setGroup(id: string, scroll: boolean) {
+    group = id
+    for (const x of chips) x.setAttribute('aria-pressed', String(x.dataset.filter === id))
+    apply()
+    if (!scroll) return
+    /* К началу списка (под липкой панелью) — откуда бы ни нажали: из подбора или из путеводителя */
+    const first = sections.find((s) => !s.hidden)
+    first?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+  }
   for (const c of chips) {
     c.addEventListener('click', () => {
-      group = c.dataset.filter ?? 'all'
-      for (const x of chips) x.setAttribute('aria-pressed', String(x === c))
-      apply()
+      setGroup(c.dataset.filter ?? 'all', false)
       /* Липкая панель не должна закрывать заголовок — прокручиваем к началу списка, если ушли ниже */
       const first = sections.find((s) => !s.hidden)
       if (first && first.getBoundingClientRect().top < 0) first.scrollIntoView({ block: 'start' })
     })
   }
+  document.addEventListener('doors:filter', (e) => setGroup((e as CustomEvent<{ group: string }>).detail.group, true))
   input.addEventListener('input', apply)
 
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-more]')) {
@@ -228,6 +246,12 @@ const listSchema = {
     padding: 0;
     list-style: none;
   }
+  /* Единственный «выход» на странице: двери поднимаются по очереди один раз */
+  .edh__door { animation: edh-rise 700ms var(--ease-out) both; }
+  .edh__door--2 { animation-delay: 90ms; }
+  .edh__door--3 { animation-delay: 180ms; }
+  @keyframes edh-rise { from { opacity: 0; transform: translateY(2rem); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .edh__door { animation: none; } }
   .edh__door--1 { --k: 0.9; }
   .edh__door--2 { --k: 1; }
   .edh__door--3 { --k: 0.82; }

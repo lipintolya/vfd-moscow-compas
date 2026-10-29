@@ -1,0 +1,70 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import {
+  GUIDE, GUIDE_KINDS, GUIDE_CRITERIA, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES, GUIDE_FAQ, GUIDE_VISUALS,
+  PICK_PLACES, PICK_NEEDS, pickResult,
+} from '../src/data/entrance-guide'
+import { DOOR_GROUPS, ENTRANCE_DOORS } from '../src/data/entrance-doors'
+
+const texts = () => [
+  GUIDE.title, GUIDE.lead, GUIDE.criteriaLead,
+  ...GUIDE_KINDS.flatMap((k) => [k.title, k.fits, k.text, k.stats]),
+  ...GUIDE_CRITERIA.flatMap((c) => [c.title, c.text, c.flat, c.house]),
+  ...GUIDE_PARTS.flatMap((p) => [p.title, p.text]),
+  ...GUIDE_STEPS.flatMap((s) => [s.title, s.text]),
+  ...GUIDE_MISTAKES.flatMap((m) => [m.title, m.text]),
+  ...GUIDE_FAQ.flatMap((f) => [f.q, f.a]),
+  ...GUIDE_VISUALS.flatMap((v) => [v.slot, v.alt, v.brief]),
+]
+
+test('путеводитель: название завода не встречается и цифры подставлены', () => {
+  for (const t of texts()) {
+    assert.doesNotMatch(t, /лабиринт|labirint/i, t)
+    assert.doesNotMatch(t, /undefined|NaN|\[object/, t)
+  }
+})
+
+test('путеводитель: виды дверей — по одному на группу каталога, фото из своей группы', () => {
+  assert.deepEqual(GUIDE_KINDS.map((k) => k.id).sort(), DOOR_GROUPS.map((g) => g.id).sort())
+  for (const k of GUIDE_KINDS) assert.equal(k.fallback.group, k.id, k.title)
+})
+
+test('путеводитель: у каждого критерия есть совет для квартиры и для дома', () => {
+  assert.ok(GUIDE_CRITERIA.length >= 8)
+  for (const c of GUIDE_CRITERIA) {
+    assert.ok(c.text.length > 60 && c.flat.length > 15 && c.house.length > 15, c.title)
+  }
+})
+
+test('подбор: для каждой пары вопросов есть группа каталога и объяснение', () => {
+  for (const p of PICK_PLACES) {
+    for (const n of PICK_NEEDS) {
+      const r = pickResult(p.id, n.id)
+      assert.ok(DOOR_GROUPS.some((g) => g.id === r.group), `${p.id}/${n.id}`)
+      assert.ok(r.why.length > 30)
+    }
+  }
+  // дом и свет — стеклопакет; дом без света — терморазрыв; электронный замок — своя группа
+  assert.equal(pickResult('house', 'light').group, 'glass')
+  assert.equal(pickResult('house', 'calm').group, 'thermo')
+  assert.equal(pickResult('flat', 'calm').group, 'flat')
+  assert.equal(pickResult('flat', 'smart').group, 'smart')
+})
+
+test('путеводитель: стеклопакет везде 81 мм и порог в комплекте у уличных дверей', () => {
+  const glass = ENTRANCE_DOORS.filter((d) => d.group === 'glass')
+  assert.ok(glass.length > 0)
+  for (const d of glass) {
+    assert.match(d.specs.find((s) => s.label === 'Стеклопакет')!.value, /81 мм/, d.id)
+    assert.ok(d.specs.some((s) => s.label === 'Защита порога'), `${d.id}: нет порога`)
+  }
+})
+
+test('рендеры: места объявлены один раз, имена — для файлов', () => {
+  const slots = GUIDE_VISUALS.map((v) => v.slot)
+  assert.equal(new Set(slots).size, slots.length)
+  for (const v of GUIDE_VISUALS) {
+    assert.match(v.slot, /^[a-z0-9-]+$/)
+    assert.ok(v.alt.length >= 30 && v.brief.length >= 60, v.slot)
+  }
+})

@@ -39,6 +39,7 @@
     "gen:partitions-tracks": "node scripts/gen-partitions-tracks.mjs",
     "gen:plintus-lines": "node scripts/gen-plintus-lines.mjs",
     "gen:entrance-doors": "node scripts/gen-entrance-doors.mjs",
+    "gen:entrance-renders": "node scripts/gen-entrance-renders.mjs",
     "gen:renders": "node scripts/gen-render-gallery.mjs",
     "gen:responsive": "node scripts/gen-responsive.mjs",
     "gen:series-covers": "node scripts/gen-series-covers.mjs",
