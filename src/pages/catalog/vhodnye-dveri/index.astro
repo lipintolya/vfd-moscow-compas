@@ -18,10 +18,11 @@ import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
 import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
 import PickDoor from '../../../components/entrance-doors/PickDoor.astro'
+import EntranceFilters from '../../../components/entrance-doors/EntranceFilters.astro'
 import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astro'
 import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcase.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
-import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
+import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, groupCover, priceFacetOf, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
 import { rub } from '../../../data/services'
@@ -30,7 +31,7 @@ import { pluralRu } from '../../../lib/plural'
 import '../../../styles/home.css'
 
 const { hero } = ENTRANCE_PAGE
-const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id) })).filter((g) => g.doors.length)
+const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id), photo: groupCover(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
 const faq = [...ENTRANCE_FAQ, ...GUIDE_FAQ]
 
@@ -84,8 +85,8 @@ const listSchema = {
                     <span class="edn__name">{typograph(g.nav)}</span>
                     <span class="edn__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}<br />от&nbsp;{rub(g.from)}</span>
                   </span>
-                  <span class="edn__img" style={`--ar: 500 / ${g.doors[0]!.cover.height}; --iw: ${(g.doors[0]!.cover.width / g.doors[0]!.cover.split) * 100}%`}>
-                    <img src={g.doors[0]!.cover.src} srcset={g.doors[0]!.cover.srcset} sizes="(min-width: 75rem) 14rem, 12rem" alt="" role="presentation" width={g.doors[0]!.cover.width} height={g.doors[0]!.cover.height} loading="lazy" decoding="async" />
+                  <span class="edn__img" style={`--ar: 500 / ${g.photo.height}; --iw: ${(g.photo.width / g.photo.split) * 100}%`}>
+                    <img src={g.photo.src} srcset={g.photo.srcset} sizes="(min-width: 75rem) 14rem, 12rem" alt="" role="presentation" width={g.photo.width} height={g.photo.height} loading="lazy" decoding="async" />
                   </span>
                 </a>
               </li>
@@ -105,10 +106,7 @@ const listSchema = {
     <PickDoor />
 
     <div id="doors-pick" class="edcat">
-      <p class="edreset container" data-reset hidden>
-        <button type="button" class="h-btn h-btn--quiet">Показать все модели</button>
-      </p>
-    <p id="edb-status" class="sr-only" role="status" aria-live="polite"></p>
+      <EntranceFilters />
 
     {groups.map((g, gi) => (
       <section id={`doors-${g.id}`} class:list={['h-sec', 'edg-sec', { 'h-sec--wall': gi % 2 === 1 }]} data-section={g.id} aria-labelledby={`doors-${g.id}-title`}>
@@ -120,7 +118,7 @@ const listSchema = {
           </header>
           <div class="rail edg__rail" data-rail>
             <ul class="rail__track edg__track" data-track role="list">
-              {g.doors.map((d) => <li data-door-li><DoorCard door={d} /></li>)}
+              {g.doors.map((d) => <li data-door-li data-group={d.group} data-pf={priceFacetOf(d.from)} data-steel={d.steel} data-price={d.from} data-name={d.name.toLowerCase()}><DoorCard door={d} /></li>)}
             </ul>
             <div class="rail__bar" data-bar>
               <span class="rail__line"><i></i></span>
@@ -164,32 +162,6 @@ const listSchema = {
 </BaseLayout>
 
 <script>
-  /* Фильтр каталога: его включают блок «Подберём за минуту» и кнопки «Показать модели»
-     в путеводителе (событие doors:filter); «показать все» над списком выключает. */
-  const sections = [...document.querySelectorAll<HTMLElement>('[data-section]')]
-  const items = [...document.querySelectorAll<HTMLElement>('li[data-door-li]')]
-  const status = document.getElementById('edb-status')!
-  const page = document.querySelector<HTMLElement>('.home')!
-  const reset = document.querySelector<HTMLElement>('[data-reset]')!
-
-  function setGroup(group: string, scroll: boolean) {
-    let shown = 0
-    for (const li of items) {
-      const ok = group === 'all' || (li.firstElementChild as HTMLElement).dataset.group === group
-      li.hidden = !ok
-      if (ok) shown++
-    }
-    for (const s of sections) s.hidden = !s.querySelector('li[data-door-li]:not([hidden])')
-    page.classList.toggle('is-filtering', group !== 'all')
-    reset.hidden = group === 'all'
-    status.textContent = `Найдено моделей: ${shown}`
-    if (!scroll) return
-    /* К кнопке сброса: она стоит прямо над первой группой, видно и что включено, и как выключить */
-    reset.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
-  }
-  reset.querySelector('button')!.addEventListener('click', () => setGroup('all', false))
-  document.addEventListener('doors:filter', (e) => setGroup((e as CustomEvent<{ group: string }>).detail.group, true))
-
   /* «Показать все»: лента раскрывается в сетку, кнопка исчезает */
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-more]')) {
     btn.addEventListener('click', () => {
@@ -280,12 +252,10 @@ const listSchema = {
     .edn__track { grid-auto-columns: minmax(0, 1fr); }
   }
 
-  /* Панель выбора: липнет под шапкой */
-  .edreset { margin: 1.5rem auto 0; }
-  .edreset[hidden] { display: none; }
-
   /* Группы: слева название и пояснение, справа лента моделей; на телефоне — друг под другом */
   .edg-sec[hidden], .edg-sec li[hidden] { display: none !important; }
+  /* Под липкой строкой фильтров: заголовок группы не прячется при переходе по якорю */
+  .edg-sec { scroll-margin-top: 4.5rem; }
   .edg { display: grid; gap: 1.75rem 0; grid-template-areas: 'head' 'rail' 'more'; }
   .edg__head { grid-area: head; display: grid; gap: 0.75rem; align-content: start; }
   .edg__title, .edg__note { margin: 0; }

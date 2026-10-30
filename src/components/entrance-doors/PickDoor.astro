@@ -2,16 +2,21 @@
 /**
  * «Подберём за минуту»: два вопроса — где стоит дверь и что важно — и совет,
  * какая группа каталога подходит (pickResult в src/data/entrance-guide.ts).
- * Кнопка в ответе применяет фильтр каталога ниже (событие doors:filter).
+ * Кнопка в ответе включает эту группу в фильтрах ниже (событие doors:filter).
  * Без скрипта блок не нужен — страница работает и без него, поэтому
  * весь блок скрыт, пока скрипт не включит его (hidden → снимается в script).
  */
 import { PICK_PLACES, PICK_NEEDS, pickResult, groupSummary } from '../../data/entrance-guide'
+import { groupCover } from '../../data/entrance-doors'
 
 /* Ответ для каждой пары — готовый, скрипт только показывает нужный */
 const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
   const r = pickResult(p.id, n.id)
-  return { place: p.id, need: n.id, group: r.group, why: r.why, ...groupSummary(r.group) }
+  const photo = groupCover(r.group)
+  return {
+    place: p.id, need: n.id, group: r.group, why: r.why, ...groupSummary(r.group),
+    img: { src: photo.src, srcset: photo.srcset, w: photo.width, h: photo.height, iw: (photo.width / photo.split) * 100 },
+  }
 }))
 ---
 
@@ -19,24 +24,41 @@ const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
   <div class="container">
     <div class="pk__box">
       <div class="pk__head">
-        <h2 id="pk-title" class="h-h3 pk__title">Подберём за минуту</h2>
+        <h2 id="pk-title" class="h-h2 pk__title">Подберём за минуту</h2>
         <p class="pk__lead">Ответьте на два вопроса — покажем, с какой группы моделей начать.</p>
       </div>
-      <div class="pk__q">
-        <p class="pk__label" id="pk-place">Где стоит дверь</p>
-        <div class="pk__opts" role="group" aria-labelledby="pk-place">
-          {PICK_PLACES.map((p) => <button type="button" class="pk__opt" data-place={p.id} aria-pressed="false">{p.label}</button>)}
+
+      <fieldset class="pk__q">
+        <legend class="pk__label"><b class="pk__num" aria-hidden="true">1</b>Где стоит дверь</legend>
+        <div class="pk__opts">
+          {PICK_PLACES.map((p) => (
+            <button type="button" class="pk__opt" data-place={p.id} aria-pressed="false">
+              <span class="pk__name">{p.label}</span>
+              <span class="pk__hint">{p.hint}</span>
+            </button>
+          ))}
         </div>
-      </div>
-      <div class="pk__q">
-        <p class="pk__label" id="pk-need">Что важнее</p>
-        <div class="pk__opts" role="group" aria-labelledby="pk-need">
-          {PICK_NEEDS.map((n) => <button type="button" class="pk__opt" data-need={n.id} aria-pressed="false">{n.label}</button>)}
+      </fieldset>
+
+      <fieldset class="pk__q">
+        <legend class="pk__label"><b class="pk__num" aria-hidden="true">2</b>Что важнее</legend>
+        <div class="pk__opts pk__opts--three">
+          {PICK_NEEDS.map((n) => (
+            <button type="button" class="pk__opt" data-need={n.id} aria-pressed="false">
+              <span class="pk__name">{n.label}</span>
+              <span class="pk__hint">{n.hint}</span>
+            </button>
+          ))}
         </div>
-      </div>
+      </fieldset>
+
       <div class="pk__res" data-result hidden aria-live="polite">
-        <p class="pk__why" data-why></p>
-        <button type="button" class="h-btn h-btn--ink pk__go" data-go></button>
+        <div class="pk__txt">
+          <p class="pk__nav" data-nav></p>
+          <p class="pk__why" data-why></p>
+          <button type="button" class="h-btn pk__go" data-go></button>
+        </div>
+        <span class="pk__img" data-img><img alt="" role="presentation" decoding="async" /></span>
       </div>
     </div>
   </div>
@@ -47,11 +69,17 @@ const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
   const root = document.querySelector<HTMLElement>('[data-pick]')
   if (root) {
     root.hidden = false
-    const answers: { place: string; need: string; group: string; why: string; nav: string; models: string; from: string }[] =
-      JSON.parse(document.getElementById('pk-answers')!.textContent!)
+    type Answer = {
+      place: string; need: string; group: string; why: string; nav: string; models: string; from: string
+      img: { src: string; srcset: string; w: number; h: number; iw: number }
+    }
+    const answers: Answer[] = JSON.parse(document.getElementById('pk-answers')!.textContent!)
     const result = root.querySelector<HTMLElement>('[data-result]')!
+    const nav = root.querySelector<HTMLElement>('[data-nav]')!
     const why = root.querySelector<HTMLElement>('[data-why]')!
     const go = root.querySelector<HTMLButtonElement>('[data-go]')!
+    const imgBox = root.querySelector<HTMLElement>('[data-img]')!
+    const img = imgBox.querySelector('img')!
     const state: { place?: string; need?: string } = {}
     let group = ''
 
@@ -64,8 +92,15 @@ const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
           result.hidden = !a
           if (!a) return
           group = a.group
+          nav.textContent = a.nav
           why.textContent = a.why
-          go.textContent = `Показать: ${a.nav.toLowerCase()} — ${a.models}, от ${a.from}`
+          go.textContent = `Показать ${a.models}, от ${a.from}`
+          imgBox.style.setProperty('--ar', `500 / ${a.img.h}`)
+          imgBox.style.setProperty('--iw', `${a.img.iw}%`)
+          img.src = a.img.src
+          img.srcset = a.img.srcset
+          img.width = a.img.w
+          img.height = a.img.h
         })
       }
     }
@@ -76,42 +111,89 @@ const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
 </script>
 
 <style>
-  .pk { padding-top: clamp(1.5rem, 3vw, 2.5rem); }
+  .pk { padding: clamp(0.5rem, 2vw, 1rem) 0 clamp(1.5rem, 4vw, 3rem); }
   .pk__box {
     display: grid;
-    gap: 1.25rem 2rem;
-    padding: clamp(1.25rem, 3vw, 2rem);
-    border: 0.0625rem solid var(--h-rule);
+    gap: 1.75rem 2rem;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
     border-radius: var(--h-tile-radius);
+    background: var(--h-wall);
   }
-  .pk__head { display: grid; gap: 0.25rem; }
+  .pk__head { display: grid; gap: 0.5rem; align-content: start; }
   .pk__title { margin: 0; }
-  .pk__lead { margin: 0; color: var(--h-soft); }
-  .pk__label { margin: 0 0 0.5rem; font-size: 0.875rem; color: var(--h-muted); }
-  .pk__opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pk__lead { margin: 0; max-width: 28rem; color: var(--h-soft); }
+  .pk__q { min-width: 0; margin: 0; padding: 0; border: 0; }
+  .pk__label { display: flex; align-items: center; gap: 0.625rem; margin: 0 0 0.75rem; padding: 0; font-size: 1rem; font-weight: 600; color: var(--h-ink); }
+  .pk__num { display: grid; place-items: center; flex: none; width: 1.5rem; height: 1.5rem; border-radius: 999rem; background: var(--h-ink); color: var(--color-white); font-size: 0.8125rem; font-weight: 600; line-height: 1; }
+  .pk__opts { display: grid; gap: 0.5rem; }
+
+  /* Вариант ответа — крупная строка: название, пояснение, справа отметка выбора */
   .pk__opt {
-    min-height: 2.75rem;
-    padding: 0 1rem;
-    border: 0.0625rem solid var(--color-slate-300);
-    border-radius: 999rem;
-    background: none;
+    position: relative;
+    display: grid;
+    gap: 0.125rem;
+    min-height: 3.75rem;
+    padding: 0.75rem 3rem 0.75rem 1rem;
+    border: 0.0625rem solid transparent;
+    border-radius: 0.875rem;
+    background: var(--color-white);
     color: var(--h-ink);
     font: inherit;
-    font-size: 0.9375rem;
-    font-weight: 600;
+    text-align: left;
     cursor: pointer;
-    transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out), color 200ms var(--ease-out);
+    transition: border-color 200ms var(--ease-out), background-color 200ms var(--ease-out), color 200ms var(--ease-out);
+  }
+  .pk__opt::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: -0.625rem;
+    border: 0.09375rem solid var(--color-slate-300);
+    border-radius: 999rem;
+    transition: border-color 200ms var(--ease-out), background-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
   }
   .pk__opt:hover { border-color: var(--h-ink); }
-  .pk__opt[aria-pressed='true'] { background: var(--h-ink); border-color: var(--h-ink); color: var(--color-white); }
+  .pk__opt[aria-pressed='true'] { background: var(--h-ink); color: var(--color-white); }
+  .pk__opt[aria-pressed='true']::after { border-color: var(--color-white); background: var(--color-white); box-shadow: inset 0 0 0 0.25rem var(--h-ink); }
+  .pk__name { font-size: 1rem; font-weight: 600; line-height: 1.25; }
+  .pk__hint { font-size: 0.8125rem; line-height: 1.3; color: var(--h-muted); }
+  .pk__opt[aria-pressed='true'] .pk__hint { color: color-mix(in srgb, var(--color-white) 70%, transparent); }
   .pk__opt:focus-visible, .pk__go:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
-  .pk__res { display: grid; gap: 0.75rem; justify-items: start; padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); animation: pk-in 360ms var(--ease-out); }
-  .pk__why { margin: 0; max-width: 42rem; color: var(--h-ink); }
-  .pk__go { height: auto; min-height: 3rem; padding-block: 0.625rem; text-align: left; }
+
+  /* Совет: графитовая плитка, как плитки групп выше, — слева текст и кнопка, справа дверь */
+  .pk__res {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: clamp(1.25rem, 3vw, 1.75rem) 0 0 clamp(1.25rem, 3vw, 1.75rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--color-graphite);
+    color: var(--color-white);
+    overflow: hidden;
+    animation: pk-in 360ms var(--ease-out);
+  }
+  .pk__res[hidden] { display: none; }
+  .pk__txt { display: grid; gap: 0.5rem; align-content: start; justify-items: start; padding-bottom: clamp(1.25rem, 3vw, 1.75rem); min-width: 0; }
+  .pk__nav { margin: 0; font-size: clamp(1.25rem, 0.8vw + 1rem, 1.5rem); font-weight: 600; line-height: 1.15; }
+  .pk__why { margin: 0; max-width: 34rem; color: color-mix(in srgb, var(--color-white) 78%, transparent); }
+  .pk__go { height: auto; min-height: 3rem; margin-top: 0.75rem; padding-block: 0.625rem; background: var(--color-white); color: var(--h-ink); text-align: left; }
+  .pk__go:hover { background: var(--color-slate-200); }
+  .pk__img { display: block; flex: none; align-self: flex-end; width: 5.5rem; margin-right: clamp(1.25rem, 3vw, 1.75rem); aspect-ratio: var(--ar, 5 / 8); overflow: hidden; }
+  .pk__img img { display: block; width: var(--iw, 200%); max-width: none; height: 100%; object-fit: fill; }
   @keyframes pk-in { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .pk__res { animation: none; } }
-  @media (min-width: 62.5rem) {
-    .pk__box { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr); align-items: start; }
+
+  @media (min-width: 43.75rem) {
+    .pk__opts--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .pk__opts:not(.pk__opts--three) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pk__img { width: 7rem; }
+  }
+  @media (min-width: 75rem) {
+    .pk__box { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.3fr); align-items: start; }
+    .pk__opts, .pk__opts--three, .pk__opts:not(.pk__opts--three) { grid-template-columns: 1fr; }
     .pk__res { grid-column: 1 / -1; }
   }
 </style>

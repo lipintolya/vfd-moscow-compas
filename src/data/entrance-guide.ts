@@ -300,13 +300,13 @@ export { DOOR_GROUPS }
 /* ---------- Подбор за три шага ---------- */
 
 export const PICK_PLACES = [
-  { id: 'flat', label: 'Квартира' },
-  { id: 'house', label: 'Частный дом или дача' },
+  { id: 'flat', label: 'Квартира', hint: 'Подъезд, лестничная клетка' },
+  { id: 'house', label: 'Частный дом или дача', hint: 'Улица, холодный тамбур' },
 ] as const
 export const PICK_NEEDS = [
-  { id: 'calm', label: 'Тепло и тишина' },
-  { id: 'light', label: 'Свет в прихожей' },
-  { id: 'smart', label: 'Электронный замок' },
+  { id: 'calm', label: 'Тепло и тишина', hint: 'Утеплённое полотно, три контура' },
+  { id: 'light', label: 'Свет в прихожей', hint: 'Стеклопакет или зеркало' },
+  { id: 'smart', label: 'Электронный замок', hint: 'Отпечаток, код, смартфон' },
 ] as const
 export type PickPlace = (typeof PICK_PLACES)[number]['id']
 export type PickNeed = (typeof PICK_NEEDS)[number]['id']

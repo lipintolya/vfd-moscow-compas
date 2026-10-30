@@ -136,37 +136,60 @@ export const ENTRANCE_DOORS: EntranceDoor[] = (catalog as Raw[]).map(build)
 export const fromPrice = (d: EntranceDoor) => `от${'\u00a0'}${rub(d.from)}`
 export const ENTRANCE_MIN_PRICE = Math.min(...ENTRANCE_DOORS.map((d) => d.from))
 
-export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: string }[] = [
+export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: string; /** Модель, чья дверь стоит на плитке группы: светлая или яркая — тёмная на графите не видна */ cover: string }[] = [
   {
     id: 'flat',
     nav: 'Для квартиры',
     title: 'Входные двери для квартиры',
     lead: 'Стальные двери с утеплением полотна и тремя контурами уплотнения: тихо, тепло и надёжно в подъезде и на лестничной клетке.',
+    cover: 'versal',
   },
   {
     id: 'thermo',
     nav: 'С терморазрывом',
     title: 'Двери с терморазрывом для дома и дачи',
     lead: 'Терморазрыв — вставка из полиамида между наружной и внутренней стороной металла: дверь не промерзает и не покрывается конденсатом.',
+    cover: 'termolayt',
   },
   {
     id: 'smart',
     nav: 'Электронный замок',
     title: 'Двери с электронным замком',
     lead: 'Открываются отпечатком пальца, пин-кодом, брелком или со смартфона; обычный ключ остаётся запасным способом.',
+    cover: 'smartlab',
   },
   {
     id: 'glass',
     nav: 'Со стеклопакетом',
     title: 'Уличные двери со стеклопакетом',
     lead: 'Для коттеджа и частного дома: трёхкамерный стеклопакет пропускает свет в прихожую и сохраняет тепло.',
+    cover: 'frost-7024',
   },
 ]
+
+/** Дверь на плитке группы: фото обложки выбранной модели группы */
+export const groupCover = (id: DoorGroupId) => {
+  const g = DOOR_GROUPS.find((x) => x.id === id)!
+  const d = doorById(g.cover)
+  if (!d || d.group !== id) throw new Error(`Входные двери: модель «${g.cover}» для плитки группы «${id}» не найдена в этой группе`)
+  return d.cover
+}
 
 /** Модели группы — от дешёвых к дорогим */
 export const doorsOfGroup = (id: DoorGroupId) => ENTRANCE_DOORS.filter((d) => d.group === id).sort((a, b) => a.from - b.from)
 export const groupFromPrice = (id: DoorGroupId) => Math.min(...doorsOfGroup(id).map((d) => d.from))
 export const doorById = (id: string) => ENTRANCE_DOORS.find((d) => d.id === id)
+
+/** Фильтры каталога: цена «от» по ступеням, толщина стали, группа; ступени — границы в ₽ */
+const PRICE_STEPS = [40000, 50000, 60000]
+const num = (v: number) => v.toLocaleString('ru-RU')
+export const PRICE_FACETS = [
+  { id: 'p0', label: `до ${rub(PRICE_STEPS[0]!)}`, test: (v: number) => v < PRICE_STEPS[0]! },
+  ...PRICE_STEPS.slice(0, -1).map((from, i) => ({ id: `p${i + 1}`, label: `${num(from)} – ${rub(PRICE_STEPS[i + 1]!)}`, test: (v: number) => v >= from && v < PRICE_STEPS[i + 1]! })),
+  { id: `p${PRICE_STEPS.length}`, label: `от ${rub(PRICE_STEPS.at(-1)!)}`, test: (v: number) => v >= PRICE_STEPS.at(-1)! },
+]
+export const priceFacetOf = (v: number) => PRICE_FACETS.find((f) => f.test(v))!.id
+export const STEEL_FACETS = [...new Set(ENTRANCE_DOORS.map((d) => d.steel))].sort((a, b) => Number(a.replace(',', '.')) - Number(b.replace(',', '.')))
 
 /** Три двери первого экрана — разные по цвету: чёрная, белая, дерево */
 export const SHOWCASE_IDS = ['alyaska-layt', 'versal', 'karmina']
