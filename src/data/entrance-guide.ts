@@ -356,10 +356,8 @@ export const GUIDE_FAQ: { q: string; a: string }[] = [
 /** Ширина и высота полотна из каталога, мм: «960×2050, 880×2050» → 960 и 2050 */
 const [DOOR_W, DOOR_H] = (ENTRANCE_DOORS[0]!.sizes.match(/(\d+)×(\d+)/) ?? []).slice(1)
 
-/* Визуализации «дверь на площадке» — под каталогом, перед путеводителем */
+/* Обложки разделов /catalog/vhodnye-dveri/ — рендеры без подписи (EntranceCover.astro) */
 export const ENTRANCE_LOBBY = {
-  title: 'Входные двери на площадке и в холле',
-  lead: 'Визуализации: как стальная входная дверь смотрится рядом со стеной, полом и лестницей. Отделку и модель подберём по каталогу.',
   visuals: ['lobby-1', 'lobby-2', 'lobby-3'].map((slot) => visualOf(slot)),
 }
 
