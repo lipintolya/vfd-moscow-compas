@@ -75,7 +75,7 @@ const faqSchema = {
     <section class="edm" aria-labelledby="door-title">
       <div class="container edm__grid" data-gallery data-lightbox data-lightbox-images={large} data-asks={asks}>
         <div class="edm__gallery">
-          <button type="button" class="h-media edm__main" data-lightbox-index="0" data-main aria-label="Открыть фото крупно">
+          <button type="button" class="h-media edm__main" style={`aspect-ratio: ${first.image.width} / ${first.image.height}`} data-lightbox-index="0" data-main aria-label="Открыть фото крупно">
             <img src={first.image.src} srcset={first.image.srcset} sizes="(min-width: 62.5rem) 46vw, 100vw" alt={first.image.alt} width={first.image.width} height={first.image.height} fetchpriority="high" decoding="async" />
             <span class="edm__zoom" aria-hidden="true">Увеличить</span>
           </button>
@@ -90,6 +90,7 @@ const faqSchema = {
                     <button
                       type="button"
                       class="h-media edm__thumb"
+                      style={`aspect-ratio: ${v.image.width} / ${v.image.height}`}
                       data-thumb={i}
                       data-src={v.image.src}
                       data-srcset={v.image.srcset}
@@ -205,7 +206,7 @@ const faqSchema = {
     .edm__panel { grid-column: 8 / span 5; position: sticky; top: calc(var(--header-height) + 1rem); }
   }
 
-  .edm__main { position: relative; display: block; width: 100%; padding: 0; border: 0; aspect-ratio: 1000 / 868; border-radius: var(--h-tile-radius); cursor: zoom-in; }
+  .edm__main { position: relative; display: block; width: 100%; padding: 0; border: 0; border-radius: var(--h-tile-radius); cursor: zoom-in; }
   .edm__zoom {
     position: absolute;
     right: 0.75rem;
@@ -227,7 +228,7 @@ const faqSchema = {
   .edm__finish-name [data-finish-price] { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
   .edm__thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .edm__thumbs { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
-  .edm__thumb { display: block; width: 100%; padding: 0; border: 0.125rem solid transparent; border-radius: 0.625rem; aspect-ratio: 1000 / 868; cursor: pointer; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; transition: border-color 200ms var(--ease-out); }
+  .edm__thumb { display: block; width: 100%; padding: 0; border: 0.125rem solid transparent; border-radius: 0.625rem; cursor: pointer; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; transition: border-color 200ms var(--ease-out); }
   .edm__thumb:hover { border-color: var(--color-slate-400); }
   .edm__thumb[aria-pressed='true'] { border-color: var(--h-signal); outline-color: transparent; }
   .edm__thumb:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }

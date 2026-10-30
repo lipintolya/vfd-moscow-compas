@@ -1,6 +1,6 @@
 /**
  * Фото входных дверей на /catalog/vhodnye-dveri/: исходники — assets/entrance-doors/
- * (<модель>-<n>.webp, кадр обрезан снизу, метка в углу закрашена — см. README там) → public/renders/entrance-doors/
+ * (<модель>-<n>.webp, кадр в рост или обрезан снизу, метка в углу закрашена — см. README там) → public/renders/entrance-doors/
  * <имя>-<ширина>.webp + размеры в src/data/entrance-doors-images.json
  * (его читает src/data/entrance-doors.ts).
  *

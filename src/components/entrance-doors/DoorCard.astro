@@ -18,7 +18,7 @@ const n = door.variants.length
 ---
 
 <article class="dcard" data-door data-group={group} data-name={door.name.toLowerCase()}>
-  <div class="h-media dcard__photo">
+  <div class="h-media dcard__photo" style={`--ar: ${door.cover.width / 2} / ${door.cover.height}`}>
     <img src={door.cover.src} srcset={door.cover.srcset} sizes="(min-width: 62.5rem) 28rem, (min-width: 43.75rem) 60vw, 92vw" alt={door.cover.alt} width={door.cover.width} height={door.cover.height} loading="lazy" decoding="async" />
     {n > 1 && <span class="dcard__count">{n} {pluralRu(n, ['вариант', 'варианта', 'вариантов'])} отделки</span>}
   </div>
@@ -29,9 +29,9 @@ const n = door.variants.length
 
 <style>
   .dcard { position: relative; display: grid; gap: 0.25rem; align-content: start; }
-  /* Половина кадра: слева дверь снаружи, справа изнутри. Верх двери виден целиком,
-     лишнее срезается снизу (object-position 0 0) */
-  .dcard__photo { position: relative; aspect-ratio: 5 / 8; border-radius: var(--h-tile-radius); }
+  /* Половина кадра: слева дверь снаружи, справа изнутри. Рамка по размерам самого
+     фото (--ar) — дверь видна в полную высоту, ничего не срезается */
+  .dcard__photo { position: relative; aspect-ratio: var(--ar, 5 / 8); border-radius: var(--h-tile-radius); }
   .dcard__photo img {
     width: 200%;
     max-width: none;

@@ -79,7 +79,7 @@ const listSchema = {
             {ENTRANCE_SHOWCASE.map((d, i) => (
               <li class={`edh__door edh__door--${i + 1}`}>
                 <a href={d.href} class="edh__link" aria-label={`${d.title}: смотреть`}>
-                  <span class="edh__img">
+                  <span class="edh__img" style={`--ar: ${d.cover.width / 2} / ${d.cover.height}`}>
                     <img src={d.cover.src} srcset={d.cover.srcset} sizes="(min-width: 62.5rem) 12rem, 28vw" alt={d.cover.alt} width={d.cover.width} height={d.cover.height} fetchpriority={i === 0 ? 'high' : undefined} decoding="async" />
                   </span>
                   <span class="edh__cap">{d.name}</span>
@@ -224,7 +224,7 @@ const listSchema = {
   .edh__door--2 { --k: 1; }
   .edh__door--3 { --k: 0.82; }
   .edh__link { display: grid; gap: 0.5rem; color: inherit; text-decoration: none; }
-  .edh__img { display: block; aspect-ratio: 5 / 8; overflow: hidden; border-radius: 0.625rem 0.625rem 0 0; background: var(--color-graphite-card); transform-origin: bottom; transform: scale(var(--k)); }
+  .edh__img { display: block; aspect-ratio: var(--ar, 5 / 8); overflow: hidden; border-radius: 0.625rem 0.625rem 0 0; background: var(--color-graphite-card); transform-origin: bottom; transform: scale(var(--k)); }
   .edh__img img { display: block; width: 200%; max-width: none; height: 100%; object-fit: cover; object-position: 0 0; }
   .edh__cap { padding-bottom: 0.875rem; font-size: 0.8125rem; font-weight: 600; text-align: center; color: color-mix(in srgb, var(--color-white) 80%, transparent); }
   .edh__link:hover .edh__cap, .edh__link:focus-visible .edh__cap { color: var(--color-white); }
