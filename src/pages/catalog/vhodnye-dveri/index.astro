@@ -85,7 +85,7 @@ const listSchema = {
                     <span class="edn__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}<br />от&nbsp;{rub(g.from)}</span>
                   </span>
                   <span class="edn__img" style={`--ar: 500 / ${g.doors[0]!.cover.height}; --iw: ${(g.doors[0]!.cover.width / g.doors[0]!.cover.split) * 100}%`}>
-                    <img src={g.doors[0]!.cover.src} srcset={g.doors[0]!.cover.srcset} sizes="9rem" alt="" role="presentation" width={g.doors[0]!.cover.width} height={g.doors[0]!.cover.height} loading="lazy" decoding="async" />
+                    <img src={g.doors[0]!.cover.src} srcset={g.doors[0]!.cover.srcset} sizes="(min-width: 75rem) 14rem, 12rem" alt="" role="presentation" width={g.doors[0]!.cover.width} height={g.doors[0]!.cover.height} loading="lazy" decoding="async" />
                   </span>
                 </a>
               </li>
@@ -225,7 +225,7 @@ const listSchema = {
 
 <style>
   /* Первый экран: светлый, по центру — заголовок, пояснение и две кнопки */
-  .edh { padding: clamp(1.5rem, 5vw, 4rem) 0 clamp(1.75rem, 4vw, 3rem); }
+  .edh { padding: clamp(0.5rem, 2vw, 1.25rem) 0 clamp(1.5rem, 3vw, 2.25rem); }
   .edh__in { display: grid; justify-items: center; text-align: center; }
   .edh__title { margin: 0; max-width: 18ch; }
   .edh__lead { margin: 1.25rem 0 0; max-width: 40rem; color: var(--h-soft); }
@@ -263,16 +263,17 @@ const listSchema = {
   .rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   @media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: flex; } }
 
-  /* Плитки групп: название и счётчик слева, дверь справа на графите */
+  /* Плитки групп — главный экран страницы: на графите крупно название и дверь в рост,
+     дверь стоит на нижней кромке плитки */
   .edn { padding-bottom: clamp(1.5rem, 4vw, 3rem); }
   .edn__track { --rail-col: min(17rem, 78vw); --rail-gap: 1rem; }
-  .edn__tile { display: flex; justify-content: space-between; gap: 0.75rem; height: 100%; padding: 1.25rem 0 0 1.25rem; border-radius: var(--h-tile-radius); background: var(--color-graphite); color: var(--color-white); text-decoration: none; overflow: hidden; }
-  .edn__text { display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem; padding-bottom: 1.25rem; min-width: 0; }
-  .edn__name { font-size: 1.0625rem; font-weight: 600; line-height: 1.2; }
-  .edn__meta { font-size: 0.875rem; line-height: 1.4; color: color-mix(in srgb, var(--color-white) 72%, transparent); }
-  .edn__img { display: block; flex: none; align-self: flex-end; width: 4.75rem; aspect-ratio: var(--ar, 5 / 8); margin: 0 1rem 0 0; overflow: hidden; transition: transform 250ms var(--ease-out); }
+  .edn__tile { display: flex; flex-direction: column; height: 100%; padding: clamp(1.25rem, 2vw, 1.75rem) clamp(1.25rem, 2vw, 1.75rem) 0; border-radius: var(--h-tile-radius); background: var(--color-graphite); color: var(--color-white); text-decoration: none; overflow: hidden; }
+  .edn__text { display: grid; gap: 0.5rem; margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
+  .edn__name { font-size: clamp(1.3125rem, 0.6vw + 1.0625rem, 1.5rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
+  .edn__meta { font-size: 0.9375rem; line-height: 1.4; color: color-mix(in srgb, var(--color-white) 72%, transparent); }
+  .edn__img { display: block; width: 74%; margin: auto auto 0; aspect-ratio: var(--ar, 5 / 8); overflow: hidden; transition: transform 300ms var(--ease-out); }
   .edn__img img { display: block; width: var(--iw, 200%); max-width: none; height: 100%; object-fit: fill; }
-  .edn__tile:hover .edn__img { transform: translateY(-0.25rem); }
+  .edn__tile:hover .edn__img { transform: translateY(-0.5rem); }
   .edn__tile:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   @media (min-width: 75rem) {
     /* Четыре плитки умещаются в ряд — лента не нужна */
