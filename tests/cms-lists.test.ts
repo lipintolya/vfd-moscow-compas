@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { ARTICLE_CATALOG_PAGES } from '../src/data/article-catalog-pages'
 import { STYLE_CATEGORIES } from '../src/data/style-categories'
 
@@ -12,7 +12,10 @@ test('страницы каталога: список в Strapi = список �
 
 test('каждая страница из списка показывает «Статью по теме»', () => {
   const dir = 'src/pages/catalog'
-  const named = readdirSync(dir).filter((f) => f.endsWith('.astro'))
+  /* Страницы-файлы и страницы-папки (vhodnye-dveri/index.astro) */
+  const files = readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? [`${e.name}/index.astro`].filter((f) => existsSync(`${dir}/${f}`)) : e.name.endsWith('.astro') ? [e.name] : [])
+  const named = files
     .flatMap((f) => [...readFileSync(`${dir}/${f}`, 'utf8').matchAll(/pagePath: [`'](\/catalog\/[^`']+\/)[`']/g)].map((m) => m[1]))
   const styles = STYLE_CATEGORIES.map((c) => `/catalog/${c.slug}/`)
   for (const path of Object.values(ARTICLE_CATALOG_PAGES)) {

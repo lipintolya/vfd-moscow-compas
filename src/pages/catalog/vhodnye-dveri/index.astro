@@ -19,6 +19,8 @@ import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
 import PickDoor from '../../../components/entrance-doors/PickDoor.astro'
 import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astro'
+import RelatedArticleCard from '../../../components/articles/RelatedArticleCard.astro'
+import { relatedArticle as relatedArticleFor } from '../../../lib/articles'
 import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcase.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
 import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, groupCover, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
@@ -32,6 +34,7 @@ import '../../../styles/home.css'
 const { hero } = ENTRANCE_PAGE
 const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id), photo: groupCover(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
+const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/vhodnye-dveri/' })
 const faq = [...ENTRANCE_FAQ, ...GUIDE_FAQ]
 
 const faqSchema = {
@@ -135,6 +138,8 @@ const listSchema = {
     <EntranceShowcase />
 
     <EntranceGuide />
+
+    {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
 
     <section class="h-sec h-sec--tight-top" aria-labelledby="doors-help">

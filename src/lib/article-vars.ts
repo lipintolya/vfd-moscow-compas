@@ -17,6 +17,12 @@ import {
 } from '../data/skrytye-dveri-products'
 import { FRAMUGA_ROWS, FROM_PRICE_FRAMUGA_KIT } from '../data/decor-products'
 import { DOOR_SIZES } from '../data/door-sizes'
+import { ENTRANCE_DOORS, ENTRANCE_MIN_PRICE } from '../data/entrance-doors'
+import { pluralRu } from './plural'
+
+const ENTRANCE_STEELS = ENTRANCE_DOORS.map((d) => d.steel)
+const ENTRANCE_STEEL = [...new Set(ENTRANCE_STEELS)].sort((a, b) => Number(a.replace(',', '.')) - Number(b.replace(',', '.'))).filter((v, i, all) => i === 0 || i === all.length - 1)
+const THERMO_COUNT = ENTRANCE_DOORS.filter((d) => d.specs.some((x) => x.label === 'Терморазрыв')).length
 
 /* Скрытая дверь 2300 мм — самый частый нестандартный запрос: цена и
    надбавка — по ступени из таблицы надбавок */
@@ -72,6 +78,19 @@ export const ARTICLE_VARS = {
     height:    String(DOOR_SIZES.standardHeight),
     /** Высота под заказ — до, мм */
     maxHeight: String(DOOR_SIZES.customMaxHeight),
+  },
+  /** Входные двери — src/data/entrance-doors.ts (каталог партнёра, цены «от») */
+  entrance: {
+    /** «57 моделей» */
+    models:    `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}`,
+    /** Самая низкая цена в каталоге, «от» */
+    priceFrom: rub(ENTRANCE_MIN_PRICE),
+    /** «1,5–1,8 мм» — толщина стали полотна */
+    steel:     nb(`${ENTRANCE_STEEL.join('–')} мм`),
+    /** Сколько моделей с терморазрывом, «26 моделей» */
+    thermo:    `${THERMO_COUNT} ${pluralRu(THERMO_COUNT, ['модель', 'модели', 'моделей'])}`,
+    /** «960×2050, 880×2050» — размеры полотна, мм */
+    sizes:     nb(`${ENTRANCE_DOORS[0]!.sizes} мм`),
   },
   /** Декор — src/data/decor-products.ts */
   decor: {

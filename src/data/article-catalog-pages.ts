@@ -14,5 +14,6 @@ export const ARTICLE_CATALOG_PAGES: Record<string, string> = {
   'Двери в стиле лофт':              '/catalog/loft-dveri/',
   'Двери в стиле минимализм':        '/catalog/minimalizm-dveri/',
   'Двери в скандинавском стиле':     '/catalog/skandinavskiy-dveri/',
+  'Входные двери':                   '/catalog/vhodnye-dveri/',
   'Декор и погонаж':                 '/catalog/decor/',
 }
