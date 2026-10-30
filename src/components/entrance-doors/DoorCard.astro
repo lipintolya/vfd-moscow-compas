@@ -1,7 +1,7 @@
 ---
 /**
  * Карточка модели входной двери: дверь в рост (левая половина фото — вид
- * снаружи; при наведении на компьютере кадр сдвигается на вид изнутри),
+ * снаружи),
  * название, сталь и толщина, число вариантов отделки и цена «от». Вся
  * карточка — ссылка на страницу модели (растянутая ссылка на названии).
  * Кнопок связи на карточке нет: они на странице модели и в блоке
@@ -38,9 +38,7 @@ const n = door.variants.length
     height: 100%;
     object-fit: cover;
     object-position: 0 0;
-    transition: transform 700ms var(--ease-out);
   }
-  .dcard:hover .dcard__photo img, .dcard:focus-within .dcard__photo img { transform: translateX(-50%); }
   .dcard__count {
     position: absolute;
     left: 0.625rem;
@@ -63,7 +61,6 @@ const n = door.variants.length
   /* Признаки не рвём посреди («Толщина 115 / мм»): переносится целиком */
   .dcard__chips span { display: inline-block; white-space: nowrap; }
   .dcard__price { margin: 0.375rem 0 0; font-size: 1.1875rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
-  @media (prefers-reduced-motion: reduce) { .dcard__photo img { transition: none; } }
   /* На телефоне подписи плотнее: две карточки в ряд */
   @media (max-width: 43.6875rem) {
     .dcard__name { font-size: 1rem; }
