@@ -21,6 +21,27 @@ const OUT = new URL('public/renders/entrance-doors/', root)
 await rm(OUT, { recursive: true, force: true }) // старые копии не копятся
 await mkdir(OUT, { recursive: true })
 
+/**
+ * Между внешней и внутренней дверью в кадре — белая полоса, её начало у разных
+ * коллекций от 488 до 508 px. Карточке нужна только левая дверь, поэтому ищем
+ * первый столбец, с которого идёт ≥4 белых подряд (на средней части высоты).
+ * Не нашли — середина кадра.
+ */
+async function findSplit(buf) {
+  const { data, info } = await sharp(buf).removeAlpha().raw().toBuffer({ resolveWithObject: true })
+  const { width: W, height: H } = info
+  const y0 = Math.round(H * 0.12), y1 = Math.round(H * 0.8)
+  const white = (x) => {
+    let sum = 0, n = 0
+    for (let y = y0; y < y1; y += 4) for (let c = 0; c < 3; c++) { sum += data[(y * W + x) * 3 + c]; n++ }
+    return sum / n >= 250
+  }
+  for (let x = Math.round(W * 0.44); x < Math.round(W * 0.56); x++) {
+    if ([0, 1, 2, 3].every((d) => white(x + d))) return x
+  }
+  return Math.round(W / 2)
+}
+
 const files = (await readdir(SRC)).filter((f) => /^[a-z0-9-]+-\d+\.webp$/.test(f)).sort()
 const meta = {}
 for (const f of files) {
@@ -32,7 +53,8 @@ for (const f of files) {
   for (const w of widths) {
     await writeFile(new URL(`${name}-${hash}-${w}.webp`, OUT), await sharp(buf).resize({ width: w }).webp({ quality: 78 }).toBuffer())
   }
-  meta[name] = { hash, widths, width: widths.at(-1), height: Math.round((H * widths.at(-1)) / W) }
+  const split = await findSplit(buf)
+  meta[name] = { hash, widths, width: widths.at(-1), height: Math.round((H * widths.at(-1)) / W), split: Math.round((split * widths.at(-1)) / W) }
 }
 await writeFile(new URL('src/data/entrance-doors-images.json', root), JSON.stringify(meta, null, 2) + '\n')
 console.log(`Фото: ${files.length}`)

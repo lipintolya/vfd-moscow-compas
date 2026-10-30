@@ -18,9 +18,9 @@ const n = door.variants.length
 ---
 
 <article class="dcard" data-door data-group={group} data-name={door.name.toLowerCase()}>
-  <div class="h-media dcard__photo" style={`--ar: ${door.cover.width / 2} / ${door.cover.height}`}>
+  <div class="h-media dcard__photo" style={`--ar: ${door.cover.width / 2} / ${door.cover.height}; --iw: ${(door.cover.width / door.cover.split) * 100}%`}>
     <img src={door.cover.src} srcset={door.cover.srcset} sizes="(min-width: 62.5rem) 28rem, (min-width: 43.75rem) 60vw, 92vw" alt={door.cover.alt} width={door.cover.width} height={door.cover.height} loading="lazy" decoding="async" />
-    {n > 1 && <span class="dcard__count">{n} {pluralRu(n, ['вариант', 'варианта', 'вариантов'])} отделки</span>}
+    {n > 1 && <span class="dcard__count"><span class="dcard__long">{n} {pluralRu(n, ['вариант', 'варианта', 'вариантов'])} отделки</span><span class="dcard__short">{n} {pluralRu(n, ['отделка', 'отделки', 'отделок'])}</span></span>}
   </div>
   <h3 class="dcard__name"><a class="dcard__link" href={door.href}>{typograph(door.name)}</a></h3>
   <p class="dcard__chips">{door.chips.slice(0, 2).map((c, i, a) => <><span>{i < a.length - 1 ? `${c},` : c}</span>{' '}</>)}</p>
@@ -31,14 +31,17 @@ const n = door.variants.length
   .dcard { position: relative; display: grid; gap: 0.25rem; align-content: start; }
   /* Половина кадра: слева дверь снаружи, справа изнутри. Рамка по размерам самого
      фото (--ar) — дверь видна в полную высоту, ничего не срезается */
-  .dcard__photo { position: relative; aspect-ratio: var(--ar, 5 / 8); border-radius: var(--h-tile-radius); }
+  .dcard__photo { position: relative; aspect-ratio: var(--ar, 5 / 8); border-radius: 0; }
+  /* Размер двери как у межкомнатных в каталоге: плитка уже карточки, слева вровень с текстом */
+  .dcard__photo { width: 84%; justify-self: start; }
   .dcard__photo img {
-    width: 200%;
+    width: var(--iw, 200%);
     max-width: none;
     height: 100%;
-    object-fit: cover;
-    object-position: 0 0;
+    /* граница половин у коллекций разная (на 1–2 %) — растяжение незаметно, зато карточки в ряду одной высоты */
+    object-fit: fill;
   }
+  .dcard__short { display: none; }
   .dcard__count {
     position: absolute;
     left: 0.625rem;
@@ -63,6 +66,9 @@ const n = door.variants.length
   .dcard__price { margin: 0.375rem 0 0; font-size: 1.1875rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
   /* На телефоне подписи плотнее: две карточки в ряд */
   @media (max-width: 43.6875rem) {
+    .dcard__photo { width: 70%; }
+    .dcard__long { display: none; }
+    .dcard__short { display: inline; white-space: nowrap; }
     .dcard__name { font-size: 1rem; }
     .dcard__count { font-size: 0.6875rem; padding: 0.1875rem 0.5rem; left: 0.5rem; bottom: 0.5rem; }
   }
