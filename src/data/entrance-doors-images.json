@@ -856,92 +856,84 @@
     "single": false
   },
   "bunker-bn-14-1": {
-    "hash": "9f4138f2",
+    "hash": "f9b71ab7",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 890,
-    "split": 509,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "bunker-bn-14-2": {
-    "hash": "8404791b",
+    "hash": "2166cfdf",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 500,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "bunker-bn-14-3": {
-    "hash": "4a202a13",
+    "hash": "c660e93b",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 500,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "bunker-bn-14-4": {
-    "hash": "96d00fb4",
+    "hash": "dd5463a6",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 500,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "bunker-bn-14-5": {
-    "hash": "6353da06",
+    "hash": "698f225b",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 500,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "bunker-bn-14-6": {
-    "hash": "88a387b6",
+    "hash": "e2585b8f",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 500,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "bunker-bn-14-7": {
-    "hash": "144968bb",
+    "hash": "90a7a44e",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 500,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "bunker-bn-14-8": {
-    "hash": "25663246",
+    "hash": "acdeead6",
     "widths": [
-      520,
-      1000
+      499
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 500,
-    "single": false
+    "width": 499,
+    "height": 977,
+    "split": 499,
+    "single": true
   },
   "evolab-1": {
     "hash": "5a79ed05",
