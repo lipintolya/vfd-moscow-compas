@@ -55,7 +55,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
     "@astrojs/vue": "^7.0.2",
-    "@supabase/supabase-js": "^2.106.0",
+    "@supabase/supabase-js": "^2.118.0",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^7.3.2",
     "github-slugger": "2.0.0",
