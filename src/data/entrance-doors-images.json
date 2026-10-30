@@ -3697,15 +3697,14 @@
     "single": true
   },
   "termolab-2-pro-1": {
-    "hash": "c1fd125a",
+    "hash": "ce266654",
     "widths": [
-      520,
-      1000
+      506
     ],
-    "width": 1000,
-    "height": 868,
-    "split": 508,
-    "single": false
+    "width": 506,
+    "height": 977,
+    "split": 506,
+    "single": true
   },
   "termolab-3-grafit-1": {
     "hash": "bf4e8ab2",
