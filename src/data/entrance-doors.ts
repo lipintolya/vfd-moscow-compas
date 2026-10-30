@@ -20,7 +20,7 @@ import { TITLE_MAX, DESCRIPTION_MAX, fitPhrase } from '../lib/product-text'
 /** Сколько вариантов отделки у модели показано (скрипт выгрузки берёт до стольких) */
 export const VARIANTS_SHOWN = 8
 
-export interface DoorImage { src: string; srcset: string; large: string; width: number; height: number; split: number; alt: string }
+export interface DoorImage { src: string; srcset: string; large: string; width: number; height: number; split: number; single: boolean; alt: string }
 export interface DoorVariant { name: string; image: DoorImage; /** Цена этой отделки по каталогу завода, ₽ */ price: number }
 
 /** Группы страницы: у двери одна, по самому важному признаку (порядок = приоритет) */
@@ -51,15 +51,17 @@ export interface EntranceDoor {
   request: string
 }
 
-const table = images as Record<string, { hash: string; widths: number[]; width: number; height: number; split: number }>
+const table = images as Record<string, { hash: string; widths: number[]; width: number; height: number; split: number; single: boolean }>
 const clean = (s: string) => s.replace(/[ \s]+/g, ' ').trim()
+
+const img_single = (file: string) => !!table[file.replace('.webp', '')]?.single
 
 function img(file: string, alt: string): DoorImage {
   const name = file.replace('.webp', '')
   const m = table[name]
   if (!m) throw new Error(`Входные двери: нет фото «${file}» — assets/entrance-doors/${file}, затем npm run gen:entrance-doors`)
   const at = (w: number) => `/renders/entrance-doors/${name}-${m.hash}-${w}.webp`
-  return { src: at(m.widths[0]!), srcset: m.widths.map((w) => `${at(w)} ${w}w`).join(', '), large: at(m.widths.at(-1)!), width: m.width, height: m.height, split: m.split, alt }
+  return { src: at(m.widths[0]!), srcset: m.widths.map((w) => `${at(w)} ${w}w`).join(', '), large: at(m.widths.at(-1)!), width: m.width, height: m.height, split: m.split, single: m.single, alt }
 }
 
 const rowOf = (specs: { label: string; value: string }[], label: string) => specs.find((s) => s.label === label)?.value
@@ -107,7 +109,7 @@ function build(raw: Raw): EntranceDoor {
   const variants = raw.variants.map((v) => ({
     name: v.name,
     price: v.price,
-    image: img(v.file, `${title}: ${v.name}, вид снаружи и изнутри — ${SITE.studioName}`),
+    image: img(v.file, `${title}: ${v.name}, ${img_single(v.file) ? 'вид снаружи' : 'вид снаружи и изнутри'} — ${SITE.studioName}`),
   }))
   return {
     id: raw.id,

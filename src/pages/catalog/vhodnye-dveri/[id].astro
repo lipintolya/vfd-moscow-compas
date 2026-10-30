@@ -75,11 +75,11 @@ const faqSchema = {
     <section class="edm" aria-labelledby="door-title">
       <div class="container edm__grid" data-gallery data-lightbox data-lightbox-images={large} data-asks={asks}>
         <div class="edm__gallery">
-          <button type="button" class="h-media edm__main" style={`aspect-ratio: ${first.image.width} / ${first.image.height}`} data-lightbox-index="0" data-main aria-label="Открыть фото крупно">
+          <button type="button" class={`h-media edm__main${first.image.single ? " edm__main--one" : ""}`} style={`aspect-ratio: ${first.image.width} / ${first.image.height}`} data-lightbox-index="0" data-main aria-label="Открыть фото крупно">
             <img src={first.image.src} srcset={first.image.srcset} sizes="(min-width: 62.5rem) 46vw, 100vw" alt={first.image.alt} width={first.image.width} height={first.image.height} fetchpriority="high" decoding="async" />
             <span class="edm__zoom" aria-hidden="true">Увеличить</span>
           </button>
-          <p class="edm__sides" aria-hidden="true"><span>Снаружи</span><span>Изнутри</span></p>
+          <p class={`edm__sides${first.image.single ? " edm__sides--one" : ""}`} aria-hidden="true"><span>Снаружи</span>{!first.image.single && <span>Изнутри</span>}</p>
 
           {multi && (
             <div class="edm__finish">
@@ -221,6 +221,9 @@ const faqSchema = {
   /* Подписи под половинами кадра */
   .edm__sides { display: grid; grid-template-columns: 1fr 1fr; margin: 0.5rem 0 0; font-size: 0.8125rem; color: var(--h-muted); }
   .edm__sides span { text-align: center; }
+  /* В кадре одна дверь (снаружи): плитка уже, подпись под ней */
+  .edm__main--one { max-width: 20rem; margin-inline: auto; }
+  .edm__sides--one { grid-template-columns: 1fr; max-width: 20rem; margin-inline: auto; }
 
   .edm__finish { margin-top: 1.5rem; }
   .edm__finish-name { display: flex; flex-wrap: wrap; gap: 0.125rem 0.75rem; margin: 0 0 0.75rem; color: var(--h-soft); }

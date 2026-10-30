@@ -18,7 +18,7 @@ const n = door.variants.length
 ---
 
 <article class="dcard" data-door data-group={group} data-name={door.name.toLowerCase()}>
-  <div class="h-media dcard__photo" style={`--ar: ${door.cover.width / 2} / ${door.cover.height}; --iw: ${(door.cover.width / door.cover.split) * 100}%`}>
+  <div class="h-media dcard__photo" style={`--ar: 500 / ${door.cover.height}; --iw: ${(door.cover.width / door.cover.split) * 100}%`}>
     <img src={door.cover.src} srcset={door.cover.srcset} sizes="(min-width: 62.5rem) 28rem, (min-width: 43.75rem) 60vw, 92vw" alt={door.cover.alt} width={door.cover.width} height={door.cover.height} loading="lazy" decoding="async" />
     {n > 1 && <span class="dcard__count"><span class="dcard__long">{n} {pluralRu(n, ['вариант', 'варианта', 'вариантов'])} отделки</span><span class="dcard__short">{n} {pluralRu(n, ['отделка', 'отделки', 'отделок'])}</span></span>}
   </div>
