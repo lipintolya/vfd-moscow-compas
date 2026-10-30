@@ -94,7 +94,7 @@ const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
           group = a.group
           nav.textContent = a.nav
           why.textContent = a.why
-          go.textContent = `Показать ${a.models}, от ${a.from}`
+          go.textContent = `Показать ${a.models}, от\u00a0${a.from}`
           imgBox.style.setProperty('--ar', `500 / ${a.img.h}`)
           imgBox.style.setProperty('--iw', `${a.img.iw}%`)
           img.src = a.img.src
@@ -163,12 +163,14 @@ const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
   .pk__opt[aria-pressed='true'] .pk__hint { color: color-mix(in srgb, var(--color-white) 70%, transparent); }
   .pk__opt:focus-visible, .pk__go:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
 
-  /* Совет: графитовая плитка, как плитки групп выше, — слева текст и кнопка, справа дверь */
+  /* Совет: графитовая плитка, как плитки групп выше. Телефон: название и пояснение слева,
+     дверь справа, кнопка во всю ширину под ними; шире — текст слева, дверь справа внизу */
   .pk__res {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: clamp(1.25rem, 3vw, 1.75rem) 0 0 clamp(1.25rem, 3vw, 1.75rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'nav nav' 'why img' 'go go';
+    gap: 0.5rem 1rem;
+    padding: clamp(1.25rem, 3vw, 1.75rem);
     border-radius: var(--h-tile-radius);
     background: var(--color-graphite);
     color: var(--color-white);
@@ -176,20 +178,31 @@ const answers = PICK_PLACES.flatMap((p) => PICK_NEEDS.map((n) => {
     animation: pk-in 360ms var(--ease-out);
   }
   .pk__res[hidden] { display: none; }
-  .pk__txt { display: grid; gap: 0.5rem; align-content: start; justify-items: start; padding-bottom: clamp(1.25rem, 3vw, 1.75rem); min-width: 0; }
-  .pk__nav { margin: 0; font-size: clamp(1.25rem, 0.8vw + 1rem, 1.5rem); font-weight: 600; line-height: 1.15; }
-  .pk__why { margin: 0; max-width: 34rem; color: color-mix(in srgb, var(--color-white) 78%, transparent); }
-  .pk__go { height: auto; min-height: 3rem; margin-top: 0.75rem; padding-block: 0.625rem; background: var(--color-white); color: var(--h-ink); text-align: left; }
+  .pk__txt { display: contents; }
+  .pk__nav { grid-area: nav; min-width: 0; margin: 0; overflow-wrap: anywhere; font-size: clamp(1.25rem, 0.8vw + 1rem, 1.5rem); font-weight: 600; line-height: 1.15; }
+  .pk__why { grid-area: why; align-self: start; min-width: 0; margin: 0; max-width: 34rem; color: color-mix(in srgb, var(--color-white) 78%, transparent); }
+  .pk__go { grid-area: go; justify-content: center; height: auto; min-height: 3rem; margin-top: 0.75rem; padding-block: 0.625rem; background: var(--color-white); color: var(--h-ink); text-align: center; white-space: normal; }
   .pk__go:hover { background: var(--color-slate-200); }
-  .pk__img { display: block; flex: none; align-self: flex-end; width: 5.5rem; margin-right: clamp(1.25rem, 3vw, 1.75rem); aspect-ratio: var(--ar, 5 / 8); overflow: hidden; }
+  .pk__img { grid-area: img; align-self: start; display: block; width: 4.75rem; aspect-ratio: var(--ar, 5 / 8); overflow: hidden; }
   .pk__img img { display: block; width: var(--iw, 200%); max-width: none; height: 100%; object-fit: fill; }
+  /* Самые узкие экраны (320): дверь меньше, текст компактнее — название не упирается в дверь */
+  @media (max-width: 23.4375rem) {
+    .pk__img { width: 3.75rem; }
+    .pk__nav { font-size: 1.125rem; }
+    .pk__why { font-size: 0.9375rem; }
+    .pk__go { font-size: 0.875rem; padding-inline: 1rem; }
+  }
   @keyframes pk-in { from { opacity: 0; transform: translateY(0.5rem); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { .pk__res { animation: none; } }
 
   @media (min-width: 43.75rem) {
     .pk__opts--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .pk__opts:not(.pk__opts--three) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .pk__img { width: 7rem; }
+    .pk__res { display: flex; justify-content: space-between; gap: 1rem; padding: clamp(1.25rem, 3vw, 1.75rem) 0 0 clamp(1.25rem, 3vw, 1.75rem); }
+    .pk__txt { display: grid; gap: 0.5rem; align-content: start; justify-items: start; padding-bottom: clamp(1.25rem, 3vw, 1.75rem); min-width: 0; }
+    .pk__nav, .pk__why, .pk__go { grid-area: auto; }
+    .pk__go { justify-content: flex-start; text-align: left; white-space: nowrap; }
+    .pk__img { flex: none; align-self: flex-end; width: 7rem; margin-right: clamp(1.25rem, 3vw, 1.75rem); }
   }
   @media (min-width: 75rem) {
     .pk__box { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.3fr); align-items: start; }

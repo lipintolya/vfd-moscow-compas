@@ -23,8 +23,8 @@ const facets = [
   { id: 'steel', label: 'Сталь', options: STEEL_FACETS.map((v) => ({ value: v, label: `${v} мм`, n: count((d) => d.steel, v) })) },
 ]
 const SORTS = [
-  { id: 'price-asc', label: 'Сначала недорогие' },
-  { id: 'price-desc', label: 'Сначала дорогие' },
+  { id: 'price-asc', label: 'Дешевле' },
+  { id: 'price-desc', label: 'Дороже' },
   { id: 'name', label: 'По названию' },
 ]
 const doorsWord = (n: number) => pluralRu(n, ['модель', 'модели', 'моделей'])
@@ -229,7 +229,7 @@ const doorsWord = (n: number) => pluralRu(n, ['модель', 'модели', '�
     border-bottom: 0.0625rem solid var(--h-rule);
   }
   .ef[hidden] { display: none; }
-  .ef__bar { display: flex; align-items: center; gap: 0.5rem; }
+  .ef__bar { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
   .ef__all, .ef__pill > summary {
     display: inline-flex;
     align-items: center;
@@ -253,6 +253,7 @@ const doorsWord = (n: number) => pluralRu(n, ['модель', 'модели', '�
   .ef__all:hover { background: var(--color-slate-700); border-color: var(--color-slate-700); }
   .ef__pill > summary:hover { border-color: var(--h-ink); }
   .ef__pill[open] > summary, .ef__pill.is-set > summary { border-color: var(--h-ink); }
+  @media (max-width: 23.4375rem) { .ef__all { padding: 0 0.875rem; } .ef__sort select { font-size: 0.875rem; } }
   .ef__all:focus-visible, .ef__pill > summary:focus-visible, .ef__sort select:focus-visible, .ef__x:focus-visible, .ef__reset:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   .ef__chev { flex: none; transition: transform 200ms var(--ease-out); }
   .ef__pill[open] .ef__chev { transform: rotate(180deg); }
@@ -279,8 +280,8 @@ const doorsWord = (n: number) => pluralRu(n, ['модель', 'модели', '�
   }
   @media (min-width: 43.75rem) { .ef__pills { display: flex; } }
 
-  .ef__sort { position: relative; display: inline-flex; align-items: center; margin-left: auto; color: var(--h-ink); }
-  .ef__sort select { appearance: none; height: 2.75rem; padding: 0 1.5rem 0 0.5rem; border: 0; background: none; color: inherit; font: inherit; font-size: 0.9375rem; font-weight: 500; cursor: pointer; }
+  .ef__sort { position: relative; display: inline-flex; align-items: center; min-width: 0; margin-left: auto; color: var(--h-ink); }
+  .ef__sort select { appearance: none; min-width: 0; max-width: 100%; text-overflow: ellipsis; height: 2.75rem; padding: 0 1.5rem 0 0.5rem; border: 0; background: none; color: inherit; font: inherit; font-size: 0.9375rem; font-weight: 500; cursor: pointer; }
   .ef__sort .ef__chev { position: absolute; right: 0.25rem; pointer-events: none; }
 
   .ef__count { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1rem; margin: 0.25rem 0 0; min-height: 1.75rem; font-size: 0.875rem; color: var(--h-muted); }
