@@ -194,7 +194,7 @@ export const ENTRANCE_PAGE = {
   title: `Входные двери в Москве: каталог, цены от ${ENTRANCE_MIN_PRICE.toLocaleString('ru-RU')} ₽`,
   h1: 'Входные двери в Москве',
   description: `Каталог входных дверей: ${ENTRANCE_DOORS.length} моделей для квартиры и дома — с терморазрывом, электронным замком, стеклопакетом. Цены от ${rub(ENTRANCE_MIN_PRICE)}. ТЦ «Компас».`,
-  lead: `${ENTRANCE_DOORS.length} моделей стальных входных дверей: фото снаружи и изнутри, характеристики и варианты отделки. Цены — от ${rub(ENTRANCE_MIN_PRICE)}: точную назовём с учётом отделки и комплектации.`,
+  lead: `${ENTRANCE_DOORS.length} моделей стальных входных дверей: фото, характеристики и варианты отделки. Цены — от ${rub(ENTRANCE_MIN_PRICE)}: точную назовём с учётом отделки и комплектации.`,
   hero: ENTRANCE_SHOWCASE[0]!.cover,
   /** Диапазон стали по каталогу: «1,5–1,8 мм» */
   steelRange: `${Math.min(...steels)}–${Math.max(...steels)}`.replace(/\./g, ','),

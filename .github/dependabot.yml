@@ -1,0 +1,20 @@
+# Обновления зависимостей и уведомления об уязвимостях — раз в неделю.
+# Сайт статический, но сборка и CMS тянут сотни пакетов: пусть новые
+# версии приходят pull request-ами, а не копятся годами.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    groups:
+      astro: { patterns: ['astro', '@astrojs/*'] }
+  - package-ecosystem: npm
+    directory: /cms
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 3
+    groups:
+      strapi: { patterns: ['@strapi/*'] }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
