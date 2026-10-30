@@ -111,7 +111,7 @@ export const PANEL_MATERIALS = [
     id: 'rails',
     title: 'Декоративные рейки',
     text: `Рейки на стену или перегородкой между зонами — в покрытиях ${reykiMaterials}. Комплект из ${REYKI_KIT_PCS} шт — от ${rub(FROM_PRICE_REYKI)}.`,
-    link: { href: '/catalog/decor/#reyki', label: 'Цены на рейки' },
+    link: { href: '/catalog/dekorativnye-reyki/', label: 'Декоративные рейки: применение и цены' },
     visual: {
       slot: 'rails', ratio: '4:5',
       alt: 'Декоративные рейки от пола до потолка разделяют кухню и обеденную зону',

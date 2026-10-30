@@ -2,17 +2,20 @@
 /**
  * src/pages/catalog/[slug].astro
  * Тонкий роут для SEO-лендингов каталога — по покрытию (DOOR_CATEGORIES),
- * по цвету (COLOR_CATEGORIES) и по стилю (STYLE_CATEGORIES). Разметка — в
- * DoorCategoryLanding.astro / ColorCategoryLanding.astro /
- * StyleCategoryLanding.astro, см. комментарии в соответствующих data-файлах.
+ * по цвету (COLOR_CATEGORIES), по стилю (STYLE_CATEGORIES) и под задачу
+ * (TASK_CATEGORIES). Разметка — в DoorCategoryLanding.astro /
+ * ColorCategoryLanding.astro / StyleCategoryLanding.astro /
+ * TaskCategoryLanding.astro, см. комментарии в соответствующих data-файлах.
  */
 
 import DoorCategoryLanding from '../../components/catalog/DoorCategoryLanding.astro'
 import ColorCategoryLanding from '../../components/catalog/ColorCategoryLanding.astro'
 import StyleCategoryLanding from '../../components/catalog/StyleCategoryLanding.astro'
+import TaskCategoryLanding from '../../components/catalog/TaskCategoryLanding.astro'
 import { DOOR_CATEGORIES } from '../../data/door-categories'
 import { COLOR_CATEGORIES } from '../../data/color-categories'
 import { STYLE_CATEGORIES } from '../../data/style-categories'
+import { TASK_CATEGORIES } from '../../data/task-categories'
 import { getCatalogCards } from '../../lib/catalog-data'
 
 export async function getStaticPaths() {
@@ -30,6 +33,10 @@ export async function getStaticPaths() {
       params: { slug: category.slug },
       props: { kind: 'style' as const, category, cards },
     })),
+    ...TASK_CATEGORIES.map(category => ({
+      params: { slug: category.slug },
+      props: { kind: 'task' as const, category, cards },
+    })),
   ]
 }
 
@@ -39,3 +46,4 @@ const { kind, category, cards } = Astro.props
 {kind === 'coating' && <DoorCategoryLanding category={category} cards={cards} />}
 {kind === 'color' && <ColorCategoryLanding category={category} cards={cards} />}
 {kind === 'style' && <StyleCategoryLanding category={category} cards={cards} />}
+{kind === 'task' && <TaskCategoryLanding category={category} cards={cards} />}

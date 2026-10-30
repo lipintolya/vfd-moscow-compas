@@ -1,0 +1,216 @@
+---
+/**
+ * src/components/catalog/TaskCategoryLanding.astro
+ *
+ * Шаблон SEO-лендингов /catalog/<slug>/ «под задачу» — высокие двери, двери
+ * в ванную, недорогие двери (данные и объяснение — src/data/task-categories.ts).
+ * Сверху — заголовок и вводка, ниже сетка моделей (если подборка отбирает
+ * модели; у «высоких дверей» сетки нет — страница ведёт в каталог), секции с
+ * ответом на задачу, работы портфолио, статья по теме и вопросы.
+ * Стили — токены дизайн-системы (.home, home.css); сетку каталога рисует тот
+ * же CatalogClient, что на /catalog/.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumbs from '../ui/Breadcrumbs.astro'
+import FaqAccordion from '../ui/FaqAccordion.astro'
+import VisitBand from '../home/VisitBand.astro'
+import WorkCard from '../portfolio/WorkCard.astro'
+import RelatedArticleCard from '../articles/RelatedArticleCard.astro'
+import CatalogClient from './CatalogClient.vue'
+import '../../styles/home.css'
+import { getArticles } from '../../lib/articles'
+import { getWorks } from '../../lib/works'
+import { localBusinessSchema } from '../../lib/local-business-schema'
+import { typograph } from '../../lib/typograph'
+import { PHONE, SITE } from '../../config/site'
+import type { CatalogStats, TaskCategory } from '../../data/task-categories'
+import type { CatalogCardItem } from './types'
+
+interface Props {
+  category: TaskCategory
+  cards: CatalogCardItem[]
+}
+
+const { category, cards } = Astro.props
+const path = `/catalog/${category.slug}/`
+const pageUrl = new URL(path, SITE.url).href
+
+/* Отбор моделей: серии из статьи или ценовая корзина. Пустой отбор — ошибка
+   сборки: подборка без моделей не должна уехать на сайт молча */
+const select = category.select
+const matched = !select
+  ? []
+  : 'series' in select
+    ? cards.filter((c) => select.series.includes(c.seriesSlug))
+    : cards.filter((c) => c.price != null && c.price < select.maxPrice)
+if (select && matched.length === 0) {
+  throw new Error(`Подборка «${category.slug}»: ни одной модели каталога (src/data/task-categories.ts)`)
+}
+if (select && 'series' in select) {
+  const lost = select.series.filter((s) => !matched.some((c) => c.seriesSlug === s))
+  if (lost.length) throw new Error(`Подборка «${category.slug}»: в каталоге нет серий ${lost.join(', ')}`)
+}
+
+const uniq = <T,>(items: T[], key: (t: T) => string) => [...new Map(items.map((i) => [key(i), i])).values()]
+const prices = matched.map((c) => c.price).filter((p): p is number => p != null)
+const stats: CatalogStats = {
+  count: matched.length,
+  minPrice: prices.length ? Math.min(...prices) : 0,
+  coatings: uniq(matched.filter((c) => c.coatingSlug), (c) => c.coatingSlug).map((c) => ({ name: c.coating, slug: c.coatingSlug })),
+  series: uniq(matched.filter((c) => c.seriesSlug), (c) => c.seriesSlug).map((c) => c.series),
+}
+const { intro, metaDescription, sections, faq } = category.text(stats)
+
+const allSeries = uniq(matched.filter((c) => c.seriesSlug), (c) => c.seriesSlug).map((c) => ({ label: c.series, value: c.seriesSlug }))
+const allCoatings = uniq(matched.filter((c) => c.coatingSlug), (c) => c.coatingSlug).map((c) => ({ label: c.coating, value: c.coatingSlug }))
+
+/* Работы портфолио и статья по теме — по id; пропавшие роняют сборку */
+const allWorks = await getWorks()
+const works = (category.works ?? []).map((id) => {
+  const w = allWorks.find((x) => x.id === id)
+  if (!w) throw new Error(`Подборка «${category.slug}»: работы «${id}» нет в портфолио (Strapi)`)
+  return w
+})
+let article
+if (category.articleSlug) {
+  article = (await getArticles()).find((a) => a.id === category.articleSlug)
+  if (!article) throw new Error(`Подборка «${category.slug}»: статьи «${category.articleSlug}» нет в Strapi`)
+}
+
+const structuredData = [
+  localBusinessSchema({ url: SITE.url }),
+  {
+    '@context': 'https://schema.org',
+    '@type': select ? 'CollectionPage' : 'WebPage',
+    name: category.h1,
+    description: metaDescription,
+    url: pageUrl,
+    ...(select && { numberOfItems: matched.length }),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+]
+
+const t = typograph
+---
+
+<BaseLayout title={category.metaTitle} description={metaDescription} canonical={pageUrl} structuredData={structuredData}>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Каталог', href: '/catalog/' }, { label: category.h1 }]} />
+    </div>
+  </div>
+
+  <div class="home">
+    <section class="tl-head" aria-labelledby="tl-title">
+      <div class="container">
+        <header class="tl-head__grid">
+          <h1 id="tl-title" class="h-h1 tl-head__title">{t(category.h1)}</h1>
+          <div class="tl-head__lead">
+            <p class="h-lead">{t(intro)}</p>
+            <div class="tl-head__actions">
+              <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать стоимость</a>
+              {select
+                ? <a href="#tl-models" class="h-btn h-btn--quiet">Смотреть модели</a>
+                : <a href="/catalog/" class="h-btn h-btn--quiet">Выбрать модель</a>}
+            </div>
+          </div>
+        </header>
+      </div>
+    </section>
+
+    {select && (
+      <section id="tl-models" class="h-sec h-sec--tight-top" aria-label="Модели в подборке">
+        <div class="container">
+          <CatalogClient client:load cards={matched} series={allSeries} coatings={allCoatings} />
+        </div>
+      </section>
+    )}
+
+    {sections.map((s, i) => (
+      <section class:list={['h-sec', { 'h-sec--wall': i % 2 === 0 }]} aria-labelledby={`tl-sec-${i}`}>
+        <div class="container tl-sec">
+          <h2 id={`tl-sec-${i}`} class="h-h2 tl-sec__title">{t(s.title)}</h2>
+          <div class="tl-sec__body">
+            {s.paragraphs?.map((p) => <p class="h-body">{t(p)}</p>)}
+            {s.bullets && (
+              <ul class="tl-list" role="list">
+                {s.bullets.map((b) => <li class="h-body">{t(b)}</li>)}
+              </ul>
+            )}
+            {s.links && (
+              <p class="tl-links">
+                {s.links.map((l) => <a class="h-link" href={l.href}>{t(l.label)}</a>)}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    ))}
+
+    {works.length > 0 && (
+      <section class="h-sec" aria-labelledby="tl-works-title">
+        <div class="container">
+          <header class="h-head">
+            <h2 id="tl-works-title" class="h-h2">Наши работы</h2>
+            <p class="h-lead">Объекты клиентов салона в Москве: фото и описание монтажа.</p>
+          </header>
+          <ul class="tl-works" role="list">
+            {works.map((w) => <li><WorkCard work={w} /></li>)}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    {article && <RelatedArticleCard article={article} />}
+
+    <section class="h-sec h-sec--wall" aria-labelledby="tl-faq-title">
+      <div class="container h-faq">
+        <h2 id="tl-faq-title" class="h-h2">Частые вопросы</h2>
+        <FaqAccordion items={faq} title={false} />
+      </div>
+    </section>
+
+    <VisitBand lead="Образцы покрытий и цветов — в салоне: приложите их к стенам и полу и подберите дверь вместе с менеджером." />
+  </div>
+</BaseLayout>
+
+<style>
+  /* Шапка: заголовок слева, вводка и кнопки справа — как у разделов портфолио */
+  .tl-head { padding-top: clamp(1rem, 2vw, 1.5rem); }
+  .tl-head__grid {
+    display: grid;
+    gap: 1.25rem var(--h-gutter);
+    align-items: end;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+  .tl-head__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+  @media (min-width: 62.5rem) {
+    .tl-head__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .tl-head__title { grid-column: 1 / span 6; }
+    .tl-head__lead { grid-column: 8 / span 5; }
+  }
+
+  /* Секция ответа: заголовок слева, текст справа */
+  .tl-sec { display: grid; gap: 1.25rem var(--h-gutter); align-items: start; }
+  .tl-sec__body { display: grid; gap: 1rem; justify-items: start; max-width: 44rem; }
+  .tl-list { display: grid; gap: 0.875rem; margin: 0; padding-left: 1.25rem; list-style: disc; }
+  .tl-list li::marker { color: var(--h-signal); }
+  .tl-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 0; }
+  @media (min-width: 62.5rem) {
+    .tl-sec { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .tl-sec__title { grid-column: 1 / span 4; }
+    .tl-sec__body { grid-column: 6 / span 7; }
+  }
+
+  .tl-works { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .tl-works { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 62.5rem) { .tl-works { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+</style>

@@ -21,6 +21,7 @@ import { getSeriesSpec, coatingGroupCopy } from '../data/series-descriptions'
 import { DOOR_CATEGORIES } from '../data/door-categories'
 import { COLOR_CATEGORIES } from '../data/color-categories'
 import { STYLE_CATEGORIES } from '../data/style-categories'
+import { TASK_CATEGORIES } from '../data/task-categories'
 import { MEASURE_TERMS, rub } from '../data/services'
 import { brandTitle } from '../lib/seo-title'
 import { pluralRu } from '../lib/plural'
@@ -210,12 +211,13 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       <div class="container">
         <header class="h-head">
           <h2 id="picks-title" class="h-h2">Подборки</h2>
-          <p class="h-lead">{typograph('Модели под цвет и стиль интерьера — с описанием, как их сочетать.')}</p>
+          <p class="h-lead">{typograph('Модели под цвет, стиль и задачу — с описанием, как их выбирать.')}</p>
         </header>
         <div class="pk">
           {[
             { title: 'По цвету', items: COLOR_CATEGORIES },
             { title: 'По стилю', items: STYLE_CATEGORIES },
+            { title: 'Под задачу', items: TASK_CATEGORIES },
           ].map((group) => (
             <div class="pk__group">
               <h3 class="pk__title">{group.title}</h3>

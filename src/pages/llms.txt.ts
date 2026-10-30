@@ -12,7 +12,9 @@ import { ALUM_PAGE, ALUM_FACTS, ALUM_LAYOUT_COUNT } from '../data/alum-partition
 import { getCatalogCards } from '../lib/catalog-data'
 import { rub, MEASURE_TERMS, INSTALL_TERMS, WARRANTY_TERMS } from '../data/services'
 import { SECRET_MIN_KIT_PRICE } from '../data/skrytye-dveri-products'
-import { FROM_PRICE_PLINTUS, FROM_PRICE_REYKI, FROM_PRICE_FRAMUGA_KIT } from '../data/decor-products'
+import { FROM_PRICE_PLINTUS, FROM_PRICE_REYKI, FROM_PRICE_FRAMUGA_KIT, REYKI_KIT_PCS } from '../data/decor-products'
+import { REYKI_PAGE } from '../data/reyki-page'
+import { TASK_CATEGORIES } from '../data/task-categories'
 import { HIDDEN_DOORS_FAQ } from '../data/hidden-doors-page'
 import { DECOR_FAQ } from '../data/decor-page'
 import { PLINTUS_FAQ, THICKNESS_RANGE, HEIGHT_RANGE, PROFILES_COUNT } from '../data/plintus'
@@ -42,6 +44,8 @@ export const GET: APIRoute = async () => {
     ['Каталог межкомнатных дверей', '/catalog/', 'серии, покрытия, цвета и цены'],
     ['Скрытые двери', '/catalog/skrytye-dveri/', 'двери скрытого монтажа, размеры и цены'],
     ['Стеновые панели', WALL_PANELS_PAGE.path, `изготовление на заказ: натуральный шпон и покрытия дверей ${SITE.name}, двери заподлицо с панелями`],
+    ['Декоративные рейки', REYKI_PAGE.path, `реечные панели на стену, потолок и перегородкой; комплект из ${REYKI_KIT_PCS} шт от ${rub(FROM_PRICE_REYKI)}`],
+    ...TASK_CATEGORIES.map((c) => [c.h1, `/catalog/${c.slug}/`, c.summary]),
     ['Входные двери', '/catalog/vhodnye-dveri/', `${ENTRANCE_DOORS.length} моделей стальных дверей: для квартиры, с терморазрывом, электронным замком и стеклопакетом; фото, характеристики, цены от ${rub(ENTRANCE_MIN_PRICE)}`],
     ['Плинтус', '/catalog/plintus/', 'напольный из МДФ, с LED-подсветкой, скрытый, микроплинтус и шпонированный; покраска по RAL и NCS, цена по запросу'],
     ['Алюминиевые перегородки', '/partitions/', 'раздвижные и стационарные системы со стеклом'],

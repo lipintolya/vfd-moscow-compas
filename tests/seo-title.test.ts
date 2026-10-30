@@ -5,6 +5,7 @@ import { productTitle } from '../src/lib/product-text'
 import { DOOR_CATEGORIES } from '../src/data/door-categories'
 import { COLOR_CATEGORIES } from '../src/data/color-categories'
 import { STYLE_CATEGORIES } from '../src/data/style-categories'
+import { TASK_CATEGORIES } from '../src/data/task-categories'
 import { SITE } from '../src/config/site'
 
 const STUDIO = ` | ${SITE.studioName}`
@@ -20,7 +21,7 @@ test('модель: бренд дверей ВФД в названии, сало
 })
 
 test('посадочные страницы каталога: ВФД в основной части, салон в конце, без старого «| ВФД»', () => {
-  for (const c of [...DOOR_CATEGORIES, ...COLOR_CATEGORIES, ...STYLE_CATEGORIES]) {
+  for (const c of [...DOOR_CATEGORIES, ...COLOR_CATEGORIES, ...STYLE_CATEGORIES, ...TASK_CATEGORIES]) {
     assert.ok(c.metaTitle.endsWith(STUDIO), c.metaTitle)
     assert.match(c.metaTitle, /ВФД/, c.metaTitle)
     assert.doesNotMatch(c.metaTitle, /\| ВФД/, c.metaTitle)

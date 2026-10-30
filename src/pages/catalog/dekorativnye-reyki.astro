@@ -1,0 +1,153 @@
+---
+/**
+ * Декоративные рейки (/catalog/dekorativnye-reyki/): реечные панели на стену,
+ * потолок и перегородкой. Отдельная страница под запросы «декоративные рейки
+ * на стену», «реечные панели»: на /catalog/decor/ рейки — одна из трёх
+ * секций, а здесь на них весь экран. Цены и инфографика — секция DecorSection
+ * (категория «reyki» из decor-page.ts, тот же прайс), тексты и вопросы —
+ * src/data/reyki-page.ts. Первый экран — LandingHero, работы — WorkCard,
+ * визит в салон — VisitBand.
+ * JSON-LD: LocalBusiness, Product + AggregateOffer, FAQPage;
+ * BreadcrumbList отдают сами хлебные крошки.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../lib/seo-title'
+import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
+import LandingHero from '../../components/ui/LandingHero.astro'
+import SectionNav from '../../components/partitions/SectionNav.astro'
+import DecorSection from '../../components/catalog/DecorSection.astro'
+import WorkCard from '../../components/portfolio/WorkCard.astro'
+import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
+import FaqAccordion from '../../components/ui/FaqAccordion.astro'
+import VisitBand from '../../components/home/VisitBand.astro'
+import '../../styles/home.css'
+
+import { decorCategory } from '../../data/decor-page'
+import { HERO_IMAGE, IMAGES, offerPrices } from '../../data/decor-products'
+import { REYKI_FAQ, REYKI_PAGE, REYKI_USES, REYKI_WORK } from '../../data/reyki-page'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
+import { getWorks } from '../../lib/works'
+import { localBusinessSchema } from '../../lib/local-business-schema'
+import { productSchema } from '../../lib/product-schema'
+import { typograph } from '../../lib/typograph'
+import { PHONE, SITE } from '../../config/site'
+
+const pageUrl = new URL(REYKI_PAGE.path, SITE.url).href
+
+/* Секция цен — та же, что на /catalog/decor/, но без ссылки на саму себя и без абзаца
+   «Где применяют» (его место — секция выше) */
+const decorReyki = decorCategory('reyki')
+const reyki = { ...decorReyki, more: undefined, text: decorReyki.text.slice(0, 1) }
+
+/* Работа с рейками-перегородкой; пропавшая из Strapi — ошибка сборки */
+const work = (await getWorks()).find((w) => w.id === REYKI_WORK)
+if (!work) throw new Error(`Декоративные рейки: работы «${REYKI_WORK}» нет в портфолио (Strapi) — src/data/reyki-page.ts`)
+
+/* Статья по теме — та, что назвала страницу декора в relatedPages */
+const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/decor/' })
+
+const heroImage = { ...HERO_IMAGE, alt: 'Стена из декоративных реек в гостиной рядом с дверью с фальшфрамугой до потолка' }
+
+const navItems = [
+  { id: 'reyki-uses', label: 'Применение' },
+  { id: 'reyki', label: 'Цены' },
+  { id: 'reyki-work', label: 'Работа' },
+  { id: 'reyki-faq', label: 'Вопросы' },
+]
+
+const structuredData = [
+  localBusinessSchema({ url: SITE.url }),
+  productSchema({
+    name: reyki.productName,
+    description: reyki.lead,
+    image: reyki.images[0]!.large,
+    prices: offerPrices(reyki.rows),
+  }),
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: REYKI_FAQ.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+]
+---
+
+<BaseLayout
+  title={brandTitle(REYKI_PAGE.title)}
+  description={REYKI_PAGE.description}
+  canonical={pageUrl}
+  ogImage={IMAGES.hero.large}
+  ogImageMeta={{ width: IMAGES.hero.width, height: IMAGES.hero.height, alt: heroImage.alt }}
+  structuredData={structuredData}
+>
+  <SectionNav items={navItems} />
+
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Каталог', href: '/catalog/' }, { label: 'Декоративные рейки' }]} />
+    </div>
+  </div>
+
+  <div class="home">
+    <LandingHero title={REYKI_PAGE.h1} lead={REYKI_PAGE.lead} image={heroImage}>
+      <Fragment slot="actions">
+        <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать рейки</a>
+        <a href="#reyki" class="h-btn h-btn--quiet">Смотреть цены</a>
+      </Fragment>
+    </LandingHero>
+
+    <section id="reyki-uses" class="h-sec" aria-labelledby="reyki-uses-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="reyki-uses-title" class="h-h2">{typograph(REYKI_USES.title)}</h2>
+          <p class="h-lead">{typograph(REYKI_USES.lead)}</p>
+        </header>
+        <ul class="rk-uses" role="list">
+          {REYKI_USES.items.map((u) => (
+            <li class="rk-use">
+              <h3 class="h-h3">{typograph(u.title)}</h3>
+              <p class="h-body">{typograph(u.text)}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <DecorSection category={reyki} title={REYKI_PAGE.pricesTitle} lead={REYKI_PAGE.pricesLead} wall />
+
+    <section id="reyki-work" class="h-sec" aria-labelledby="reyki-work-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="reyki-work-title" class="h-h2">Рейки в нашей работе</h2>
+          <p class="h-lead">Объект клиента салона в Москве: фото и описание монтажа.</p>
+        </header>
+        <div class="rk-work"><WorkCard work={work} /></div>
+      </div>
+    </section>
+
+    {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
+
+    <section id="reyki-faq" class="h-sec h-sec--wall" aria-labelledby="reyki-faq-title">
+      <div class="container h-faq">
+        <h2 id="reyki-faq-title" class="h-h2">Вопросы о&nbsp;декоративных рейках</h2>
+        <FaqAccordion items={REYKI_FAQ} title={false} />
+      </div>
+    </section>
+
+    <VisitBand lead={REYKI_PAGE.visit} />
+  </div>
+</BaseLayout>
+
+<style>
+  /* Применение: на телефоне друг под другом, на планшете по два, на широком — в один ряд (колонок столько, сколько пунктов) */
+  .rk-uses { display: grid; gap: 2.5rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .rk-uses { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 68.75rem) { .rk-uses { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); } }
+  .rk-use { padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
+  .rk-use .h-body { margin-top: 0.75rem; font-size: 0.9375rem; }
+
+  .rk-work { max-width: 26rem; }
+</style>

@@ -17,11 +17,12 @@ import { getWorks } from '../../lib/works'
 import { DOOR_CATEGORIES } from '../../data/door-categories'
 import { COLOR_CATEGORIES } from '../../data/color-categories'
 import { STYLE_CATEGORIES } from '../../data/style-categories'
+import { TASK_CATEGORIES } from '../../data/task-categories'
 
 /* Подборки каталога — ссылки с главной на посадочные страницы (покрытие,
    цвет, стиль) со словами из запросов: «Двери эмаль», «Белые двери»…
    Список — из тех же данных, что и страницы: новая подборка появится сама */
-const collections = [...DOOR_CATEGORIES, ...COLOR_CATEGORIES, ...STYLE_CATEGORIES]
+const collections = [...DOOR_CATEGORIES, ...COLOR_CATEGORIES, ...STYLE_CATEGORIES, ...TASK_CATEGORIES]
   .map((c) => ({ href: `/catalog/${c.slug}/`, label: c.h1.replace(/ в Москве$/, '') }))
 
 const wallsPhoto = shownVisual(PANEL_HOME_TILE.visual, await getWorks())

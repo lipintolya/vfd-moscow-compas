@@ -87,6 +87,7 @@ export const DECOR_CATEGORIES: DecorCategory[] = [
     materials: REYKI_MATERIALS,
     rows: REYKI_ROWS,
     note: `Длина рейки — ${REYKI_LENGTH} мм, цена — за ${REYKI_KIT_PCS} шт одного типа.`,
+    more: { href: '/catalog/dekorativnye-reyki/', label: 'Декоративные рейки на стену: где применяют и сколько стоят' },
     productName: `Декоративные рейки ${SITE.name}`,
   },
 ]

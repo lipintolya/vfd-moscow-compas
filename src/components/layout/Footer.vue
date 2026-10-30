@@ -39,9 +39,13 @@ const CATEGORY_LINKS = [
   { href: '/catalog/skrytye-dveri/',  label: 'Скрытые двери' },
   { href: '/catalog/vhodnye-dveri/',  label: 'Входные двери' },
   { href: '/catalog/stenovye-paneli/', label: 'Стеновые панели' },
+  { href: '/catalog/dekorativnye-reyki/', label: 'Декоративные рейки' },
   { href: '/partitions/',             label: 'Перегородки' },
   { href: '/partitions/alum/',  label: 'Перегородки ALUM' },
   { href: '/catalog/decor/',          label: 'Декор' },
+  { href: '/catalog/vysokie-dveri/',  label: 'Высокие двери' },
+  { href: '/catalog/dveri-v-vannuyu/', label: 'Двери в ванную' },
+  { href: '/catalog/nedorogie-dveri/', label: 'Недорогие двери' },
 ] as const
 
 const CONTACTS = {

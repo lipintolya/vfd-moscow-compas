@@ -25,8 +25,10 @@ interface Props {
   more?: DecorCategory['more']
   /** Серый фон — чередование секций на странице */
   wall?: boolean
+  /** Пояснение вместо category.lead — когда страница уже сказала это в первом экране */
+  lead?: string
 }
-const { category: c, title = c.title, more = c.more, wall = false } = Astro.props
+const { category: c, title = c.title, more = c.more, wall = false, lead = c.lead } = Astro.props
 const gallery = c.images.length > 1
 const titleId = `${c.id}-title`
 
@@ -50,7 +52,7 @@ const sizes = gallery ? '(min-width: 62.5rem) 25vw, 50vw' : '(min-width: 62.5rem
   <div class="container">
     <header class="h-head">
       <h2 id={titleId} class="h-h2">{typograph(title)}</h2>
-      <p class="h-lead">{typograph(c.lead)}</p>
+      <p class="h-lead">{typograph(lead)}</p>
     </header>
 
     <div class:list={['dsec__body', { 'dsec__body--gallery': gallery }]}>

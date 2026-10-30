@@ -267,7 +267,7 @@ export default defineConfig({
         }
         // Напольный плинтус и стеновые панели — страницы каталога под поиск
         // (src/pages/catalog/plintus.astro, stenovye-paneli.astro)
-        if (/\/catalog\/(plintus|stenovye-paneli|vhodnye-dveri)\/?$/.test(u)) {
+        if (/\/catalog\/(plintus|stenovye-paneli|dekorativnye-reyki|vhodnye-dveri)\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         // Модели входных дверей — src/pages/catalog/vhodnye-dveri/[id].astro
@@ -275,7 +275,7 @@ export default defineConfig({
           return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.7 }
         }
         // Стилевые SEO-лендинги — см. src/data/style-categories.ts.
-        if (/\/catalog\/(loft-dveri|minimalizm-dveri)\/?$/.test(u)) {
+        if (/\/catalog\/(loft-dveri|minimalizm-dveri|skandinavskiy-dveri|vysokie-dveri|nedorogie-dveri)\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
         if (/\/articles\/?$/.test(u)) {
