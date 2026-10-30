@@ -218,9 +218,15 @@ const counterId = SITE.analytics.yandexMetrikaId
       padding: 1rem;
       border-radius: 1rem;
     }
-    .cookie__text { font-size: 0.875rem; }
+    .cookie__text { font-size: 0.8125rem; line-height: 1.4; }
     .cookie__actions { display: grid; grid-template-columns: 1fr 1fr; }
-    .cookie__btn { min-width: 0; width: 100%; }
+    .cookie__btn { min-width: 0; width: 100%; height: 2.5rem; font-size: 0.875rem; padding: 0 0.75rem; }
+  }
+  /* Невысокие телефоны (iPhone 7/SE: 667 и 568 px): плашка компактнее, чтобы не съедать четверть экрана */
+  @media (max-width: 39.9375rem) and (max-height: 44rem) {
+    .cookie { gap: 0.625rem; padding: 0.75rem; bottom: calc(0.5rem + env(safe-area-inset-bottom, 0rem)); }
+    .cookie__text { font-size: 0.75rem; line-height: 1.35; }
+    .cookie__btn { height: 2.25rem; font-size: 0.8125rem; }
   }
   @media (prefers-reduced-motion: reduce) { .cookie { transition: none; } }
   @media print { .cookie { display: none; } }

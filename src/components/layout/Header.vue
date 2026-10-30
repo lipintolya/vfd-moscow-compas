@@ -879,6 +879,17 @@ onUnmounted(() => {
   font-weight: 700;
   letter-spacing: 0.06em;
 }
+/* Узкие телефоны (≤ 360 px): название не обрезается — плотнее шрифт и межбуквенный */
+@media (max-width: 22.5rem) {
+  .hdr-brand { gap: 0.5rem; }
+  .hdr-brand__name { font-size: 0.8125rem; letter-spacing: 0.02em; }
+  .hdr-brand__sub { font-size: 0.625rem; letter-spacing: 0.06em; }
+}
+/* 320 px (iPhone SE 1): ещё плотнее */
+@media (max-width: 20.5rem) {
+  .hdr-brand__name { font-size: 0.75rem; letter-spacing: 0; }
+  .hdr-brand__sub { display: none; }
+}
 .hdr-brand__sub {
   font-size: 0.6875rem;
   font-weight: 600;
