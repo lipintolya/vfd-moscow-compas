@@ -32,8 +32,7 @@ const n = door.variants.length
   /* Половина кадра: слева дверь снаружи, справа изнутри. Рамка по размерам самого
      фото (--ar) — дверь видна в полную высоту, ничего не срезается */
   .dcard__photo { position: relative; aspect-ratio: var(--ar, 5 / 8); border-radius: 0; }
-  /* Размер двери как у межкомнатных в каталоге: плитка уже карточки, слева вровень с текстом */
-  .dcard__photo { width: 84%; justify-self: start; }
+  /* Ширину карточки задаёт лента на странице: на компьютере 14,5 rem — дверь по высоте как у межкомнатных */
   .dcard__photo img {
     width: var(--iw, 200%);
     max-width: none;
@@ -66,7 +65,6 @@ const n = door.variants.length
   .dcard__price { margin: 0.375rem 0 0; font-size: 1.1875rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
   /* На телефоне подписи плотнее: две карточки в ряд */
   @media (max-width: 43.6875rem) {
-    .dcard__photo { width: 70%; }
     .dcard__long { display: none; }
     .dcard__short { display: inline; white-space: nowrap; }
     .dcard__name { font-size: 1rem; }

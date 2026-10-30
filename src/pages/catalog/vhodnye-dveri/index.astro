@@ -1,12 +1,15 @@
 ---
 /**
- * Каталог входных дверей (/catalog/vhodnye-dveri/): тёмный первый экран с
- * тремя дверями в рост, «Подберём за минуту» и модели по группам — для
- * квартиры, с терморазрывом, с электронным замком, со стеклопакетом, внизу —
- * путеводитель по выбору. Карточка — дверь в рост, число вариантов отделки и
- * цена «от». У каждой модели своя страница ([id].astro). Фильтр — только из
- * подбора и путеводителя (событие doors:filter), отдельной панели нет.
- * Данные и тексты — src/data/entrance-doors.ts.
+ * Каталог входных дверей (/catalog/vhodnye-dveri/): светлый первый экран с
+ * заголовком по центру, лента плиток-групп, «Подберём за минуту» и модели по
+ * группам — для квартиры, с терморазрывом, с электронным замком, со
+ * стеклопакетом: слева название и пояснение группы, справа лента моделей
+ * (листается пальцем или стрелками), «Показать все» раскрывает ленту в сетку;
+ * внизу — путеводитель по выбору. Ориентир подачи — каталог направлений
+ * volhovec.ru (центр, воздух, лента карточек). Карточка — дверь в рост, число
+ * вариантов отделки и цена «от». У каждой модели своя страница ([id].astro).
+ * Фильтр — только из подбора и путеводителя (событие doors:filter), отдельной
+ * панели нет. Данные и тексты — src/data/entrance-doors.ts.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../../lib/seo-title'
@@ -18,7 +21,7 @@ import PickDoor from '../../../components/entrance-doors/PickDoor.astro'
 import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astro'
 import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcase.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
-import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS, ENTRANCE_SHOWCASE } from '../../../data/entrance-doors'
+import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
 import { rub } from '../../../data/services'
@@ -30,10 +33,6 @@ const { hero } = ENTRANCE_PAGE
 const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
 const faq = [...ENTRANCE_FAQ, ...GUIDE_FAQ]
-/* Сколько моделей группы видно сразу (два ряда по четыре); остальные — по кнопке */
-const SHOWN = 8
-/* На телефоне — два ряда по две: страница не превращается в километровую ленту */
-const SHOWN_PHONE = 4
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -54,7 +53,6 @@ const listSchema = {
   description={ENTRANCE_PAGE.description}
   ogImage={hero.large}
   ogImageMeta={{ width: hero.width, height: hero.height, alt: hero.alt }}
-  preloadImage={hero.src}
   structuredData={[localBusinessSchema({ url: SITE.url }), listSchema, faqSchema]}
 >
   <div class="breadcrumb-bar">
@@ -65,31 +63,44 @@ const listSchema = {
 
   <div class="home">
     <section class="edh" aria-labelledby="doors-title">
+      <div class="container edh__in">
+        <h1 id="doors-title" class="h-h1 edh__title">{typograph(ENTRANCE_PAGE.h1)}</h1>
+        <p class="h-lead edh__lead">{typograph(ENTRANCE_PAGE.lead)}</p>
+        <div class="edh__actions">
+          <a class="h-btn h-btn--ink h-btn--phone-wide" href="#doors-pick">Выбрать модель</a>
+          <a class="h-btn h-btn--quiet h-btn--phone-wide" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+        </div>
+      </div>
+    </section>
+
+    <nav class="edn" aria-label="Группы входных дверей">
       <div class="container">
-        <div class="edh__panel">
-          <div class="edh__text">
-            <h1 id="doors-title" class="h-h1 edh__title">{typograph(ENTRANCE_PAGE.h1)}</h1>
-            <p class="h-lead edh__lead">{typograph(ENTRANCE_PAGE.lead)}</p>
-            <div class="edh__actions">
-              <a class="h-btn edh__go h-btn--phone-wide" href="#doors-pick">Выбрать модель</a>
-              <a class="h-btn edh__call h-btn--phone-wide" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
-            </div>
-          </div>
-          <ul class="edh__doors" role="list">
-            {ENTRANCE_SHOWCASE.map((d, i) => (
-              <li class={`edh__door edh__door--${i + 1}`}>
-                <a href={d.href} class="edh__link" aria-label={`${d.title}: смотреть`}>
-                  <span class="edh__img" style={`--ar: ${d.cover.split} / ${d.cover.height}; --iw: ${(d.cover.width / d.cover.split) * 100}%`}>
-                    <img src={d.cover.src} srcset={d.cover.srcset} sizes="(min-width: 62.5rem) 12rem, 28vw" alt={d.cover.alt} width={d.cover.width} height={d.cover.height} fetchpriority={i === 0 ? 'high' : undefined} decoding="async" />
+        <div class="rail" data-rail>
+          <ul class="rail__track edn__track" data-track role="list">
+            {groups.map((g) => (
+              <li>
+                <a class="edn__tile" href={`#doors-${g.id}`}>
+                  <span class="edn__text">
+                    <span class="edn__name">{typograph(g.nav)}</span>
+                    <span class="edn__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}<br />от&nbsp;{rub(g.from)}</span>
                   </span>
-                  <span class="edh__cap">{d.name}</span>
+                  <span class="edn__img" style={`--ar: 500 / ${g.doors[0]!.cover.height}; --iw: ${(g.doors[0]!.cover.width / g.doors[0]!.cover.split) * 100}%`}>
+                    <img src={g.doors[0]!.cover.src} srcset={g.doors[0]!.cover.srcset} sizes="9rem" alt="" role="presentation" width={g.doors[0]!.cover.width} height={g.doors[0]!.cover.height} loading="lazy" decoding="async" />
+                  </span>
                 </a>
               </li>
             ))}
           </ul>
+          <div class="rail__bar" data-bar>
+            <span class="rail__line"><i></i></span>
+            <span class="rail__btns">
+              <button type="button" class="rail__btn" data-prev aria-label="Назад"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <button type="button" class="rail__btn" data-next aria-label="Дальше"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            </span>
+          </div>
         </div>
       </div>
-    </section>
+    </nav>
 
     <PickDoor />
 
@@ -101,20 +112,25 @@ const listSchema = {
 
     {groups.map((g, gi) => (
       <section id={`doors-${g.id}`} class:list={['h-sec', 'edg-sec', { 'h-sec--wall': gi % 2 === 1 }]} data-section={g.id} aria-labelledby={`doors-${g.id}-title`}>
-        <div class="container">
-          <header class="edg-head">
-            <div class="edg-head__text">
-              <h2 id={`doors-${g.id}-title`} class="h-h2">{typograph(g.title)}</h2>
-              <p class="h-body edg-head__note">{typograph(g.lead)}</p>
-            </div>
-            <p class="edg-head__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}, от&nbsp;{rub(g.from)}</p>
+        <div class="container edg">
+          <header class="edg__head">
+            <h2 id={`doors-${g.id}-title`} class="h-h2 edg__title">{typograph(g.title)}</h2>
+            <p class="h-body edg__note">{typograph(g.lead)}</p>
+            <p class="edg__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}, от&nbsp;{rub(g.from)}</p>
           </header>
-          <ul class="edg" role="list">
-            {g.doors.map((d, i) => <li data-door-li data-xd={i >= SHOWN ? '' : undefined} data-xp={i >= SHOWN_PHONE ? '' : undefined}><DoorCard door={d} /></li>)}
-          </ul>
-          {g.doors.length > SHOWN_PHONE && (
-            <p class="edg-more" data-short={g.doors.length <= SHOWN ? '' : undefined}><button type="button" class="h-btn h-btn--quiet" data-more aria-expanded="false">Показать все {g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}</button></p>
-          )}
+          <div class="rail edg__rail" data-rail>
+            <ul class="rail__track edg__track" data-track role="list">
+              {g.doors.map((d) => <li data-door-li><DoorCard door={d} /></li>)}
+            </ul>
+            <div class="rail__bar" data-bar>
+              <span class="rail__line"><i></i></span>
+              <span class="rail__btns">
+                <button type="button" class="rail__btn" data-prev aria-label="Назад"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                <button type="button" class="rail__btn" data-next aria-label="Дальше"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </span>
+            </div>
+          </div>
+          <p class="edg__more"><button type="button" class="h-btn h-btn--ink h-btn--phone-wide" data-more aria-expanded="false">Показать все {g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}</button></p>
         </div>
       </section>
     ))}
@@ -174,90 +190,122 @@ const listSchema = {
   reset.querySelector('button')!.addEventListener('click', () => setGroup('all', false))
   document.addEventListener('doors:filter', (e) => setGroup((e as CustomEvent<{ group: string }>).detail.group, true))
 
+  /* «Показать все»: лента раскрывается в сетку, кнопка исчезает */
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-more]')) {
     btn.addEventListener('click', () => {
-      btn.closest('section')!.querySelector('.edg')!.classList.add('is-open')
-      btn.closest('.edg-more')!.remove()
+      btn.closest('section')!.classList.add('is-open')
+      btn.closest('.edg__more')!.remove()
     })
+  }
+
+  /* Ленты: полоска прогресса, стрелки на компьютере; на телефоне листается пальцем */
+  const smooth = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth')
+  for (const rail of document.querySelectorAll<HTMLElement>('[data-rail]')) {
+    const track = rail.querySelector<HTMLElement>('[data-track]')!
+    const thumb = rail.querySelector<HTMLElement>('.rail__line i')!
+    const prev = rail.querySelector<HTMLButtonElement>('[data-prev]')!
+    const next = rail.querySelector<HTMLButtonElement>('[data-next]')!
+    const update = () => {
+      const max = track.scrollWidth - track.clientWidth
+      const share = max > 1 ? track.clientWidth / track.scrollWidth : 1
+      const at = max > 1 ? track.scrollLeft / max : 0
+      thumb.style.width = `${share * 100}%`
+      thumb.style.left = `${at * (1 - share) * 100}%`
+      rail.toggleAttribute('data-static', max <= 1)
+      prev.disabled = track.scrollLeft <= 1
+      next.disabled = track.scrollLeft >= max - 1
+    }
+    track.addEventListener('scroll', update, { passive: true })
+    new ResizeObserver(update).observe(track)
+    prev.addEventListener('click', () => track.scrollBy({ left: -track.clientWidth * 0.85, behavior: smooth() }))
+    next.addEventListener('click', () => track.scrollBy({ left: track.clientWidth * 0.85, behavior: smooth() }))
+    update()
   }
 </script>
 
 <style>
-  /* Первый экран: графитовая панель, текст слева, три двери в рост справа */
-  .edh { padding: clamp(1rem, 2vw, 1.5rem) 0 0; }
-  .edh__panel {
-    display: grid;
-    gap: 2rem var(--h-gutter);
-    align-items: end;
-    padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.25rem, 4vw, 3.5rem) 0;
-    border-radius: var(--h-tile-radius);
-    background: var(--color-graphite);
-    color: var(--color-white);
-    overflow: hidden;
-  }
-  .edh__text { align-self: center; padding-bottom: clamp(0rem, 3vw, 3rem); }
-  .edh__title { margin: 0; color: inherit; }
-  .edh__lead { margin: 1rem 0 0; max-width: 34rem; color: color-mix(in srgb, var(--color-white) 78%, transparent); }
-  .edh__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
-  .edh__go { background: var(--color-white); color: var(--h-ink); }
-  .edh__go:hover { background: var(--color-slate-200); }
-  .edh__call { border-color: color-mix(in srgb, var(--color-white) 35%, transparent); background: none; color: var(--color-white); }
-  .edh__call:hover { border-color: var(--color-white); color: var(--color-white); }
+  /* Первый экран: светлый, по центру — заголовок, пояснение и две кнопки */
+  .edh { padding: clamp(1.5rem, 5vw, 4rem) 0 clamp(1.75rem, 4vw, 3rem); }
+  .edh__in { display: grid; justify-items: center; text-align: center; }
+  .edh__title { margin: 0; max-width: 18ch; }
+  .edh__lead { margin: 1.25rem 0 0; max-width: 40rem; color: var(--h-soft); }
+  .edh__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 1.75rem; }
+  @media (max-width: 43.6875rem) { .edh__actions { width: 100%; } }
 
-  /* Двери стоят на одной линии пола, разной высоты; левая половина кадра — дверь снаружи */
-  .edh__doors {
+  /* Ленты (плитки групп и модели): листаются пальцем, на компьютере — стрелками; полоска показывает место */
+  .rail { position: relative; }
+  .rail__track {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(0.5rem, 2vw, 1.25rem);
-    align-items: end;
-    margin: 0;
-    padding: 0;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--rail-col, 14.5rem);
+    gap: var(--rail-gap, 1.5rem);
+    margin: 0 calc(-1 * var(--h-pad));
+    padding: 0 var(--h-pad);
+    scroll-padding-inline: var(--h-pad);
     list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
-  /* Единственный «выход» на странице: двери поднимаются по очереди один раз */
-  .edh__door { animation: edh-rise 700ms var(--ease-out) both; }
-  .edh__door--2 { animation-delay: 90ms; }
-  .edh__door--3 { animation-delay: 180ms; }
-  @keyframes edh-rise { from { opacity: 0; transform: translateY(2rem); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .edh__door { animation: none; } }
-  .edh__door--1 { --k: 0.9; }
-  .edh__door--2 { --k: 1; }
-  .edh__door--3 { --k: 0.82; }
-  .edh__link { display: grid; gap: 0.5rem; color: inherit; text-decoration: none; }
-  .edh__img { display: block; aspect-ratio: var(--ar, 5 / 8); overflow: hidden; border-radius: 0.625rem 0.625rem 0 0; background: var(--color-graphite-card); transform-origin: bottom; transform: scale(var(--k)); }
-  .edh__img img { display: block; width: var(--iw, 200%); max-width: none; height: 100%; object-fit: cover; object-position: 0 0; }
-  .edh__cap { padding-bottom: 0.875rem; font-size: 0.8125rem; font-weight: 600; text-align: center; color: color-mix(in srgb, var(--color-white) 80%, transparent); }
-  .edh__link:hover .edh__cap, .edh__link:focus-visible .edh__cap { color: var(--color-white); }
-  .edh__link:focus-visible { outline: 0.1875rem solid var(--color-white); outline-offset: 0.125rem; }
-  @media (min-width: 62.5rem) {
-    .edh__panel { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .edh__text { grid-column: 1 / span 5; }
-    .edh__doors { grid-column: 6 / span 7; }
+  .rail__track::-webkit-scrollbar { display: none; }
+  .rail__track > li { scroll-snap-align: start; min-width: 0; }
+  /* Планшет и компьютер: лента обрезается по краю контейнера, не вылезает за него */
+  @media (min-width: 43.75rem) { .rail__track { margin: 0; padding: 0; scroll-padding-inline: 0; } }
+  .rail__bar { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+  .rail[data-static] .rail__bar { display: none; }
+  .rail__line { position: relative; flex: 1; height: 0.125rem; background: var(--color-slate-300); }
+  .rail__line i { position: absolute; top: 0; bottom: 0; background: var(--h-ink); }
+  .rail__btns { display: none; gap: 0.25rem; }
+  .rail__btn { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: 999rem; background: none; color: var(--h-ink); cursor: pointer; transition: color 150ms var(--ease-out); }
+  .rail__btn:hover:not(:disabled) { color: var(--h-signal); }
+  .rail__btn:disabled { color: var(--color-slate-300); cursor: default; }
+  .rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  @media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: flex; } }
+
+  /* Плитки групп: название и счётчик слева, дверь справа на графите */
+  .edn { padding-bottom: clamp(1.5rem, 4vw, 3rem); }
+  .edn__track { --rail-col: min(17rem, 78vw); --rail-gap: 1rem; }
+  .edn__tile { display: flex; justify-content: space-between; gap: 0.75rem; height: 100%; padding: 1.25rem 0 0 1.25rem; border-radius: var(--h-tile-radius); background: var(--color-graphite); color: var(--color-white); text-decoration: none; overflow: hidden; }
+  .edn__text { display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem; padding-bottom: 1.25rem; min-width: 0; }
+  .edn__name { font-size: 1.0625rem; font-weight: 600; line-height: 1.2; }
+  .edn__meta { font-size: 0.875rem; line-height: 1.4; color: color-mix(in srgb, var(--color-white) 72%, transparent); }
+  .edn__img { display: block; flex: none; align-self: flex-end; width: 4.75rem; aspect-ratio: var(--ar, 5 / 8); margin: 0 1rem 0 0; overflow: hidden; transition: transform 250ms var(--ease-out); }
+  .edn__img img { display: block; width: var(--iw, 200%); max-width: none; height: 100%; object-fit: fill; }
+  .edn__tile:hover .edn__img { transform: translateY(-0.25rem); }
+  .edn__tile:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  @media (min-width: 75rem) {
+    /* Четыре плитки умещаются в ряд — лента не нужна */
+    .edn__track { grid-auto-columns: minmax(0, 1fr); }
   }
 
   /* Панель выбора: липнет под шапкой */
   .edreset { margin: 1.5rem auto 0; }
   .edreset[hidden] { display: none; }
-  /* Группы — отдельные полосы с воздухом: заголовок, пояснение и счётчик, ниже модели */
-  .edg-sec[hidden], .edg li[hidden] { display: none !important; }
-  .edg-head { display: grid; gap: 0.75rem 2rem; margin-bottom: clamp(2rem, 4vw, 3rem); }
-  .edg-head__text { display: grid; gap: 0.75rem; max-width: 44rem; }
-  .edg-head :global(h2), .edg-head__note { margin: 0; }
-  .edg-head__note { color: var(--h-soft); }
-  .edg-head__meta { margin: 0; align-self: end; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
-  @media (min-width: 62.5rem) { .edg-head { grid-template-columns: minmax(0, 1fr) auto; align-items: end; } }
 
-  /* Модели: телефон 2 в ряд, планшет 3, ПК 4; после первых двух рядов — «Показать все» */
-  .edg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem 0.875rem; margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .edg { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.25rem 1.75rem; } }
-  @media (min-width: 62.5rem) { .edg { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3.5rem 2rem; } }
-  /* Что скрыто до «Показать все»: на телефоне всё с пятой модели, на компьютере — с девятой */
-  .edg li[data-xp] { display: none; }
-  @media (min-width: 43.75rem) { .edg li[data-xp] { display: block; } .edg li[data-xd] { display: none; } }
-  .edg.is-open li, :global(.is-filtering) .edg li { display: block; }
-  @media (min-width: 43.75rem) { .edg-more[data-short] { display: none; } }
-  .edg-more { display: flex; justify-content: center; margin: clamp(2.5rem, 5vw, 3.5rem) 0 0; }
-  :global(.is-filtering) .edg-more { display: none; }
+  /* Группы: слева название и пояснение, справа лента моделей; на телефоне — друг под другом */
+  .edg-sec[hidden], .edg-sec li[hidden] { display: none !important; }
+  .edg { display: grid; gap: 1.75rem 0; grid-template-areas: 'head' 'rail' 'more'; }
+  .edg__head { grid-area: head; display: grid; gap: 0.75rem; align-content: start; }
+  .edg__title, .edg__note { margin: 0; }
+  .edg__title { font-size: clamp(1.625rem, 2vw + 1rem, 2.25rem); }
+  .edg__note { color: var(--h-soft); }
+  .edg__meta { margin: 0.25rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
+  .edg__rail { grid-area: rail; min-width: 0; }
+  .edg__more { grid-area: more; margin: 0; }
+  .edg__track { --rail-col: 9rem; --rail-gap: 0.875rem; }
+  @media (min-width: 43.75rem) { .edg__track { --rail-col: 14.5rem; --rail-gap: 1.5rem; } .edg__more { justify-self: start; } }
+  @media (min-width: 62.5rem) {
+    .edg { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-areas: 'head head head rail rail rail rail rail rail rail rail rail' 'more more more rail rail rail rail rail rail rail rail rail'; gap: 0 var(--h-gutter); grid-template-rows: auto 1fr; }
+    .edg__more { align-self: start; margin-top: 1.5rem; }
+    .edg__rail { padding-left: 0; }
+  }
+  /* Раскрыто: заголовок сверху, под ним сетка карточек той же ширины */
+  .is-open .edg { grid-template-areas: 'head' 'rail'; grid-template-columns: minmax(0, 1fr); }
+  .is-open .edg__head { max-width: 44rem; margin-bottom: 1rem; }
+  .is-open .edg__track { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 3rem var(--rail-gap); margin: 0; padding: 0; overflow: visible; }
+  .is-open .rail__bar { display: none; }
+  @media (max-width: 43.6875rem) { .is-open .edg__track { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
   .edc {
     display: grid;
