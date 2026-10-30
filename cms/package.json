@@ -22,10 +22,10 @@
     "work:meta": "node scripts/work-meta.mjs"
   },
   "dependencies": {
-    "@strapi/database": "5.57.0",
-    "@strapi/plugin-users-permissions": "5.57.0",
-    "@strapi/strapi": "5.57.0",
-    "@strapi/utils": "5.57.0",
+    "@strapi/database": "5.59.0",
+    "@strapi/plugin-users-permissions": "5.59.0",
+    "@strapi/strapi": "5.59.0",
+    "@strapi/utils": "5.59.0",
     "better-sqlite3": "12.8.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
