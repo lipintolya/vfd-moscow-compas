@@ -16,7 +16,7 @@ import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
 import PickDoor from '../../../components/entrance-doors/PickDoor.astro'
 import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astro'
-import EntranceCover from '../../../components/entrance-doors/EntranceCover.astro'
+import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcase.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
 import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS, ENTRANCE_SHOWCASE } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
@@ -121,11 +121,10 @@ const listSchema = {
 
     </div>
 
-    <EntranceCover n={0} />
+    <EntranceShowcase />
 
     <EntranceGuide />
 
-    <EntranceCover n={1} position="72% 50%" />
 
     <section class="h-sec h-sec--tight-top" aria-labelledby="doors-help">
       <div class="container">
@@ -138,8 +137,6 @@ const listSchema = {
         </div>
       </div>
     </section>
-
-    <EntranceCover n={2} />
 
     <section id="doors-faq" class="h-sec" aria-labelledby="doors-faq-title">
       <div class="container h-faq">

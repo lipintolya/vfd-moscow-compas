@@ -9,7 +9,7 @@
 import RenderSlot from './RenderSlot.astro'
 import StepsRow from '../home/StepsRow.astro'
 import DoorExplorer from './DoorExplorer.astro'
-import { GUIDE, GUIDE_KINDS, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES } from '../../data/entrance-guide'
+import { GUIDE, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES } from '../../data/entrance-guide'
 import { renderOf } from '../../lib/entrance-renders'
 import { typograph } from '../../lib/typograph'
 
@@ -24,33 +24,12 @@ const hasAnatomy = !!renderOf(GUIDE.anatomy)
         <h2 id="guide-title" class="h-h2">{typograph(GUIDE.title)}</h2>
         <p class="h-lead egi__lead">{typograph(GUIDE.lead)}</p>
         <nav class="egi__nav" aria-label="Разделы путеводителя">
-          <a class="h-pill h-pill--line" href="#guide-kinds">Виды дверей</a>
           <a class="h-pill h-pill--line" href="#guide-criteria">Что учесть</a>
           <a class="h-pill h-pill--line" href="#guide-parts">Из чего состоит дверь</a>
           <a class="h-pill h-pill--line" href="#guide-steps">Шаги выбора</a>
         </nav>
       </div>
       {hasHouse && <RenderSlot visual={GUIDE.house} sizes="(min-width: 62.5rem) 52vw, 100vw" class="egi__media" />}
-    </div>
-  </section>
-
-  <section id="guide-kinds" class="h-sec h-sec--wall" aria-labelledby="kinds-title">
-    <div class="container">
-      <h2 id="kinds-title" class="h-h2 eg__h2">{GUIDE.kindsTitle}</h2>
-      <ul class="egk" role="list">
-        {GUIDE_KINDS.map((k) => (
-          <li class="egk__item">
-            <RenderSlot visual={k.visual} fallback={k.fallback} sizes="(min-width: 62.5rem) 18rem, (min-width: 43.75rem) 30vw, 90vw" class="egk__media" />
-            <div class="egk__body">
-              <h3 class="egk__title">{k.title}</h3>
-              <p class="egk__fits">{k.fits}</p>
-              <p class="egk__text">{typograph(k.text)}</p>
-              <p class="egk__stats">{k.stats}</p>
-              <button type="button" class="h-btn h-btn--quiet egk__go" data-kind={k.id}>Показать модели</button>
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   </section>
 
@@ -95,13 +74,6 @@ const hasAnatomy = !!renderOf(GUIDE.anatomy)
   </section>
 </div>
 
-<script>
-  /* «Показать модели» у вида двери — фильтр каталога выше (слушает index.astro) */
-  for (const b of document.querySelectorAll<HTMLButtonElement>('[data-kind]')) {
-    b.addEventListener('click', () => document.dispatchEvent(new CustomEvent('doors:filter', { detail: { group: b.dataset.kind } })))
-  }
-</script>
-
 <style>
   .eg__h2 { margin: 0 0 clamp(1.75rem, 4vw, 2.75rem); }
   .eg__head { display: grid; gap: 0.75rem; margin-bottom: clamp(1.75rem, 4vw, 2.75rem); }
@@ -120,17 +92,6 @@ const hasAnatomy = !!renderOf(GUIDE.anatomy)
   }
 
   /* Виды: карточки с фото слева, на телефоне — одна под другой */
-  .egk { display: grid; gap: clamp(2rem, 4vw, 3rem) var(--h-gutter); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 62.5rem) { .egk { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .egk__item { display: grid; gap: 1.25rem 1.5rem; align-items: start; }
-  @media (min-width: 43.75rem) { .egk__item { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); } }
-  @media (max-width: 43.6875rem) { .egk :global(.egk__media) { max-width: 16rem; } }
-  .egk__body { display: grid; gap: 0.625rem; justify-items: start; }
-  .egk__title { margin: 0; font-size: 1.375rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); }
-  .egk__fits { margin: 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-muted); }
-  .egk__text { margin: 0; color: var(--h-soft); }
-  .egk__stats { margin: 0; font-weight: 600; color: var(--h-ink); }
-  .egk__go { margin-top: 0.5rem; }
 
   /* Из чего состоит: рендер разреза слева, список слева-направо; без рендера — две колонки */
   .egp { display: grid; gap: 2rem var(--h-gutter); align-items: center; }

@@ -1,0 +1,112 @@
+---
+/**
+ * Блок с рендерами «дверь на площадке» на /catalog/vhodnye-dveri/ — над
+ * путеводителем: слева заголовок, текст и ссылки, справа слайдер кадров с
+ * полоской под ним. Кадры без подписей — assets/entrance-renders/lobby-<n>.*
+ * → npm run gen:entrance-renders; тексты и описания для поиска по картинкам —
+ * ENTRANCE_LOBBY (src/data/entrance-guide.ts). Нет ни одного рендера — блок
+ * не выводится. Листание — прокрутка со «прилипанием» (свайп, колесо,
+ * клавиши) и полоска-индикатор; по нажатию кадр открывается крупно.
+ */
+import { ENTRANCE_LOBBY } from '../../data/entrance-guide'
+import { renderOf } from '../../lib/entrance-renders'
+import { typograph } from '../../lib/typograph'
+
+const shots = ENTRANCE_LOBBY.visuals.map((v) => renderOf(v)).filter((r) => r !== null)
+const sizes = '(min-width: 62.5rem) 56vw, 100vw'
+---
+
+{shots.length > 0 && (
+  <section id="showcase" class="h-sec" aria-labelledby="showcase-title">
+    <div class="container esc">
+      <div class="esc__text">
+        <h2 id="showcase-title" class="h-h2">{typograph(ENTRANCE_LOBBY.title)}</h2>
+        <p class="h-lead">{typograph(ENTRANCE_LOBBY.text)}</p>
+        <p class="esc__links">
+          {ENTRANCE_LOBBY.links.map((l) => <a class="h-link" href={l.href}>{typograph(l.label)}</a>)}
+        </p>
+      </div>
+
+      <div class="esc__slider" data-esc>
+        <ul
+          class="esc__track"
+          role="list"
+          tabindex="0"
+          aria-label="Кадры"
+          data-esc-track
+          data-lightbox
+          data-lightbox-images={JSON.stringify(shots.map((r) => ({ src: r.src, alt: r.alt })))}
+        >
+          {shots.map((r, i) => (
+            <li class="esc__slide">
+              <button type="button" class="h-media esc__zoom" data-lightbox-index={i} aria-label={`Открыть крупно: ${r.alt}`}>
+                <img
+                  src={r.src} srcset={r.srcset} sizes={sizes} alt={r.alt} width={r.width} height={r.height}
+                  loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+                />
+              </button>
+            </li>
+          ))}
+        </ul>
+        {shots.length > 1 && (
+          <div class="esc__bar" role="group" aria-label="Выбор кадра">
+            {shots.map((_, i) => (
+              <button type="button" class="esc__seg" data-esc-seg={i} aria-label={`Кадр ${i + 1} из ${shots.length}`} aria-current={i === 0 ? 'true' : undefined}></button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+)}
+
+<script>
+  import { initLightboxGroups } from '../../lib/lightbox'
+  initLightboxGroups()
+
+  /* Полоска показывает кадр, который сейчас в окне; нажатие на сегмент листает к нему */
+  for (const root of document.querySelectorAll<HTMLElement>('[data-esc]')) {
+    const track = root.querySelector<HTMLElement>('[data-esc-track]')
+    const segs = [...root.querySelectorAll<HTMLButtonElement>('[data-esc-seg]')]
+    if (!track || !segs.length) continue
+    const show = (i: number) => segs.forEach((s, k) => (k === i ? s.setAttribute('aria-current', 'true') : s.removeAttribute('aria-current')))
+    track.addEventListener('scroll', () => show(Math.round(track.scrollLeft / track.clientWidth)), { passive: true })
+    segs.forEach((s, i) => s.addEventListener('click', () => track.scrollTo({ left: i * track.clientWidth, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })))
+  }
+</script>
+
+<style>
+  .esc { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
+  .esc__text { display: grid; gap: 1.25rem; justify-items: start; }
+  .esc__text :global(.h-h2), .esc__text :global(.h-lead) { margin: 0; }
+  .esc__links { display: grid; gap: 0.75rem; margin: 0.5rem 0 0; justify-items: start; }
+  @media (min-width: 62.5rem) {
+    .esc { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .esc__text { grid-column: 1 / span 5; }
+    .esc__slider { grid-column: 6 / span 7; }
+  }
+
+  .esc__track {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    border-radius: var(--h-tile-radius);
+  }
+  .esc__track::-webkit-scrollbar { display: none; }
+  .esc__track:focus-visible { outline: 0.125rem solid var(--color-link); outline-offset: 0.25rem; }
+  .esc__slide { flex: 0 0 100%; scroll-snap-align: start; }
+  .esc__zoom { width: 100%; padding: 0; border: 0; cursor: zoom-in; aspect-ratio: 3 / 2; border-radius: 0; }
+  .esc__zoom img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Полоска кадров: по сегменту на кадр, текущий — графитовый */
+  .esc__bar { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  .esc__seg { flex: 1; height: 0.75rem; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+  .esc__seg::before { content: ''; position: absolute; inset: 50% 0 auto; height: 0.1875rem; margin-top: -0.09375rem; border-radius: 0.125rem; background: var(--color-slate-300); transition: background-color 200ms; }
+  .esc__seg[aria-current='true']::before { background: var(--h-ink); }
+  @media (prefers-reduced-motion: reduce) { .esc__seg::before { transition: none; } }
+</style>

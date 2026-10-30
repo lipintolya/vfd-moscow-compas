@@ -1,14 +1,14 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  GUIDE, GUIDE_KINDS, GUIDE_CRITERIA, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES, GUIDE_FAQ, GUIDE_VISUALS,
+  GUIDE, ENTRANCE_LOBBY, GUIDE_CRITERIA, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES, GUIDE_FAQ, GUIDE_VISUALS,
   PICK_PLACES, PICK_NEEDS, pickResult,
 } from '../src/data/entrance-guide'
 import { DOOR_GROUPS, ENTRANCE_DOORS } from '../src/data/entrance-doors'
 
 const texts = () => [
   GUIDE.title, GUIDE.lead, GUIDE.criteriaLead,
-  ...GUIDE_KINDS.flatMap((k) => [k.title, k.fits, k.text, k.stats]),
+  ENTRANCE_LOBBY.title, ENTRANCE_LOBBY.text,
   ...GUIDE_CRITERIA.flatMap((c) => [c.title, c.what, c.text, c.flat.verdict, c.flat.note, c.house.verdict, c.house.note]),
   ...GUIDE_PARTS.flatMap((p) => [p.title, p.text]),
   ...GUIDE_STEPS.flatMap((s) => [s.title, s.text]),
@@ -22,11 +22,6 @@ test('путеводитель: название завода не встреч�
     assert.doesNotMatch(t, /лабиринт|labirint/i, t)
     assert.doesNotMatch(t, /undefined|NaN|\[object/, t)
   }
-})
-
-test('путеводитель: виды дверей — по одному на группу каталога, фото из своей группы', () => {
-  assert.deepEqual(GUIDE_KINDS.map((k) => k.id).sort(), DOOR_GROUPS.map((g) => g.id).sort())
-  for (const k of GUIDE_KINDS) assert.equal(k.fallback.group, k.id, k.title)
 })
 
 test('путеводитель: у каждого критерия — суть, совет и важность для квартиры и для дома', () => {

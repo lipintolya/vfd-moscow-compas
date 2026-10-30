@@ -1,5 +1,5 @@
 /**
- * Путеводитель на /catalog/vhodnye-dveri/: как выбрать входную дверь, виды,
+ * Путеводитель на /catalog/vhodnye-dveri/: как выбрать входную дверь,
  * критерии для квартиры и для дома, из чего состоит дверь, шаги выбора,
  * частые ошибки, места под рендеры. Все цифры — из каталога
  * (entrance-doors.ts: сталь, толщина, классы замков, число моделей, цены),
@@ -7,10 +7,10 @@
  *
  * Рендеры — assets/entrance-renders/<место>.jpg|png|webp → npm run
  * gen:entrance-renders → src/data/entrance-render-files.json. У места без
- * рендера: у видов дверей — фото модели из каталога, у остальных — только
- * текст (в режиме разработки — рамка с описанием, что нарисовать).
+ * рендера блок остаётся текстовым (в режиме разработки — рамка с описанием,
+ * что нарисовать).
  */
-import { ENTRANCE_DOORS, DOOR_GROUPS, doorsOfGroup, groupFromPrice, doorById, type DoorGroupId, type EntranceDoor } from './entrance-doors'
+import { ENTRANCE_DOORS, DOOR_GROUPS, doorsOfGroup, groupFromPrice, type DoorGroupId, type EntranceDoor } from './entrance-doors'
 import { rub } from './services'
 import { pluralRu } from '../lib/plural'
 
@@ -28,30 +28,6 @@ export const GUIDE_VISUALS: GuideVisual[] = [
     ratio: '16:10',
     alt: 'Входная дверь частного дома: крыльцо, навес и тёмная стальная дверь с боковым стеклом',
     brief: 'Фасад современного частного дома в сумерках: крыльцо, навес, графитовая стальная входная дверь, тёплый свет из прихожей. Без людей и вывесок, без логотипов.',
-  },
-  {
-    slot: 'kind-flat',
-    ratio: '4:5',
-    alt: 'Белая стальная входная дверь в квартиру на лестничной площадке',
-    brief: 'Светлая лестничная площадка нового дома, закрытая белая стальная дверь в квартиру, аккуратная фурнитура. Нейтральная съёмка, без вывесок и номеров.',
-  },
-  {
-    slot: 'kind-thermo',
-    ratio: '4:5',
-    alt: 'Входная дверь с терморазрывом на морозе: иней на соседней стене, на двери чисто',
-    brief: 'Зимнее крыльцо загородного дома, на кирпиче иней, на тёмной стальной двери с терморазрывом нет наледи. Холодный свет, чистая композиция.',
-  },
-  {
-    slot: 'kind-smart',
-    ratio: '4:5',
-    alt: 'Входная дверь с электронным замком: рука у сканера отпечатка пальца',
-    brief: 'Крупный план: ладонь у панели электронного замка на тёмной двери, мягкая подсветка сканера. Без текста и логотипов на замке.',
-  },
-  {
-    slot: 'kind-glass',
-    ratio: '4:5',
-    alt: 'Уличная входная дверь со стеклопакетом и решёткой, свет падает в прихожую',
-    brief: 'Прихожая изнутри: уличная дверь с узким стеклопакетом и кованой решёткой, дневной свет ложится на пол. Спокойный интерьер без людей.',
   },
   {
     slot: 'lobby-1',
@@ -109,71 +85,6 @@ const polyamide = [...new Set(ENTRANCE_DOORS.map((d) => spec(d, 'Термора�
 /* Размер по коробу: «960х2050 мм (внешний 1130х2130 мм)» — на сколько короб шире полотна */
 const box = ENTRANCE_DOORS.map((d) => spec(d, 'Размер по коробу')?.match(/^(\d+)х\d+ мм \(внешний (\d+)х/)).find(Boolean)
 const boxExtra = box ? Number(box[2]) - Number(box[1]) : 0
-
-/* ---------- Виды ---------- */
-
-export interface GuideKind {
-  id: DoorGroupId
-  title: string
-  /** Для кого и когда */
-  fits: string
-  text: string
-  /** Цифры из каталога — одной строкой */
-  stats: string
-  visual: GuideVisual
-  /** Модель, фото которой стоит на месте, пока нет рендера */
-  fallback: EntranceDoor
-}
-
-const FALLBACK_IDS: Record<DoorGroupId, string> = { flat: 'versal', thermo: 'alyaska-layt', smart: 'smartlab', glass: 'skandiya' }
-const kindStats = (id: DoorGroupId) => {
-  const ds = doorsOfGroup(id)
-  return `${models(ds.length)}, от ${rub(groupFromPrice(id))}`
-}
-const fallbackOf = (id: DoorGroupId) => {
-  const d = doorById(FALLBACK_IDS[id])
-  if (!d || d.group !== id) throw new Error(`Путеводитель: модель «${FALLBACK_IDS[id]}» не из группы «${id}» — src/data/entrance-guide.ts`)
-  return d
-}
-
-export const GUIDE_KINDS: GuideKind[] = [
-  {
-    id: 'flat',
-    title: 'Для квартиры',
-    fits: 'Квартира, тамбур на этаже',
-    text: `Стальное полотно ${steelRange} мм, внутри минеральная вата, три контура уплотнения. Дверь стоит в тепле, поэтому главное для неё — тишина, отсутствие сквозняков и надёжные замки.`,
-    stats: kindStats('flat'),
-    visual: visualOf('kind-flat'),
-    fallback: fallbackOf('flat'),
-  },
-  {
-    id: 'thermo',
-    title: 'С терморазрывом',
-    fits: 'Частный дом, дача, неотапливаемый тамбур',
-    text: `Наружный и внутренний лист металла разделены вставкой из полиамида (${polyamide.join(' или ')} мм): холод не идёт по стали насквозь, на двери нет наледи и конденсата. Терморазрыв есть у ${models(withThermo)} каталога.`,
-    stats: kindStats('thermo'),
-    visual: visualOf('kind-thermo'),
-    fallback: fallbackOf('thermo'),
-  },
-  {
-    id: 'smart',
-    title: 'С электронным замком',
-    fits: 'Семья, гости, удалённый доступ',
-    text: 'Открывается отпечатком пальца, пин-кодом, брелком или со смартфона, обычный ключ остаётся запасным способом. Удобно, если дверью пользуется вся семья и не хочется носить ключи.',
-    stats: kindStats('smart'),
-    visual: visualOf('kind-smart'),
-    fallback: fallbackOf('smart'),
-  },
-  {
-    id: 'glass',
-    title: 'Со стеклопакетом',
-    fits: 'Коттедж, частный дом с прихожей без окон',
-    text: 'Трёхкамерный стеклопакет 81 мм впускает дневной свет в прихожую, а решётка или тонировка закрывают прихожую от лишних взглядов. Уличные двери из этой группы идут с нержавеющим порогом в комплекте.',
-    stats: kindStats('glass'),
-    visual: visualOf('kind-glass'),
-    fallback: fallbackOf('glass'),
-  },
-]
 
 /* ---------- Критерии ---------- */
 
@@ -356,8 +267,15 @@ export const GUIDE_FAQ: { q: string; a: string }[] = [
 /** Ширина и высота полотна из каталога, мм: «960×2050, 880×2050» → 960 и 2050 */
 const [DOOR_W, DOOR_H] = (ENTRANCE_DOORS[0]!.sizes.match(/(\d+)×(\d+)/) ?? []).slice(1)
 
-/* Обложки разделов /catalog/vhodnye-dveri/ — рендеры без подписи (EntranceCover.astro) */
+/* Блок с рендерами «дверь на площадке» над путеводителем — текст слева, слайдер справа
+   (EntranceShowcase.astro); кадры без подписей, описания — для поиска по картинкам */
 export const ENTRANCE_LOBBY = {
+  title: 'Как дверь смотрится на площадке',
+  text: `${models(total)} стальных входных дверей: полотно ${steelRange.replace('–', '\u2060–\u2060')}\u00a0мм, отделка панели, цвет и фурнитура — под ваши стены и пол. Образцы отделки можно сравнить в салоне.`,
+  links: [
+    { href: '#doors-pick', label: 'Смотреть модели' },
+    { href: '/contacts/', label: 'Как добраться' },
+  ],
   visuals: ['lobby-1', 'lobby-2', 'lobby-3'].map((slot) => visualOf(slot)),
 }
 
@@ -365,10 +283,9 @@ export const GUIDE = {
   doorWidth: DOOR_W,
   doorHeight: DOOR_H,
   title: 'Как выбрать входную дверь: квартира, дом или дача',
-  lead: 'Главное решает место: квартирная дверь живёт в тепле, а дверь частного дома — на улице, где её проверяют мороз, влага и солнце. Ниже — по порядку, на что смотреть и чем отличаются виды дверей.',
+  lead: 'Главное решает место: квартирная дверь живёт в тепле, а дверь частного дома — на улице, где её проверяют мороз, влага и солнце. Ниже — по порядку, на что смотреть и из чего состоит дверь.',
   house: visualOf('guide-house'),
   anatomy: visualOf('guide-anatomy'),
-  kindsTitle: 'Какие бывают входные двери',
   criteriaTitle: 'На что смотреть при выборе',
   criteriaLead: 'Нажмите на узел двери или на строку списка — покажем, что это и что выбрать в квартиру и в частный дом.',
   partsTitle: 'Из чего состоит входная дверь',

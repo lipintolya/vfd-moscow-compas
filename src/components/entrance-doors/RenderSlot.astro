@@ -2,23 +2,19 @@
 /**
  * Место под рендер в путеводителе входных дверей. Есть рендер
  * (assets/entrance-renders/<место>.* → npm run gen:entrance-renders) —
- * показываем его; нет — фото модели из каталога — дверь снаружи (если
- * передана модель), иначе в режиме разработки — рамка с описанием, что
+ * показываем его; нет — в режиме разработки рамка с описанием, что
  * нарисовать, на сайте — ничего (блок остаётся текстовым).
  */
 import type { GuideVisual } from '../../data/entrance-guide'
-import type { EntranceDoor } from '../../data/entrance-doors'
 import { renderOf } from '../../lib/entrance-renders'
 
 interface Props {
   visual: GuideVisual
   /** sizes картинки — по ширине кадра в сетке */
   sizes: string
-  /** Фото модели на месте, пока нет рендера */
-  fallback?: EntranceDoor
   class?: string
 }
-const { visual, sizes, fallback, class: cls } = Astro.props
+const { visual, sizes, class: cls } = Astro.props
 const render = renderOf(visual)
 const ratio = visual.ratio.replace(':', ' / ')
 const minWidth = visual.ratio === '4:5' ? 1200 : 1600
@@ -29,12 +25,6 @@ const isDev = import.meta.env.DEV
   <figure class:list={['rs', cls]}>
     <span class="h-media rs__frame" style={`aspect-ratio: ${ratio}`}>
       <img src={render.src} srcset={render.srcset} sizes={sizes} alt={render.alt} width={render.width} height={render.height} loading="lazy" decoding="async" />
-    </span>
-  </figure>
-) : fallback ? (
-  <figure class:list={['rs', cls]}>
-    <span class="rs__frame rs__frame--door" style={`aspect-ratio: ${ratio}`}>
-      <img src={fallback.cover.src} srcset={fallback.cover.srcset} sizes={sizes} alt={fallback.cover.alt} width={fallback.cover.width} height={fallback.cover.height} loading="lazy" decoding="async" />
     </span>
   </figure>
 ) : isDev ? (
@@ -50,9 +40,6 @@ const isDev = import.meta.env.DEV
   .rs { margin: 0; }
   .rs__frame { position: relative; display: block; border-radius: var(--h-tile-radius); overflow: hidden; }
   .rs__frame img { width: 100%; height: 100%; object-fit: cover; }
-  /* Пока нет рендера: левая половина фото модели (дверь снаружи), как в карточке каталога */
-  .rs__frame--door { background: var(--color-graphite); }
-  .rs__frame--door img { width: 200%; max-width: none; object-fit: cover; object-position: 0 0; }
   .rs--slot {
     display: grid;
     align-content: center;
