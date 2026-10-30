@@ -161,6 +161,7 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 | `npm test` | тесты |
 | `npm run deploy` | собрать и выложить сайт на https://dveriziz.ru (нужен запущенный Strapi) |
 | `npm run indexnow` | сообщить Яндексу и Bing о страницах сайта (IndexNow); `-- /catalog/` — только эти |
+| `npm run seo:suggest` | собрать подсказки поиска Яндекса по затравкам `docs/seo/seeds.json` → `docs/seo/suggest.json` (`-- "Скрытые двери"` — одна группа); разбор — `docs/seo/semantic-core.md` |
 | `npm run server:setup` | настроить сервер (`-- --cert` — выпустить HTTPS-сертификат) |
 | `node scripts/compare-builds.mjs <старая dist> <новая dist>` | какие страницы изменились по видимому тексту — проверка после переделок |
 

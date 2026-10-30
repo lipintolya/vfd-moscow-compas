@@ -49,6 +49,7 @@
     "video:optimize": "node scripts/optimize-video.mjs",
     "deploy": "node scripts/deploy-site.mjs",
     "indexnow": "node scripts/indexnow.mjs",
+    "seo:suggest": "node scripts/seo-suggest.mjs",
     "server:setup": "node scripts/deploy-site.mjs setup"
   },
   "dependencies": {
