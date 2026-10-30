@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/vue": "^7.0.2",
+    "@astrojs/vue": "^7.1.2",
     "@supabase/supabase-js": "^2.106.0",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^7.3.2",
