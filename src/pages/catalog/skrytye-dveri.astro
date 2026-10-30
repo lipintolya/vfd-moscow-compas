@@ -136,7 +136,7 @@ const pageUrl = new URL('/catalog/skrytye-dveri/', SITE.url).href
 const title = brandTitle(`Скрытые двери ${SITE.name} под покраску ${SITE.city.in} — от ${rub(SECRET_MIN_KIT_PRICE)}`)
 // ~160 символов — длиннее поисковики обрезают
 const description =
-  `Скрытые двери ${SITE.city.in}: «Секрет», «Секрет Реверс» и зеркальная «Рефлекс». ` +
+  `Скрытые двери-невидимки ${SITE.city.in}: «Секрет», «Секрет Реверс» и зеркальная «Рефлекс». ` +
   `Комплект с коробом от ${rub(SECRET_MIN_KIT_PRICE)}, высота до ${CUSTOM_MAX_HEIGHT} мм, замер и монтаж.`
 
 const product = (name: string, description: string, image: string, prices: number[]) =>
@@ -185,8 +185,8 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
 
   <div class="home">
     <LandingHero
-      title={`Скрытые двери ${SITE.city.in}`}
-      lead="Полотно вровень со стеной — без наличников и видимых петель. Под покраску, штукатурку или обои в цвет стен. Замер и монтаж по Москве и области."
+      title={`Скрытые двери-невидимки ${SITE.city.in}`}
+      lead="Двери скрытого монтажа: полотно вровень со стеной, без наличников и видимых петель. Под покраску, штукатурку или обои в цвет стен. Замер и монтаж по Москве и области."
       image={HERO_IMAGES}
       facts={HERO_FACTS}
     >
@@ -399,7 +399,7 @@ const relatedArticle = await relatedArticleFor({ pagePath: `/catalog/skrytye-dve
     <section class="h-sec" aria-labelledby="construct-title">
       <div class="container">
         <header class="h-head">
-          <h2 id="construct-title" class="h-h2">Как устроена скрытая дверь</h2>
+          <h2 id="construct-title" class="h-h2">Как устроена дверь скрытого монтажа</h2>
           <p class="h-lead">Алюминиевый короб монтируется в&nbsp;проём заподлицо со&nbsp;стеной, полотно навешивается на&nbsp;скрытые петли. Снаружи&nbsp;— только тонкая кромка.</p>
         </header>
         <div class="hd-construct">

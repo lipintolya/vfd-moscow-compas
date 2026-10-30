@@ -167,8 +167,9 @@ const structuredDataJson = structuredData
       <slot />
     </main>
 
-    {/* Footer: модальное окно требует Vue */}
-    <Footer client:only="vue" />
+    {/* Footer: ссылки на разделы — в готовом HTML, чтобы их видел любой робот
+         без JS; Vue оживляет окна «Правовая информация» и «Разработчик» */}
+    <Footer client:load />
 
     {/* Окно просмотра фото — одно на сайт, открывается событием
          'open-lightbox' (src/lib/lightbox.ts) */}
