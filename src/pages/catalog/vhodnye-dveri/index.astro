@@ -8,8 +8,8 @@
  * внизу — путеводитель по выбору. Ориентир подачи — каталог направлений
  * volhovec.ru (центр, воздух, лента карточек). Карточка — дверь в рост, число
  * вариантов отделки и цена «от». У каждой модели своя страница ([id].astro).
- * Фильтр — только из подбора и путеводителя (событие doors:filter), отдельной
- * панели нет. Данные и тексты — src/data/entrance-doors.ts.
+ * Отдельной панели фильтров нет (владелец убрал); «Подберём за минуту»
+ * (событие doors:filter) прокручивает к нужной группе. Данные и тексты — src/data/entrance-doors.ts.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../../lib/seo-title'
@@ -18,11 +18,10 @@ import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
 import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
 import PickDoor from '../../../components/entrance-doors/PickDoor.astro'
-import EntranceFilters from '../../../components/entrance-doors/EntranceFilters.astro'
 import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astro'
 import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcase.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
-import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, groupCover, priceFacetOf, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
+import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, groupCover, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
 import { rub } from '../../../data/services'
@@ -106,8 +105,6 @@ const listSchema = {
     <PickDoor />
 
     <div id="doors-pick" class="edcat">
-      <EntranceFilters />
-
     {groups.map((g, gi) => (
       <section id={`doors-${g.id}`} class:list={['h-sec', 'edg-sec', { 'h-sec--wall': gi % 2 === 1 }]} data-section={g.id} aria-labelledby={`doors-${g.id}-title`}>
         <div class="container edg">
@@ -118,7 +115,7 @@ const listSchema = {
           </header>
           <div class="rail edg__rail" data-rail>
             <ul class="rail__track edg__track" data-track role="list">
-              {g.doors.map((d) => <li data-door-li data-group={d.group} data-pf={priceFacetOf(d.from)} data-steel={d.steel} data-price={d.from} data-name={d.name.toLowerCase()}><DoorCard door={d} /></li>)}
+              {g.doors.map((d) => <li data-door-li><DoorCard door={d} /></li>)}
             </ul>
             <div class="rail__bar" data-bar>
               <span class="rail__line"><i></i></span>
@@ -162,6 +159,12 @@ const listSchema = {
 </BaseLayout>
 
 <script>
+  /* «Подберём за минуту» ведёт к нужной группе моделей */
+  document.addEventListener('doors:filter', (e) => {
+    const group = (e as CustomEvent<{ group: string }>).detail.group
+    document.getElementById(`doors-${group}`)?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+  })
+
   /* «Показать все»: лента раскрывается в сетку, кнопка исчезает */
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-more]')) {
     btn.addEventListener('click', () => {
@@ -254,8 +257,7 @@ const listSchema = {
 
   /* Группы: слева название и пояснение, справа лента моделей; на телефоне — друг под другом */
   .edg-sec[hidden], .edg-sec li[hidden] { display: none !important; }
-  /* Под липкой строкой фильтров: заголовок группы не прячется при переходе по якорю */
-  .edg-sec { scroll-margin-top: 4.5rem; }
+  .edg-sec { scroll-margin-top: 1rem; }
   .edg { display: grid; gap: 1.75rem 0; grid-template-areas: 'head' 'rail' 'more'; }
   .edg__head { grid-area: head; display: grid; gap: 0.75rem; align-content: start; }
   .edg__title, .edg__note { margin: 0; }

@@ -180,17 +180,6 @@ export const doorsOfGroup = (id: DoorGroupId) => ENTRANCE_DOORS.filter((d) => d.
 export const groupFromPrice = (id: DoorGroupId) => Math.min(...doorsOfGroup(id).map((d) => d.from))
 export const doorById = (id: string) => ENTRANCE_DOORS.find((d) => d.id === id)
 
-/** Фильтры каталога: цена «от» по ступеням, толщина стали, группа; ступени — границы в ₽ */
-const PRICE_STEPS = [40000, 50000, 60000]
-const num = (v: number) => v.toLocaleString('ru-RU')
-export const PRICE_FACETS = [
-  { id: 'p0', label: `до ${rub(PRICE_STEPS[0]!)}`, test: (v: number) => v < PRICE_STEPS[0]! },
-  ...PRICE_STEPS.slice(0, -1).map((from, i) => ({ id: `p${i + 1}`, label: `${num(from)} – ${rub(PRICE_STEPS[i + 1]!)}`, test: (v: number) => v >= from && v < PRICE_STEPS[i + 1]! })),
-  { id: `p${PRICE_STEPS.length}`, label: `от ${rub(PRICE_STEPS.at(-1)!)}`, test: (v: number) => v >= PRICE_STEPS.at(-1)! },
-]
-export const priceFacetOf = (v: number) => PRICE_FACETS.find((f) => f.test(v))!.id
-export const STEEL_FACETS = [...new Set(ENTRANCE_DOORS.map((d) => d.steel))].sort((a, b) => Number(a.replace(',', '.')) - Number(b.replace(',', '.')))
-
 /** Три двери первого экрана — разные по цвету: чёрная, белая, дерево */
 export const SHOWCASE_IDS = ['alyaska-layt', 'versal', 'karmina']
 export const ENTRANCE_SHOWCASE = SHOWCASE_IDS.map((id) => {
