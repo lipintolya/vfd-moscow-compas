@@ -1,8 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  GUIDE, ENTRANCE_LOBBY, GUIDE_CRITERIA, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES, GUIDE_FAQ, GUIDE_VISUALS,
-  PICK_PLACES, PICK_NEEDS, pickResult,
+  GUIDE, ENTRANCE_LOBBY, GUIDE_CRITERIA, GUIDE_STEPS, GUIDE_MISTAKES, GUIDE_FAQ, GUIDE_VISUALS,
 } from '../src/data/entrance-guide'
 import { DOOR_GROUPS, ENTRANCE_DOORS } from '../src/data/entrance-doors'
 
@@ -10,7 +9,6 @@ const texts = () => [
   GUIDE.title, GUIDE.lead, GUIDE.criteriaLead,
   ENTRANCE_LOBBY.title, ENTRANCE_LOBBY.text,
   ...GUIDE_CRITERIA.flatMap((c) => [c.title, c.what, c.text, c.flat.verdict, c.flat.note, c.house.verdict, c.house.note]),
-  ...GUIDE_PARTS.flatMap((p) => [p.title, p.text]),
   ...GUIDE_STEPS.flatMap((s) => [s.title, s.text]),
   ...GUIDE_MISTAKES.flatMap((m) => [m.title, m.text]),
   ...GUIDE_FAQ.flatMap((f) => [f.q, f.a]),
@@ -47,21 +45,6 @@ test('путеводитель: у каждого критерия — суть,
   const thermo = GUIDE_CRITERIA.find((c) => c.title === 'Терморазрыв')!
   assert.equal(thermo.house.level, 'must')
   assert.equal(thermo.flat.level, 'skip')
-})
-
-test('подбор: для каждой пары вопросов есть группа каталога и объяснение', () => {
-  for (const p of PICK_PLACES) {
-    for (const n of PICK_NEEDS) {
-      const r = pickResult(p.id, n.id)
-      assert.ok(DOOR_GROUPS.some((g) => g.id === r.group), `${p.id}/${n.id}`)
-      assert.ok(r.why.length > 30)
-    }
-  }
-  // дом и свет — стеклопакет; дом без света — терморазрыв; электронный замок — своя группа
-  assert.equal(pickResult('house', 'light').group, 'glass')
-  assert.equal(pickResult('house', 'calm').group, 'thermo')
-  assert.equal(pickResult('flat', 'calm').group, 'flat')
-  assert.equal(pickResult('flat', 'smart').group, 'smart')
 })
 
 test('путеводитель: фото двери для «На что смотреть» есть в каталоге', () => {

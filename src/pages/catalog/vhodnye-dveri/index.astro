@@ -2,7 +2,7 @@
 /**
  * Каталог входных дверей (/catalog/vhodnye-dveri/): первый экран — сцена с
  * рендером двери на доме (обложка, src/data/entrance-scenes.ts), заголовок и
- * кнопки слева на затемнении; лента плиток-групп, «Подберём за минуту» и модели по
+ * кнопки слева на затемнении; лента плиток-групп и модели по
  * группам — для квартиры, с терморазрывом, с электронным замком, со
  * стеклопакетом: слева название и пояснение группы, справа лента моделей
  * (листается пальцем или стрелками), «Показать все» раскрывает ленту в сетку;
@@ -10,8 +10,7 @@
  * модели) и путеводитель по выбору. Ориентир подачи — каталог направлений
  * volhovec.ru (воздух, лента карточек). Карточка — дверь в рост, число
  * вариантов отделки и цена «от». У каждой модели своя страница ([id].astro).
- * Отдельной панели фильтров нет (владелец убрал); «Подберём за минуту»
- * (событие doors:filter) прокручивает к нужной группе. Данные и тексты — src/data/entrance-doors.ts.
+ * Отдельной панели фильтров и подбора «за минуту» нет (владелец убрал). Данные и тексты — src/data/entrance-doors.ts.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../../lib/seo-title'
@@ -19,7 +18,6 @@ import Breadcrumbs from '../../../components/ui/Breadcrumbs.astro'
 import FaqAccordion from '../../../components/ui/FaqAccordion.astro'
 import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
-import PickDoor from '../../../components/entrance-doors/PickDoor.astro'
 import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astro'
 import RelatedArticleCard from '../../../components/articles/RelatedArticleCard.astro'
 import { relatedArticle as relatedArticleFor } from '../../../lib/articles'
@@ -147,8 +145,6 @@ const listSchema = {
       </div>
     </nav>
 
-    <PickDoor />
-
     <div id="doors-pick" class="edcat">
     {groups.map((g, gi) => (
       <section id={`doors-${g.id}`} class:list={['h-sec', 'edg-sec', { 'h-sec--wall': gi % 2 === 1 }]} data-section={g.id} aria-labelledby={`doors-${g.id}-title`}>
@@ -231,12 +227,6 @@ const listSchema = {
 <script>
   import { initLightboxGroups } from '../../../lib/lightbox'
   initLightboxGroups()
-
-  /* «Подберём за минуту» ведёт к нужной группе моделей */
-  document.addEventListener('doors:filter', (e) => {
-    const group = (e as CustomEvent<{ group: string }>).detail.group
-    document.getElementById(`doors-${group}`)?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
-  })
 
   /* «Показать все»: лента раскрывается в сетку, кнопка исчезает */
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-more]')) {

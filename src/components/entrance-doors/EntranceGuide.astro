@@ -1,20 +1,18 @@
 ---
 /**
  * Путеводитель по выбору входной двери под каталогом на /catalog/vhodnye-dveri/:
- * введение с рендером дома, виды дверей (с кнопкой «показать модели»),
- * критерии для квартиры и для дома, из чего состоит дверь, шаги выбора и
- * частые ошибки. Тексты и цифры — src/data/entrance-guide.ts (цифры из
+ * введение с рендером дома, критерии для квартиры и для дома (на фото двери),
+ * шаги выбора и частые ошибки. Тексты и цифры — src/data/entrance-guide.ts (цифры из
  * каталога); рендеры — RenderSlot.astro.
  */
 import RenderSlot from './RenderSlot.astro'
 import StepsRow from '../home/StepsRow.astro'
 import DoorExplorer from './DoorExplorer.astro'
-import { GUIDE, GUIDE_PARTS, GUIDE_STEPS, GUIDE_MISTAKES } from '../../data/entrance-guide'
+import { GUIDE, GUIDE_STEPS, GUIDE_MISTAKES } from '../../data/entrance-guide'
 import { renderOf } from '../../lib/entrance-renders'
 import { typograph } from '../../lib/typograph'
 
 const hasHouse = !!renderOf(GUIDE.house)
-const hasAnatomy = !!renderOf(GUIDE.anatomy)
 ---
 
 <div class="eg">
@@ -25,7 +23,6 @@ const hasAnatomy = !!renderOf(GUIDE.anatomy)
         <p class="h-lead egi__lead">{typograph(GUIDE.lead)}</p>
         <nav class="egi__nav" aria-label="Разделы путеводителя">
           <a class="h-pill h-pill--line" href="#guide-criteria">Что учесть</a>
-          <a class="h-pill h-pill--line" href="#guide-parts">Из чего состоит дверь</a>
           <a class="h-pill h-pill--line" href="#guide-steps">Шаги выбора</a>
         </nav>
       </div>
@@ -40,20 +37,6 @@ const hasAnatomy = !!renderOf(GUIDE.anatomy)
         <p class="h-body eg__note">{typograph(GUIDE.criteriaLead)}</p>
       </header>
       <DoorExplorer />
-    </div>
-  </section>
-
-  <section id="guide-parts" class="h-sec h-sec--wall" aria-labelledby="parts-title">
-    <div class="container egp" data-with-media={hasAnatomy || undefined}>
-      {hasAnatomy && <RenderSlot visual={GUIDE.anatomy} sizes="(min-width: 62.5rem) 56vw, 100vw" class="egp__media" />}
-      <div class="egp__text">
-        <h2 id="parts-title" class="h-h2 eg__h2">{GUIDE.partsTitle}</h2>
-        <ul class="egp__list" role="list">
-          {GUIDE_PARTS.map((p) => (
-            <li><h3 class="egp__name">{p.title}</h3><p class="egp__desc">{typograph(p.text)}</p></li>
-          ))}
-        </ul>
-      </div>
     </div>
   </section>
 
@@ -92,19 +75,6 @@ const hasAnatomy = !!renderOf(GUIDE.anatomy)
   }
 
   /* Виды: карточки с фото слева, на телефоне — одна под другой */
-
-  /* Из чего состоит: рендер разреза слева, список слева-направо; без рендера — две колонки */
-  .egp { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
-  .egp__list { display: grid; gap: 1.25rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .egp__list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .egp__name { margin: 0 0 0.25rem; font-size: 1.0625rem; font-weight: 600; color: var(--h-ink); }
-  .egp__desc { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
-  @media (min-width: 62.5rem) {
-    .egp[data-with-media] { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .egp[data-with-media] :global(.egp__media) { grid-column: 1 / span 7; }
-    .egp[data-with-media] .egp__text { grid-column: 8 / span 5; }
-    .egp[data-with-media] .egp__list { grid-template-columns: 1fr; }
-  }
 
   .egm { display: grid; gap: 1.5rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .egm { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -11,6 +11,10 @@
  * серая — на белой странице. Для единственной статьи на главной и первой
  * в разделе.
  *
+ * compact — «Статья по теме» на страницах каталога (RelatedArticleCard): та же
+ * плитка, но ниже — фото слева, справа тип, дата, заголовок и описание;
+ * без автора и кнопки на компьютере. Серая на белой странице, белая в серой секции.
+ *
  * Обложка — 16:9 (1920×1080) и может быть с текстом: показываем её
  * всегда в 16:9 и без обрезки — и столбиком, и рядом с панелью. Рядом
  * высота панели зависит от длины заголовка, поэтому фото не тянется на
@@ -24,18 +28,19 @@ import { typograph } from '../../lib/typograph'
 interface Props {
   article: Article
   feature?: boolean
+  compact?: boolean
   loading?: 'lazy' | 'eager'
   /** Уровень заголовка карточки — по месту на странице */
   heading?: 'h2' | 'h3'
 }
-const { article, feature = false, loading = 'lazy', heading = 'h3' } = Astro.props
+const { article, feature = false, compact = false, loading = 'lazy', heading = 'h3' } = Astro.props
 const { data } = article
 const Heading = heading
 const author = articleAuthor(article)
-const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : '(min-width: 56.25rem) 33vw, (min-width: 43.75rem) 50vw, 82vw'
+const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : compact ? '(min-width: 43.75rem) 34vw, 100vw' : '(min-width: 56.25rem) 33vw, (min-width: 43.75rem) 50vw, 82vw'
 ---
 
-<a href={articleHref(article.id)} class:list={['acard', { 'acard--feature': feature }]}>
+<a href={articleHref(article.id)} class:list={['acard', { 'acard--feature': feature, 'acard--compact': compact }]}>
   <span class="h-media acard__media">
     {data.coverImage
       ? <img
@@ -136,6 +141,19 @@ const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : '(min-width: 56.25
       border-radius: calc(var(--h-tile-radius) - 0.25rem);
     }
     .acard--feature .acard__body { align-self: stretch; }
+  }
+
+  /* ── Компактная: «Статья по теме» ── */
+  .acard--compact { overflow: hidden; height: auto; border-radius: var(--h-tile-radius); background: var(--h-wall); }
+  :global(.h-sec--wall) .acard--compact { background: var(--h-paper); }
+  .acard--compact .acard__media { border-radius: 0; }
+  .acard--compact .acard__body { padding: clamp(1.25rem, 3vw, 1.75rem); }
+  .acard--compact .acard__meta { margin-top: 0; }
+  .acard--compact .acard__title { margin-top: 0.625rem; font-size: clamp(1.3125rem, 2vw, 1.625rem); }
+  @media (min-width: 43.75rem) {
+    .acard--compact { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: center; }
+    .acard--compact .acard__media { margin: 1rem 0 1rem 1rem; border-radius: calc(var(--h-tile-radius) - 0.25rem); }
+    .acard--compact .acard__foot { display: none; }
   }
 
   /* Низ панели: автор слева, «Читать статью» справа — под линейкой */
