@@ -1,0 +1,36 @@
+---
+/**
+ * Кадр «дверь на доме» в ленте на /catalog/vhodnye-dveri/: рендер целиком (без
+ * обрезки — ширину задаёт лента по пропорции кадра), под ним название модели и
+ * цена «от». Вся карточка — ссылка на страницу модели (растянутая ссылка на
+ * названии), как у DoorCard. Кадры — src/data/entrance-scenes.ts.
+ */
+import { fromPrice } from '../../data/entrance-doors'
+import type { SceneImage } from '../../lib/entrance-scenes'
+import { typograph } from '../../lib/typograph'
+
+interface Props { scene: SceneImage }
+const { scene } = Astro.props
+const { door } = scene
+---
+
+<article class="scard">
+  <span class="h-media scard__photo" style={`aspect-ratio: ${scene.width} / ${scene.height}`}>
+    <img src={scene.src} srcset={scene.srcset} sizes="(min-width: 43.75rem) 30rem, 85vw" alt={scene.alt} width={scene.width} height={scene.height} loading="lazy" decoding="async" />
+  </span>
+  <h3 class="scard__name"><a class="scard__link" href={door.href}>{typograph(door.name)}</a></h3>
+  <p class="scard__price">{fromPrice(door)}</p>
+</article>
+
+<style>
+  .scard { position: relative; display: grid; gap: 0.25rem; align-content: start; }
+  .scard__photo { position: relative; }
+  .scard__name { margin: 0.625rem 0 0; font-size: 1.125rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); }
+  .scard__link { color: inherit; text-decoration: none; }
+  .scard__link::after { content: ''; position: absolute; inset: 0; }
+  .scard:hover .scard__link { text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.15em; }
+  .scard__link:focus-visible { outline: none; }
+  .scard:has(.scard__link:focus-visible) .scard__photo { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  .scard__price { margin: 0; font-size: 1.1875rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
+  @media (max-width: 43.6875rem) { .scard__name { font-size: 1rem; } .scard__price { font-size: 1.0625rem; } }
+</style>

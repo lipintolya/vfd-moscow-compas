@@ -42,7 +42,7 @@ const sizes = '(min-width: 62.5rem) 56vw, 100vw'
               <button type="button" class="h-media esc__zoom" data-lightbox-index={i} aria-label={`Открыть крупно: ${r.alt}`}>
                 <img
                   src={r.src} srcset={r.srcset} sizes={sizes} alt={r.alt} width={r.width} height={r.height}
-                  loading={i === 0 ? 'eager' : 'lazy'} decoding="async"
+                  loading="lazy" decoding="async"
                 />
               </button>
             </li>

@@ -5,6 +5,8 @@
  * и текст сообщения менеджеру (в нём название отделки); справа главные
  * параметры, цена «от» и кнопки связи (Telegram, MAX). Ниже — полная таблица
  * характеристик, соседние модели, вопросы. Данные — src/data/entrance-doors.ts.
+ * Есть рендер модели на фасаде дома (src/data/entrance-scenes.ts) — блок под
+ * фото: кадры целиком, по нажатию открываются крупно.
  */
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { brandTitle } from '../../../lib/seo-title'
@@ -14,6 +16,8 @@ import DoorCard from '../../../components/entrance-doors/DoorCard.astro'
 import DoorRequest from '../../../components/entrance-doors/DoorRequest.astro'
 import { ENTRANCE_DOORS, ENTRANCE_FAQ, DOOR_GROUPS, doorsOfGroup, doorTitle, doorDescription, fromPrice } from '../../../data/entrance-doors'
 import type { EntranceDoor } from '../../../data/entrance-doors'
+import { sceneSection } from '../../../data/entrance-scenes'
+import { scenesOfDoor } from '../../../lib/entrance-scenes'
 import { productSchemaFrom } from '../../../lib/product-schema'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { telegramWithText, maxWithText } from '../../../lib/messengers'
@@ -40,6 +44,9 @@ const large = JSON.stringify(door.variants.map((v) => ({ src: v.image.large, alt
 const askText = (name: string) => `Интересует входная дверь «${door.name}», отделка: ${name}. Подскажите, пожалуйста, цену и сроки.`
 const asks = JSON.stringify(door.variants.map((v) => ({ tg: telegramWithText(askText(v.name)), max: maxWithText(askText(v.name)) })))
 const first = door.variants[0]!
+const scenes = scenesOfDoor(door.id)
+const sceneText = sceneSection(door)
+const scenesLarge = JSON.stringify(scenes.map((s) => ({ src: s.src, alt: s.alt })))
 const faq = ENTRANCE_FAQ.slice(0, 3)
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -131,6 +138,26 @@ const faqSchema = {
         </aside>
       </div>
     </section>
+
+    {scenes.length > 0 && (
+      <section class="h-sec h-sec--tight-top" aria-labelledby="door-scene">
+        <div class="container eds" data-lightbox data-lightbox-images={scenesLarge}>
+          <header class="eds__head">
+            <h2 id="door-scene" class="h-h2 eds__title">{typograph(sceneText.title)}</h2>
+            <p class="h-body eds__note">{typograph(sceneText.note)}</p>
+          </header>
+          <ul class="eds__list" role="list">
+            {scenes.map((s, i) => (
+              <li style={`--ar: ${s.ratio.toFixed(4)}`}>
+                <button type="button" class="h-media eds__item" style={`aspect-ratio: ${s.width} / ${s.height}`} data-lightbox-index={i} aria-label={`Открыть крупно: ${s.alt}`}>
+                  <img src={s.src} srcset={s.srcset} sizes="(min-width: 62.5rem) 46rem, 100vw" alt={s.alt} width={s.width} height={s.height} loading="lazy" decoding="async" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )}
 
     <section class="h-sec h-sec--wall" aria-labelledby="door-spec">
       <div class="container">
@@ -264,6 +291,24 @@ const faqSchema = {
   @media (max-width: 62.4375rem) { .edm__from { display: none; } }
   .edm__from { margin: 0; font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 600; line-height: 1.1; color: var(--h-ink); font-variant-numeric: tabular-nums; }
   .edm__price-note { margin: 0; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
+
+  /* Рендер на фасаде: слева заголовок и пояснение, справа кадры целиком (несколько — в ряд одной высоты,
+     ширина по пропорции кадра); на телефоне — друг под другом */
+  .eds { display: grid; gap: 1.5rem var(--h-gutter); align-items: end; }
+  .eds__head { display: grid; gap: 0.75rem; align-content: end; }
+  .eds__title, .eds__note { margin: 0; }
+  /* Название модели с неразрывными пробелами («Термолаб 2 Про на фасаде») — длинная цепочка:
+     кегль ниже обычного H2, а в узкой колонке цепочка переносится, а не вылезает под кадр */
+  .eds__title { font-size: clamp(1.5rem, 2.4vw, 2rem); overflow-wrap: anywhere; }
+  .eds__list { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+  .eds__item { position: relative; display: block; width: 100%; padding: 0; border: 0; cursor: zoom-in; }
+  .eds__item:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  @media (min-width: 62.5rem) {
+    .eds { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .eds__head { grid-column: 1 / span 5; }
+    .eds__list { grid-column: 6 / span 7; display: flex; gap: var(--h-gutter); }
+    .eds__list > li { flex: var(--ar) 1 0; min-width: 0; }
+  }
 
   .edm__h2 { margin: 0; }
   .edm__note { margin: 0.75rem 0 0; max-width: 44rem; color: var(--h-soft); }

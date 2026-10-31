@@ -13,6 +13,10 @@
  * настроек: заменили рендер — новое имя, кэш /renders/ не подсунет старый
  * кадр. Копии убранных рендеров удаляются.
  *
+ * Обрезки под телефон (CROPS): у обложки каталога на телефоне виден только
+ * квадрат с дверью — для него отдельные копии <место>-<обрезка>-<хеш>-<ширина>.webp
+ * (480–960 px), чтобы телефон не качал весь рендер ради двух третей кадра.
+ *
  * Запуск: npm run gen:entrance-renders — когда рендер добавили, заменили или убрали.
  */
 import sharp from 'sharp'
@@ -21,6 +25,12 @@ import { readdir, readFile, writeFile, mkdir, unlink } from 'node:fs/promises'
 
 const WIDTHS = [640, 960, 1440]
 const QUALITY = 80
+/* Обрезки: место → имя → пропорция и центр кадра (доля ширины рендера — где стоит дверь).
+   Страница берёт обрезку из <picture>; нет обрезки — телефон получает весь рендер. */
+const CROPS = {
+  'house-nord-plyus': { square: { aspect: 1, focus: 0.655 } },
+}
+const CROP_WIDTHS = [480, 720, 960]
 const root = new URL('../', import.meta.url)
 const SRC = new URL('assets/entrance-renders/', root)
 const OUT = new URL('public/renders/entrance-guide/', root)
@@ -36,7 +46,7 @@ for (const f of sources) {
   if (data[slot]) throw new Error(`Два файла для места «${slot}» — оставьте один`)
   const buf = await readFile(new URL(f, SRC))
   const meta = await sharp(buf).metadata()
-  const hash = createHash('sha1').update(buf).update(JSON.stringify({ WIDTHS, QUALITY })).digest('hex').slice(0, 8)
+  const hash = createHash('sha1').update(buf).update(JSON.stringify({ WIDTHS, QUALITY })).update(CROPS[slot] ? JSON.stringify({ CROPS: CROPS[slot], CROP_WIDTHS }) : '').digest('hex').slice(0, 8)
   const widths = [...new Set(WIDTHS.map((w) => Math.min(w, meta.width)))]
   for (const w of widths) {
     const file = `${slot}-${hash}-${w}.webp`
@@ -47,6 +57,23 @@ for (const f of sources) {
   }
   const big = widths.at(-1)
   data[slot] = { hash, widths, width: big, height: Math.round((meta.height * big) / meta.width) }
+
+  for (const [name, c] of Object.entries(CROPS[slot] ?? {})) {
+    if ((meta.orientation ?? 1) > 1) throw new Error(`«${slot}»: у исходника EXIF-поворот — обрезка ждёт кадр в нормальной ориентации`)
+    const cw = Math.min(meta.width, Math.round(meta.height * c.aspect))
+    const ch = Math.round(cw / c.aspect)
+    const left = Math.max(0, Math.min(meta.width - cw, Math.round(c.focus * meta.width - cw / 2)))
+    const cropWidths = [...new Set(CROP_WIDTHS.map((w) => Math.min(w, cw)))]
+    for (const w of cropWidths) {
+      const file = `${slot}-${name}-${hash}-${w}.webp`
+      const out = await sharp(buf).extract({ left, top: 0, width: cw, height: ch }).resize({ width: w }).webp({ quality: QUALITY }).toBuffer()
+      await writeFile(new URL(file, OUT), out)
+      written.add(file)
+      console.log(`${file}: ${(out.length / 1024).toFixed(0)}KB`)
+    }
+    const cbig = cropWidths.at(-1)
+    data[slot].crops = { ...data[slot].crops, [name]: { widths: cropWidths, width: cbig, height: Math.round((ch * cbig) / cw) } }
+  }
 }
 
 for (const f of await readdir(OUT)) {

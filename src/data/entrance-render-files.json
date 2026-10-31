@@ -1,4 +1,85 @@
 {
+  "house-frost-7024": {
+    "hash": "acda539d",
+    "widths": [
+      640,
+      960,
+      1440
+    ],
+    "width": 1440,
+    "height": 1080
+  },
+  "house-impero": {
+    "hash": "10194134",
+    "widths": [
+      640,
+      960,
+      1440
+    ],
+    "width": 1440,
+    "height": 1080
+  },
+  "house-nord-plyus": {
+    "hash": "d0cf28eb",
+    "widths": [
+      640,
+      960,
+      1440
+    ],
+    "width": 1440,
+    "height": 960,
+    "crops": {
+      "square": {
+        "widths": [
+          480,
+          720,
+          960
+        ],
+        "width": 960,
+        "height": 960
+      }
+    }
+  },
+  "house-skandiya": {
+    "hash": "278bc9af",
+    "widths": [
+      640,
+      960,
+      1199
+    ],
+    "width": 1199,
+    "height": 1312
+  },
+  "house-termolab-2-pro-tall": {
+    "hash": "21a2ad82",
+    "widths": [
+      640,
+      960,
+      1024
+    ],
+    "width": 1024,
+    "height": 1536
+  },
+  "house-termolab-2-pro": {
+    "hash": "c3e02b8c",
+    "widths": [
+      640,
+      960,
+      1440
+    ],
+    "width": 1440,
+    "height": 960
+  },
+  "house-tundra-plyus": {
+    "hash": "ae950abe",
+    "widths": [
+      640,
+      960,
+      1440
+    ],
+    "width": 1440,
+    "height": 960
+  },
   "lobby-1": {
     "hash": "e706899c",
     "widths": [

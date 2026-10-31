@@ -1,12 +1,14 @@
 ---
 /**
- * Каталог входных дверей (/catalog/vhodnye-dveri/): светлый первый экран с
- * заголовком по центру, лента плиток-групп, «Подберём за минуту» и модели по
+ * Каталог входных дверей (/catalog/vhodnye-dveri/): первый экран — сцена с
+ * рендером двери на доме (обложка, src/data/entrance-scenes.ts), заголовок и
+ * кнопки слева на затемнении; лента плиток-групп, «Подберём за минуту» и модели по
  * группам — для квартиры, с терморазрывом, с электронным замком, со
  * стеклопакетом: слева название и пояснение группы, справа лента моделей
  * (листается пальцем или стрелками), «Показать все» раскрывает ленту в сетку;
- * внизу — путеводитель по выбору. Ориентир подачи — каталог направлений
- * volhovec.ru (центр, воздух, лента карточек). Карточка — дверь в рост, число
+ * дальше — рендеры «на площадке» и «на фасаде дома» (лента кадров со ссылками на
+ * модели) и путеводитель по выбору. Ориентир подачи — каталог направлений
+ * volhovec.ru (воздух, лента карточек). Карточка — дверь в рост, число
  * вариантов отделки и цена «от». У каждой модели своя страница ([id].astro).
  * Отдельной панели фильтров нет (владелец убрал); «Подберём за минуту»
  * (событие doors:filter) прокручивает к нужной группе. Данные и тексты — src/data/entrance-doors.ts.
@@ -22,8 +24,11 @@ import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astr
 import RelatedArticleCard from '../../../components/articles/RelatedArticleCard.astro'
 import { relatedArticle as relatedArticleFor } from '../../../lib/articles'
 import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcase.astro'
+import SceneCard from '../../../components/entrance-doors/SceneCard.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
-import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, groupCover, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
+import { ENTRANCE_HOUSES } from '../../../data/entrance-scenes'
+import { COVER_SCENE, HOUSE_SCENES } from '../../../lib/entrance-scenes'
+import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, groupCover, fromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
 import { rub } from '../../../data/services'
@@ -31,7 +36,10 @@ import { typograph } from '../../../lib/typograph'
 import { pluralRu } from '../../../lib/plural'
 import '../../../styles/home.css'
 
-const { hero } = ENTRANCE_PAGE
+/* Обложка — рендер двери на доме; на телефоне — квадратная обрезка с дверью (меньше байт, дверь по центру) */
+const cover = COVER_SCENE
+const coverPhone = cover.crops?.square
+const PHONE_MEDIA = '(max-width: 47.9375rem)'
 const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id), photo: groupCover(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
 const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/vhodnye-dveri/' })
@@ -54,8 +62,8 @@ const listSchema = {
 <BaseLayout
   title={brandTitle(ENTRANCE_PAGE.title)}
   description={ENTRANCE_PAGE.description}
-  ogImage={hero.large}
-  ogImageMeta={{ width: hero.width, height: hero.height, alt: hero.alt }}
+  ogImage={cover.src}
+  ogImageMeta={{ width: cover.width, height: cover.height, alt: cover.alt }}
   structuredData={[localBusinessSchema({ url: SITE.url }), listSchema, faqSchema]}
 >
   <div class="breadcrumb-bar">
@@ -66,12 +74,23 @@ const listSchema = {
 
   <div class="home">
     <section class="edh" aria-labelledby="doors-title">
-      <div class="container edh__in">
-        <h1 id="doors-title" class="h-h1 edh__title">{typograph(ENTRANCE_PAGE.h1)}</h1>
-        <p class="h-lead edh__lead">{typograph(ENTRANCE_PAGE.lead)}</p>
-        <div class="edh__actions">
-          <a class="h-btn h-btn--ink h-btn--phone-wide" href="#doors-pick">Выбрать модель</a>
-          <a class="h-btn h-btn--quiet h-btn--phone-wide" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+      <div class="container">
+        <div class="edh__scene">
+          <div class="edh__media">
+            <picture>
+              {coverPhone && <source media={PHONE_MEDIA} srcset={coverPhone.srcset} sizes="calc(100vw - 2rem)" width={coverPhone.width} height={coverPhone.height} />}
+              <img class="edh__img" src={cover.src} srcset={cover.srcset} sizes="(min-width: 80rem) 76rem, 100vw" alt={cover.alt} width={cover.width} height={cover.height} loading="eager" fetchpriority="high" decoding="async" />
+            </picture>
+            <a class="edh__tag" href={cover.door.href}>На фото: {typograph(cover.door.name)}, {fromPrice(cover.door)}</a>
+          </div>
+          <div class="edh__copy">
+            <h1 id="doors-title" class="h-h1 edh__title">{typograph(ENTRANCE_PAGE.h1)}</h1>
+            <p class="h-lead edh__lead">{typograph(ENTRANCE_PAGE.lead)}</p>
+            <div class="edh__actions">
+              <a class="h-btn h-btn--signal h-btn--phone-wide" href="#doors-pick">Выбрать модель</a>
+              <a class="h-btn edh__call h-btn--phone-wide" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -136,6 +155,29 @@ const listSchema = {
     </div>
 
     <EntranceShowcase />
+
+    {HOUSE_SCENES.length > 0 && (
+      <section id="houses" class="h-sec h-sec--wall" aria-labelledby="houses-title">
+        <div class="container">
+          <header class="h-head">
+            <h2 id="houses-title" class="h-h2">{typograph(ENTRANCE_HOUSES.title)}</h2>
+            <p class="h-lead">{typograph(ENTRANCE_HOUSES.lead)}</p>
+          </header>
+          <div class="rail" data-rail>
+            <ul class="rail__track ehs" data-track role="list">
+              {HOUSE_SCENES.map((scene) => <li style={`--ar: ${scene.ratio.toFixed(4)}`}><SceneCard scene={scene} /></li>)}
+            </ul>
+            <div class="rail__bar" data-bar>
+              <span class="rail__line"><i></i></span>
+              <span class="rail__btns">
+                <button type="button" class="rail__btn" data-prev aria-label="Назад"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                <button type="button" class="rail__btn" data-next aria-label="Дальше"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
 
     <EntranceGuide />
 
@@ -204,13 +246,52 @@ const listSchema = {
 </script>
 
 <style>
-  /* Первый экран: светлый, по центру — заголовок, пояснение и две кнопки */
+  /* Первый экран — сцена, как на главной: рендер двери на доме, текст слева на затемнении
+     (затемнение только под текстом, дверь справа остаётся чистой). Телефон: кадр сверху, текст под ним
+     на графите — дверь ничем не закрыта */
   .edh { padding: clamp(0.5rem, 2vw, 1.25rem) 0 clamp(1.5rem, 3vw, 2.25rem); }
-  .edh__in { display: grid; justify-items: center; text-align: center; }
-  .edh__title { margin: 0; max-width: 18ch; }
-  .edh__lead { margin: 1.25rem 0 0; max-width: 40rem; color: var(--h-soft); }
-  .edh__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 1.75rem; }
+  .edh__scene { position: relative; display: grid; border-radius: 1.75rem; overflow: hidden; background: var(--color-graphite); isolation: isolate; }
+  .edh__media { position: relative; aspect-ratio: 1; }
+  .edh__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--color-graphite) 0%, transparent 28%); pointer-events: none; }
+  .edh__img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+  .edh__media picture { display: contents; }
+  .edh__copy { display: grid; justify-items: start; padding: 0 clamp(1.25rem, 4vw, 1.75rem) clamp(1.5rem, 4vw, 2rem); color: var(--color-white); }
+  .edh__title { color: var(--color-white); }
+  .edh__lead { margin: 1rem 0 0; max-width: 28rem; color: color-mix(in srgb, var(--color-white) 82%, transparent); }
+  .edh__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+  /* Вторая кнопка — на фото: белый контур, на наведение — белая (как на главной) */
+  .edh__call { border-color: color-mix(in srgb, var(--color-white) 60%, transparent); color: var(--color-white); }
+  .edh__call:hover { border-color: var(--color-white); background: var(--color-white); color: var(--h-ink); }
   @media (max-width: 43.6875rem) { .edh__actions { width: 100%; } }
+  /* 320 px: «Входные двери» помещаются в строку */
+  @media (max-width: 23.4375rem) { .edh__title { font-size: 2rem; } }
+  .edh__tag {
+    position: absolute;
+    z-index: 1;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    max-width: calc(100% - 1.5rem);
+    padding: 0.5rem 0.875rem;
+    border-radius: 999rem;
+    background: color-mix(in srgb, var(--color-white) 90%, transparent);
+    backdrop-filter: blur(0.5rem);
+    color: var(--h-ink);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    transition: background-color 180ms var(--ease-out);
+  }
+  .edh__tag:hover { background: var(--color-white); text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.2em; }
+  .edh__tag:focus-visible { outline: 0.1875rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
+  @media (min-width: 48rem) {
+    .edh__scene { display: flex; flex-direction: column; justify-content: center; min-height: clamp(30rem, 44vw, 40rem); }
+    .edh__media { position: absolute; inset: 0; z-index: -2; aspect-ratio: auto; }
+    .edh__media::after { background: linear-gradient(100deg, color-mix(in srgb, var(--color-slate-950) 74%, transparent) 0%, color-mix(in srgb, var(--color-slate-950) 46%, transparent) 38%, transparent 62%); }
+    .edh__img { object-position: 50% 55%; }
+    .edh__copy { max-width: min(36rem, 58%); padding: clamp(2rem, 4vw, 3.5rem); }
+    .edh__tag { left: auto; right: clamp(0.75rem, 2vw, 1.25rem); bottom: clamp(0.75rem, 2vw, 1.25rem); }
+  }
 
   /* Ленты (плитки групп и модели): листаются пальцем, на компьютере — стрелками; полоска показывает место */
   .rail { position: relative; }
@@ -242,6 +323,11 @@ const listSchema = {
   .rail__btn:disabled { color: var(--color-slate-300); cursor: default; }
   .rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   @media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: flex; } }
+
+  /* Лента «на фасаде дома»: кадры целиком, без обрезки — у всех одна высота, ширина по пропорции кадра */
+  .ehs { --scene-h: min(15rem, 56vw); display: flex; --rail-gap: 1rem; }
+  .ehs > li { flex: none; width: calc(var(--scene-h) * var(--ar)); }
+  @media (min-width: 43.75rem) { .ehs { --scene-h: clamp(15rem, 24vw, 21rem); --rail-gap: 1.5rem; } }
 
   /* Плитки групп — главный экран страницы: на графите крупно название и дверь в рост,
      дверь стоит на нижней кромке плитки */
