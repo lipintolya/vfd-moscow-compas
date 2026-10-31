@@ -1,258 +1,54 @@
 ---
 /**
- * «Входные двери VFD со сменными панелями (накладками) под межкомнатные двери VFD» —
- * отдельный блок на /catalog/vhodnye-dveri/ после групп каталога. Данные, цены «от»
- * и тексты — src/data/entrance-vfd.ts; разметку собирает src/lib/vfd-view.ts, одна и
- * та же на сервере (первый показ) и в браузере (выбор).
- *
- * Сверху лента моделей (на компьютере — все девять в ряд, ниже — листается пальцем).
- * Слева сцена: дверь снаружи, в интерьере или изнутри с выбранной накладкой; справа
- * название, накладка (серия → цвет с миниатюрами), цена «от», кнопки Telegram и MAX
- * с готовым текстом (модель, накладка, цена) и раскрывающиеся характеристики и
- * комплектация. Без скрипта виден первый показ, выбор не работает.
+ * «Входные двери VFD со сменными панелями (накладками)» — отдельный блок на
+ * /catalog/vhodnye-dveri/ после групп каталога, по образцу группы: слева название,
+ * пояснение и «9 моделей, 40 накладок, от …», справа лента карточек моделей (VfdCard,
+ * общая лента .rail со стрелками и полоской). Карточка ведёт на страницу модели
+ * (/catalog/vhodnye-dveri/vfd/<id>/), где выбирают накладку. Данные и тексты —
+ * src/data/entrance-vfd.ts.
  */
-import DoorRequest from './DoorRequest.astro'
+import VfdCard from './VfdCard.astro'
 import RailBar from '../ui/RailBar.astro'
-import { VFD_MODELS, VFD_SECTION, VIEW_LABEL } from '../../data/entrance-vfd'
-import { initialState, modelOf, headHtml, modelButtonHtml, stageImage, specsHtml, hardwareHtml, askText } from '../../lib/vfd-view'
+import { VFD_MODELS, VFD_SECTION } from '../../data/entrance-vfd'
 import { typograph } from '../../lib/typograph'
-
-const state = initialState()
-const model = modelOf(state.model)
-const img = stageImage(state)
-const views = Object.keys(VIEW_LABEL) as (keyof typeof VIEW_LABEL)[]
 ---
 
-<section id={VFD_SECTION.id} class="h-sec vfd" aria-labelledby="vfd-title" data-vfd>
-  <div class="container vfd__layout">
-    <header class="vfd__head">
-      <h2 id="vfd-title" class="h-h2 vfd__title">{typograph(VFD_SECTION.title)}</h2>
-      <p class="h-body vfd__lead">{typograph(VFD_SECTION.lead)}</p>
-      <p class="vfd__meta">{VFD_SECTION.meta}</p>
+<section id={VFD_SECTION.id} class="h-sec vfd-sec" aria-labelledby="vfd-title">
+  <div class="container vfd-sec__layout">
+    <header class="vfd-sec__head">
+      <h2 id="vfd-title" class="h-h2 vfd-sec__title">{typograph(VFD_SECTION.title)}</h2>
+      <p class="h-body vfd-sec__lead">{typograph(VFD_SECTION.lead)}</p>
+      <p class="vfd-sec__meta">{VFD_SECTION.meta}</p>
     </header>
 
-    <div class="rail vfd__rail" data-rail>
-      <ul class="rail__track vfd__models" data-track role="list">
-        {VFD_MODELS.map((m) => <li set:html={modelButtonHtml(m, m.id === state.model)} />)}
+    <div class="rail vfd-sec__rail" data-rail>
+      <ul class="rail__track vfd-sec__track" data-track role="list">
+        {VFD_MODELS.map((m) => <li><VfdCard model={m} /></li>)}
       </ul>
       <RailBar />
-    </div>
-
-    <div class="vfd__grid" data-vfd-config>
-      <div class="vfd__stage">
-        <div class="h-toggles" role="group" aria-label="Вид двери">
-          {views.map((v) => <button type="button" class="h-toggle" data-view={v} aria-pressed={v === state.view}>{VIEW_LABEL[v]}</button>)}
-        </div>
-        <div class="h-media vfd__frame" data-vfd-frame data-view={state.view}>
-          <img data-vfd-img src={img.src} srcset={img.srcset} sizes={img.sizes} alt={img.alt} width={img.width} height={img.height} loading="lazy" decoding="async" />
-        </div>
-      </div>
-
-      <div class="vfd__info">
-        <div data-vfd-head set:html={headHtml(state)} />
-        <div class="vfd__ask"><DoorRequest text={askText(state)} /></div>
-        <details class="vfd__more">
-          <summary>{VFD_SECTION.specsTitle}</summary>
-          <div data-vfd-specs set:html={specsHtml(model)} />
-        </details>
-        <details class="vfd__more">
-          <summary>{VFD_SECTION.hardwareTitle}</summary>
-          <div data-vfd-hardware set:html={hardwareHtml(model)} />
-        </details>
-      </div>
     </div>
   </div>
 </section>
 
 <script>
-  import { initialState, settle, optionOf, modelOf, stageImage, headHtml, specsHtml, hardwareHtml, askText, type VfdState, type VfdView } from '../../lib/vfd-view'
-  import { optionsOf } from '../../data/entrance-vfd'
   import { initRails } from '../../lib/rail'
-  import { telegramWithText, maxWithText } from '../../lib/messengers'
-
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches
   initRails()
-
-  for (const root of document.querySelectorAll<HTMLElement>('[data-vfd]')) {
-    let state: VfdState = initialState()
-    const frame = root.querySelector<HTMLElement>('[data-vfd-frame]')!
-    const img = frame.querySelector<HTMLImageElement>('[data-vfd-img]')!
-    const head = root.querySelector<HTMLElement>('[data-vfd-head]')!
-    const specs = root.querySelector<HTMLElement>('[data-vfd-specs]')!
-    const hardware = root.querySelector<HTMLElement>('[data-vfd-hardware]')!
-    const tg = root.querySelector<HTMLAnchorElement>('[data-ask="tg"]')
-    const max = root.querySelector<HTMLAnchorElement>('[data-ask="max"]')
-    let swapId = 0
-
-    /* Кадр меняется, когда новый уже загружен и разобран, — без пустой рамки между кадрами */
-    function showImage() {
-      const next = stageImage(state)
-      const apply = () => {
-        img.srcset = next.srcset
-        img.sizes = next.sizes
-        img.src = next.src
-        img.alt = next.alt
-        img.width = next.width
-        img.height = next.height
-        frame.classList.remove('is-swap')
-      }
-      const id = ++swapId
-      const pre = new Image()
-      pre.sizes = next.sizes
-      pre.srcset = next.srcset
-      pre.src = next.src
-      if (still) { apply(); return }
-      frame.classList.add('is-swap')
-      const done = () => { if (id === swapId) apply() }
-      Promise.race([pre.decode(), new Promise((r) => setTimeout(r, 700))]).then(done, done)
-    }
-
-    function render(prev: VfdState, focus?: string) {
-      root.querySelectorAll<HTMLElement>('[data-model]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.model === state.model)))
-      root.querySelectorAll<HTMLElement>('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === state.view)))
-      frame.dataset.view = state.view
-      showImage()
-      if (prev.model !== state.model || prev.skin !== state.skin) {
-        head.innerHTML = headHtml(state)
-        // фокус с клавиатуры не должен теряться вместе с заменённой кнопкой
-        if (focus) head.querySelector<HTMLElement>(focus)?.focus()
-      }
-      if (prev.model !== state.model) {
-        const m = modelOf(state.model)
-        specs.innerHTML = specsHtml(m)
-        hardware.innerHTML = hardwareHtml(m)
-      }
-      const text = askText(state)
-      if (tg) tg.href = telegramWithText(text)
-      if (max) max.dataset.copyText = maxWithText(text)
-    }
-
-    function set(patch: Partial<VfdState>, focus?: string) {
-      const prev = state
-      state = settle(patch.model ?? state.model, patch.skin ?? state.skin, patch.view ?? state.view)
-      render(prev, focus)
-    }
-
-    /* Лента стоит над выбором: после нажатия на модель подводим выбор к экрану, если его не видно */
-    const config = root.querySelector<HTMLElement>('[data-vfd-config]')!
-    function reveal() {
-      const r = config.getBoundingClientRect()
-      if (r.top > 0 && r.top < innerHeight * 0.5) return
-      config.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' })
-    }
-
-    root.addEventListener('click', (e) => {
-      const t = (e.target as Element).closest<HTMLElement>('[data-model], [data-view], [data-series], [data-skin]')
-      if (!t || !root.contains(t)) return
-      if (t.dataset.model) { set({ model: t.dataset.model }); reveal() }
-      else if (t.dataset.view) set({ view: t.dataset.view as VfdView })
-      else if (t.dataset.skin) set({ skin: t.dataset.skin, view: 'inside' }, `[data-skin="${t.dataset.skin}"]`)
-      else if (t.dataset.series) {
-        // серия: первая накладка серии у этой модели
-        const first = optionsOf(modelOf(state.model)).find((o) => o.skin.name === t.dataset.series)
-        if (first) set({ skin: first.skin.id, view: 'inside' }, `[data-series="${CSS.escape(t.dataset.series)}"]`)
-      }
-    })
-  }
 </script>
 
-<style is:global>
-  .vfd { scroll-margin-top: 1rem; }
-  /* Как группы каталога: слева название и пояснение, справа лента моделей; выбор — ниже на всю ширину */
-  .vfd__layout { display: grid; gap: 1.75rem var(--h-gutter); }
-  .vfd__head { display: grid; gap: 0.75rem; align-content: start; }
-  .vfd__title, .vfd__lead, .vfd__meta { margin: 0; }
-  .vfd__title { font-size: clamp(1.5rem, 1.4vw + 1rem, 1.875rem); }
-  .vfd__meta { margin-top: 0.25rem; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
-  .vfd__rail { min-width: 0; }
-  .vfd__grid { margin-top: clamp(1rem, 3vw, 2.5rem); }
+<style>
+  .vfd-sec { scroll-margin-top: 1rem; }
+  .vfd-sec__layout { display: grid; gap: 1.75rem var(--h-gutter); }
+  .vfd-sec__head { display: grid; gap: 0.75rem; align-content: start; }
+  .vfd-sec__title, .vfd-sec__lead, .vfd-sec__meta { margin: 0; }
+  .vfd-sec__title { font-size: clamp(1.625rem, 2vw + 1rem, 2.25rem); }
+  .vfd-sec__lead { color: var(--h-soft); }
+  .vfd-sec__meta { margin-top: 0.25rem; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
+  .vfd-sec__rail { min-width: 0; }
+  .vfd-sec__track { --rail-col: 9rem; --rail-gap: 0.875rem; }
+  @media (min-width: 43.75rem) { .vfd-sec__track { --rail-col: 14.5rem; --rail-gap: 1.5rem; } }
   @media (min-width: 62.5rem) {
-    .vfd__layout { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .vfd__head { grid-column: 1 / span 4; }
-    .vfd__rail { grid-column: 5 / span 8; }
-    .vfd__grid { grid-column: 1 / -1; }
-  }
-
-  /* Лента моделей — общая .rail (home.css), карточки того же размера, что в группах каталога */
-  .vfd__models { --rail-col: 9rem; --rail-gap: 0.875rem; }
-  @media (min-width: 43.75rem) { .vfd__models { --rail-col: 14.5rem; --rail-gap: 1.5rem; } }
-  .vfd__model { display: grid; gap: 0.125rem; align-content: start; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-  .vfd__thumb { position: relative; display: block; aspect-ratio: 500 / 977; margin-bottom: 0.625rem; border-radius: 0; background: var(--h-wall); overflow: hidden; outline: 0.125rem solid transparent; outline-offset: 0.125rem; transition: outline-color 200ms var(--ease-out); }
-  .vfd__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .vfd__model:hover .vfd__thumb { outline-color: var(--color-slate-300); }
-  .vfd__model[aria-pressed='true'] .vfd__thumb { outline-color: var(--h-signal); }
-  .vfd__model:focus-visible { outline: none; }
-  .vfd__model:focus-visible .vfd__thumb { outline-color: var(--color-secondary-700); }
-  .vfd__status { position: absolute; left: 0.375rem; top: 0.375rem; }
-  .vfd__mname { font-size: 1rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); overflow-wrap: break-word; }
-  @media (min-width: 43.75rem) { .vfd__mname { font-size: 1.125rem; } }
-  .vfd__mkind { font-size: 0.875rem; line-height: 1.35; color: var(--h-soft); }
-  .vfd__mprice { margin-top: 0.375rem; font-size: 1.0625rem; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--h-ink); }
-
-  /* Сцена слева, выбор справа; на компьютере сцена стоит на месте, пока читают характеристики */
-  .vfd__grid { display: grid; gap: 2rem var(--h-gutter); align-items: start; }
-  .vfd__stage { display: grid; gap: 1rem; }
-  @media (min-width: 62.5rem) {
-    .vfd__grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
-    .vfd__stage { grid-column: 1 / span 5; position: sticky; top: calc(var(--header-height) + 1rem); }
-    .vfd__info { grid-column: 7 / span 6; }
-  }
-  .vfd .vfd__frame { position: relative; aspect-ratio: 1; border-radius: var(--h-tile-radius); }
-  @media (min-width: 43.75rem) { .vfd .vfd__frame { aspect-ratio: 4 / 5; } }
-  .vfd .vfd__frame img { box-sizing: border-box; padding: clamp(0.75rem, 3vw, 1.5rem); object-fit: contain; transition: opacity 150ms var(--ease-out); }
-  .vfd .vfd__frame[data-view='render'] img { padding: 0; object-fit: cover; }
-  .vfd .vfd__frame.is-swap img { opacity: 0.35; }
-
-  .vfd__name { margin: 0; font-size: clamp(1.625rem, 1rem + 2vw, 2.25rem); font-weight: var(--h-weight-display); line-height: 1.1; letter-spacing: -0.03em; color: var(--h-ink); text-wrap: balance; }
-  .vfd__tagline { margin: 0.5rem 0 0; max-width: 34rem; }
-  .vfd__pick { display: grid; gap: 0.875rem; margin-top: 1.75rem; }
-  .vfd__label { margin: 0; font-size: 0.9375rem; color: var(--h-soft); }
-  .vfd__label b { font-weight: 600; color: var(--h-ink); }
-  .vfd__glass { display: block; margin-top: 0.125rem; font-size: 0.8125rem; color: var(--h-muted); }
-  .vfd__skins { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
-  .vfd__skin { display: block; width: 3.75rem; aspect-ratio: 7 / 15; padding: 0; border: 0.125rem solid transparent; border-radius: 0; background: var(--h-wall); overflow: hidden; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; cursor: pointer; transition: border-color 200ms var(--ease-out); }
-  .vfd__skin img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .vfd__skin:hover { border-color: var(--color-slate-400); }
-  .vfd__skin[aria-pressed='true'] { border-color: var(--h-signal); outline-color: transparent; }
-  .vfd__skin:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
-
-  /* Телефон: серии и миниатюры — одной строкой вбок, а не четыре строки пилюль */
-  @media (max-width: 43.6875rem) {
-    .vfd__series, .vfd__skins {
-      flex-wrap: nowrap;
-      margin-inline: calc(-1 * var(--h-pad));
-      padding-inline: var(--h-pad);
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-padding-inline: var(--h-pad);
-      scrollbar-width: none;
-    }
-    .vfd__series::-webkit-scrollbar, .vfd__skins::-webkit-scrollbar { display: none; }
-    .vfd__series > *, .vfd__skins > li { flex: none; }
-  }
-
-  .vfd__price { margin: 1.75rem 0 0; font-size: clamp(1.75rem, 1rem + 2.4vw, 2.25rem); font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--h-ink); }
-  .vfd__note { margin: 0.5rem 0 0; max-width: 32rem; font-size: 0.9375rem; line-height: 1.45; color: var(--h-soft); }
-  .vfd__ask { margin-top: 1.25rem; }
-
-  /* Характеристики и комплектация — свёрнуты под кнопками */
-  .vfd__info > .vfd__more:first-of-type { margin-top: clamp(1.75rem, 3vw, 2.5rem); }
-  .vfd__more { border-top: 0.0625rem solid var(--h-rule); }
-  .vfd__more:last-child { border-bottom: 0.0625rem solid var(--h-rule); }
-  .vfd__more > summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.125rem 0; font-size: 1.1875rem; font-weight: 600; color: var(--h-ink); list-style: none; cursor: pointer; }
-  .vfd__more > summary::-webkit-details-marker { display: none; }
-  .vfd__more > summary::after { content: '+'; font-size: 1.5rem; font-weight: 300; line-height: 1; }
-  .vfd__more[open] > summary::after { content: '\2212'; }
-  .vfd__more > summary:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: -0.1875rem; border-radius: 0.375rem; }
-  .vfd__spec { margin: 0 0 1.25rem; }
-  .vfd__row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 1rem; padding: 0.75rem 0; border-top: 0.0625rem solid var(--h-rule); }
-  .vfd__row dt { color: var(--h-muted); }
-  .vfd__row dd { margin: 0; color: var(--h-ink); }
-  @media (max-width: 43.6875rem) { .vfd__row { grid-template-columns: 1fr; gap: 0.25rem; } }
-  .vfd__hw { margin: 0 0 1.25rem; padding: 0; list-style: none; }
-  .vfd__hw li { padding: 0.625rem 0; border-top: 0.0625rem solid var(--h-rule); color: var(--h-ink); }
-
-  @media (prefers-reduced-motion: reduce) {
-    .vfd__thumb, .vfd__skin, .vfd .vfd__frame img { transition: none; }
+    .vfd-sec__layout { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .vfd-sec__head { grid-column: 1 / span 3; }
+    .vfd-sec__rail { grid-column: 4 / span 9; }
   }
 </style>

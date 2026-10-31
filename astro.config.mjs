@@ -270,8 +270,8 @@ export default defineConfig({
         if (/\/catalog\/(plintus|stenovye-paneli|dekorativnye-reyki|vhodnye-dveri)\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.WEEKLY, priority: 0.8 }
         }
-        // Модели входных дверей — src/pages/catalog/vhodnye-dveri/[id].astro
-        if (/\/catalog\/vhodnye-dveri\/[a-z0-9-]+\/?$/.test(u)) {
+        // Модели входных дверей — src/pages/catalog/vhodnye-dveri/[id].astro и vfd/[id].astro
+        if (/\/catalog\/vhodnye-dveri\/(vfd\/)?[a-z0-9-]+\/?$/.test(u)) {
           return { ...item, changefreq: ChangeFreqEnum.MONTHLY, priority: 0.7 }
         }
         // Стилевые SEO-лендинги — см. src/data/style-categories.ts.

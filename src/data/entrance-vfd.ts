@@ -15,6 +15,7 @@
  */
 import { rub } from './services'
 import { SITE } from '../config/site'
+import { TITLE_MAX, DESCRIPTION_MAX, fitPhrase } from '../lib/product-text'
 import { pluralRu } from '../lib/plural'
 
 export interface VfdSkin {
@@ -463,8 +464,8 @@ export const VIEW_LABEL = { outside: 'Снаружи', render: 'В интерь�
 
 export const VFD_SECTION = {
   id: 'vfd-doors',
-  title: 'Входные двери VFD со сменными панелями (накладками) под межкомнатные двери VFD',
-  lead: 'Модель двери и накладку изнутри выбирают отдельно. Часть накладок повторяет цвет и рисунок межкомнатных дверей VFD, поэтому входная дверь сочетается с дверями в квартире.',
+  title: 'Входные двери VFD со сменными панелями (накладками)',
+  lead: 'Накладку изнутри выбирают отдельно от модели. Часть накладок повторяет цвет и рисунок межкомнатных дверей VFD, поэтому входная дверь сочетается с дверями в квартире. Откройте модель и выберите панель.',
   meta: `${modelsText}, ${skinsText}, ${fromText(VFD_MIN_PRICE)}`,
   panelTitle: 'Накладка изнутри',
   priceNote: 'Цена «от» — дверь с выбранной накладкой. Точную сумму с учётом размера, комплектации и монтажа подтвердит менеджер.',
@@ -493,4 +494,22 @@ export const vfdAlt = {
   outside: (m: VfdModel) => `${vfdTitle(m)}, вид снаружи — ${SITE.studioName}`,
   render: (m: VfdModel) => `${vfdTitle(m)} в интерьере, визуализация — ${SITE.studioName}`,
   inside: (m: VfdModel, s: VfdSkin) => `${vfdTitle(m)}, накладка ${skinLabel(s)}, вид изнутри — ${SITE.studioName}`,
+}
+
+/* ---------- Страница модели ---------- */
+
+export const vfdHref = (m: VfdModel) => `/catalog/vhodnye-dveri/vfd/${m.id}/`
+
+/** Основа <title> (без «| Студия Зизевского»): части добавляются, пока влезают */
+export function vfdPageTitle(m: VfdModel): string {
+  const budget = TITLE_MAX - ` | ${SITE.studioName}`.length
+  return fitPhrase(vfdTitle(m), [['с накладками', ' '], ['в Москве', ' '], [`— ${fromText(modelFrom(m))}`, ' ']], budget)
+}
+
+/** <meta description> модели: что за дверь, число накладок, цена «от» */
+export function vfdDescription(m: VfdModel): string {
+  const n = optionsOf(m).length
+  const head = `${vfdTitle(m)} со сменными накладками изнутри`
+  const panels = n > 1 ? `${n} ${pluralRu(n, ['вариант', 'варианта', 'вариантов'])} цвета и рисунка` : 'накладка в цвет межкомнатных дверей'
+  return fitPhrase(head, [[panels, ': '], [`цена ${fromText(modelFrom(m))}`, ', '], ['ТЦ «Компас», Москва', '. ']], DESCRIPTION_MAX)
 }

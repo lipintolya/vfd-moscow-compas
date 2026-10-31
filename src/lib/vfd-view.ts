@@ -3,7 +3,7 @@
    накладки) — вид до и после выбора не расходится. Состояние — модель, накладка, вид двери.
    Классы — BEM «vfd__*», стили — в VfdDoors.astro. Тексты экранируются: в данных бывают «&», кавычки. */
 import {
-  VFD_MODELS, VFD_SECTION, PURPOSE_LABEL, skinLabel, optionsOf, fromText, modelFrom, vfdAlt, vfdAsk,
+  VFD_MODELS, VFD_SECTION, skinLabel, optionsOf, fromText, vfdAlt, vfdAsk,
   type VfdModel, type VfdSkin, type VfdOption,
 } from '../data/entrance-vfd'
 import { outsideOf, renderOf, skinImage, type VfdImage } from './entrance-vfd'
@@ -27,10 +27,9 @@ export function settle(model: string, skin: string, view: VfdView): VfdState {
   return { model, skin: keep.skin.id, view }
 }
 
-export function initialState(): VfdState {
-  // первая карточка ленты — она на виду и выбрана
-  const first = VFD_MODELS[0]!
-  return settle(first.id, optionsOf(first)[0]!.skin.id, 'outside')
+/** Первый показ страницы модели: дверь снаружи, первая накладка списка */
+export function initialState(modelId: string): VfdState {
+  return settle(modelId, optionsOf(modelOf(modelId))[0]!.skin.id, 'outside')
 }
 
 export const optionOf = (s: VfdState): VfdOption => optionsOf(modelOf(s.model)).find((o) => o.skin.id === s.skin)!
@@ -45,22 +44,6 @@ export function stageImage(s: VfdState): VfdImage & { alt: string; sizes: string
   if (s.view === 'render') return { ...renderOf(m.id), alt: vfdAlt.render(m), sizes: STAGE_SIZES }
   if (s.view === 'inside') return { ...skinImage(s.skin), alt: vfdAlt.inside(m, optionOf(s).skin), sizes: STAGE_SIZES }
   return { ...outsideOf(m.id), alt: vfdAlt.outside(m), sizes: STAGE_SIZES }
-}
-
-/* ---------- Лента моделей ---------- */
-
-/** Название модели из двух слов («КомфортТермо») при нехватке места переносится по слову, а не посреди слова */
-const breakable = (name: string) => esc(name).replace(/([а-яё])([А-ЯЁ])/g, '$1<wbr>$2')
-
-export function modelButtonHtml(m: VfdModel, pressed: boolean): string {
-  const img = outsideOf(m.id)
-  return `<button type="button" class="vfd__model" data-model="${m.id}" aria-pressed="${pressed}">` +
-    `<span class="vfd__thumb"><img src="${img.src}" srcset="${img.srcset}" sizes="(min-width: 43.75rem) 14.5rem, 9rem" alt="" role="presentation" width="${img.width}" height="${img.height}" loading="lazy" decoding="async">` +
-    (m.hit ? '<span class="h-status h-meta h-status--photo vfd__status" data-status="new">Хит</span>' : '') + '</span>' +
-    `<span class="vfd__mname">${breakable(m.name)}</span>` +
-    `<span class="vfd__mkind">${PURPOSE_LABEL[m.purpose]}</span>` +
-    `<span class="vfd__mprice">${fromText(modelFrom(m))}</span>` +
-    '</button>'
 }
 
 /* ---------- Правая колонка: название, накладка, цена ---------- */
@@ -81,7 +64,7 @@ export function headHtml(s: VfdState): string {
     ? `<ul class="vfd__skins" role="list">` + inSeries.map((o) => skinThumb(o.skin, o.skin.id === cur.skin.id)).join('') + '</ul>'
     : ''
 
-  return `<h3 class="vfd__name">${esc(m.name)}</h3>` +
+  return `<h1 class="vfd__name">${esc(m.name)}</h1>` +
     `<p class="h-body vfd__tagline">${esc(m.tagline)}</p>` +
     `<div class="vfd__pick"><p class="vfd__label">${esc(VFD_SECTION.panelTitle)}: <b>${esc(skinLabel(cur.skin))}</b>` +
     (cur.skin.glass ? `<span class="vfd__glass">стекло — ${esc(cur.skin.glass)}</span>` : '') + '</p>' +

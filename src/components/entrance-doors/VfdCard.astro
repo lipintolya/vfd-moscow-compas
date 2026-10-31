@@ -1,0 +1,53 @@
+---
+/**
+ * Карточка входной двери VFD в ленте на /catalog/vhodnye-dveri/ и в «Других моделях»
+ * на странице модели: дверь снаружи, число накладок, название, для квартиры или дома
+ * и цена «от». Вся карточка — ссылка на страницу модели (растянутая ссылка на названии),
+ * как у DoorCard; накладку выбирают уже на странице модели.
+ */
+import { PURPOSE_LABEL, fromText, modelFrom, optionsOf, vfdHref, type VfdModel } from '../../data/entrance-vfd'
+import { outsideOf } from '../../lib/entrance-vfd'
+import { pluralRu } from '../../lib/plural'
+import { typograph } from '../../lib/typograph'
+
+interface Props { model: VfdModel }
+const { model } = Astro.props
+const img = outsideOf(model.id)
+const n = optionsOf(model).length
+---
+
+<article class="vcard">
+  <div class="h-media vcard__photo">
+    <img src={img.src} srcset={img.srcset} sizes="(min-width: 62.5rem) 14.5rem, (min-width: 43.75rem) 28vw, 45vw" alt={`Входная дверь VFD ${model.name}, вид снаружи`} width={img.width} height={img.height} loading="lazy" decoding="async" />
+    {model.hit && <span class="h-status h-meta h-status--photo vcard__hit" data-status="new">Хит</span>}
+    {n > 1 && <span class="vcard__count">{n} {pluralRu(n, ['накладка', 'накладки', 'накладок'])}</span>}
+  </div>
+  <h3 class="vcard__name"><a class="vcard__link" href={vfdHref(model)}>{typograph(model.name)}</a></h3>
+  <p class="vcard__kind">{PURPOSE_LABEL[model.purpose]}</p>
+  <p class="vcard__price">{fromText(modelFrom(model))}</p>
+</article>
+
+<style>
+  .vcard { position: relative; display: grid; gap: 0.25rem; align-content: start; }
+  .vcard__photo { position: relative; aspect-ratio: 500 / 977; border-radius: 0; }
+  .vcard__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .vcard__hit { position: absolute; left: 0.5rem; top: 0.5rem; }
+  .vcard__count {
+    position: absolute; left: 0.625rem; bottom: 0.625rem;
+    padding: 0.25rem 0.625rem; border-radius: 999rem;
+    background: color-mix(in srgb, var(--color-white) 92%, transparent); color: var(--h-ink);
+    font-size: 0.75rem; font-weight: 600; line-height: 1.3;
+  }
+  .vcard__name { margin: 0.625rem 0 0; font-size: 1.125rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); overflow-wrap: break-word; }
+  .vcard__link { color: inherit; text-decoration: none; }
+  .vcard__link::after { content: ''; position: absolute; inset: 0; }
+  .vcard:hover .vcard__link { text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.15em; }
+  .vcard__link:focus-visible { outline: none; }
+  .vcard:has(.vcard__link:focus-visible) .vcard__photo { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  .vcard__kind { margin: 0; font-size: 0.875rem; line-height: 1.35; color: var(--h-soft); }
+  .vcard__price { margin: 0.375rem 0 0; font-size: 1.1875rem; font-weight: 600; line-height: 1.2; color: var(--h-ink); font-variant-numeric: tabular-nums; }
+  @media (max-width: 43.6875rem) {
+    .vcard__name { font-size: 1rem; }
+    .vcard__count { font-size: 0.6875rem; padding: 0.1875rem 0.5rem; left: 0.5rem; bottom: 0.5rem; }
+  }
+</style>

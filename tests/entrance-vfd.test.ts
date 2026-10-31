@@ -2,11 +2,13 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
 import {
-  VFD_MODELS, VFD_SKINS, VFD_SECTION, VFD_FAQ, VFD_MIN_PRICE, optionsOf, modelFrom, skinLabel, fromText, vfdAsk,
+  VFD_MODELS, VFD_SKINS, VFD_SECTION, VFD_FAQ, VFD_MIN_PRICE, optionsOf, modelFrom, skinLabel, fromText, vfdAsk, vfdPageTitle, vfdDescription, vfdHref,
 } from '../src/data/entrance-vfd'
 import { outsideOf, renderOf, skinImage } from '../src/lib/entrance-vfd'
-import { initialState, settle, headHtml, modelButtonHtml, stageImage, askText, specsHtml, hardwareHtml, optionOf } from '../src/lib/vfd-view'
+import { initialState, settle, headHtml, stageImage, askText, specsHtml, hardwareHtml, optionOf } from '../src/lib/vfd-view'
 
+import { TITLE_MAX, DESCRIPTION_MAX } from '../src/lib/product-text'
+import { brandTitle } from '../src/lib/seo-title'
 const BRAND = /лабиринт|labirint/i
 // на сайт не должны попасть следы чужого города и сайта-источника
 const FOREIGN = /челябинск|vfd74/i
@@ -59,7 +61,9 @@ test('входные двери VFD: тексты без названия зав
     assert.doesNotMatch(t, FOREIGN, t)
     assert.doesNotMatch(t, /по запросу|undefined|NaN|\[object/, t)
   }
-  assert.match(VFD_SECTION.title, /VFD.*накладк.*межкомнатные двери VFD/)
+  // название не перегружено: «VFD» один раз
+  assert.equal((VFD_SECTION.title.match(/VFD/g) ?? []).length, 1)
+  assert.match(VFD_SECTION.title, /накладк/)
 })
 
 test('входные двери VFD: подпись блока и цифры считаются из данных', () => {
@@ -70,7 +74,7 @@ test('входные двери VFD: подпись блока и цифры с�
 })
 
 test('входные двери VFD: выбор — накладка сохраняется при смене модели, иначе первая; сообщение менеджеру с моделью, накладкой и ценой', () => {
-  const start = initialState()
+  const start = initialState('balancetwin')
   assert.equal(start.view, 'outside')
   const other = VFD_MODELS.find((m) => m.id !== start.model)!
   const kept = settle(other.id, start.skin, 'inside')
@@ -90,11 +94,10 @@ test('входные двери VFD: выбор — накладка сохра�
 })
 
 test('входные двери VFD: разметка выбора — все модели в ленте, накладки текущей серии, экранирование', () => {
-  const s = initialState()
+  const s = initialState('optima')
   const head = headHtml(s)
   assert.ok(head.includes(`aria-pressed="true"`))
   for (const m of VFD_MODELS) {
-    assert.ok(modelButtonHtml(m, false).includes(`data-model="${m.id}"`))
     assert.ok(specsHtml(m).includes('vfd__row') && hardwareHtml(m).includes('<li>'))
     for (const view of ['outside', 'render', 'inside'] as const) {
       const first = optionsOf(m)[0]!
@@ -104,4 +107,16 @@ test('входные двери VFD: разметка выбора — все м
   }
   // данные не должны открывать теги: всё, что выводится в разметку, экранировано
   assert.equal(head.includes('<script'), false)
+})
+
+test('входные двери VFD: у каждой модели своя страница — адрес, заголовок и описание в лимитах поисковика, без повторов', () => {
+  const titles = VFD_MODELS.map((m) => brandTitle(vfdPageTitle(m)))
+  for (const [i, m] of VFD_MODELS.entries()) {
+    assert.match(vfdHref(m), /^\/catalog\/vhodnye-dveri\/vfd\/[a-z0-9-]+\/$/)
+    assert.ok(titles[i]!.length <= TITLE_MAX, `${titles[i]!.length}: ${titles[i]}`)
+    assert.ok(vfdDescription(m).length <= DESCRIPTION_MAX && vfdDescription(m).includes(m.name), vfdDescription(m))
+    assert.doesNotMatch(vfdDescription(m), FOREIGN)
+  }
+  assert.equal(new Set(titles).size, titles.length, 'повтор заголовков')
+  assert.equal(new Set(VFD_MODELS.map(vfdHref)).size, VFD_MODELS.length)
 })

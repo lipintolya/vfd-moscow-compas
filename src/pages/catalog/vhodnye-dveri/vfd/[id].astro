@@ -1,0 +1,93 @@
+---
+/**
+ * Страница модели входной двери VFD (/catalog/vhodnye-dveri/vfd/<id>/): сцена с дверью
+ * (снаружи, в интерьере, изнутри с выбранной накладкой) и выбор накладки — серия, цвет,
+ * цена «от», Telegram и MAX с готовым текстом; ниже другие модели VFD и вопросы.
+ * Данные — src/data/entrance-vfd.ts.
+ */
+import BaseLayout from '../../../../layouts/BaseLayout.astro'
+import { brandTitle } from '../../../../lib/seo-title'
+import Breadcrumbs from '../../../../components/ui/Breadcrumbs.astro'
+import FaqAccordion from '../../../../components/ui/FaqAccordion.astro'
+import VfdConfigurator from '../../../../components/entrance-doors/VfdConfigurator.astro'
+import VfdCard from '../../../../components/entrance-doors/VfdCard.astro'
+import { VFD_MODELS, VFD_FAQ, VFD_SECTION, vfdTitle, vfdPageTitle, vfdDescription, vfdHref, optionsOf } from '../../../../data/entrance-vfd'
+import type { VfdModel } from '../../../../data/entrance-vfd'
+import { renderOf, outsideOf } from '../../../../lib/entrance-vfd'
+import { productSchema } from '../../../../lib/product-schema'
+import { localBusinessSchema } from '../../../../lib/local-business-schema'
+import { SITE } from '../../../../config/site'
+import '../../../../styles/home.css'
+
+export function getStaticPaths() {
+  return VFD_MODELS.map((model) => ({ params: { id: model.id }, props: { model } }))
+}
+interface Props { model: VfdModel }
+const { model } = Astro.props
+
+const og = renderOf(model.id)
+const description = vfdDescription(model)
+/* Другие модели — по кругу, чтобы у каждой были ссылки */
+const at = VFD_MODELS.findIndex((m) => m.id === model.id)
+const others = [1, 2, 3, 4].map((n) => VFD_MODELS[(at + n) % VFD_MODELS.length]!).filter((m, i, a) => m.id !== model.id && a.indexOf(m) === i)
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: VFD_FAQ.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+}
+---
+
+<BaseLayout
+  title={brandTitle(vfdPageTitle(model))}
+  description={description}
+  canonical={new URL(vfdHref(model), SITE.url).href}
+  ogImage={og.src}
+  ogImageMeta={{ width: og.width, height: og.height, alt: `${vfdTitle(model)} в интерьере, визуализация — ${SITE.studioName}` }}
+  structuredData={[
+    localBusinessSchema({ url: SITE.url }),
+    productSchema({ name: vfdTitle(model), description: model.description, image: outsideOf(model.id).src, prices: optionsOf(model).map((o) => o.price) }),
+    faqSchema,
+  ]}
+>
+  <div class="breadcrumb-bar">
+    <div class="container">
+      <Breadcrumbs items={[
+        { label: 'Главная', href: '/' },
+        { label: 'Каталог', href: '/catalog/' },
+        { label: 'Входные двери', href: '/catalog/vhodnye-dveri/' },
+        { label: 'Входные двери VFD', href: `/catalog/vhodnye-dveri/#${VFD_SECTION.id}` },
+        { label: model.name },
+      ]} />
+    </div>
+  </div>
+
+  <div class="home">
+    <VfdConfigurator model={model} />
+
+    {others.length > 0 && (
+      <section class="h-sec h-sec--wall" aria-labelledby="vfd-others">
+        <div class="container">
+          <h2 id="vfd-others" class="h-h2 vfd-others__title">Другие входные двери VFD</h2>
+          <ul class="vfd-others" role="list">
+            {others.map((m) => <li><VfdCard model={m} /></li>)}
+          </ul>
+          <p class="vfd-others__all"><a class="h-btn h-btn--quiet" href={`/catalog/vhodnye-dveri/#${VFD_SECTION.id}`}>Все входные двери VFD</a></p>
+        </div>
+      </section>
+    )}
+
+    <section class="h-sec" aria-labelledby="vfd-faq-title">
+      <div class="container h-faq">
+        <h2 id="vfd-faq-title" class="h-h2">Частые вопросы</h2>
+        <FaqAccordion items={VFD_FAQ} title={false} />
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .vfd-others__title { margin: 0; }
+  .vfd-others { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 0.75rem; margin: clamp(1.5rem, 3vw, 2rem) 0 0; padding: 0; list-style: none; }
+  @media (min-width: 62.5rem) { .vfd-others { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.25rem var(--h-gutter); } }
+  .vfd-others__all { margin: 2rem 0 0; }
+</style>

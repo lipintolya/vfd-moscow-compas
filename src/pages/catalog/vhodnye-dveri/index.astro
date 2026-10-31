@@ -6,8 +6,8 @@
  * группам — для квартиры, с терморазрывом, с электронным замком, со
  * стеклопакетом: слева название и пояснение группы, справа лента моделей
  * (листается пальцем или стрелками), «Показать все» раскрывает ленту в сетку;
- * после групп — входные двери VFD со сменными накладками (VfdDoors: выбор модели и
- * накладки, цены «от»); дальше — рендеры «на площадке» и «на фасаде дома» (лента кадров со ссылками на
+ * после групп — входные двери VFD со сменными накладками (VfdDoors: лента моделей, накладку
+ * выбирают на странице модели, цены «от»); дальше — рендеры «на площадке» и «на фасаде дома» (лента кадров со ссылками на
  * модели) и путеводитель по выбору. Ориентир подачи — каталог направлений
  * volhovec.ru (воздух, лента карточек). Карточка — дверь в рост, число
  * вариантов отделки и цена «от». У каждой модели своя страница ([id].astro).
@@ -27,9 +27,7 @@ import RailBar from '../../../components/ui/RailBar.astro'
 import SceneCard from '../../../components/entrance-doors/SceneCard.astro'
 import VfdDoors from '../../../components/entrance-doors/VfdDoors.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
-import { VFD_MODELS, VFD_FAQ, optionsOf, vfdTitle } from '../../../data/entrance-vfd'
-import { outsideOf } from '../../../lib/entrance-vfd'
-import { productSchema } from '../../../lib/product-schema'
+import { VFD_FAQ } from '../../../data/entrance-vfd'
 import { ENTRANCE_HOUSES } from '../../../data/entrance-scenes'
 import { COVER_SCENE, HOUSE_SCENES } from '../../../lib/entrance-scenes'
 import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, fromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
@@ -60,8 +58,6 @@ const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: 
 const total = ENTRANCE_DOORS.length
 const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/vhodnye-dveri/' })
 const faq = [...ENTRANCE_FAQ, ...VFD_FAQ, ...GUIDE_FAQ]
-/* Входные двери VFD с накладками: Product с ценами всех пар «модель + накладка» */
-const vfdSchemas = VFD_MODELS.map((m) => productSchema({ name: vfdTitle(m), description: m.description, image: outsideOf(m.id).src, prices: optionsOf(m).map((o) => o.price) }))
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -82,7 +78,7 @@ const listSchema = {
   description={ENTRANCE_PAGE.description}
   ogImage={cover.src}
   ogImageMeta={{ width: cover.width, height: cover.height, alt: cover.alt }}
-  structuredData={[localBusinessSchema({ url: SITE.url }), listSchema, ...vfdSchemas, faqSchema]}
+  structuredData={[localBusinessSchema({ url: SITE.url }), listSchema, faqSchema]}
 >
   <div class="breadcrumb-bar">
     <div class="container">
