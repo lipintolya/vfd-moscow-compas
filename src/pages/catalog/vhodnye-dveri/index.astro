@@ -2,7 +2,7 @@
 /**
  * Каталог входных дверей (/catalog/vhodnye-dveri/): первый экран — сцена с
  * рендером двери на доме (обложка, src/data/entrance-scenes.ts), заголовок и
- * кнопки слева на затемнении; лента плиток-групп и модели по
+ * кнопки слева на затемнении; модели по
  * группам — для квартиры, с терморазрывом, с электронным замком, со
  * стеклопакетом: слева название и пояснение группы, справа лента моделей
  * (листается пальцем или стрелками), «Показать все» раскрывает ленту в сетку;
@@ -26,7 +26,7 @@ import SceneCard from '../../../components/entrance-doors/SceneCard.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
 import { ENTRANCE_HOUSES } from '../../../data/entrance-scenes'
 import { COVER_SCENE, HOUSE_SCENES } from '../../../lib/entrance-scenes'
-import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, groupCover, fromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
+import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, fromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
 import { rub } from '../../../data/services'
@@ -50,7 +50,7 @@ const fitStyle = [
   spot && `--wx: ${pct(spot.x)}; --wy: ${pct(spot.y)}`,
   spotPhone && `--px: ${pct(spotPhone.x)}; --py: ${pct(spotPhone.y)}`,
 ].filter(Boolean).join('; ')
-const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id), photo: groupCover(g.id) })).filter((g) => g.doors.length)
+const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
 const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/vhodnye-dveri/' })
 const faq = [...ENTRANCE_FAQ, ...GUIDE_FAQ]
@@ -115,35 +115,6 @@ const listSchema = {
         </div>
       </div>
     </section>
-
-    <nav class="edn" aria-label="Группы входных дверей">
-      <div class="container">
-        <div class="rail" data-rail>
-          <ul class="rail__track edn__track" data-track role="list">
-            {groups.map((g) => (
-              <li>
-                <a class="edn__tile" href={`#doors-${g.id}`}>
-                  <span class="edn__text">
-                    <span class="edn__name">{typograph(g.nav)}</span>
-                    <span class="edn__meta">{g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}<br />от&nbsp;{rub(g.from)}</span>
-                  </span>
-                  <span class="edn__img" style={`--ar: 500 / ${g.photo.height}; --iw: ${(g.photo.width / g.photo.split) * 100}%`}>
-                    <img src={g.photo.src} srcset={g.photo.srcset} sizes="(min-width: 75rem) 14rem, 12rem" alt="" role="presentation" width={g.photo.width} height={g.photo.height} loading="lazy" decoding="async" />
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ul>
-          <div class="rail__bar" data-bar>
-            <span class="rail__line"><i></i></span>
-            <span class="rail__btns">
-              <button type="button" class="rail__btn" data-prev aria-label="Назад"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-              <button type="button" class="rail__btn" data-next aria-label="Дальше"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            </span>
-          </div>
-        </div>
-      </div>
-    </nav>
 
     <div id="doors-pick" class="edcat">
     {groups.map((g, gi) => (
@@ -408,22 +379,6 @@ const listSchema = {
   .ehs { --scene-h: min(15rem, 56vw); display: flex; --rail-gap: 1rem; }
   .ehs > li { flex: none; width: calc(var(--scene-h) * var(--ar)); }
   @media (min-width: 43.75rem) { .ehs { --scene-h: clamp(15rem, 24vw, 21rem); --rail-gap: 1.5rem; } }
-
-  /* Плитки групп — главный экран страницы: на графите крупно название и дверь в рост,
-     дверь стоит на нижней кромке плитки */
-  .edn { padding-bottom: clamp(1.5rem, 4vw, 3rem); }
-  .edn__track { --rail-col: min(17rem, 78vw); --rail-gap: 1rem; }
-  .edn__tile { display: flex; flex-direction: column; height: 100%; padding: clamp(1.25rem, 2vw, 1.75rem) clamp(1.25rem, 2vw, 1.75rem) 0; border-radius: var(--h-tile-radius); background: var(--color-graphite); color: var(--color-white); text-decoration: none; overflow: hidden; }
-  .edn__text { display: grid; gap: 0.5rem; margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
-  .edn__name { font-size: clamp(1.3125rem, 0.6vw + 1.0625rem, 1.5rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
-  .edn__meta { font-size: 0.9375rem; line-height: 1.4; color: color-mix(in srgb, var(--color-white) 72%, transparent); }
-  .edn__img { display: block; width: 74%; margin: auto auto 0; aspect-ratio: var(--ar, 5 / 8); overflow: hidden; }
-  .edn__img img { display: block; width: var(--iw, 200%); max-width: none; height: 100%; object-fit: fill; }
-  .edn__tile:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
-  @media (min-width: 75rem) {
-    /* Четыре плитки умещаются в ряд — лента не нужна */
-    .edn__track { grid-auto-columns: minmax(0, 1fr); }
-  }
 
   /* Группы: слева название и пояснение, справа лента моделей; на телефоне — друг под другом */
   .edg-sec[hidden], .edg-sec li[hidden] { display: none !important; }

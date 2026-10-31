@@ -4,7 +4,7 @@
  * фото-плитка (система .h-tile, как у направлений) с рендером двери на
  * доме, справа по одной модели из каждой группы каталога (DoorCard — та же
  * карточка, что в /catalog/vhodnye-dveri/) и ссылка на весь раздел.
- * Модели — DOOR_GROUPS[].cover: новая группа появится сама. Тексты — ENTRANCE_HOME_TILE
+ * Модели — groupDoor(): по DOOR_GROUPS[].cover, новая группа появится сама. Тексты — ENTRANCE_HOME_TILE
  * (src/data/entrance-doors.ts), фото — HOME_SCENE (src/data/entrance-scenes.ts).
  *
  * Компьютер: плитка 4 колонки + 4 карточки в ряд (8 колонок). Планшет: плитка
@@ -12,15 +12,11 @@
  * карточек вбок.
  */
 import DoorCard from '../entrance-doors/DoorCard.astro'
-import { DOOR_GROUPS, doorById, ENTRANCE_HOME_TILE } from '../../data/entrance-doors'
+import { DOOR_GROUPS, groupDoor, ENTRANCE_HOME_TILE } from '../../data/entrance-doors'
 import { HOME_SCENE } from '../../lib/entrance-scenes'
 import { typograph } from '../../lib/typograph'
 
-const doors = DOOR_GROUPS.map((g) => {
-  const d = doorById(g.cover)
-  if (!d) throw new Error(`Главная: в каталоге входных дверей нет модели «${g.cover}» (DOOR_GROUPS[].cover)`)
-  return d
-})
+const doors = DOOR_GROUPS.map((g) => groupDoor(g.id))
 const photo = HOME_SCENE
 ---
 

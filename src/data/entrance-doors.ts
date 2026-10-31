@@ -137,7 +137,7 @@ export const ENTRANCE_DOORS: EntranceDoor[] = (catalog as Raw[]).map(build)
 export const fromPrice = (d: EntranceDoor) => `от${'\u00a0'}${rub(d.from)}`
 export const ENTRANCE_MIN_PRICE = Math.min(...ENTRANCE_DOORS.map((d) => d.from))
 
-export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: string; /** Модель, чья дверь стоит на плитке группы: светлая или яркая — тёмная на графите не видна */ cover: string }[] = [
+export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: string; /** Модель, которая представляет группу на главной (groupDoor) */ cover: string }[] = [
   {
     id: 'flat',
     nav: 'Для квартиры',
@@ -168,12 +168,12 @@ export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: s
   },
 ]
 
-/** Дверь на плитке группы: фото обложки выбранной модели группы */
-export const groupCover = (id: DoorGroupId) => {
+/** Модель, которая представляет группу (превью на главной): должна быть из этой группы */
+export const groupDoor = (id: DoorGroupId) => {
   const g = DOOR_GROUPS.find((x) => x.id === id)!
   const d = doorById(g.cover)
-  if (!d || d.group !== id) throw new Error(`Входные двери: модель «${g.cover}» для плитки группы «${id}» не найдена в этой группе`)
-  return d.cover
+  if (!d || d.group !== id) throw new Error(`Входные двери: модель «${g.cover}» для группы «${id}» не найдена в этой группе`)
+  return d
 }
 
 /** Модели группы — от дешёвых к дорогим */
