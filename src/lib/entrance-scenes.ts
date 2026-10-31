@@ -13,12 +13,13 @@ export interface SceneImage extends RenderImage {
   door: EntranceDoor
   /** Отношение сторон числом — для ширины кадра в ленте при общей высоте */
   ratio: number
+  spot?: { x: number; y: number }
 }
 
 function imageOf(s: DoorScene): SceneImage {
   const r = renderOf({ slot: s.slot, alt: sceneAlt(s) })
   if (!r) throw new Error(`Рендеры «на доме»: нет файла для «${s.slot}» — положите assets/entrance-renders/${s.slot}.webp и выполните npm run gen:entrance-renders`)
-  return { ...r, slot: s.slot, door: sceneDoor(s), ratio: r.width / r.height }
+  return { ...r, slot: s.slot, door: sceneDoor(s), ratio: r.width / r.height, spot: s.spot }
 }
 
 const all = DOOR_SCENES.map(imageOf)

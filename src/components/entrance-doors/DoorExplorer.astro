@@ -1,63 +1,78 @@
 ---
 /**
- * «На что смотреть при выборе»: схема двери (SVG, наша графика) с точками на
- * узлах и список критериев рядом. Узел или строка — открывает критерий: что
- * это, и что выбрать в квартиру и в частный дом; на схеме подсвечиваются
- * нужные части. Тексты, части и точки — src/data/entrance-guide.ts
+ * «На что смотреть при выборе»: настоящая дверь из каталога (фото модели
+ * GUIDE.explorerDoor) с точками на узлах и список критериев рядом. Узел или
+ * строка — открывает критерий: что это, и что выбрать в квартиру и в
+ * частный дом; на фото подсвечиваются нужные части (контуры нарисованы под
+ * этот кадр, SHAPE_FRAME — его размер: другой кадр — другие контуры, сборка
+ * не даст перепутать). Тексты, части и точки — src/data/entrance-guide.ts
  * (GUIDE_CRITERIA); подписи размеров — из каталога. Без скрипта все
  * критерии раскрыты и читаются списком; со скриптом открыт один.
- *
- * Схему можно заменить рендером разреза (guide-anatomy) — точки задаются
- * в процентах рисунка.
  */
 import { GUIDE, GUIDE_CRITERIA, LEVEL_LABEL } from '../../data/entrance-guide'
+import { doorById } from '../../data/entrance-doors'
 import { typograph } from '../../lib/typograph'
 
 const FIRST = GUIDE_CRITERIA.find((c) => c.key === 'thermo') ?? GUIDE_CRITERIA[0]!
 const PLACES = [['flat', 'Квартира'], ['house', 'Частный дом']] as const
+
+const door = doorById(GUIDE.explorerDoor)
+if (!door) throw new Error(`«На что смотреть»: в каталоге нет модели «${GUIDE.explorerDoor}» (GUIDE.explorerDoor)`)
+const photo = door.cover
+/* Контуры подсветки заданы в пикселях кадра 503×977 (Версаль, вид снаружи) */
+const SHAPE_FRAME = { width: 503, height: 977 }
+if (photo.width !== SHAPE_FRAME.width || photo.height !== SHAPE_FRAME.height) {
+  throw new Error(`«На что смотреть»: фото «${door.id}» ${photo.width}×${photo.height}, а контуры подсветки нарисованы под ${SHAPE_FRAME.width}×${SHAPE_FRAME.height} — перерисуйте их в DoorExplorer.astro`)
+}
 ---
 
 <div class="dx" data-explorer data-active={FIRST.key} data-parts={FIRST.parts.join(' ')}>
   <div class="dx__fig">
-    <div class="dx__stage">
-      <svg class="dx__svg" viewBox="0 0 320 600" aria-hidden="true" focusable="false">
-        <!-- Короб и порог -->
-        <rect class="d-frame" x="40" y="20" width="240" height="508" rx="3" />
-        <rect class="d-open" x="62" y="42" width="196" height="486" />
-        <rect class="d-threshold" x="40" y="528" width="240" height="12" rx="1.5" />
-        <!-- Контуры уплотнения -->
-        <rect class="d-seal" x="66" y="46" width="188" height="478" rx="2" />
-        <!-- Полотно -->
-        <rect class="d-leaf" x="72" y="52" width="176" height="468" rx="2" />
-        <line class="d-edge" x1="248" y1="52" x2="248" y2="520" />
+    <div class="dx__stage" style={`aspect-ratio: ${photo.width} / ${photo.height}`}>
+      <img class="dx__photo" src={photo.src} srcset={photo.srcset} sizes="(min-width: 62.5rem) 19rem, 17rem" alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
+      <svg class="dx__svg" viewBox={`0 0 ${photo.width} ${photo.height}`} aria-hidden="true" focusable="false">
+        <!-- Короб: левая и правая стойки и перемычка -->
+        <g class="dp-frame">
+          <rect x="1" y="1" width="33" height="975" />
+          <rect x="1" y="1" width="501" height="30" />
+          <rect x="469" y="1" width="33" height="975" />
+        </g>
+        <!-- Полотно и контур уплотнения -->
+        <rect class="dp-leaf" x="36" y="32" width="432" height="944" />
+        <rect class="dp-seal" x="41" y="36" width="422" height="936" rx="3" />
+        <line class="dp-edge" x1="467" y1="32" x2="467" y2="976" />
         <!-- Филёнки -->
-        <g class="d-panels d-finish">
-          <rect x="92" y="74" width="120" height="120" rx="2" />
-          <rect x="92" y="210" width="120" height="84" rx="2" />
-          <rect x="92" y="310" width="120" height="140" rx="2" />
+        <g class="dp-panels">
+          <rect x="126" y="122" width="256" height="378" rx="4" />
+          <rect x="126" y="570" width="256" height="80" rx="4" />
+          <rect x="126" y="700" width="256" height="276" rx="4" />
         </g>
         <!-- Замки и ручка -->
-        <g class="d-locks">
-          <rect x="222" y="330" width="18" height="26" rx="9" />
-          <rect x="222" y="380" width="18" height="26" rx="3" />
-          <line x1="222" y1="368" x2="190" y2="368" />
+        <g class="dp-locks">
+          <rect x="54" y="346" width="52" height="58" rx="26" />
+          <rect x="54" y="494" width="98" height="104" rx="22" />
         </g>
         <!-- Петли -->
-        <g class="d-hinges">
-          <rect x="64" y="96" width="10" height="22" rx="2" />
-          <rect x="64" y="276" width="10" height="22" rx="2" />
-          <rect x="64" y="456" width="10" height="22" rx="2" />
+        <g class="dp-hinges">
+          <rect x="466" y="56" width="30" height="72" rx="4" />
+          <rect x="466" y="196" width="30" height="72" rx="4" />
+          <rect x="466" y="888" width="30" height="76" rx="4" />
         </g>
-        <!-- Размеры по каталогу -->
-        <g class="d-dims">
-          <line x1="40" y1="574" x2="280" y2="574" />
-          <line x1="40" y1="568" x2="40" y2="580" />
-          <line x1="280" y1="568" x2="280" y2="580" />
-          <text x="160" y="590" text-anchor="middle">{GUIDE.doorWidth} мм</text>
-          <line x1="304" y1="20" x2="304" y2="540" />
-          <line x1="298" y1="20" x2="310" y2="20" />
-          <line x1="298" y1="540" x2="310" y2="540" />
-          <text x="0" y="0" text-anchor="middle" transform="translate(318 280) rotate(90)">{GUIDE.doorHeight} мм</text>
+        <rect class="dp-threshold" x="36" y="954" width="432" height="22" />
+        <!-- Размеры по каталогу: линии поверх фото, подписи на белых плашках -->
+        <g class="dp-dims">
+          <line x1="36" y1="889" x2="468" y2="889" />
+          <line x1="36" y1="877" x2="36" y2="901" />
+          <line x1="468" y1="877" x2="468" y2="901" />
+          <rect class="dp-pill" x="156" y="867" width="192" height="44" rx="22" />
+          <text x="252" y="897" text-anchor="middle">{GUIDE.doorWidth} мм</text>
+          <line x1="443" y1="36" x2="443" y2="972" />
+          <line x1="431" y1="36" x2="455" y2="36" />
+          <line x1="431" y1="972" x2="455" y2="972" />
+          <g transform="translate(443 442) rotate(90)">
+            <rect class="dp-pill" x="-96" y="-22" width="192" height="44" rx="22" />
+            <text x="0" y="10" text-anchor="middle">{GUIDE.doorHeight} мм</text>
+          </g>
         </g>
       </svg>
       {GUIDE_CRITERIA.flatMap((c) => c.spots.map(([x, y], i) => (
@@ -88,7 +103,7 @@ const PLACES = [['flat', 'Квартира'], ['house', 'Частный дом']
                 </div>
               ))}
             </div>
-            <button type="button" class="dx__show" data-show>Показать на схеме</button>
+            <button type="button" class="dx__show" data-show>Показать на двери</button>
           </div>
         </div>
       </li>
@@ -115,12 +130,12 @@ const PLACES = [['flat', 'Квартира'], ['house', 'Частный дом']
         r.querySelector('.dx__btn')!.setAttribute('aria-expanded', String(open))
       }
       for (const s of spots) s.setAttribute('aria-pressed', String(s.dataset.spot === key))
-      /* Нажали на схему на телефоне — список ниже схемы: подводим его к экрану */
+      /* Нажали на дверь на телефоне — список ниже фото: подводим его к экрану */
       if (fromSpot && narrow()) row.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
     }
     for (const r of rows) r.querySelector('.dx__btn')!.addEventListener('click', () => select(r.dataset.crit!, false))
     for (const s of spots) s.addEventListener('click', () => select(s.dataset.spot!, true))
-    /* Телефон: схема стоит над списком — кнопка в разборе возвращает к ней */
+    /* Телефон: фото стоит над списком — кнопка в разборе возвращает к ней */
     for (const b of root.querySelectorAll<HTMLButtonElement>('[data-show]')) {
       b.addEventListener('click', () => root.querySelector('.dx__fig')!.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }))
     }
@@ -134,38 +149,27 @@ const PLACES = [['flat', 'Квартира'], ['house', 'Частный дом']
     .dx__fig { position: sticky; top: calc(var(--header-height) + 1.5rem); }
   }
 
-  /* Схема: белая дверь на серой подложке, точки — кнопки поверх рисунка */
+  /* Фото двери на серой подложке; контуры подсветки и точки-кнопки лежат поверх кадра */
   .dx__fig { display: grid; place-items: center; padding: clamp(1rem, 3vw, 2rem); border-radius: var(--h-tile-radius); background: var(--h-wall); }
-  .dx__stage { position: relative; width: min(100%, 17rem); aspect-ratio: 320 / 600; }
+  .dx__stage { position: relative; width: min(100%, 17rem); }
   @media (min-width: 62.5rem) { .dx__stage { width: min(100%, 19rem); } }
-  .dx__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .dx__svg * { transition: stroke 250ms var(--ease-out), fill 250ms var(--ease-out), stroke-width 250ms var(--ease-out); }
-  .dx__svg { --line: var(--color-slate-900); --hot: var(--h-signal); fill: none; stroke: var(--line); stroke-width: 1.5; stroke-linecap: round; }
-  .d-frame { fill: var(--color-white); stroke-width: 2; }
-  .d-open { fill: var(--color-slate-100); }
-  .d-leaf { fill: var(--color-white); stroke-width: 2; }
-  .d-seal { stroke-dasharray: 4 4; stroke: var(--color-slate-500); }
-  .d-edge { stroke: var(--line); stroke-width: 2; }
-  .d-panels rect { stroke: var(--color-slate-400); fill: var(--color-slate-100); }
-  .d-locks rect { fill: var(--color-white); }
-  .d-locks line { stroke-width: 4; }
-  .d-hinges rect { fill: var(--color-slate-900); }
-  .d-threshold { fill: var(--color-slate-900); }
-  .d-dims line { stroke: var(--color-slate-400); stroke-width: 1; }
-  .d-dims text { fill: var(--color-slate-500); stroke: none; font-size: 13px; font-family: var(--h-font); font-variant-numeric: tabular-nums; }
-
-  /* Подсветка выбранного узла — акцентным красным сайта */
-  .dx[data-parts~='frame'] .d-frame, .dx[data-parts~='leaf'] .d-leaf, .dx[data-parts~='edge'] .d-edge,
-  .dx[data-parts~='seal'] .d-seal, .dx[data-parts~='locks'] .d-locks rect, .dx[data-parts~='locks'] .d-locks line,
-  .dx[data-parts~='dims'] .d-dims line { stroke: var(--hot); stroke-width: 3; }
-  .dx[data-parts~='seal'] .d-seal { stroke-dasharray: none; }
-  .dx[data-parts~='edge'] .d-edge { stroke-width: 5; }
-  .dx[data-parts~='dims'] .d-dims line { stroke-width: 2; }
-  .dx[data-parts~='dims'] .d-dims text { fill: var(--hot); }
-  .dx[data-parts~='hinges'] .d-hinges rect, .dx[data-parts~='threshold'] .d-threshold { fill: var(--hot); stroke: var(--hot); }
-  .dx[data-parts~='panels'] .d-panels rect { fill: color-mix(in srgb, var(--hot) 14%, white); stroke: var(--hot); }
-  .dx[data-parts~='finish'] .d-panels rect { stroke: var(--hot); }
-  .dx[data-parts~='frame'] .d-open { fill: color-mix(in srgb, var(--hot) 8%, white); }
+  .dx__photo { display: block; width: 100%; height: 100%; }
+  .dx__svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; --hot: var(--h-signal); fill: none; stroke: var(--hot); stroke-width: 3; stroke-linecap: round; }
+  .dx__svg * { vector-effect: non-scaling-stroke; }
+  /* Контуры скрыты; выбранный узел проявляет свои части */
+  .dp-frame, .dp-leaf, .dp-seal, .dp-edge, .dp-panels, .dp-locks, .dp-hinges, .dp-threshold, .dp-dims { opacity: 0; transition: opacity 250ms var(--ease-out); }
+  .dp-frame rect, .dp-leaf, .dp-panels rect, .dp-locks rect, .dp-hinges rect, .dp-threshold { fill: color-mix(in srgb, var(--hot) 16%, transparent); }
+  .dp-seal { stroke-dasharray: 7 6; }
+  .dp-edge { stroke-width: 6; }
+  .dp-dims line { stroke-width: 2; }
+  .dp-pill { fill: var(--color-white); stroke: none; }
+  .dp-dims text { fill: var(--h-ink); stroke: none; font-size: 26px; font-weight: 600; font-family: var(--h-font); font-variant-numeric: tabular-nums; vector-effect: none; }
+  .dx[data-parts~='frame'] .dp-frame, .dx[data-parts~='leaf'] .dp-leaf, .dx[data-parts~='seal'] .dp-seal, .dx[data-parts~='edge'] .dp-edge,
+  .dx[data-parts~='panels'] .dp-panels, .dx[data-parts~='finish'] .dp-panels, .dx[data-parts~='locks'] .dp-locks,
+  .dx[data-parts~='hinges'] .dp-hinges, .dx[data-parts~='threshold'] .dp-threshold, .dx[data-parts~='dims'] .dp-dims { opacity: 1; }
+  /* «Отделка» — только контур филёнок, «звук» — с заливкой */
+  .dx[data-parts~='finish'] .dp-panels rect { fill: none; }
+  .dx[data-parts~='finish'][data-parts~='panels'] .dp-panels rect { fill: color-mix(in srgb, var(--hot) 16%, transparent); }
 
   .dx__spot {
     position: absolute;

@@ -40,6 +40,18 @@ import '../../../styles/home.css'
 const cover = COVER_SCENE
 const coverPhone = cover.crops?.square
 const PHONE_MEDIA = '(max-width: 47.9375rem)'
+/* Точка на двери: на широком экране — как в рендере, на телефоне — пересчёт в квадратную обрезку.
+   Рамка .edh__fit повторяет object-fit: cover в CSS (контейнерные единицы), поэтому точка стоит на двери при любом размере */
+const spot = cover.spot
+const spotPhone = spot && coverPhone ? { x: (spot.x - coverPhone.x) / coverPhone.w, y: spot.y } : spot
+const coverGroup = DOOR_GROUPS.find((g) => g.id === cover.door.group)!
+const pct = (n: number) => `${(n * 100).toFixed(2)}%`
+const fitStyle = [
+  `--ar-wide: ${(cover.width / cover.height).toFixed(4)}`,
+  `--ar-phone: ${coverPhone ? (coverPhone.width / coverPhone.height).toFixed(4) : (cover.width / cover.height).toFixed(4)}`,
+  spot && `--wx: ${pct(spot.x)}; --wy: ${pct(spot.y)}`,
+  spotPhone && `--px: ${pct(spotPhone.x)}; --py: ${pct(spotPhone.y)}`,
+].filter(Boolean).join('; ')
 const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: groupFromPrice(g.id), photo: groupCover(g.id) })).filter((g) => g.doors.length)
 const total = ENTRANCE_DOORS.length
 const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/vhodnye-dveri/' })
@@ -77,11 +89,22 @@ const listSchema = {
       <div class="container">
         <div class="edh__scene">
           <div class="edh__media">
-            <picture>
-              {coverPhone && <source media={PHONE_MEDIA} srcset={coverPhone.srcset} sizes="calc(100vw - 2rem)" width={coverPhone.width} height={coverPhone.height} />}
-              <img class="edh__img" src={cover.src} srcset={cover.srcset} sizes="(min-width: 80rem) 76rem, 100vw" alt={cover.alt} width={cover.width} height={cover.height} loading="eager" fetchpriority="high" decoding="async" />
-            </picture>
-            <a class="edh__tag" href={cover.door.href}>На фото: {typograph(cover.door.name)}, {fromPrice(cover.door)}</a>
+            <div class="edh__fit" style={fitStyle}>
+              <picture>
+                {coverPhone && <source media={PHONE_MEDIA} srcset={coverPhone.srcset} sizes="calc(100vw - 2rem)" width={coverPhone.width} height={coverPhone.height} />}
+                <img class="edh__img" src={cover.src} srcset={cover.srcset} sizes="(min-width: 80rem) 76rem, 100vw" alt={cover.alt} width={cover.width} height={cover.height} loading="eager" fetchpriority="high" decoding="async" />
+              </picture>
+              {spot && (
+                <div class="edh__spot" data-hero-spot>
+                  <button type="button" class="edh__dot" aria-expanded="false" aria-controls="edh-pop" aria-label={`На фото: ${cover.door.name}. Показать цену`}></button>
+                  <a id="edh-pop" class="edh__pop" href={cover.door.href}>
+                    <strong>{typograph(cover.door.name)}</strong>
+                    <span>{typograph(coverGroup.nav)}</span>
+                    <b>{fromPrice(cover.door)}</b>
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
           <div class="edh__copy">
             <h1 id="doors-title" class="h-h1 edh__title">{typograph(ENTRANCE_PAGE.h1)}</h1>
@@ -164,8 +187,8 @@ const listSchema = {
             <p class="h-lead">{typograph(ENTRANCE_HOUSES.lead)}</p>
           </header>
           <div class="rail" data-rail>
-            <ul class="rail__track ehs" data-track role="list">
-              {HOUSE_SCENES.map((scene) => <li style={`--ar: ${scene.ratio.toFixed(4)}`}><SceneCard scene={scene} /></li>)}
+            <ul class="rail__track ehs" data-track role="list" data-lightbox data-lightbox-images={JSON.stringify(HOUSE_SCENES.map((x) => ({ src: x.src, alt: x.alt })))}>
+              {HOUSE_SCENES.map((scene, i) => <li style={`--ar: ${scene.ratio.toFixed(4)}`}><SceneCard scene={scene} index={i} /></li>)}
             </ul>
             <div class="rail__bar" data-bar>
               <span class="rail__line"><i></i></span>
@@ -206,6 +229,9 @@ const listSchema = {
 </BaseLayout>
 
 <script>
+  import { initLightboxGroups } from '../../../lib/lightbox'
+  initLightboxGroups()
+
   /* «Подберём за минуту» ведёт к нужной группе моделей */
   document.addEventListener('doors:filter', (e) => {
     const group = (e as CustomEvent<{ group: string }>).detail.group
@@ -218,6 +244,41 @@ const listSchema = {
       btn.closest('section')!.classList.add('is-open')
       btn.closest('.edg__more')!.remove()
     })
+  }
+
+  /* Точка на двери первого экрана: нажатие открывает и закрывает карточку (на телефоне наведения нет) */
+  for (const spot of document.querySelectorAll<HTMLElement>('[data-hero-spot]')) {
+    const dot = spot.querySelector<HTMLButtonElement>('.edh__dot')!
+    const set = (open: boolean) => {
+      spot.toggleAttribute('data-open', open)
+      dot.setAttribute('aria-expanded', String(open))
+    }
+    dot.addEventListener('click', () => set(!spot.hasAttribute('data-open')))
+    document.addEventListener('click', (e) => { if (!spot.contains(e.target as Node)) set(false) })
+    spot.addEventListener('keydown', (e) => { if (e.key === 'Escape') { set(false); dot.focus() } })
+  }
+
+  /* Появление карточек: пока карточка вне экрана — прозрачна и чуть ниже; вошла — встаёт на место */
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue
+        e.target.classList.remove('is-pre')
+        io.unobserve(e.target)
+      }
+    }, { rootMargin: '0px 0px -8% 0px' })
+    for (const track of document.querySelectorAll<HTMLElement>('[data-track]')) {
+      let n = 0
+      for (const li of track.querySelectorAll<HTMLElement>(':scope > li')) {
+        li.classList.add('rv')
+        li.style.setProperty('--rv-d', `${Math.min(n++, 5) * 70}ms`)
+        // уже на экране — остаётся как есть, без мигания
+        const r = li.getBoundingClientRect()
+        if (r.width && r.top < innerHeight && r.bottom > 0 && r.left < innerWidth && r.right > 0) continue
+        li.classList.add('is-pre')
+        io.observe(li)
+      }
+    }
   }
 
   /* Ленты: полоска прогресса, стрелки на компьютере; на телефоне листается пальцем */
@@ -251,10 +312,54 @@ const listSchema = {
      на графите — дверь ничем не закрыта */
   .edh { padding: clamp(0.5rem, 2vw, 1.25rem) 0 clamp(1.5rem, 3vw, 2.25rem); }
   .edh__scene { position: relative; display: grid; border-radius: 1.75rem; overflow: hidden; background: var(--color-graphite); isolation: isolate; }
-  .edh__media { position: relative; aspect-ratio: 1; }
+  .edh__media { position: relative; aspect-ratio: 1; container-type: size; }
   .edh__media::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--color-graphite) 0%, transparent 28%); pointer-events: none; }
-  .edh__img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; color: transparent; }
+  /* Рамка по пропорции кадра: покрывает сцену, как object-fit: cover (ox/oy — object-position); картинка и точка лежат в ней */
+  .edh__fit {
+    --ar: var(--ar-phone); --ox: 0.5; --oy: 0.5; --sx: var(--px); --sy: var(--py);
+    --w: max(100cqw, calc(100cqh * var(--ar)));
+    position: absolute;
+    width: var(--w);
+    height: calc(var(--w) / var(--ar));
+    left: calc((100cqw - var(--w)) * var(--ox));
+    top: calc((100cqh - var(--w) / var(--ar)) * var(--oy));
+  }
+  .edh__img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; color: transparent; }
   .edh__media picture { display: contents; }
+
+  /* Точка на двери: по наведению, фокусу или нажатию — карточка с моделью и ценой */
+  .edh__spot { position: absolute; z-index: 1; left: var(--sx); top: var(--sy); width: 0; height: 0; }
+  .edh__dot {
+    position: absolute; left: -1.375rem; top: -1.375rem;
+    display: grid; place-items: center;
+    width: 2.75rem; height: 2.75rem; padding: 0; border: 0; border-radius: 50%;
+    background: color-mix(in srgb, var(--color-white) 32%, transparent);
+    backdrop-filter: blur(0.25rem);
+    cursor: pointer;
+    transition: transform 250ms var(--ease-out), background-color 250ms var(--ease-out);
+  }
+  .edh__dot::before { content: ''; width: 1rem; height: 1rem; border-radius: 50%; background: var(--color-white); box-shadow: 0 0.125rem 0.5rem color-mix(in srgb, var(--color-slate-950) 35%, transparent); }
+  .edh__dot:focus-visible { outline: 0.1875rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
+  .edh__spot:hover .edh__dot, .edh__spot[data-open] .edh__dot { transform: scale(1.12); background: color-mix(in srgb, var(--color-white) 45%, transparent); }
+  .edh__pop {
+    position: absolute; left: 0; bottom: 1.875rem; z-index: 1;
+    display: grid; justify-items: center; gap: 0.125rem;
+    width: max-content; min-width: 10.5rem; max-width: calc(100vw - 3rem);
+    padding: 0.875rem 1.25rem; border-radius: 1rem;
+    background: var(--color-white); color: var(--h-ink); text-align: center; text-decoration: none;
+    box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--color-slate-950) 28%, transparent);
+    opacity: 0; visibility: hidden; transform: translate(-50%, 0.375rem);
+    transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out), visibility 0s linear 200ms;
+  }
+  /* Мостик между точкой и карточкой, чтобы наведение не терялось в зазоре */
+  .edh__pop::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: 0.75rem; }
+  .edh__pop strong { font-size: 1.0625rem; font-weight: 700; line-height: 1.25; }
+  .edh__pop span { font-size: 0.875rem; line-height: 1.35; color: var(--h-soft); }
+  .edh__pop b { margin-top: 0.125rem; font-size: 1.0625rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .edh__pop:hover strong { text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.15em; }
+  .edh__pop:focus-visible { outline: 0.1875rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
+  .edh__spot[data-open] .edh__pop, .edh__spot:focus-within .edh__pop { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
+  @media (hover: hover) { .edh__spot:hover .edh__pop { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; } }
   .edh__copy { display: grid; justify-items: start; padding: 0 clamp(1.25rem, 4vw, 1.75rem) clamp(1.5rem, 4vw, 2rem); color: var(--color-white); }
   .edh__title { color: var(--color-white); }
   .edh__lead { margin: 1rem 0 0; max-width: 28rem; color: color-mix(in srgb, var(--color-white) 82%, transparent); }
@@ -265,32 +370,12 @@ const listSchema = {
   @media (max-width: 43.6875rem) { .edh__actions { width: 100%; } }
   /* 320 px: «Входные двери» помещаются в строку */
   @media (max-width: 23.4375rem) { .edh__title { font-size: 2rem; } }
-  .edh__tag {
-    position: absolute;
-    z-index: 1;
-    left: 0.75rem;
-    bottom: 0.75rem;
-    max-width: calc(100% - 1.5rem);
-    padding: 0.5rem 0.875rem;
-    border-radius: 999rem;
-    background: color-mix(in srgb, var(--color-white) 90%, transparent);
-    backdrop-filter: blur(0.5rem);
-    color: var(--h-ink);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    line-height: 1.3;
-    text-decoration: none;
-    transition: background-color 180ms var(--ease-out);
-  }
-  .edh__tag:hover { background: var(--color-white); text-decoration: underline; text-decoration-color: var(--h-signal); text-underline-offset: 0.2em; }
-  .edh__tag:focus-visible { outline: 0.1875rem solid var(--color-secondary-500); outline-offset: 0.125rem; }
   @media (min-width: 48rem) {
     .edh__scene { display: flex; flex-direction: column; justify-content: center; min-height: clamp(30rem, 44vw, 40rem); }
     .edh__media { position: absolute; inset: 0; z-index: -2; aspect-ratio: auto; }
     .edh__media::after { background: linear-gradient(100deg, color-mix(in srgb, var(--color-slate-950) 74%, transparent) 0%, color-mix(in srgb, var(--color-slate-950) 46%, transparent) 38%, transparent 62%); }
-    .edh__img { object-position: 50% 55%; }
+    .edh__fit { --ar: var(--ar-wide); --oy: 0.55; --sx: var(--wx); --sy: var(--wy); }
     .edh__copy { max-width: min(36rem, 58%); padding: clamp(2rem, 4vw, 3.5rem); }
-    .edh__tag { left: auto; right: clamp(0.75rem, 2vw, 1.25rem); bottom: clamp(0.75rem, 2vw, 1.25rem); }
   }
 
   /* Ленты (плитки групп и модели): листаются пальцем, на компьютере — стрелками; полоска показывает место */
@@ -324,6 +409,11 @@ const listSchema = {
   .rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   @media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: flex; } }
 
+  /* Карточки появляются при прокрутке: снизу и из прозрачности, внутри ленты — друг за другом.
+     Класс ставит скрипт и только тем, кого ещё нет на экране: без скрипта и при reduced-motion всё видно сразу */
+  .rv { transition: opacity 600ms var(--ease-out) var(--rv-d, 0ms), transform 600ms var(--ease-out) var(--rv-d, 0ms); }
+  .rv.is-pre { opacity: 0; transform: translateY(1rem); }
+
   /* Лента «на фасаде дома»: кадры целиком, без обрезки — у всех одна высота, ширина по пропорции кадра */
   .ehs { --scene-h: min(15rem, 56vw); display: flex; --rail-gap: 1rem; }
   .ehs > li { flex: none; width: calc(var(--scene-h) * var(--ar)); }
@@ -337,9 +427,8 @@ const listSchema = {
   .edn__text { display: grid; gap: 0.5rem; margin-bottom: clamp(1.5rem, 3vw, 2.25rem); }
   .edn__name { font-size: clamp(1.3125rem, 0.6vw + 1.0625rem, 1.5rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
   .edn__meta { font-size: 0.9375rem; line-height: 1.4; color: color-mix(in srgb, var(--color-white) 72%, transparent); }
-  .edn__img { display: block; width: 74%; margin: auto auto 0; aspect-ratio: var(--ar, 5 / 8); overflow: hidden; transition: transform 300ms var(--ease-out); }
+  .edn__img { display: block; width: 74%; margin: auto auto 0; aspect-ratio: var(--ar, 5 / 8); overflow: hidden; }
   .edn__img img { display: block; width: var(--iw, 200%); max-width: none; height: 100%; object-fit: fill; }
-  .edn__tile:hover .edn__img { transform: translateY(-0.5rem); }
   .edn__tile:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   @media (min-width: 75rem) {
     /* Четыре плитки умещаются в ряд — лента не нужна */

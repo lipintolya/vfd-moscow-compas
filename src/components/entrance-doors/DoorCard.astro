@@ -31,7 +31,7 @@ const n = door.variants.length
   .dcard { position: relative; display: grid; gap: 0.25rem; align-content: start; }
   /* Половина кадра: слева дверь снаружи, справа изнутри. Рамка по размерам самого
      фото (--ar) — дверь видна в полную высоту, ничего не срезается */
-  .dcard__photo { position: relative; aspect-ratio: var(--ar, 5 / 8); border-radius: 0; }
+  .dcard__photo { position: relative; aspect-ratio: var(--ar, 5 / 8); border-radius: 0 }
   /* Ширину карточки задаёт лента на странице: на компьютере 14,5 rem — дверь по высоте как у межкомнатных */
   .dcard__photo img {
     width: var(--iw, 200%);

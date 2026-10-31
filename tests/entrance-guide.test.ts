@@ -35,7 +35,7 @@ test('путеводитель: у каждого критерия — суть,
       assert.ok(v.note.length > 20, c.title)
     }
   }
-  // схема: у каждого критерия — уникальный ключ, части схемы и хотя бы одна точка внутри рисунка
+  // фото двери: у каждого критерия — уникальный ключ, части для подсветки и хотя бы одна точка внутри кадра
   const keys = GUIDE_CRITERIA.map((c) => c.key)
   assert.equal(new Set(keys).size, keys.length)
   const known = ['leaf', 'edge', 'frame', 'seal', 'locks', 'hinges', 'finish', 'threshold', 'dims', 'panels']
@@ -62,6 +62,10 @@ test('подбор: для каждой пары вопросов есть гр�
   assert.equal(pickResult('house', 'calm').group, 'thermo')
   assert.equal(pickResult('flat', 'calm').group, 'flat')
   assert.equal(pickResult('flat', 'smart').group, 'smart')
+})
+
+test('путеводитель: фото двери для «На что смотреть» есть в каталоге', () => {
+  assert.ok(ENTRANCE_DOORS.some((d) => d.id === GUIDE.explorerDoor), GUIDE.explorerDoor)
 })
 
 test('путеводитель: стеклопакет везде 81 мм и порог в комплекте у уличных дверей', () => {

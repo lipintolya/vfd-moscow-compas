@@ -72,7 +72,8 @@ for (const f of sources) {
       console.log(`${file}: ${(out.length / 1024).toFixed(0)}KB`)
     }
     const cbig = cropWidths.at(-1)
-    data[slot].crops = { ...data[slot].crops, [name]: { widths: cropWidths, width: cbig, height: Math.round((ch * cbig) / cw) } }
+    // x и w — где обрезка лежит в рендере (доли ширины): страница по ним пересчитывает точку на двери
+    data[slot].crops = { ...data[slot].crops, [name]: { widths: cropWidths, width: cbig, height: Math.round((ch * cbig) / cw), x: +(left / meta.width).toFixed(5), w: +(cw / meta.width).toFixed(5) } }
   }
 }
 
