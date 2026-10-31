@@ -8,6 +8,7 @@ import '../styles/home.css'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
 import ShowroomHero from '../components/home/ShowroomHero.astro'
 import Directions from '../components/home/Directions.astro'
+import EntrancePreview from '../components/home/EntrancePreview.astro'
 import Videos from '../components/home/Videos.astro'
 import Spotlight from '../components/home/Spotlight.astro'
 import InSalon from '../components/home/InSalon.astro'
@@ -73,6 +74,7 @@ const localBusinessSchema = buildLocalBusiness()
   <div class="home">
     <ShowroomHero />
     <Directions />
+    <EntrancePreview />
     <Videos />
     <InSalon cards={catalogCards} />
     <OurWorks />

@@ -29,6 +29,11 @@ const covers = DOOR_SCENES.filter((s) => s.cover)
 if (covers.length !== 1) throw new Error(`Рендеры «на доме»: обложка должна быть одна, сейчас ${covers.length} (cover: true в src/data/entrance-scenes.ts)`)
 export const COVER_SCENE: SceneImage = all.find((s) => s.slot === covers[0]!.slot)!
 
+/** Фото плитки «Входные двери» на главной */
+const homes = DOOR_SCENES.filter((s) => s.home)
+if (homes.length !== 1) throw new Error(`Рендеры «на доме»: фото для главной должно быть одно, сейчас ${homes.length} (home: true в src/data/entrance-scenes.ts)`)
+export const HOME_SCENE: SceneImage = all.find((s) => s.slot === homes[0]!.slot)!
+
 /** Все кадры модели, в порядке объявления */
 export const scenesOfDoor = (id: string): SceneImage[] => all.filter((s) => s.door.id === id)
 

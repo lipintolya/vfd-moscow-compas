@@ -16,6 +16,7 @@ import images from './entrance-doors-images.json'
 import { SITE } from '../config/site'
 import { rub } from './services'
 import { TITLE_MAX, DESCRIPTION_MAX, fitPhrase } from '../lib/product-text'
+import { pluralRu } from '../lib/plural'
 
 /** Сколько вариантов отделки у модели показано (скрипт выгрузки берёт до стольких) */
 export const VARIANTS_SHOWN = 8
@@ -198,6 +199,14 @@ export const ENTRANCE_PAGE = {
   hero: ENTRANCE_SHOWCASE[0]!.cover,
   /** Диапазон стали по каталогу: «1,5–1,8 мм» */
   steelRange: `${Math.min(...steels)}–${Math.max(...steels)}`.replace(/\./g, ','),
+}
+
+/** Плитка «Входные двери» на главной (EntrancePreview): тексты; цену и число моделей берёт из каталога */
+export const ENTRANCE_HOME_TILE = {
+  title: 'Входные двери',
+  text: `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])} для квартиры и частного дома: с терморазрывом, электронным замком и стеклопакетом`,
+  chip: 'для квартиры и дома',
+  all: `Все ${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}`,
 }
 
 export const ENTRANCE_FAQ = [
