@@ -15,7 +15,7 @@ const { door } = scene
 ---
 
 <article class="scard">
-  <button type="button" class="h-media scard__photo" style={`aspect-ratio: ${scene.width} / ${scene.height}`} data-lightbox-index={index} aria-label={`Открыть крупно: ${scene.alt}`}>
+  <button type="button" class="h-media scard__photo" style={`aspect-ratio: ${scene.width} / ${scene.height}`} data-lightbox-index={index} aria-label={`Увеличить: ${scene.alt}`}>
     <img src={scene.src} srcset={scene.srcset} sizes="(min-width: 43.75rem) 30rem, 85vw" alt={scene.alt} width={scene.width} height={scene.height} loading="lazy" decoding="async" />
     <span class="scard__zoom" aria-hidden="true">Увеличить</span>
   </button>

@@ -12,12 +12,15 @@ import { ENTRANCE_LOBBY } from '../../data/entrance-guide'
 import { renderOf } from '../../lib/entrance-renders'
 import { typograph } from '../../lib/typograph'
 
+/** tightTop — блок идёт сразу за белой секцией: верхний отступ не удваиваем */
+interface Props { tightTop?: boolean }
+const { tightTop = false } = Astro.props
 const shots = ENTRANCE_LOBBY.visuals.map((v) => renderOf(v)).filter((r) => r !== null)
 const sizes = '(min-width: 62.5rem) 56vw, 100vw'
 ---
 
 {shots.length > 0 && (
-  <section id="showcase" class="h-sec" aria-labelledby="showcase-title">
+  <section id="showcase" class:list={['h-sec', { 'h-sec--tight-top': tightTop }]} aria-labelledby="showcase-title">
     <div class="container esc">
       <div class="esc__text">
         <h2 id="showcase-title" class="h-h2">{typograph(ENTRANCE_LOBBY.title)}</h2>
@@ -39,7 +42,7 @@ const sizes = '(min-width: 62.5rem) 56vw, 100vw'
         >
           {shots.map((r, i) => (
             <li class="esc__slide">
-              <button type="button" class="h-media esc__zoom" data-lightbox-index={i} aria-label={`Открыть крупно: ${r.alt}`}>
+              <button type="button" class="h-media esc__zoom" data-lightbox-index={i} aria-label={`Увеличить: ${r.alt}`}>
                 <img
                   src={r.src} srcset={r.srcset} sizes={sizes} alt={r.alt} width={r.width} height={r.height}
                   loading="lazy" decoding="async"

@@ -144,7 +144,8 @@ const sizes = feature ? '(min-width: 56.25rem) 58vw, 100vw' : compact ? '(min-wi
   }
 
   /* ── Компактная: «Статья по теме» ── */
-  .acard--compact { overflow: hidden; height: auto; border-radius: var(--h-tile-radius); background: var(--h-wall); }
+  /* Серая плитка на белой странице: приглушённый текст темнее обычного — на slate-100 обычный даёт контраст 4,3 при норме 4,5 */
+  .acard--compact { --h-muted: color-mix(in oklab, var(--color-slate-500), var(--color-slate-600) 30%); overflow: hidden; height: auto; border-radius: var(--h-tile-radius); background: var(--h-wall); }
   :global(.h-sec--wall) .acard--compact { background: var(--h-paper); }
   .acard--compact .acard__media { border-radius: 0; }
   .acard--compact .acard__body { padding: clamp(1.25rem, 3vw, 1.75rem); }
