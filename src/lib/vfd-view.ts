@@ -28,7 +28,8 @@ export function settle(model: string, skin: string, view: VfdView): VfdState {
 }
 
 export function initialState(): VfdState {
-  const first = VFD_MODELS.find((m) => m.hit) ?? VFD_MODELS[0]!
+  // первая карточка ленты — она на виду и выбрана
+  const first = VFD_MODELS[0]!
   return settle(first.id, optionsOf(first)[0]!.skin.id, 'outside')
 }
 
@@ -54,7 +55,7 @@ const breakable = (name: string) => esc(name).replace(/([а-яё])([А-ЯЁ])/g,
 export function modelButtonHtml(m: VfdModel, pressed: boolean): string {
   const img = outsideOf(m.id)
   return `<button type="button" class="vfd__model" data-model="${m.id}" aria-pressed="${pressed}">` +
-    `<span class="vfd__thumb"><img src="${img.src}" srcset="${img.srcset}" sizes="8rem" alt="" role="presentation" width="${img.width}" height="${img.height}" loading="lazy" decoding="async">` +
+    `<span class="vfd__thumb"><img src="${img.src}" srcset="${img.srcset}" sizes="(min-width: 43.75rem) 14.5rem, 9rem" alt="" role="presentation" width="${img.width}" height="${img.height}" loading="lazy" decoding="async">` +
     (m.hit ? '<span class="h-status h-meta h-status--photo vfd__status" data-status="new">Хит</span>' : '') + '</span>' +
     `<span class="vfd__mname">${breakable(m.name)}</span>` +
     `<span class="vfd__mkind">${PURPOSE_LABEL[m.purpose]}</span>` +
