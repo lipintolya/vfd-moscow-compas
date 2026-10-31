@@ -497,3 +497,46 @@
   .h-tile:hover .h-arrow { transform: none; }
   .h-tile--photo:hover > img { transform: none; }
 }
+
+/* ── Лента карточек ───────────────────────────────────────
+   Листается пальцем, на компьютере — стрелками; полоска показывает место.
+   Разметка: .rail > ul.rail__track[data-track] + RailBar; скрипт — src/lib/rail.ts.
+   По вертикали лента не прокручивается (overflow-y: hidden): иначе сдвиг
+   карточки на 1 px (появление, фокус) даёт вертикальный «люфт» под пальцем,
+   и страница не прокручивается. */
+.rail { position: relative; }
+.rail__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--rail-col, 14.5rem);
+  gap: var(--rail-gap, 1.5rem);
+  margin: 0 calc(-1 * var(--h-pad));
+  padding: 0 var(--h-pad);
+  scroll-padding-inline: var(--h-pad);
+  list-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.rail__track::-webkit-scrollbar { display: none; }
+.rail__track > li { scroll-snap-align: start; min-width: 0; }
+/* Планшет и компьютер: лента обрезается по краю контейнера, не вылезает за него */
+@media (min-width: 43.75rem) { .rail__track { margin: 0; padding: 0; scroll-padding-inline: 0; } }
+.rail__bar { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.rail[data-static] .rail__bar { display: none; }
+.rail__line { position: relative; flex: 1; height: 0.125rem; background: var(--color-slate-300); }
+.rail__line i { position: absolute; top: 0; bottom: 0; background: var(--h-ink); }
+.rail__btns { display: none; gap: 0.25rem; }
+.rail__btn { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: 999rem; background: none; color: var(--h-ink); cursor: pointer; transition: color 150ms var(--ease-out); }
+.rail__btn:hover:not(:disabled) { color: var(--h-signal); }
+.rail__btn:disabled { color: var(--color-slate-300); cursor: default; }
+.rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+@media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: flex; } }
+
+/* Карточки появляются при прокрутке: снизу и из прозрачности, внутри ленты — друг за другом.
+   Класс ставит скрипт и только тем, кого ещё нет на экране: без скрипта и при reduced-motion всё видно сразу */
+.rv { transition: opacity 600ms var(--ease-out) var(--rv-d, 0ms), transform 600ms var(--ease-out) var(--rv-d, 0ms); }
+.rv.is-pre { opacity: 0; transform: translateY(1rem); }
+

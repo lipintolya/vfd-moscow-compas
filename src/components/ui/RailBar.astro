@@ -1,0 +1,15 @@
+---
+/**
+ * Полоска под лентой карточек: прогресс прокрутки и стрелки (на компьютере).
+ * Пара к .rail / .rail__track в src/styles/home.css; оживляет src/lib/rail.ts —
+ * достаточно, чтобы на странице был скрипт с initRails().
+ */
+---
+
+<div class="rail__bar" data-bar>
+  <span class="rail__line"><i></i></span>
+  <span class="rail__btns">
+    <button type="button" class="rail__btn" data-prev aria-label="Назад"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button type="button" class="rail__btn" data-next aria-label="Дальше"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </span>
+</div>

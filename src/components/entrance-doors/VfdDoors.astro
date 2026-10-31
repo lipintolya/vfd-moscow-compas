@@ -12,6 +12,7 @@
  * комплектация. Без скрипта виден первый показ, выбор не работает.
  */
 import DoorRequest from './DoorRequest.astro'
+import RailBar from '../ui/RailBar.astro'
 import { VFD_MODELS, VFD_SECTION, VIEW_LABEL } from '../../data/entrance-vfd'
 import { initialState, modelOf, headHtml, modelButtonHtml, stageImage, specsHtml, hardwareHtml, askText } from '../../lib/vfd-view'
 import { typograph } from '../../lib/typograph'
@@ -32,9 +33,12 @@ const views = Object.keys(VIEW_LABEL) as (keyof typeof VIEW_LABEL)[]
       </div>
     </header>
 
-    <ul class="vfd__models" role="list">
-      {VFD_MODELS.map((m) => <li set:html={modelButtonHtml(m, m.id === state.model)} />)}
-    </ul>
+    <div class="rail vfd__rail" data-rail>
+      <ul class="rail__track vfd__models" data-track role="list">
+        {VFD_MODELS.map((m) => <li set:html={modelButtonHtml(m, m.id === state.model)} />)}
+      </ul>
+      <RailBar />
+    </div>
 
     <div class="vfd__grid">
       <div class="vfd__stage">
@@ -65,9 +69,11 @@ const views = Object.keys(VIEW_LABEL) as (keyof typeof VIEW_LABEL)[]
 <script>
   import { initialState, settle, optionOf, modelOf, stageImage, headHtml, specsHtml, hardwareHtml, askText, type VfdState, type VfdView } from '../../lib/vfd-view'
   import { optionsOf } from '../../data/entrance-vfd'
+  import { initRails } from '../../lib/rail'
   import { telegramWithText, maxWithText } from '../../lib/messengers'
 
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+  initRails()
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-vfd]')) {
     let state: VfdState = initialState()
@@ -148,31 +154,14 @@ const views = Object.keys(VIEW_LABEL) as (keyof typeof VIEW_LABEL)[]
   .vfd { scroll-margin-top: 1rem; }
   .vfd__meta { margin: 0.75rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
 
-  /* Лента моделей: на компьютере все в ряд, ниже — листается пальцем */
-  .vfd__models {
-    display: flex;
-    gap: 0.875rem;
-    margin: 0 calc(-1 * var(--h-pad)) clamp(1.75rem, 3.5vw, 2.5rem);
-    padding: 0 var(--h-pad);
-    list-style: none;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scroll-padding-inline: var(--h-pad);
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-  }
-  .vfd__models::-webkit-scrollbar { display: none; }
-  .vfd__models > li { flex: none; width: 7.5rem; scroll-snap-align: start; }
-  @media (min-width: 43.75rem) {
-    .vfd__models { margin-inline: 0; padding-inline: 0; scroll-padding-inline: 0; gap: 1.25rem; }
-    .vfd__models > li { width: 8.5rem; }
-  }
-  @media (min-width: 75rem) {
-    .vfd__models { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); overflow: visible; }
-    .vfd__models > li { width: auto; }
-  }
+  /* Лента моделей — общая .rail (home.css): листается пальцем, стрелки и полоска на компьютере;
+     на широком экране все модели в ряд, и полоска не нужна */
+  .vfd__rail { margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem); }
+  .vfd__models { --rail-col: 7.5rem; --rail-gap: 0.875rem; }
+  @media (min-width: 43.75rem) { .vfd__models { --rail-col: 8.5rem; --rail-gap: 1.25rem; } }
+  @media (min-width: 75rem) { .vfd__models { --rail-gap: 1rem; grid-auto-columns: minmax(0, 1fr); } }
   .vfd__model { display: grid; gap: 0.125rem; align-content: start; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-  .vfd__thumb { position: relative; display: block; aspect-ratio: 1 / 2; margin-bottom: 0.625rem; border-radius: 0.75rem; background: var(--h-wall); overflow: hidden; outline: 0.125rem solid transparent; outline-offset: 0.125rem; transition: outline-color 200ms var(--ease-out); }
+  .vfd__thumb { position: relative; display: block; aspect-ratio: 1 / 2; margin-bottom: 0.625rem; border-radius: 0; background: var(--h-wall); overflow: hidden; outline: 0.125rem solid transparent; outline-offset: 0.125rem; transition: outline-color 200ms var(--ease-out); }
   .vfd__thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .vfd__model:hover .vfd__thumb { outline-color: var(--color-slate-300); }
   .vfd__model[aria-pressed='true'] .vfd__thumb { outline-color: var(--h-signal); }
@@ -205,7 +194,7 @@ const views = Object.keys(VIEW_LABEL) as (keyof typeof VIEW_LABEL)[]
   .vfd__label b { font-weight: 600; color: var(--h-ink); }
   .vfd__glass { display: block; margin-top: 0.125rem; font-size: 0.8125rem; color: var(--h-muted); }
   .vfd__skins { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
-  .vfd__skin { display: block; width: 3.75rem; aspect-ratio: 7 / 15; padding: 0; border: 0.125rem solid transparent; border-radius: 0.5rem; background: var(--h-wall); overflow: hidden; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; cursor: pointer; transition: border-color 200ms var(--ease-out); }
+  .vfd__skin { display: block; width: 3.75rem; aspect-ratio: 7 / 15; padding: 0; border: 0.125rem solid transparent; border-radius: 0; background: var(--h-wall); overflow: hidden; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; cursor: pointer; transition: border-color 200ms var(--ease-out); }
   .vfd__skin img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .vfd__skin:hover { border-color: var(--color-slate-400); }
   .vfd__skin[aria-pressed='true'] { border-color: var(--h-signal); outline-color: transparent; }
@@ -218,6 +207,7 @@ const views = Object.keys(VIEW_LABEL) as (keyof typeof VIEW_LABEL)[]
       margin-inline: calc(-1 * var(--h-pad));
       padding-inline: var(--h-pad);
       overflow-x: auto;
+      overflow-y: hidden;
       scroll-padding-inline: var(--h-pad);
       scrollbar-width: none;
     }

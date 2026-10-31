@@ -23,6 +23,7 @@ import EntranceGuide from '../../../components/entrance-doors/EntranceGuide.astr
 import RelatedArticleCard from '../../../components/articles/RelatedArticleCard.astro'
 import { relatedArticle as relatedArticleFor } from '../../../lib/articles'
 import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcase.astro'
+import RailBar from '../../../components/ui/RailBar.astro'
 import SceneCard from '../../../components/entrance-doors/SceneCard.astro'
 import VfdDoors from '../../../components/entrance-doors/VfdDoors.astro'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
@@ -136,13 +137,7 @@ const listSchema = {
             <ul class="rail__track edg__track" data-track role="list">
               {g.doors.map((d) => <li data-door-li><DoorCard door={d} /></li>)}
             </ul>
-            <div class="rail__bar" data-bar>
-              <span class="rail__line"><i></i></span>
-              <span class="rail__btns">
-                <button type="button" class="rail__btn" data-prev aria-label="Назад"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <button type="button" class="rail__btn" data-next aria-label="Дальше"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-              </span>
-            </div>
+            <RailBar />
           </div>
           <p class="edg__more"><button type="button" class="h-btn h-btn--ink h-btn--phone-wide" data-more aria-expanded="false">Показать все {g.doors.length} {pluralRu(g.doors.length, ['модель', 'модели', 'моделей'])}</button></p>
         </div>
@@ -166,13 +161,7 @@ const listSchema = {
             <ul class="rail__track ehs" data-track role="list" data-lightbox data-lightbox-images={JSON.stringify(HOUSE_SCENES.map((x) => ({ src: x.src, alt: x.alt })))}>
               {HOUSE_SCENES.map((scene, i) => <li style={`--ar: ${scene.ratio.toFixed(4)}`}><SceneCard scene={scene} index={i} /></li>)}
             </ul>
-            <div class="rail__bar" data-bar>
-              <span class="rail__line"><i></i></span>
-              <span class="rail__btns">
-                <button type="button" class="rail__btn" data-prev aria-label="Назад"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M13 8H3M7 4 3 8l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-                <button type="button" class="rail__btn" data-next aria-label="Дальше"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-              </span>
-            </div>
+            <RailBar />
           </div>
         </div>
       </section>
@@ -206,6 +195,7 @@ const listSchema = {
 
 <script>
   import { initLightboxGroups } from '../../../lib/lightbox'
+  import { initRails } from '../../../lib/rail'
   initLightboxGroups()
 
   /* «Показать все»: лента раскрывается в сетку, кнопка исчезает */
@@ -251,29 +241,7 @@ const listSchema = {
     }
   }
 
-  /* Ленты: полоска прогресса, стрелки на компьютере; на телефоне листается пальцем */
-  const smooth = () => (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth')
-  for (const rail of document.querySelectorAll<HTMLElement>('[data-rail]')) {
-    const track = rail.querySelector<HTMLElement>('[data-track]')!
-    const thumb = rail.querySelector<HTMLElement>('.rail__line i')!
-    const prev = rail.querySelector<HTMLButtonElement>('[data-prev]')!
-    const next = rail.querySelector<HTMLButtonElement>('[data-next]')!
-    const update = () => {
-      const max = track.scrollWidth - track.clientWidth
-      const share = max > 1 ? track.clientWidth / track.scrollWidth : 1
-      const at = max > 1 ? track.scrollLeft / max : 0
-      thumb.style.width = `${share * 100}%`
-      thumb.style.left = `${at * (1 - share) * 100}%`
-      rail.toggleAttribute('data-static', max <= 1)
-      prev.disabled = track.scrollLeft <= 1
-      next.disabled = track.scrollLeft >= max - 1
-    }
-    track.addEventListener('scroll', update, { passive: true })
-    new ResizeObserver(update).observe(track)
-    prev.addEventListener('click', () => track.scrollBy({ left: -track.clientWidth * 0.85, behavior: smooth() }))
-    next.addEventListener('click', () => track.scrollBy({ left: track.clientWidth * 0.85, behavior: smooth() }))
-    update()
-  }
+  initRails()
 </script>
 
 <style>
@@ -347,42 +315,6 @@ const listSchema = {
     .edh__fit { --ar: var(--ar-wide); --oy: 0.55; --sx: var(--wx); --sy: var(--wy); }
     .edh__copy { max-width: min(36rem, 58%); padding: clamp(2rem, 4vw, 3.5rem); }
   }
-
-  /* Ленты (плитки групп и модели): листаются пальцем, на компьютере — стрелками; полоска показывает место */
-  .rail { position: relative; }
-  .rail__track {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: var(--rail-col, 14.5rem);
-    gap: var(--rail-gap, 1.5rem);
-    margin: 0 calc(-1 * var(--h-pad));
-    padding: 0 var(--h-pad);
-    scroll-padding-inline: var(--h-pad);
-    list-style: none;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-  }
-  .rail__track::-webkit-scrollbar { display: none; }
-  .rail__track > li { scroll-snap-align: start; min-width: 0; }
-  /* Планшет и компьютер: лента обрезается по краю контейнера, не вылезает за него */
-  @media (min-width: 43.75rem) { .rail__track { margin: 0; padding: 0; scroll-padding-inline: 0; } }
-  .rail__bar { display: flex; align-items: center; gap: 1rem; margin-top: 1.5rem; }
-  .rail[data-static] .rail__bar { display: none; }
-  .rail__line { position: relative; flex: 1; height: 0.125rem; background: var(--color-slate-300); }
-  .rail__line i { position: absolute; top: 0; bottom: 0; background: var(--h-ink); }
-  .rail__btns { display: none; gap: 0.25rem; }
-  .rail__btn { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: 999rem; background: none; color: var(--h-ink); cursor: pointer; transition: color 150ms var(--ease-out); }
-  .rail__btn:hover:not(:disabled) { color: var(--h-signal); }
-  .rail__btn:disabled { color: var(--color-slate-300); cursor: default; }
-  .rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
-  @media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: flex; } }
-
-  /* Карточки появляются при прокрутке: снизу и из прозрачности, внутри ленты — друг за другом.
-     Класс ставит скрипт и только тем, кого ещё нет на экране: без скрипта и при reduced-motion всё видно сразу */
-  .rv { transition: opacity 600ms var(--ease-out) var(--rv-d, 0ms), transform 600ms var(--ease-out) var(--rv-d, 0ms); }
-  .rv.is-pre { opacity: 0; transform: translateY(1rem); }
 
   /* Лента «на фасаде дома»: кадры целиком, без обрезки — у всех одна высота, ширина по пропорции кадра */
   .ehs { --scene-h: min(15rem, 56vw); display: flex; --rail-gap: 1rem; }
