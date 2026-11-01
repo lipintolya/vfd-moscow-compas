@@ -12,7 +12,8 @@
  * Первый экран — текст и кадр 3:2 по 6 колонок (кадр ~600 px CSS): рендер
  * 1536 px чёткий и на ретине; во всю ширину (LandingHero) он вышел бы
  * мыльным. Уже 6 колонок текст нельзя — «от производителя» в H1 не влезает.
- * JSON-LD: LocalBusiness, Service (цены — в тексте, без Offer: итог по проекту), FAQPage;
+ * JSON-LD: LocalBusiness, Service (цены — в тексте, без Offer: итог по проекту),
+ * VideoObject (видео с объекта в кадре первого экрана), FAQPage;
  * BreadcrumbList отдают сами хлебные крошки.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
@@ -20,6 +21,7 @@ import { brandTitle } from '../../lib/seo-title'
 import Breadcrumbs from '../../components/ui/Breadcrumbs.astro'
 import SectionNav from '../../components/partitions/SectionNav.astro'
 import PanelFigure from '../../components/wall-panels/PanelFigure.astro'
+import PanelVideo from '../../components/wall-panels/PanelVideo.astro'
 import WorkCard from '../../components/portfolio/WorkCard.astro'
 import Videos from '../../components/home/Videos.astro'
 import StepsRow from '../../components/home/StepsRow.astro'
@@ -32,7 +34,7 @@ import '../../styles/home.css'
 
 import {
   WALL_PANELS_PAGE, PANEL_SECTIONS, PANEL_MATERIALS, PANEL_ROOMS, PANEL_DOORS, PANEL_PRICE,
-  PANEL_STEPS, PANEL_FAQ, PANEL_WORKS_TAG, PANEL_VIDEO_IDS,
+  PANEL_STEPS, PANEL_FAQ, PANEL_WORKS_TAG, PANEL_VIDEO_IDS, PANEL_HERO_VIDEO, PANEL_MIN_PRICE,
 } from '../../data/wall-panels-page'
 import { shownVisual, missingRenders } from '../../lib/wall-panels'
 import { getWorks } from '../../lib/works'
@@ -109,6 +111,16 @@ const structuredData = [
   },
   {
     '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: PANEL_HERO_VIDEO.title,
+    description: PANEL_HERO_VIDEO.description,
+    thumbnailUrl: PANEL_HERO_VIDEO.poster,
+    contentUrl: PANEL_HERO_VIDEO.src,
+    uploadDate: PANEL_HERO_VIDEO.uploadDate,
+    duration: `PT${PANEL_HERO_VIDEO.seconds}S`,
+  },
+  {
+    '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: PANEL_FAQ.map((f) => ({
       '@type': 'Question',
@@ -145,6 +157,9 @@ const structuredData = [
         <div class="wp-hero__text">
           <h1 id="wp-title" class="h-h1">{typograph(page.h1)}</h1>
           <p class="h-lead wp-hero__lead">{typograph(page.lead)}</p>
+          <p class="wp-hero__price">
+            <a href="#wp-price">{typograph(page.heroPrice)} от&nbsp;<strong>{rub(PANEL_MIN_PRICE)}</strong> за&nbsp;м²</a>
+          </p>
           <div class="wp-hero__actions">
             <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--ink h-btn--phone-wide">Обсудить проект</a>
             {MAX_CHAT && (
@@ -154,7 +169,9 @@ const structuredData = [
             )}
           </div>
         </div>
-        <PanelFigure class="wp-hero__media" visual={page.hero} shown={hero} sizes={HERO_SIZES} eager />
+        <PanelFigure class="wp-hero__media" visual={page.hero} shown={hero} sizes={HERO_SIZES} eager>
+          <PanelVideo />
+        </PanelFigure>
       </div>
     </section>
 
@@ -315,6 +332,17 @@ const structuredData = [
   .wp-hero { padding-block: clamp(1rem, 2vw, 1.5rem) clamp(2.5rem, 5vw, 4rem); }
   .wp-hero__grid { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
   .wp-hero__lead { margin-top: 1.25rem; }
+  /* Цена с первого экрана — ссылка на прайс сразу под ним */
+  .wp-hero__price { margin: 1.5rem 0 0; font-size: clamp(1.0625rem, 1.4vw, 1.25rem); line-height: 1.4; }
+  .wp-hero__price a {
+    color: var(--h-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--h-rule);
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color 200ms var(--ease-out);
+  }
+  .wp-hero__price a:hover { text-decoration-color: currentColor; }
+  .wp-hero__price strong { color: var(--h-ink); font-size: 1.3em; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .wp-hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
   /* Кадр — элемент PanelFigure: стили страницы до него доходят через :global */
   .wp-hero__grid > :global(.wp-hero__media) { width: 100%; }

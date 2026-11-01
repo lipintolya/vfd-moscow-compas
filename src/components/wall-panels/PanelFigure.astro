@@ -48,6 +48,8 @@ const isDev = import.meta.env.DEV
         fetchpriority={eager ? 'high' : undefined}
         decoding="async"
       />
+      {/* Слой поверх кадра — видео первого экрана (PanelVideo) */}
+      <slot />
     </span>
     {(caption || work) && (
       <figcaption class="h-meta pf__cap">

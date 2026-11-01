@@ -56,7 +56,8 @@ const PRICE_ROWS = [
   { wood: 'дуб', woodOf: 'дуба', name: 'Натуральный шпон дуба', text: 'Гладкая панель, укладка вертикально или горизонтально', price: 11900 },
   { wood: 'орех американский', woodOf: 'ореха американского', name: 'Натуральный шпон ореха американского', text: 'Наборный шпон, сложная рубашка с рисунком', price: 13860 },
 ]
-const MIN_PRICE = Math.min(...PRICE_ROWS.map((r) => r.price))
+/** Самая низкая цена прайса — «от …» в описании и на первом экране */
+export const PANEL_MIN_PRICE = Math.min(...PRICE_ROWS.map((r) => r.price))
 /** «дуба и ореха американского» */
 const woodsOf = listRu(PRICE_ROWS.map((r) => r.woodOf))
 
@@ -66,7 +67,7 @@ export const WALL_PANELS_PAGE = {
      по подсказкам Яндекса (docs/seo/semantic-core.md) */
   title: 'Стеновые панели из шпона на заказ в Москве — цены за м²',
   description:
-    `Стеновые панели из натурального шпона на заказ в Москве: ${listRu(PRICE_ROWS.map((r) => r.wood))} от ${rub(MIN_PRICE)} за м². ` +
+    `Стеновые панели из натурального шпона на заказ в Москве: ${listRu(PRICE_ROWS.map((r) => r.wood))} от ${rub(PANEL_MIN_PRICE)} за м². ` +
     'Изготавливаем сами, двери встраиваем заподлицо.',
   h1: 'Стеновые панели из шпона на заказ в Москве',
   lead:
@@ -81,6 +82,24 @@ export const WALL_PANELS_PAGE = {
     work: { slug: WALLS_WORK, photo: 0 },
   } satisfies PanelVisual,
   visit: 'Приезжайте в салон: покажем наши работы и обсудим стены и проёмы по вашему плану.',
+  /** Строка цены на первом экране: «<текст> от <цена> за м²» */
+  heroPrice: 'Панели из натурального шпона',
+}
+
+/** Видео с объекта в кадре первого экрана — только по «плей» (preload="none").
+    Облегчённый ролик и кадр-обложка: npm run video:optimize -- <источник>
+    public/renders/wall-panels-video/montazh 0.5 (источник 848×464, 5,8 МБ —
+    в облаке, vfd.moscow.compass/video.block/). Нет файла — сборка падает */
+export const PANEL_HERO_VIDEO = {
+  src: '/renders/wall-panels-video/montazh.mp4',
+  poster: '/renders/wall-panels-video/montazh-poster.webp',
+  title: 'Монтаж стеновых панелей из шпона со скрытыми дверями',
+  description: 'Видео с объекта: стена из шпонированных стеновых панелей и скрытые двери заподлицо во время монтажа.',
+  label: 'Видео с объекта',
+  /** Длительность, целых секунд (ролик 27,97 с) — как показывает плеер: подпись «0:27», duration в JSON-LD */
+  seconds: 27,
+  /** Дата публикации ролика на сайте — uploadDate в JSON-LD */
+  uploadDate: '2026-11-01',
 }
 
 /** Заголовки (H2) и пояснения секций страницы */

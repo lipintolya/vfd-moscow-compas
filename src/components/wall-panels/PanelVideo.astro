@@ -1,0 +1,93 @@
+---
+/**
+ * Видео с объекта поверх кадра первого экрана «Стеновых панелей»: стоит в
+ * слоте PanelFigure, внутри рамки фото. До нажатия видна фотография (LCP
+ * страницы) и пилюля «▶ Видео с объекта · 0:27»; ролик не скачивается
+ * (preload="none"). По нажатию он раскрывается в той же рамке и играет со
+ * звуком и родными элементами управления браузера; досмотрели — снова фото.
+ * Ролик невысокого разрешения (720 px), поэтому он не растягивается шире
+ * кадра. Данные — PANEL_HERO_VIDEO (src/data/wall-panels-page.ts).
+ */
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
+import { PANEL_HERO_VIDEO } from '../../data/wall-panels-page'
+
+const v = PANEL_HERO_VIDEO
+for (const file of [v.src, v.poster]) {
+  if (!existsSync(join(process.cwd(), 'public', file))) {
+    throw new Error(`Стеновые панели: нет файла видео ${file} — npm run video:optimize (см. PANEL_HERO_VIDEO)`)
+  }
+}
+const time = `${Math.floor(v.seconds / 60)}:${String(v.seconds % 60).padStart(2, '0')}`
+---
+
+<video class="pv__video" data-pv src={v.src} poster={v.poster} preload="none" playsinline hidden aria-label={v.title}></video>
+<button type="button" class="h-pill h-pill--white pv__play" data-pv-play aria-label={`Смотреть видео: ${v.title}, ${v.seconds} секунд`}>
+  <span class="pv__icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="14" height="14"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
+  </span>
+  {v.label}
+  <span class="pv__time">{time}</span>
+</button>
+
+<script>
+  for (const video of document.querySelectorAll<HTMLVideoElement>('[data-pv]')) {
+    const play = video.parentElement!.querySelector<HTMLButtonElement>('[data-pv-play]')!
+    play.addEventListener('click', () => {
+      video.hidden = false
+      video.controls = true
+      play.hidden = true
+      void video.play()
+      video.focus({ preventScroll: true })
+    })
+    /* Досмотрели — снова фото и пилюля */
+    video.addEventListener('ended', () => {
+      video.controls = false
+      video.hidden = true
+      video.load()
+      play.hidden = false
+      play.focus({ preventScroll: true })
+    })
+  }
+</script>
+
+<style>
+  /* Ролик — в рамке кадра, поверх фото; чёрная подложка вместо полос по краям */
+  .pv__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--color-slate-950);
+  }
+  .pv__video[hidden] { display: none; }
+  .pv__play {
+    position: absolute;
+    left: clamp(0.75rem, 2vw, 1.25rem);
+    bottom: clamp(0.75rem, 2vw, 1.25rem);
+    gap: 0.625rem;
+    padding: 0.375rem 1rem 0.375rem 0.375rem;
+    box-shadow: 0 0.5rem 1.5rem -0.5rem color-mix(in oklab, var(--color-slate-950), transparent 55%);
+    cursor: pointer;
+  }
+  .pv__play[hidden] { display: none; }
+  /* Круг «плей» — графит, как кнопки страницы */
+  .pv__icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--h-ink);
+    color: var(--color-white);
+    transition: transform 180ms var(--ease-out);
+  }
+  .pv__icon svg { margin-left: 0.125rem; }
+  .pv__play:hover .pv__icon,
+  .pv__play:focus-visible .pv__icon { transform: scale(1.08); }
+  .pv__time { color: var(--h-muted); font-variant-numeric: tabular-nums; }
+  @media (prefers-reduced-motion: reduce) {
+    .pv__icon { transition: none; }
+  }
+</style>

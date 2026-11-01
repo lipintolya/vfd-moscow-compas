@@ -2,8 +2,10 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   WALL_PANELS_PAGE, PANEL_VISUALS, PANEL_FAQ, PANEL_MATERIALS, PANEL_ROOMS, PANEL_PRICE, PANEL_VIDEO_IDS,
-  PANEL_SECTIONS, PANEL_DOORS, PANEL_STEPS,
+  PANEL_SECTIONS, PANEL_DOORS, PANEL_STEPS, PANEL_HERO_VIDEO,
 } from '../src/data/wall-panels-page'
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { renderOf, shownVisual } from '../src/lib/wall-panels'
 import { WORK_VIDEOS } from '../src/data/videos'
 import { rub } from '../src/data/services'
@@ -38,6 +40,11 @@ test('стеновые панели: без рендера и фото рабо�
   // Пропала работа или фото — ошибка сборки, а не пустое место
   assert.throws(() => shownVisual({ ...v, work: { slug: 'nope', photo: 0 } }, [work] as never), /работы «nope» нет/)
   assert.throws(() => shownVisual({ ...v, work: { slug: 'w', photo: 5 } }, [work] as never), /нет фото №5/)
+})
+
+test('стеновые панели: видео первого экрана — облегчённый ролик и обложка лежат в public', () => {
+  for (const f of [PANEL_HERO_VIDEO.src, PANEL_HERO_VIDEO.poster]) assert.ok(existsSync(join('public', f)), f)
+  assert.ok(Number.isInteger(PANEL_HERO_VIDEO.seconds) && PANEL_HERO_VIDEO.seconds > 0)
 })
 
 test('стеновые панели: ролики есть в списке видео с объектов', () => {
