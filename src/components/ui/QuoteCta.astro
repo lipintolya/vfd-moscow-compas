@@ -14,6 +14,8 @@ interface Props {
   primaryExternal?: boolean
   secondaryHref: string
   secondaryLabel: string
+  /** Заливка: красная (по умолчанию) или графит — на /portfolio/ */
+  tone?: 'accent' | 'graphite'
 }
 
 const {
@@ -25,10 +27,11 @@ const {
   primaryExternal = true,
   secondaryHref,
   secondaryLabel,
+  tone = 'accent',
 } = Astro.props
 ---
 
-<div class="qc-cta">
+<div class:list={['qc-cta', { 'qc-cta--graphite': tone === 'graphite' }]}>
   <div class="qc-cta__text">
     <h2 class="t-h2 m-0 text-white tracking-[-0.02em]">{title}</h2>
     <p class="m-0 text-sm leading-relaxed text-white/82">{description}</p>
@@ -57,13 +60,22 @@ const {
 
 <style>
   .qc-cta {
+    /* Цвета заливки — по тону; графит переопределяет их ниже */
+    --qc-fill: var(--color-accent-fill);
+    --qc-fill-end: var(--color-accent-fill-hover);
+    --qc-blend: var(--color-accent-hover);
     display: grid;
     grid-template-columns: 1fr auto;
     border-radius: 1.5rem;
     overflow: hidden;
     /* Под белым текстом — плотная заливка (--color-accent-fill): #FF0020 с белым ниже нормы контраста */
-    background: linear-gradient(135deg, var(--color-accent-fill) 0%, var(--color-accent-fill) 60%, var(--color-accent-fill-hover) 100%);
-    box-shadow: 0 8px 32px color-mix(in srgb, var(--color-accent-hover) 28%, transparent);
+    background: linear-gradient(135deg, var(--qc-fill) 0%, var(--qc-fill) 60%, var(--qc-fill-end) 100%);
+    box-shadow: 0 8px 32px color-mix(in srgb, var(--qc-blend) 28%, transparent);
+  }
+  .qc-cta--graphite {
+    --qc-fill: var(--color-slate-900);
+    --qc-fill-end: var(--color-slate-800);
+    --qc-blend: var(--color-slate-900);
   }
 
   .qc-cta__text {
@@ -89,13 +101,13 @@ const {
     object-position: center;
   }
 
-  /* Градиент: слева вливается в бирюзовый фон, справа лёгкое затемнение */
+  /* Градиент: слева вливается в заливку блока, справа лёгкое затемнение */
   .qc-cta__media::before {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: linear-gradient(to right, var(--color-accent-hover) 0%, color-mix(in srgb, var(--color-accent-hover) 50%, transparent) 35%, rgba(0, 0, 0, 0.28) 100%);
+    background: linear-gradient(to right, var(--qc-blend) 0%, color-mix(in srgb, var(--qc-blend) 50%, transparent) 35%, rgba(0, 0, 0, 0.28) 100%);
   }
 
   .qc-cta__btns {
