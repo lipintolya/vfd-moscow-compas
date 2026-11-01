@@ -92,7 +92,7 @@ const CATALOG_DROPDOWN = [
   { href: '/catalog/',               label: 'Все двери',      desc: 'Межкомнатные' },
   { href: '/catalog/vhodnye-dveri/', label: 'Входные двери', desc: 'Стальные, с терморазрывом' },
   { href: '/catalog/skrytye-dveri/', label: 'Скрытые двери', desc: 'Скрытый монтаж' },
-  { href: '/catalog/stenovye-paneli/', label: 'Стеновые панели', desc: 'Шпон и покрытия дверей' },
+  { href: '/catalog/stenovye-paneli/', label: 'Стеновые панели', desc: 'Натуральный шпон, цены за м²' },
   { href: '/catalog/decor/',         label: 'Декор',         desc: 'Плинтус, фрамуги, рейки' },
   { href: '/catalog/plintus/',       label: 'Плинтус', desc: 'Напольный, скрытый, с подсветкой' },
 ] as const

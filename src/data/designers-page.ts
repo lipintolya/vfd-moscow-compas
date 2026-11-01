@@ -153,7 +153,7 @@ export const DESIGNER_RANGE = [
   { title: 'Межкомнатные двери',      text: 'Эмаль, Эмалекс, ПЭТ, экошпон — серии и цвета каталога',       href: '/catalog/',              photo: DIRECTION_PHOTOS.interior,   position: '72% 50%' },
   { title: 'Скрытые двери',           text: `Заподлицо со стеной; в наличии ${stockList}`,                  href: '/catalog/skrytye-dveri/', photo: DIRECTION_PHOTOS.hidden,     position: '56% 50%' },
   { title: 'Алюминиевые перегородки', text: 'Раздвижные и стационарные конструкции со стеклом',           href: '/partitions/',            photo: DIRECTION_PHOTOS.partitions, position: '50% 50%' },
-  { title: 'Стеновые панели',          text: 'Натуральный шпон и покрытия дверей ВФД, двери заподлицо с панелями', href: '/catalog/stenovye-paneli/', photo: { src: renderOf(PANEL_HOME_TILE.visual)?.src ?? DIRECTION_PHOTOS.hidden.src, alt: PANEL_HOME_TILE.visual.alt }, position: '50% 55%' },
+  { title: 'Стеновые панели',          text: 'Натуральный шпон, двери заподлицо с панелями', href: '/catalog/stenovye-paneli/', photo: { src: renderOf(PANEL_HOME_TILE.visual)?.src ?? DIRECTION_PHOTOS.hidden.src, alt: PANEL_HOME_TILE.visual.alt }, position: '50% 55%' },
   { title: 'Плинтус по RAL и NCS',     text: `Напольный из МДФ — ${PROFILES_COUNT}, скрытый, с подсветкой, микроплинтус`, href: '/catalog/plintus/', photo: { src: PLINTUS_PAGE.hero.src, alt: PLINTUS_PAGE.hero.alt }, position: '50% 65%' },
   { title: 'Фальшфрамуга и декор',     text: 'Фальшфрамуга с компланарным коробом, рейки и плинтус в покрытиях дверей', href: '/catalog/decor/', photo: { src: DECOR_IMAGES.hero.src, alt: DECOR_HERO.alt }, position: '50% 50%' },
 ]
@@ -186,7 +186,7 @@ export const DESIGNER_SOLUTIONS = {
     },
     {
       title: 'Стеновые панели в цвет дверей',
-      text: 'Изготавливаем панели из натурального шпона и в покрытиях дверей ВФД: стена и полотна в одном оттенке, скрытые двери заподлицо с панелями.',
+      text: 'Изготавливаем панели из натурального шпона: стена и полотна в одном оттенке, скрытые двери заподлицо с панелями.',
       href: '/catalog/stenovye-paneli/',
     },
     {
@@ -294,7 +294,7 @@ export const DESIGNERS_FAQ = [
   },
   {
     q: 'Есть ли стеновые панели в цвет дверей?',
-    a: 'Да. Изготавливаем стеновые панели из натурального шпона и в покрытиях дверей ВФД, двери встраиваем заподлицо с панелями. Стоимость считаем по проекту.',
+    a: 'Да. Изготавливаем стеновые панели из натурального шпона, двери встраиваем заподлицо с панелями. Цена — за квадратный метр по прайсу, итоговую сумму считаем по проекту.',
   },
   {
     q: 'Где взять 3D-модели и чертежи?',

@@ -1,8 +1,8 @@
 ---
 /**
  * Стеновые панели (/catalog/stenovye-paneli/): изготовление Студии
- * Зизевского — натуральный шпон и покрытия дверей ВФД, двери заподлицо
- * с панелями. Тексты, места под изображения и вопросы —
+ * Зизевского — натуральный шпон, двери заподлицо с панелями; бренда ВФД
+ * на странице нет (решение владельца). Тексты, места под изображения и вопросы —
  * src/data/wall-panels-page.ts; что показать на месте (рендер или фото с
  * объекта) — src/lib/wall-panels.ts; на странице только разметка.
  *
@@ -147,9 +147,11 @@ const structuredData = [
           <p class="h-lead wp-hero__lead">{typograph(page.lead)}</p>
           <div class="wp-hero__actions">
             <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--ink h-btn--phone-wide">Обсудить проект</a>
-            <a href={whatsapp} class="h-btn h-btn--quiet h-btn--phone-wide wp-wa" target="_blank" rel="noopener">
-              <WhatsAppIcon class="wp-wa__ico" />Написать в WhatsApp
-            </a>
+            {MAX_CHAT && (
+              <a href={maxChatUrl()} class="h-btn h-btn--quiet h-btn--phone-wide wp-wa" target="_blank" rel="noopener" data-copy-text={maxCopy} aria-label="Написать в MAX (текст скопируется)">
+                <MaxIcon class="wp-wa__ico" />Написать в MAX
+              </a>
+            )}
           </div>
         </div>
         <PanelFigure class="wp-hero__media" visual={page.hero} shown={hero} sizes={HERO_SIZES} eager />
@@ -308,9 +310,9 @@ const structuredData = [
 
 <style>
   /* ── Первый экран ── */
-  /* Снизу без поля: отступ задаёт следующая секция (.h-sec) — иначе на телефоне
-     два поля складывались в пустоту ~110 px */
-  .wp-hero { padding-block: clamp(1rem, 2vw, 1.5rem) 0; }
+  /* Снизу — поле до серой секции цен: без него кнопки и кадр упирались
+     в край серого фона. Меньше --h-sec: следующая секция добавляет своё */
+  .wp-hero { padding-block: clamp(1rem, 2vw, 1.5rem) clamp(2.5rem, 5vw, 4rem); }
   .wp-hero__grid { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
   .wp-hero__lead { margin-top: 1.25rem; }
   .wp-hero__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }

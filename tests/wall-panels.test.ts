@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   WALL_PANELS_PAGE, PANEL_VISUALS, PANEL_FAQ, PANEL_MATERIALS, PANEL_ROOMS, PANEL_PRICE, PANEL_VIDEO_IDS,
+  PANEL_SECTIONS, PANEL_DOORS, PANEL_STEPS,
 } from '../src/data/wall-panels-page'
 import { renderOf, shownVisual } from '../src/lib/wall-panels'
 import { WORK_VIDEOS } from '../src/data/videos'
@@ -50,13 +51,23 @@ test('стеновые панели: цены за м² — только пра�
   assert.match(PANEL_PRICE.note, /уточняйте у менеджера/)
   // Вопрос о стоимости называет каждую цену из прайса
   for (const r of PANEL_PRICE.rows) assert.ok(PANEL_FAQ[0].a.includes(rub(r.price)), r.name)
+  // В описании для поисковика — минимальная цена из прайса, а не своя цифра
+  const min = Math.min(...PANEL_PRICE.rows.map((r) => r.price))
+  assert.ok(WALL_PANELS_PAGE.description.includes(`от ${rub(min)} за м²`), WALL_PANELS_PAGE.description)
   // За пределами прайса цен за м² и сроков салон не давал
   const texts = [
-    WALL_PANELS_PAGE.lead, WALL_PANELS_PAGE.description,
+    WALL_PANELS_PAGE.lead,
     ...PANEL_MATERIALS.map((m) => m.text), ...PANEL_ROOMS.map((r) => r.text),
     PANEL_PRICE.lead, PANEL_PRICE.note, ...PANEL_PRICE.factors, ...PANEL_FAQ.flatMap((f) => [f.q, f.a]),
   ].join('\n')
   assert.doesNotMatch(texts, /м²|м2|кв\.?\s*м|за метр|недел|рабочих дн/)
   // Декоративные рейки — единственная цена за комплект вне прайса шпона
   assert.match(PANEL_PRICE.rails, /от \d/)
+})
+
+test('стеновые панели: страница Студии Зизевского — бренда ВФД в текстах нет', () => {
+  const texts = JSON.stringify([
+    WALL_PANELS_PAGE, PANEL_SECTIONS, PANEL_MATERIALS, PANEL_ROOMS, PANEL_DOORS, PANEL_PRICE, PANEL_STEPS, PANEL_FAQ,
+  ])
+  assert.doesNotMatch(texts, /ВФД|VFD|покрыти[а-я]* дверей/i)
 })
