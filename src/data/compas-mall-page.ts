@@ -14,15 +14,24 @@ import { MEASURE_TERMS } from './services'
 
 const { opens, closes } = companyLegalInfo.workingHours.weekdays as { opens: string; closes: string }
 const metro = SITE.address.metro
+/** «Красная Сосна, 2А» — адрес без «ул.», как его набирают в поиске */
+const street = SITE.address.street.replace(/^ул\.\s*/, '')
+/** Предложный падеж улицы: «на Красной Сосне, 2А» */
+const streetOn = 'на Красной Сосне, 2А'
 // Метро: станции и время из SITE.address.metro (единый источник для адреса)
 
+/* Запросы (подсказки Яндекса, docs/seo/suggest.json, группа «ТЦ Компас»):
+   ищут сам торговый центр — «тц компас москва», «тц компас красная сосна
+   (2а)», «компас ул красная сосна 2а фото», «… как добраться»; про двери
+   в «Компасе» запросов нет. Поэтому title и H1 — про ТЦ и адрес, салон —
+   внутри: человек, который ищет ТЦ, узнаёт, что в нём шоурум дверей */
 export const COMPAS_PAGE = {
   path: '/compas-mall/',
-  title: 'Двери в ТЦ «Компас» — как добраться, Москва',
+  title: `${SITE.address.mall}, ${street}: фото и как добраться`,
   description:
-    `Салон дверей ВФД в ТЦ «Компас», ${SITE.address.street}: как добраться от МЦК «${metro[0]!.station}» и метро «${metro[1]!.station}», ` +
-    `часы работы. Приходить можно без записи.`,
-  h1: `Салон дверей в ТЦ «Компас» в Москве`,
+    `${SITE.address.mall} в Москве, ${SITE.address.street}: фото здания, как добраться от МЦК «${metro[0]!.station}» ` +
+    `и метро «${metro[1]!.station}». ${SITE.address.floorIn.replace(/^на/, 'На')} — салон дверей ВФД, без записи.`,
+  h1: `${SITE.address.mall} ${streetOn} — салон дверей ${SITE.address.floorIn}`,
   lead:
     `Салон на третьем этаже ТЦ «Компас» ${SITE.address.districtIn}. ` +
     `Покажем двери и покрытия вживую, подберём модель и рассчитаем комплект с менеджером.`,
@@ -48,6 +57,11 @@ export const COMPAS_PAGE = {
     { label: 'Часы работы', text: `Ежедневно, ${opens}–${closes}, без выходных.` },
   ],
   faq: [
+    {
+      q: 'Где находится ТЦ «Компас» в Москве?',
+      a: `${SITE.city.name}, ${SITE.address.street}, ${SITE.address.districtIn}. ` +
+        `Салон дверей ВФД — ${SITE.address.floorIn} торгового центра.`,
+    },
     {
       q: 'Как добраться до ТЦ «Компас» на метро?',
       a: `Ближайшая станция — ${metro[0]!.station} (${metro[0]!.line}), ${metro[0]!.time}. ` +

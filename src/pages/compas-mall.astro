@@ -1,7 +1,9 @@
 ---
 /**
- * Двери в ТЦ «Компас» (/compas-mall/) — посадочная страница под запросы
- * «двери/салон в ТЦ Компас». Тексты — src/data/compas-mall-page.ts; адрес,
+ * ТЦ «Компас» (/compas-mall/) — посадочная страница под запросы о самом ТЦ:
+ * «тц компас москва», «тц компас красная сосна 2а», «… фото», «как добраться»
+ * (подсказки Яндекса, docs/seo/suggest.json); салон дверей — внутри ТЦ.
+ * Ссылки сюда: подвал («Как нас найти») и плитка «Салон» на /contacts/. Тексты — src/data/compas-mall-page.ts; адрес,
  * метро и часы — из SITE и contacts-data. Маршрут, карта и фото здания —
  * общий блок VisitBand (не дублируем). Проезд на машине и парковка — не
  * публикуем, пока владелец не подтвердит (см. комментарий в данных).
@@ -20,7 +22,21 @@ import '../styles/home.css'
 const pageUrl = new URL(COMPAS_PAGE.path, SITE.url).href
 
 const structuredData = [
-  localBusinessSchema({ url: pageUrl }),
+  /* Салон — внутри торгового центра: ShoppingCenter с тем же адресом */
+  {
+    ...localBusinessSchema({ url: pageUrl }),
+    containedInPlace: {
+      '@type': 'ShoppingCenter',
+      name: SITE.address.mallFull,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: SITE.address.street,
+        addressLocality: SITE.city.name,
+        postalCode: SITE.address.postalCode,
+        addressCountry: 'RU',
+      },
+    },
+  },
   {
     '@context': 'https://schema.org',
     '@type': 'WebPage',

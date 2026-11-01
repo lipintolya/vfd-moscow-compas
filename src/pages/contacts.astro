@@ -124,7 +124,8 @@ const breadcrumbItems = [
             </li>
           )}
           <li class="ct-tiles__salon">
-            <a href="#visit" class="h-tile h-tile--dark ct-tile">
+            {/* Плитка салона — на страницу ТЦ «Компас» (фото, метро, вопросы, та же карта) */}
+            <a href="/compas-mall/" class="h-tile h-tile--dark ct-tile">
               <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
               <span class="ct-tile__label">Салон</span>
               <span class="h-tile__title">{typograph(`${SITE.address.mall}, ${SITE.address.floor}`)}</span>

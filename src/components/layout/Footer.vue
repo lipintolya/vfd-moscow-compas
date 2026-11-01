@@ -395,6 +395,13 @@ onUnmounted(() => {
             </h2>
             <p class="text-base font-medium text-white">{{ CONTACTS.address }}</p>
             <p class="mt-1 text-sm text-white/50">{{ companyLegalInfo.address.entrance }}</p>
+            <!-- Страница о ТЦ: фото здания, метро, вопросы — подвал единственный ведёт на неё со всех страниц -->
+            <a
+              href="/compas-mall/"
+              class="mt-3 block w-fit text-sm text-white/70 underline decoration-white/30 underline-offset-4 hover:text-white hover:decoration-white transition-colors duration-200"
+            >
+              {{ SITE.address.mall }}: фото и как добраться
+            </a>
             <a
               :href="ROUTE_URL"
               target="_blank"
