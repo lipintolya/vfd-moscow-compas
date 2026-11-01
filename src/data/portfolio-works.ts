@@ -7,7 +7,7 @@
 
 import type { SiteImage } from '../lib/strapi'
 
-export type WorkCategory = 'interior' | 'hidden' | 'partitions' | 'walls'
+export type WorkCategory = 'interior' | 'hidden' | 'partitions' | 'walls' | 'entrance'
 export type ObjectType   = 'apartment' | 'house' | 'office' | 'commercial'
 
 export const CATEGORY_LABELS: Record<WorkCategory, string> = {
@@ -15,6 +15,7 @@ export const CATEGORY_LABELS: Record<WorkCategory, string> = {
   hidden:     'Скрытые двери',
   partitions: 'Перегородки',
   walls:      'Стеновые панели',
+  entrance:   'Входные двери',
 }
 
 /** Цвет бейджа категории на карточке/странице работы — разные цвета на
@@ -24,6 +25,7 @@ export const CATEGORY_BADGE_COLORS: Record<WorkCategory, string> = {
   hidden:     'bg-accent-600',                  // фирменный акцент — флагманский продукт
   partitions: 'bg-indigo-600',                  // холодный синий — алюминий/стекло
   walls:      'bg-slate-700',                    // графит — отделка стен
+  entrance:   'bg-slate-900',                    // почти чёрный — сталь входной двери
 }
 
 /** Тот же цветовой код категории, но как цвет текста подписи — вместо
@@ -33,6 +35,7 @@ export const CATEGORY_TEXT_COLORS: Record<WorkCategory, string> = {
   hidden:     'text-accent-600',
   partitions: 'text-indigo-600',
   walls:      'text-slate-700',
+  entrance:   'text-slate-900',
 }
 
 /** Разделы с отдельной страницей: плитка на /portfolio/ ведёт туда, а не на фильтр */
@@ -86,4 +89,5 @@ export const CATALOG_LINKS: Record<string, { href: string; label: string }> = {
   'Белые двери':              { href: '/catalog/belye-dveri/',   label: 'Белые двери в каталоге' },
   'Перегородки':              { href: '/partitions/',            label: 'Алюминиевые перегородки' },
   'Декор и погонаж':          { href: '/catalog/decor/',         label: 'Декор и погонаж' },
+  'Входные двери':            { href: '/catalog/vhodnye-dveri/', label: 'Входные двери в каталоге' },
 }

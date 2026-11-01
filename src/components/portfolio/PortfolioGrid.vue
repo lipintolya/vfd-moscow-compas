@@ -38,6 +38,7 @@ const CATEGORY_FALLBACK: Record<WorkCategory, string> = {
   hidden:     '/renders/home/secret-2.webp',
   partitions: '/renders/alum-covers/3.webp',
   walls:      '/renders/home/videos/work-panel-door.webp',
+  entrance:   '/renders/entrance-guide/house-frost-7024-acda539d-640.webp',
 }
 const coverOf = (key: WorkCategory) => {
   const work = props.works.find((w) => w.category === key)
@@ -191,9 +192,10 @@ const hrefOf = (key: WorkCategory) => CATEGORY_PAGES[key] ?? CATEGORY_HREF[key]
   list-style: none;
 }
 .pf-cat-row > li { min-width: 0; }
-/* Категорий четыре: две колонки на планшете, четыре в ряд на компьютере */
+/* Категорий пять: две колонки на узком планшете, три на широком, все в ряд на компьютере */
 @media (min-width: 40rem) { .pf-cat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (min-width: 80rem) { .pf-cat-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 56.25rem) { .pf-cat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 80rem) { .pf-cat-row { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 .pf-cat {
   display: flex;
   align-items: center;
@@ -241,6 +243,13 @@ const hrefOf = (key: WorkCategory) => CATEGORY_PAGES[key] ?? CATEGORY_HREF[key]
   white-space: nowrap;
 }
 @media (min-width: 30rem) { .pf-cat__count { display: inline; } }
+/* От трёх колонок плитка уже: счётчик — под подписью, иначе подпись обрезается */
+@media (min-width: 56.25rem) {
+  .pf-cat { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'thumb label' 'thumb count'; gap: 0.125rem 0.625rem; }
+  .pf-cat__thumb { grid-area: thumb; }
+  .pf-cat__label { grid-area: label; }
+  .pf-cat__count { grid-area: count; margin-left: 0; }
+}
 
 /* ── Сетка работ: портретные кадры 3:4, подпись под каждым ── */
 .pf-grid {

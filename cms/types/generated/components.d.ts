@@ -396,6 +396,7 @@ export interface SharedCatalogLink extends Struct.ComponentSchema {
         '\u0411\u0435\u043B\u044B\u0435 \u0434\u0432\u0435\u0440\u0438',
         '\u041F\u0435\u0440\u0435\u0433\u043E\u0440\u043E\u0434\u043A\u0438',
         '\u0414\u0435\u043A\u043E\u0440 \u0438 \u043F\u043E\u0433\u043E\u043D\u0430\u0436',
+        '\u0412\u0445\u043E\u0434\u043D\u044B\u0435 \u0434\u0432\u0435\u0440\u0438',
       ]
     > &
       Schema.Attribute.Required;

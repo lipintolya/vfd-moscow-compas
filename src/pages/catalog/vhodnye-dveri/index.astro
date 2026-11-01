@@ -26,11 +26,14 @@ import EntranceShowcase from '../../../components/entrance-doors/EntranceShowcas
 import RailBar from '../../../components/ui/RailBar.astro'
 import SceneCard from '../../../components/entrance-doors/SceneCard.astro'
 import VfdDoors from '../../../components/entrance-doors/VfdDoors.astro'
+import InlineVideo from '../../../components/articles/InlineVideo.astro'
+import { getWorks } from '../../../lib/works'
+import { WORK_VIDEOS } from '../../../data/videos'
 import { GUIDE_FAQ } from '../../../data/entrance-guide'
 import { VFD_FAQ } from '../../../data/entrance-vfd'
 import { ENTRANCE_HOUSES } from '../../../data/entrance-scenes'
 import { COVER_SCENE, HOUSE_SCENES } from '../../../lib/entrance-scenes'
-import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, fromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS } from '../../../data/entrance-doors'
+import { DOOR_GROUPS, doorsOfGroup, groupFromPrice, fromPrice, ENTRANCE_PAGE, ENTRANCE_FAQ, ENTRANCE_DOORS, ENTRANCE_OBJECT, entranceObjectLead, doorById } from '../../../data/entrance-doors'
 import { localBusinessSchema } from '../../../lib/local-business-schema'
 import { PHONE, SITE } from '../../../config/site'
 import { rub } from '../../../data/services'
@@ -58,6 +61,16 @@ const groups = DOOR_GROUPS.map((g) => ({ ...g, doors: doorsOfGroup(g.id), from: 
 const total = ENTRANCE_DOORS.length
 const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/vhodnye-dveri/' })
 const faq = [...ENTRANCE_FAQ, ...VFD_FAQ, ...GUIDE_FAQ]
+
+/* Монтаж с объекта: фото работы из Strapi + ролик с объекта (ENTRANCE_OBJECT) */
+const objWork = (await getWorks()).find((w) => w.id === ENTRANCE_OBJECT.work)
+if (!objWork) throw new Error(`Входные двери: нет работы «${ENTRANCE_OBJECT.work}» в Strapi (ENTRANCE_OBJECT)`)
+const objVideo = WORK_VIDEOS.find((v) => v.id === ENTRANCE_OBJECT.video)
+if (!objVideo?.src || !objVideo.cover) throw new Error(`Входные двери: нет ролика «${ENTRANCE_OBJECT.video}» в WORK_VIDEOS (ENTRANCE_OBJECT)`)
+const objDoor = doorById(ENTRANCE_OBJECT.door)
+if (!objDoor) throw new Error(`Входные двери: нет модели «${ENTRANCE_OBJECT.door}» (ENTRANCE_OBJECT)`)
+const objPhotos = objWork.photos.map((p, i) => ({ ...p, full: objWork.images[i] ?? p.src, ratio: p.width && p.height ? p.width / p.height : 3 / 4 }))
+const objVideoTitle = objVideo.title.replace(/\s+/g, ' ')
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -162,6 +175,37 @@ const listSchema = {
         </div>
       </section>
     )}
+
+    {/* Монтаж с объекта — сразу после визуализаций, тот же серый фон: сначала
+         рендеры, потом настоящая дверь на доме. Ролик — по «плей», фото — крупно по нажатию */}
+    <section id="object" class="h-sec h-sec--wall h-sec--tight-top" aria-labelledby="object-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="object-title" class="h-h2">{typograph(ENTRANCE_OBJECT.title)}</h2>
+          <p class="h-lead">{typograph(entranceObjectLead(objDoor))}</p>
+        </header>
+        <div class="rail" data-rail>
+          <ul class="rail__track ehs eobj" data-track role="list" data-lightbox data-lightbox-images={JSON.stringify(objPhotos.map((p) => ({ src: p.full, alt: p.alt })))}>
+            <li style="--ar: 0.5625">
+              <InlineVideo src={objVideo.src} poster={objVideo.cover} title={objVideoTitle} ratio="9 / 16" />
+            </li>
+            {objPhotos.map((p, i) => (
+              <li style={`--ar: ${p.ratio.toFixed(4)}`}>
+                <button type="button" class="h-media eobj__photo" data-lightbox-index={i} aria-label={`Увеличить: ${p.alt}`}>
+                  <img src={p.src} srcset={p.srcset} sizes="(min-width: 43.75rem) 16rem, 42vw" alt={p.alt} width={p.width} height={p.height} loading="lazy" decoding="async" />
+                  <span class="eobj__zoom" aria-hidden="true">Увеличить</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <RailBar />
+        </div>
+        <p class="eobj__links">
+          <a class="h-link" href={objDoor.href}>Модель «{objDoor.name}» — {fromPrice(objDoor)}</a>
+          <a class="h-link" href={`/portfolio/${objWork.id}/`}>Объект в портфолио</a>
+        </p>
+      </div>
+    </section>
 
     <EntranceGuide />
 
@@ -316,6 +360,21 @@ const listSchema = {
   .ehs { --scene-h: min(15rem, 56vw); display: flex; --rail-gap: 1rem; }
   .ehs > li { flex: none; width: calc(var(--scene-h) * var(--ar)); }
   @media (min-width: 43.75rem) { .ehs { --scene-h: clamp(15rem, 24vw, 21rem); --rail-gap: 1.5rem; } }
+
+  /* Монтаж с объекта: ролик 9:16 и фото — одной высоты в той же ленте, что визуализации */
+  .eobj :global(.ivideo) { margin: 0; }
+  .eobj__photo { position: relative; display: block; width: 100%; aspect-ratio: var(--ar); padding: 0; border: 0; cursor: zoom-in; }
+  .eobj__photo img { transition: transform 700ms var(--ease-out); }
+  @media (hover: hover) { .eobj__photo:hover img { transform: scale(1.04); } }
+  .eobj__photo:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  .eobj__zoom {
+    position: absolute; right: 0.625rem; bottom: 0.625rem;
+    padding: 0.25rem 0.625rem; border-radius: 999rem;
+    background: color-mix(in srgb, var(--color-white) 92%, transparent); color: var(--h-ink);
+    font-size: 0.75rem; font-weight: 600; line-height: 1.3;
+  }
+  .eobj__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 1.5rem 0 0; }
+  @media (prefers-reduced-motion: reduce) { .eobj__photo img { transition: none; } .eobj__photo:hover img { transform: none; } }
 
   /* Группы: слева название и пояснение, справа лента моделей; на телефоне — друг под другом */
   .edg-sec[hidden], .edg-sec li[hidden] { display: none !important; }

@@ -177,6 +177,27 @@ export const ENTRANCE_HOME_DOORS = HOME_DOOR_IDS.map((id) => {
   return d
 })
 
+/** Монтаж с объекта на /catalog/vhodnye-dveri/ (после визуализаций на домах):
+    фото — работа портфолио в Strapi (slug), видео — ролик WORK_VIDEOS
+    (src/data/videos.ts). Нет работы, ролика или модели — сборка падает */
+export const ENTRANCE_OBJECT = {
+  work: 'vhodnaya-dver-ayslab-chastny-dom',
+  video: 'work-entrance-ayslab',
+  door: 'ayslab',
+  title: 'Установка входной двери в частном доме: фото и видео',
+  place: 'в частном загородном доме в Московской области',
+}
+/** Как назвать группу модели внутри фразы: «Модель «Айслаб» с терморазрывом …» */
+const GROUP_IN_PHRASE: Record<DoorGroupId, string> = {
+  flat: '',
+  thermo: ' с терморазрывом',
+  smart: ' с электронным замком',
+  glass: ' со стеклопакетом',
+}
+/** Пояснение блока: модель, её группа и место — из данных */
+export const entranceObjectLead = (d: EntranceDoor) =>
+  `Модель «${d.name}»${GROUP_IN_PHRASE[d.group]} ${ENTRANCE_OBJECT.place}: снимки и видео с монтажа, а не визуализация.`
+
 /** Три двери первого экрана — разные по цвету: чёрная, белая, дерево */
 export const SHOWCASE_IDS = ['alyaska-layt', 'versal', 'karmina']
 export const ENTRANCE_SHOWCASE = SHOWCASE_IDS.map((id) => {

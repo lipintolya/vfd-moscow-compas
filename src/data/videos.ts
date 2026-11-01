@@ -190,6 +190,17 @@ const WORK = 'https://storage.yandexcloud.net/vfd.moscow.compass/video.block'
 
 export const WORK_VIDEOS: Video[] = [
   {
+    id:       'work-entrance-ayslab',
+    title:    'Входная дверь «Айслаб»\nв загородном доме',
+    text:     'Дверь с рейками под дерево и чёрной панелью на входе в дом: как она выглядит на фасаде вживую.',
+    /* Сжатая копия (5,4 → 1,6 МБ); источник — облако, video.block/outdoor_video_main_1.11.26.mp4 */
+    src:      '/renders/home/videos/work-entrance-ayslab.mp4',
+    cover:    '/renders/home/videos/work-entrance-ayslab.webp',
+    coverAt:  2,
+    duration: '0:25',
+    vertical: true,
+  },
+  {
     id:       'work-panel-door',
     title:    'Дверь в стеновой панели\nна объекте',
     text:     'Полотно стоит в одной плоскости с отделкой стены, поэтому дверь почти не видна среди панелей.',
