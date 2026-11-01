@@ -2,9 +2,9 @@
 /**
  * Превью входных дверей на главной — между «Направлениями» и видео: слева
  * фото-плитка (система .h-tile, как у направлений) с рендером двери на
- * доме, справа по одной модели из каждой группы каталога (DoorCard — та же
- * карточка, что в /catalog/vhodnye-dveri/) и ссылка на весь раздел.
- * Модели — groupDoor(): по DOOR_GROUPS[].cover, новая группа появится сама. Тексты — ENTRANCE_HOME_TILE
+ * доме, справа четыре модели (DoorCard — та же карточка, что в
+ * /catalog/vhodnye-dveri/) и ссылка на весь раздел.
+ * Модели — ENTRANCE_HOME_DOORS (выбор владельца). Тексты — ENTRANCE_HOME_TILE
  * (src/data/entrance-doors.ts), фото — HOME_SCENE (src/data/entrance-scenes.ts).
  *
  * Компьютер: плитка 4 колонки + 4 карточки в ряд (8 колонок). Планшет: плитка
@@ -12,11 +12,11 @@
  * карточек вбок.
  */
 import DoorCard from '../entrance-doors/DoorCard.astro'
-import { DOOR_GROUPS, groupDoor, ENTRANCE_HOME_TILE } from '../../data/entrance-doors'
+import { ENTRANCE_HOME_DOORS, ENTRANCE_HOME_TILE } from '../../data/entrance-doors'
 import { HOME_SCENE } from '../../lib/entrance-scenes'
 import { typograph } from '../../lib/typograph'
 
-const doors = DOOR_GROUPS.map((g) => groupDoor(g.id))
+const doors = ENTRANCE_HOME_DOORS
 const photo = HOME_SCENE
 ---
 

@@ -137,49 +137,45 @@ export const ENTRANCE_DOORS: EntranceDoor[] = (catalog as Raw[]).map(build)
 export const fromPrice = (d: EntranceDoor) => `от${'\u00a0'}${rub(d.from)}`
 export const ENTRANCE_MIN_PRICE = Math.min(...ENTRANCE_DOORS.map((d) => d.from))
 
-export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: string; /** Модель, которая представляет группу на главной (groupDoor) */ cover: string }[] = [
+export const DOOR_GROUPS: { id: DoorGroupId; nav: string; title: string; lead: string }[] = [
   {
     id: 'flat',
     nav: 'Для квартиры',
     title: 'Входные двери для квартиры',
     lead: 'Стальные двери с утеплением полотна и тремя контурами уплотнения: тихо, тепло и надёжно в подъезде и на лестничной клетке.',
-    cover: 'versal',
   },
   {
     id: 'thermo',
     nav: 'С терморазрывом',
     title: 'Двери с терморазрывом для дома и дачи',
     lead: 'Терморазрыв — вставка из полиамида между наружной и внутренней стороной металла: дверь не промерзает и не покрывается конденсатом.',
-    cover: 'termolayt',
   },
   {
     id: 'smart',
     nav: 'Электронный замок',
     title: 'Двери с электронным замком',
     lead: 'Открываются отпечатком пальца, пин-кодом, брелком или со смартфона; обычный ключ остаётся запасным способом.',
-    cover: 'smartlab',
   },
   {
     id: 'glass',
     nav: 'Со стеклопакетом',
     title: 'Уличные двери со стеклопакетом',
     lead: 'Для коттеджа и частного дома: трёхкамерный стеклопакет пропускает свет в прихожую и сохраняет тепло.',
-    cover: 'frost-7024',
   },
 ]
-
-/** Модель, которая представляет группу (превью на главной): должна быть из этой группы */
-export const groupDoor = (id: DoorGroupId) => {
-  const g = DOOR_GROUPS.find((x) => x.id === id)!
-  const d = doorById(g.cover)
-  if (!d || d.group !== id) throw new Error(`Входные двери: модель «${g.cover}» для группы «${id}» не найдена в этой группе`)
-  return d
-}
 
 /** Модели группы — от дешёвых к дорогим */
 export const doorsOfGroup = (id: DoorGroupId) => ENTRANCE_DOORS.filter((d) => d.group === id).sort((a, b) => a.from - b.from)
 export const groupFromPrice = (id: DoorGroupId) => Math.min(...doorsOfGroup(id).map((d) => d.from))
 export const doorById = (id: string) => ENTRANCE_DOORS.find((d) => d.id === id)
+
+/** Четыре модели в превью на главной (EntrancePreview) — выбор владельца, 1 ноября 2026 */
+export const HOME_DOOR_IDS = ['kredor', 'karmina', 'leolab', 'royal-smart']
+export const ENTRANCE_HOME_DOORS = HOME_DOOR_IDS.map((id) => {
+  const d = doorById(id)
+  if (!d) throw new Error(`Входные двери: нет модели «${id}» для превью на главной`)
+  return d
+})
 
 /** Три двери первого экрана — разные по цвету: чёрная, белая, дерево */
 export const SHOWCASE_IDS = ['alyaska-layt', 'versal', 'karmina']

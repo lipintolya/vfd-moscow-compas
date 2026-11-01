@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync } from 'node:fs'
 import { DOOR_SCENES, ENTRANCE_HOUSES, sceneAlt, sceneDoor, sceneSection } from '../src/data/entrance-scenes'
 import { COVER_SCENE, HOME_SCENE, HOUSE_SCENES, scenesOfDoor } from '../src/lib/entrance-scenes'
-import { ENTRANCE_DOORS, ENTRANCE_HOME_TILE, DOOR_GROUPS, doorById } from '../src/data/entrance-doors'
+import { ENTRANCE_DOORS, ENTRANCE_HOME_TILE, ENTRANCE_HOME_DOORS, HOME_DOOR_IDS } from '../src/data/entrance-doors'
 import { SITE } from '../src/config/site'
 
 const BRAND = /лабиринт|labirint/i
@@ -68,11 +68,12 @@ test('рендеры «на доме»: тексты блоков без наз�
   assert.ok(sceneSection(door).title.includes(door.name))
 })
 
-test('главная: плитка «Входные двери» — одно фото на главную, по модели из каждой группы, тексты из каталога', () => {
+test('главная: плитка «Входные двери» — одно фото на главную, четыре модели из каталога, тексты из каталога', () => {
   assert.equal(DOOR_SCENES.filter((s) => s.home).length, 1)
   assert.ok(HOME_SCENE.height > HOME_SCENE.width, 'кадр для плитки — вертикальный')
   for (const url of HOME_SCENE.srcset.split(', ').map((x) => x.split(' ')[0]!)) assert.ok(onDisk(url), url)
-  for (const g of DOOR_GROUPS) assert.ok(doorById(g.cover), g.cover)
+  assert.deepEqual(ENTRANCE_HOME_DOORS.map((d) => d.id), HOME_DOOR_IDS)
+  assert.equal(new Set(HOME_DOOR_IDS).size, 4, 'четыре разные модели')
   assert.ok(ENTRANCE_HOME_TILE.text.includes(String(ENTRANCE_DOORS.length)))
   assert.ok(ENTRANCE_HOME_TILE.all.includes(String(ENTRANCE_DOORS.length)))
   for (const t of Object.values(ENTRANCE_HOME_TILE)) assert.doesNotMatch(t, BRAND, t)
