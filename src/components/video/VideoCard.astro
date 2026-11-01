@@ -42,6 +42,8 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
       <span class="h-h3 vid__title">{title}</span>
     </button>
     {text && <p id={`vid-text-${v.id}`} class="h-cap vid__text">{text}</p>}
+    {/* Ссылка — вне кнопки-плеера: интерактивное в интерактивное не вкладываем */}
+    {v.link && <a class="h-link vid__link" href={v.link.href}>{typograph(v.link.label)}</a>}
   </>
 ) : (
   <div class="vid vid--empty">
@@ -126,6 +128,7 @@ const play = '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
     white-space: pre-line;
   }
   .vid__text { margin-top: 0.25rem; text-wrap: pretty; }
+  .vid__link { display: inline-block; margin-top: 0.5rem; font-size: 0.875rem; }
   .vid:not(.vid--empty):hover .vid__title { text-decoration: underline; text-decoration-color: var(--h-signal); text-decoration-thickness: 0.0625rem; text-underline-offset: 0.25em; }
   .vid:focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.25rem; border-radius: var(--h-tile-radius); }
 

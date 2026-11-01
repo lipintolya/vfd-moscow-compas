@@ -46,6 +46,8 @@ export interface Video {
   /** Подпись длительности, например «4:12» */
   duration?: string
   vertical?: boolean
+  /** Ссылка под описанием карточки — например, на модель из ролика в каталоге */
+  link?:    { href: string; label: string }
   /** Заглушка (PLACEHOLDER): ролика ещё нет — карточка без плеера */
   placeholder?: boolean
 }
@@ -189,6 +191,18 @@ export const VIDEOS: Video[] = [
 const WORK = 'https://storage.yandexcloud.net/vfd.moscow.compass/video.block'
 
 export const WORK_VIDEOS: Video[] = [
+  {
+    id:       'work-urban-skin',
+    title:    'Двери «Урбан 2В»\nи\u00A0скин-накладка',
+    text:     'Межкомнатные двери и накладка на входную дверь в одной отделке: прихожая выглядит единым целым.',
+    /* Сжатая копия (2,9 → 0,8 МБ); источник — облако, video.block/FILE 2026-11-01 12:16:32.mp4 */
+    src:      '/renders/home/videos/work-urban-skin.mp4',
+    cover:    '/renders/home/videos/work-urban-skin.webp',
+    coverAt:  2,
+    duration: '0:13',
+    vertical: true,
+    link:     { href: '/models/urban-2vr-urban-48ab6a/', label: 'Модель «Урбан 2В» в каталоге' },
+  },
   {
     id:       'work-entrance-ayslab',
     title:    'Входная дверь «Айслаб»\nв загородном доме',
