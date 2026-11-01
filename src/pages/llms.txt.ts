@@ -22,7 +22,7 @@ import { PLINTUS_LINES_FAQ } from '../data/plintus-lines'
 import { ENTRANCE_DOORS, ENTRANCE_MIN_PRICE } from '../data/entrance-doors'
 import { VFD_MODELS, VFD_SKINS, VFD_MIN_PRICE, VFD_SECTION } from '../data/entrance-vfd'
 import { DESIGNERS_FAQ } from '../data/designers-page'
-import { WALL_PANELS_PAGE, PANEL_FAQ } from '../data/wall-panels-page'
+import { WALL_PANELS_PAGE, PANEL_FAQ, PANEL_PRICE_LINE, PANEL_PRICES_DATE } from '../data/wall-panels-page'
 import { pluralRu } from '../lib/plural'
 
 const abs = (path: string) => new URL(path, SITE.url).href
@@ -75,7 +75,7 @@ export const GET: APIRoute = async () => {
     '',
     `- Межкомнатные двери ВФД: ${cards.length} ${modelsWord} в ${seriesCount} ${seriesWord}, цены от ${rub(doorMin)} за полотно (${SITE.url}/catalog/). Цены указаны за полотно; комплект с коробом считается по выбранным опциям.`,
     `- Скрытые двери «Секрет», «Секрет Реверс», «Рефлекс»: комплект с алюминиевым коробом от ${rub(SECRET_MIN_KIT_PRICE)} (${SITE.url}/catalog/skrytye-dveri/). Калькулятор цены по кромке, открыванию, коробу, высоте и зеркалу.`,
-    `- Стеновые панели на заказ (${abs(WALL_PANELS_PAGE.path)}): изготавливает ${SITE.studioName} — из натурального шпона и в покрытиях дверей ${SITE.name}, двери встраиваются заподлицо с панелями. Стоимость — расчёт по проекту после замера.`,
+    `- Стеновые панели на заказ (${abs(WALL_PANELS_PAGE.path)}): изготавливает ${SITE.studioName} — из натурального шпона и в покрытиях дверей ${SITE.name}, двери встраиваются заподлицо с панелями. Цена за квадратный метр панели: ${PANEL_PRICE_LINE} (актуально на ${PANEL_PRICES_DATE}, актуальную стоимость уточняйте у менеджера); итог — по проекту после замера.`,
     `- Декор: плинтус от ${rub(FROM_PRICE_PLINTUS)}, рейки от ${rub(FROM_PRICE_REYKI)} за комплект, фальшфрамуга от ${rub(FROM_PRICE_FRAMUGA_KIT)} (${SITE.url}/catalog/decor/).`,
     `- Входные двери: ${ENTRANCE_DOORS.length} моделей (${SITE.url}/catalog/vhodnye-dveri/) — стальные, размеры полотна ${ENTRANCE_DOORS[0]!.sizes} мм, для квартиры и дома (терморазрыв, электронный замок, стеклопакет); у каждой модели своя страница с характеристиками и вариантами отделки. Цены от ${rub(ENTRANCE_MIN_PRICE)} (минимальная цена модели; цену выбранной отделки подтверждает менеджер).`,
     `- ${VFD_SECTION.title} (${SITE.url}/catalog/vhodnye-dveri/#vfd-doors): ${VFD_MODELS.length} моделей — для квартиры и для дома с терморазрывом; накладку изнутри выбирают отдельно (${VFD_SKINS.length} вариантов, часть повторяет цвет и рисунок межкомнатных дверей VFD). Цены от ${rub(VFD_MIN_PRICE)} (дверь с выбранной накладкой; точную сумму подтверждает менеджер).`,

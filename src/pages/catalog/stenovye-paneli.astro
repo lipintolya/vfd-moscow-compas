@@ -6,12 +6,13 @@
  * src/data/wall-panels-page.ts; что показать на месте (рендер или фото с
  * объекта) — src/lib/wall-panels.ts; на странице только разметка.
  *
- * Секции — по группам запросов: материал → помещения → двери в панелях
- * (главное отличие) → работы и видео → цена → как заказать → вопросы.
+ * Секции — по группам запросов: цена → материал → помещения → двери в панелях
+ * (главное отличие) → работы и видео → как заказать → вопросы. Цена стоит
+ * сразу после первого экрана, чтобы её было видно без прокрутки по странице.
  * Первый экран — текст и кадр 3:2 по 6 колонок (кадр ~600 px CSS): рендер
  * 1536 px чёткий и на ретине; во всю ширину (LandingHero) он вышел бы
  * мыльным. Уже 6 колонок текст нельзя — «от производителя» в H1 не влезает.
- * JSON-LD: LocalBusiness, Service (цен за м² нет — без Offer), FAQPage;
+ * JSON-LD: LocalBusiness, Service (цены — в тексте, без Offer: итог по проекту), FAQPage;
  * BreadcrumbList отдают сами хлебные крошки.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro'
@@ -40,6 +41,7 @@ import { localBusinessSchema, sellerRef } from '../../lib/local-business-schema'
 import { AREA_SERVED } from '../../lib/product-schema'
 import { whatsappWithText, telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
 import { typograph } from '../../lib/typograph'
+import { rub } from '../../data/services'
 import { PHONE, SITE } from '../../config/site'
 
 const page = WALL_PANELS_PAGE
@@ -83,11 +85,11 @@ const CARD_SIZES = '(min-width: 56.25rem) 25rem, (min-width: 43.75rem) 45vw, 82v
 const PAIR_SIZES = '(min-width: 62.5rem) 22rem, 45vw'
 
 const navItems = [
+  { id: 'wp-price', label: 'Цена' },
   { id: 'wp-materials', label: 'Материалы' },
   { id: 'wp-rooms', label: 'Помещения' },
   { id: 'wp-doors', label: 'Двери в панелях' },
   ...(works.length ? [{ id: 'wp-works', label: 'Работы' }] : []),
-  { id: 'wp-price', label: 'Цена' },
   { id: 'wp-faq', label: 'Вопросы' },
 ]
 
@@ -144,13 +146,69 @@ const structuredData = [
           <h1 id="wp-title" class="h-h1">{typograph(page.h1)}</h1>
           <p class="h-lead wp-hero__lead">{typograph(page.lead)}</p>
           <div class="wp-hero__actions">
-            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal h-btn--phone-wide">Обсудить проект</a>
+            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--ink h-btn--phone-wide">Обсудить проект</a>
             <a href={whatsapp} class="h-btn h-btn--quiet h-btn--phone-wide wp-wa" target="_blank" rel="noopener">
               <WhatsAppIcon class="wp-wa__ico" />Написать в WhatsApp
             </a>
           </div>
         </div>
         <PanelFigure class="wp-hero__media" visual={page.hero} shown={hero} sizes={HERO_SIZES} eager />
+      </div>
+    </section>
+
+    {/* Цена — сразу после первого экрана: прайс на натуральный шпон и расчёт по проекту */}
+    <section id="wp-price" class="h-sec h-sec--wall" aria-labelledby="wp-price-title">
+      <div class="container wp-price">
+        <div>
+          <h2 id="wp-price-title" class="h-h2">{typograph(PANEL_PRICE.title)}</h2>
+          <p class="h-lead wp-price__lead">{typograph(PANEL_PRICE.lead)}</p>
+          <div class="wp-prices">
+            <table aria-labelledby="wp-price-title">
+              <thead>
+                <tr>
+                  <th scope="col">Материал</th>
+                  <th scope="col" class="wp-prices__price">Цена за м²</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PANEL_PRICE.rows.map((r) => (
+                  <tr>
+                    <th scope="row">
+                      <span class="wp-prices__name">{typograph(r.name)}</span>
+                      <span class="wp-prices__text">{typograph(r.text)}</span>
+                    </th>
+                    <td class="wp-prices__price">{rub(r.price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p class="wp-prices__note">{typograph(PANEL_PRICE.note)}</p>
+          </div>
+          <p class="h-body wp-price__factors">{typograph(PANEL_PRICE.factorsLead)}</p>
+          <ul class="wp-points" role="list">
+            {PANEL_PRICE.factors.map((f) => <li class="h-body">{typograph(f)}</li>)}
+          </ul>
+        </div>
+        <aside class="wp-price__card" aria-label="Расчёт стоимости">
+          <p class="h-body">{typograph(PANEL_PRICE.rails)}</p>
+          <div class="wp-price__actions">
+            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--ink">Рассчитать проект</a>
+            <a href={whatsapp} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" aria-label="Написать в WhatsApp">
+              <WhatsAppIcon class="wp-wa__ico" />WhatsApp
+            </a>
+            {telegram && (
+              <a href={telegram} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+                <TelegramIcon class="wp-wa__ico" />Telegram
+              </a>
+            )}
+            {MAX_CHAT && (
+              <a href={maxChatUrl()} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" data-copy-text={maxCopy} aria-label="Написать в MAX (текст скопируется)">
+                <MaxIcon class="wp-wa__ico" />MAX
+              </a>
+            )}
+          </div>
+          <a class="wp-price__phone" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
+        </aside>
       </div>
     </section>
 
@@ -234,38 +292,6 @@ const structuredData = [
       tightTop={false}
       cols={4}
     />
-
-    <section id="wp-price" class="h-sec h-sec--tight-top" aria-labelledby="wp-price-title">
-      <div class="container wp-price">
-        <div>
-          <h2 id="wp-price-title" class="h-h2">{typograph(PANEL_PRICE.title)}</h2>
-          <p class="h-lead wp-price__lead">{typograph(PANEL_PRICE.lead)}</p>
-          <ul class="wp-points" role="list">
-            {PANEL_PRICE.factors.map((f) => <li class="h-body">{typograph(f)}</li>)}
-          </ul>
-        </div>
-        <aside class="wp-price__card" aria-label="Расчёт стоимости">
-          <p class="h-body">{typograph(PANEL_PRICE.rails)}</p>
-          <div class="wp-price__actions">
-            <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--signal">Рассчитать проект</a>
-            <a href={whatsapp} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" aria-label="Написать в WhatsApp">
-              <WhatsAppIcon class="wp-wa__ico" />WhatsApp
-            </a>
-            {telegram && (
-              <a href={telegram} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
-                <TelegramIcon class="wp-wa__ico" />Telegram
-              </a>
-            )}
-            {MAX_CHAT && (
-              <a href={maxChatUrl()} class="h-btn h-btn--quiet wp-wa" target="_blank" rel="noopener" data-copy-text={maxCopy} aria-label="Написать в MAX (текст скопируется)">
-                <MaxIcon class="wp-wa__ico" />MAX
-              </a>
-            )}
-          </div>
-          <a class="wp-price__phone" href={`tel:${PHONE.raw}`}>{PHONE.label}</a>
-        </aside>
-      </div>
-    </section>
 
     <StepsRow id="wp-steps" steps={PANEL_STEPS} title={PANEL_SECTIONS.steps.title} lead={PANEL_SECTIONS.steps.lead} />
 
@@ -368,12 +394,43 @@ const structuredData = [
   /* ── Цена ── */
   .wp-price { display: grid; gap: 2.5rem var(--h-gutter); align-items: start; }
   .wp-price__lead { margin-top: 1.25rem; }
+  /* Прайс — белая карточка на сером фоне секции, как плитки материалов */
+  .wp-prices {
+    margin-top: 2rem;
+    padding-inline: clamp(1.25rem, 3vw, 2rem);
+    border-radius: var(--h-tile-radius);
+    background: var(--h-paper);
+  }
+  .wp-prices table { width: 100%; border-collapse: collapse; }
+  .wp-prices th,
+  .wp-prices td {
+    padding-block: 1.25rem;
+    border-bottom: 0.0625rem solid var(--h-rule);
+    text-align: left;
+    vertical-align: top;
+  }
+  .wp-prices tbody tr:last-child > * { border-bottom: 0; }
+  .wp-prices thead th { padding-block: 1.5rem 0.875rem; font-size: 0.875rem; font-weight: 500; color: var(--h-muted); }
+  .wp-prices__name { display: block; color: var(--h-ink); font-weight: 600; }
+  .wp-prices__text { display: block; margin-top: 0.25rem; color: var(--h-soft); font-weight: 400; }
+  .wp-prices__price {
+    text-align: right;
+    white-space: nowrap;
+    color: var(--h-ink);
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .wp-prices thead .wp-prices__price { font-size: 0.875rem; font-weight: 500; color: var(--h-muted); }
+  .wp-prices__note { padding-block: 1.25rem 1.5rem; color: var(--h-ink); }
+  .wp-price__factors { margin: 2rem 0 0; }
+  .wp-price__factors + .wp-points { margin-top: 0.75rem; }
   .wp-price__card {
     display: grid;
     gap: 1.25rem;
     padding: clamp(1.5rem, 3vw, 2rem);
     border-radius: var(--h-tile-radius);
-    background: var(--h-wall);
+    background: var(--h-paper);
   }
   /* Действия столбиком на всю ширину карточки: звонок, затем три мессенджера */
   .wp-price__actions { display: grid; gap: 0.625rem; }

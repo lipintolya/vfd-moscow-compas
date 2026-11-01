@@ -5,6 +5,7 @@ import {
 } from '../src/data/wall-panels-page'
 import { renderOf, shownVisual } from '../src/lib/wall-panels'
 import { WORK_VIDEOS } from '../src/data/videos'
+import { rub } from '../src/data/services'
 import { TITLE_MAX, DESCRIPTION_MAX } from '../src/lib/product-text'
 import { brandTitle } from '../src/lib/seo-title'
 
@@ -42,13 +43,20 @@ test('стеновые панели: ролики есть в списке ви�
   for (const id of PANEL_VIDEO_IDS) assert.ok(WORK_VIDEOS.some((v) => v.id === id), id)
 })
 
-test('стеновые панели: цен за м² и сроков салон не давал — их нет в текстах', () => {
+test('стеновые панели: цены за м² — только прайс салона на шпон, с датой актуальности', () => {
+  assert.ok(PANEL_PRICE.rows.length > 0)
+  for (const r of PANEL_PRICE.rows) assert.ok(Number.isInteger(r.price) && r.price > 0, r.name)
+  assert.match(PANEL_PRICE.note, /актуальны на 1 ноября 2026 года/)
+  assert.match(PANEL_PRICE.note, /уточняйте у менеджера/)
+  // Вопрос о стоимости называет каждую цену из прайса
+  for (const r of PANEL_PRICE.rows) assert.ok(PANEL_FAQ[0].a.includes(rub(r.price)), r.name)
+  // За пределами прайса цен за м² и сроков салон не давал
   const texts = [
     WALL_PANELS_PAGE.lead, WALL_PANELS_PAGE.description,
     ...PANEL_MATERIALS.map((m) => m.text), ...PANEL_ROOMS.map((r) => r.text),
-    PANEL_PRICE.lead, ...PANEL_PRICE.factors, ...PANEL_FAQ.flatMap((f) => [f.q, f.a]),
+    PANEL_PRICE.lead, PANEL_PRICE.note, ...PANEL_PRICE.factors, ...PANEL_FAQ.flatMap((f) => [f.q, f.a]),
   ].join('\n')
   assert.doesNotMatch(texts, /м²|м2|кв\.?\s*м|за метр|недел|рабочих дн/)
-  // Единственная цена — рейки из прайса декора
+  // Декоративные рейки — единственная цена за комплект вне прайса шпона
   assert.match(PANEL_PRICE.rails, /от \d/)
 })
