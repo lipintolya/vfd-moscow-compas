@@ -9,7 +9,8 @@
  * входной дверью или панелью, находит её сразу, не открывая меню.
  * Новый раздел — строка в items.
  */
-import { ENTRANCE_DOORS, ENTRANCE_PAGE, ENTRANCE_MIN_PRICE } from '../../data/entrance-doors'
+import { ENTRANCE_DOORS, ENTRANCE_MIN_PRICE } from '../../data/entrance-doors'
+import { COVER_SCENE } from '../../lib/entrance-scenes'
 import { rub } from '../../data/services'
 import { DIRECTION_PHOTOS } from '../../data/direction-photos'
 import { PANEL_HOME_TILE, WALL_PANELS_PAGE } from '../../data/wall-panels-page'
@@ -20,14 +21,16 @@ import { pluralRu } from '../../lib/plural'
 
 const walls = shownVisual(PANEL_HOME_TILE.visual, await getWorks())
 if (!walls) throw new Error('Каталог: у плитки «Стеновые панели» нет ни рендера, ни фото работы')
-const hero = ENTRANCE_PAGE.hero
+/* Плитка входных дверей — рендер «дверь на доме» (обложка раздела), квадратная обрезка с дверью по центру */
+const entranceSquare = COVER_SCENE.crops?.square
+if (!entranceSquare) throw new Error('Каталог: у обложки входных дверей нет квадратной обрезки — npm run gen:entrance-renders')
 
 const items = [
   {
     title: 'Входные двери',
     note: `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}, от ${rub(ENTRANCE_MIN_PRICE)}`,
     href: '/catalog/vhodnye-dveri/',
-    src: hero.src, srcset: hero.srcset, alt: hero.alt, position: '25% 0%',
+    src: COVER_SCENE.src, srcset: entranceSquare.srcset, alt: '', position: '50% 50%',
   },
   {
     title: 'Скрытые двери',
