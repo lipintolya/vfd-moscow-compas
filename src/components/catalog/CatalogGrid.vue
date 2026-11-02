@@ -22,7 +22,8 @@ withDefaults(defineProps<{
 
 <style scoped>
 /* Колонки — от ширины места под сетку, а не экрана: на /catalog/ рядом
-   фильтры, на странице серии их нет. 24 на странице делятся на 2, 3 и 4. */
+   фильтры, на странице серии их нет. На компьютере — четыре в ряд: 24 на
+   странице делятся на 2, 3 и 4 (последний ряд всегда полный). */
 .cg {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr));
@@ -31,8 +32,9 @@ withDefaults(defineProps<{
   padding: 0;
   list-style: none;
 }
-@media (width >= 1920px) {
-  .cg { grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
+/* Четыре — когда рядом с сеткой фильтры (от 62,5 rem), но карточки не уже ~200 px */
+@media (min-width: 80rem) {
+  .cg { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 35.9375rem) {
   .cg { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.5rem 1rem; }
