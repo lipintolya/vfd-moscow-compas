@@ -27,6 +27,7 @@ import Videos from '../../components/home/Videos.astro'
 import StepsRow from '../../components/home/StepsRow.astro'
 import FaqAccordion from '../../components/ui/FaqAccordion.astro'
 import VisitBand from '../../components/home/VisitBand.astro'
+import RelatedArticleCard from '../../components/articles/RelatedArticleCard.astro'
 import WhatsAppIcon from '../../components/ui/WhatsAppIcon.vue'
 import TelegramIcon from '../../components/ui/TelegramIcon.vue'
 import MaxIcon from '../../components/ui/MaxIcon.vue'
@@ -43,6 +44,7 @@ import { localBusinessSchema, sellerRef } from '../../lib/local-business-schema'
 import { AREA_SERVED } from '../../lib/product-schema'
 import { whatsappWithText, telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
 import { typograph } from '../../lib/typograph'
+import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import { rub } from '../../data/services'
 import { PHONE, SITE } from '../../config/site'
 
@@ -63,6 +65,7 @@ const doorVisuals = PANEL_DOORS.visuals.map((d) => ({ ...d, shown: show(d.visual
 
 /* Работы: раздел «Стеновые панели» и работы с этой меткой (скрытые двери в панелях) */
 const works = allWorks.filter((w) => w.category === 'walls' || w.tags?.includes(PANEL_WORKS_TAG)).slice(0, 6)
+const relatedArticle = await relatedArticleFor({ pagePath: '/catalog/stenovye-paneli/' })
 
 const videos = PANEL_VIDEO_IDS.map((id) => {
   const v = WORK_VIDEOS.find((x) => x.id === id)
@@ -313,6 +316,8 @@ const structuredData = [
     />
 
     <StepsRow id="wp-steps" steps={PANEL_STEPS} title={PANEL_SECTIONS.steps.title} lead={PANEL_SECTIONS.steps.lead} />
+
+    {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 
     <section id="wp-faq" class="h-sec h-sec--wall" aria-labelledby="wp-faq-title">
       <div class="container h-faq">

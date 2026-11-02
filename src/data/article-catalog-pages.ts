@@ -16,4 +16,5 @@ export const ARTICLE_CATALOG_PAGES: Record<string, string> = {
   'Двери в скандинавском стиле':     '/catalog/skandinavskiy-dveri/',
   'Входные двери':                   '/catalog/vhodnye-dveri/',
   'Декор и погонаж':                 '/catalog/decor/',
+  'Стеновые панели':                 '/catalog/stenovye-paneli/',
 }
