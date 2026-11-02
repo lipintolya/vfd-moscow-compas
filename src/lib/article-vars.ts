@@ -19,6 +19,7 @@ import { FRAMUGA_ROWS, FROM_PRICE_FRAMUGA_KIT } from '../data/decor-products'
 import { DOOR_SIZES } from '../data/door-sizes'
 import { ENTRANCE_DOORS, ENTRANCE_MIN_PRICE } from '../data/entrance-doors'
 import { pluralRu } from './plural'
+import { PANEL_PRICE, PANEL_PRICES_DATE } from '../data/wall-panels-page'
 
 const ENTRANCE_STEELS = ENTRANCE_DOORS.map((d) => d.steel)
 const ENTRANCE_STEEL = [...new Set(ENTRANCE_STEELS)].sort((a, b) => Number(a.replace(',', '.')) - Number(b.replace(',', '.'))).filter((v, i, all) => i === 0 || i === all.length - 1)
@@ -91,6 +92,15 @@ export const ARTICLE_VARS = {
     thermo:    `${THERMO_COUNT} ${pluralRu(THERMO_COUNT, ['модель', 'модели', 'моделей'])}`,
     /** «960×2050, 880×2050» — размеры полотна, мм */
     sizes:     nb(`${ENTRANCE_DOORS[0]!.sizes} мм`),
+  },
+  /** Стеновые панели — прайс салона на натуральный шпон, src/data/wall-panels-page.ts */
+  panels: {
+    /** Дуб, за м², «11 900 ₽» */
+    oakPrice:    rub(PANEL_PRICE.rows.find((r) => r.wood === 'дуб')!.price),
+    /** Американский орех, наборный шпон, за м² */
+    walnutPrice: rub(PANEL_PRICE.rows.find((r) => r.wood === 'орех американский')!.price),
+    /** На какую дату актуален прайс: «1 ноября 2026 года» */
+    pricesDate:  PANEL_PRICES_DATE,
   },
   /** Декор — src/data/decor-products.ts */
   decor: {
