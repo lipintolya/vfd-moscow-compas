@@ -1,9 +1,13 @@
 ---
 /**
- * Другие разделы каталога — ряд фото-плиток над сеткой межкомнатных дверей
+ * Другие разделы каталога — ряд фото-плиток под сеткой межкомнатных дверей
  * на /catalog/: входные двери, скрытые, стеновые панели, декор и плинтус.
- * Человек, пришедший за входной дверью или панелью, находит её сразу, не
- * открывая меню. Новый раздел — строка в items.
+ * Под сеткой, а не над ней: человек, пришедший за межкомнатной дверью, сначала
+ * видит её и не уходит со страницы.
+ * Плитки те же, что на главной (.h-tile--photo из styles/home.css): фото во
+ * всю плитку, название и строка-пояснение внизу. Человек, пришедший за
+ * входной дверью или панелью, находит её сразу, не открывая меню.
+ * Новый раздел — строка в items.
  */
 import { ENTRANCE_DOORS, ENTRANCE_PAGE, ENTRANCE_MIN_PRICE } from '../../data/entrance-doors'
 import { rub } from '../../data/services'
@@ -21,9 +25,9 @@ const hero = ENTRANCE_PAGE.hero
 const items = [
   {
     title: 'Входные двери',
-    note: `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}, от ${rub(ENTRANCE_MIN_PRICE)}`,
+    note: `${ENTRANCE_DOORS.length} ${pluralRu(ENTRANCE_DOORS.length, ['модель', 'модели', 'моделей'])}, от ${rub(ENTRANCE_MIN_PRICE)}`,
     href: '/catalog/vhodnye-dveri/',
-    src: hero.src, srcset: hero.srcset, alt: hero.alt, position: '25% 0%', fit: 'door',
+    src: hero.src, srcset: hero.srcset, alt: hero.alt, position: '25% 0%',
   },
   {
     title: 'Скрытые двери',
@@ -50,14 +54,13 @@ const items = [
   <ul class="cs__list" role="list">
     {items.map((it) => (
       <li>
-        <a class="cs__item" href={it.href}>
-          <span class="h-media cs__photo">
-            <img src={it.src} srcset={it.srcset} sizes="(min-width: 62.5rem) 14rem, 44vw" alt="" role="presentation" style={`object-position: ${it.position}`} loading="lazy" decoding="async" />
+        <a href={it.href} class="h-tile h-tile--photo cs__tile">
+          <img src={it.src} srcset={it.srcset} sizes="(min-width: 62.5rem) 25vw, 50vw" alt="" role="presentation" style={`object-position: ${it.position}`} loading="lazy" decoding="async" />
+          <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </span>
-          <span class="cs__text">
-            <span class="cs__title">{it.title}</span>
-            <span class="cs__note">{it.note}</span>
-          </span>
+          <span class="h-tile__title">{it.title}</span>
+          <span class="h-cap">{it.note}</span>
         </a>
       </li>
     ))}
@@ -65,18 +68,15 @@ const items = [
 </nav>
 
 <style>
-  .cs { margin: 0 0 clamp(1.5rem, 3vw, 2.25rem); }
+  .cs { margin: clamp(2.5rem, 5vw, 4rem) 0 0; }
   .cs__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 62.5rem) { .cs__list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--h-tile-gap); } }
-  .cs__item { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0.75rem; align-items: center; padding: 0.5rem; border: 0.0625rem solid var(--h-rule); border-radius: var(--h-radius); color: inherit; text-decoration: none; transition: border-color 200ms var(--ease-out); }
-  .cs__item:hover { border-color: var(--h-signal); }
-  .cs__photo { aspect-ratio: 1; border-radius: 0.625rem; }
-  .cs__text { display: grid; gap: 0.125rem; min-width: 0; }
-  .cs__title { font-size: 0.9375rem; font-weight: 600; line-height: 1.25; color: var(--h-ink); }
-  .cs__note { font-size: 0.8125rem; line-height: 1.3; color: var(--h-muted); }
-  /* Телефон: плитка вертикально — фото сверху, подпись под ним */
-  @media (max-width: 43.6875rem) {
-    .cs__item { grid-template-columns: 1fr; gap: 0.5rem; padding: 0.5rem 0.5rem 0.75rem; }
-    .cs__photo { aspect-ratio: 4 / 3; }
+  .cs__tile { min-height: 12.5rem; padding: clamp(0.875rem, 1.6vw, 1.25rem); }
+  .cs__tile .h-tile__title { font-size: 1.0625rem; line-height: 1.2; }
+  .cs__tile .h-cap { margin-top: 0.25rem; max-width: none; font-size: 0.8125rem; line-height: 1.35; }
+  @media (min-width: 62.5rem) {
+    .cs__list { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--h-tile-gap); }
+    .cs__tile { min-height: 16rem; }
+    .cs__tile .h-tile__title { font-size: clamp(1.25rem, 1.7vw, 1.5rem); }
+    .cs__tile .h-cap { font-size: 0.875rem; }
   }
 </style>
