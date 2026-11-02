@@ -1,69 +1,59 @@
 /**
- * src/pages/feed/vk.xml.ts → <SITE.url>/feed/vk.xml
+ * src/pages/feed/vk.xml.ts → <SITE.url>/feed/vk.xml (та же выгрузка — /feed/vk.yml)
  *
  * Товарный фид (YML) для VK Маркета: импорт в группе ВКонтакте по ссылке
  * (Маркет → Товары → Импорт → YML). Те же товары и те же данные, что и
  * у страниц моделей и у фида Яндекса (lib/model-entries, lib/feed-common),
  * поэтому цена, фото и наличие совпадают с сайтом.
  *
- * Ограничения VK, которые выполняются здесь: до 15 000 товаров в файле
- * (в каталоге сейчас ~160), размер до 8 МБ (сейчас ~0,3 МБ), до 10 фото
- * на товар. Варианты (цвет) не выделяются: цвета — это фото карточки, а
- * характеристики — обычные <param>, то есть не более двух свойств варианта.
+ * Требования VK (справка «Импорт товаров», раздел «Требования к YML-файлу»),
+ * которые выполняются здесь: до 15 000 товаров в файле (в каталоге ~160), размер
+ * до 8 МБ (сейчас ~0,3 МБ), не более 2 свойств (param) у товара, фото только
+ * JPG/PNG/GIF минимум 400×400 (lib/vk-photo.ts), без HTML в описании, до 10 фото.
+ * Варианты (цвет) не выделяются: цвета — это фото карточки.
  */
 import type { APIRoute } from 'astro'
 import { getModelEntries } from '../../lib/model-entries'
-import { describeTrim } from '../../lib/trim-labels'
-import { getSeriesSpec } from '../../data/series-descriptions'
 import { BRAND, coatingInline, productName, productDescription } from '../../lib/product-text'
 import { SITE } from '../../config/site'
 import {
-  MAX_PICTURES, COATING_CATEGORY_IDS, ROOT_CATEGORY_ID, xml, offerId, feedDate, isAvailable,
+  MAX_PICTURES, COATING_CATEGORY_IDS, ROOT_CATEGORY_ID, xml, vkOfferId, feedDate, isAvailable,
   feedOffers, assertUniqueIds, categoriesXml,
 } from '../../lib/feed-common'
 import type { ModelEntry } from '../../lib/model-entries'
-import { coverSource, coverKey } from '../../lib/vk-cover'
+import { vkPictureFiles } from '../../lib/vk-photo'
 
 /* Ограничения VK Маркета (справка «Импорт товаров») */
 const MAX_OFFERS = 15_000
 
-/* Цена в каталоге — за полотно: сказано в параметре, а не только в описании */
-const PRICE_BASIS = 'за полотно, без коробки и наличников'
+/* Цена в каталоге — за полотно: в описании, потому что свойств не больше двух */
+const PRICE_BASIS = 'Цена — за полотно, без коробки и наличников.'
 
-/** Первое фото — обложка на квадрате с графитом (/feed/vk-covers/…), дальше — фото цветов */
-function pictureLines(e: ModelEntry, site: URL, key: string | undefined): string[] {
-  const cover = coverSource(e)
-  const rest = [...new Set(e.colors.map(c => c.photo))].filter(src => src !== cover)
-  const urls = [
-    ...(cover && key ? [new URL(`/feed/vk-covers/${offerId(e.model.id)}-${key}.jpg`, site).href] : []),
-    ...rest.map(src => new URL(src, site).href),
-  ].slice(0, MAX_PICTURES)
-  return urls.map(href => `        <picture>${xml(href)}</picture>`)
+/** Фото карточки: /feed/vk-photos/… (первое — обложка), адреса совпадают с файлами сборки */
+function pictureLines(site: URL, files: { file: string }[]): string[] {
+  return files
+    .slice(0, MAX_PICTURES)
+    .map(({ file }) => `        <picture>${xml(new URL(`/feed/vk-photos/${file}.jpg`, site).href)}</picture>`)
 }
 
-function offerXml(e: ModelEntry, site: URL, key: string | undefined): string {
-  const spec     = getSeriesSpec(e.seriesSlug, e.coatingSlug)
-  const trim     = describeTrim(e.model.trim)
-  const params: [string, string, string?][] = [
+function offerXml(e: ModelEntry, site: URL, files: { file: string }[]): string {
+  /* Два свойства — лимит VK; толщина и кромка уже в описании (productDescription) */
+  const params: [string, string][] = [
     ['Серия', e.seriesName],
     ['Покрытие', e.coatingName],
-    ...(trim ? [[trim.kind === 'glass' ? 'Остекление' : 'Кромка', trim.label] as [string, string]] : []),
-    ...(spec.thickness ? [['Толщина полотна', spec.thickness, 'мм'] as [string, string, string]] : []),
-    ['Цена', PRICE_BASIS],
   ]
 
   return [
-    `      <offer id="${offerId(e.model.id)}" available="${isAvailable(e)}">`,
+    `      <offer id="${vkOfferId(e.model.id)}" available="${isAvailable(e)}">`,
     `        <name>${xml(productName(e, { withBrand: true }))}</name>`,
     `        <vendor>${xml(BRAND)}</vendor>`,
     `        <url>${xml(new URL(`/models/${e.slug}/`, site).href)}</url>`,
     `        <price>${Math.round(e.minPrice!)}</price>`,
     `        <currencyId>RUR</currencyId>`,
     `        <categoryId>${COATING_CATEGORY_IDS[e.coatingSlug] ?? ROOT_CATEGORY_ID}</categoryId>`,
-    ...pictureLines(e, site, key),
-    `        <description>${xml(productDescription(e))}</description>`,
-    ...params.map(([name, value, unit]) =>
-      `        <param name="${xml(name)}"${unit ? ` unit="${xml(unit)}"` : ''}>${xml(value)}</param>`),
+    ...pictureLines(site, files),
+    `        <description>${xml(`${productDescription(e)} ${PRICE_BASIS}`)}</description>`,
+    ...params.map(([name, value]) => `        <param name="${xml(name)}">${xml(value)}</param>`),
     `      </offer>`,
   ].join('\n')
 }
@@ -82,13 +72,11 @@ export const GET: APIRoute = async ({ site }) => {
   if (offers.length > MAX_OFFERS) {
     throw new Error(`[feed/vk.xml] ${offers.length} товаров — больше лимита VK (${MAX_OFFERS}), нужно делить на файлы`)
   }
-  assertUniqueIds(offers, 'feed/vk.xml')
+  assertUniqueIds(offers, 'feed/vk.xml', vkOfferId)
 
-  /* Хеш обложки — по каждому товару (см. lib/vk-cover.ts) */
-  const keys = new Map(await Promise.all(offers.map(async e => {
-    const src = coverSource(e)
-    return [e.model.id, src ? await coverKey(src) : undefined] as const
-  })))
+  /* Файлы фото по каждому товару (см. lib/vk-photo.ts) */
+  const pictures = new Map(await Promise.all(offers.map(async e =>
+    [e.model.id, await vkPictureFiles(e)] as const)))
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -104,7 +92,7 @@ export const GET: APIRoute = async ({ site }) => {
     ...categoriesXml(offers, coatingInline),
     '    </categories>',
     '    <offers>',
-    ...offers.map(e => offerXml(e, base, keys.get(e.model.id))),
+    ...offers.map(e => offerXml(e, base, pictures.get(e.model.id) ?? [])),
     '    </offers>',
     '  </shop>',
     '</yml_catalog>',

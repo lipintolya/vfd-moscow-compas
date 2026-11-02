@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { xml, offerId, feedOffers, categoriesXml, COATING_CATEGORY_IDS, ROOT_CATEGORY_ID } from '../src/lib/feed-common'
+import { xml, offerId, vkOfferId, feedOffers, categoriesXml, COATING_CATEGORY_IDS, ROOT_CATEGORY_ID } from '../src/lib/feed-common'
 import type { ModelEntry } from '../src/lib/model-entries'
 
 test('xml(): экранирует спецсимволы — название с кавычками и амперсандом не ломает фид', () => {
@@ -12,6 +12,13 @@ test('offerId(): постоянный id до 20 символов без деф�
   const id = offerId('3f2b8c1e-9d4a-4b6e-8f0a-1c2d3e4f5a6b')
   assert.equal(id, '3f2b8c1e9d4a4b6e8f0a')
   assert.ok(id.length <= 20)
+})
+
+test('vkOfferId(): новая версия id VK — не совпадает со старым id и не длиннее 22 символов', () => {
+  const modelId = '3f2b8c1e-9d4a-4b6e-8f0a-1c2d3e4f5a6b'
+  assert.equal(vkOfferId(modelId), 'v23f2b8c1e9d4a4b6e8f0a')
+  assert.notEqual(vkOfferId(modelId), offerId(modelId))
+  assert.ok(vkOfferId(modelId).length <= 22)
 })
 
 test('feedOffers(): без цены или без фото модель в фид не идёт', () => {

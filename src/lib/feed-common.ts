@@ -33,6 +33,15 @@ export const xml = (s: string | number) =>
 /** UUID модели без дефисов, первые 20 символов — постоянный и уникальный. */
 export const offerId = (modelId: string) => modelId.replaceAll('-', '').slice(0, 20)
 
+/* Версия id товаров VK Маркета. VK не заменяет фото у товара, который уже
+   создан с этим id (импорт обновляет поля, а фото остаются старые), поэтому
+   новые фото дойдут до карточек только у товаров с новым id. Поднять версию —
+   и площадка создаст все товары заново; старые карточки удалить в кабинете. */
+export const VK_ITEM_REV = 'v2'
+
+/** id товара в VK Маркете: версия + offerId (не пересекается с id Яндекса и старой версией). */
+export const vkOfferId = (modelId: string) => `${VK_ITEM_REV}${offerId(modelId)}`
+
 /** RFC 3339 с часовым поясом Москвы (UTC+5, без перехода на летнее время). */
 export function feedDate(): string {
   const local = new Date(Date.now() + 5 * 60 * 60 * 1000)
@@ -48,8 +57,8 @@ export const feedOffers = (entries: ModelEntry[]) =>
   entries.filter(e => e.minPrice && e.colors.length > 0)
 
 /** Проверка: id офферов должны быть уникальны, иначе площадка склеит товары. */
-export function assertUniqueIds(offers: ModelEntry[], feed: string) {
-  const ids = new Set(offers.map(e => offerId(e.model.id)))
+export function assertUniqueIds(offers: ModelEntry[], feed: string, idOf: (modelId: string) => string = offerId) {
+  const ids = new Set(offers.map(e => idOf(e.model.id)))
   if (ids.size !== offers.length) {
     throw new Error(`[${feed}] совпали id офферов — нужен другой способ сокращения UUID`)
   }
