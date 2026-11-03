@@ -3,9 +3,18 @@ import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { ENTRANCE_DOORS } from '../src/data/entrance-doors'
-import { vkEntranceId, entrancePictureSources, entranceDescription, ENTRANCE_CATEGORY_ID } from '../src/lib/vk-entrance'
+import { vkEntranceId, entrancePictureSources, entranceDescription, entranceName, ENTRANCE_CATEGORY_ID } from '../src/lib/vk-entrance'
 import { vkOfferId } from '../src/lib/feed-common'
 import { ENTRANCE_PHOTO_BG, PHOTO_BG } from '../src/lib/vk-photo'
+import { BRAND } from '../src/lib/product-text'
+
+test('название входной двери — как у межкомнатных: с поставщиком ВФД', () => {
+  for (const d of ENTRANCE_DOORS) {
+    const name = entranceName(d)
+    assert.ok(name.startsWith('Входная дверь ' + BRAND + ' '), name)
+    assert.ok(name.endsWith(d.name), name)
+  }
+})
 
 test('vkEntranceId(): у каждой входной двери свой id, он не совпадает с межкомнатными (v2…)', () => {
   const ids = ENTRANCE_DOORS.map((d) => vkEntranceId(d.id))

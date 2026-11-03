@@ -29,7 +29,7 @@ import { vkPictureFiles, type VkPicture } from '../../lib/vk-photo'
 import { ENTRANCE_DOORS, type EntranceDoor } from '../../data/entrance-doors'
 import {
   ENTRANCE_CATEGORY_ID, ENTRANCE_CATEGORY_NAME, vkEntranceId, entrancePictureFiles,
-  entranceGroupName, entranceDescription,
+  entranceGroupName, entranceName, entranceDescription,
 } from '../../lib/vk-entrance'
 
 /* Ограничения VK Маркета (справка «Импорт товаров») */
@@ -67,7 +67,7 @@ function offerXml(e: ModelEntry, site: URL, files: { file: string }[]): string {
   ].join('\n')
 }
 
-/** Входная дверь: без поставщика, два свойства; фото — на белом (lib/vk-entrance.ts) */
+/** Входная дверь: структура как у межкомнатных (название, поставщик, два свойства); фото — на белом (lib/vk-entrance.ts) */
 function entranceOfferXml(d: EntranceDoor, site: URL, files: VkPicture[]): string {
   const params: [string, string][] = [
     ['Тип', entranceGroupName(d)],
@@ -76,7 +76,8 @@ function entranceOfferXml(d: EntranceDoor, site: URL, files: VkPicture[]): strin
 
   return [
     `      <offer id="${vkEntranceId(d.id)}" available="true">`,
-    `        <name>${xml(d.title)}</name>`,
+    `        <name>${xml(entranceName(d))}</name>`,
+    `        <vendor>${xml(BRAND)}</vendor>`,
     `        <url>${xml(new URL(d.href, site).href)}</url>`,
     `        <price>${Math.round(d.from)}</price>`,
     `        <currencyId>RUR</currencyId>`,

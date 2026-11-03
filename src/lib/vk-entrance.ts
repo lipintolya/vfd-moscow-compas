@@ -5,12 +5,14 @@
  * дверь, фото — её отделки по порядку, на белом фоне. Цена — «от» (минимум
  * модели, как на сайте); точную сумму называет менеджер.
  *
- * Без поставщика (vendor): на сайте входные двери тоже без бренда
- * (productSchemaFrom), название завода в фид не попадает.
+ * Структура товара — как у межкомнатных (тот же файл, который VK принял):
+ * название «Входная дверь ВФД …» и <vendor>ВФД</vendor>. Без поставщика
+ * импорт в VK не проходил (владелец, 3 ноя 2026).
  */
 import { DOOR_GROUPS, VARIANTS_SHOWN, type EntranceDoor } from '../data/entrance-doors'
 import { rub } from '../data/services'
 import { MAX_PICTURES } from './feed-common'
+import { BRAND } from './product-text'
 import { vkPhotoFiles, ENTRANCE_PHOTO_BG, type VkPicture } from './vk-photo'
 
 /* id категории — постоянный, как у корня межкомнатных (1) и покрытий (11–15) */
@@ -21,6 +23,9 @@ export const ENTRANCE_CATEGORY_NAME = 'Входные двери'
 export const vkEntranceId = (doorId: string) => `ve${doorId.replaceAll('-', '').slice(0, 20)}`
 
 export const entranceGroupName = (d: EntranceDoor) => DOOR_GROUPS.find((g) => g.id === d.group)!.nav
+
+/** Название и поставщик — как у межкомнатных: «Межкомнатная дверь ВФД …» → «Входная дверь ВФД …» */
+export const entranceName = (d: EntranceDoor) => `Входная дверь ${BRAND} ${d.name}`
 
 /** Фото карточки: отделки по порядку, как на странице модели (первая — обложка) */
 export function entrancePictureSources(d: EntranceDoor): string[] {
