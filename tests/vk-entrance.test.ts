@@ -6,13 +6,11 @@ import { ENTRANCE_DOORS } from '../src/data/entrance-doors'
 import { vkEntranceId, entrancePictureSources, entranceDescription, entranceName, ENTRANCE_CATEGORY_ID } from '../src/lib/vk-entrance'
 import { vkOfferId } from '../src/lib/feed-common'
 import { ENTRANCE_PHOTO_BG, PHOTO_BG } from '../src/lib/vk-photo'
-import { BRAND } from '../src/lib/product-text'
-
-test('название входной двери — как у межкомнатных: с поставщиком ВФД', () => {
+test('название входной двери — как на сайте, без бренда: входные двери не ВФД', () => {
   for (const d of ENTRANCE_DOORS) {
     const name = entranceName(d)
-    assert.ok(name.startsWith('Входная дверь ' + BRAND + ' '), name)
-    assert.ok(name.endsWith(d.name), name)
+    assert.equal(name, d.title)
+    assert.ok(!name.includes('ВФД'), name)
   }
 })
 

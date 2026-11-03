@@ -67,7 +67,7 @@ function offerXml(e: ModelEntry, site: URL, files: { file: string }[]): string {
   ].join('\n')
 }
 
-/** Входная дверь: структура как у межкомнатных (название, поставщик, два свойства); фото — на белом (lib/vk-entrance.ts) */
+/** Входная дверь: без бренда и поставщика, два свойства; фото — на белом (lib/vk-entrance.ts) */
 function entranceOfferXml(d: EntranceDoor, site: URL, files: VkPicture[]): string {
   const params: [string, string][] = [
     ['Тип', entranceGroupName(d)],
@@ -77,7 +77,6 @@ function entranceOfferXml(d: EntranceDoor, site: URL, files: VkPicture[]): strin
   return [
     `      <offer id="${vkEntranceId(d.id)}" available="true">`,
     `        <name>${xml(entranceName(d))}</name>`,
-    `        <vendor>${xml(BRAND)}</vendor>`,
     `        <url>${xml(new URL(d.href, site).href)}</url>`,
     `        <price>${Math.round(d.from)}</price>`,
     `        <currencyId>RUR</currencyId>`,
