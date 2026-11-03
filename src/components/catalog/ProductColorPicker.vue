@@ -239,21 +239,13 @@ const shareModel = async () => {
       </div>
     </div>
 
-    <!-- Калькулятор — отдельным приглашением, не наравне с контактными кнопками:
-         это другое по смыслу действие (инструмент, а не связь с салоном), поэтому
-         не btn-outline в общем ряду, а свой акцентный блок. -->
-    <button type="button" class="color-picker__calc-promo" @click="calcOpen = true">
-      <span class="color-picker__calc-promo-icon" aria-hidden="true">
-        <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
-          <rect x="5" y="3" width="14" height="18" rx="2" />
-          <path d="M8 7h8M8 11h2m3 0h3M8 14.5h2m3 0h3M8 18h2m3 0h3" stroke-linecap="round" />
-        </svg>
+    <!-- Калькулятор — отдельная строка, не кнопка в общем ряду: это инструмент, а не связь с салоном -->
+    <button type="button" class="color-picker__calc" @click="calcOpen = true">
+      <span class="color-picker__calc-text">
+        <span class="color-picker__calc-title">Рассчитать стоимость</span>
+        <span class="color-picker__calc-note">Соберите комплект: короб, наличники, петли и замок</span>
       </span>
-      <span class="color-picker__calc-promo-text">
-        <span class="color-picker__calc-promo-title">Рассчитать стоимость</span>
-        <span class="color-picker__calc-promo-subtitle">Короб, наличники, петли, замок — соберите комплект</span>
-      </span>
-      <svg class="color-picker__calc-promo-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <svg class="color-picker__calc-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
         <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
@@ -519,77 +511,53 @@ const shareModel = async () => {
   flex-shrink: 0;
 }
 
-.color-picker__calc-promo {
+.color-picker__calc {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
+  gap: 1rem;
   width: 100%;
-  padding: 0.875rem 1rem;
-  background: var(--color-accent-50);
-  border: 1px solid var(--color-accent-200);
-  border-radius: 1rem;
-  cursor: pointer;
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-slate-300);
+  border-radius: 0.875rem;
+  color: var(--color-slate-900);
   text-align: left;
-  transition: background 150ms ease, border-color 150ms ease;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease-out);
 }
-.color-picker__calc-promo:hover {
-  background: var(--color-accent-100);
-  border-color: var(--color-accent-300);
-}
-.color-picker__calc-promo-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  flex-shrink: 0;
-  background: #fff;
-  border-radius: 0.75rem;
-  color: var(--color-accent-600);
-}
-.color-picker__calc-promo-icon svg { width: 1.375rem; height: 1.375rem; }
-.color-picker__calc-promo-text {
+.color-picker__calc:hover { border-color: var(--color-slate-900); }
+.color-picker__calc:focus-visible { outline: 2px solid var(--color-secondary); outline-offset: 2px; }
+.color-picker__calc-text {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 0.25rem;
   min-width: 0;
   flex: 1;
 }
-.color-picker__calc-promo-title {
-  font-size: 0.9375rem;
+.color-picker__calc-title {
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--color-slate-900);
+  line-height: 1.3;
 }
-.color-picker__calc-promo-subtitle {
-  font-size: 0.8125rem;
-  color: var(--color-accent-700);
+.color-picker__calc-note {
+  font-size: 0.875rem;
   line-height: 1.4;
+  color: var(--color-slate-600);
 }
-/* Чуть крупнее на десктопе (иконка/паддинги, шрифт не трогаем — крупный
-   текст смотрелся вычурно) + отступ сверху от кружков цвета — вместе
-   подтягивают низ левой колонки ближе к низу правой. Мобильный размер не
-   трогаем. */
-@media (min-width: 901px) {
-  .color-picker__calc-promo {
-    gap: 1.125rem;
-    padding: 1.5rem 1.75rem;
-    border-radius: 1.25rem;
-    margin-top: 1.75rem;
-  }
-  .color-picker__calc-promo-icon {
-    width: 3.25rem;
-    height: 3.25rem;
-    border-radius: 0.875rem;
-  }
-  .color-picker__calc-promo-icon svg { width: 1.625rem; height: 1.625rem; }
-  .color-picker__calc-promo-arrow { width: 1.25rem; height: 1.25rem; }
-}
-
-.color-picker__calc-promo-arrow {
+.color-picker__calc-arrow {
   width: 1.125rem;
   height: 1.125rem;
   flex-shrink: 0;
-  color: var(--color-accent-600);
+  transition: transform 200ms var(--ease-out);
+}
+.color-picker__calc:hover .color-picker__calc-arrow { transform: translateX(3px); }
+@media (min-width: 901px) {
+  .color-picker__calc { margin-top: 1.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .color-picker__calc, .color-picker__calc-arrow { transition: none; }
+  .color-picker__calc:hover .color-picker__calc-arrow { transform: none; }
 }
 
 .color-picker__cta {
