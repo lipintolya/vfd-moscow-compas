@@ -19,16 +19,25 @@ export interface ColorVariant {
 import { calcKitPrice, BASE_KIT_DESCRIPTION } from '../../data/accessories'
 import { companyLegalInfo } from '../../lib/contacts-data'
 import { isMadeToOrder, isInStock } from '../../lib/made-to-order'
+import { TELEGRAM_CHAT, telegramWithText, MAX_CHAT, maxChatUrl, maxWithText } from '../../lib/messengers'
+import TelegramIcon from '../ui/TelegramIcon.vue'
+import MaxIcon from '../ui/MaxIcon.vue'
 import PriceCalculatorModal from './PriceCalculatorModal.vue'
 
+/* Страница модели целиком: фото слева, справа — заголовок (слот head,
+   статичный H1 из .astro), цена, выбор цвета, панель покупки и короткие
+   характеристики (слот facts). Цвет меняет фото, цену, сумму комплекта и
+   текст сообщения менеджеру, поэтому всё это — в одном острове. На телефоне
+   панель раскладывается вокруг фото: заголовок и цена над ним, остальное ниже. */
 const props = defineProps<{
   colors:      ColorVariant[]
   /** Остальные цвета покрытия, для которых у ЭТОЙ модели пока нет фото —
-      справочный список, не свотч (см. блок ниже под color-picker__swatches). */
+      справочный список, не свотч (см. блок под свотчами). */
   extraColors?: { name: string; hex: string }[]
   modelName:   string
   modelId:     string
   seriesSlug:  string
+  isNew?:      boolean
 }>()
 
 const phone = companyLegalInfo.contacts.phone[0]!
@@ -41,6 +50,14 @@ const selected = computed(() => props.colors[selectedIdx.value] ?? props.colors[
    IN_STOCK_OVERRIDE) относится к конкретной модели+цвету, не ко всей серии. */
 const madeToOrder = computed(() => isMadeToOrder(props.seriesSlug, props.modelId, selected.value.name))
 const inStock     = computed(() => isInStock(props.modelId, selected.value.name))
+
+/* Статус словом у цены — те же роли, что на карточке каталога (.h-status) */
+const status = computed(() => {
+  if (inStock.value) return { key: 'stock', label: 'В наличии' }
+  if (props.isNew) return { key: 'new', label: 'Новинка' }
+  if (madeToOrder.value) return { key: 'order', label: 'Под заказ' }
+  return null
+})
 
 /* Фото не пропадает при выборе цвета без снимка — остаётся фото первого
    сфотканного цвета вместо пустого плейсхолдера. */
@@ -60,6 +77,12 @@ const normalizeHex = (hex: string) => {
   const v = (hex ?? '').trim().replaceAll('С', 'C').replaceAll('с', 'c')
   return /^#[0-9a-fA-F]{3,6}$/.test(v) ? v : 'var(--color-slate-300)'
 }
+
+/* Сообщение менеджеру — с моделью и выбранным цветом, как у входных дверей */
+const askText = computed(() =>
+  `Интересует межкомнатная дверь «${props.modelName}», цвет: ${selected.value.name}. Подскажите, пожалуйста, сроки и наличие.`)
+const telegramHref = computed(() => telegramWithText(askText.value))
+const maxCopy      = computed(() => maxWithText(askText.value))
 
 /* ── mounted-гейт для обоих Teleport ниже (зум-фото и калькулятор). Раньше
    считали, что проблема Teleport+SSR-хайдрейшн бьёт только при нескольких
@@ -121,45 +144,147 @@ const shareModel = async () => {
 </script>
 
 <template>
-  <div class="color-picker">
+  <div class="pp">
     <!-- Фото -->
-    <div class="color-picker__photo-wrap">
-      <button
-        v-if="displayPhoto"
-        type="button"
-        class="color-picker__photo-btn"
-        :aria-label="`Увеличить фото: ${modelName} — ${selected.name}`"
-        @click="openZoom"
-      >
-        <img
-          :key="displayPhoto"
-          :src="displayPhoto"
-          :alt="`Межкомнатная дверь ${modelName}, ${selected.name}`"
-          class="color-picker__photo"
-          width="600"
-          height="780"
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-        />
-        <span class="color-picker__zoom-hint" aria-hidden="true">
-          <svg viewBox="0 0 20 20" fill="none">
-            <circle cx="9" cy="9" r="5.5" stroke="currentColor" stroke-width="1.75"/>
-            <path d="M13.5 13.5l3 3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-            <path d="M9 6.5v5M6.5 9h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    <div class="pp__media">
+      <div class="pp__frame">
+        <button
+          v-if="displayPhoto"
+          type="button"
+          class="pp__photo-btn"
+          :aria-label="`Увеличить фото: ${modelName} — ${selected.name}`"
+          @click="openZoom"
+        >
+          <img
+            :key="displayPhoto"
+            :src="displayPhoto"
+            :alt="`Межкомнатная дверь ${modelName}, ${selected.name}`"
+            class="pp__photo"
+            width="508"
+            height="1115"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+          <span class="pp__zoom" aria-hidden="true">Увеличить</span>
+        </button>
+        <div v-else class="pp__placeholder" aria-hidden="true">
+          <svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" width="48" height="48">
+            <rect x="5" y="3" width="14" height="18" rx="1.5" />
+            <path d="M15 12h.01" stroke-linecap="round" />
           </svg>
-          Увеличить
-        </span>
-      </button>
-      <div v-else class="color-picker__placeholder" aria-hidden="true">
-        <svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 24 24" width="48" height="48">
-          <rect x="5" y="3" width="14" height="18" rx="1.5" />
-          <path d="M15 12h.01" stroke-linecap="round" />
-        </svg>
+        </div>
+
+        <button
+          type="button"
+          class="pp__share"
+          :aria-label="shareCopied ? 'Ссылка скопирована' : 'Поделиться ссылкой на модель'"
+          @click="shareModel"
+        >
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="18" cy="5" r="2.5" />
+            <circle cx="6" cy="12" r="2.5" />
+            <circle cx="18" cy="19" r="2.5" />
+            <path stroke-linecap="round" d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6" />
+          </svg>
+          <span class="pp__share-tip" :class="{ 'is-visible': shareCopied }">Ссылка скопирована</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="pp__panel">
+      <!-- Заголовок и цена: на телефоне — над фото -->
+      <div class="pp__head">
+        <slot name="head" />
+        <p class="pp__price-row">
+          <span class="pp__price h-price">{{ selected.available === false ? 'По запросу' : formatPrice(selected.price) }}</span>
+          <span class="pp__price-note">за полотно</span>
+          <span v-if="status" class="h-status pp__status" :data-status="status.key">{{ status.label }}</span>
+        </p>
       </div>
 
-      <span v-if="inStock" class="color-picker__order-badge bg-secondary-600 text-white">В наличии</span>
-      <span v-else-if="madeToOrder" class="color-picker__order-badge bg-fg text-white">Под заказ</span>
+      <!-- Цвет -->
+      <div class="pp__colors">
+        <p class="pp__color-name">
+          Цвет: <b>{{ selected.name }}</b>
+          <span v-if="selected.available === false" class="pp__color-note">, фото уточняется</span>
+        </p>
+        <div
+          v-if="colors.length > 1"
+          class="pp__swatches"
+          role="group"
+          :aria-label="`Цвет: ${modelName}`"
+        >
+          <button
+            v-for="(color, i) in colors"
+            :key="color.id"
+            type="button"
+            class="pp__swatch"
+            :class="{ 'is-unavailable': color.available === false }"
+            :style="{ backgroundColor: normalizeHex(color.hex) }"
+            :title="color.available === false ? `${color.name}, фото уточняется` : color.name"
+            :aria-label="color.available === false ? `${color.name}, фото уточняется` : color.name"
+            :aria-pressed="String(i === selectedIdx)"
+            @click="selectedIdx = i"
+          />
+        </div>
+
+        <!-- Цвета покрытия без фото этой модели — справка, не выбор -->
+        <div v-if="extraColors && extraColors.length > 0" class="pp__extra">
+          <p class="pp__extra-label">Под заказ есть и другие цвета покрытия, фото пришлёт менеджер:</p>
+          <ul class="pp__extra-list" role="list">
+            <li v-for="color in extraColors" :key="color.name" class="pp__extra-color">
+              <span class="pp__extra-dot" :style="{ backgroundColor: normalizeHex(color.hex) }" aria-hidden="true" />{{ color.name }}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Покупка: комплект, калькулятор, связь -->
+      <div class="pp__buy">
+        <div v-if="kitTotal" class="pp__kit">
+          <p class="pp__kit-row"><span>Комплект</span><span class="h-price pp__kit-price">{{ kitTotal.toLocaleString('ru-RU') }} ₽</span></p>
+          <p class="pp__kit-note">Полотно, {{ BASE_KIT_DESCRIPTION }}. Петли, замок и добор добавите в расчёте.</p>
+        </div>
+
+        <button type="button" class="h-btn h-btn--signal pp__calc" @click="calcOpen = true">
+          <svg class="pp__btn-ico" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="4" y="2.75" width="12" height="14.5" rx="2" stroke="currentColor" stroke-width="1.5" />
+            <path d="M7 6.25h6M7 10h.01M10 10h.01M13 10h.01M7 13.25h.01M10 13.25h.01M13 13.25h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          Рассчитать стоимость
+        </button>
+
+        <div v-if="TELEGRAM_CHAT || MAX_CHAT" class="pp__ask">
+          <a
+            v-if="TELEGRAM_CHAT"
+            class="h-btn h-btn--ink pp__ask-btn"
+            :href="telegramHref"
+            target="_blank"
+            rel="noopener"
+            :aria-label="`Написать в Telegram: @${TELEGRAM_CHAT}`"
+          >
+            <TelegramIcon class="pp__btn-ico" tone="dark" />Telegram
+          </a>
+          <a
+            v-if="MAX_CHAT"
+            class="h-btn h-btn--ink pp__ask-btn"
+            :href="maxChatUrl()"
+            target="_blank"
+            rel="noopener"
+            :data-copy-text="maxCopy"
+            aria-label="Написать в MAX (текст скопируется)"
+          >
+            <MaxIcon class="pp__btn-ico" tone="dark" />MAX
+          </a>
+        </div>
+
+        <p class="pp__call">Позвонить в салон: <a :href="`tel:${phone.raw}`">{{ phone.label }}</a></p>
+      </div>
+
+      <div class="pp__facts">
+        <slot name="facts" />
+      </div>
     </div>
 
     <!-- Зум-модалка -->
@@ -167,113 +292,24 @@ const shareModel = async () => {
       <Transition name="zoom-fade">
         <div
           v-if="zoomOpen"
-          class="color-picker__zoom-overlay"
+          class="pp-zoom"
           role="dialog"
           aria-modal="true"
           :aria-label="`${modelName} — ${selected.name}`"
           @click.self="closeZoom"
         >
-          <button class="color-picker__zoom-close" type="button" aria-label="Закрыть" @click="closeZoom">
+          <button class="pp-zoom__close" type="button" aria-label="Закрыть" @click="closeZoom">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
             </svg>
           </button>
-          <figure class="color-picker__zoom-figure" @click.self="closeZoom">
-            <img :src="displayPhoto" :alt="`Межкомнатная дверь ${modelName}, ${selected.name}`" class="color-picker__zoom-img" decoding="async" />
-            <figcaption class="color-picker__zoom-caption">{{ modelName }} — {{ selected.name }}</figcaption>
+          <figure class="pp-zoom__figure" @click.self="closeZoom">
+            <img :src="displayPhoto" :alt="`Межкомнатная дверь ${modelName}, ${selected.name}`" class="pp-zoom__img" decoding="async" />
+            <figcaption class="pp-zoom__caption">{{ modelName }}, {{ selected.name }}</figcaption>
           </figure>
         </div>
       </Transition>
     </Teleport>
-
-    <!-- Цена -->
-    <div class="color-picker__price-row">
-      <span class="color-picker__price">{{ selected.available === false ? 'По запросу' : formatPrice(selected.price) }}</span>
-      <span class="color-picker__price-note">за полотно</span>
-    </div>
-    <div v-if="kitTotal" class="color-picker__kit-row">
-      <span class="color-picker__kit-price">{{ kitTotal.toLocaleString('ru-RU') }} ₽</span>
-      <p class="color-picker__kit-note">за комплект — полотно, {{ BASE_KIT_DESCRIPTION }}</p>
-    </div>
-
-    <!-- Выбранный цвет -->
-    <p class="color-picker__color-name">
-      Цвет:&nbsp;<strong>{{ selected.name }}</strong>
-      <span v-if="selected.available === false" class="color-picker__color-note"> — фото уточняется</span>
-    </p>
-
-    <!-- Свотчи -->
-    <div
-      v-if="colors.length > 1"
-      class="color-picker__swatches"
-      role="radiogroup"
-      :aria-label="`Цвет: ${modelName}`"
-    >
-      <button
-        v-for="(color, i) in colors"
-        :key="color.id"
-        type="button"
-        class="color-picker__swatch"
-        :class="{ 'is-active': i === selectedIdx, 'is-unavailable': color.available === false }"
-        :style="{ backgroundColor: normalizeHex(color.hex) }"
-        :title="color.available === false ? `${color.name} — фото уточняется` : color.name"
-        :aria-label="color.available === false ? `${color.name}, фото уточняется` : color.name"
-        :aria-pressed="String(i === selectedIdx)"
-        @click="selectedIdx = i"
-      />
-    </div>
-
-    <!-- Также доступные цвета покрытия — тот же паттерн, что у свотчей выше
-         (кружок + подпись, обёрнутым рядом), но справочный текст, не свотч:
-         фото под эту модель ещё не прислали, кликать/выбирать здесь нечего. -->
-    <div v-if="extraColors && extraColors.length > 0" class="color-picker__extra-colors">
-      <p class="color-picker__extra-colors-label">Также доступны цвета покрытия (под заказ, фото уточняйте у консультанта):</p>
-      <div class="color-picker__extra-colors-list">
-        <span
-          v-for="color in extraColors"
-          :key="color.name"
-          class="color-picker__extra-color"
-        >
-          <span class="color-picker__extra-dot" :style="{ backgroundColor: normalizeHex(color.hex) }" aria-hidden="true" />{{ color.name }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Калькулятор — отдельная строка, не кнопка в общем ряду: это инструмент, а не связь с салоном -->
-    <button type="button" class="color-picker__calc" @click="calcOpen = true">
-      <span class="color-picker__calc-text">
-        <span class="color-picker__calc-title">Рассчитать стоимость</span>
-        <span class="color-picker__calc-note">Соберите комплект: короб, наличники, петли и замок</span>
-      </span>
-      <svg class="color-picker__calc-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
-
-    <!-- CTA -->
-    <div class="color-picker__cta">
-      <!-- Связь — только звонок: у салона один Telegram-канал, писать в него нельзя -->
-      <a :href="`tel:${phone.raw}`" class="btn btn-primary">
-        <svg class="color-picker__phone-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 0 1 2-2h2.28a1 1 0 0 1 .95.68l1.1 3.3a1 1 0 0 1-.44 1.18l-1.7 1a11.05 11.05 0 0 0 5.6 5.6l1-1.7a1 1 0 0 1 1.18-.44l3.3 1.1a1 1 0 0 1 .68.95V19a2 2 0 0 1-2 2h-1C9.72 21 3 14.28 3 6V5Z" />
-        </svg>
-        {{ phone.label }}
-      </a>
-      <button
-        type="button"
-        class="btn btn-outline color-picker__share-btn"
-        :aria-label="shareCopied ? 'Ссылка скопирована' : 'Поделиться ссылкой на модель'"
-        @click="shareModel"
-      >
-        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
-          <circle cx="18" cy="5" r="2.5" />
-          <circle cx="6" cy="12" r="2.5" />
-          <circle cx="18" cy="19" r="2.5" />
-          <path stroke-linecap="round" d="M8.2 10.8l7.6-4.6M8.2 13.2l7.6 4.6" />
-        </svg>
-        <span class="color-picker__share-tip" :class="{ 'is-visible': shareCopied }">Ссылка скопирована</span>
-      </button>
-    </div>
 
     <PriceCalculatorModal
       :open="calcOpen"
@@ -289,356 +325,245 @@ const shareModel = async () => {
 </template>
 
 <style scoped>
-.color-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Раскладка в языке страницы входной двери (catalog/vhodnye-dveri/[id]):
+   фото — 6 колонок из 12, панель — 5, между ними колонка воздуха. Стили
+   кнопок, цены и статуса — общие из styles/home.css (.h-btn, .h-price,
+   .h-status), страница оборачивает остров в .home. */
+.pp {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
 }
 
-.color-picker__photo-wrap {
-  border-radius: 1.5rem;
-  overflow: hidden;
-  background: var(--color-slate-50);
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Фолбэк для браузеров без aspect-ratio (Safari < 15, старые iOS) — без
-     него блок без явной высоты схлопывается, а фото внутри (width/height:
-     100%) растягивается/сжимается непропорционально. padding-bottom:100%
-     держит квадрат через классический приём, а не через aspect-ratio. */
+/* Телефон и планшет: заголовок с ценой — над фото, остальное — под ним */
+.pp__panel { display: contents; }
+.pp__head   { order: 1; }
+.pp__media  { order: 2; }
+.pp__colors { order: 3; }
+.pp__buy    { order: 4; }
+.pp__facts  { order: 5; }
+
+@media (min-width: 62.5rem) {
+  .pp { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0 var(--h-gutter); }
+  .pp__media { grid-column: 1 / span 6; }
+  .pp__panel { grid-column: 8 / span 5; display: grid; gap: 1.75rem; }
+  .pp__head, .pp__media, .pp__colors, .pp__buy, .pp__facts { order: 0; }
+}
+/* Фото не уезжает, пока листается панель, — если целиком помещается в экран */
+@media (min-width: 62.5rem) and (min-height: 50rem) {
+  .pp__media { position: sticky; top: calc(var(--header-height) + 1rem); }
+}
+
+/* ── Фото ── */
+.pp__frame {
   position: relative;
-  height: 0;
-  padding-bottom: 100%;
+  aspect-ratio: 5 / 6;
+  overflow: hidden;
+  border-radius: var(--h-tile-radius);
+  background: var(--h-wall);
 }
-@supports (aspect-ratio: 1 / 1) {
-  .color-picker__photo-wrap {
-    height: auto;
-    padding-bottom: 0;
-    aspect-ratio: 1 / 1;
-  }
+@media (min-width: 62.5rem) {
+  .pp__frame { aspect-ratio: 4 / 5; }
 }
-
-.color-picker__photo-btn {
+.pp__photo-btn {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   padding: 0;
-  border: none;
+  border: 0;
   background: none;
   cursor: zoom-in;
 }
-
-.color-picker__photo {
+.pp__photo {
+  display: block;
   width: 100%;
   height: 100%;
+  padding: clamp(1.25rem, 5%, 2.5rem);
   object-fit: contain;
-  padding: 1.5rem;
-  display: block;
-  transition: transform 300ms ease;
+  transition: transform 400ms var(--ease-out);
 }
-.color-picker__photo-btn:hover .color-picker__photo {
-  transform: scale(1.02);
-}
-
-.color-picker__zoom-hint {
+.pp__photo-btn:hover .pp__photo { transform: scale(1.02); }
+.pp__photo-btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: -0.1875rem; border-radius: inherit; }
+.pp__zoom {
   position: absolute;
-  left: 0.875rem;
-  bottom: 0.875rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
   padding: 0.375rem 0.75rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid var(--color-slate-200);
-  font-size: 0.75rem;
+  border-radius: 999rem;
+  background: color-mix(in srgb, var(--color-white) 92%, transparent);
+  color: var(--h-ink);
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-slate-600);
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 150ms ease, transform 150ms ease;
 }
-.color-picker__zoom-hint svg { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
-.color-picker__photo-btn:hover .color-picker__zoom-hint,
-.color-picker__photo-btn:focus-visible .color-picker__zoom-hint {
-  opacity: 1;
-  transform: translateY(0);
-}
-@media (hover: none) {
-  /* На тач-устройствах ховера нет — подсказка видна всегда, иначе о зуме
-     нечем догадаться. */
-  .color-picker__zoom-hint { opacity: 1; transform: none; }
-}
-
-.color-picker__placeholder {
+.pp__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
   color: var(--color-slate-300);
 }
 
-/* Цвет — utility-классы Tailwind (bg-fg) в шаблоне, тут только форма/
-   позиция: справа снизу от фото, симметрично зум-подсказке слева. */
-.color-picker__order-badge {
+.pp__share {
   position: absolute;
-  right: 0;
-  bottom: 0.875rem;
-  max-width: 70%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 0.375rem 0.75rem;
-  border-radius: 9999px 0 0 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-
-.color-picker__price-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.color-picker__price {
-  font-size: 1.875rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-  line-height: 1;
-}
-
-.color-picker__price-note {
-  font-size: 0.875rem;
-  color: var(--color-slate-500);
-}
-
-.color-picker__kit-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.color-picker__kit-price {
-  font-size: 1.875rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.color-picker__kit-note {
-  font-size: 0.875rem;
-  color: var(--color-slate-500);
-  margin: 0;
-}
-
-.color-picker__color-name {
-  font-size: 0.875rem;
-  color: var(--color-slate-600);
-  margin: 0;
-}
-.color-picker__color-note {
-  color: var(--color-slate-400);
-  font-weight: 400;
-}
-
-.color-picker__swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.color-picker__swatch {
-  width: 2rem;
-  height: 2rem;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
-  border: 2px solid transparent;
+  background: color-mix(in srgb, var(--color-white) 92%, transparent);
+  color: var(--h-ink);
   cursor: pointer;
-  transition: transform 150ms ease, box-shadow 150ms ease;
-  outline: none;
-  flex-shrink: 0;
+  transition: color 180ms var(--ease-out);
 }
-
-.color-picker__swatch:hover {
-  transform: scale(1.15);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-}
-
-.color-picker__swatch.is-active {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-accent-500);
-}
-.color-picker__swatch.is-unavailable {
-  border: 2px dashed rgba(0, 0, 0, 0.32);
-}
-
-.color-picker__swatch:focus-visible {
-  outline: 2px solid var(--color-secondary);
-  outline-offset: 3px;
-}
-
-.color-picker__extra-colors {
-  margin: 0;
-}
-.color-picker__extra-colors-label {
-  margin: 0 0 0.625rem;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--color-slate-500);
-}
-.color-picker__extra-colors-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-}
-.color-picker__extra-color {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8125rem;
-  color: var(--color-slate-700);
-}
-.color-picker__extra-dot {
-  display: inline-block;
-  width: 1.25rem;
-  height: 1.25rem;
-  border-radius: 50%;
-  /* Тот же приём глубины, что у крупных выкрасок на странице серии
-     (.sr-colors__dot) — единый язык формы/тени по сайту. */
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--color-slate-900) 10%, transparent),
-    0 2px 6px -2px color-mix(in srgb, var(--color-slate-900) 22%, transparent);
-  flex-shrink: 0;
-}
-
-.color-picker__calc {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  margin-top: 1.5rem;
-  padding: 1rem 1.25rem;
-  background: var(--color-white);
-  border: 1px solid var(--color-slate-300);
-  border-radius: 0.875rem;
-  color: var(--color-slate-900);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 150ms var(--ease-out);
-}
-.color-picker__calc:hover { border-color: var(--color-slate-900); }
-.color-picker__calc:focus-visible { outline: 2px solid var(--color-secondary); outline-offset: 2px; }
-.color-picker__calc-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 0;
-  flex: 1;
-}
-.color-picker__calc-title {
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.3;
-}
-.color-picker__calc-note {
-  font-size: 0.875rem;
-  line-height: 1.4;
-  color: var(--color-slate-600);
-}
-.color-picker__calc-arrow {
-  width: 1.125rem;
-  height: 1.125rem;
-  flex-shrink: 0;
-  transition: transform 200ms var(--ease-out);
-}
-.color-picker__calc:hover .color-picker__calc-arrow { transform: translateX(3px); }
-@media (min-width: 901px) {
-  .color-picker__calc { margin-top: 1.75rem; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .color-picker__calc, .color-picker__calc-arrow { transition: none; }
-  .color-picker__calc:hover .color-picker__calc-arrow { transform: none; }
-}
-
-.color-picker__cta {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  padding-top: 0.25rem;
-}
-
-.color-picker__phone-icon {
-  width: 1.1rem;
-  height: 1.1rem;
-  margin-right: 0.5rem;
-}
-
-/* ── Поделиться — иконка-кнопка, без текста в общем ряду ── */
-.color-picker__share-btn {
-  position: relative;
-  flex: 0 0 auto;
-  padding: 0.6rem;
-}
-.color-picker__share-btn svg { width: 1.1rem; height: 1.1rem; }
-.color-picker__share-tip {
+.pp__share:hover { color: var(--h-signal); }
+.pp__share:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+.pp__share svg { width: 1.125rem; height: 1.125rem; }
+.pp__share-tip {
   position: absolute;
-  bottom: calc(100% + 0.5rem);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  top: 50%;
+  right: calc(100% + 0.5rem);
+  transform: translate(4px, -50%);
   padding: 0.375rem 0.75rem;
   border-radius: 0.5rem;
-  background: var(--color-slate-900);
-  color: #fff;
-  font-size: 0.75rem;
+  background: var(--h-ink);
+  color: var(--color-white);
+  font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 150ms ease, transform 150ms ease;
 }
-.color-picker__share-tip.is-visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
+.pp__share-tip.is-visible { opacity: 1; transform: translate(0, -50%); }
+
+/* ── Заголовок и цена ── */
+.pp__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.625rem;
+  margin: 1rem 0 0;
+}
+.pp__price {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.1;
+}
+.pp__price-note { color: var(--h-soft); }
+.pp__status { align-self: center; font-size: 0.8125rem; }
+
+/* ── Цвет ── */
+.pp__color-name { margin: 0; color: var(--h-soft); }
+.pp__color-name b { color: var(--h-ink); font-weight: 600; }
+.pp__color-note { color: var(--h-muted); }
+.pp__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.875rem;
+}
+/* Тот же свотч, что на карточке каталога (.pc__swatch): выбранный — графитовое кольцо */
+.pp__swatch {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--color-slate-900) 12%, transparent);
+  transition: box-shadow 150ms var(--ease-out);
+}
+.pp__swatch:hover { box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--color-slate-900) 12%, transparent), 0 0 0 0.1875rem var(--h-paper), 0 0 0 0.25rem var(--color-slate-300); }
+.pp__swatch[aria-pressed='true'] { box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--color-slate-900) 12%, transparent), 0 0 0 0.1875rem var(--h-paper), 0 0 0 0.3125rem var(--h-ink); }
+/* Телефон: восемь цветов — один ряд на 358 px, без «сироты» во втором */
+@media (max-width: 30rem) {
+  .pp__swatches { gap: 0.5rem; }
+  .pp__swatch { width: 2.25rem; height: 2.25rem; }
+}
+.pp__swatch.is-unavailable { outline: 0.125rem dashed color-mix(in srgb, var(--color-slate-900) 32%, transparent); outline-offset: -0.125rem; }
+.pp__swatch:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.375rem; }
+
+.pp__extra { margin-top: 1.25rem; }
+.pp__extra-label { margin: 0 0 0.625rem; font-size: 0.875rem; line-height: 1.45; color: var(--h-muted); }
+.pp__extra-list { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin: 0; padding: 0; list-style: none; }
+.pp__extra-color { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; color: var(--h-soft); }
+.pp__extra-dot {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.0625rem color-mix(in srgb, var(--color-slate-900) 12%, transparent);
 }
 
+/* ── Покупка ── */
+.pp__buy {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-radius: var(--h-radius);
+  background: var(--h-wall);
+}
+.pp__kit { margin-bottom: 0.5rem; }
+.pp__kit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0;
+  font-weight: 600;
+  color: var(--h-ink);
+}
+.pp__kit-price { font-size: 1.3125rem; }
+.pp__kit-note { margin: 0.25rem 0 0; font-size: 0.875rem; line-height: 1.45; color: var(--h-soft); }
+.pp__calc, .pp__ask-btn { gap: 0.5rem; width: 100%; }
+.pp__btn-ico { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+.pp__ask { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; }
+.pp__ask-btn { padding-inline: 1rem; }
+.pp__call { margin: 0.25rem 0 0; font-size: 0.9375rem; color: var(--h-soft); text-align: center; }
+.pp__call a { color: var(--h-ink); font-weight: 600; text-decoration: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pp__call a:hover { color: var(--h-signal); }
+
 /* ── Зум-модалка ── */
-.color-picker__zoom-overlay {
+.pp-zoom {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.90);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.9);
 }
-.color-picker__zoom-close {
+.pp-zoom__close {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 2.75rem;
-  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.10);
+  width: 2.75rem;
+  height: 2.75rem;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
   cursor: pointer;
   transition: background 150ms ease;
 }
-.color-picker__zoom-close:hover { background: rgba(255, 255, 255, 0.22); }
-.color-picker__zoom-close svg { width: 1.375rem; height: 1.375rem; }
-
-.color-picker__zoom-figure {
-  margin: 0;
+.pp-zoom__close:hover { background: rgba(255, 255, 255, 0.22); }
+.pp-zoom__close svg { width: 1.375rem; height: 1.375rem; }
+.pp-zoom__figure {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.875rem;
+  margin: 0;
 }
-.color-picker__zoom-img {
+.pp-zoom__img {
   max-width: min(95vw, 1100px);
   max-height: 85vh;
   object-fit: contain;
@@ -646,13 +571,7 @@ const shareModel = async () => {
   background: #fff;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
 }
-.color-picker__zoom-caption {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-}
+.pp-zoom__caption { font-size: 0.875rem; font-weight: 500; color: rgba(255, 255, 255, 0.72); }
 
 .zoom-fade-enter-active,
 .zoom-fade-leave-active { transition: opacity 180ms ease; }
@@ -660,9 +579,9 @@ const shareModel = async () => {
 .zoom-fade-leave-to { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .color-picker__photo,
-  .color-picker__zoom-hint,
+  .pp__photo, .pp__swatch, .pp__share-tip,
   .zoom-fade-enter-active,
   .zoom-fade-leave-active { transition: none; }
+  .pp__photo-btn:hover .pp__photo { transform: none; }
 }
 </style>

@@ -15,8 +15,12 @@ import { merchantPolicy } from '../../lib/contacts-data'
 import { getModelEntries } from '../../lib/model-entries'
 import { DOOR_CATEGORIES } from '../../data/door-categories'
 import type { ModelEntry } from '../../lib/model-entries'
+import CatalogGrid from '../../components/catalog/CatalogGrid.vue'
+import { getCatalogCards, getSeriesCards } from '../../lib/catalog-data'
+import { pluralRu } from '../../lib/plural'
+import '../../styles/home.css'
 import {
-  DOOR_TYPE, BRAND, cleanModelName, priceLabel,
+  DOOR_TYPE, BRAND, cleanModelName,
   productName, productTitle, productMetaDescription, productDescription,
 } from '../../lib/product-text'
 
@@ -96,6 +100,34 @@ const breadcrumbs = [
   { label: displayName },
 ]
 
+/* Другие модели той же серии — ряд карточек каталога под характеристиками:
+   соседние модели серии по цене, без текущей. Четыре — один ряд на компьютере,
+   два на телефоне. */
+const RELATED_LIMIT = 4
+const seriesCards   = getSeriesCards((await getCatalogCards()).cards, seriesSlug)
+const relatedCards  = seriesCards.filter(c => c.id !== model.id).slice(0, RELATED_LIMIT)
+
+/* Короткие характеристики рядом с ценой — только то, что пишется в два-три
+   слова; длинные описания серии — в разделе «Характеристики» ниже. */
+const facts = [
+  ...(seriesName ? [{ label: 'Серия', value: seriesName, href: `/catalog/series/${seriesSlug}/` }] : []),
+  ...(coatingName ? [{ label: 'Покрытие', value: coatingName }] : []),
+  ...(trim ? [{ label: trim.kind === 'glass' ? 'Остекление' : 'Кромка', value: trim.label }] : []),
+  ...(spec.thickness ? [{ label: 'Толщина полотна', value: `${spec.thickness} мм` }] : []),
+]
+
+const specRows: { label: string; value?: string; list?: string[] }[] = [
+  ...(spec.description ? [{ label: 'О серии', value: spec.description }] : []),
+  ...(spec.features.length ? [{ label: 'Особенности', list: spec.features }] : []),
+  ...(spec.coating  ? [{ label: 'Покрытие и отделка', value: spec.coating }] : []),
+  ...(spec.material ? [{ label: 'Материал и конструкция', value: spec.material }] : []),
+  ...(spec.edge     ? [{ label: 'Кромка', value: spec.edge }] : []),
+  ...(spec.thickness ? [{ label: 'Толщина полотна', value: `${spec.thickness} мм` }] : []),
+]
+
+/* Короткое значение («37 мм») на телефоне видно сразу, длинные тексты свёрнуты */
+const SHORT_SPEC = 40
+
 const productImages = [...new Set(colors.map(c => c.photo).filter(Boolean))]
 
 const structuredData = [{
@@ -140,11 +172,11 @@ const structuredData = [{
     </div>
   </div>
 
-  <div class="section product-page">
-    <div class="container">
-      <div class="product-layout">
-
-        {/* ── Фото + выбор цвета (Vue island) ── */}
+  <div class="home">
+    <section class="mp" aria-labelledby="model-title">
+      <div class="container">
+        {/* Фото, цена, цвет, покупка — Vue-остров; заголовок и короткие
+            характеристики — статичный HTML в его слотах */}
         <ProductColorPicker
           client:load
           colors={colors}
@@ -152,467 +184,317 @@ const structuredData = [{
           modelName={displayName}
           modelId={model.id}
           seriesSlug={seriesSlug}
-        />
-
-        {/* ── Характеристики (статический HTML для SEO) ── */}
-        <div class="product-info">
-          <div class="product-badges">
-            {model.isNew && <span class="product-badge product-badge--new">Новинка</span>}
-            {seriesName && <span class="product-badge">{seriesName}</span>}
-            {coatingName && <span class="product-badge product-badge--muted">{coatingName}</span>}
-          </div>
-
-          <h1 class="product-title">
-            <span class="product-title__type">{`${DOOR_TYPE} `}</span>{displayName}{coatingName && <span class="product-title__coating"> — {coatingName}</span>}{trim && <span class="product-title__coating">, {trim.phrase}</span>}
+          isNew={model.isNew}
+        >
+          <h1 slot="head" id="model-title" class="mp__title">
+            <span class="mp__type">{`${DOOR_TYPE} `}</span>{displayName}{coatingName && <span class="mp__muted"> — {coatingName}</span>}{trim && <span class="mp__muted">, {trim.phrase}</span>}
           </h1>
 
-          {spec.description && (
-            <details class="product-description">
-              <summary class="product-description__toggle">Смотреть описание</summary>
-              <p class="product-description__text">{spec.description}</p>
-            </details>
-          )}
-
-          {(trim || spec.features.length > 0 || spec.coating || spec.material || spec.edge || spec.thickness) && (
-            <dl class="product-specs">
-              {trim && (
-                <div class="product-specs__row">
-                  <dt>{trim.kind === 'glass' ? 'Остекление' : 'Кромка'}</dt>
-                  <dd>{trim.label}</dd>
-                </div>
-              )}
-              {spec.features.length > 0 && (
-                <div class="product-specs__row">
-                  <dt>Особенности</dt>
-                  <dd>{spec.features.join('; ')}</dd>
-                </div>
-              )}
-              {spec.coating && (
-                <div class="product-specs__row">
-                  <dt>Покрытие / Отделка</dt>
-                  <dd>{spec.coating}</dd>
-                </div>
-              )}
-              {spec.material && (
-                <div class="product-specs__row">
-                  <dt>Материал / Конструктив</dt>
-                  <dd>{spec.material}</dd>
-                </div>
-              )}
-              {spec.edge && (
-                <div class="product-specs__row">
-                  <dt>Кромка</dt>
-                  <dd>{spec.edge}</dd>
-                </div>
-              )}
-              {spec.thickness && (
-                <div class="product-specs__row">
-                  <dt>Толщина</dt>
-                  <dd>{spec.thickness} мм</dd>
-                </div>
-              )}
-            </dl>
-          )}
-
-          {/* Быстрый ориентир по цене (статика, всегда виден до гидратации) */}
-          {minPrice && (
-            <p class="product-price-hint">
-              Цена: <strong>{priceLabel(entry)}</strong> за полотно
-            </p>
-          )}
-
-          {coatingLanding && (
-            <a href={`/catalog/${coatingLanding.slug}/`} class="product-coating-link">
-              Все {coatingLanding.h1.charAt(0).toLowerCase() + coatingLanding.h1.slice(1)}
-              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </a>
-          )}
-
-        </div>
-
+          <div slot="facts">
+            {facts.length > 0 && (
+              <dl class="mp__facts">
+                {facts.map((f) => (
+                  <div class="mp__fact">
+                    <dt>{f.label}</dt>
+                    <dd>{f.href ? <a href={f.href}>{f.value}</a> : f.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {/* Перелинковка на лендинг покрытия: анкор — его H1, т.е. целевой запрос */}
+            {coatingLanding && (
+              <p class="mp__landing">
+                <a href={`/catalog/${coatingLanding.slug}/`}>Все {coatingLanding.h1.charAt(0).toLowerCase() + coatingLanding.h1.slice(1)}</a>
+              </p>
+            )}
+          </div>
+        </ProductColorPicker>
       </div>
-    </div>
+    </section>
+
+    {/* ── Характеристики: описание серии слева, параметры справа ── */}
+    {specRows.length > 0 && (
+      <section class="h-sec h-sec--wall" aria-labelledby="model-spec">
+        <div class="container mp-spec">
+          <div class="mp-spec__intro">
+            <h2 id="model-spec" class="h-h2">Характеристики</h2>
+            {seriesName && <p class="h-body mp-spec__note">Общие для моделей серии {seriesName} в покрытии {coatingName}.</p>}
+          </div>
+          {/* Строки — <details>: на компьютере раскрыты и стоят таблицей, на
+              телефоне свёрнуты под названия (скрипт ниже), без JS — раскрыты */}
+          <div class="mp-spec__list">
+            {specRows.map((row) => row.list || (row.value?.length ?? 0) > SHORT_SPEC ? (
+              <details class="mp-spec__row" open data-collapse-mobile>
+                <summary class="mp-spec__label">{row.label}</summary>
+                <div class="mp-spec__value">
+                  {row.list
+                    ? <ul class="mp-spec__features" role="list">{row.list.map((f) => <li>{f}</li>)}</ul>
+                    : <p>{row.value}</p>}
+                </div>
+              </details>
+            ) : (
+              <div class="mp-spec__row mp-spec__row--short">
+                <p class="mp-spec__label">{row.label}</p>
+                <div class="mp-spec__value"><p>{row.value}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {/* ── Погонажные изделия: прайс по покрытию ── */}
+    {accessories.length > 0 && (
+      <section class="h-sec" aria-labelledby="model-acc">
+        <div class="container mp-acc">
+          <div class="mp-acc__intro">
+            <h2 id="model-acc" class="h-h2">Погонажные изделия</h2>
+            <p class="h-body mp-acc__note">
+              Короб, наличники и доборы под покрытие {coatingName}. Цены актуальны на {PRICE_LIST_UPDATED}, точный прайс уточняйте у менеджера салона в ТЦ «Компас».
+            </p>
+          </div>
+          <div class="mp-acc__groups">
+            {accessoryGroups.map(([category, items], i) => (
+              <details class="mp-acc__group" open={i === 0}>
+                <summary class="mp-acc__label">
+                  <span>{CATEGORY_LABELS[category] ?? category}</span>
+                  <span class="mp-acc__count">{items.length}</span>
+                </summary>
+                <ul class="mp-acc__list" role="list">
+                  {items.map(item => (
+                    <li class="mp-acc__item">
+                      <div class="mp-acc__line">
+                        <span class="mp-acc__name">{item.name}</span>
+                        <span class="h-price mp-acc__price">
+                          {item.price ? `${item.price.toLocaleString('ru-RU')} ₽ / ${item.unit}` : 'Цена уточняется'}
+                        </span>
+                      </div>
+                      {(item.image || item.scheme) && (
+                        <div class="mp-acc__media">
+                          <InfoImageViewer
+                            client:visible
+                            variant="wide"
+                            aspectRatio={item.mediaAspect ?? '2 / 1'}
+                            images={[
+                              ...(item.image  ? [{ src: item.image,  caption: 'Фото',  alt: `Фото: ${item.name}` }]  : []),
+                              ...(item.scheme ? [{ src: item.scheme, caption: 'Схема', alt: `Схема с размерами: ${item.name}` }] : []),
+                            ]}
+                          />
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {CATEGORY_NOTES[category] && (
+                  <p class="mp-acc__group-note">{CATEGORY_NOTES[category]}</p>
+                )}
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {/* ── Другие модели серии ── */}
+    {relatedCards.length > 0 && (
+      <section class="h-sec h-sec--tight-top" aria-labelledby="model-related">
+        <div class="container">
+          <div class="mp-rel__head">
+            <h2 id="model-related" class="h-h2">Другие модели серии {seriesName}</h2>
+            <a class="h-btn h-btn--quiet" href={`/catalog/series/${seriesSlug}/`}>
+              Вся серия: {seriesCards.length} {pluralRu(seriesCards.length, ['модель', 'модели', 'моделей'])}
+            </a>
+          </div>
+          <CatalogGrid client:visible cards={relatedCards} />
+        </div>
+      </section>
+    )}
   </div>
 
   {/* ── Плинтус к дверям (только для покрытий, где он есть — Эмаль/Эмалекс) ── */}
   {hasPlinth && <PlinthSection title="Плинтус к дверям" />}
 
-  {/* ── Погонажные изделия ── */}
-  {accessories.length > 0 && (
-    <section class="accessories-section">
-      <div class="container">
-        <div class="accessories-header">
-          <h2 class="accessories-title">Погонажные изделия</h2>
-          <p class="accessories-note">
-            Цены актуальны на момент публикации от {PRICE_LIST_UPDATED} — актуальный прайс уточняйте
-            у менеджера в фирменном салоне ВФД в ТЦ «Компас»
-          </p>
-        </div>
-        <div class="accessories-groups">
-          {accessoryGroups.map(([category, items]) => (
-            <details class:list={['accessories-group', category === 'kit' && 'accessories-group--kit']}>
-              <summary class="accessories-group__label">
-                {CATEGORY_LABELS[category] ?? category}
-              </summary>
-              <ul class="accessories-list">
-                {items.map(item => (
-                  <li class="accessories-item">
-                    <span class="accessories-item__name">{item.name}</span>
-                    <span class="accessories-item__price">
-                      {item.price ? `${item.price.toLocaleString('ru-RU')} ₽ / ${item.unit}` : 'Цена уточняется'}
-                    </span>
-                    {(item.image || item.scheme) && (
-                      <div class="accessories-item__media">
-                        <InfoImageViewer
-                          client:visible
-                          variant="wide"
-                          aspectRatio={item.mediaAspect ?? '2 / 1'}
-                          images={[
-                            ...(item.image  ? [{ src: item.image,  caption: 'Фото',  alt: `Фото: ${item.name}` }]  : []),
-                            ...(item.scheme ? [{ src: item.scheme, caption: 'Схема', alt: `Схема с размерами: ${item.name}` }] : []),
-                          ]}
-                        />
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              {CATEGORY_NOTES[category] && (
-                <p class="accessories-note accessories-note--group">{CATEGORY_NOTES[category]}</p>
-              )}
-            </details>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
   {relatedArticle && <RelatedArticleCard article={relatedArticle} />}
 </BaseLayout>
 
+<script>
+  /* Характеристики на телефоне свёрнуты под названия (без JS — раскрыты).
+     Когда сворачивать, решает CSS (--mp-fold), как на /partitions/alum/ */
+  document.querySelectorAll<HTMLDetailsElement>('[data-collapse-mobile]').forEach((d) => {
+    if (getComputedStyle(d).getPropertyValue('--mp-fold').trim() === 'closed') d.open = false
+  })
+</script>
+
 <style>
-/* ── Product layout ── */
-.product-page {
-  padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
-}
+/* Первый экран модели — тот же язык, что у страницы входной двери:
+   типографика и цвета из styles/home.css (.home), раскладка — в острове. */
+.mp { padding: clamp(1rem, 2vw, 1.5rem) 0 clamp(3rem, 6vw, 5rem); }
 
-.product-layout {
-  display: grid;
-  grid-template-columns: 34rem 1fr;
-  gap: 3.5rem;
-  margin-top: 1.75rem;
-  align-items: start;
+/* H1: тип товара — часть заголовка (по нему ищут: «межкомнатная дверь
+   иннова 02»), но визуально тихая строка над названием; покрытие и кромка —
+   тоже в H1 (модели с коротким кодом — Р1, Е1 — без них неразличимы в
+   поиске), приглушённым цветом: вес остаётся на названии модели. */
+.mp__title {
+  margin: 0;
+  font-family: var(--h-font);
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  font-weight: var(--h-weight-display);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--h-ink);
+  text-wrap: balance;
 }
-
-@media (max-width: 900px) {
-  .product-layout {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-}
-
-/* ── Info panel ── */
-.product-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.product-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.3rem 0.875rem;
-  border-radius: 9999px;
-  background: var(--color-accent-50);
-  border: 1px solid var(--color-accent-100);
-  color: var(--color-accent-700);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.product-badge--muted {
-  background: var(--color-slate-50);
-  border-color: var(--color-slate-200);
-  color: var(--color-slate-600);
-}
-
-.product-badge--new {
-  background: oklch(57.7% 0.245 27.325);
-  border-color: oklch(57.7% 0.245 27.325);
-  color: #fff;
-}
-
-.product-title {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 500;
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  color: var(--color-slate-900);
-  margin: 0 0 1rem;
-}
-/* Тип товара — часть H1 (по нему ищут: «межкомнатная дверь иннова 02»),
-   но визуально — тихая строка над названием, вес остаётся на модели. */
-.product-title__type {
+.mp__type {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.625rem;
   font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: 0;
-  color: var(--color-slate-500);
+  color: var(--h-muted);
 }
-/* Покрытие в самом H1, не только в бейдже сверху — модели с коротким кодом
-   (Р1, Е1, НР2) сами по себе не различимы в поиске без бренда покрытия,
-   а именно так их и ищут («эмалекс р1»). Визуально второстепенно —
-   приглушённым цветом, вес остаётся на названии модели. */
-.product-title__coating {
-  color: var(--color-slate-500);
-  font-weight: 400;
-}
+.mp__muted { color: var(--h-muted); }
 
-.product-description {
-  margin: 0 0 1.5rem;
-}
-
-.product-description__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--color-accent-600);
-  cursor: pointer;
-  user-select: none;
-  list-style: none;
-}
-.product-description__toggle:hover { color: var(--color-accent-700); }
-
-.product-description__toggle::-webkit-details-marker {
-  display: none;
-}
-
-.product-description__toggle::after {
-  content: '';
-  flex-shrink: 0;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: rotate(45deg);
-  transition: transform 200ms ease;
-}
-
-.product-description[open] > .product-description__toggle::after {
-  transform: rotate(-135deg);
-}
-
-.product-description__text {
-  margin: 0.75rem 0 0;
-  font-size: 1rem;
-  color: var(--color-slate-600);
-  line-height: 1.65;
-}
-
-/* ── Specs table ── */
-.product-specs {
-  margin: 0 0 1.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.product-specs__row {
+/* Короткие характеристики — две колонки с волосяными линиями */
+.mp__facts {
   display: grid;
-  grid-template-columns: 160px 1fr;
-}
-
-.product-specs__row + .product-specs__row {
-  border-top: 1px solid var(--color-border);
-}
-
-.product-specs__row dt {
-  padding: 0.75rem 1rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-slate-500);
-  background: var(--color-slate-50);
-}
-
-.product-specs__row dd {
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-  color: var(--color-slate-900);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--h-gutter);
   margin: 0;
-  line-height: 1.55;
+  border-top: 0.0625rem solid var(--h-rule);
 }
+.mp__fact { padding: 0.75rem 0; border-bottom: 0.0625rem solid var(--h-rule); }
+.mp__fact dt { font-size: 0.8125rem; color: var(--h-muted); }
+.mp__fact dd { margin: 0.125rem 0 0; font-size: 1.0625rem; font-weight: 600; line-height: 1.3; color: var(--h-ink); }
+.mp__fact a { color: inherit; text-decoration: underline; text-decoration-color: var(--color-slate-300); text-underline-offset: 0.2em; }
+.mp__fact a:hover { color: var(--h-signal); text-decoration-color: currentColor; }
+.mp__landing { margin: 1rem 0 0; font-size: 0.9375rem; }
+.mp__landing a { color: var(--h-ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--color-slate-300); text-underline-offset: 0.25em; }
+.mp__landing a:hover { color: var(--h-signal); text-decoration-color: currentColor; }
 
-@media (max-width: 480px) {
-  .product-specs__row {
-    grid-template-columns: 1fr;
+/* ── Характеристики ── */
+.mp-spec { display: grid; gap: 1.5rem var(--h-gutter); align-items: start; }
+.mp-spec__note { margin-top: 1rem; max-width: 26em; }
+.mp-spec__list { border-top: 0.0625rem solid var(--h-rule); }
+.mp-spec__row { --mp-fold: open; display: flow-root; border-bottom: 0.0625rem solid var(--h-rule); }
+.mp-spec__label { color: var(--h-muted); list-style: none; }
+.mp-spec__label::-webkit-details-marker { display: none; }
+.mp-spec__value { color: var(--h-ink); line-height: 1.6; }
+.mp-spec__value p { margin: 0; }
+.mp-spec__features { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.mp-spec__features li { position: relative; padding-left: 1rem; }
+.mp-spec__features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.8em;
+  width: 0.375rem;
+  height: 0.0625rem;
+  background: currentColor;
+}
+/* Компьютер и планшет: название слева, текст справа — таблица */
+@media (min-width: 43.75rem) {
+  .mp-spec__row { padding: 1rem 0; }
+  .mp-spec__label { float: left; width: 28%; padding-right: 1.5rem; pointer-events: none; }
+  .mp-spec__value { margin-left: 28%; }
+}
+/* Телефон: свёрнутые строки с шевроном, как погонаж ниже */
+@media (max-width: 43.6875rem) {
+  .mp-spec__row { --mp-fold: closed; }
+  .mp-spec__label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    font-weight: 600;
+    color: var(--h-ink);
+    cursor: pointer;
   }
-  .product-specs__row dt {
-    padding-bottom: 0.25rem;
+  .mp-spec__label::after {
+    content: '';
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-right: 0.125rem solid currentColor;
+    border-bottom: 0.125rem solid currentColor;
+    transform: translateY(-0.125rem) rotate(45deg);
   }
+  .mp-spec__row[open] > .mp-spec__label::after { transform: translateY(0.125rem) rotate(-135deg); }
+  .mp-spec__value { padding-bottom: 1.125rem; color: var(--h-soft); }
+  .mp-spec__row--short { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .mp-spec__row--short .mp-spec__label { margin: 0; cursor: default; }
+  .mp-spec__row--short .mp-spec__label::after { content: none; }
+  .mp-spec__row--short .mp-spec__value { padding-bottom: 0; color: var(--h-ink); }
+}
+.mp-spec__row--short .mp-spec__label { margin: 0; }
+.mp-spec__label:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.25rem; border-radius: 0.25rem; }
+@media (min-width: 56.25rem) {
+  .mp-spec { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .mp-spec__intro { grid-column: 1 / span 4; position: sticky; top: calc(var(--header-height) + 1.5rem); }
+  .mp-spec__list { grid-column: 6 / span 7; }
 }
 
-/* ── Price hint + contacts ── */
-.product-price-hint {
-  font-size: 0.9375rem;
-  color: var(--color-slate-600);
-  margin: 0 0 1.25rem;
-}
-
-.product-price-hint strong {
-  color: var(--color-slate-900);
-  font-weight: 600;
-}
-
-.product-coating-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--color-accent-600);
-  text-decoration: none;
-  transition: color 200ms ease;
-}
-.product-coating-link:hover { color: var(--color-accent-700); }
-.product-coating-link svg {
-  width: 0.875rem;
-  height: 0.875rem;
-  flex-shrink: 0;
-}
-
-/* ── Accessories ── */
-.accessories-section {
-  padding: clamp(2.5rem, 4vw, 4rem) 0;
-}
-
-.accessories-header {
-  margin-bottom: 2rem;
-}
-
-.accessories-title {
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 500;
-  color: var(--color-slate-900);
-  margin: 0 0 0.375rem;
-}
-
-.accessories-note {
-  font-size: 0.9rem;
-  color: var(--color-slate-500);
-  margin: 0;
-}
-
-.accessories-note--group {
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  padding: 1rem 1.5rem 1.375rem;
-  margin: 0;
-  border-top: 1px dashed var(--color-slate-200);
-}
-
-.accessories-groups {
+/* ── Погонаж: аккордеон с волосяными линиями, как частые вопросы ── */
+.mp-acc { display: grid; gap: 1.5rem var(--h-gutter); align-items: start; }
+.mp-acc__note { margin-top: 1rem; max-width: 34em; }
+.mp-acc__groups { border-top: 0.0625rem solid var(--h-rule); }
+.mp-acc__group { border-bottom: 0.0625rem solid var(--h-rule); }
+.mp-acc__label {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.75rem;
-}
-
-.accessories-group {
-  background: #fff;
-  border: 1px solid var(--color-slate-200);
-  border-radius: 1.5rem;
-  overflow: hidden;
-}
-
-.accessories-group__label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 1.0625rem;
-  font-weight: 500;
-  color: var(--color-slate-900);
-  padding: 1.25rem 1.5rem;
+  padding: 1.125rem 0;
+  font-size: 1.1875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--h-ink);
   cursor: pointer;
-  user-select: none;
   list-style: none;
 }
-
-.accessories-group__label::-webkit-details-marker {
-  display: none;
-}
-
-.accessories-group__label::after {
+.mp-acc__label::-webkit-details-marker { display: none; }
+.mp-acc__label:hover { color: var(--h-signal); }
+.mp-acc__label:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.25rem; border-radius: 0.25rem; }
+.mp-acc__count { font-size: 0.875rem; font-weight: 500; color: var(--h-muted); font-variant-numeric: tabular-nums; }
+.mp-acc__label::after {
   content: '';
   flex-shrink: 0;
   width: 0.5625rem;
   height: 0.5625rem;
-  border-right: 2px solid var(--color-slate-400);
-  border-bottom: 2px solid var(--color-slate-400);
-  transform: rotate(45deg);
-  transition: transform 200ms ease;
+  margin-left: auto;
+  border-right: 0.125rem solid currentColor;
+  border-bottom: 0.125rem solid currentColor;
+  transform: translateY(-0.125rem) rotate(45deg);
+  transition: transform 200ms var(--ease-out);
+}
+.mp-acc__group[open] > .mp-acc__label::after { transform: translateY(0.125rem) rotate(-135deg); }
+.mp-acc__list { display: grid; margin: 0; padding: 0 0 1rem; list-style: none; }
+.mp-acc__item { padding: 0.75rem 0; }
+.mp-acc__item + .mp-acc__item { border-top: 0.0625rem dashed var(--h-rule); }
+.mp-acc__line { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.25rem 1.5rem; }
+.mp-acc__name { color: var(--h-soft); line-height: 1.45; }
+.mp-acc__price { font-size: 0.9375rem; }
+.mp-acc__media { margin-top: 0.75rem; max-width: 26rem; }
+.mp-acc__group-note { margin: 0 0 1.25rem; font-size: 0.875rem; line-height: 1.5; color: var(--h-muted); }
+@media (min-width: 56.25rem) {
+  .mp-acc { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .mp-acc__intro { grid-column: 1 / span 4; }
+  .mp-acc__groups { grid-column: 6 / span 7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mp-acc__label::after { transition: none; }
 }
 
-.accessories-group[open] > .accessories-group__label::after {
-  transform: rotate(-135deg);
-}
-
-.accessories-list {
-  list-style: none;
-  padding: 0 1.5rem 1.25rem;
-  margin: 0;
-  border-top: 1px solid var(--color-slate-200);
+/* ── Другие модели серии ── */
+.mp-rel__head {
   display: flex;
-  flex-direction: column;
-  gap: 0;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem var(--h-gutter);
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
 }
-
-.accessories-list > .accessories-item:first-child {
-  padding-top: 1rem;
+@media (max-width: 43.6875rem) {
+  .mp-rel__head .h-btn { width: 100%; }
 }
-
-.accessories-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.875rem;
-  line-height: 1.4;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--color-slate-200);
-}
-
-.accessories-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.accessories-item__name {
-  color: var(--color-slate-500);
-}
-
-.accessories-item__price {
-  font-weight: 600;
-  color: var(--color-slate-900);
-}
-
-.accessories-item__media {
-  margin-top: 0.5rem;
-  max-width: 26rem;
-}
-
-.accessories-group--kit {
-  background: var(--color-accent-50);
-  border-color: var(--color-accent-200);
-}
-
-.accessories-group--kit .accessories-group__label {
-  color: var(--color-accent-700);
-}
-
 </style>
