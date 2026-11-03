@@ -11,6 +11,10 @@
  * до 8 МБ (сейчас ~0,3 МБ), не более 2 свойств (param) у товара, фото только
  * JPG/PNG/GIF минимум 400×400 (lib/vk-photo.ts), без HTML в описании, до 10 фото.
  * Варианты (цвет) не выделяются: цвета — это фото карточки.
+ *
+ * В этот же файл — входные двери (lib/vk-entrance): после межкомнатных, с
+ * другими id и категорией. Межкомнатные строки от этого не меняются, поэтому
+ * повторный импорт по той же ссылке добавляет двери, а не заменяет каталог.
  */
 import type { APIRoute } from 'astro'
 import { getModelEntries } from '../../lib/model-entries'
@@ -21,7 +25,12 @@ import {
   feedOffers, assertUniqueIds, categoriesXml,
 } from '../../lib/feed-common'
 import type { ModelEntry } from '../../lib/model-entries'
-import { vkPictureFiles } from '../../lib/vk-photo'
+import { vkPictureFiles, type VkPicture } from '../../lib/vk-photo'
+import { ENTRANCE_DOORS, type EntranceDoor } from '../../data/entrance-doors'
+import {
+  ENTRANCE_CATEGORY_ID, ENTRANCE_CATEGORY_NAME, vkEntranceId, entrancePictureFiles,
+  entranceGroupName, entranceDescription,
+} from '../../lib/vk-entrance'
 
 /* Ограничения VK Маркета (справка «Импорт товаров») */
 const MAX_OFFERS = 15_000
@@ -58,6 +67,27 @@ function offerXml(e: ModelEntry, site: URL, files: { file: string }[]): string {
   ].join('\n')
 }
 
+/** Входная дверь: без поставщика, два свойства; фото — на белом (lib/vk-entrance.ts) */
+function entranceOfferXml(d: EntranceDoor, site: URL, files: VkPicture[]): string {
+  const params: [string, string][] = [
+    ['Тип', entranceGroupName(d)],
+    ['Открывание', d.opening],
+  ]
+
+  return [
+    `      <offer id="${vkEntranceId(d.id)}" available="true">`,
+    `        <name>${xml(d.title)}</name>`,
+    `        <url>${xml(new URL(d.href, site).href)}</url>`,
+    `        <price>${Math.round(d.from)}</price>`,
+    `        <currencyId>RUR</currencyId>`,
+    `        <categoryId>${ENTRANCE_CATEGORY_ID}</categoryId>`,
+    ...pictureLines(site, files),
+    `        <description>${xml(entranceDescription(d))}</description>`,
+    ...params.map(([name, value]) => `        <param name="${xml(name)}">${xml(value)}</param>`),
+    `      </offer>`,
+  ].join('\n')
+}
+
 export const GET: APIRoute = async ({ site }) => {
   const base    = site ?? new URL(SITE.url)
   const entries = await getModelEntries()
@@ -69,14 +99,22 @@ export const GET: APIRoute = async ({ site }) => {
   }
 
   const offers = feedOffers(entries)
-  if (offers.length > MAX_OFFERS) {
-    throw new Error(`[feed/vk.xml] ${offers.length} товаров — больше лимита VK (${MAX_OFFERS}), нужно делить на файлы`)
+  const entrance = ENTRANCE_DOORS
+  if (offers.length + entrance.length > MAX_OFFERS) {
+    throw new Error(`[feed/vk.xml] ${offers.length + entrance.length} товаров — больше лимита VK (${MAX_OFFERS}), нужно делить на файлы`)
   }
   assertUniqueIds(offers, 'feed/vk.xml', vkOfferId)
+  /* Межкомнатные и входные — в одном файле: их id не должны совпасть (VK сольёт товары) */
+  const ids = [...offers.map(e => vkOfferId(e.model.id)), ...entrance.map(d => vkEntranceId(d.id))]
+  if (new Set(ids).size !== ids.length) {
+    throw new Error('[feed/vk.xml] повторяются id товаров: межкомнатные и входные двери')
+  }
 
-  /* Файлы фото по каждому товару (см. lib/vk-photo.ts) */
+  /* Файлы фото по каждому товару (см. lib/vk-photo.ts, lib/vk-entrance.ts) */
   const pictures = new Map(await Promise.all(offers.map(async e =>
     [e.model.id, await vkPictureFiles(e)] as const)))
+  const entrancePictures = new Map(await Promise.all(entrance.map(async d =>
+    [d.id, await entrancePictureFiles(d)] as const)))
 
   const body = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -90,9 +128,11 @@ export const GET: APIRoute = async ({ site }) => {
     '    </currencies>',
     '    <categories>',
     ...categoriesXml(offers, coatingInline),
+    `      <category id="${ENTRANCE_CATEGORY_ID}">${xml(ENTRANCE_CATEGORY_NAME)}</category>`,
     '    </categories>',
     '    <offers>',
     ...offers.map(e => offerXml(e, base, pictures.get(e.model.id) ?? [])),
+    ...entrance.map(d => entranceOfferXml(d, base, entrancePictures.get(d.id) ?? [])),
     '    </offers>',
     '  </shop>',
     '</yml_catalog>',
