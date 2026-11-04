@@ -375,11 +375,15 @@ const shareModel = async () => {
   background: none;
   cursor: zoom-in;
 }
+/* Дверь — примерно на 20 % меньше прежнего: высота 73 % кадра, по центру
+   (раньше дверь занимала почти весь кадр, около 92 % высоты) */
 .pp__photo {
+  position: absolute;
+  top: 13.5%;
+  left: 0;
   display: block;
   width: 100%;
-  height: 100%;
-  padding: clamp(1.25rem, 5%, 2.5rem);
+  height: 73%;
   object-fit: contain;
   transition: transform 400ms var(--ease-out);
 }
