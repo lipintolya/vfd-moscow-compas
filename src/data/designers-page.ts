@@ -20,6 +20,12 @@ import { IMAGES as DECOR_IMAGES, HERO_IMAGE as DECOR_HERO } from './decor-produc
 import { PANEL_HOME_TILE } from './wall-panels-page'
 import { renderOf } from '../lib/wall-panels'
 import { VFD } from './vfd-factory'
+import { PANEL_MIN_PRICE } from './wall-panels-page'
+import { SECRET_MIN_KIT_PRICE } from './skrytye-dveri-products'
+import { FROM_PRICE_FRAMUGA_KIT } from './decor-products'
+import { rub } from './services'
+import { VIDEOS } from './videos'
+import { textWithBody } from '../lib/messengers'
 
 const hours = companyLegalInfo.workingHours.shortDisplay
 const days  = companyLegalInfo.workingHours.weekdays
@@ -148,62 +154,121 @@ export const DESIGNER_STEPS = [
   { num: '04', title: 'Замер, доставка и монтаж',     text: `Организуем замер, доставку и монтаж собственной бригадой ${SITE.city.in} и области.` },
 ]
 
-/* Ассортимент для проектов — фото те же, что у направлений на главной */
-export const DESIGNER_RANGE = [
-  { title: 'Межкомнатные двери',      text: 'Эмаль, Эмалекс, ПЭТ, экошпон — серии и цвета каталога',       href: '/catalog/',              photo: DIRECTION_PHOTOS.interior,   position: '72% 50%' },
-  { title: 'Скрытые двери',           text: `Заподлицо со стеной; в наличии ${stockList}`,                  href: '/catalog/skrytye-dveri/', photo: DIRECTION_PHOTOS.hidden,     position: '56% 50%' },
-  { title: 'Алюминиевые перегородки', text: 'Раздвижные и стационарные конструкции со стеклом',           href: '/partitions/',            photo: DIRECTION_PHOTOS.partitions, position: '50% 50%' },
-  { title: 'Стеновые панели',          text: 'Натуральный шпон, двери заподлицо с панелями', href: '/catalog/stenovye-paneli/', photo: { src: renderOf(PANEL_HOME_TILE.visual)?.src ?? DIRECTION_PHOTOS.hidden.src, alt: PANEL_HOME_TILE.visual.alt }, position: '50% 55%' },
-  { title: 'Плинтус по RAL и NCS',     text: `Напольный из МДФ — ${PROFILES_COUNT}, скрытый, с подсветкой, микроплинтус`, href: '/catalog/plintus/', photo: { src: PLINTUS_PAGE.hero.src, alt: PLINTUS_PAGE.hero.alt }, position: '50% 65%' },
-  { title: 'Фальшфрамуга и декор',     text: 'Фальшфрамуга с компланарным коробом, рейки и плинтус в покрытиях дверей', href: '/catalog/decor/', photo: { src: DECOR_IMAGES.hero.src, alt: DECOR_HERO.alt }, position: '50% 50%' },
-]
+/* Что подбираем под дизайн-проект — разделы ассортимента карточками
+   «фото + что умеем + цена от». Запросы дизайнеров (скрытые двери под
+   покраску, нестандартная высота, стеновые панели, плинтус по RAL/NCS,
+   перегородки, фальшфрамуга); факты и цены — из данных разделов. Цена
+   межкомнатных — минимум каталога (Supabase), её передаёт страница.
+   Фото — те же, что у направлений на главной. */
+export interface DesignerSolution {
+  title:    string
+  text:     string
+  href:     string
+  photo:    { src: string; alt: string }
+  position: string
+  /** «от 11 900 ₽ за м²»; без цены — строки нет (плинтус и перегородки считаются по проекту) */
+  price?:   string
+}
+
+export function designerSolutions(catalogMinPrice: number): { title: string; lead: string; items: DesignerSolution[] } {
+  return {
+    title: `Двери, панели и плинтус под дизайн-проект ${SITE.city.in}`,
+    lead: 'Подбираем всё, что стоит в проёме и вдоль стены, в одной стилистике — и показываем вживую в шоуруме. Цены «от» — для первой сметы, точную сумму считаем по спецификации.',
+    items: [
+      {
+        title: 'Межкомнатные двери до 3 метров',
+        text: `Эмаль, Эмалекс, ПЭТ, экошпон и натуральный шпон. Высота под заказ — до ${DOOR_SIZES.customMaxHeight / 1000} м, под высокие потолки и проёмы проекта.`,
+        href: '/catalog/',
+        photo: DIRECTION_PHOTOS.interior,
+        position: '72% 50%',
+        price: `от ${rub(catalogMinPrice)} за полотно`,
+      },
+      {
+        title: 'Скрытые двери под покраску',
+        text: `Полотно красят в цвет стены по проекту, короб уходит под отделку. Высота до ${CUSTOM_MAX_HEIGHT} мм, в наличии ${stockList}.`,
+        href: '/catalog/skrytye-dveri-dizayn-proekt/',
+        photo: DIRECTION_PHOTOS.hidden,
+        position: '56% 50%',
+        price: `комплект от ${rub(SECRET_MIN_KIT_PRICE)}`,
+      },
+      {
+        title: 'Стеновые панели в цвет дверей',
+        text: 'Изготавливаем панели из натурального шпона: стена и полотна в одном оттенке, скрытые двери заподлицо с панелями.',
+        href: '/catalog/stenovye-paneli/',
+        photo: { src: renderOf(PANEL_HOME_TILE.visual)?.src ?? DIRECTION_PHOTOS.hidden.src, alt: PANEL_HOME_TILE.visual.alt },
+        position: '50% 55%',
+        price: `от ${rub(PANEL_MIN_PRICE)} за м²`,
+      },
+      {
+        title: 'Плинтус по RAL и NCS',
+        text: `Напольный плинтус из МДФ — ${PROFILES_COUNT}, высота ${HEIGHT_RANGE}, красим по палитре RAL и NCS. Есть скрытый плинтус, микроплинтус и плинтус с подсветкой.`,
+        href: '/catalog/plintus/',
+        photo: { src: PLINTUS_PAGE.hero.src, alt: PLINTUS_PAGE.hero.alt },
+        position: '50% 65%',
+      },
+      {
+        title: 'Алюминиевые перегородки',
+        text: 'Раздвижные, распашные и стационарные перегородки со стеклом: подберём профиль, стекло и раскладку под проём.',
+        href: '/partitions/',
+        photo: DIRECTION_PHOTOS.partitions,
+        position: '50% 50%',
+      },
+      {
+        title: 'Фальшфрамуга и декор',
+        text: 'Фальшфрамуга с компланарным коробом поднимает дверь до потолка, рейки и плинтус — в тех же покрытиях, что и двери.',
+        href: '/catalog/decor/',
+        photo: { src: DECOR_IMAGES.hero.src, alt: DECOR_HERO.alt },
+        position: '50% 50%',
+        price: `комплект фальшфрамуги от ${rub(FROM_PRICE_FRAMUGA_KIT)}`,
+      },
+    ],
+  }
+}
+
+/* Ещё разделы — пилюлями под карточками */
 export const DESIGNER_RANGE_MORE = [
-  { label: 'Скрытые двери под покраску',      href: '/catalog/skrytye-dveri-dizayn-proekt/' },
+  { label: 'Скрытые двери: все модели',       href: '/catalog/skrytye-dveri/' },
+  { label: 'Высокие двери',                   href: '/catalog/vysokie-dveri/' },
   { label: 'Перегородки ALUM',                href: '/partitions/alum/' },
   { label: 'Двери со стеклом',                href: '/catalog/dveri-so-steklom/' },
   { label: 'Двери Эмалекс',                   href: '/catalog/dveri-emaleks/' },
   { label: 'Двери ПЭТ',                       href: '/catalog/dveri-pet/' },
+  { label: 'Декоративные рейки',              href: '/catalog/dekorativnye-reyki/' },
   { label: 'Все серии',                       href: '/catalog/series/' },
-  { label: 'Видео о дверях',                  href: '/video/' },
 ]
 
-/* Что подбираем под дизайн-проект — запросы дизайнеров (скрытые двери под
-   покраску, нестандартная высота, стеновые панели, плинтус по RAL/NCS,
-   перегородки, фальшфрамуга). Факты и числа — из данных разделов */
-export const DESIGNER_SOLUTIONS = {
-  title: `Двери, панели и плинтус под дизайн-проект ${SITE.city.in}`,
-  lead: 'Подбираем всё, что стоит в проёме и вдоль стены, в одной стилистике — и показываем вживую в шоуруме.',
-  items: [
-    {
-      title: 'Скрытые двери под покраску',
-      text: `Полотно красят в цвет стены по проекту, короб уходит под отделку. Высота до ${CUSTOM_MAX_HEIGHT} мм, в наличии ${stockList}.`,
-      href: '/catalog/skrytye-dveri-dizayn-proekt/',
-    },
-    {
-      title: 'Двери нестандартной высоты',
-      text: 'Межкомнатные двери до 3 метров — под высокие потолки и проёмы проекта. Размеры и сроки серии подскажем при расчёте.',
-      href: '/catalog/',
-    },
-    {
-      title: 'Стеновые панели в цвет дверей',
-      text: 'Изготавливаем панели из натурального шпона: стена и полотна в одном оттенке, скрытые двери заподлицо с панелями.',
-      href: '/catalog/stenovye-paneli/',
-    },
-    {
-      title: 'Плинтус по RAL и NCS',
-      text: `Напольный плинтус из МДФ — ${PROFILES_COUNT}, высота ${HEIGHT_RANGE}, красим по палитре RAL и NCS. Есть скрытый плинтус, микроплинтус и плинтус с подсветкой.`,
-      href: '/catalog/plintus/',
-    },
-    {
-      title: 'Алюминиевые перегородки',
-      text: 'Раздвижные, распашные и стационарные перегородки со стеклом: подберём профиль, стекло и раскладку под проём.',
-      href: '/partitions/',
-    },
-    {
-      title: 'Фальшфрамуга и декор',
-      text: 'Фальшфрамуга с компланарным коробом поднимает дверь до потолка, рейки и плинтус — в тех же покрытиях, что и двери.',
-      href: '/catalog/decor/',
-    },
+/* Работы с объектов (Strapi, «Портфолио») — те, что ближе всего к
+   дизайн-проектам: натуральный шпон, скрытые двери в панелях,
+   нестандартный проём. Работы нет — сборка падает (designers.astro) */
+export const DESIGNER_WORK_IDS = [
+  'dveri-gladkaya-luchi-naturalny-dub-patina-kvartira',
+  '2026-09-28-skrytye-dveri-paneli-shpon',
+  'nestandartny-proem-chetyre-polotna-tri-framugi',
+  '2026-10-19-dveri-stenovye-paneli',
+]
+
+/* Видео со встречи клуба дизайнеров — ролик из общего списка (videos.ts) */
+const clubVideo = VIDEOS.find((v) => v.id === 'club-designers-2026-10')
+if (!clubVideo) throw new Error('[designers] нет ролика club-designers-2026-10 в src/data/videos.ts')
+export const DESIGNERS_CLUB = {
+  title: 'Говорим с дизайнерами о дверях',
+  lead:  'Ролик со встречи клуба дизайнеров в Москве — о том, почему двери нельзя оставлять на последний момент.',
+  quote: clubVideo.text,
+  video: clubVideo,
+}
+
+/* Пришлите проект — главный способ начать: мессенджер, куда можно
+   приложить план и спецификацию. Сообщение уже набрано (messengers.ts) */
+export const DESIGNER_MESSAGE_BODY = 'Я дизайнер (архитектор), хочу обсудить проект и условия сотрудничества. Пришлю план с проёмами.'
+export const DESIGNER_MESSAGE = textWithBody(DESIGNER_MESSAGE_BODY)
+export const DESIGNERS_SEND = {
+  title: 'Пришлите проект на расчёт',
+  lead:  'Напишите в Telegram или MAX и приложите то, что уже есть по объекту, — посчитаем двери, панели и плинтус одной сметой.',
+  list: [
+    'План с размерами проёмов или обмерный план',
+    'Спецификация дверей — если она уже есть в проекте',
+    'Покрытия, цвета и референсы интерьера',
+    'Адрес объекта и стадия ремонта',
   ],
 }
 
@@ -302,6 +367,6 @@ export const DESIGNERS_FAQ = [
   },
   {
     q: 'Как начать сотрудничество?',
-    a: `Позвоните по номеру ${PHONE.label} или приезжайте в шоурум — обсудим проект и условия.`,
+    a: `Напишите в Telegram или MAX и приложите план с проёмами, позвоните по номеру ${PHONE.label} или приезжайте в шоурум — обсудим проект и условия.`,
   },
 ]

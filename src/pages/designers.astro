@@ -7,9 +7,10 @@
  * счётчиком проектов, манифест крупным набором, плиточная сетка выгод
  * (у каждой плитки своё наполнение: бонусы — красная, схема высоты
  * двери, высоты на складе, ссылки на каталог, рендер, дорожка этапов),
- * шаги работы (StepsRow), графитовая сцена шоурума, ассортимент
- * карточками «фото + подпись», визуализации перегородок и дверей,
- * материалы фабрики, FAQ, карта.
+ * шаги работы (StepsRow), работы с объектов (Strapi), графитовая сцена
+ * шоурума, ролик со встречи клуба дизайнеров, ассортимент карточками
+ * «фото + что умеем + цена от», визуализации перегородок и дверей,
+ * материалы фабрики, «Пришлите проект» (Telegram / MAX), FAQ, карта.
  *
  * Тексты и факты — src/data/designers-page.ts (только от владельца).
  */
@@ -20,11 +21,19 @@ import LandingHero from '../components/ui/LandingHero.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
 import FaqAccordion from '../components/ui/FaqAccordion.astro'
+import WorkCard from '../components/portfolio/WorkCard.astro'
+import InlineVideo from '../components/articles/InlineVideo.astro'
+import TelegramIcon from '../components/ui/TelegramIcon.vue'
+import MaxIcon from '../components/ui/MaxIcon.vue'
 import {
   DESIGNERS_HERO, DESIGNERS_INTRO, DESIGNER_BENEFITS, DESIGNERS_SHOWROOM, DESIGNER_STEPS,
-  DESIGNER_RANGE, DESIGNER_RANGE_MORE, DESIGNER_SOLUTIONS, DESIGNER_RESOURCES, DESIGNER_RESOURCES_LEAD, DESIGNER_RENDERS, DESIGNER_RENDERS_FEATURED,
+  DESIGNER_RANGE_MORE, designerSolutions, DESIGNER_RESOURCES, DESIGNER_RESOURCES_LEAD, DESIGNER_RENDERS, DESIGNER_RENDERS_FEATURED,
   DESIGNERS_FAQ, RESOURCE_ACTION, resourceMeta, type ResourceType,
+  DESIGNER_WORK_IDS, DESIGNERS_CLUB, DESIGNERS_SEND, DESIGNER_MESSAGE, DESIGNER_MESSAGE_BODY,
 } from '../data/designers-page'
+import { getCatalogCards } from '../lib/catalog-data'
+import { getWorks } from '../lib/works'
+import { TELEGRAM_CHAT, telegramWithText, MAX_CHAT, maxChatUrl } from '../lib/messengers'
 import { SITE, PHONE } from '../config/site'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../lib/local-business-schema'
 import { typograph } from '../lib/typograph'
@@ -32,6 +41,22 @@ import { pluralRu } from '../lib/plural'
 import '../styles/home.css'
 
 const CALL = `tel:${PHONE.raw}`
+const SEND = '#ds-send'
+
+/* Цена «от» межкомнатных — минимум каталога, как на /catalog/ */
+const { cards } = await getCatalogCards()
+const catalogMin = Math.min(...cards.map((c) => c.price).filter((p): p is number => typeof p === 'number' && p > 0))
+const SOLUTIONS = designerSolutions(catalogMin)
+
+/* Работы с объектов — по списку из данных; пропавшая работа роняет сборку */
+const allWorks = await getWorks()
+const works = DESIGNER_WORK_IDS.map((id) => {
+  const w = allWorks.find((x) => x.id === id)
+  if (!w) throw new Error(`[designers] нет работы портфолио «${id}» (DESIGNER_WORK_IDS)`)
+  return w
+})
+
+const telegram = TELEGRAM_CHAT ? telegramWithText(DESIGNER_MESSAGE_BODY) : ''
 const pageUrl = new URL('/designers/', SITE.url).href
 const title = brandTitle(`Двери для дизайнеров и архитекторов ${SITE.city.in} — ${SITE.name}`)
 const description =
@@ -121,7 +146,7 @@ const breadcrumbItems = [
 
   <div class="home">
     <LandingHero title={DESIGNERS_HERO.title} lead={DESIGNERS_HERO.lead} image={DESIGNERS_HERO.images} facts={DESIGNERS_HERO.facts}>
-      <a slot="actions" href={CALL} class="h-btn h-btn--signal">Обсудить проект</a>
+      <a slot="actions" href={SEND} class="h-btn h-btn--signal">Обсудить проект</a>
       <a slot="actions" href="#showroom" class="h-btn h-btn--quiet">Шоурум для встреч</a>
     </LandingHero>
 
@@ -148,7 +173,7 @@ const breadcrumbItems = [
             <h3 class="ds-bonus__title">{typograph(bonus.title)}</h3>
             <div class="ds-bonus__foot">
               <p class="ds-bonus__text">{typograph(bonus.text)}</p>
-              <a href={CALL} class="h-btn ds-bonus__cta">{bonus.action}</a>
+              <a href={SEND} class="h-btn ds-bonus__cta">{bonus.action}</a>
             </div>
           </li>
 
@@ -234,6 +259,25 @@ const breadcrumbItems = [
       steps={DESIGNER_STEPS}
     />
 
+    {/* Работы с объектов — реальные фото после монтажа (Strapi) */}
+    <section class="h-sec" aria-labelledby="ds-works-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="ds-works-title" class="h-h2">Двери и&nbsp;панели на&nbsp;объектах</h2>
+          <div>
+            <p class="h-lead">Фото с&nbsp;монтажа: натуральный шпон, скрытые двери в&nbsp;панелях, нестандартные проёмы&nbsp;— как это выглядит в&nbsp;интерьере.</p>
+            <a href="/portfolio/" class="h-btn h-btn--ink ds-works__all">
+              Все работы
+              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </header>
+        <ul class="ds-works h-rail" role="list">
+          {works.map((w) => <li><WorkCard work={w} sizes="(min-width: 80rem) 25vw, (min-width: 43.75rem) 50vw, 85vw" /></li>)}
+        </ul>
+      </div>
+    </section>
+
     {/* Шоурум — графитовая сцена: текст слева, фото консультации справа */}
     <section class="h-sec" id="showroom" aria-labelledby="ds-showroom-title">
       <div class="container">
@@ -270,25 +314,47 @@ const breadcrumbItems = [
       </div>
     </section>
 
-    {/* Ассортимент — карточки разделов (фото + подпись) и ссылки дальше */}
-    <section class="h-sec h-sec--wall" aria-labelledby="ds-range-title">
+    {/* Встреча клуба дизайнеров — ролик (играет только по нажатию) */}
+    <section class="h-sec" aria-labelledby="ds-club-title">
+      <div class="container ds-club">
+        <div class="ds-club__text">
+          <h2 id="ds-club-title" class="h-h2">{typograph(DESIGNERS_CLUB.title)}</h2>
+          <p class="h-lead">{typograph(DESIGNERS_CLUB.lead)}</p>
+          <blockquote class="ds-club__quote"><p>{typograph(DESIGNERS_CLUB.quote)}</p></blockquote>
+          <a href="/video/" class="h-link">Все видео салона</a>
+        </div>
+        <div class="ds-club__video">
+          <InlineVideo
+            src={DESIGNERS_CLUB.video.src}
+            poster={DESIGNERS_CLUB.video.cover!}
+            title={DESIGNERS_CLUB.video.title.replaceAll('\n', ' ')}
+            caption={`${DESIGNERS_CLUB.video.title.replaceAll('\n', ' ')} · ${DESIGNERS_CLUB.video.duration}`}
+          />
+        </div>
+      </div>
+    </section>
+
+    {/* Что подбираем под дизайн-проект — разделы карточками: фото, что
+         умеем, цена «от» для первой сметы; ниже — ссылки на подразделы */}
+    <section class="h-sec h-sec--wall" aria-labelledby="ds-solutions-title">
       <div class="container">
         <header class="h-head">
-          <h2 id="ds-range-title" class="h-h2">Ассортимент для ваших проектов</h2>
-          <p class="h-lead">Всё можно посмотреть в&nbsp;шоуруме и&nbsp;заказать под проект — в&nbsp;том числе нестандартных размеров.</p>
+          <h2 id="ds-solutions-title" class="h-h2">{typograph(SOLUTIONS.title)}</h2>
+          <p class="h-lead">{typograph(SOLUTIONS.lead)}</p>
         </header>
         <ul class="ds-range h-rail" role="list">
-          {DESIGNER_RANGE.map((r) => (
+          {SOLUTIONS.items.map((r) => (
             <li>
               <a href={r.href} class="ds-range__card">
                 <span class="h-media ds-range__media">
                   <img src={r.photo.src} alt={r.photo.alt} loading="lazy" decoding="async" width="1672" height="941" style={`object-position: ${r.position}`} />
                 </span>
                 <span class="ds-range__row">
-                  <span class="h-h3 ds-range__title">{r.title}</span>
+                  <span class="h-h3 ds-range__title">{typograph(r.title)}</span>
                   <span class="h-arrow" aria-hidden="true"><Fragment set:html={arrow} /></span>
                 </span>
                 <span class="h-body ds-range__text">{typograph(r.text)}</span>
+                {r.price && <span class="ds-range__price">{r.price}</span>}
               </a>
             </li>
           ))}
@@ -296,26 +362,6 @@ const breadcrumbItems = [
         <ul class="ds-more" role="list" aria-label="Ещё разделы">
           {DESIGNER_RANGE_MORE.map((m) => (
             <li><a href={m.href} class="h-pill h-pill--line">{m.label}</a></li>
-          ))}
-        </ul>
-      </div>
-    </section>
-
-    {/* Что подбираем под дизайн-проект — запросы дизайнеров, у каждого
-         пункта — ссылка на раздел */}
-    <section class="h-sec" aria-labelledby="ds-solutions-title">
-      <div class="container">
-        <header class="h-head">
-          <h2 id="ds-solutions-title" class="h-h2">{typograph(DESIGNER_SOLUTIONS.title)}</h2>
-          <p class="h-lead">{typograph(DESIGNER_SOLUTIONS.lead)}</p>
-        </header>
-        <ul class="ds-sol" role="list">
-          {DESIGNER_SOLUTIONS.items.map((s) => (
-            <li class="ds-sol__item">
-              <h3 class="h-h3 ds-sol__title">{typograph(s.title)}</h3>
-              <p class="h-body ds-sol__text">{typograph(s.text)}</p>
-              <a href={s.href} class="h-link ds-sol__link">Подробнее</a>
-            </li>
           ))}
         </ul>
       </div>
@@ -398,6 +444,37 @@ const breadcrumbItems = [
             </li>
           ))}
         </ul>
+      </div>
+    </section>
+
+    {/* Пришлите проект — мессенджер, куда можно приложить план; сообщение уже набрано */}
+    <section class="h-sec" id="ds-send" aria-labelledby="ds-send-title">
+      <div class="container">
+        <div class="ds-send">
+          <div class="ds-send__head">
+            <h2 id="ds-send-title" class="h-h2 ds-send__title">{typograph(DESIGNERS_SEND.title)}</h2>
+            <p class="ds-send__lead">{typograph(DESIGNERS_SEND.lead)}</p>
+          </div>
+          <div class="ds-send__body">
+            <p class="ds-send__label">Что приложить</p>
+            <ol class="ds-send__list" role="list">
+              {DESIGNERS_SEND.list.map((x) => <li>{typograph(x)}</li>)}
+            </ol>
+            <div class="ds-send__actions">
+              {telegram && (
+                <a href={telegram} class="h-btn ds-send__btn" target="_blank" rel="noopener" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+                  <TelegramIcon class="ds-send__ico" />Telegram
+                </a>
+              )}
+              {MAX_CHAT && (
+                <a href={maxChatUrl()} class="h-btn ds-send__btn" target="_blank" rel="noopener" data-copy-text={DESIGNER_MESSAGE} aria-label="Написать в MAX (текст скопируется)">
+                  <MaxIcon class="ds-send__ico" />MAX
+                </a>
+              )}
+              <a href={CALL} class="h-btn ds-send__ghost">{PHONE.label}</a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -628,7 +705,7 @@ const breadcrumbItems = [
   .ds-tile__media { position: relative; flex: 1 1 auto; min-height: 12rem; border-radius: 0; }
   /* ПК: фото растягивается на высоту ряда вместе с соседней плиткой этапов —
      собственный минимум ниже, чтобы ряд не задавал пустоту в той плитке */
-  @media (min-width: 62.5rem) { .ds-tile--photo .ds-tile__media { min-height: 9rem; } }
+  @media (min-width: 62.5rem) { .ds-tile--photo .ds-tile__media { min-height: 11rem; } }
   .ds-tile__media > img { position: absolute; inset: 0; }
   .ds-tile__body { display: flex; flex-direction: column; gap: 0.75rem; padding: clamp(1.25rem, 2vw, 1.75rem); }
   /* Планшет: плитка во всю ширину — рендер слева, подпись справа */
@@ -1042,11 +1119,92 @@ const breadcrumbItems = [
     .ds-range__card:hover .ds-range__media img, .ds-renders__item:hover > img { transform: none; }
   }
 
-  /* Что подбираем под дизайн-проект: пункты под линейками, 3 колонки на ПК */
-  .ds-sol { display: grid; gap: 2rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
-  @media (min-width: 43.75rem) { .ds-sol { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 62.5rem) { .ds-sol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  .ds-sol__item { display: flex; flex-direction: column; padding-top: 1.25rem; border-top: 0.0625rem solid var(--h-rule); }
-  .ds-sol__text { margin-top: 0.625rem; color: var(--h-soft); }
-  .ds-sol__link { align-self: flex-start; margin-top: auto; padding-top: 0.875rem; }
+  /* ── Работы с объектов: как «Наши работы» на главной ── */
+  .ds-works__all { gap: 0.625rem; margin-top: 1.5rem; }
+  .ds-works { display: grid; gap: 3rem var(--h-gutter); margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 43.75rem) { .ds-works { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 80rem) { .ds-works { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+  /* ── Клуб дизайнеров: текст слева, вертикальный ролик справа ── */
+  .ds-club { display: grid; gap: 2rem var(--h-gutter); align-items: center; }
+  @media (min-width: 56.25rem) {
+    .ds-club { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .ds-club__text { grid-column: 1 / span 6; }
+    .ds-club__video { grid-column: 8 / span 4; }
+  }
+  .ds-club__text { display: flex; flex-direction: column; align-items: flex-start; gap: 1.25rem; }
+  .ds-club__text .h-lead { margin: 0; }
+  .ds-club__quote {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+    border-left: 0.1875rem solid var(--h-signal);
+  }
+  .ds-club__quote p {
+    margin: 0;
+    font-family: var(--h-font);
+    font-size: clamp(1.25rem, 2vw, 1.625rem);
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    color: var(--h-ink);
+    text-wrap: pretty;
+  }
+  .ds-club__video { width: 100%; max-width: 22rem; justify-self: center; }
+  @media (max-width: 56.1875rem) { .ds-club__video { max-width: 18rem; } }
+
+  /* Цена «от» на карточке раздела — строкой под текстом, прижата к низу */
+  .ds-range__card { height: 100%; }
+  .ds-range__price {
+    margin-top: auto;
+    padding-top: 0.875rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--h-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Пришлите проект: графитовая плоскость, слева заголовок, справа
+     что приложить и кнопки мессенджеров ── */
+  .ds-send {
+    display: grid;
+    gap: 2rem var(--h-gutter);
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+    border-radius: 1.75rem;
+    background: var(--color-slate-950);
+    color: var(--color-white);
+  }
+  @media (min-width: 56.25rem) { .ds-send { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); column-gap: clamp(2rem, 5vw, 5rem); } }
+  .ds-send__head { display: flex; flex-direction: column; gap: 1.25rem; }
+  .ds-send__title { color: var(--color-white); }
+  .ds-send__lead { margin: 0; max-width: 32em; font-size: clamp(1.0625rem, 1.4vw, 1.1875rem); line-height: 1.6; color: var(--color-slate-300); text-wrap: pretty; }
+  .ds-send__label { margin: 0 0 0.25rem; font-size: 0.8125rem; color: var(--color-slate-400); }
+  .ds-send__list { margin: 0; padding: 0; list-style: none; counter-reset: ds-send; border-top: 0.0625rem solid var(--color-slate-700); }
+  .ds-send__list li {
+    counter-increment: ds-send;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    padding-block: 0.875rem;
+    border-bottom: 0.0625rem solid var(--color-slate-700);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+  .ds-send__list li::before {
+    content: counter(ds-send, decimal-leading-zero);
+    padding-top: 0.1875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--h-signal);
+    font-variant-numeric: tabular-nums;
+  }
+  .ds-send__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+  .ds-send__btn { gap: 0.625rem; background: var(--color-white); border-color: var(--color-white); color: var(--h-ink); }
+  .ds-send__btn:hover { background: var(--color-slate-200); border-color: var(--color-slate-200); }
+  .home .ds-send__btn:focus-visible, .home .ds-send__ghost:focus-visible { outline-color: var(--color-white); }
+  .ds-send__ico { width: 1.25rem; height: 1.25rem; }
+  .ds-send__ghost { border-color: var(--color-slate-600); color: var(--color-white); font-variant-numeric: tabular-nums; }
+  .ds-send__ghost:hover { border-color: var(--color-white); }
+  @media (max-width: 29.9375rem) {
+    .ds-send__actions > * { flex: 1 1 calc(50% - 0.375rem); }
+    .ds-send__ghost { flex-basis: 100%; }
+  }
 </style>
