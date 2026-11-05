@@ -9,6 +9,7 @@ import {
   type HingeType, type HardwareImages,
 } from '../../data/hardware'
 import { PHONE, SITE } from '../../config/site'
+import { DOOR_SIZES } from '../../data/door-sizes'
 import { WHATSAPP, whatsappWithText, TELEGRAM_CHAT, telegramWithText, MAX_CHAT, maxChatUrl, maxWithText } from '../../lib/messengers'
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
@@ -220,7 +221,7 @@ onUnmounted(() => {
                   </select>
                   <span class="calc-row__price">{{ doborItem?.price ? fmt(doborItem.price * DOBOR_QTY) : 'уточняется' }}</span>
                 </label>
-                <p class="calc-hint">Короб — 32 мм. Если стена глубже — добор компенсирует разницу, выбирайте по факту глубины проёма.</p>
+                <p class="calc-hint">Короб — {{ DOOR_SIZES.boxDepth }} мм. Если стена глубже — добор компенсирует разницу, выбирайте по факту глубины проёма.</p>
               </div>
 
               <div class="calc-divider" />

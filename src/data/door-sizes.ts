@@ -5,4 +5,6 @@ export const DOOR_SIZES = {
   standardHeight:  2000,
   /** Высота полотна под заказ — до этой, мм */
   customMaxHeight: 3000,
+  /** Глубина (ширина) короба межкомнатной двери, мм — глубже стена — добор */
+  boxDepth:        80,
 } as const
