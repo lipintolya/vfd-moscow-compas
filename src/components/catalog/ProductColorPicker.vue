@@ -472,6 +472,7 @@ const shareModel = async () => {
 }
 /* Тот же свотч, что на карточке каталога (.pc__swatch): выбранный — графитовое кольцо */
 .pp__swatch {
+  position: relative;
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
@@ -488,7 +489,16 @@ const shareModel = async () => {
   .pp__swatches { gap: 0.5rem; }
   .pp__swatch { width: 2.25rem; height: 2.25rem; }
 }
-.pp__swatch.is-unavailable { outline: 0.125rem dashed color-mix(in srgb, var(--color-slate-900) 32%, transparent); outline-offset: -0.125rem; }
+/* Нет в наличии — пунктир внутри кружка. Не outline: рамку при касании гасит
+   правило html[data-input='pointer'] (global.css), а пометка должна остаться */
+.pp__swatch.is-unavailable::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 0.125rem dashed color-mix(in srgb, var(--color-slate-900) 32%, transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
 .pp__swatch:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.375rem; }
 
 .pp__extra { margin-top: 1.25rem; }

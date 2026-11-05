@@ -237,6 +237,32 @@ const onKeydown = (e: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
+/* Плашка «порядок / фильтры» на телефоне и планшете прилипает под шапкой;
+   тень — только когда прилипла. Плашка — первый элемент выдачи: прилипла,
+   когда верх выдачи ушёл выше её top. На ПК top = auto → NaN → не липкая */
+const barRef = ref<HTMLElement | null>(null)
+const barStuck = ref(false)
+let barFrame = 0
+const measureBar = () => {
+  barFrame = 0
+  const bar = barRef.value
+  const results = resultsRef.value
+  if (!bar || !results) return
+  const top = parseFloat(getComputedStyle(bar).top)
+  barStuck.value = Number.isFinite(top) && results.getBoundingClientRect().top < top
+}
+const onBarScroll = () => { if (!barFrame) barFrame = requestAnimationFrame(measureBar) }
+onMounted(() => {
+  window.addEventListener('scroll', onBarScroll, { passive: true })
+  window.addEventListener('resize', onBarScroll, { passive: true })
+  measureBar()
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', onBarScroll)
+  window.removeEventListener('resize', onBarScroll)
+  if (barFrame) cancelAnimationFrame(barFrame)
+})
+
 /* Teleport в серверно-отрисованном острове — только после монтирования,
    иначе гидратация не сходится (CLAUDE.md, Runtime conventions) */
 const isMounted = ref(false)
@@ -300,7 +326,7 @@ onMounted(() => { isMounted.value = true })
       </aside>
 
       <div ref="resultsRef" class="cat__results">
-        <div class="cat__bar">
+        <div ref="barRef" class="cat__bar" :class="{ 'is-stuck': barStuck }">
           <label class="cat__sort">
             <span class="sr-only">Порядок</span>
             <select v-model="sortBy" class="cat__select">
@@ -311,13 +337,17 @@ onMounted(() => { isMounted.value = true })
             </select>
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
           </label>
-          <p class="cat__found" aria-live="polite">Найдено {{ filteredCards.length }} {{ modelsWord(filteredCards.length) }}</p>
+          <p class="cat__found cat__found--bar" aria-live="polite">Найдено {{ filteredCards.length }} {{ modelsWord(filteredCards.length) }}</p>
           <button ref="sheetToggleRef" type="button" class="cat__filters-btn" aria-haspopup="dialog" @click="sheetOpen = true">
             Фильтры
             <span v-if="panelCount" class="cat__badge">{{ panelCount }}</span>
             <svg v-else viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
           </button>
         </div>
+        <!-- Телефон и планшет: «найдено» — строкой под плашкой, не липкой.
+             Строк две (в плашке — для ПК), видна одна: скрытая через
+             display: none не озвучивается, поэтому aria-live у обеих -->
+        <p class="cat__found cat__found--below" aria-live="polite">Найдено {{ filteredCards.length }} {{ modelsWord(filteredCards.length) }}</p>
 
         <ul v-if="chips.length" class="cat__chips" role="list" aria-label="Выбранные фильтры">
           <li v-for="chip in chips" :key="`${chip.key}-${chip.value}`">
@@ -498,6 +528,8 @@ onMounted(() => { isMounted.value = true })
   border-bottom: 0.0625rem solid var(--h-rule);
 }
 .cat__found { margin: 0; font-size: 0.9375rem; color: var(--h-muted); font-variant-numeric: tabular-nums; }
+/* «Найдено» под плашкой — только на телефоне и планшете (@media ниже) */
+.cat__found--below { display: none; }
 .cat__sort { position: relative; display: inline-flex; align-items: center; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
 .cat__select {
   min-height: 2.75rem;
@@ -586,27 +618,50 @@ onMounted(() => { isMounted.value = true })
 }
 .cat__range { margin: 0; }
 
-/* Телефон и планшет: колонки фильтров нет — строка «порядок / фильтры»
-   прилипает под шапкой, «найдено» — под ней */
+/* Телефон и планшет: колонки фильтров нет — «порядок / фильтры» — вторая
+   плашка в стиле шапки (Header.vue): та же ширина (контейнер), графит,
+   волосяной контур, скругление; прилипает на 0.5rem ниже видимой плашки
+   шапки (--header-pill-bottom, global.css). Поле по бокам — как у шапки
+   (--header-pill-gap): «порядок» стоит по краю логотипа, «Фильтры» — по
+   краю кнопки меню. Тень — только когда прилипла (is-stuck, скрипт выше).
+   «Найдено» — отдельной строкой под плашкой, не липкой */
 @media (max-width: 62.4375rem) {
   .cat__bar {
     position: sticky;
-    top: var(--header-height);
+    top: calc(var(--header-pill-bottom) + 0.5rem);
     z-index: 5;
-    flex-wrap: wrap;
-    gap: 0 1rem;
-    margin-inline: calc(-1 * var(--h-pad));
-    padding: 0.25rem var(--h-pad) 0.5rem;
-    background: var(--h-paper);
+    gap: 1rem;
+    min-height: 3rem;
+    padding: 0 var(--header-pill-gap);
+    border: 0;
+    border-radius: 1.25rem;
+    background: var(--color-slate-900);
+    color: var(--color-white);
+    box-shadow: inset 0 0 0 0.0625rem var(--color-slate-700);
+    transition: box-shadow 200ms var(--ease-out);
   }
+  .cat__bar.is-stuck {
+    box-shadow:
+      inset 0 0 0 0.0625rem var(--color-slate-700),
+      0 0.625rem 0.9375rem -0.1875rem color-mix(in srgb, var(--color-slate-950) 10%, transparent),
+      0 0.25rem 0.375rem -0.25rem color-mix(in srgb, var(--color-slate-950) 10%, transparent);
+  }
+  .cat__bar .cat__sort,
+  .cat__bar .cat__filters-btn { color: var(--color-white); }
+  .cat__bar .cat__select option { color: var(--h-ink); }
+  .cat__bar .cat__badge { background: var(--color-white); color: var(--color-slate-900); }
   .cat__filters-btn { display: inline-flex; }
-  .cat__found { order: 3; width: 100%; font-size: 0.8125rem; }
+  .cat__found--bar { display: none; }
+  .cat__found--below { display: block; margin-top: 0.625rem; font-size: 0.8125rem; }
+  /* Фокус на графите — светлый, как у шапки (--hdr-focus) */
+  .cat__bar .cat__sort:has(.cat__select:focus-visible),
+  .cat__bar .cat__filters-btn:focus-visible { outline-color: var(--color-secondary-300); }
 }
 
 .cat :is(button):focus-visible { outline: 0.125rem solid var(--color-secondary-500); outline-offset: 0.1875rem; }
 
 @media (prefers-reduced-motion: reduce) {
-  .cc__card, .cc__media img, .cc__media::after, .cat__chip { transition: none; }
+  .cc__card, .cc__media img, .cc__media::after, .cat__chip, .cat__bar { transition: none; }
   .cc__card:hover .cc__media img { transform: none; }
 }
 </style>

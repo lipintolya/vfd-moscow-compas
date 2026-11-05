@@ -730,7 +730,7 @@ onUnmounted(() => {
   --hdr-shadow:        color-mix(in srgb, var(--color-slate-950) 10%, transparent);
   --hdr-focus:         var(--color-secondary-600);
   --hdr-hair:          0.0625rem;
-  --hdr-tap:           2.75rem;
+  --hdr-tap:           var(--header-tap);       /* global.css — общая с плашкой фильтров каталога */
   --hdr-h:             var(--header-bar);       /* global.css — общая с отступом страницы */
   --hdr-ease:          var(--ease-out);
   --hdr-ease-soft:     cubic-bezier(0.16, 1, 0.3, 1);  /* мягкое торможение в конце */
@@ -769,7 +769,7 @@ onUnmounted(() => {
   /* Поле плашки вокруг содержимого: круглые кнопки (--hdr-tap) стоят
      в ней с равным зазором сверху, снизу и по краям. Края плашки — ровно
      по контейнеру (как сцена hero под ней), поле — внутрь */
-  --hdr-pill-gap: 0.375rem;
+  --hdr-pill-gap: var(--header-pill-gap);   /* global.css; на телефоне — 0.5rem */
   position: relative;
   padding-inline: var(--hdr-pill-gap);
   display: grid;
@@ -805,10 +805,8 @@ onUnmounted(() => {
 }
 /* Телефон: плашка на ~7 % выше (3.5 → 3.75rem) за счёт поля вокруг
    кнопок — кнопки и текст прежние; полоса --header-bar (4.5rem) та же,
-   плашка в неё помещается, отступ страницы под шапкой не меняется */
-@media (max-width: 47.9375rem) {
-  .hdr { --hdr-pill-gap: 0.5rem; }
-}
+   плашка в неё помещается, отступ страницы под шапкой не меняется.
+   Само поле — --header-pill-gap в global.css (0.5rem на телефоне) */
 
 .site-header :is(a, button):focus-visible,
 .mnav :is(a, button):focus-visible {

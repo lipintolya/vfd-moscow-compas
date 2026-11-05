@@ -71,6 +71,19 @@ const structuredDataJson = structuredData
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    {/* Режим ввода для рамки фокуса (global.css): после касания или клика —
+         'pointer', рамки нет; с клавиатуры — 'keyboard', рамка есть. Шторки,
+         меню и окна сами ставят фокус (на крестик, обратно на кнопку) — Safari
+         рисует :focus-visible и после тапа. Одиночные модификаторы режим не
+         меняют: Shift/Cmd с кликом — всё ещё мышь. */}
+    <script is:inline>
+      (function () {
+        var root = document.documentElement
+        var MODIFIERS = { Shift: 1, Control: 1, Alt: 1, Meta: 1 }
+        addEventListener('pointerdown', function () { root.dataset.input = 'pointer' }, { capture: true, passive: true })
+        addEventListener('keydown', function (e) { if (!MODIFIERS[e.key]) root.dataset.input = 'keyboard' }, true)
+      })()
+    </script>
     <meta name="description" content={description} />
     {noIndex ? <meta name="robots" content="noindex, nofollow" /> : <meta name="robots" content="index, follow" />}
 

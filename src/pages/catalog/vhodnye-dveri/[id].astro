@@ -258,9 +258,9 @@ const faqSchema = {
   .edm__finish-name [data-finish-price] { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
   .edm__thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
   @media (min-width: 43.75rem) { .edm__thumbs { grid-template-columns: repeat(8, minmax(0, 1fr)); } }
-  .edm__thumb { display: block; width: 100%; padding: 0; border: 0.125rem solid transparent; border-radius: 0.625rem; cursor: pointer; outline: 0.0625rem solid var(--h-rule); outline-offset: -0.0625rem; transition: border-color 200ms var(--ease-out); }
+  .edm__thumb { display: block; width: 100%; padding: 0; border: 0.125rem solid transparent; border-radius: 0.625rem; cursor: pointer; box-shadow: 0 0 0 0.0625rem var(--h-rule); transition: border-color 200ms var(--ease-out); }
   .edm__thumb:hover { border-color: var(--color-slate-400); }
-  .edm__thumb[aria-pressed='true'] { border-color: var(--h-signal); outline-color: transparent; }
+  .edm__thumb[aria-pressed='true'] { border-color: var(--h-signal); box-shadow: none; }
   .edm__thumb:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   .edm__more { margin: 0.75rem 0 0; font-size: 0.875rem; color: var(--h-muted); }
 

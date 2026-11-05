@@ -225,10 +225,22 @@
      учтена через env(). */
   --header-bar:    4.5rem;
   --header-height: calc(env(safe-area-inset-top, 0rem) + var(--header-bar));
+  /* Видимая плашка шапки внутри полосы: кнопки (--header-tap) и поле
+     вокруг них (--header-pill-gap; на телефоне шире — ниже в @media).
+     --header-pill-bottom — низ плашки: под ним прилипает плашка фильтров
+     каталога (CatalogClient.vue) */
+  --header-tap:        2.75rem;
+  --header-pill-gap:   0.375rem;
+  --header-pill-inset: calc((var(--header-bar) - var(--header-tap)) / 2 - var(--header-pill-gap));
+  --header-pill-bottom: calc(var(--header-height) - var(--header-pill-inset));
 
   /* Motion */
   --ease-out:      cubic-bezier(0.4,0,0.2,1);
   --duration-base: 200ms;
+}
+/* Телефон: плашка шапки выше за счёт поля вокруг кнопок (Header.vue) */
+@media (max-width: 47.9375rem) {
+  :root { --header-pill-gap: 0.5rem; }
 }
 
 /* ============================================================
@@ -248,6 +260,9 @@ html {
   color: var(--color-fg);
   background-color: var(--color-slate-950); /* цвет футера — виден при overscroll вниз */
   -webkit-font-smoothing: antialiased;
+  /* Без серой вспышки iOS при касании: на карточке со ссылкой на всю
+     площадь она закрывала всю карточку */
+  -webkit-tap-highlight-color: transparent;
   scroll-behavior: smooth;
   /* Якоря (#video и т.п.) не уезжают под фиксированную шапку */
   scroll-padding-top: calc(var(--header-height) + 1rem);
@@ -493,6 +508,22 @@ astro-island:has(> .section) + .section,
 :focus-visible {
   outline: 2px solid var(--color-secondary);
   outline-offset: 3px;
+}
+
+/* Рамка фокуса — только для клавиатуры. Шторки, меню и окна возвращают
+   фокус из кода, и Safari рисует :focus-visible после тапа — на iPhone
+   это выглядело как баг. Режим ввода пишет скрипт в <head> (BaseLayout).
+   Селекторы — все места, где сайт рисует рамку: сам элемент, его ::after
+   (карточка товара), сосед (галочки фильтров), потомок (карточки покрытий),
+   родитель через :has (сортировка, плитки). Поэтому outline на сайте —
+   только для фокуса; рамки и выбор в дизайне — box-shadow или border. */
+html[data-input='pointer'] :focus-visible,
+html[data-input='pointer'] :focus-visible::before,
+html[data-input='pointer'] :focus-visible::after,
+html[data-input='pointer'] :focus-visible ~ *,
+html[data-input='pointer'] :focus-visible *,
+html[data-input='pointer'] :has(:focus-visible) {
+  outline: none !important;
 }
 
 /* ── Dropdown / panel animation ── */

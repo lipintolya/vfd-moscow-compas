@@ -384,17 +384,18 @@ const finish = finishLabel(profile.id, glass.id)
     place-items: center;
     width: 100%;
     border-radius: 0.75rem;
-    outline: 0.0625rem solid var(--h-rule);
-    outline-offset: 0;
-    transition: outline-color 150ms var(--ease-out), outline-width 150ms var(--ease-out);
+    /* Рамка и выбор — box-shadow, не outline: outline при касании гасит
+       правило html[data-input='pointer'] (global.css), а выбор должен быть виден */
+    box-shadow: 0 0 0 0.0625rem var(--h-rule);
+    transition: box-shadow 150ms var(--ease-out);
   }
   /* Подпись — 13 px; уже 375 px чуть мельче, чтобы «Прозрачный» помещался
      под образцом стекла (четыре в ряд на 360 px) */
   .oa-chip__name { font-size: clamp(0.75rem, 4vw - 0.125rem, 0.8125rem); font-weight: 500; line-height: 1.25; color: var(--h-soft); }
   .oa-chip__note { display: block; font-weight: 400; color: var(--h-muted); }
 
-  .oa-chip:hover .oa-chip__face { outline-color: var(--color-slate-400); }
-  .oa-radio:checked ~ .oa-chip__face { outline: 0.125rem solid var(--h-ink); outline-offset: 0.125rem; }
+  .oa-chip:hover .oa-chip__face { box-shadow: 0 0 0 0.0625rem var(--color-slate-400); }
+  .oa-radio:checked ~ .oa-chip__face { box-shadow: 0 0 0 0.125rem var(--h-paper), 0 0 0 0.25rem var(--h-ink); }
   .oa-radio:checked ~ .oa-chip__name { font-weight: 600; color: var(--h-ink); }
   .oa-radio:focus-visible ~ .oa-chip__face { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.1875rem; }
 
@@ -407,6 +408,7 @@ const finish = finishLabel(profile.id, glass.id)
   .oa-swatch { aspect-ratio: 1; }
   .oa-swatch--profile { width: min(100%, 2.75rem); border-radius: 50%; background: var(--sw); outline-offset: 0; }
   .oa-radio:checked ~ .oa-swatch--profile { outline-offset: 0.1875rem; }
+  .oa-radio:checked ~ .oa-chip__face.oa-swatch--profile { box-shadow: 0 0 0 0.1875rem var(--h-paper), 0 0 0 0.3125rem var(--h-ink); }
   .oa-swatch--glass {
     position: relative;
     overflow: hidden;
