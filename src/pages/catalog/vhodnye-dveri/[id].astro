@@ -86,7 +86,7 @@ const faqSchema = {
             <img src={first.image.src} srcset={first.image.srcset} sizes="(min-width: 62.5rem) 46vw, 100vw" alt={first.image.alt} width={first.image.width} height={first.image.height} fetchpriority="high" decoding="async" />
             <span class="edm__zoom" aria-hidden="true">Увеличить</span>
           </button>
-          <p class={`edm__sides${first.image.single ? " edm__sides--one" : ""}`} aria-hidden="true"><span>Снаружи</span>{!first.image.single && <span>Изнутри</span>}</p>
+          <p class={`edm__sides${first.image.single ? " edm__sides--one" : ""}`} aria-hidden="true" data-sides><span>Снаружи</span><span data-inside hidden={first.image.single}>Изнутри</span></p>
 
           {multi && (
             <div class="edm__finish">
@@ -104,6 +104,8 @@ const faqSchema = {
                       data-alt={v.image.alt}
                       data-name={v.name}
                       data-price={rub(v.price)}
+                      data-single={v.image.single ? '1' : '0'}
+                      data-ratio={`${v.image.width} / ${v.image.height}`}
                       aria-pressed={i === 0 ? 'true' : 'false'}
                       aria-label={`Отделка: ${v.name}`}
                     >
@@ -212,6 +214,15 @@ const faqSchema = {
       img.srcset = t.dataset.srcset!
       img.alt = t.dataset.alt!
       main.dataset.lightboxIndex = String(i)
+      /* Кадр может быть одной дверью (снаружи) или двумя (снаружи и изнутри): пропорции и подписи — по выбранной отделке */
+      const one = t.dataset.single === '1'
+      main.style.aspectRatio = t.dataset.ratio!
+      main.classList.toggle('edm__main--one', one)
+      const sides = gallery.querySelector<HTMLElement>('[data-sides]')
+      if (sides) {
+        sides.classList.toggle('edm__sides--one', one)
+        sides.querySelector<HTMLElement>('[data-inside]')!.hidden = one
+      }
       if (label) label.textContent = t.dataset.name!
       if (priceEl) priceEl.textContent = t.dataset.price!
       thumbs.forEach((x) => x.setAttribute('aria-pressed', String(x === t)))

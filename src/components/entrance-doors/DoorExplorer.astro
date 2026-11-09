@@ -19,18 +19,24 @@ const PLACES = [['flat', 'Квартира'], ['house', 'Частный дом']
 const door = doorById(GUIDE.explorerDoor)
 if (!door) throw new Error(`«На что смотреть»: в каталоге нет модели «${GUIDE.explorerDoor}» (GUIDE.explorerDoor)`)
 const photo = door.cover
-/* Контуры подсветки заданы в пикселях кадра 503×977 (Версаль, вид снаружи) */
+/* Контуры подсветки заданы в пикселях кадра 503×977 — это наружная сторона (Версаль, вид снаружи).
+   Кадр может быть «снаружи и изнутри» (наружная — левая часть, та же мерка): показываем только её,
+   контуры остаются на месте. */
 const SHAPE_FRAME = { width: 503, height: 977 }
-if (photo.width !== SHAPE_FRAME.width || photo.height !== SHAPE_FRAME.height) {
-  throw new Error(`«На что смотреть»: фото «${door.id}» ${photo.width}×${photo.height}, а контуры подсветки нарисованы под ${SHAPE_FRAME.width}×${SHAPE_FRAME.height} — перерисуйте их в DoorExplorer.astro`)
+const nativeWidth = (photo.width / photo.height) * SHAPE_FRAME.height
+if (nativeWidth < SHAPE_FRAME.width - 1) {
+  throw new Error(`«На что смотреть»: фото «${door.id}» ${photo.width}×${photo.height} — уже наружной стороны 503×977, контуры подсветки нарисованы под неё — перерисуйте их в DoorExplorer.astro`)
 }
+/* Доля кадра, которую занимает наружная сторона; фото растягиваем так, чтобы показать только её */
+const outerShare = SHAPE_FRAME.width / nativeWidth
+const photoStyle = `width: ${(100 / outerShare).toFixed(3)}%; height: auto; max-width: none`
 ---
 
 <div class="dx" data-explorer data-active={FIRST.key} data-parts={FIRST.parts.join(' ')}>
   <div class="dx__fig">
-    <div class="dx__stage" style={`aspect-ratio: ${photo.width} / ${photo.height}`}>
-      <img class="dx__photo" src={photo.src} srcset={photo.srcset} sizes="(min-width: 62.5rem) 19rem, 17rem" alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
-      <svg class="dx__svg" viewBox={`0 0 ${photo.width} ${photo.height}`} aria-hidden="true" focusable="false">
+    <div class="dx__stage" style={`aspect-ratio: ${SHAPE_FRAME.width} / ${SHAPE_FRAME.height}`}>
+      <img class="dx__photo" src={photo.src} srcset={photo.srcset} sizes="(min-width: 62.5rem) 38rem, 34rem" alt={photo.alt} width={photo.width} height={photo.height} style={photoStyle} loading="lazy" decoding="async" />
+      <svg class="dx__svg" viewBox={`0 0 ${SHAPE_FRAME.width} ${SHAPE_FRAME.height}`} aria-hidden="true" focusable="false">
         <!-- Короб: левая и правая стойки и перемычка -->
         <g class="dp-frame">
           <rect x="1" y="1" width="33" height="975" />
@@ -151,7 +157,7 @@ if (photo.width !== SHAPE_FRAME.width || photo.height !== SHAPE_FRAME.height) {
 
   /* Фото двери на серой подложке; контуры подсветки и точки-кнопки лежат поверх кадра */
   .dx__fig { display: grid; place-items: center; padding: clamp(1rem, 3vw, 2rem); border-radius: var(--h-tile-radius); background: var(--h-wall); }
-  .dx__stage { position: relative; width: min(100%, 17rem); }
+  .dx__stage { position: relative; width: min(100%, 17rem); overflow: hidden; }
   @media (min-width: 62.5rem) { .dx__stage { width: min(100%, 19rem); } }
   .dx__photo { display: block; width: 100%; height: 100%; }
   .dx__svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; --hot: var(--h-signal); fill: none; stroke: var(--hot); stroke-width: 3; stroke-linecap: round; }
