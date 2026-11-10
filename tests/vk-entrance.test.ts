@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { ENTRANCE_DOORS } from '../src/data/entrance-doors'
-import { vkEntranceId, entrancePictureSources, entranceDescription, entranceName, ENTRANCE_CATEGORY_ID } from '../src/lib/vk-entrance'
+import { vkEntranceId, entrancePictureSources, entranceDescription, entranceName, ENTRANCE_CATEGORY_ID, VK_ENTRANCE_REV } from '../src/lib/vk-entrance'
 import { vkOfferId } from '../src/lib/feed-common'
 import { ENTRANCE_PHOTO_BG, PHOTO_BG } from '../src/lib/vk-photo'
 test('название входной двери — как на сайте, без бренда: входные двери не ВФД', () => {
@@ -53,5 +53,22 @@ test('описание: обычный текст, «от» и цена из к�
     assert.ok(!/[<>]/.test(text), d.id)
     assert.match(text, /Цена — от \d/, d.id)
     assert.ok(text.includes(d.sizes), d.id)
+  }
+})
+
+test('id входных дверей — версия 2 (11 ноя 2026): VK не меняет фото у созданного товара, а фото с накладками должны дойти до карточек', () => {
+  assert.equal(VK_ENTRANCE_REV, '2')
+  for (const d of ENTRANCE_DOORS) {
+    const id = vkEntranceId(d.id)
+    assert.ok(id.startsWith('ve2'), id)
+    assert.notEqual(id, `ve${d.id.replaceAll('-', '').slice(0, 20)}`, `${id}: прежний id без версии — карточка в VK останется со старыми фото`)
+  }
+})
+
+test('фото входной двери в VK — как на странице модели: лицевая сторона и накладка, без кадров только снаружи', () => {
+  for (const d of ENTRANCE_DOORS) {
+    const sources = entrancePictureSources(d)
+    const shown = d.variants.filter((v) => sources.includes(v.image.large))
+    assert.ok(shown.length > 0 && shown.every((v) => !v.image.single), `${d.id}: в фото попал кадр только с наружной стороной`)
   }
 })

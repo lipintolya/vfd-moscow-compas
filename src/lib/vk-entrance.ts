@@ -17,8 +17,18 @@ import { vkPhotoFiles, ENTRANCE_PHOTO_BG, type VkPicture } from './vk-photo'
 export const ENTRANCE_CATEGORY_ID = 2
 export const ENTRANCE_CATEGORY_NAME = 'Входные двери'
 
-/* Префикс «ve» не совпадает с межкомнатными («v2» + hex id модели) */
-export const vkEntranceId = (doorId: string) => `ve${doorId.replaceAll('-', '').slice(0, 20)}`
+/* Версия id входных дверей. VK не заменяет фото у товара, который уже создан
+   с этим id (импорт обновляет поля, а фото остаются старые) — как у межкомнатных
+   (VK_ITEM_REV в feed-common.ts). Первая выгрузка (3 ноя 2026, id «ve…») ушла,
+   когда у многих моделей была только наружная сторона; накладки добавлены
+   10 ноября — версия 2 (11 ноя 2026), чтобы карточки получили фото как на
+   сайте: лицевая сторона и накладка. Поднять версию — площадка создаст
+   входные двери заново; старые карточки удалить в кабинете VK. */
+export const VK_ENTRANCE_REV = '2'
+
+/* Префикс «ve» + версия не совпадает с межкомнатными («v2» + hex id модели);
+   длина — не больше 22 знаков, как у межкомнатных (id модели укорочен на знак) */
+export const vkEntranceId = (doorId: string) => `ve${VK_ENTRANCE_REV}${doorId.replaceAll('-', '').slice(0, 19)}`
 
 export const entranceGroupName = (d: EntranceDoor) => DOOR_GROUPS.find((g) => g.id === d.group)!.nav
 
