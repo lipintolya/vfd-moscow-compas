@@ -1140,14 +1140,15 @@
     "single": false
   },
   "frost-7024-1": {
-    "hash": "a3a6e34f",
+    "hash": "eef46736",
     "widths": [
-      500
+      520,
+      1000
     ],
-    "width": 500,
-    "height": 977,
-    "split": 500,
-    "single": true
+    "width": 1000,
+    "height": 975,
+    "split": 502,
+    "single": false
   },
   "grand-1": {
     "hash": "26fcdb73",
@@ -1227,14 +1228,15 @@
     "single": false
   },
   "impero-1": {
-    "hash": "b7da761e",
+    "hash": "51d9a81f",
     "widths": [
-      498
+      520,
+      1000
     ],
-    "width": 498,
-    "height": 977,
-    "split": 498,
-    "single": true
+    "width": 1000,
+    "height": 975,
+    "split": 501,
+    "single": false
   },
   "infiniti-1": {
     "hash": "1bb675be",
@@ -2542,14 +2544,15 @@
     "single": true
   },
   "nord-plyus-1": {
-    "hash": "82e0a429",
+    "hash": "be0406a7",
     "widths": [
-      502
+      520,
+      1000
     ],
-    "width": 502,
-    "height": 967,
-    "split": 502,
-    "single": true
+    "width": 1000,
+    "height": 975,
+    "split": 510,
+    "single": false
   },
   "nyu-york-1": {
     "hash": "daba98b2",
@@ -3509,14 +3512,15 @@
     "single": false
   },
   "skandiya-1": {
-    "hash": "f1e0a461",
+    "hash": "96918dda",
     "widths": [
-      502
+      520,
+      1000
     ],
-    "width": 502,
-    "height": 967,
-    "split": 502,
-    "single": true
+    "width": 1000,
+    "height": 975,
+    "split": 510,
+    "single": false
   },
   "skaylab-1": {
     "hash": "0be5d1e4",
@@ -3867,14 +3871,15 @@
     "single": false
   },
   "termolab-2-pro-1": {
-    "hash": "ce266654",
+    "hash": "a1817d7d",
     "widths": [
-      506
+      520,
+      1000
     ],
-    "width": 506,
-    "height": 977,
-    "split": 506,
-    "single": true
+    "width": 1000,
+    "height": 975,
+    "split": 509,
+    "single": false
   },
   "termolab-3-grafit-1": {
     "hash": "ccc6a5b9",
@@ -4134,14 +4139,15 @@
     "single": false
   },
   "tundra-plyus-1": {
-    "hash": "fa936c98",
+    "hash": "f6e6000c",
     "widths": [
-      504
+      520,
+      1000
     ],
-    "width": 504,
-    "height": 967,
-    "split": 504,
-    "single": true
+    "width": 1000,
+    "height": 975,
+    "split": 512,
+    "single": false
   },
   "urban-1": {
     "hash": "2c3e6013",
@@ -4232,14 +4238,15 @@
     "single": false
   },
   "versa-1": {
-    "hash": "00d7c22d",
+    "hash": "347d0de3",
     "widths": [
-      502
+      520,
+      1000
     ],
-    "width": 502,
-    "height": 967,
-    "split": 502,
-    "single": true
+    "width": 1000,
+    "height": 975,
+    "split": 510,
+    "single": false
   },
   "versal-1": {
     "hash": "ab48226b",
