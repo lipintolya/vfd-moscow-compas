@@ -101,7 +101,7 @@ import { MESSENGER_ICONS, MAX_GRADIENT } from '../../lib/messenger-icons'
   }
   .fab__max.is-on { animation: fab-beat 2.4s var(--ease-out) infinite; }
   .fab__max.is-on::before { animation: fab-ring 2.4s var(--ease-out) infinite; }
-  .fab__max.is-on::after { animation: fab-ring 2.4s var(--ease-out) 1.2s infinite; }
+  .fab__max.is-on::after { animation: fab-ring-inner 2.4s var(--ease-out) 1.2s infinite; }
   /* Наведение — пауза: кольца и «дыхание» гаснут, кнопка остаётся на месте */
   .fab__max:hover, .fab__max:focus-visible { animation: none; scale: 1; }
   .fab__max:hover::before, .fab__max:hover::after,
@@ -109,6 +109,11 @@ import { MESSENGER_ICONS, MAX_GRADIENT } from '../../lib/messenger-icons'
   @keyframes fab-ring {
     0% { opacity: 0.9; scale: 1; }
     100% { opacity: 0; scale: 1.7; }
+  }
+  /* Второе кольцо — ближе к кнопке и бледнее: не перебивает первое */
+  @keyframes fab-ring-inner {
+    0% { opacity: 0.6; scale: 1; }
+    100% { opacity: 0; scale: 1.35; }
   }
   @keyframes fab-beat {
     0%, 100% { scale: 1; }
