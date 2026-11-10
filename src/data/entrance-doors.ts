@@ -107,7 +107,10 @@ function build(raw: Raw): EntranceDoor {
   ].filter((c): c is string => !!c)
 
   const title = `Входная дверь ${raw.name}`
-  const variants = raw.variants.map((v) => ({
+  /* Отделка, где у завода нет фото накладки (кадр — одна дверь снаружи), не показываем: она ломает ряд
+     отделок и крупное фото. Если таких отделок у модели нет вовсе, остаётся её единственный кадр */
+  const withInside = raw.variants.filter((v) => !img_single(v.file))
+  const variants = (withInside.length > 0 ? withInside : raw.variants).map((v) => ({
     name: v.name,
     price: v.price,
     image: img(v.file, `${title}: ${v.name}, ${img_single(v.file) ? 'вид снаружи' : 'вид снаружи и изнутри'} — ${SITE.studioName}`),

@@ -69,6 +69,16 @@ test('входные двери: у каждой модели фото, разм
   }
 })
 
+test('входные двери: отделка без накладки (вид одной дверью) не показывается, если у модели есть отделки с накладкой', () => {
+  for (const d of ENTRANCE_DOORS) {
+    const single = d.variants.filter((v) => v.image.single).length
+    assert.ok(single === 0 || single === d.variants.length, `${d.id}: ${single} из ${d.variants.length} отделок — только вид одной дверью`)
+  }
+  /* У семи моделей вида с накладкой нет вовсе — им остаётся их единственный кадр */
+  const onlyOne = ENTRANCE_DOORS.filter((d) => d.variants.every((v) => v.image.single)).map((d) => d.id).sort()
+  assert.deepEqual(onlyOne, ['frost-7024', 'impero', 'nord-plyus', 'skandiya', 'termolab-2-pro', 'tundra-plyus', 'versa'])
+})
+
 test('входные двери: каждая группа не пуста', () => {
   for (const g of DOOR_GROUPS) assert.ok(ENTRANCE_DOORS.some((d) => d.group === g.id), g.id)
 })
