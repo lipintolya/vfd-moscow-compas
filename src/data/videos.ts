@@ -192,6 +192,17 @@ const WORK = 'https://storage.yandexcloud.net/vfd.moscow.compass/video.block'
 
 export const WORK_VIDEOS: Video[] = [
   {
+    id:       'work-replace-door',
+    title:    'Замена двери:\nподберём и установим',
+    text:     'Подберём практически любую дверь и оперативно заменим старую — установим аккуратно.',
+    /* Сжатая копия (4,0 МБ, 720×1280); источник — облако, video.block/IMG_6318_compross.mp4 */
+    src:      '/renders/home/videos/work-replace-door.mp4',
+    cover:    '/renders/home/videos/work-replace-door.webp',
+    coverAt:  4,
+    duration: '0:32',
+    vertical: true,
+  },
+  {
     id:       'work-urban-skin',
     title:    'Двери «Урбан 2В»\nи\u00A0скин-накладка',
     text:     'Межкомнатные двери и накладка на входную дверь в одной отделке: прихожая выглядит единым целым.',
@@ -256,3 +267,13 @@ export const WORK_VIDEOS: Video[] = [
     vertical: true,
   },
 ]
+
+/** Видео с монтажа входной двери — блок на странице входных дверей (catalog/vhodnye-dveri/).
+ *  Не в WORK_VIDEOS: это отчёт с монтажа, а не ролик «Видео с объектов».
+ *  Сжатая копия (1,6 МБ, 352×640); источник — облако, video.block/IMG_5649_compross.mp4 */
+export const ENTRANCE_INSTALL_VIDEO = {
+  src:      '/renders/entrance-install-video/montazh.mp4',
+  poster:   '/renders/entrance-install-video/montazh-poster.webp',
+  title:    'Видео с монтажа входной двери',
+  duration: '0:33',
+} as const
