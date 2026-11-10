@@ -23,6 +23,9 @@ import { BOOK_MESSAGE, WHATSAPP, whatsappUrl, TELEGRAM_CHAT, telegramChatUrl, MA
 import WhatsAppIcon from '../ui/WhatsAppIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
 import MaxIcon from '../ui/MaxIcon.vue'
+/* Число моделей и цена «от» — из каталога (считает главная), в лиде первого экрана */
+interface Props { modelsCount: string; fromPrice: string }
+const { modelsCount, fromPrice } = Astro.props
 const facade = responsivePhoto(SITE.address.photo)
 
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
@@ -76,14 +79,17 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
 
       <div class="stage__copy">
         <h1 id="hero-heading" class="stage__title">
-          Шоурум дверей {SITE.name} {SITE.city.in.replace(' ', '\u00A0')}
+          <span class="stage__title-main">Салон дверей {SITE.city.in.replace(' ', '\u00A0')}</span><span class="sr-only">: </span>
+          <span class="stage__title-sub">межкомнатные и&nbsp;скрытые двери {SITE.name}, входные двери и&nbsp;алюминиевые перегородки</span>
         </h1>
         <p class="stage__fact">
           <span><span class="stage__nowrap">Более <span class="stage__count" data-count={count}>{soldCount}</span> {soldNoun}</span> установлено нашим клиентам в&nbsp;{year}&nbsp;году</span>
         </p>
         <p class="stage__lead">
-          Посмотрите двери, покрытия и&nbsp;фурнитуру вживую — в&nbsp;нашем салоне на&nbsp;северо-востоке
-          Москвы, {SITE.address.districtIn} ({SITE.address.okrug}). Замер и&nbsp;монтаж под ключ.
+          {modelsCount} межкомнатных дверей {SITE.name} от&nbsp;{fromPrice}&nbsp;за&nbsp;полотно, скрытые двери,
+          входные двери, алюминиевые перегородки и&nbsp;стеновые панели. Салон в&nbsp;{SITE.address.mall}{' '}
+          ({SITE.address.street}, {SITE.address.floorIn}, {SITE.address.districtIn}) — образцы вживую,
+          замер и&nbsp;монтаж под ключ.
         </p>
         {/* Главные действия: записаться — выбор, как связаться (форм на сайте
              нет: звонок или мессенджер с готовым текстом); рассчитать — каталог,
@@ -122,6 +128,14 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           </details>
           <a href="/catalog/" class="h-btn stage__calc">Рассчитать двери</a>
         </div>
+        {/* Разделы, которых нет среди трёх направлений ниже: в порядке приоритета салона,
+             обычные ссылки в готовом HTML — их видит и человек, и робот без JS */}
+        <p class="stage__more">
+          Ещё в&nbsp;салоне:{' '}
+          <a href="/catalog/stenovye-paneli/">стеновые панели</a>,{' '}
+          <a href="/catalog/dekorativnye-reyki/">декоративные рейки</a>,{' '}
+          <a href="/catalog/vhodnye-dveri/">входные двери</a>
+        </p>
       </div>
 
       <nav class="ways" aria-label="Направления салона">
@@ -369,9 +383,34 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
     border-radius: 0.125rem;
     background: var(--h-signal);
   }
+  /* Вторая строка заголовка — что продаёт салон: мельче и тоньше главной фразы, но тот же H1 */
+  .stage__title-main { display: block; }
+  .stage__title-sub {
+    display: block;
+    margin-top: 0.625rem;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: color-mix(in srgb, var(--color-white) 88%, transparent);
+  }
+  .stage__more {
+    margin: 1.125rem 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--color-white) 78%, transparent);
+  }
+  .stage__more a {
+    color: var(--color-white);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--color-white) 45%, transparent);
+    text-underline-offset: 0.2em;
+  }
+  .stage__more a:hover { text-decoration-color: var(--color-white); }
+  .stage__more a:focus-visible { outline: 0.125rem solid var(--color-white); outline-offset: 0.1875rem; border-radius: 0.125rem; }
   .stage__lead {
     margin: 0.75rem 0 0;
-    max-width: 27rem;
+    max-width: 32rem;
     font-size: 0.9375rem;
     line-height: 1.6;
     color: color-mix(in srgb, var(--color-white) 82%, transparent);

@@ -72,7 +72,7 @@ const localBusinessSchema = buildLocalBusiness()
   ogImage={HERO_COVER_IMAGE}
 >
   <div class="home">
-    <ShowroomHero />
+    <ShowroomHero modelsCount={modelsCount} fromPrice={rub(Math.min(...modelPrices))} />
     <Directions />
     <EntrancePreview />
     <Videos />

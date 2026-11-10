@@ -18,7 +18,7 @@ export interface HeroSlide {
 }
 
 export const HERO_SLIDES: HeroSlide[] = [
-  { src: `${CDN}/hero_block_visual.webp`,  position: '55% 50%', alt: 'Скрытые двери ВФД в стеновых панелях под шеврон', way: 'hidden' },
+  { src: `${CDN}/hero_block_visual.webp`,  position: '55% 50%', alt: 'Скрытые двери ВФД в стеновых панелях под шеврон — салон дверей в Москве, Студия Зизевского', way: 'hidden' },
   { src: `${CDN}/hero_block_visual2.webp`, position: '60% 50%', alt: 'Скрытые двери ВФД заподлицо с терракотовой стеной', way: 'hidden' },
   { src: '/media/catalog-vfd/catalog_preview/catalog-preview3.webp', position: '50% 55%', alt: 'Алюминиевая перегородка со стеклом', way: 'partitions' },
   { src: `${CDN}/hero_block_visual3.webp`, position: '50% 45%', alt: 'Коридор с межкомнатными дверями ВФД', way: 'interior' },
