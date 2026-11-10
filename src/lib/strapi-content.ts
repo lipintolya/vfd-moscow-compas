@@ -29,6 +29,7 @@ export function toPromo(raw: StrapiPromo): Promo {
     imageSrcset: img?.srcset,
     imageWidth: img?.width,
     imageHeight: img?.height,
+    imageAlt: img?.alt || undefined,
     validUntil: raw.validUntil,
     order: raw.order ?? 100,
     discount: opt(raw.discount),

@@ -5,7 +5,7 @@
  * сборке в коллекцию promos (src/content.config.ts,
  * src/lib/strapi-content.ts). Здесь — тип для компонентов.
  *
- * Блок Promo.vue на главной и /akcii/ показывают активные (validUntil ещё
+ * Блок Promo.astro на главной и /akcii/ показывают активные (validUntil ещё
  * не прошёл), /promo-archive/ — истёкшие: дата решает, переносить вручную
  * не нужно.
  */
@@ -23,6 +23,8 @@ export interface Promo {
   /** Размер выбранной копии — баннер показывается целиком, по своим пропорциям */
   imageWidth?:   number
   imageHeight?:  number
+  /** «Что на фото» из медиатеки Strapi; пусто — подписью служит название акции */
+  imageAlt?:     string
   ctaText?:      string
   ctaLink?:      string
   discount?:     string

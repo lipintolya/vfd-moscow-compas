@@ -14,7 +14,7 @@ import Spotlight from '../components/home/Spotlight.astro'
 import InSalon from '../components/home/InSalon.astro'
 import StepsRow from '../components/home/StepsRow.astro'
 import VisitBand from '../components/home/VisitBand.astro'
-import Promo from '../components/home/Promo.vue'
+import Promo from '../components/home/Promo.astro'
 import OurWorks from '../components/home/OurWorks.astro'
 import Reviews from '../components/home/Reviews.astro'
 import LatestArticles from '../components/home/LatestArticles.astro'
@@ -32,8 +32,8 @@ import { activePromos } from '../lib/promo-dates'
 
 const faqItems = faqs.map(f => ({ q: f.question, a: f.answer }))
 
-/* Акции — из Strapi: действующие на момент сборки; блок сам уберёт истёкшие
-   после загрузки страницы. Блок стоит сразу под первым экраном — заказчик
+/* Акции — из Strapi: действующие на момент сборки; истёкшую после сборки
+   блок спрячет сам. Блок стоит сразу под первым экраном — заказчик
    просил сделать упор на акции (10 ноября 2026) */
 const promos = activePromos((await getCollection('promos')).map((e) => e.data))
 
@@ -76,7 +76,7 @@ const localBusinessSchema = buildLocalBusiness()
 >
   <div class="home">
     <ShowroomHero modelsCount={modelsCount} fromPrice={rub(Math.min(...modelPrices))} />
-    <Promo client:load promos={promos} />
+    <Promo promos={promos} />
     <Directions />
     <EntrancePreview />
     <Videos />

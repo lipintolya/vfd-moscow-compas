@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { toPromo } from '../src/lib/strapi-content'
-import { isPromoActive, activePromos } from '../src/lib/promo-dates'
+import { isPromoActive, activePromos, moscowToday, daysLeft, daysLeftLabel } from '../src/lib/promo-dates'
 
 test('акция из Strapi → вид сайта', () => {
   const promo = toPromo({
@@ -31,6 +31,20 @@ test('«действует до» сегодня — акция активна �
   const promo = toPromo({ documentId: 'p2', title: 'А', subtitle: 'Б', validUntil: '2026-10-11', image: null })
   assert.equal(isPromoActive(promo.validUntil, new Date(2026, 9, 11, 23, 30)), true)
   assert.equal(isPromoActive(promo.validUntil, new Date(2026, 9, 12, 0, 5)), false)
+})
+
+test('срок акции — по московскому дню: сколько осталось и когда истекла', () => {
+  /* 31 декабря 22:30 UTC — в Москве уже 1 января */
+  assert.equal(moscowToday(new Date(Date.UTC(2026, 11, 31, 22, 30))), '2027-01-01')
+  assert.equal(moscowToday(new Date(Date.UTC(2026, 11, 31, 20, 30))), '2026-12-31')
+  assert.equal(daysLeft('2026-12-31', '2026-11-10'), 51)
+  assert.equal(daysLeft('2026-12-31', '2027-01-01'), -1)
+  const label = (today: string) => daysLeftLabel('2026-12-31', today).replace('\u00a0', ' ')
+  assert.equal(label('2026-11-10'), 'Остался 51 день')
+  assert.equal(label('2026-12-29'), 'Осталось 2 дня')
+  assert.equal(label('2026-12-20'), 'Осталось 11 дней')
+  assert.equal(label('2026-12-31'), 'Последний день')
+  assert.equal(label('2027-01-01'), '')
 })
 
 import { toWork } from '../src/lib/strapi-content'

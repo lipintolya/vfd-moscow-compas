@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro'
-import Promo from '../components/home/Promo.vue'
+import Promo from '../components/home/Promo.astro'
 import '../styles/home.css'
 import { brandTitle } from '../lib/seo-title'
 import { SITE } from '../config/site'
@@ -9,7 +9,7 @@ import { activePromos, formatDate } from '../lib/promo-dates'
 
 /* Акции — из Strapi (раздел «Акции»): действующие на момент сборки; истёкшую
    после загрузки страницы уберёт сам блок. Оформление и тексты карточек — те
-   же, что на главной (Promo.vue, режим page). */
+   же, что на главной (Promo.astro, режим page). */
 const promos = activePromos((await getCollection('promos')).map((e) => e.data))
 const lastDay = promos.map((p) => p.validUntil).sort().at(-1)
 ---
@@ -20,6 +20,6 @@ const lastDay = promos.map((p) => p.validUntil).sort().at(-1)
   noIndex={promos.length === 0}
 >
   <div class="home">
-    <Promo client:load page promos={promos} />
+    <Promo page promos={promos} />
   </div>
 </BaseLayout>

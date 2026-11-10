@@ -1,0 +1,294 @@
+---
+/* Блок акций — главная (сразу под первым экраном) и страница /akcii/ (page).
+
+   Устройство: первая акция списка («Порядок на сайте» в Strapi) — разворотом:
+   баннер слева, справа предложение и главное действие. Остальные — ряд
+   небольших карточек: баннер и одна строка условия. На главной карточка
+   ведёт к полным условиям на /akcii/, на /akcii/ условия раскрыты и у каждой
+   акции своя ссылка в каталог.
+
+   Баннер показывается целиком, по своим пропорциям: текст акции — на самой
+   картинке, обрезка недопустима. Без баннера карточка — графитовая плашка со
+   «Скидкой» крупно.
+
+   Статический HTML, без островов: срок и число оставшихся дней дописывает
+   короткий скрипт внизу — он же прячет акцию, истёкшую уже после сборки. */
+import type { Promo } from '../../data/promos'
+import { PHONE, SITE } from '../../config/site'
+import { telegramWithText, TELEGRAM_CHAT } from '../../lib/messengers'
+import { formatDate } from '../../lib/promo-dates'
+
+interface Props {
+  /** Действующие акции в порядке показа — activePromos() на странице */
+  promos: Promo[]
+  /** Страница /akcii/: заголовок h1, условия раскрыты */
+  page?: boolean
+}
+const { promos, page = false } = Astro.props
+
+/** Карточек в ряд на широком экране: не меньше трёх (иначе плакаты гигантские),
+    не больше пяти (иначе текст на баннере не прочесть) */
+const ROW_MIN = 3
+const ROW_MAX = 5
+
+const [lead, ...rest] = promos
+/* /akcii/: 2 или 4 карточки — по две в ряд (в три колонки четвёртая осталась бы одна) */
+const cols = page
+  ? (rest.length === 2 || rest.length === 4 ? 2 : ROW_MIN)
+  : Math.min(ROW_MAX, Math.max(ROW_MIN, rest.length))
+
+/* Срок один на все акции — он в шапке блока; разные — у каждой свой */
+const lastDay = promos.map((p) => p.validUntil).sort().at(-1)
+const oneDeadline = promos.length > 0 && promos.every((p) => p.validUntil === lastDay)
+
+/* Заголовки карточек ниже — явными тегами: у динамического тега Astro не
+   ставит атрибут scoped-стилей, и оформление не применяется */
+const Title = page ? 'h1' : 'h2'
+const anchor = (p: Promo) => `akciya-${p.id}`
+/** «31 декабря 2026 года» не рвётся переносом посреди даты */
+const nowrap = (s: string) => s.replaceAll(' ', '\u00a0')
+const askUrl = telegramWithText('Хочу уточнить условия акций.')
+
+const LEAD_SIZES = '(max-width: 43.6875rem) 92vw, (max-width: 80rem) 39vw, 31rem'
+const CARD_SIZES = page
+  ? `(max-width: 43.6875rem) 82vw, (max-width: 68.6875rem) 31vw, ${Math.round(76 / cols)}rem`
+  : `(max-width: 43.6875rem) 62vw, (max-width: 68.6875rem) 31vw, ${Math.round(76 / cols)}rem`
+---
+
+{(promos.length > 0 || page) && (
+<section id="promo" class="h-sec h-sec--wall promo" aria-labelledby="promo-heading" data-promo data-promo-page={page ? '' : undefined}>
+  <div class="container">
+    <header class="h-head">
+      <Title id="promo-heading" class={page ? 'h-h1' : 'h-h2'}>Акции салона</Title>
+      {promos.length > 0 ? (
+        <p class="h-lead" data-promo-live>
+          {oneDeadline
+            ? <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall} до&nbsp;{nowrap(formatDate(lastDay!))}.</>
+            : <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall}. Срок — у&nbsp;каждой акции.</>}
+          {oneDeadline && <span class="promo__left" data-left={lastDay} hidden></span>}
+        </p>
+      ) : null}
+      <p class="h-lead" data-promo-empty hidden={promos.length > 0}>
+        Сейчас действующих акций нет. Новые появятся здесь, завершённые — в&nbsp;<a href="/promo-archive/" class="h-link">архиве</a>.
+      </p>
+    </header>
+
+    {lead && (
+      <article id={anchor(lead)} class="plead" data-until={lead.validUntil}>
+        <div class:list={['h-media', 'plead__media', { pposter: !lead.image }]}>
+          {lead.image
+            ? <img src={lead.image} srcset={lead.imageSrcset} sizes={LEAD_SIZES} alt={lead.imageAlt ?? lead.title}
+                width={lead.imageWidth} height={lead.imageHeight} loading={page ? 'eager' : 'lazy'} fetchpriority={page ? 'high' : undefined} decoding="async" />
+            : <span class="pposter__text">{lead.discount || lead.title}</span>}
+        </div>
+        <div class="plead__body">
+          {!oneDeadline && <p class="h-meta"><time datetime={lead.validUntil}>до {formatDate(lead.validUntil)}</time></p>}
+          {page ? <h2 class="plead__title">{lead.title}</h2> : <h3 class="plead__title">{lead.title}</h3>}
+          <p class="plead__sub">{lead.subtitle}</p>
+          {lead.description && <p class="h-body plead__desc">{lead.description}</p>}
+          <p class="plead__actions">
+            {lead.ctaText && lead.ctaLink && <a href={lead.ctaLink} class="h-btn h-btn--signal h-btn--phone-wide">{lead.ctaText}</a>}
+            <a href={`tel:${PHONE.raw}`} class="h-link plead__phone">Позвонить {PHONE.label}</a>
+          </p>
+        </div>
+      </article>
+    )}
+
+    {rest.length > 0 && (
+      <ul class="pcards" style={`--cols: ${cols}`} role="list">
+        {rest.map((promo) => (
+          <li id={anchor(promo)} class="pcard" data-until={promo.validUntil}>
+            <div class:list={['h-media', 'pcard__media', { pposter: !promo.image }]}>
+              {promo.image
+                ? <img src={promo.image} srcset={promo.imageSrcset} sizes={CARD_SIZES} alt={promo.imageAlt ?? promo.title}
+                    width={promo.imageWidth} height={promo.imageHeight} loading="lazy" decoding="async" />
+                : <span class="pposter__text">{promo.discount || promo.title}</span>}
+            </div>
+            {page
+              ? <h2 class="pcard__title">{promo.title}</h2>
+              : <h3 class="pcard__title"><a href={`/akcii/#${anchor(promo)}`} class="pcard__link">{promo.title}</a></h3>}
+            <p class="pcard__sub">{promo.subtitle}</p>
+            {!oneDeadline && <p class="h-meta pcard__until"><time datetime={promo.validUntil}>до {formatDate(promo.validUntil)}</time></p>}
+            {page && promo.description && <p class="h-body pcard__desc">{promo.description}</p>}
+            {page && promo.ctaText && promo.ctaLink && <p class="pcard__more"><a href={promo.ctaLink} class="h-link">{promo.ctaText}</a></p>}
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {promos.length > 0 && (
+      <p class="pask" data-promo-live>
+        <span>Подскажем, какая акция выгоднее для вашего заказа: <a href={`tel:${PHONE.raw}`} class="h-link">{PHONE.label}</a>{TELEGRAM_CHAT && <> или <a href={askUrl} class="h-link" target="_blank" rel="noopener">Telegram</a></>}.</span>
+        {page
+          ? <a href="/promo-archive/" class="h-link">Завершённые акции</a>
+          : <a href="/akcii/" class="h-link">Условия всех акций</a>}
+      </p>
+    )}
+  </div>
+</section>
+)}
+
+<script>
+  /* Страница собрана заранее, а срок акции идёт: «осталось N дней» считаем
+     в браузере (по московскому дню), истёкшую после сборки акцию прячем.
+     Если истекли все — на главной блок исчезает, на /akcii/ остаётся
+     заголовок и «акций нет». */
+  import { moscowToday, daysLeft, daysLeftLabel } from '../../lib/promo-dates'
+
+  const today = moscowToday()
+  for (const block of document.querySelectorAll<HTMLElement>('[data-promo]')) {
+    let alive = 0
+    for (const el of block.querySelectorAll<HTMLElement>('[data-until]')) {
+      if (daysLeft(el.dataset.until!, today) < 0) el.hidden = true
+      else alive++
+    }
+    for (const el of block.querySelectorAll<HTMLElement>('[data-left]')) {
+      const label = daysLeftLabel(el.dataset.left!, today)
+      el.textContent = label ? ` ${label}.` : ''
+      el.hidden = !label
+    }
+    if (alive) continue
+    if (!('promoPage' in block.dataset)) { block.hidden = true; continue }
+    for (const el of block.querySelectorAll<HTMLElement>('[data-promo-live]')) el.hidden = true
+    block.querySelector<HTMLElement>('[data-promo-empty]')!.hidden = false
+  }
+</script>
+
+<style>
+/* Сколько осталось — тем же тоном, что заголовки: срок здесь главный довод */
+.promo__left { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
+[hidden] { display: none !important; }
+
+/* Баннер — целиком: высота по картинке, а не по рамке */
+.plead__media > img,
+.pcard__media > img { height: auto; object-fit: contain; }
+
+/* Без баннера — графитовая плашка той же формы, что баннеры (квадрат):
+   предложение крупно, внизу */
+.pposter {
+  display: flex;
+  align-items: flex-end;
+  aspect-ratio: 1 / 1;
+  padding: clamp(0.875rem, 8%, 2rem);
+  background: var(--h-ink);
+  color: var(--color-white);
+}
+.pposter__text {
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: var(--h-weight-display);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.plead .pposter__text { font-size: clamp(2.25rem, 5vw, 4rem); letter-spacing: -0.04em; }
+
+/* ── Первая акция — разворот ───────────────────────────── */
+.plead { display: grid; gap: 1.5rem; }
+/* font-family — явно: заголовкам сайт по умолчанию ставит Rubik, главная набрана Manrope */
+.plead__title {
+  margin: 0;
+  font-family: var(--h-font);
+  color: var(--h-ink);
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+  font-weight: var(--h-weight-display);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.plead__body > .h-meta + .plead__title { margin-top: 0.5rem; }
+.plead__sub {
+  margin: 0.875rem 0 0;
+  font-size: clamp(1.0625rem, 1.5vw, 1.3125rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--h-ink);
+  text-wrap: balance;
+}
+.plead__desc { margin-top: 0.875rem; max-width: 34em; }
+.plead__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem; margin: 1.75rem 0 0; font-size: 0.9375rem; }
+/* С планшета — баннер рядом с текстом: во всю ширину он занял бы весь экран */
+@media (min-width: 43.75rem) {
+  .plead { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--h-gutter); align-items: center; }
+  .plead__media { grid-column: 1 / span 5; }
+  .plead__body { grid-column: 6 / span 7; }
+}
+@media (min-width: 56.25rem) {
+  .plead__body { grid-column: 7 / span 6; }
+}
+@media (max-width: 43.6875rem) {
+  /* На телефоне подробности — на /akcii/: под баннером только предложение и кнопка */
+  .promo:not([data-promo-page]) .plead__desc { display: none; }
+  .plead__actions { flex-direction: column; align-items: stretch; text-align: center; }
+}
+
+/* ── Остальные акции — ряд карточек ────────────────────── */
+.pcards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5rem var(--h-gutter);
+  align-items: start;
+  margin: clamp(2.5rem, 5vw, 4rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 68.75rem) { .pcards { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
+.pcard { position: relative; min-width: 0; }
+.pcard__title {
+  margin: 0.875rem 0 0;
+  font-family: var(--h-font);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--h-ink);
+}
+/* Карточка главной — одна ссылка на всю площадь: баннер тоже нажимается */
+.pcard__link { color: inherit; text-decoration: none; }
+.pcard__link::after { content: ''; position: absolute; inset: 0; }
+.pcard:hover .pcard__link { text-decoration: underline; text-decoration-color: var(--h-signal); text-decoration-thickness: 0.0625rem; text-underline-offset: 0.3em; }
+.pcard__sub { margin: 0.375rem 0 0; font-size: 0.875rem; line-height: 1.45; color: var(--h-soft); text-wrap: pretty; }
+.pcard__until { margin: 0.5rem 0 0; }
+.pcard__desc { margin-top: 0.75rem; font-size: 0.9375rem; }
+.pcard__more { margin: 0.875rem 0 0; font-size: 0.9375rem; }
+/* /akcii/ — условия раскрыты, заголовок и строка условия крупнее */
+.promo[data-promo-page] .pcard__title { font-size: 1.3125rem; margin-top: 1.125rem; }
+.promo[data-promo-page] .pcard__sub { font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
+
+/* Телефон: лента вбок — край следующей карточки подсказывает, что ряд листается */
+@media (max-width: 43.6875rem) {
+  .pcards {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 62%;
+    gap: 0.75rem;
+    margin-inline: calc(-1 * var(--h-pad));
+    padding-inline: var(--h-pad);
+    scroll-padding-inline: var(--h-pad);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .pcards::-webkit-scrollbar { display: none; }
+  .pcard { scroll-snap-align: start; }
+  /* С раскрытыми условиями узкая карточка превращается в столбик текста */
+  .promo[data-promo-page] .pcards { grid-auto-columns: 82%; }
+}
+
+/* ── Строка под акциями ────────────────────────────────── */
+.pask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding-top: 1.25rem;
+  border-top: 0.0625rem solid var(--h-rule);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--h-soft);
+}
+</style>
