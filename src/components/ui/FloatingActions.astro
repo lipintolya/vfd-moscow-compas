@@ -9,7 +9,7 @@
  * Пустой SITE.social.maxChat — кнопки MAX нет.
  */
 import { MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../../lib/messengers'
-import { MESSENGER_ICONS } from '../../lib/messenger-icons'
+import { MESSENGER_ICONS, MAX_GRADIENT } from '../../lib/messenger-icons'
 ---
 <div class="fab" id="fab" data-fab>
   {MAX_CHAT && (
@@ -20,6 +20,7 @@ import { MESSENGER_ICONS } from '../../lib/messenger-icons'
       rel="noopener"
       data-copy-text={CONSULT_MESSAGE}
       data-fab-max
+      style={`--fab-max-grad: ${MAX_GRADIENT}`}
       aria-label="Написать в MAX"
       title="Написать в MAX"
     >
@@ -80,15 +81,15 @@ import { MESSENGER_ICONS } from '../../lib/messenger-icons'
 
   .fab__max img { width: 1.5rem; height: 1.5rem; }
 
-  /* Мягкая пульсация: синее кольцо расходится и тает, затем долгая пауза.
-     Синее — чтобы кнопка MAX не сливалась с графитовой «Наверх» */
+  /* Мягкая пульсация: кольцо в фирменном градиенте MAX расходится и тает, затем долгая пауза.
+     Градиент задаёт --fab-max-grad (MAX_GRADIENT в messenger-icons.ts) */
   .fab__max::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: var(--color-secondary-600);
+    background: var(--fab-max-grad, var(--color-secondary-600));
     opacity: 0;
     pointer-events: none;
   }

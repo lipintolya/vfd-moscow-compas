@@ -16,6 +16,10 @@ export const MESSENGER_ICONS = {
   max:      { onLight: icon('max-dark.svg'),       onDark: icon('max-white.svg') },
 } as const
 
+/** Фирменный градиент MAX — цвета из стилей max.ru (градиент логотипа/текста).
+ *  Только для кольца пульсации у кнопки MAX; сам знак градиентом не красим */
+export const MAX_GRADIENT = 'linear-gradient(135deg, #43d6ff 0%, #5a8cff 50%, #8f3fff 100%)'
+
 /** Официальный знак YouTube — красный, один на светлом и тёмном фоне */
 export const YOUTUBE_ICON = icon('youtube.svg')
 
