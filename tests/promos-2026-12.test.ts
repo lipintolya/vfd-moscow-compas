@@ -7,7 +7,7 @@ import { formatDate } from '../src/lib/promo-dates'
 /* Акции до конца 2026 года (cms/scripts/promos-2026-12.json → add:promos):
    пока записей нет в Strapi, этот файл — единственный источник текстов */
 interface FilePromo {
-  id: string; title: string; subtitle: string; description: string; discount: string; ctaText: string; ctaLink: string; order: number
+  slug: string; title: string; subtitle: string; description: string; discount: string; ctaText: string; ctaLink: string; order: number
   bannerAlt: string
 }
 const FILE = JSON.parse(readFileSync('cms/scripts/promos-2026-12.json', 'utf8')) as { validUntil: string; promos: FilePromo[]; retired: string[] }
@@ -26,8 +26,9 @@ test('акции конца года: тексты укладываются в �
     for (const f of ['title', 'subtitle', 'description', 'discount', 'ctaText', 'ctaLink'] as const) {
       assert.ok(p[f].length <= SCHEMA[f].maxLength, `«${p.title}»: ${f} длиннее ${SCHEMA[f].maxLength}`)
     }
-    const { id: _id, bannerAlt: _alt, ...fields } = p
-    const promo = toPromo({ documentId: p.id, ...fields, validUntil: FILE.validUntil })
+    const { bannerAlt: _alt, ...fields } = p
+    const promo = toPromo({ documentId: p.slug, ...fields, validUntil: FILE.validUntil })
+    assert.equal(promo.slug, p.slug)
     assert.equal(promo.order, p.order)
   }
 })
@@ -59,10 +60,10 @@ test('«Комплект под ключ» снят заказчиком (11 н�
 })
 
 test('баннеры акций: у каждой — файл заказчика и подпись с текстом баннера', () => {
-  assert.equal(new Set(PROMOS.map((p) => p.id)).size, PROMOS.length)
+  assert.equal(new Set(PROMOS.map((p) => p.slug)).size, PROMOS.length)
   for (const p of PROMOS) {
-    assert.match(p.id, /^[a-z0-9-]+$/, `«${p.title}»: id — имя файла баннера`)
-    assert.ok(existsSync(`assets/promo-banners/${p.id}.webp`), `«${p.title}»: нет баннера assets/promo-banners/${p.id}.webp`)
+    assert.match(p.slug, /^[a-z0-9]+(-[a-z0-9]+)*$/, `«${p.title}»: адрес — латиница через дефис (/offers/#…), он же имя файла баннера`)
+    assert.ok(existsSync(`assets/promo-banners/${p.slug}.webp`), `«${p.title}»: нет баннера assets/promo-banners/${p.slug}.webp`)
     assert.ok(p.bannerAlt.length > 30 && /надпись/.test(p.bannerAlt), `«${p.title}»: в подписи баннера опишите фото и его надпись`)
   }
 })

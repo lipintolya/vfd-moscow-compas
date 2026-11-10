@@ -56,7 +56,7 @@ export const GET: APIRoute = async () => {
     ['Плинтус', '/catalog/plintus/', 'напольный из МДФ, с LED-подсветкой, скрытый, микроплинтус и шпонированный; покраска по RAL и NCS, цена по запросу'],
     ['Алюминиевые перегородки', '/partitions/', 'раздвижные и стационарные системы со стеклом'],
     [ALUM_PAGE.name, ALUM_PAGE.path, `раздвижные алюминиевые перегородки: ${ALUM_LAYOUT_COUNT}, ${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height}`],
-    ...(promos.length ? [['Акции салона', '/akcii/', `${promos.map((p) => p.title).join('; ')} — до ${formatDate(promos.map((p) => p.validUntil).sort().at(-1)!)}`]] : []),
+    ...(promos.length ? [['Акции салона', '/offers/', `${promos.map((p) => p.title).join('; ')} — до ${formatDate(promos.map((p) => p.validUntil).sort().at(-1)!)}`]] : []),
     ['Дизайнерам и архитекторам', '/designers/', 'сотрудничество и шоурум для встреч с заказчиками'],
     ['О нас', '/about/', `${SITE.studioName} — официальный дилер ${SITE.manufacturerOf}`],
     ['Контакты', '/contacts/', 'адрес, часы работы, как добраться'],

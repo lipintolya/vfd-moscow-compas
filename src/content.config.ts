@@ -102,7 +102,7 @@ const articles = defineCollection({
 const promos = defineCollection({
   loader: promosLoader(),
   schema: z.object({
-    id: z.string(), title: z.string(), subtitle: z.string(), description: z.string(),
+    id: z.string(), slug: z.string().regex(/^[a-z0-9-]+$/), title: z.string(), subtitle: z.string(), description: z.string(),
     image: z.string().optional(), imageSrcset: z.string().optional(),
     imageWidth: z.number().optional(), imageHeight: z.number().optional(), imageAlt: z.string().optional(),
     validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), order: z.number(),

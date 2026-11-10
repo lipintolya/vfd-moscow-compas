@@ -1,11 +1,11 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro'
-import Promo from '../components/home/Promo.astro'
-import '../styles/home.css'
-import { brandTitle } from '../lib/seo-title'
-import { SITE } from '../config/site'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Promo from '../../components/home/Promo.astro'
+import '../../styles/home.css'
+import { brandTitle } from '../../lib/seo-title'
+import { SITE } from '../../config/site'
 import { getCollection } from 'astro:content'
-import { activePromos, formatDate } from '../lib/promo-dates'
+import { activePromos, formatDate } from '../../lib/promo-dates'
 
 /* Акции — из Strapi (раздел «Акции»): действующие на момент сборки; истёкшую
    после загрузки страницы уберёт сам блок. Оформление и тексты карточек — те

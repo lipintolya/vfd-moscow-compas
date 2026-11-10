@@ -1,7 +1,7 @@
 /**
  * src/lib/promo-dates.ts
  * Общая логика «активна/истекла» и «сколько осталось» для акций — блок
- * акций (components/home/Promo.astro: главная и /akcii/), /promo-archive/,
+ * акций (components/home/Promo.astro: главная и /offers/), /offers/archive/,
  * меню и /llms.txt считают одним кодом, чтобы не разойтись.
  */
 import { pluralRu } from './plural'
@@ -53,7 +53,7 @@ export const formatDate = (dateStr: string): string => {
 const sortPromos = <T extends { validUntil: string; order: number; title: string }>(promos: readonly T[]): T[] =>
   [...promos].sort((a, b) => a.order - b.order || a.validUntil.localeCompare(b.validUntil) || a.title.localeCompare(b.title, 'ru'))
 
-/** Действующие акции в порядке показа. Одно место для главной, /akcii/, шапки
+/** Действующие акции в порядке показа. Одно место для главной, /offers/, шапки
     и подвала — списки не расходятся. */
 export const activePromos = <T extends { validUntil: string; order: number; title: string }>(promos: readonly T[], now: Date = new Date()): T[] =>
   sortPromos(promos.filter((p) => isPromoActive(p.validUntil, now)))

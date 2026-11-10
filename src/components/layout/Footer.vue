@@ -23,7 +23,7 @@ const year = new Date().getFullYear()
 const NAV_LINKS = [
   { href: '/',           label: 'Главная' },
   { href: '/catalog/',    label: 'Каталог' },
-  ...(props.hasPromos ? [{ href: '/akcii/', label: 'Акции' }] : []),
+  ...(props.hasPromos ? [{ href: '/offers/', label: 'Акции' }] : []),
   { href: '/partitions/', label: 'Перегородки' },
   { href: '/designers/',  label: 'Дизайнерам' },
   { href: '/about/',      label: 'О нас' },
@@ -36,7 +36,7 @@ const HAS_COOKIES = Boolean(SITE.analytics.yandexMetrikaId)
 const openCookieSettings = () => window.dispatchEvent(new Event(CONSENT_SETTINGS_EVENT))
 
 const LEGAL_LINKS = [
-  { href: '/promo-archive/', label: 'Архив акций' },
+  { href: '/offers/archive/', label: 'Архив акций' },
 ] as const
 
 const CATEGORY_LINKS = [

@@ -82,7 +82,7 @@ const brandIntro = (() => {
 const NAV_LINKS: { href: string; label: string; desc: string }[] = [
   { href: '/',            label: 'Главная',     desc: '' },
   { href: '/catalog/',    label: 'Каталог',     desc: '' },
-  ...(props.hasPromos ? [{ href: '/akcii/', label: 'Акции', desc: 'Скидки и подарки салона' }] : []),
+  ...(props.hasPromos ? [{ href: '/offers/', label: 'Акции', desc: 'Скидки и подарки салона' }] : []),
   { href: '/partitions/', label: 'Перегородки', desc: '' },
   { href: '/designers/',  label: 'Дизайнерам',  desc: 'Условия и материалы для проектов' },
   { href: '/about/',      label: 'О нас',       desc: `${SITE.studioName} и фабрика ${SITE.name}` },

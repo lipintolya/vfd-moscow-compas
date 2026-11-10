@@ -5,14 +5,16 @@
  * сборке в коллекцию promos (src/content.config.ts,
  * src/lib/strapi-content.ts). Здесь — тип для компонентов.
  *
- * Блок Promo.astro на главной и /akcii/ показывают активные (validUntil ещё
- * не прошёл), /promo-archive/ — истёкшие: дата решает, переносить вручную
+ * Блок Promo.astro на главной и /offers/ показывают активные (validUntil ещё
+ * не прошёл), /offers/archive/ — истёкшие: дата решает, переносить вручную
  * не нужно.
  */
 
 export interface Promo {
   /** documentId записи в Strapi */
   id:            string
+  /** Адрес акции в ссылке: /offers/#<slug>. Латиница; в Strapi пусто — offer-<порядок> */
+  slug:          string
   title:         string
   subtitle:      string
   description:   string

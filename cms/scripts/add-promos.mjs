@@ -5,8 +5,8 @@
  * по названию: тексты и порядок из файла перезаписывают правки админки.
  *   npm --prefix cms run add:promos     (Strapi при этом остановлен)
  *
- * Баннеры — от заказчика, лежат в assets/promo-banners/<id>.webp. Скрипт
- * загружает баннер в медиатеку под именем promo-<id>-<хеш>.webp (подпись —
+ * Баннеры — от заказчика, лежат в assets/promo-banners/<slug>.webp. Скрипт
+ * загружает баннер в медиатеку под именем promo-<slug>-<хеш>.webp (подпись —
  * bannerAlt) и ставит в поле «Баннер». Свой баннер, загруженный в админке
  * (имя другое), не трогает; прежний загруженный скриптом — заменяет и
  * удаляет из медиатеки, если файл баннера изменился.
@@ -38,14 +38,17 @@ const upload = app.plugin('upload').service('upload')
 
 /** Баннер акции: id файла в медиатеке и файл на замену; null — ставить нечего */
 async function bannerFor(promo, current) {
-  const file = path.join(BANNERS, `${promo.id}.webp`)
+  const file = path.join(BANNERS, `${promo.slug}.webp`)
   if (!existsSync(file)) return null
-  const own = `promo-${promo.id}-`
-  /* В медиатеке имя хранится без расширения или с ним — сравниваем по началу */
-  if (current && !current.name.startsWith(own)) return null
+  /* Свой прежний баннер скрипт узнаёт по имени promo-<адрес>-<хеш>; другое имя —
+     загружен в админке вручную, его не трогаем */
+  const generated = current && /^promo-[a-z0-9-]+-[0-9a-f]{8}(\.webp)?$/.test(current.name)
+  if (current && !generated) return null
   const hash = createHash('sha1').update(await readFile(file)).digest('hex').slice(0, 8)
-  const name = `${own}${hash}.webp`
-  if (current && current.name.startsWith(`${own}${hash}`)) return null
+  const name = `promo-${promo.slug}-${hash}.webp`
+  /* Тот же файл под тем же адресом акции — загружать нечего; сменился файл или
+     адрес — загружаем заново (имя файла видно в ссылке на картинку) */
+  if (current && current.name.replace(/\.webp$/, '') === name.replace(/\.webp$/, '')) return null
   const { size } = await stat(file)
   const [done] = await upload.upload({
     data: { fileInfo: { name, alternativeText: promo.bannerAlt } },
@@ -56,7 +59,7 @@ async function bannerFor(promo, current) {
 
 try {
   for (const promo of promos) {
-    const { id: _id, bannerAlt: _alt, ...fields } = promo
+    const { bannerAlt: _alt, ...fields } = promo
     const data = { ...fields, validUntil }
     const existing = await docs.findFirst({ filters: { title: promo.title }, populate: ['image'] })
     const banner = await bannerFor(promo, existing?.image)

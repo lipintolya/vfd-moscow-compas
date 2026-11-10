@@ -13,7 +13,7 @@ import { CATALOG_LINKS, CATEGORY_LABELS, OBJECT_TYPE_LABELS, type PortfolioWork,
 export interface StrapiPromo {
   documentId: string; title: string; subtitle: string; description?: string | null
   image?: StrapiMedia | null; validUntil: string; discount?: string | null
-  ctaText?: string | null; ctaLink?: string | null; order?: number | null
+  ctaText?: string | null; ctaLink?: string | null; order?: number | null; slug?: string | null
 }
 
 const opt = (v: string | null | undefined) => v || undefined
@@ -22,6 +22,7 @@ export function toPromo(raw: StrapiPromo): Promo {
   const img = raw.image ? strapiImage(raw.image, 1200) : undefined
   return {
     id: raw.documentId,
+    slug: raw.slug || `offer-${raw.order ?? 100}`,
     title: raw.title,
     subtitle: raw.subtitle,
     description: raw.description ?? '',

@@ -1,0 +1,97 @@
+---
+/* Архив акций — /offers/archive/ (до 11.11.2026 — /promo-archive/, редирект).
+   Акции из Strapi, срок которых прошёл: баннер, название, условие и дата
+   окончания. Оформление — по дизайн-системе главной, как /offers/.
+   Закрыт от поисковиков: завершённые акции не должны попадать в выдачу. */
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import '../../styles/home.css'
+import { brandTitle } from '../../lib/seo-title'
+import { SITE } from '../../config/site'
+import { getCollection } from 'astro:content'
+import { isPromoActive, formatDate } from '../../lib/promo-dates'
+
+const archived = (await getCollection('promos')).map((e) => e.data)
+  .filter((p) => !isPromoActive(p.validUntil))
+  .sort((a, b) => b.validUntil.localeCompare(a.validUntil))
+---
+
+<BaseLayout
+  title={brandTitle('Архив акций')}
+  description={`Завершённые акции ${SITE.studioNameOf} — салона дверей ${SITE.name} в ${SITE.address.mall}, ${SITE.city.name}.`}
+  noIndex={true}
+>
+  <div class="home">
+    <section class="h-sec" aria-labelledby="archive-heading">
+      <div class="container">
+        <header class="ahead">
+          <div>
+            <h1 id="archive-heading" class="h-h1">Архив акций</h1>
+            <p class="h-lead ahead__lead">
+              {archived.length
+                ? 'Акции, срок которых уже закончился. Действующие — на странице акций.'
+                : 'Завершённых акций пока нет — все действуют.'}
+            </p>
+          </div>
+          <a href="/offers/" class="h-pill h-pill--line">
+            Действующие акции
+            <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </header>
+
+        {archived.length > 0 && (
+          <ul class="acards" role="list">
+            {archived.map((p) => (
+              <li class="acard">
+                {p.image && (
+                  <span class="h-media acard__media">
+                    <img src={p.image} srcset={p.imageSrcset} sizes="(max-width: 43.6875rem) 92vw, (max-width: 68.6875rem) 45vw, 19rem"
+                      alt={p.imageAlt ?? p.title} width={p.imageWidth} height={p.imageHeight} loading="lazy" decoding="async" />
+                  </span>
+                )}
+                <p class="h-meta acard__until"><time datetime={p.validUntil}>Действовала до {formatDate(p.validUntil)}</time></p>
+                <h2 class="acard__title">{p.title}</h2>
+                <p class="acard__sub">{p.subtitle}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+.ahead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+.ahead__lead { margin-top: 0.875rem; max-width: 34rem; }
+
+.acards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: 2.5rem var(--h-gutter);
+  align-items: start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Акция закончилась — баннер приглушён */
+.acard__media > img { height: auto; object-fit: contain; filter: grayscale(0.6); opacity: 0.85; }
+.acard__until { margin: 0.875rem 0 0; }
+/* font-family — явно: заголовкам сайт по умолчанию ставит Rubik, главная набрана Manrope */
+.acard__title {
+  margin: 0.375rem 0 0;
+  font-family: var(--h-font);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--h-ink);
+}
+.acard__sub { margin: 0.375rem 0 0; font-size: 0.875rem; line-height: 1.45; color: var(--h-soft); }
+</style>

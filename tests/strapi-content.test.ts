@@ -16,6 +16,7 @@ test('акция из Strapi → вид сайта', () => {
   assert.equal(promo.ctaText, undefined)
   assert.equal(promo.imageWidth, 640)
   assert.equal(promo.order, 100, 'без «Порядка на сайте» акция уходит в конец')
+  assert.equal(promo.slug, 'offer-100', 'без «Адреса в ссылке» — offer-<порядок>')
 })
 
 test('действующие акции: по порядку, затем по сроку; истёкшие не попадают', () => {

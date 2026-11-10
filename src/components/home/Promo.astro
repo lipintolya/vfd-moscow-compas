@@ -1,27 +1,36 @@
 ---
-/* Блок акций — главная (сразу под первым экраном) и страница /akcii/ (page).
+/* Блок акций — главная (сразу под первым экраном) и страница /offers/ (page).
 
-   Устройство: первая акция списка («Порядок на сайте» в Strapi) — разворотом:
-   баннер слева, справа предложение и главное действие. Остальные — ряд
-   небольших карточек: баннер и одна строка условия. На главной карточка
-   ведёт к полным условиям на /akcii/, на /akcii/ условия раскрыты и у каждой
-   акции своя ссылка в каталог.
+   Устройство: шапка как у соседних блоков главной — заголовок и срок слева,
+   кнопка «Все акции» справа. Первая акция списка («Порядок на сайте» в
+   Strapi) — разворотом: баннер слева, справа предложение, графитовая кнопка
+   акции и «Написать в MAX» с готовым текстом. Остальные — ряд карточек.
+   Баннер — ссылка: при наведении он чуть приближается, а круглая стрелка в
+   углу краснеет и поворачивается (тот же отклик, что у плиток главной), на
+   телефоне стрелка видна сразу — подсказывает, что баннер нажимается.
+   С главной карточка ведёт к полным условиям на /offers/#<адрес акции>, на
+   /offers/ — туда, куда ведёт кнопка акции. Внизу — плашка «подскажем,
+   какая акция выгоднее»: MAX, Telegram, телефон.
 
    Баннер показывается целиком, по своим пропорциям: текст акции — на самой
    картинке, обрезка недопустима. Без баннера карточка — графитовая плашка со
    «Скидкой» крупно.
 
    Статический HTML, без островов: срок и число оставшихся дней дописывает
-   короткий скрипт внизу — он же прячет акцию, истёкшую уже после сборки. */
+   короткий скрипт внизу — он же прячет акцию, истёкшую уже после сборки.
+   MAX не принимает текст в ссылке — текст копируется по клику
+   (data-copy-text, src/lib/copy-on-click.ts). */
 import type { Promo } from '../../data/promos'
 import { PHONE, SITE } from '../../config/site'
-import { telegramWithText, TELEGRAM_CHAT } from '../../lib/messengers'
+import { telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
 import { formatDate } from '../../lib/promo-dates'
+import MaxIcon from '../ui/MaxIcon.vue'
+import TelegramIcon from '../ui/TelegramIcon.vue'
 
 interface Props {
   /** Действующие акции в порядке показа — activePromos() на странице */
   promos: Promo[]
-  /** Страница /akcii/: заголовок h1, условия раскрыты */
+  /** Страница /offers/: заголовок h1, условия раскрыты */
   page?: boolean
 }
 const { promos, page = false } = Astro.props
@@ -32,10 +41,9 @@ const ROW_MIN = 3
 const ROW_MAX = 5
 
 const [lead, ...rest] = promos
-/* /akcii/: 2 или 4 карточки — по две в ряд (в три колонки четвёртая осталась бы одна) */
-const cols = page
-  ? (rest.length === 2 || rest.length === 4 ? 2 : ROW_MIN)
-  : Math.min(ROW_MAX, Math.max(ROW_MIN, rest.length))
+/* Карточки всегда мельче первой акции: она — главная. На /offers/ под
+   карточкой ещё условия, поэтому в ряд не больше четырёх */
+const cols = Math.min(page ? 4 : ROW_MAX, Math.max(ROW_MIN, rest.length))
 
 /* Срок один на все акции — он в шапке блока; разные — у каждой свой */
 const lastDay = promos.map((p) => p.validUntil).sort().at(-1)
@@ -44,10 +52,13 @@ const oneDeadline = promos.length > 0 && promos.every((p) => p.validUntil === la
 /* Заголовки карточек ниже — явными тегами: у динамического тега Astro не
    ставит атрибут scoped-стилей, и оформление не применяется */
 const Title = page ? 'h1' : 'h2'
-const anchor = (p: Promo) => `akciya-${p.id}`
+/** Куда ведёт баннер карточки: с главной — к условиям акции, на /offers/ — по кнопке акции */
+const cardHref = (p: Promo) => (page ? p.ctaLink : undefined) ?? `/offers/#${p.slug}`
 /** «31 декабря 2026 года» не рвётся переносом посреди даты */
-const nowrap = (s: string) => s.replaceAll(' ', '\u00a0')
-const askUrl = telegramWithText('Хочу уточнить условия акций.')
+const nowrap = (s: string) => s.replaceAll(' ', ' ')
+/** Готовый текст менеджеру про конкретную акцию */
+const aboutPromo = (p: Promo) => `Хочу воспользоваться акцией «${p.title}».`
+const ASK = 'Хочу узнать, какие акции подойдут для моего заказа.'
 
 const LEAD_SIZES = '(max-width: 43.6875rem) 92vw, (max-width: 80rem) 39vw, 31rem'
 const CARD_SIZES = page
@@ -56,40 +67,58 @@ const CARD_SIZES = page
 ---
 
 {(promos.length > 0 || page) && (
-<section id="promo" class="h-sec h-sec--wall promo" aria-labelledby="promo-heading" data-promo data-promo-page={page ? '' : undefined}>
+<section id="promo" class="h-sec promo" aria-labelledby="promo-heading" data-promo data-promo-page={page ? '' : undefined}>
   <div class="container">
-    <header class="h-head">
-      <Title id="promo-heading" class={page ? 'h-h1' : 'h-h2'}>Акции салона</Title>
-      {promos.length > 0 ? (
-        <p class="h-lead" data-promo-live>
-          {oneDeadline
-            ? <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall} до&nbsp;{nowrap(formatDate(lastDay!))}.</>
-            : <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall}. Срок — у&nbsp;каждой акции.</>}
-          {oneDeadline && <span class="promo__left" data-left={lastDay} hidden></span>}
+    <header class="phead">
+      <div>
+        <Title id="promo-heading" class={page ? 'h-h1' : 'h-h2'}>Акции салона</Title>
+        {promos.length > 0 && (
+          <p class="h-lead phead__lead" data-promo-live>
+            {oneDeadline
+              ? <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall} до&nbsp;{nowrap(formatDate(lastDay!))}.</>
+              : <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall}. Срок — у&nbsp;каждой акции.</>}
+            {oneDeadline && <span class="phead__left" data-left={lastDay} hidden></span>}
+          </p>
+        )}
+        <p class="h-lead phead__lead" data-promo-empty hidden={promos.length > 0}>
+          Сейчас действующих акций нет. Новые появятся здесь, завершённые — в&nbsp;<a href="/offers/archive/" class="h-link">архиве</a>.
         </p>
-      ) : null}
-      <p class="h-lead" data-promo-empty hidden={promos.length > 0}>
-        Сейчас действующих акций нет. Новые появятся здесь, завершённые — в&nbsp;<a href="/promo-archive/" class="h-link">архиве</a>.
-      </p>
+      </div>
+      {!page && promos.length > 0 && (
+        <a href="/offers/" class="h-pill h-pill--line" data-promo-live>
+          Все акции
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      )}
     </header>
 
     {lead && (
-      <article id={anchor(lead)} class="plead" data-until={lead.validUntil}>
-        <div class:list={['h-media', 'plead__media', { pposter: !lead.image }]}>
+      <article id={lead.slug} class="plead" data-until={lead.validUntil}>
+        {/* Баннер повторяет кнопку акции — для клавиатуры и экранного диктора
+            ссылка одна, кнопка; описание баннера диктору — абзацем ниже,
+            alt оставлен для поиска по картинкам и карты сайта */}
+        <a href={lead.ctaLink ?? `/offers/#${lead.slug}`} class:list={['h-media', 'pban', 'plead__media', { pposter: !lead.image }]} tabindex="-1" aria-hidden="true">
           {lead.image
             ? <img src={lead.image} srcset={lead.imageSrcset} sizes={LEAD_SIZES} alt={lead.imageAlt ?? lead.title}
                 width={lead.imageWidth} height={lead.imageHeight} loading={page ? 'eager' : 'lazy'} fetchpriority={page ? 'high' : undefined} decoding="async" />
             : <span class="pposter__text">{lead.discount || lead.title}</span>}
-        </div>
+          <span class="h-arrow h-arrow--white pban__arrow"><svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
         <div class="plead__body">
           {!oneDeadline && <p class="h-meta"><time datetime={lead.validUntil}>до {formatDate(lead.validUntil)}</time></p>}
           {page ? <h2 class="plead__title">{lead.title}</h2> : <h3 class="plead__title">{lead.title}</h3>}
           <p class="plead__sub">{lead.subtitle}</p>
           {lead.description && <p class="h-body plead__desc">{lead.description}</p>}
-          <p class="plead__actions">
-            {lead.ctaText && lead.ctaLink && <a href={lead.ctaLink} class="h-btn h-btn--signal h-btn--phone-wide">{lead.ctaText}</a>}
-            <a href={`tel:${PHONE.raw}`} class="h-link plead__phone">Позвонить {PHONE.label}</a>
-          </p>
+          {lead.image && <p class="sr-only">На баннере: {lead.imageAlt ?? lead.title}</p>}
+          <div class="plead__actions">
+            {lead.ctaText && lead.ctaLink && <a href={lead.ctaLink} class="h-btn h-btn--ink">{lead.ctaText}</a>}
+            {MAX_CHAT && (
+              <a href={maxChatUrl()} target="_blank" rel="noopener" class="h-btn h-btn--quiet pbtn" data-copy-text={maxWithText(aboutPromo(lead))} aria-label="Написать в MAX (текст скопируется)">
+                <MaxIcon class="pbtn__ico" />Написать в MAX
+              </a>
+            )}
+          </div>
+          <p class="plead__phone">или позвоните: <a href={`tel:${PHONE.raw}`} class="h-link">{PHONE.label}</a></p>
         </div>
       </article>
     )}
@@ -97,32 +126,56 @@ const CARD_SIZES = page
     {rest.length > 0 && (
       <ul class="pcards" style={`--cols: ${cols}`} role="list">
         {rest.map((promo) => (
-          <li id={anchor(promo)} class="pcard" data-until={promo.validUntil}>
-            <div class:list={['h-media', 'pcard__media', { pposter: !promo.image }]}>
+          <li id={promo.slug} class="pcard" data-until={promo.validUntil}>
+            <a href={cardHref(promo)} class:list={['h-media', 'pban', 'pcard__media', { pposter: !promo.image }]} tabindex="-1" aria-hidden="true">
               {promo.image
                 ? <img src={promo.image} srcset={promo.imageSrcset} sizes={CARD_SIZES} alt={promo.imageAlt ?? promo.title}
                     width={promo.imageWidth} height={promo.imageHeight} loading="lazy" decoding="async" />
                 : <span class="pposter__text">{promo.discount || promo.title}</span>}
-            </div>
+              <span class="h-arrow h-arrow--white pban__arrow"><svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </a>
             {page
               ? <h2 class="pcard__title">{promo.title}</h2>
-              : <h3 class="pcard__title"><a href={`/akcii/#${anchor(promo)}`} class="pcard__link">{promo.title}</a></h3>}
+              : <h3 class="pcard__title"><a href={cardHref(promo)} class="pcard__link">{promo.title}</a></h3>}
             <p class="pcard__sub">{promo.subtitle}</p>
             {!oneDeadline && <p class="h-meta pcard__until"><time datetime={promo.validUntil}>до {formatDate(promo.validUntil)}</time></p>}
+            {promo.image && <p class="sr-only">На баннере: {promo.imageAlt ?? promo.title}</p>}
             {page && promo.description && <p class="h-body pcard__desc">{promo.description}</p>}
-            {page && promo.ctaText && promo.ctaLink && <p class="pcard__more"><a href={promo.ctaLink} class="h-link">{promo.ctaText}</a></p>}
+            {page && (
+              <p class="pcard__more">
+                {promo.ctaText && promo.ctaLink && <a href={promo.ctaLink} class="h-link">{promo.ctaText}</a>}
+                {MAX_CHAT && (
+                  <a href={maxChatUrl()} target="_blank" rel="noopener" class="h-link pcard__max" data-copy-text={maxWithText(aboutPromo(promo))} aria-label={`Спросить про акцию «${promo.title}» в MAX (текст скопируется)`}>
+                    <MaxIcon class="pcard__max-ico" />Спросить в MAX
+                  </a>
+                )}
+              </p>
+            )}
           </li>
         ))}
       </ul>
     )}
 
     {promos.length > 0 && (
-      <p class="pask" data-promo-live>
-        <span>Подскажем, какая акция выгоднее для вашего заказа: <a href={`tel:${PHONE.raw}`} class="h-link">{PHONE.label}</a>{TELEGRAM_CHAT && <> или <a href={askUrl} class="h-link" target="_blank" rel="noopener">Telegram</a></>}.</span>
-        {page
-          ? <a href="/promo-archive/" class="h-link">Завершённые акции</a>
-          : <a href="/akcii/" class="h-link">Условия всех акций</a>}
-      </p>
+      <div class="pask" data-promo-live>
+        <div class="pask__text">
+          <p class="pask__title">Подскажем, какая акция выгоднее для вашего заказа</p>
+          <p class="pask__sub">Напишите или позвоните — посчитаем заказ с&nbsp;учётом акций.{page && <> Завершённые акции — в&nbsp;<a href="/offers/archive/" class="h-link">архиве</a>.</>}</p>
+        </div>
+        <div class="pask__actions">
+          {MAX_CHAT && (
+            <a href={maxChatUrl()} target="_blank" rel="noopener" class="h-btn h-btn--ink pbtn" data-copy-text={maxWithText(ASK)} aria-label="Написать в MAX (текст скопируется)">
+              <MaxIcon class="pbtn__ico" tone="dark" />Написать в MAX
+            </a>
+          )}
+          {TELEGRAM_CHAT && (
+            <a href={telegramWithText(ASK)} target="_blank" rel="noopener" class="h-btn h-btn--quiet pbtn" aria-label={`Написать в Telegram: @${TELEGRAM_CHAT}`}>
+              <TelegramIcon class="pbtn__ico" />Telegram
+            </a>
+          )}
+          <a href={`tel:${PHONE.raw}`} class="h-btn h-btn--quiet">{PHONE.label}</a>
+        </div>
+      </div>
     )}
   </div>
 </section>
@@ -131,7 +184,7 @@ const CARD_SIZES = page
 <script>
   /* Страница собрана заранее, а срок акции идёт: «осталось N дней» считаем
      в браузере (по московскому дню), истёкшую после сборки акцию прячем.
-     Если истекли все — на главной блок исчезает, на /akcii/ остаётся
+     Если истекли все — на главной блок исчезает, на /offers/ остаётся
      заголовок и «акций нет». */
   import { moscowToday, daysLeft, daysLeftLabel } from '../../lib/promo-dates'
 
@@ -155,13 +208,53 @@ const CARD_SIZES = page
 </script>
 
 <style>
-/* Сколько осталось — тем же тоном, что заголовки: срок здесь главный довод */
-.promo__left { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
 [hidden] { display: none !important; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
 
+/* ── Шапка — как у «Направлений»: текст слева, «Все акции» справа ── */
+.phead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
+  margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
+}
+.phead__lead { margin-top: 0.875rem; max-width: 34rem; }
+/* Сколько осталось — тоном заголовка: срок здесь главный довод */
+.phead__left { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
+
+/* ── Баннер-ссылка ─────────────────────────────────────── */
 /* Баннер — целиком: высота по картинке, а не по рамке */
-.plead__media > img,
-.pcard__media > img { height: auto; object-fit: contain; }
+.pban { position: relative; isolation: isolate; }
+.pban > img {
+  height: auto;
+  object-fit: contain;
+  transition: transform 500ms var(--ease-out);
+}
+.pban:hover > img { transform: scale(1.03); }
+.pban__arrow {
+  position: absolute;
+  right: clamp(0.625rem, 3%, 1rem);
+  bottom: clamp(0.625rem, 3%, 1rem);
+  z-index: 1;
+}
+.pban:hover .pban__arrow,
+.pcard:hover .pban__arrow { transform: rotate(45deg); background: var(--h-signal); color: var(--color-white); }
+@media (prefers-reduced-motion: reduce) {
+  .pban > img, .pban__arrow { transition: none; }
+  .pban:hover > img { transform: none; }
+}
 
 /* Без баннера — графитовая плашка той же формы, что баннеры (квадрат):
    предложение крупно, внизу */
@@ -172,8 +265,10 @@ const CARD_SIZES = page
   padding: clamp(0.875rem, 8%, 2rem);
   background: var(--h-ink);
   color: var(--color-white);
+  text-decoration: none;
 }
 .pposter__text {
+  max-width: calc(100% - 2.75rem);
   font-size: clamp(1.25rem, 2.2vw, 1.75rem);
   font-weight: var(--h-weight-display);
   line-height: 1.05;
@@ -181,6 +276,10 @@ const CARD_SIZES = page
   text-wrap: balance;
 }
 .plead .pposter__text { font-size: clamp(2.25rem, 5vw, 4rem); letter-spacing: -0.04em; }
+
+/* Кнопки с логотипом мессенджера */
+.pbtn { gap: 0.5rem; }
+.pbtn :global(.pbtn__ico) { width: 1.25rem; height: 1.25rem; }
 
 /* ── Первая акция — разворот ───────────────────────────── */
 .plead { display: grid; gap: 1.5rem; }
@@ -206,7 +305,8 @@ const CARD_SIZES = page
   text-wrap: balance;
 }
 .plead__desc { margin-top: 0.875rem; max-width: 34em; }
-.plead__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.75rem; margin: 1.75rem 0 0; font-size: 0.9375rem; }
+.plead__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; margin-top: 1.75rem; }
+.plead__phone { margin: 1rem 0 0; font-size: 0.9375rem; color: var(--h-soft); }
 /* С планшета — баннер рядом с текстом: во всю ширину он занял бы весь экран */
 @media (min-width: 43.75rem) {
   .plead { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--h-gutter); align-items: center; }
@@ -217,9 +317,10 @@ const CARD_SIZES = page
   .plead__body { grid-column: 7 / span 6; }
 }
 @media (max-width: 43.6875rem) {
-  /* На телефоне подробности — на /akcii/: под баннером только предложение и кнопка */
+  /* На телефоне подробности — на /offers/: под баннером предложение и кнопки */
   .promo:not([data-promo-page]) .plead__desc { display: none; }
-  .plead__actions { flex-direction: column; align-items: stretch; text-align: center; }
+  .plead__actions { display: grid; grid-template-columns: 1fr; }
+  .plead__phone { text-align: center; }
 }
 
 /* ── Остальные акции — ряд карточек ────────────────────── */
@@ -245,13 +346,16 @@ const CARD_SIZES = page
 }
 /* Карточка главной — одна ссылка на всю площадь: баннер тоже нажимается */
 .pcard__link { color: inherit; text-decoration: none; }
-.pcard__link::after { content: ''; position: absolute; inset: 0; }
+.pcard__link::after { content: ''; position: absolute; inset: 0; z-index: 2; }
 .pcard:hover .pcard__link { text-decoration: underline; text-decoration-color: var(--h-signal); text-decoration-thickness: 0.0625rem; text-underline-offset: 0.3em; }
+.pcard:hover .pban > img { transform: scale(1.03); }
 .pcard__sub { margin: 0.375rem 0 0; font-size: 0.875rem; line-height: 1.45; color: var(--h-soft); text-wrap: pretty; }
 .pcard__until { margin: 0.5rem 0 0; }
 .pcard__desc { margin-top: 0.75rem; font-size: 0.9375rem; }
-.pcard__more { margin: 0.875rem 0 0; font-size: 0.9375rem; }
-/* /akcii/ — условия раскрыты, заголовок и строка условия крупнее */
+.pcard__more { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; margin: 1rem 0 0; font-size: 0.9375rem; }
+.pcard__max { display: inline-flex; align-items: center; gap: 0.4375rem; }
+.pcard__max :global(.pcard__max-ico) { width: 1.125rem; height: 1.125rem; }
+/* /offers/ — условия раскрыты, заголовок и строка условия крупнее */
 .promo[data-promo-page] .pcard__title { font-size: 1.3125rem; margin-top: 1.125rem; }
 .promo[data-promo-page] .pcard__sub { font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
 
@@ -277,18 +381,30 @@ const CARD_SIZES = page
   .promo[data-promo-page] .pcards { grid-auto-columns: 82%; }
 }
 
-/* ── Строка под акциями ────────────────────────────────── */
+/* ── Плашка «подскажем» — MAX, Telegram, телефон ────────── */
 .pask {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.75rem 2rem;
-  margin: clamp(2rem, 4vw, 3rem) 0 0;
-  padding-top: 1.25rem;
-  border-top: 0.0625rem solid var(--h-rule);
-  font-size: 0.9375rem;
-  line-height: 1.5;
-  color: var(--h-soft);
+  gap: 1.25rem 2rem;
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: var(--h-tile-radius);
+  background: var(--h-wall);
+}
+.pask__title {
+  margin: 0;
+  font-size: clamp(1.125rem, 1.8vw, 1.3125rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--h-ink);
+  text-wrap: balance;
+}
+.pask__sub { margin: 0.375rem 0 0; font-size: 0.9375rem; line-height: 1.5; color: var(--h-soft); }
+.pask__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; }
+@media (max-width: 43.6875rem) {
+  .pask__actions { display: grid; grid-template-columns: 1fr; width: 100%; }
 }
 </style>

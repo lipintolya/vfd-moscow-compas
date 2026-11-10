@@ -529,7 +529,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
 export interface ApiPromoPromo extends Struct.CollectionTypeSchema {
   collectionName: 'promos';
   info: {
-    description: '\u0410\u043A\u0442\u0438\u0432\u043D\u044B\u0435 \u2014 \u043D\u0430 \u0433\u043B\u0430\u0432\u043D\u043E\u0439 \u0438 /akcii/, \u043F\u043E\u0441\u043B\u0435 \u0434\u0430\u0442\u044B \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F \u2014 \u0432 \u0430\u0440\u0445\u0438\u0432\u0435';
+    description: '\u0410\u043A\u0442\u0438\u0432\u043D\u044B\u0435 \u2014 \u043D\u0430 \u0433\u043B\u0430\u0432\u043D\u043E\u0439 \u0438 /offers/, \u043F\u043E\u0441\u043B\u0435 \u0434\u0430\u0442\u044B \u043E\u043A\u043E\u043D\u0447\u0430\u043D\u0438\u044F \u2014 \u0432 \u0430\u0440\u0445\u0438\u0432\u0435';
     displayName: '\u0410\u043A\u0446\u0438\u0438';
     pluralName: 'promos';
     singularName: 'promo';
@@ -576,6 +576,10 @@ export interface ApiPromoPromo extends Struct.CollectionTypeSchema {
       > &
       Schema.Attribute.DefaultTo<100>;
     publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 60;
+      }>;
     subtitle: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{

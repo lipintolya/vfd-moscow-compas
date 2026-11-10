@@ -123,9 +123,10 @@ const SITE_URL = 'https://dveriziz.ru'
 
 /* Страницы вне сайтмапа: /privacy/, /consent/ — служебные (закрыты в
    robots.txt); /catalog/skrytye-dveri/raboty/ — noindex, пока пуст INVISIBLE_WORKS;
-   /promo-archive/ — архив акций, закрыт noindex всегда.
+   /offers/archive/ — архив акций, закрыт noindex всегда; /akcii/ и
+   /promo-archive/ — прежние адреса акций (до 11.11.2026), теперь редиректы.
    Включили раздел там — уберите его отсюда. */
-const SITEMAP_EXCLUDE = ['/privacy/', '/consent/', '/catalog/skrytye-dveri/raboty/', '/promo-archive/']
+const SITEMAP_EXCLUDE = ['/privacy/', '/consent/', '/catalog/skrytye-dveri/raboty/', '/offers/archive/', '/akcii/', '/promo-archive/']
 
 const modelImages = await fetchModelImages()
 
@@ -179,9 +180,9 @@ const ARTICLES = await fetchStrapi('articles', { 'fields[0]': 'slug', 'fields[1]
 const ARTICLE_LASTMOD = new Map(ARTICLES.map((a) => [a.slug, a.updatedDate ?? a.publishDate]))
 const HAS_ARTICLES = ARTICLE_LASTMOD.size > 0
 
-/* Акции: раздел /akcii/ — в карте только если есть активная акция (срок —
+/* Акции: раздел /offers/ — в карте только если есть активная акция (срок —
    до конца дня validUntil, как в src/lib/promo-dates.ts; дата — московская).
-   Пустой раздел закрыт noindex (src/pages/akcii.astro), чтобы не тонуть
+   Пустой раздел закрыт noindex (src/pages/offers/index.astro), чтобы не тонуть
    в выдаче тонкой страницей «акций нет». */
 const PROMOS = await fetchStrapi('promos', { 'fields[0]': 'validUntil' })
 const MOSCOW_TODAY = new Date(Date.now() + 3 * 3600_000).toISOString().slice(0, 10)
@@ -201,6 +202,13 @@ export default defineConfig({
      странице без кэша между страницами. */
   build: { inlineStylesheets: 'always' },
   site: SITE_URL,
+  /* Прежние адреса акций (до 11.11.2026) — на новые. Это страницы с
+     мгновенным переходом; настоящий 301 отдаёт nginx (deploy/nginx/site.conf),
+     эти — запас, если конфиг сервера ещё не обновлён. */
+  redirects: {
+    '/akcii': '/offers/',
+    '/promo-archive': '/offers/archive/',
+  },
 
   vite: {
     plugins: [tailwindcss()],
@@ -229,7 +237,7 @@ export default defineConfig({
         // Статьи: заглушки (закрыты noindex) — не в карте; раздел — только
         // если есть опубликованные (см. readArticles выше)
         isArticleInSitemap(page) &&
-        (page !== `${SITE_URL}/akcii/` || HAS_ACTIVE_PROMOS),
+        (page !== `${SITE_URL}/offers/` || HAS_ACTIVE_PROMOS),
       serialize(item) {
         const u = item.url
 

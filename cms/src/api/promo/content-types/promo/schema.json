@@ -5,7 +5,7 @@
     "singularName": "promo",
     "pluralName": "promos",
     "displayName": "Акции",
-    "description": "Активные — на главной и /akcii/, после даты окончания — в архиве"
+    "description": "Активные — на главной и /offers/, после даты окончания — в архиве"
   },
   "options": { "draftAndPublish": true },
   "pluginOptions": { "i18n": { "localized": false } },
@@ -18,6 +18,7 @@
     "discount": { "type": "string", "maxLength": 20 },
     "ctaText": { "type": "string", "maxLength": 40 },
     "ctaLink": { "type": "string", "maxLength": 200 },
-    "order": { "type": "integer", "default": 100, "min": 1, "max": 999 }
+    "order": { "type": "integer", "default": 100, "min": 1, "max": 999 },
+    "slug": { "type": "string", "maxLength": 60, "regex": "^[a-z0-9]+(-[a-z0-9]+)*$" }
   }
 }

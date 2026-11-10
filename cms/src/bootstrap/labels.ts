@@ -17,6 +17,7 @@ const LABELS: Record<string, Labels> = {
     ctaText: { label: 'Текст кнопки', placeholder: 'Узнать подробнее' },
     ctaLink: { label: 'Ссылка кнопки', placeholder: '/catalog/skrytye-dveri/' },
     order: { label: 'Порядок на сайте', description: 'Меньше число — акция выше. Первая в списке показывается крупно' },
+    slug: { label: 'Адрес в ссылке', description: 'Латиницей через дефис, например warm-doors — ссылка на акцию будет /offers/#warm-doors. Пусто — номер акции' },
   },
   'api::work.work': {
     title: { label: 'Название', description: 'Заголовок страницы работы' },
