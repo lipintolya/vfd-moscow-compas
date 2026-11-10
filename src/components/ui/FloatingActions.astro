@@ -1,0 +1,164 @@
+---
+/**
+ * Плавающие кнопки справа внизу: «Написать в MAX» над «Наверх».
+ * Обе появляются после первого экрана — на первом экране ничего не закрывают;
+ * над подвалом кнопка MAX прячется (там свои ссылки на мессенджеры).
+ * MAX не принимает текст в ссылке — готовая фраза копируется по клику
+ * (data-copy-text, src/lib/copy-on-click.ts). Пульсация — мягкое кольцо раз
+ * в несколько секунд, на наведении пауза, при «уменьшить движение» её нет.
+ * Пустой SITE.social.maxChat — кнопки MAX нет.
+ */
+import { MAX_CHAT, maxChatUrl, CONSULT_MESSAGE } from '../../lib/messengers'
+import { MESSENGER_ICONS } from '../../lib/messenger-icons'
+---
+<div class="fab" id="fab" data-fab>
+  {MAX_CHAT && (
+    <a
+      class="fab__btn fab__max"
+      href={maxChatUrl()}
+      target="_blank"
+      rel="noopener"
+      data-copy-text={CONSULT_MESSAGE}
+      data-fab-max
+      aria-label="Написать в MAX"
+      title="Написать в MAX"
+    >
+      <img src={MESSENGER_ICONS.max.onDark} alt="" aria-hidden="true" width="24" height="24" decoding="async" />
+      <span class="fab__label" aria-hidden="true">Написать в MAX</span>
+    </a>
+  )}
+  <button class="fab__btn fab__top" id="btt-btn" type="button" aria-label="Наверх — прокрутить страницу в начало" title="Наверх">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>
+
+<style>
+  /* Колонка у правого края; ниже cookie-плашки (49) и шапки (50), выше страницы */
+  .fab {
+    position: fixed;
+    right: 1.5rem;
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0rem));
+    z-index: 48;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.625rem;
+    pointer-events: none;
+  }
+
+  /* Графитовая плашка с белым знаком — в тон шапке */
+  .fab__btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 0;
+    border-radius: 1rem;
+    background: var(--color-graphite);
+    color: var(--color-white);
+    box-shadow: 0 0.5rem 1.5rem color-mix(in srgb, var(--color-slate-950) 22%, transparent);
+    cursor: pointer;
+    text-decoration: none;
+    opacity: 0;
+    translate: 0 0.625rem;
+    transition:
+      opacity 220ms var(--ease-out),
+      translate 220ms var(--ease-out),
+      background-color 150ms var(--ease-out);
+  }
+  .fab__btn.is-on { opacity: 1; translate: none; pointer-events: auto; }
+  .fab__btn:hover { background: var(--color-slate-700); }
+  .fab__btn:active { background: var(--color-slate-950); }
+  .fab__btn:focus-visible { outline: 0.125rem solid var(--color-secondary-600); outline-offset: 0.1875rem; }
+
+  .fab__top svg { width: 1.25rem; height: 1.25rem; transition: translate 200ms var(--ease-out); }
+  .fab__top:hover svg { translate: 0 -0.125rem; }
+
+  .fab__max img { width: 1.5rem; height: 1.5rem; }
+
+  /* Мягкая пульсация: кольцо расходится и тает, затем долгая пауза */
+  .fab__max::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--color-graphite);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .fab__max.is-on::after { animation: fab-pulse 4s var(--ease-out) 1.2s infinite; }
+  .fab__max:hover::after, .fab__max:focus-visible::after { animation-play-state: paused; opacity: 0; }
+  @keyframes fab-pulse {
+    0% { opacity: 0.32; scale: 1; }
+    40% { opacity: 0; scale: 1.5; }
+    100% { opacity: 0; scale: 1.5; }
+  }
+
+  /* Подпись слева от кнопки — только на компьютере, по наведению или фокусу */
+  .fab__label {
+    position: absolute;
+    right: calc(100% + 0.625rem);
+    top: 50%;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999rem;
+    background: var(--color-graphite);
+    color: var(--color-white);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    translate: 0.25rem -50%;
+    pointer-events: none;
+    transition: opacity 160ms var(--ease-out), translate 160ms var(--ease-out);
+  }
+  @media (hover: hover) and (min-width: 48rem) {
+    .fab__max:hover .fab__label, .fab__max:focus-visible .fab__label { opacity: 1; translate: 0 -50%; }
+  }
+  @media (hover: none), (max-width: 47.9375rem) { .fab__label { display: none; } }
+
+  @media (max-width: 40rem) {
+    .fab { right: 1rem; bottom: calc(1.25rem + env(safe-area-inset-bottom, 0rem)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fab__btn, .fab__top svg { transition: opacity 150ms linear; }
+    .fab__top:hover svg { translate: none; }
+    .fab__max.is-on::after { animation: none; }
+  }
+</style>
+
+<script>
+  const top = document.getElementById('btt-btn')
+  const max = document.querySelector<HTMLElement>('[data-fab-max]')
+  if (top) {
+    let pastFirstScreen = false
+    let footerInView = false
+    const render = () => {
+      top.classList.toggle('is-on', pastFirstScreen)
+      max?.classList.toggle('is-on', pastFirstScreen && !footerInView)
+    }
+    // Порог — высота окна, а не число: на любом экране кнопки появляются после первого экрана
+    const onScroll = () => {
+      const next = window.scrollY > window.innerHeight
+      if (next !== pastFirstScreen) { pastFirstScreen = next; render() }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    render()
+
+    const footer = document.querySelector('footer')
+    if (max && footer && 'IntersectionObserver' in window) {
+      new IntersectionObserver(([entry]) => { footerInView = !!entry?.isIntersecting; render() }).observe(footer)
+    }
+
+    const still = matchMedia('(prefers-reduced-motion: reduce)')
+    top.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: still.matches ? 'auto' : 'smooth' })
+    })
+  }
+</script>

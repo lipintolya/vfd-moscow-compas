@@ -4,7 +4,7 @@ import Header from '../components/layout/Header.vue'
 import Footer from '../components/layout/Footer.vue'
 import PhotoLightbox from '../components/ui/PhotoLightbox.vue'
 import CookieConsent from '../components/analytics/CookieConsent.astro'
-import BackToTop from '../components/ui/BackToTop.astro'
+import FloatingActions from '../components/ui/FloatingActions.astro'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
 import { SITE } from '../config/site'
 
@@ -188,7 +188,7 @@ const structuredDataJson = structuredData
          'open-lightbox' (src/lib/lightbox.ts) */}
     <PhotoLightbox client:only="vue" />
 
-    <BackToTop />
+    <FloatingActions />
 
     <CookieConsent />
 
