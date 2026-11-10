@@ -24,6 +24,7 @@ import type { Promo } from '../../data/promos'
 import { PHONE, SITE } from '../../config/site'
 import { telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
 import { formatDate } from '../../lib/promo-dates'
+import { pluralRu } from '../../lib/plural'
 import MaxIcon from '../ui/MaxIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
 
@@ -59,6 +60,10 @@ const nowrap = (s: string) => s.replaceAll(' ', ' ')
 /** Готовый текст менеджеру про конкретную акцию */
 const aboutPromo = (p: Promo) => `Хочу воспользоваться акцией «${p.title}».`
 const ASK = 'Хочу узнать, какие акции подойдут для моего заказа.'
+/** «Все 5 акций» — число из данных; одна акция — «Подробнее об акции» */
+const allLabel = promos.length > 1
+  ? `Все ${promos.length} ${pluralRu(promos.length, ['акция', 'акции', 'акций'])}`
+  : 'Подробнее об акции'
 
 const LEAD_SIZES = '(max-width: 43.6875rem) 92vw, (max-width: 80rem) 39vw, 31rem'
 const CARD_SIZES = page
@@ -85,9 +90,9 @@ const CARD_SIZES = page
         </p>
       </div>
       {!page && promos.length > 0 && (
-        <a href="/offers/" class="h-pill h-pill--line" data-promo-live>
-          Все акции
-          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <a href="/offers/" class="h-btn h-btn--ink pall" data-promo-live>
+          {allLabel}
+          <span class="pall__arrow" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M5 11 11 5M6 5h5v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </a>
       )}
     </header>
@@ -231,6 +236,22 @@ const CARD_SIZES = page
   margin-bottom: clamp(1.75rem, 3vw, 2.5rem);
 }
 .phead__lead { margin-top: 0.875rem; max-width: 34rem; }
+/* «Все N акций» — полноразмерная графитовая кнопка, как кнопки акции ниже:
+   белая стрелка в круге поворачивается при наведении (отклик плиток главной) */
+.pall { gap: 1rem; min-height: 3.5rem; padding: 0 0.5rem 0 1.75rem; font-size: 1.0625rem; }
+.pall__arrow {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-white);
+  color: var(--h-ink);
+  transition: transform 220ms var(--ease-out), background-color 220ms var(--ease-out), color 220ms var(--ease-out);
+}
+.pall:hover .pall__arrow { transform: rotate(45deg); background: var(--h-signal); color: var(--color-white); }
+@media (prefers-reduced-motion: reduce) { .pall__arrow { transition: none; } }
+@media (max-width: 43.6875rem) { .pall { width: 100%; justify-content: space-between; padding-left: 1.5rem; } }
 /* Сколько осталось — тоном заголовка: срок здесь главный довод */
 .phead__left { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
 
