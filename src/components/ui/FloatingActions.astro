@@ -80,14 +80,15 @@ import { MESSENGER_ICONS } from '../../lib/messenger-icons'
 
   .fab__max img { width: 1.5rem; height: 1.5rem; }
 
-  /* Мягкая пульсация: кольцо расходится и тает, затем долгая пауза */
+  /* Мягкая пульсация: синее кольцо расходится и тает, затем долгая пауза.
+     Синее — чтобы кнопка MAX не сливалась с графитовой «Наверх» */
   .fab__max::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: var(--color-graphite);
+    background: var(--color-secondary-600);
     opacity: 0;
     pointer-events: none;
   }
