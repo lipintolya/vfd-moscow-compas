@@ -86,10 +86,8 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
           <span><span class="stage__nowrap">Более <span class="stage__count" data-count={count}>{soldCount}</span> {soldNoun}</span> установлено нашим клиентам в&nbsp;{year}&nbsp;году</span>
         </p>
         <p class="stage__lead">
-          {modelsCount} межкомнатных дверей {SITE.name} от&nbsp;{fromPrice}&nbsp;за&nbsp;полотно, скрытые двери,
-          входные двери, алюминиевые перегородки и&nbsp;стеновые панели. Салон в&nbsp;{SITE.address.mall}{' '}
-          ({SITE.address.street}, {SITE.address.floorIn}, {SITE.address.districtIn}) — образцы вживую,
-          замер и&nbsp;монтаж под ключ.
+          {modelsCount} дверей {SITE.name} от&nbsp;{fromPrice}. Салон в&nbsp;{SITE.address.mall},{' '}
+          {SITE.address.street.replace('ул. ', '')}: образцы вживую, замер и&nbsp;монтаж.
         </p>
         {/* Главные действия: записаться — выбор, как связаться (форм на сайте
              нет: звонок или мессенджер с готовым текстом); рассчитать — каталог,
