@@ -14,11 +14,16 @@ import { CONSENT_SETTINGS_EVENT } from '../../lib/cookie-consent'
 /* ============================================================
    Data
    ============================================================ */
+/* hasPromos — есть действующая акция (BaseLayout, при сборке): ссылка «Акции»
+   в готовом HTML для роботов — только тогда */
+const props = defineProps<{ hasPromos?: boolean }>()
+
 const year = new Date().getFullYear()
 
 const NAV_LINKS = [
   { href: '/',           label: 'Главная' },
   { href: '/catalog/',    label: 'Каталог' },
+  ...(props.hasPromos ? [{ href: '/akcii/', label: 'Акции' }] : []),
   { href: '/partitions/', label: 'Перегородки' },
   { href: '/designers/',  label: 'Дизайнерам' },
   { href: '/about/',      label: 'О нас' },

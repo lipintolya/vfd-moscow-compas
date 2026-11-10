@@ -11,11 +11,12 @@ const LABELS: Record<string, Labels> = {
     title: { label: 'Название', description: 'Коротко: «−15 % на скрытые двери»' },
     subtitle: { label: 'Условия', description: 'Одна строка под названием' },
     description: { label: 'Описание', description: 'Подробности, если нужны' },
-    image: { label: 'Фото', description: 'Горизонтальное, от 1200 px по ширине' },
+    image: { label: 'Баннер', description: 'Показывается целиком, без обрезки: квадратный или чуть вытянутый вверх, от 1000 px по ширине. Без баннера карточка — текстовая' },
     validUntil: { label: 'Действует до', description: 'Включительно; на следующий день акция уйдёт в архив' },
     discount: { label: 'Скидка', placeholder: '−10 %' },
     ctaText: { label: 'Текст кнопки', placeholder: 'Узнать подробнее' },
     ctaLink: { label: 'Ссылка кнопки', placeholder: '/catalog/skrytye-dveri/' },
+    order: { label: 'Порядок на сайте', description: 'Меньше число — акция выше. Первая в списке показывается крупно' },
   },
   'api::work.work': {
     title: { label: 'Название', description: 'Заголовок страницы работы' },

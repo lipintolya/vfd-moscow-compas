@@ -566,6 +566,15 @@ export interface ApiPromoPromo extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::promo.promo'> &
       Schema.Attribute.Private;
+    order: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 999;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<100>;
     publishedAt: Schema.Attribute.DateTime;
     subtitle: Schema.Attribute.String &
       Schema.Attribute.Required &

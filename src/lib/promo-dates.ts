@@ -27,9 +27,20 @@ export const getDaysLeft = (validUntil: string, now: Date = new Date()): number 
 }
 
 export const formatDate = (dateStr: string): string => {
+  /* «31 декабря 2026 г.» → «31 декабря 2026 года»: в середине фразы не остаётся
+     «г.» с точкой (после неё предложение давало «г..») */
   return parseLocalDate(dateStr).toLocaleDateString('ru-RU', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
-  })
+  }).replace(/\s*г\.$/, ' года')
 }
+
+/** Порядок показа: по «Порядку на сайте», затем по сроку, затем по названию */
+export const sortPromos = <T extends { validUntil: string; order: number; title: string }>(promos: readonly T[]): T[] =>
+  [...promos].sort((a, b) => a.order - b.order || a.validUntil.localeCompare(b.validUntil) || a.title.localeCompare(b.title, 'ru'))
+
+/** Действующие акции в порядке показа. Одно место для главной, /akcii/, шапки
+    и подвала — списки не расходятся. */
+export const activePromos = <T extends { validUntil: string; order: number; title: string }>(promos: readonly T[], now: Date = new Date()): T[] =>
+  sortPromos(promos.filter((p) => isPromoActive(p.validUntil, now)))

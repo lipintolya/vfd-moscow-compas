@@ -17,6 +17,7 @@
     "import:works": "node scripts/import-works.mjs",
     "import:articles": "node scripts/import-articles.mjs",
     "add:work": "node scripts/add-work.mjs",
+    "add:promos": "node scripts/add-promos.mjs",
     "add:article": "node scripts/add-article.mjs",
     "set:cover": "node scripts/set-article-cover.mjs",
     "work:meta": "node scripts/work-meta.mjs"

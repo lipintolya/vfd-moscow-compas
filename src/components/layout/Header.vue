@@ -9,6 +9,10 @@ import { whatsappUrl, WHATSAPP, TELEGRAM_CHAT, telegramChatUrl, MAX_CHAT, maxCha
 import { MAP_URL, ROUTE_URL } from '../../lib/map-links'
 import { MESSENGER_ICONS } from '../../lib/messenger-icons'
 
+/* hasPromos — есть действующая акция (BaseLayout, при сборке): «Акции» в меню
+   только тогда, иначе ссылка вела бы на пустую страницу */
+const props = defineProps<{ hasPromos?: boolean }>()
+
 /* ============================================================
    Constants
    ============================================================ */
@@ -75,14 +79,15 @@ const brandIntro = (() => {
 
 /* desc — пояснение пункта в мобильном меню (у разделов с подменю —
    пояснения у его пунктов) */
-const NAV_LINKS = [
+const NAV_LINKS: { href: string; label: string; desc: string }[] = [
   { href: '/',            label: 'Главная',     desc: '' },
   { href: '/catalog/',    label: 'Каталог',     desc: '' },
+  ...(props.hasPromos ? [{ href: '/akcii/', label: 'Акции', desc: 'Скидки и подарки салона' }] : []),
   { href: '/partitions/', label: 'Перегородки', desc: '' },
   { href: '/designers/',  label: 'Дизайнерам',  desc: 'Условия и материалы для проектов' },
   { href: '/about/',      label: 'О нас',       desc: `${SITE.studioName} и фабрика ${SITE.name}` },
   { href: '/contacts/',   label: 'Контакты',    desc: 'Адрес, часы и как добраться' },
-] as const
+]
 
 /* На десктопе «Главная» не выводится — на главную ведёт логотип, а
    освободившееся место держит навигацию строго по центру панели. */

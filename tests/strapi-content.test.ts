@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { toPromo } from '../src/lib/strapi-content'
-import { isPromoActive } from '../src/lib/promo-dates'
+import { isPromoActive, activePromos } from '../src/lib/promo-dates'
 
 test('акция из Strapi → вид сайта', () => {
   const promo = toPromo({
@@ -14,6 +14,17 @@ test('акция из Strapi → вид сайта', () => {
   assert.equal(promo.image, '/uploads/small_p.jpg')
   assert.equal(promo.imageSrcset, '/uploads/small_p.jpg 640w')
   assert.equal(promo.ctaText, undefined)
+  assert.equal(promo.imageWidth, 640)
+  assert.equal(promo.order, 100, 'без «Порядка на сайте» акция уходит в конец')
+})
+
+test('действующие акции: по порядку, затем по сроку; истёкшие не попадают', () => {
+  const mk = (title: string, order: number | null, validUntil: string) => toPromo({ documentId: title, title, subtitle: 'С', validUntil, order })
+  const list = activePromos(
+    [mk('В', null, '2026-12-31'), mk('Б', 2, '2026-12-31'), mk('А', 1, '2026-12-31'), mk('Г', 3, '2026-11-01'), mk('Д', 1, '2026-11-09')],
+    new Date(2026, 10, 10, 12),
+  )
+  assert.deepEqual(list.map((p) => p.title), ['А', 'Б', 'В'])
 })
 
 test('«действует до» сегодня — акция активна до конца дня', () => {

@@ -13,13 +13,13 @@ import { CATALOG_LINKS, CATEGORY_LABELS, OBJECT_TYPE_LABELS, type PortfolioWork,
 export interface StrapiPromo {
   documentId: string; title: string; subtitle: string; description?: string | null
   image?: StrapiMedia | null; validUntil: string; discount?: string | null
-  ctaText?: string | null; ctaLink?: string | null
+  ctaText?: string | null; ctaLink?: string | null; order?: number | null
 }
 
 const opt = (v: string | null | undefined) => v || undefined
 
 export function toPromo(raw: StrapiPromo): Promo {
-  const img = raw.image ? strapiImage(raw.image, 800) : undefined
+  const img = raw.image ? strapiImage(raw.image, 1200) : undefined
   return {
     id: raw.documentId,
     title: raw.title,
@@ -27,7 +27,10 @@ export function toPromo(raw: StrapiPromo): Promo {
     description: raw.description ?? '',
     image: img?.src,
     imageSrcset: img?.srcset,
+    imageWidth: img?.width,
+    imageHeight: img?.height,
     validUntil: raw.validUntil,
+    order: raw.order ?? 100,
     discount: opt(raw.discount),
     ctaText: opt(raw.ctaText),
     ctaLink: raw.ctaLink ? safeUrl(raw.ctaLink, `Акция «${raw.title}»`) : undefined,
@@ -51,7 +54,7 @@ export function strapiLoader<T>(name: string, fetchAll: () => Promise<{ id: stri
 }
 
 /** Запросы к Strapi — одни для сборки и проверки перед публикацией (scripts/check-content.ts) */
-export const PROMO_QUERY = { 'populate[image]': 'true', sort: 'validUntil:asc' }
+export const PROMO_QUERY = { 'populate[image]': 'true', sort: 'order:asc,validUntil:asc' }
 
 export const promosLoader = () =>
   strapiLoader('strapi-promos', async () =>

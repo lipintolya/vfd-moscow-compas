@@ -10,6 +10,8 @@ import { getArticles, articleHref } from '../lib/articles'
 import { ARTICLES_SECTION } from '../data/article-kinds'
 import { ALUM_PAGE, ALUM_FACTS, ALUM_LAYOUT_COUNT } from '../data/alum-partitions'
 import { getCatalogCards } from '../lib/catalog-data'
+import { getCollection } from 'astro:content'
+import { activePromos, formatDate } from '../lib/promo-dates'
 import { rub, MEASURE_TERMS, INSTALL_TERMS, WARRANTY_TERMS } from '../data/services'
 import { SECRET_MIN_KIT_PRICE } from '../data/skrytye-dveri-products'
 import { FROM_PRICE_PLINTUS, FROM_PRICE_REYKI, FROM_PRICE_FRAMUGA_KIT, REYKI_KIT_PCS } from '../data/decor-products'
@@ -41,6 +43,8 @@ export const GET: APIRoute = async () => {
   const seriesWord = pluralRu(seriesCount, ['серия', 'серии', 'серий'])
   const reviewsWord = pluralRu(reviews.length, ['отзыв', 'отзыва', 'отзывов'])
   const ratingsWord = pluralRu(YANDEX_RATING.ratings, ['оценка', 'оценки', 'оценок'])
+  /* Акции — только действующие; раздел появляется и исчезает вместе с ними */
+  const promos = activePromos((await getCollection('promos')).map((e) => e.data))
   const sections = [
     ['Каталог межкомнатных дверей', '/catalog/', 'серии, покрытия, цвета и цены'],
     ['Скрытые двери', '/catalog/skrytye-dveri/', 'двери скрытого монтажа, размеры и цены'],
@@ -52,6 +56,7 @@ export const GET: APIRoute = async () => {
     ['Плинтус', '/catalog/plintus/', 'напольный из МДФ, с LED-подсветкой, скрытый, микроплинтус и шпонированный; покраска по RAL и NCS, цена по запросу'],
     ['Алюминиевые перегородки', '/partitions/', 'раздвижные и стационарные системы со стеклом'],
     [ALUM_PAGE.name, ALUM_PAGE.path, `раздвижные алюминиевые перегородки: ${ALUM_LAYOUT_COUNT}, ${ALUM_FACTS.glass}, высота ${ALUM_FACTS.height}`],
+    ...(promos.length ? [['Акции салона', '/akcii/', `${promos.map((p) => p.title).join('; ')} — до ${formatDate(promos.map((p) => p.validUntil).sort().at(-1)!)}`]] : []),
     ['Дизайнерам и архитекторам', '/designers/', 'сотрудничество и шоурум для встреч с заказчиками'],
     ['О нас', '/about/', `${SITE.studioName} — официальный дилер ${SITE.manufacturerOf}`],
     ['Контакты', '/contacts/', 'адрес, часы работы, как добраться'],

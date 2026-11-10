@@ -20,9 +20,14 @@ export interface Promo {
   image?:        string
   /** Все копии Strapi (srcset) — браузер берёт подходящую под экран */
   imageSrcset?:  string
+  /** Размер выбранной копии — баннер показывается целиком, по своим пропорциям */
+  imageWidth?:   number
+  imageHeight?:  number
   ctaText?:      string
   ctaLink?:      string
   discount?:     string
   /** Последний день акции, YYYY-MM-DD (включительно) */
   validUntil:    string
+  /** Порядок на сайте: меньше — выше; первая акция списка показывается крупно */
+  order:         number
 }

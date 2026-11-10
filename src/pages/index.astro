@@ -28,11 +28,14 @@ import { brandTitle } from '../lib/seo-title'
 import { rub } from '../data/services'
 import { pluralRu } from '../lib/plural'
 import { getCollection } from 'astro:content'
+import { activePromos } from '../lib/promo-dates'
 
 const faqItems = faqs.map(f => ({ q: f.question, a: f.answer }))
 
-/* Акции — из Strapi; блок сам покажет только активные */
-const promos = (await getCollection('promos')).map((e) => e.data)
+/* Акции — из Strapi: действующие на момент сборки; блок сам уберёт истёкшие
+   после загрузки страницы. Блок стоит сразу под первым экраном — заказчик
+   просил сделать упор на акции (10 ноября 2026) */
+const promos = activePromos((await getCollection('promos')).map((e) => e.data))
 
 /* Каталог — блоку «Новинки и двери в наличии» (src/data/in-salon.ts):
    статусы, цвет на складе и адрес страницы модели */
@@ -73,6 +76,7 @@ const localBusinessSchema = buildLocalBusiness()
 >
   <div class="home">
     <ShowroomHero modelsCount={modelsCount} fromPrice={rub(Math.min(...modelPrices))} />
+    <Promo client:load promos={promos} />
     <Directions />
     <EntrancePreview />
     <Videos />
@@ -82,7 +86,6 @@ const localBusinessSchema = buildLocalBusiness()
     <Spotlight />
     <LatestArticles />
     <VisitBand />
-    <Promo client:visible promos={promos} />
     <Reviews />
 
     <section class="h-sec" aria-label="Частые вопросы">

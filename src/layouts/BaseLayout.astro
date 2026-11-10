@@ -7,6 +7,8 @@ import CookieConsent from '../components/analytics/CookieConsent.astro'
 import FloatingActions from '../components/ui/FloatingActions.astro'
 import { HERO_COVER_IMAGE } from '../data/hero-image'
 import { SITE } from '../config/site'
+import { getCollection } from 'astro:content'
+import { activePromos } from '../lib/promo-dates'
 
 interface Props {
   title?:         string
@@ -33,6 +35,9 @@ interface Props {
   /** ISO-дата публикации — только для ogType="article" (og:article:published_time) */
   publishedTime?: string
 }
+
+/* «Акции» в меню — только пока есть действующая (иначе ссылка вела бы на пустую страницу) */
+const hasPromos = activePromos((await getCollection('promos')).map((e) => e.data)).length > 0
 
 const {
   title        = `Двери ${SITE.name} в ${SITE.address.mall} — салон дверей ${SITE.city.in}`,
@@ -171,7 +176,7 @@ const structuredDataJson = structuredData
   <body class="min-h-screen flex flex-col">
 
     {/* Header: только клиент, без hydration mismatch */}
-    <Header client:only="vue" />
+    <Header client:only="vue" hasPromos={hasPromos} />
 
     <main
       id="main-content"
@@ -182,7 +187,7 @@ const structuredDataJson = structuredData
 
     {/* Footer: ссылки на разделы — в готовом HTML, чтобы их видел любой робот
          без JS; Vue оживляет окна «Правовая информация» и «Разработчик» */}
-    <Footer client:load />
+    <Footer client:load hasPromos={hasPromos} />
 
     {/* Окно просмотра фото — одно на сайт, открывается событием
          'open-lightbox' (src/lib/lightbox.ts) */}
