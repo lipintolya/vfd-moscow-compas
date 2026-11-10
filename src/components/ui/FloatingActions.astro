@@ -81,24 +81,39 @@ import { MESSENGER_ICONS, MAX_GRADIENT } from '../../lib/messenger-icons'
 
   .fab__max img { width: 1.5rem; height: 1.5rem; }
 
-  /* Мягкая пульсация: кольцо в фирменном градиенте MAX расходится и тает, затем долгая пауза.
-     Градиент задаёт --fab-max-grad (MAX_GRADIENT в messenger-icons.ts) */
+  /* Пульсация: два кольца в фирменном градиенте MAX (--fab-max-grad, MAX_GRADIENT в messenger-icons.ts)
+     расходятся от кнопки и гаснут, пока кнопка чуть «дышит». Кольцо — только по краю (маска, 3 px),
+     поэтому центр кнопки не тонируется и знак остаётся чётким */
+  .fab__max::before,
   .fab__max::after {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: -3px;
     z-index: -1;
-    border-radius: inherit;
+    padding: 3px;
+    border-radius: 50%;
     background: var(--fab-max-grad, var(--color-secondary-600));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
     opacity: 0;
     pointer-events: none;
   }
-  .fab__max.is-on::after { animation: fab-pulse 4s var(--ease-out) 1.2s infinite; }
-  .fab__max:hover::after, .fab__max:focus-visible::after { animation-play-state: paused; opacity: 0; }
-  @keyframes fab-pulse {
-    0% { opacity: 0.32; scale: 1; }
-    40% { opacity: 0; scale: 1.5; }
-    100% { opacity: 0; scale: 1.5; }
+  .fab__max.is-on { animation: fab-beat 2.4s var(--ease-out) infinite; }
+  .fab__max.is-on::before { animation: fab-ring 2.4s var(--ease-out) infinite; }
+  .fab__max.is-on::after { animation: fab-ring 2.4s var(--ease-out) 1.2s infinite; }
+  /* Наведение — пауза: кольца и «дыхание» гаснут, кнопка остаётся на месте */
+  .fab__max:hover, .fab__max:focus-visible { animation: none; scale: 1; }
+  .fab__max:hover::before, .fab__max:hover::after,
+  .fab__max:focus-visible::before, .fab__max:focus-visible::after { animation: none; opacity: 0; }
+  @keyframes fab-ring {
+    0% { opacity: 0.9; scale: 1; }
+    100% { opacity: 0; scale: 1.7; }
+  }
+  @keyframes fab-beat {
+    0%, 100% { scale: 1; }
+    8% { scale: 1.07; }
+    16% { scale: 1; }
   }
 
   /* Подпись слева от кнопки — только на компьютере, по наведению или фокусу */
@@ -130,7 +145,7 @@ import { MESSENGER_ICONS, MAX_GRADIENT } from '../../lib/messenger-icons'
   @media (prefers-reduced-motion: reduce) {
     .fab__btn, .fab__top svg { transition: opacity 150ms linear; }
     .fab__top:hover svg { translate: none; }
-    .fab__max.is-on::after { animation: none; }
+    .fab__max.is-on, .fab__max.is-on::before, .fab__max.is-on::after { animation: none; }
   }
 </style>
 
