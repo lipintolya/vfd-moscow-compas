@@ -19,6 +19,9 @@ const KINDS: Record<string, 'article' | 'work' | 'promo'> = {
 type Attr = { type: string; component?: string; components?: string[]; target?: string }
 type Populate = Record<string, unknown>
 
+const hasSlug = (strapi: Core.Strapi, uid: string) =>
+  'slug' in (strapi.getModel(uid as UID.Schema).attributes as Record<string, unknown>)
+
 /** Всё, что читает сайт: медиа, компоненты, зоны блоков; у связанных
     статей — только адрес */
 export function deepPopulate(strapi: Core.Strapi, uid: string): Populate {
@@ -32,7 +35,10 @@ export function deepPopulate(strapi: Core.Strapi, uid: string): Populate {
     if (attr.type === 'media') out[name] = true
     else if (attr.type === 'component') out[name] = nested(attr.component!)
     else if (attr.type === 'dynamiczone') out[name] = { on: Object.fromEntries(attr.components!.map((c) => [c, nested(c)])) }
-    else if (attr.type === 'relation' && attr.target?.startsWith('api::')) out[name] = { fields: ['slug'] }
+    /* Связь на тип с адресом (статья, работа) — только адрес. Связь на тот же
+       тип без адреса (i18n-плагин добавляет «localizations» к акциям) —
+       пропускаем: иначе публикация падает с «Invalid key slug» */
+    else if (attr.type === 'relation' && attr.target?.startsWith('api::') && hasSlug(strapi, attr.target)) out[name] = { fields: ['slug'] }
   }
   return out
 }

@@ -104,7 +104,8 @@ const promos = defineCollection({
   schema: z.object({
     id: z.string(), title: z.string(), subtitle: z.string(), description: z.string(),
     image: z.string().optional(), imageSrcset: z.string().optional(),
-    validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    imageWidth: z.number().optional(), imageHeight: z.number().optional(),
+    validUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), order: z.number(),
     discount: z.string().optional(), ctaText: z.string().optional(), ctaLink: z.string().optional(),
   }),
 })

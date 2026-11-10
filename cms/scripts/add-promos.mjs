@@ -48,7 +48,11 @@ try {
     await docs.publish({ documentId })
     console.log(`${existing ? 'обновлено' : 'создано'} и опубликовано: ${promo.title}`)
   }
+} catch (error) {
+  /* Ошибку — в вывод и код выхода: process.exit в finally её бы проглотил */
+  console.error('Ошибка:', error)
+  process.exitCode = 1
 } finally {
   await app.destroy()
-  process.exit(0)
+  process.exit(process.exitCode ?? 0)
 }
