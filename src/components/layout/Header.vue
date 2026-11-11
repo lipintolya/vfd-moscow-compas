@@ -312,8 +312,10 @@ onUnmounted(() => {
     <div class="container">
 
       <!-- ── Шапка — плашка по ширине контейнера (как сцена
-           hero под ней). Сетка 1fr / auto / 1fr держит навигацию строго
-           по центру независимо от ширины краёв. ── -->
+           hero под ней). Сетка auto / 1fr / auto: навигация — по центру
+           свободного места между брендом и кнопками, зазоры слева и справа
+           равны (кнопки справа шире бренда — центр по всей плашке
+           прижимал меню к телефону). ── -->
       <div class="hdr">
 
         <!-- Бренд: знак + две строки -->
@@ -806,7 +808,7 @@ onUnmounted(() => {
   box-shadow: inset 0 0 0 var(--hdr-hair) var(--hdr-line), 0 0.75rem 2rem -1.25rem var(--hdr-shadow);
 }
 @media (min-width: 80rem) {
-  .hdr { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .hdr { grid-template-columns: auto minmax(0, 1fr) auto; }
 }
 /* Телефон: плашка на ~7 % выше (3.5 → 3.75rem) за счёт поля вокруг
    кнопок — кнопки и текст прежние; полоса --header-bar (4.5rem) та же,
@@ -913,7 +915,7 @@ onUnmounted(() => {
 /* ── Навигация (десктоп) ── */
 .hdr-nav { display: none; }
 @media (min-width: 80rem) {
-  .hdr-nav { display: flex; align-items: center; gap: 0.125rem; }
+  .hdr-nav { display: flex; align-items: center; gap: 0.125rem; justify-self: center; }
 }
 .hdr-dropwrap { position: relative; }
 .hdr-link {
