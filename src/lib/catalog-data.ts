@@ -4,7 +4,10 @@
  * в CatalogCardItem) — используется /catalog и страницами серий, чтобы не
  * дублировать JOIN и нормализацию цветов в каждом месте.
  */
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { supabase } from './supabase'
+import { catalogThumb, CATALOG_THUMB_WIDTHS } from './catalog-thumb'
 import { localMedia } from './media'
 import { buildModelSlugMap } from './slugify'
 import { getSeriesSpec } from '../data/series-descriptions'
@@ -165,6 +168,21 @@ async function loadCatalogCards(): Promise<{ cards: CatalogCardItem[] }> {
   const slugMap = buildModelSlugMap(cards.map(c => ({ id: c.id, name: c.name, seriesSlug: c.seriesSlug })))
   for (const card of cards) {
     card.slug = slugMap.get(card.id)!
+  }
+
+  /* Карточка показывает облегчённую копию фото (catalogThumb): нет копии —
+     в каталоге была бы пустая картинка, поэтому сборка падает с подсказкой */
+  const missing = new Set<string>()
+  for (const card of cards) {
+    for (const photo of [card.photo, ...card.colorSwatches.map((s) => s.photo)]) {
+      if (!photo || catalogThumb(photo) === photo) continue
+      for (const w of CATALOG_THUMB_WIDTHS) {
+        if (!existsSync(join(process.cwd(), 'public', decodeURIComponent(catalogThumb(photo, w))))) missing.add(photo)
+      }
+    }
+  }
+  if (missing.size) {
+    throw new Error(`Каталог: у ${missing.size} фото нет облегчённой копии для карточки (например, ${[...missing][0]}) — запустите npm run gen:catalog-thumbs`)
   }
 
   return { cards }

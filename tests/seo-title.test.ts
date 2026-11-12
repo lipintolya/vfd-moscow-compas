@@ -93,3 +93,31 @@ test('compactTrim: убирает описание, сохраняет цвет 
   assert.equal(compactTrim('английская решётка, стекло сатин белый'), 'стекло сатин белый')
   assert.equal(compactTrim('кромка серебро'), 'кромка серебро')
 })
+
+import { productTitles } from '../src/lib/product-text'
+
+test('заголовки моделей без повторов: совпавшим добавляется покрытие, молдинг или слово серии', () => {
+  const m = (name: string, trim: string | null, seriesName: string, coatingName: string, coatingSlug: string) =>
+    ({ model: { name, trim }, seriesName, coatingName, coatingSlug }) as never
+  /* Реальные группы, у которых 12 Nov 2026 совпадал <title> */
+  const list = [
+    m('Урбан 2ГР', 'Чёрная', 'Урбан', 'Эмалекс', 'emalex'),
+    m('Урбан 2ГР', 'Чёрная', 'Урбан Лофт', 'Экошпон', 'ekoshpon'),
+    m('Урбан ЗТ', 'Серебро', 'Урбан', 'Эмалекс', 'emalex'),
+    m('Урбан ЗТ', 'Серебро', 'Урбан Лофт', 'Экошпон', 'ekoshpon'),
+    m('Урбан ЗТ', 'Золотая', 'Урбан Древесный', 'Экошпон', 'ekoshpon'),
+    m('Урбан ЗТ', 'Золотая с молдингом', 'Урбан Древесный', 'Экошпон', 'ekoshpon'),
+    m('Урбан ЗТ', 'Чёрная с молдингом', 'Урбан Древесный', 'Экошпон', 'ekoshpon'),
+    m('Урбан ЗТ', 'Чёрная', 'Урбан Древесный', 'Экошпон', 'ekoshpon'),
+    m('Урбан ЗТ', 'Чёрная', 'Урбан Лофт', 'Экошпон', 'ekoshpon'),
+  ]
+  const titles = [...productTitles(list).values()]
+  assert.equal(new Set(titles).size, list.length, titles.join('\n'))
+  for (const t of titles) {
+    assert.ok(t.length <= TITLE_MAX, `${t.length}: ${t}`)
+    assert.ok(t.endsWith(STUDIO), t)
+  }
+  /* Модель без совпадений — заголовок как раньше */
+  const single = m('Некст НР2', 'Протач', 'Некст', 'Протач', 'protach')
+  assert.equal(productTitles([single]).get(single), productTitle(single))
+})

@@ -16,6 +16,7 @@ import { getColorsByCoatingSlug } from './catalog-data'
 import { adjustPrice } from './price-adjustments'
 import { isNewModel } from './new-models'
 import { withInStockFirst } from './made-to-order'
+import { productTitles } from './product-text'
 
 /** Структурно совпадает с ColorVariant из ProductColorPicker.vue. */
 export interface ModelColor {
@@ -174,4 +175,14 @@ let cached: Promise<ModelEntry[]> | null = null
 export function getModelEntries(): Promise<ModelEntry[]> {
   cached ??= loadModelEntries()
   return cached
+}
+
+/** <title> страниц моделей по адресу (slug) — без повторов, один расчёт на сборку */
+let titles: Promise<Map<string, string>> | null = null
+export function getModelTitles(): Promise<Map<string, string>> {
+  titles ??= getModelEntries().then((entries) => {
+    const map = productTitles(entries)
+    return new Map(entries.map((e) => [e.slug, map.get(e)!]))
+  })
+  return titles
 }

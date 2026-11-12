@@ -170,6 +170,50 @@ export const productTitle = (m: NamingInput) => {
   return brandTitle(base)
 }
 
+/**
+ * Заголовки всех моделей сразу, без повторов. Обычный заголовок
+ * (productTitle) иногда теряет то, что отличает модели: покрытие не влезает
+ * в длину («Урбан 2ГР, кромка чёрная» — и в Эмалексе, и в экошпоне),
+ * «с молдингом» сокращается, а серии «Урбан Лофт» и «Урбан Древесный» дают
+ * одно имя «Урбан ЗТ». Одинаковый <title> у разных страниц поисковики
+ * считают дублем (12 Nov 2026: 4 группы, 9 страниц). Совпавшим заголовкам
+ * подбирается первый вариант, который вмещается и ни с кем не совпадает:
+ * полная кромка → покрытие → слово серии («Лофт», «Древесный») → короткий
+ * тип «Дверь». Остальные заголовки не меняются.
+ */
+export function productTitles<T extends NamingInput>(entries: readonly T[]): Map<T, string> {
+  const budget = TITLE_MAX - ` | ${SITE.studioName}`.length
+  const titles = new Map(entries.map((m) => [m, productTitle(m)]))
+  const count = new Map<string, number>()
+  for (const t of titles.values()) count.set(t, (count.get(t) ?? 0) + 1)
+  const used = new Set([...titles.values()].filter((t) => count.get(t) === 1))
+  for (const m of entries) {
+    if (count.get(titles.get(m)!) === 1) continue
+    const headline = productHeadline(m)
+    const trim = describeTrim(m.model.trim)?.phrase ?? ''
+    const coating = m.coatingName && !hasWords(headline, m.coatingName) ? coatingInline(m) : ''
+    /* Слова серии, которых нет в названии: «Урбан Лофт» при «Урбан ЗТ» → «Лофт» */
+    const extra = m.seriesName.split(/\s+/).filter((w) => w && !hasWords(headline, w)).join(' ')
+    const names = [headline, ...(extra ? [`${headline} ${extra}`] : [])]
+    const attrs = [[trim, coating], [compactTrim(trim), coating]].map((a) => a.filter(Boolean).join(', '))
+    let picked = ''
+    for (const name of names) {
+      for (const a of attrs) {
+        for (const type of [DOOR_TYPE, 'Дверь']) {
+          const base = `${type} ${BRAND} ${name}${a ? `, ${a}` : ''}`
+          if (base.length > budget) continue
+          const t = brandTitle(fitPhrase(base, [['в Москве', ' ']], budget))
+          if (!used.has(t)) { picked = t; break }
+        }
+        if (picked) break
+      }
+      if (picked) break
+    }
+    if (picked) { titles.set(m, picked); used.add(picked) }
+  }
+  return titles
+}
+
 /** <meta description>: цена и город — здесь (в отличие от фида), признаки — пока
     помещаются, в конце — что входит в услугу салона. */
 export function productMetaDescription(m: ModelEntry): string {

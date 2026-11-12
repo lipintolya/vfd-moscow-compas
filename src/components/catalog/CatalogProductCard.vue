@@ -11,6 +11,7 @@ import { calcKitPrice } from '../../data/accessories'
 import { modelStatus, MODEL_STATUS_LABEL } from '../../lib/made-to-order'
 import type { ColorFamilySlug } from '../../data/color-families'
 import type { CatalogCardItem } from './types'
+import { catalogThumb, catalogThumbSrcset } from '../../lib/catalog-thumb'
 
 const props = withDefaults(defineProps<{
   card: CatalogCardItem
@@ -103,7 +104,9 @@ const status = computed(() => modelStatus(props.card, activeColorName.value))
       <img
         v-if="activePhoto"
         :key="activePhoto"
-        :src="activePhoto"
+        :src="catalogThumb(activePhoto)"
+        :srcset="catalogThumbSrcset(activePhoto)"
+        sizes="(max-width: 35.9375rem) 46vw, (min-width: 80rem) 16rem, 20rem"
         :alt="`Межкомнатная дверь ${card.name}, ${activeColorName}`"
         :loading="priority ? 'eager' : 'lazy'"
         :fetchpriority="priority ? 'high' : undefined"

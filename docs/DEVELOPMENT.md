@@ -177,6 +177,7 @@ Strapi 5.57 — в `cms/`, со своим `package.json` (версии закр
 | `npm run gen:renders` | галерея рендеров перегородок GRAFIA |
 | `npm run gen:partitions-hero` / `gen:partitions-tracks` / `gen:partitions-swatches` | первый экран, направляющие и образцы цветов на `/partitions/` |
 | `npm run gen:series-covers` | обложки серий каталога |
+| `npm run gen:catalog-thumbs` | копии 280/400/560 px фото каталога для карточек (после `npm run media:pull`; без копии сборка падает) |
 | `npm run gen:video-covers` | обложки роликов |
 | `npm run video:optimize -- <ссылка> <файл> [секунда]` | облегчённый ролик для статьи и кадр-обложка |
 | `npm run gen:home` / `gen:home-tiles` | фото для главной, «В салоне» и статей |

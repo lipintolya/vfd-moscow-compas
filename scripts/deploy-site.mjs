@@ -77,9 +77,24 @@ const STATE_FILE = path.join(ROOT, 'deploy/indexnow-state.json')
 const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' }) // ГГГГ-ММ-ДД
 const prevState = readState(existsSync(STATE_FILE) ? JSON.parse(readFileSync(STATE_FILE, 'utf8')) : null)
 const state = nextState(prevState, contentHashes(DIST), today)
+const freshest = new Map()
 for (const f of readdirSync(DIST).filter((n) => /^sitemap-\d+\.xml$/.test(n))) {
   const file = path.join(DIST, f)
-  writeFileSync(file, withLastmod(readFileSync(file, 'utf8'), siteUrl, state))
+  const xml = withLastmod(readFileSync(file, 'utf8'), siteUrl, state)
+  writeFileSync(file, xml)
+  const dates = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1].slice(0, 10)).sort()
+  if (dates.length) freshest.set(f, dates.at(-1))
+}
+/* Индекс карты — дата самой свежей страницы в каждом файле: иначе @astrojs/sitemap
+   оставлял там дату сборки статей (2 Nov при страницах от 12 Nov), и робот,
+   который смотрит на дату индекса, мог не перечитать карту (аудит 12 Nov 2026) */
+const indexFile = path.join(DIST, 'sitemap-index.xml')
+if (existsSync(indexFile)) {
+  const index = readFileSync(indexFile, 'utf8').replace(
+    /<loc>([^<]*\/(sitemap-\d+\.xml))<\/loc>(?:<lastmod>[^<]*<\/lastmod>)?/g,
+    (all, loc, name) => (freshest.has(name) ? `<loc>${loc}</loc><lastmod>${freshest.get(name)}</lastmod>` : all),
+  )
+  writeFileSync(indexFile, index)
 }
 
 /* ── Выкладка: страницы, затем фото Strapi ── */

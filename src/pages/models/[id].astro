@@ -12,7 +12,7 @@ import type { AccessoryCategory, CoatingSlug } from '../../data/accessories'
 import InfoImageViewer from '../../components/catalog/InfoImageViewer.vue'
 import { describeTrim } from '../../lib/trim-labels'
 import { merchantPolicy } from '../../lib/contacts-data'
-import { getModelEntries } from '../../lib/model-entries'
+import { getModelEntries, getModelTitles } from '../../lib/model-entries'
 import { DOOR_CATEGORIES } from '../../data/door-categories'
 import type { ModelEntry } from '../../lib/model-entries'
 import CatalogGrid from '../../components/catalog/CatalogGrid.vue'
@@ -38,6 +38,12 @@ export async function getStaticPaths() {
 }
 
 const entry = Astro.props as ModelEntry
+/* Старый адрес по UUID (12 Nov 2026) — мгновенный переход на адрес-слаг:
+   страница с meta refresh 0, canonical и noindex, которую Яндекс и Google
+   считают постоянным редиректом. Раньше здесь была полная копия карточки
+   с noindex и canonical на слаг — противоречивые сигналы и 174 дубля в
+   сборке. Настоящий 301 — когда сервер начнёт отдавать редиректы по карте */
+if (Astro.params.id !== entry.slug) return Astro.redirect(`/models/${entry.slug}/`, 301)
 const { model, slug, colors, minPrice, seriesName, seriesSlug, coatingName, coatingSlug, extraColors } = entry
 
 const spec        = getSeriesSpec(seriesSlug, coatingSlug)
@@ -61,13 +67,6 @@ const accessoryGroups: [AccessoryCategory, typeof accessories][] = Object.entrie
   .map(([category, items]) => [category as AccessoryCategory, items])
 
 const canonicalUrl  = Astro.site ? new URL(`/models/${slug}/`, Astro.site).href : undefined
-/* UUID-маршрут — тот же контент, что и на slug-странице (см. комментарий
-   у getStaticPaths: оставлен, чтобы не 404'ить старые проиндексированные
-   ссылки). canonical выше уже указывает на slug-версию, но Яндекс.Вебмастер
-   всё равно считает title/description дублями по факту краулинга — noIndex
-   явно говорит роботу не индексировать и не учитывать эту версию отдельной
-   страницей, ссылка при этом продолжает открываться. */
-const isUuidRoute   = Astro.params.id !== slug
 /* Имя модели для показа: без лишних пробелов и латинских букв-двойников
    внутри кириллических слов (см. cleanModelName). */
 const displayName = cleanModelName(model.name)
@@ -89,7 +88,8 @@ const coatingLanding = DOOR_CATEGORIES.find(c => c.coatingSlug === coatingSlug)
    первым словом: по нему ищут, а в имени модели («Иннова 02СТ», «ЕР1»)
    его нет. Meta description — уникальная по модели (не spec.description:
    это текст серии, общий на десятки моделей). */
-const pageTitle = productTitle(entry)
+/* Заголовок — из набора всех моделей: совпавшим добавляется отличие (productTitles) */
+const pageTitle = (await getModelTitles()).get(entry.slug) ?? productTitle(entry)
 const pageDesc  = productMetaDescription(entry)
 
 /* BreadcrumbList в JSON-LD отдаёт сам Breadcrumbs.astro — здесь не дублируем. */
@@ -164,7 +164,6 @@ const structuredData = [{
   canonical={canonicalUrl}
   ogImage={colors[0]?.photo || undefined}
   structuredData={structuredData}
-  noIndex={isUuidRoute}
 >
   <div class="breadcrumb-bar">
     <div class="container">

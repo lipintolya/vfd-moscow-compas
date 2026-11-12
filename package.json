@@ -43,6 +43,7 @@
     "gen:entrance-vfd": "node scripts/gen-entrance-vfd.mjs",
     "gen:renders": "node scripts/gen-render-gallery.mjs",
     "gen:responsive": "node scripts/gen-responsive.mjs",
+    "gen:catalog-thumbs": "node scripts/gen-catalog-thumbs.mjs",
     "gen:series-covers": "node scripts/gen-series-covers.mjs",
     "gen:video-covers": "node scripts/gen-video-covers.mjs",
     "gen:visit-map": "node scripts/gen-visit-map.mjs",
