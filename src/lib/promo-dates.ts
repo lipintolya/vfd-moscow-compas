@@ -57,3 +57,15 @@ const sortPromos = <T extends { validUntil: string; order: number; title: string
     и подвала — списки не расходятся. */
 export const activePromos = <T extends { validUntil: string; order: number; title: string }>(promos: readonly T[], now: Date = new Date()): T[] =>
   sortPromos(promos.filter((p) => isPromoActive(p.validUntil, now)))
+
+/** Сколько осталось до конца акции — до полуночи после её последнего дня по
+    Москве (UTC+3 круглый год): дни, часы, минуты, секунды. Истекла — null.
+    Таймер в шапке блока акций (Promo.astro) тикает этим кодом в браузере */
+export const timeLeft = (validUntil: string, now: Date = new Date()) => {
+  const [y, m, d] = validUntil.split('-').map(Number)
+  const end = Date.UTC(y!, (m || 1) - 1, (d || 1) + 1) - 3 * 3_600_000
+  const ms = end - now.getTime()
+  if (ms <= 0) return null
+  const s = Math.floor(ms / 1000)
+  return { days: Math.floor(s / 86_400), hours: Math.floor(s / 3600) % 24, minutes: Math.floor(s / 60) % 60, seconds: s % 60 }
+}

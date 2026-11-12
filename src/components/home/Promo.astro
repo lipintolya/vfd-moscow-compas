@@ -23,7 +23,7 @@
 import type { Promo } from '../../data/promos'
 import { PHONE, SITE } from '../../config/site'
 import { telegramWithText, maxWithText, maxChatUrl, TELEGRAM_CHAT, MAX_CHAT } from '../../lib/messengers'
-import { formatDate } from '../../lib/promo-dates'
+import { formatDate, timeLeft } from '../../lib/promo-dates'
 import { pluralRu } from '../../lib/plural'
 import MaxIcon from '../ui/MaxIcon.vue'
 import TelegramIcon from '../ui/TelegramIcon.vue'
@@ -49,6 +49,15 @@ const cols = Math.min(page ? 4 : ROW_MAX, Math.max(ROW_MIN, rest.length))
 /* Срок один на все акции — он в шапке блока; разные — у каждой свой */
 const lastDay = promos.map((p) => p.validUntil).sort().at(-1)
 const oneDeadline = promos.length > 0 && promos.every((p) => p.validUntil === lastDay)
+/* Отсчёт в шапке — на момент сборки; в браузере скрипт сразу ставит точное
+   время и тикает. Без JS видно только число дней */
+const left = oneDeadline ? timeLeft(lastDay!) : null
+const pad = (n: number) => String(n).padStart(2, '0')
+const TIMER_UNITS = [
+  { key: 'hours',   label: 'ч' },
+  { key: 'minutes', label: 'мин' },
+  { key: 'seconds', label: 'сек' },
+] as const
 
 /* Заголовки карточек ниже — явными тегами: у динамического тега Astro не
    ставит атрибут scoped-стилей, и оформление не применяется */
@@ -82,8 +91,24 @@ const CARD_SIZES = page
             {oneDeadline
               ? <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall} до&nbsp;{nowrap(formatDate(lastDay!))}.</>
               : <>Действуют в&nbsp;салоне в&nbsp;{SITE.address.mall}. Срок — у&nbsp;каждой акции.</>}
-            {oneDeadline && <span class="phead__left" data-left={lastDay} hidden></span>}
           </p>
+        )}
+        {left && (
+          <div class="ptimer" data-timer={lastDay} data-promo-live>
+            <p class="ptimer__label"><span class="ptimer__dot" aria-hidden="true"></span>До конца акций</p>
+            <p class="ptimer__cells" role="timer" aria-label={`До конца акций: ${left.days} ${pluralRu(left.days, ['день', 'дня', 'дней'])}`}>
+              <span class="ptimer__cell ptimer__cell--days">
+                <b class="ptimer__num" data-t="days" data-count={left.days}>{left.days}</b>
+                <span class="ptimer__unit" data-t-word>{pluralRu(left.days, ['день', 'дня', 'дней'])}</span>
+              </span>
+              {TIMER_UNITS.map((u) => (
+                <span class="ptimer__cell ptimer__cell--hms" aria-hidden="true">
+                  <b class="ptimer__num" data-t={u.key}>{pad(left[u.key])}</b>
+                  <span class="ptimer__unit">{u.label}</span>
+                </span>
+              ))}
+            </p>
+          </div>
         )}
         <p class="h-lead phead__lead" data-promo-empty hidden={promos.length > 0}>
           Сейчас действующих акций нет. Новые появятся здесь, завершённые — в&nbsp;<a href="/offers/archive/" class="h-link">архиве</a>.
@@ -133,6 +158,11 @@ const CARD_SIZES = page
         {rest.map((promo) => (
           <li id={promo.slug} class="pcard" data-until={promo.validUntil}>
             <a href={cardHref(promo)} class:list={['h-media', 'pban', 'pcard__media', { pposter: !promo.image }]} tabindex="-1" aria-hidden="true">
+              {/* Баннер не квадратный — целиком в квадрате, по бокам размытая
+                  подложка из того же кадра: низ карточек в ряду ровный */}
+              {promo.image && promo.imageWidth && promo.imageHeight && promo.imageWidth !== promo.imageHeight && (
+                <span class="pban__fill" style={`background-image: url('${promo.image}')`}></span>
+              )}
               {promo.image
                 ? <img src={promo.image} srcset={promo.imageSrcset} sizes={CARD_SIZES} alt={promo.imageAlt ?? promo.title}
                     width={promo.imageWidth} height={promo.imageHeight} loading="lazy" decoding="async" />
@@ -191,7 +221,9 @@ const CARD_SIZES = page
      в браузере (по московскому дню), истёкшую после сборки акцию прячем.
      Если истекли все — на главной блок исчезает, на /offers/ остаётся
      заголовок и «акций нет». */
-  import { moscowToday, daysLeft, daysLeftLabel } from '../../lib/promo-dates'
+  import { moscowToday, daysLeft, daysLeftLabel, timeLeft } from '../../lib/promo-dates'
+  import { countUp } from '../../lib/count-up'
+  import { pluralRu } from '../../lib/plural'
 
   const today = moscowToday()
   for (const block of document.querySelectorAll<HTMLElement>('[data-promo]')) {
@@ -205,10 +237,59 @@ const CARD_SIZES = page
       el.textContent = label ? ` ${label}.` : ''
       el.hidden = !label
     }
-    if (alive) continue
+    if (alive) { startTimer(block); continue }
     if (!('promoPage' in block.dataset)) { block.hidden = true; continue }
     for (const el of block.querySelectorAll<HTMLElement>('[data-promo-live]')) el.hidden = true
     block.querySelector<HTMLElement>('[data-promo-empty]')!.hidden = false
+  }
+
+  /* Живой отсчёт до конца акций: дни при появлении досчитывают от нуля
+     (countUp), часы-минуты-секунды тикают раз в секунду; сменившаяся цифра
+     коротко «выезжает» сверху. При reduced-motion — те же числа без движения */
+  function startTimer(block: HTMLElement) {
+    const timer = block.querySelector<HTMLElement>('[data-timer]')
+    if (!timer) return
+    const until = timer.dataset.timer!
+    const num = (k: string) => timer.querySelector<HTMLElement>(`[data-t="${k}"]`)!
+    const days = num('days')
+    const word = timer.querySelector<HTMLElement>('[data-t-word]')!
+    const cells = timer.querySelector<HTMLElement>('[role="timer"]')!
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const write = (el: HTMLElement, text: string) => {
+      if (el.textContent === text) return
+      el.textContent = text
+      if (!still) el.animate([{ transform: 'translateY(-40%)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2,.7,.2,1)' })
+    }
+    const sayDays = (n: number) => {
+      const w = pluralRu(n, ['день', 'дня', 'дней'])
+      word.textContent = w
+      cells.setAttribute('aria-label', `До конца акций: ${n} ${w}`)
+    }
+    /* Точное число дней — до счёта: в собранной странице оно на момент сборки */
+    const first = timeLeft(until)
+    if (!first) { timer.hidden = true; return }
+    days.textContent = String(first.days)
+    days.dataset.count = String(first.days)
+    sayDays(first.days)
+    timer.classList.add('is-live')
+    countUp([days], 1600)
+    let shownDays = first.days
+    const tick = () => {
+      const t = timeLeft(until)
+      if (!t) { timer.hidden = true; return }
+      /* Дни меняем только после досчёта, чтобы не сбить его */
+      if (t.days !== shownDays && (!days.dataset.final || 'counted' in days.dataset)) {
+        shownDays = t.days
+        write(days, String(t.days))
+        sayDays(t.days)
+      }
+      write(num('hours'), pad(t.hours))
+      write(num('minutes'), pad(t.minutes))
+      write(num('seconds'), pad(t.seconds))
+      setTimeout(tick, 1000 - (Date.now() % 1000))
+    }
+    tick()
   }
 </script>
 
@@ -252,8 +333,68 @@ const CARD_SIZES = page
 .pall:hover .pall__arrow { transform: rotate(45deg); background: var(--h-signal); color: var(--color-white); }
 @media (prefers-reduced-motion: reduce) { .pall__arrow { transition: none; } }
 @media (max-width: 43.6875rem) { .pall { width: 100%; justify-content: space-between; padding-left: 1.5rem; } }
-/* Сколько осталось — тоном заголовка: срок здесь главный довод */
-.phead__left { color: var(--h-ink); font-weight: 600; white-space: nowrap; }
+/* ── Отсчёт до конца акций — срок здесь главный довод ── */
+.ptimer {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.25rem;
+  padding: 0.875rem 1.25rem 0.875rem 1.125rem;
+  border-radius: var(--h-tile-radius);
+  background: var(--h-ink);
+  color: var(--color-white);
+}
+.ptimer__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+/* Красная точка «идёт» — мягкая пульсация */
+.ptimer__dot { position: relative; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--h-signal); }
+.ptimer__dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--h-signal);
+  animation: ptimer-pulse 2s var(--ease-out) infinite;
+}
+@keyframes ptimer-pulse {
+  0%   { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(3); opacity: 0; }
+}
+.ptimer__cells { display: flex; align-items: baseline; gap: 0.25rem 1rem; margin: 0; }
+.ptimer__cell { display: inline-flex; align-items: baseline; gap: 0.3125rem; }
+.ptimer__num {
+  display: inline-block;
+  font-family: var(--h-font);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: var(--h-weight-display);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.ptimer__cell--days .ptimer__num { color: var(--color-white); }
+.ptimer__unit { font-size: 0.875rem; color: color-mix(in srgb, var(--color-white) 62%, transparent); }
+/* Без JS — только дни: часы и секунды на момент сборки были бы неправдой */
+.ptimer:not(.is-live) .ptimer__cell--hms { display: none; }
+@media (max-width: 43.6875rem) {
+  .ptimer { display: flex; }
+  .ptimer__cells { gap: 0.25rem 0.75rem; }
+}
+/* Узкий телефон (320–359 px): четыре числа в строку, не шире колонки */
+@media (max-width: 22.4375rem) {
+  .ptimer { padding-inline: 0.875rem; }
+  .ptimer__cells { gap: 0.25rem 0.5rem; }
+  .ptimer__num { font-size: 1.375rem; }
+  .ptimer__unit { font-size: 0.8125rem; }
+}
+@media (prefers-reduced-motion: reduce) { .ptimer__dot::after { animation: none; opacity: 0; } }
 
 /* ── Баннер-ссылка ─────────────────────────────────────── */
 /* Баннер — целиком: высота по картинке, а не по рамке */
@@ -356,6 +497,19 @@ const CARD_SIZES = page
 }
 @media (min-width: 68.75rem) { .pcards { grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); } }
 .pcard { position: relative; min-width: 0; }
+/* Баннеры карточек — одним квадратом: низ ряда ровный; баннер другой
+   пропорции — целиком (не обрезан), по бокам подложка .pban__fill */
+.pcard__media { aspect-ratio: 1 / 1; }
+.pcard__media > img { height: 100%; object-fit: contain; }
+.pban__fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-position: center;
+  background-size: cover;
+  filter: blur(1.5rem) brightness(0.85);
+  transform: scale(1.25);
+}
 .pcard__title {
   margin: 0.875rem 0 0;
   font-family: var(--h-font);
