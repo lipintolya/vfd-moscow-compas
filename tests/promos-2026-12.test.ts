@@ -14,10 +14,10 @@ const FILE = JSON.parse(readFileSync('cms/scripts/promos-2026-12.json', 'utf8'))
 const PROMOS = FILE.promos
 const SCHEMA = JSON.parse(readFileSync('cms/src/api/promo/content-types/promo/schema.json', 'utf8')).attributes
 
-test('акции конца года: пять штук, порядок и названия не повторяются', () => {
-  assert.equal(PROMOS.length, 5)
+test('акции конца года: шесть штук, порядок и названия не повторяются', () => {
+  assert.equal(PROMOS.length, 6)
   assert.equal(new Set(PROMOS.map((p) => p.title)).size, PROMOS.length)
-  assert.deepEqual(PROMOS.map((p) => p.order), [1, 2, 3, 4, 5])
+  assert.deepEqual(PROMOS.map((p) => p.order), [1, 2, 3, 4, 5, 6])
   assert.match(PROMOS[0]!.title, /терморазрыв/i, 'первой — сезонная акция на тёплые двери (просьба заказчика)')
 })
 
@@ -50,7 +50,7 @@ test('акции конца года: условия, которых заказ�
 })
 
 test('акции конца года: ссылки — на существующие разделы сайта', () => {
-  for (const p of PROMOS) assert.match(p.ctaLink, /^\/(catalog\/|contacts\/)/)
+  for (const p of PROMOS) assert.match(p.ctaLink, /^\/(catalog\/|contacts\/|partitions\/)/)
   assert.equal(PROMOS[0]!.ctaLink, '/catalog/vhodnye-dveri/#doors-thermo')
 })
 
