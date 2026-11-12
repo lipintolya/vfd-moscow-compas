@@ -1,7 +1,7 @@
 /**
  * Уменьшенные копии фото, которые на телефоне показаны мельче оригинала:
- * фасад ТЦ на главной (блок «Где нас найти»), 640 и 960 px, но не шире
- * исходника. Ширина картинки здесь совпадает с плиткой (object-fit: cover
+ * фасад ТЦ на главной (блок «Где нас найти»), плитки направлений, фото
+ * основателя — 320…1280 px, но не шире исходника. Ширина картинки здесь совпадает с плиткой (object-fit: cover
  * на широкой плитке), поэтому sizes по ширине точен.
 
  * Плитки направлений и кадры первого экрана сюда не входят: у них высокая
@@ -24,8 +24,17 @@ import { readFile, writeFile, mkdir, readdir, unlink } from 'node:fs/promises'
 /** Исходники — пути как в коде (/media/…), файлы — в public/ */
 const SOURCES = [
   '/media/vfd.moscow.compass/hero.block/about.compas.hall/1138447691-6.webp', // фасад ТЦ (ShowroomHero, «Где нас найти»)
+  /* Плитки направлений (Directions, /designers/, CatalogSections) и фото
+     основателя (ShowroomHero) — PageSpeed 12 Nov 2026: файлы 1254–1672 px при
+     плитке 250–850 px. Плитка — object-fit: cover, поэтому sizes в компонентах
+     считаются по нарисованной ширине кадра, а не по ширине плитки */
+  '/media/vfd.moscow.compass/hero.block/catalog.preview.main/catalog_preview_left.webp',
+  '/media/vfd.moscow.compass/hero.block/catalog.preview.main/catalog_preview_top_right.webp',
+  '/media/vfd.moscow.compass/hero.block/catalog.preview.main/catalog_preview_down_right.webp',
+  '/media/vfd.moscow.compass/hero.block/hero.block.main/director_main.webp',
 ]
-const WIDTHS = [640, 960]
+/* Копии уже исходника; у каждого фото — те, что меньше его ширины */
+const WIDTHS = [320, 480, 640, 960, 1280]
 const QUALITY = 78
 
 const root = new URL('../', import.meta.url)

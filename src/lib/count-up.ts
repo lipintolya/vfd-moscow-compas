@@ -33,12 +33,20 @@ export function countUp(elements: Iterable<HTMLElement>, ms = 1400) {
   const run = (el: HTMLElement, to: number, final: string) => {
     const fmt = countFormatter(final)
     let t0 = 0
+    let last = 0
     const tick = (now: number) => {
       if (!t0) t0 = now
       const p = Math.min(1, (now - t0) / ms)
+      /* Текст пишется не чаще ~30 раз в секунду и только если число сменилось:
+         каждая запись — пересчёт стилей и раскладки, а при записи в каждом
+         кадре счёт на главной давал ~200 перерасчётов за загрузку
+         (PageSpeed «основной поток», 12 Nov 2026). Глазом разницы нет */
+      if (p < 1 && now - last < 33) { requestAnimationFrame(tick); return }
+      last = now
       /* Округление вниз: итоговое число появляется ровно в конце, а не
          раньше времени на последних долях процента */
-      el.textContent = p < 1 ? fmt(Math.floor(to * countEase(p))) : final
+      const text = p < 1 ? fmt(Math.floor(to * countEase(p))) : final
+      if (el.textContent !== text) el.textContent = text
       if (p < 1) requestAnimationFrame(tick)
       else {
         el.style.minWidth = ''

@@ -27,6 +27,8 @@ import MaxIcon from '../ui/MaxIcon.vue'
 interface Props { modelsCount: string; fromPrice: string }
 const { modelsCount, fromPrice } = Astro.props
 const facade = responsivePhoto(SITE.address.photo)
+/* Фото основателя в плитке 182–300 px — копии 320/480 (gen:responsive) */
+const founder = responsivePhoto(SITE.contactPhoto)
 
 /* Время показа одного кадра — и для таймера, и для полоски прогресса */
 const SLIDE_MS = 6000
@@ -160,7 +162,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </li>
       <li>
         <a href="#video" class="h-tile h-tile--dark tile tile--video">
-          <img class="tile__person" src={SITE.contactPhoto} alt={`${SITE.contactPerson}, основатель ${SITE.studioNameOf}`} width="640" height="640" loading="lazy" decoding="async" />
+          <img class="tile__person" src={founder.src} srcset={founder.srcset} sizes="(max-width: 43.6875rem) 47vw, (max-width: 62.4375rem) 43vw, 16rem" alt={`${SITE.contactPerson}, основатель ${SITE.studioNameOf}`} width="640" height="640" loading="lazy" decoding="async" />
           <span class="h-tile__corner h-tile__corner--left tile__play" aria-hidden="true">
             <svg viewBox="0 0 16 16" width="14" height="14"><path d="M5 3.5v9l7.5-4.5z" fill="currentColor"/></svg>
           </span>
@@ -170,7 +172,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-
       </li>
       <li>
         <a href={MAP_URL} target="_blank" rel="noopener" class="h-tile h-tile--photo tile tile--place" aria-label={`${SITE.address.full} — открыть на Яндекс Картах`}>
-          <img src={facade.src} srcset={facade.srcset} sizes="(max-width: 639px) 90vw, 33vw" alt={`${SITE.address.mallFull}, ${SITE.address.street} — ${SITE.studioName} ${SITE.address.floorIn}`} loading="lazy" decoding="async" />
+          <img src={facade.src} srcset={facade.srcset} sizes="(max-width: 639px) 86vw, 33vw" alt={`${SITE.address.mallFull}, ${SITE.address.street} — ${SITE.studioName} ${SITE.address.floorIn}`} loading="lazy" decoding="async" />
           <span class="h-tile__corner h-arrow h-arrow--white" aria-hidden="true"><Fragment set:html={arrow} /></span>
           <span class="h-tile__title">{SITE.address.mall}, {SITE.address.floor}</span>
           <span class="h-cap place__street">{SITE.address.street}</span>

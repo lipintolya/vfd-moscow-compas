@@ -8,6 +8,7 @@
  */
 import { SITE } from '../config/site'
 import { WARRANTY_TERMS } from '../data/services'
+import { YOUTUBE_ICON, VK_ICON } from './messenger-icons'
 
 /** Почта задана? Пока в конфиге заглушка — адрес на сайте не выводим */
 export const HAS_EMAIL = !/placeholder/i.test(SITE.email)
@@ -65,8 +66,8 @@ export const companyLegalInfo = {
   // Telegram-канал салона (читать); написать — WhatsApp и личный Telegram, src/lib/messengers.ts
   socialMedia: [
     { name: 'Telegram', label: 'Telegram-канал', url: SITE.social.telegram, icon: '/media/catalog-vfd/icons/tg_logo.svg' },
-    { name: 'YouTube', label: 'YouTube-канал', url: SITE.social.youtube, icon: '/icons/youtube.svg' },
-    ...(SITE.social.vk ? [{ name: 'ВКонтакте', label: 'Сообщество ВКонтакте', url: SITE.social.vk, icon: '/icons/vk.svg' }] : []),
+    { name: 'YouTube', label: 'YouTube-канал', url: SITE.social.youtube, icon: YOUTUBE_ICON },
+    ...(SITE.social.vk ? [{ name: 'ВКонтакте', label: 'Сообщество ВКонтакте', url: SITE.social.vk, icon: VK_ICON }] : []),
   ],
 
   // Дополнительная информация

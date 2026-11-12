@@ -4,12 +4,108 @@
     "height": 958,
     "copies": [
       {
+        "width": 320,
+        "src": "/renders/responsive/1138447691-6-320-25503b49.webp"
+      },
+      {
+        "width": 480,
+        "src": "/renders/responsive/1138447691-6-480-25503b49.webp"
+      },
+      {
         "width": 640,
-        "src": "/renders/responsive/1138447691-6-640-acf4a932.webp"
+        "src": "/renders/responsive/1138447691-6-640-25503b49.webp"
       },
       {
         "width": 960,
-        "src": "/renders/responsive/1138447691-6-960-acf4a932.webp"
+        "src": "/renders/responsive/1138447691-6-960-25503b49.webp"
+      }
+    ]
+  },
+  "/media/vfd.moscow.compass/hero.block/catalog.preview.main/catalog_preview_left.webp": {
+    "width": 1254,
+    "height": 1254,
+    "copies": [
+      {
+        "width": 320,
+        "src": "/renders/responsive/catalog_preview_left-320-666b79f8.webp"
+      },
+      {
+        "width": 480,
+        "src": "/renders/responsive/catalog_preview_left-480-666b79f8.webp"
+      },
+      {
+        "width": 640,
+        "src": "/renders/responsive/catalog_preview_left-640-666b79f8.webp"
+      },
+      {
+        "width": 960,
+        "src": "/renders/responsive/catalog_preview_left-960-666b79f8.webp"
+      }
+    ]
+  },
+  "/media/vfd.moscow.compass/hero.block/catalog.preview.main/catalog_preview_top_right.webp": {
+    "width": 1672,
+    "height": 941,
+    "copies": [
+      {
+        "width": 320,
+        "src": "/renders/responsive/catalog_preview_top_right-320-37097dfb.webp"
+      },
+      {
+        "width": 480,
+        "src": "/renders/responsive/catalog_preview_top_right-480-37097dfb.webp"
+      },
+      {
+        "width": 640,
+        "src": "/renders/responsive/catalog_preview_top_right-640-37097dfb.webp"
+      },
+      {
+        "width": 960,
+        "src": "/renders/responsive/catalog_preview_top_right-960-37097dfb.webp"
+      },
+      {
+        "width": 1280,
+        "src": "/renders/responsive/catalog_preview_top_right-1280-37097dfb.webp"
+      }
+    ]
+  },
+  "/media/vfd.moscow.compass/hero.block/catalog.preview.main/catalog_preview_down_right.webp": {
+    "width": 1672,
+    "height": 941,
+    "copies": [
+      {
+        "width": 320,
+        "src": "/renders/responsive/catalog_preview_down_right-320-fa360ecf.webp"
+      },
+      {
+        "width": 480,
+        "src": "/renders/responsive/catalog_preview_down_right-480-fa360ecf.webp"
+      },
+      {
+        "width": 640,
+        "src": "/renders/responsive/catalog_preview_down_right-640-fa360ecf.webp"
+      },
+      {
+        "width": 960,
+        "src": "/renders/responsive/catalog_preview_down_right-960-fa360ecf.webp"
+      },
+      {
+        "width": 1280,
+        "src": "/renders/responsive/catalog_preview_down_right-1280-fa360ecf.webp"
+      }
+    ]
+  },
+  "/media/vfd.moscow.compass/hero.block/hero.block.main/director_main.webp": {
+    "width": 640,
+    "height": 640,
+    "copies": [
+      {
+        "width": 320,
+        "src": "/renders/responsive/director_main-320-36407741.webp"
+      },
+      {
+        "width": 480,
+        "src": "/renders/responsive/director_main-480-36407741.webp"
       }
     ]
   }
