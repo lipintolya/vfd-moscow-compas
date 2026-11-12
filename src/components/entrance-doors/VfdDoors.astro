@@ -38,15 +38,16 @@ import { typograph } from '../../lib/typograph'
 <style>
   .vfd-sec { scroll-margin-top: 1rem; }
   .vfd-sec__layout { display: grid; gap: 1.75rem var(--h-gutter); }
-  .vfd-sec__head { display: grid; gap: 0.75rem; align-content: start; }
+  .vfd-sec__head { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; align-content: start; }
   .vfd-sec__title, .vfd-sec__lead, .vfd-sec__meta { margin: 0; }
-  .vfd-sec__title { font-size: clamp(1.625rem, 2vw + 1rem, 2.25rem); }
+  .vfd-sec__title { font-size: clamp(1.625rem, 2vw + 1rem, 2.25rem); overflow-wrap: break-word; hyphens: auto; }
   .vfd-sec__lead { color: var(--h-soft); }
   .vfd-sec__meta { margin-top: 0.25rem; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
   .vfd-sec__rail { min-width: 0; }
   .vfd-sec__track { --rail-col: 9rem; --rail-gap: 0.875rem; }
   @media (min-width: 43.75rem) { .vfd-sec__track { --rail-col: 14.5rem; --rail-gap: 1.5rem; } }
-  @media (min-width: 62.5rem) {
+  /* Как у групп каталога: колонки — только с 1280 px */
+  @media (min-width: 80rem) {
     .vfd-sec__layout { grid-template-columns: repeat(12, minmax(0, 1fr)); }
     .vfd-sec__head { grid-column: 1 / span 3; }
     .vfd-sec__rail { grid-column: 4 / span 9; }

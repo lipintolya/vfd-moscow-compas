@@ -1,7 +1,8 @@
 ---
 /**
- * Кадр «дверь на доме» в ленте на /catalog/vhodnye-dveri/: рендер целиком (без
- * обрезки — ширину задаёт лента по пропорции кадра); нажатие на кадр открывает
+ * Кадр «дверь на доме» в ленте на /catalog/vhodnye-dveri/: плитка 4:3, у всех
+ * одна (лента ровная, крайняя плитка не режется); рендер в ней целиком, без
+ * обрезки — поля другой пропорции заполняет размытая копия кадра (.h-fit); нажатие на кадр открывает
  * его крупно (группа [data-lightbox] — лента на странице), под кадром название
  * модели — ссылка на её страницу — и цена «от». Кадры — src/data/entrance-scenes.ts.
  */
@@ -12,10 +13,14 @@ import { typograph } from '../../lib/typograph'
 interface Props { scene: SceneImage; /** Номер кадра в группе для lightbox */ index: number }
 const { scene, index } = Astro.props
 const { door } = scene
+/** Плитка ленты — одна на все кадры */
+const TILE = 4 / 3
+const odd = Math.abs(scene.width / scene.height - TILE) > 0.02
 ---
 
 <article class="scard">
-  <button type="button" class="h-media scard__photo" style={`aspect-ratio: ${scene.width} / ${scene.height}`} data-lightbox-index={index} aria-label={`Увеличить: ${scene.alt}`}>
+  <button type="button" class="h-media h-fit scard__photo" data-lightbox-index={index} aria-label={`Увеличить: ${scene.alt}`}>
+    {odd && <span class="h-fit__bg" aria-hidden="true" style={`background-image: url('${scene.src}')`}></span>}
     <img src={scene.src} srcset={scene.srcset} sizes="(min-width: 43.75rem) 30rem, 85vw" alt={scene.alt} width={scene.width} height={scene.height} loading="lazy" decoding="async" />
     <span class="scard__zoom" aria-hidden="true">Увеличить</span>
   </button>
@@ -25,7 +30,7 @@ const { door } = scene
 
 <style>
   .scard { display: grid; gap: 0.25rem; align-content: start; }
-  .scard__photo { position: relative; display: block; width: 100%; padding: 0; border: 0; cursor: zoom-in; }
+  .scard__photo { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; cursor: zoom-in; }
   /* Наведение — кадр чуть приближается, как фото-плитки на главной */
   .scard__photo img { transition: transform 700ms var(--ease-out); }
   @media (hover: hover) { .scard__photo:hover img { transform: scale(1.04); } }

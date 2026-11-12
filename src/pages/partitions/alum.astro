@@ -287,13 +287,14 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
         </header>
         <div class="rail" data-rail>
           <ul class="rail__track oa-obj" data-track role="list">
-            <li style="--ar: 0.5625">
-              <InlineVideo src={objVideo.src} poster={objVideo.cover} title={objVideoTitle} ratio="9 / 16" />
+            <li>
+              <InlineVideo src={objVideo.src} poster={objVideo.cover} title={objVideoTitle} ratio="3 / 4" fit="contain" />
             </li>
             {objPhotos.map((p) => (
-              <li style={`--ar: ${p.ratio.toFixed(4)}`}>
-                <button type="button" class="h-media oa-obj__photo" data-zoom={p.full} data-zoom-caption={p.alt} aria-label={zoom(p.alt)}>
-                  <img src={p.src} srcset={p.srcset} sizes="(min-width: 43.75rem) 28rem, 75vw" alt={p.alt} width={p.width} height={p.height} loading="lazy" decoding="async" />
+              <li>
+                <button type="button" class="h-media h-fit oa-obj__photo" data-zoom={p.full} data-zoom-caption={p.alt} aria-label={zoom(p.alt)}>
+                  {Math.abs(p.ratio - 3 / 4) > 0.02 && <span class="h-fit__bg" aria-hidden="true" style={`background-image: url('${p.src}')`}></span>}
+                  <img src={p.src} srcset={p.srcset} sizes="(min-width: 43.75rem) 16rem, 62vw" alt={p.alt} width={p.width} height={p.height} loading="lazy" decoding="async" />
                 </button>
               </li>
             ))}
@@ -534,13 +535,14 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
   .oa-card__shown { margin: 0.25rem 0 0.875rem; color: var(--h-muted); }
   .oa-card__apply { align-self: flex-start; margin-top: auto; cursor: pointer; font: inherit; font-size: 0.875rem; }
 
-  /* ── На объекте: лента одной высоты, ширина — по пропорции кадра ── */
-  .oa-obj { --obj-h: min(21rem, 70vw); display: flex; --rail-gap: 1rem; }
-  .oa-obj > li { flex: none; width: calc(var(--obj-h) * var(--ar)); }
-  @media (min-width: 43.75rem) { .oa-obj { --obj-h: clamp(22rem, 32vw, 28rem); --rail-gap: 1.5rem; } }
+  /* ── На объекте: одинаковые плитки 3:4 (как монтаж на странице входных
+     дверей): кадр и ролик в плитке целиком, поля — размытая копия (.h-fit);
+     на компьютере в ширину только целые плитки (rail.ts) ── */
+  .oa-obj { --rail-col: min(62vw, 15rem); --rail-gap: 1rem; }
+  @media (min-width: 43.75rem) { .oa-obj { --rail-col: 15rem; --rail-gap: 1.5rem; } }
   .oa-obj :global(.ivideo) { margin: 0; }
-  .oa-obj__photo { display: block; width: 100%; aspect-ratio: var(--ar); padding: 0; border: 0; cursor: zoom-in; }
-  .oa-obj__photo img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease-out); }
+  .oa-obj__photo { display: block; width: 100%; aspect-ratio: 3 / 4; padding: 0; border: 0; cursor: zoom-in; }
+  .oa-obj__photo img { display: block; width: 100%; height: 100%; object-fit: contain; transition: transform 700ms var(--ease-out); }
   @media (hover: hover) { .oa-obj__photo:hover img { transform: scale(1.03); } }
   .oa-obj__photo:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
   .oa-obj__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 1.5rem 0 0; }

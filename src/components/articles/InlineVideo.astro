@@ -16,12 +16,16 @@ interface Props {
   ratio?:   string
   /** Узкий по центру колонки — для вертикального ролика в тексте */
   narrow?:  boolean
+  /** contain — ролик целиком в рамке другой пропорции (плитка ленты), поля —
+   *  размытая обложка; по умолчанию cover — ролик заполняет рамку */
+  fit?:     'cover' | 'contain'
 }
-const { src, poster, title, caption, ratio = '9 / 16', narrow = false } = Astro.props
+const { src, poster, title, caption, ratio = '9 / 16', narrow = false, fit = 'cover' } = Astro.props
 ---
 
-<figure class:list={['ivideo', { 'ivideo--narrow': narrow }]}>
+<figure class:list={['ivideo', { 'ivideo--narrow': narrow, 'ivideo--contain': fit === 'contain' }]}>
   <div class="ivideo__frame" style={`--ivideo-ratio: ${ratio}`}>
+    {fit === 'contain' && <span class="ivideo__bg" aria-hidden="true" style={`background-image: url('${poster}')`}></span>}
     <video data-ivideo src={src} poster={poster} preload="none" playsinline aria-label={title}></video>
     <button type="button" class="ivideo__play" data-ivideo-play aria-label={`Смотреть видео: ${title}`}>
       <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M8 5.5v13a.8.8 0 0 0 1.2.7l10.4-6.5a.8.8 0 0 0 0-1.4L9.2 4.8A.8.8 0 0 0 8 5.5Z" fill="currentColor"/></svg>
@@ -67,6 +71,17 @@ const { src, poster, title, caption, ratio = '9 / 16', narrow = false } = Astro.
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  .ivideo--contain .ivideo__frame { isolation: isolate; }
+  .ivideo--contain .ivideo__frame video { position: relative; object-fit: contain; }
+  .ivideo__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-position: center;
+    background-size: cover;
+    filter: blur(1.5rem) brightness(0.7);
+    transform: scale(1.25);
   }
   .ivideo__play {
     position: absolute;

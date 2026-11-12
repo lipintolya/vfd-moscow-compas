@@ -301,6 +301,20 @@
   height: 100%;
   object-fit: cover;
 }
+/* Кадр целиком в плитке другой пропорции (ленты одинаковых плиток): картинка
+   не обрезается (contain), поля за ней — размытая копия того же кадра
+   (.h-fit__bg с background-image), как у баннеров акций */
+.h-fit { position: relative; isolation: isolate; }
+.h-media.h-fit > img { object-fit: contain; }
+.h-fit__bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-position: center;
+  background-size: cover;
+  filter: blur(1.5rem) brightness(0.85);
+  transform: scale(1.25);
+}
 
 /* ── Пилюля и круглая кнопка-стрелка ───────────────────── */
 .h-pill {

@@ -168,7 +168,7 @@ const listSchema = {
           </header>
           <div class="rail" data-rail>
             <ul class="rail__track ehs" data-track role="list" data-lightbox data-lightbox-images={JSON.stringify(HOUSE_SCENES.map((x) => ({ src: x.src, alt: x.alt })))}>
-              {HOUSE_SCENES.map((scene, i) => <li style={`--ar: ${scene.ratio.toFixed(4)}`}><SceneCard scene={scene} index={i} /></li>)}
+              {HOUSE_SCENES.map((scene, i) => <li><SceneCard scene={scene} index={i} /></li>)}
             </ul>
             <RailBar />
           </div>
@@ -185,13 +185,14 @@ const listSchema = {
           <p class="h-lead">{typograph(entranceObjectLead(objDoor))}</p>
         </header>
         <div class="rail" data-rail>
-          <ul class="rail__track ehs eobj" data-track role="list" data-lightbox data-lightbox-images={JSON.stringify(objPhotos.map((p) => ({ src: p.full, alt: p.alt })))}>
-            <li style="--ar: 0.5625">
-              <InlineVideo src={objVideo.src} poster={objVideo.cover} title={objVideoTitle} ratio="9 / 16" />
+          <ul class="rail__track eobj" data-track role="list" data-lightbox data-lightbox-images={JSON.stringify(objPhotos.map((p) => ({ src: p.full, alt: p.alt })))}>
+            <li>
+              <InlineVideo src={objVideo.src} poster={objVideo.cover} title={objVideoTitle} ratio="3 / 4" fit="contain" />
             </li>
             {objPhotos.map((p, i) => (
-              <li style={`--ar: ${p.ratio.toFixed(4)}`}>
-                <button type="button" class="h-media eobj__photo" data-lightbox-index={i} aria-label={`Увеличить: ${p.alt}`}>
+              <li>
+                <button type="button" class="h-media h-fit eobj__photo" data-lightbox-index={i} aria-label={`Увеличить: ${p.alt}`}>
+                  {Math.abs(p.ratio - 3 / 4) > 0.02 && <span class="h-fit__bg" aria-hidden="true" style={`background-image: url('${p.src}')`}></span>}
                   <img src={p.src} srcset={p.srcset} sizes="(min-width: 43.75rem) 16rem, 42vw" alt={p.alt} width={p.width} height={p.height} loading="lazy" decoding="async" />
                   <span class="eobj__zoom" aria-hidden="true">Увеличить</span>
                 </button>
@@ -370,14 +371,17 @@ const listSchema = {
     .edh__copy { max-width: min(36rem, 58%); padding: clamp(2rem, 4vw, 3.5rem); }
   }
 
-  /* Лента «на фасаде дома»: кадры целиком, без обрезки — у всех одна высота, ширина по пропорции кадра */
-  .ehs { --scene-h: min(15rem, 56vw); display: flex; --rail-gap: 1rem; }
-  .ehs > li { flex: none; width: calc(var(--scene-h) * var(--ar)); }
-  @media (min-width: 43.75rem) { .ehs { --scene-h: clamp(15rem, 24vw, 21rem); --rail-gap: 1.5rem; } }
+  /* Лента «на фасаде дома»: одинаковые плитки 4:3 (кадр в плитке целиком —
+     SceneCard), на компьютере в ширину только целые плитки (rail.ts) */
+  .ehs { --rail-col: min(80vw, 20rem); --rail-gap: 1rem; }
+  @media (min-width: 43.75rem) { .ehs { --rail-col: 22rem; --rail-gap: 1.5rem; } }
 
-  /* Монтаж с объекта: ролик 9:16 и фото — одной высоты в той же ленте, что визуализации */
+  /* Монтаж с объекта: ролик и фото — одинаковые плитки 3:4 (фото с объекта
+     вертикальные 3:4, ролик 9:16 — в плитке целиком на размытой обложке) */
+  .eobj { --rail-col: min(62vw, 15rem); --rail-gap: 1rem; }
+  @media (min-width: 43.75rem) { .eobj { --rail-col: 14.5rem; --rail-gap: 1.5rem; } }
   .eobj :global(.ivideo) { margin: 0; }
-  .eobj__photo { position: relative; display: block; width: 100%; aspect-ratio: var(--ar); padding: 0; border: 0; cursor: zoom-in; }
+  .eobj__photo { position: relative; display: block; width: 100%; aspect-ratio: 3 / 4; padding: 0; border: 0; cursor: zoom-in; }
   .eobj__photo img { transition: transform 700ms var(--ease-out); }
   @media (hover: hover) { .eobj__photo:hover img { transform: scale(1.04); } }
   .eobj__photo:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
@@ -396,16 +400,20 @@ const listSchema = {
   .edg-sec[hidden], .edg-sec li[hidden] { display: none !important; }
   .edg-sec { scroll-margin-top: 1rem; }
   .edg { display: grid; gap: 1.75rem 0; grid-template-areas: 'head' 'rail' 'more'; }
-  .edg__head { grid-area: head; display: grid; gap: 0.75rem; align-content: start; }
+  /* minmax(0, 1fr): длинное слово заголовка не распирает колонку — иначе текст
+     уходил под ленту (планшет 1024–1180 px, замечание 12 Nov 2026) */
+  .edg__head { grid-area: head; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; align-content: start; }
   .edg__title, .edg__note { margin: 0; }
-  .edg__title { font-size: clamp(1.625rem, 2vw + 1rem, 2.25rem); }
+  .edg__title { font-size: clamp(1.625rem, 2vw + 1rem, 2.25rem); overflow-wrap: break-word; hyphens: auto; }
   .edg__note { color: var(--h-soft); }
   .edg__meta { margin: 0.25rem 0 0; font-size: 0.9375rem; font-weight: 600; color: var(--h-ink); }
   .edg__rail { grid-area: rail; min-width: 0; }
   .edg__more { grid-area: more; margin: 0; }
   .edg__track { --rail-col: 9rem; --rail-gap: 0.875rem; }
   @media (min-width: 43.75rem) { .edg__track { --rail-col: 14.5rem; --rail-gap: 1.5rem; } .edg__more { justify-self: start; } }
-  @media (min-width: 62.5rem) {
+  /* Текст слева, лента справа — только с 1280 px: уже колонка текста (3/12)
+     не вмещает «терморазрывом»; на планшете текст над лентой во всю ширину */
+  @media (min-width: 80rem) {
     .edg { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-areas: 'head head head rail rail rail rail rail rail rail rail rail' 'more more more rail rail rail rail rail rail rail rail rail'; gap: 0 var(--h-gutter); grid-template-rows: auto 1fr; }
     .edg__more { align-self: start; margin-top: 1.5rem; }
     .edg__rail { padding-left: 0; }
