@@ -508,7 +508,9 @@
 .rail__track {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: var(--rail-col, 14.5rem);
+  /* --rail-fit ставит src/lib/rail.ts на компьютере: в ширину ленты — только
+     целые карточки, крайняя не обрезана (замечание заказчика, 12 Nov 2026) */
+  grid-auto-columns: var(--rail-fit, var(--rail-col, 14.5rem));
   gap: var(--rail-gap, 1.5rem);
   margin: 0 calc(-1 * var(--h-pad));
   padding: 0 var(--h-pad);
@@ -528,12 +530,37 @@
 .rail[data-static] .rail__bar { display: none; }
 .rail__line { position: relative; flex: 1; height: 0.125rem; background: var(--color-slate-300); }
 .rail__line i { position: absolute; top: 0; bottom: 0; background: var(--h-ink); }
-.rail__btns { display: none; gap: 0.25rem; }
-.rail__btn { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: 999rem; background: none; color: var(--h-ink); cursor: pointer; transition: color 150ms var(--ease-out); }
-.rail__btn:hover:not(:disabled) { color: var(--h-signal); }
-.rail__btn:disabled { color: var(--color-slate-300); cursor: default; }
+/* Стрелки — крупные белые круги по краям ленты, на середине фото карточек
+   (--rail-mid считает rail.ts): видно, куда листать. Мелкие стрелки под лентой
+   заказчик не замечал (12 Nov 2026). В начале ленты «назад» нет, в конце —
+   «вперёд» нет. Только на компьютере с мышью; на телефоне лента — пальцем */
+.rail__btns { display: none; }
+.rail__btn {
+  position: absolute;
+  top: var(--rail-mid, 40%);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  padding: 0;
+  border: 0.0625rem solid var(--h-rule);
+  border-radius: 999rem;
+  background: var(--color-white);
+  color: var(--h-ink);
+  box-shadow: 0 0.375rem 1.25rem color-mix(in srgb, var(--h-ink) 18%, transparent);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out), opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+.rail__btn[data-prev] { left: -1.25rem; }
+.rail__btn[data-next] { right: -1.25rem; }
+.rail__btn svg { width: 1.25rem; height: 1.25rem; }
+.rail__btn:hover:not(:disabled) { background: var(--h-ink); color: var(--color-white); transform: translateY(-50%) scale(1.06); }
+.rail__btn:disabled { opacity: 0; pointer-events: none; }
 .rail__btn:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
-@media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: flex; } }
+@media (hover: hover) and (min-width: 43.75rem) { .rail__btns { display: contents; } }
+@media (prefers-reduced-motion: reduce) { .rail__btn { transition: none; } .rail__btn:hover:not(:disabled) { transform: translateY(-50%); } }
 
 /* Карточки появляются при прокрутке: снизу и из прозрачности, внутри ленты — друг за другом.
    Класс ставит скрипт и только тем, кого ещё нет на экране: без скрипта и при reduced-motion всё видно сразу */

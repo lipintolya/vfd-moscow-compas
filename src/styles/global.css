@@ -149,6 +149,19 @@
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
 }
 
+/* Знак рубля ₽ (U+20BD) — отдельным крошечным файлом (~1 КБ, только этот
+   знак, вырезан из набора latin-ext шрифта): в подключённых наборах его нет,
+   и браузер брал ₽ из системного шрифта — на старой Windows 7 (Arial и Segoe UI
+   без ₽) вместо рубля был квадрат. Файл грузится, только если на странице есть ₽ */
+@font-face {
+  font-family: 'Manrope Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/manrope-ruble-wght-normal.woff2') format('woff2-variations'), url('/fonts/manrope-ruble-wght-normal.woff2') format('woff2');
+  unicode-range: U+20BD;
+}
+
 /* Запасной шрифт на время загрузки Manrope (font-display: swap) — Arial,
    подогнанный под метрики Manrope: строки не меняют ширину и высоту при
    подмене, страница не прыгает (CLS). Без него браузер брал system-ui —
@@ -196,6 +209,15 @@
   font-weight: 400 900;
   src: url('/fonts/rubik-latin-wght-normal.woff2') format('woff2-variations');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: 'Rubik Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 900;
+  src: url('/fonts/rubik-ruble-wght-normal.woff2') format('woff2-variations'), url('/fonts/rubik-ruble-wght-normal.woff2') format('woff2');
+  unicode-range: U+20BD;
 }
 
 /* ============================================================
