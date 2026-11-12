@@ -209,6 +209,28 @@ export const VIDEOS: Video[] = [
 const WORK = 'https://storage.yandexcloud.net/vfd.moscow.compass/video.block'
 
 export const WORK_VIDEOS: Video[] = [
+  /* Два ролика с отзывом клиента по объекту «Эмалекс в новостройке» (12 Nov 2026).
+     Сжатые копии — в облаке, video.block/FILE 2026-11-12 17_26_24/30_compross.mp4 */
+  {
+    id:       'work-emalex-review-1',
+    title:    'Двери в покрытии\nЭмалекс в новостройке',
+    text:     'Клиент выбирал долго и купил восемь дверей: подбор, фото и видео от салона, доставка в полном комплекте.',
+    src:      `${WORK}/FILE%202026-11-12%2017_26_24_compross.mp4`,
+    cover:    '/renders/home/videos/work-emalex-review-1.webp',
+    coverAt:  2,
+    duration: '0:16',
+    vertical: true,
+  },
+  {
+    id:       'work-emalex-review-2',
+    title:    'Отзыв клиента\nо покупке дверей',
+    text:     'Двери в покрытии Эмалекс для квартиры в Москве: задачу выполнили оперативно, клиент остался доволен.',
+    src:      `${WORK}/FILE%202026-11-12%2017_26_30_compross.mp4`,
+    cover:    '/renders/home/videos/work-emalex-review-2.webp',
+    coverAt:  2,
+    duration: '0:27',
+    vertical: true,
+  },
   {
     id:       'work-replace-door',
     title:    'Замена двери:\nподберём и установим',
