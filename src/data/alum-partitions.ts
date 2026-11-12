@@ -415,6 +415,20 @@ export const ALUM_STEPS = [
    Статьи с таким именем нет — сборка остановится с ошибкой */
 export const ALUM_ARTICLES = ['alyuminievye-peregorodki-v-kvartire', 'vfd-dizain-dveri-pod-zadachu', 'dveri-v-stile-loft', 'dveri-so-steklom-ili-gluhie']
 
+/** «На объекте»: видеообзор перегородки (VIDEOS в src/data/videos.ts — его
+ *  VideoObject стоит только здесь) и фото работы из Strapi по её адресу.
+ *  Пропал ролик или работа — сборка падает. Ролик и фото — разные объекты:
+ *  в тексте профиль назван у каждого свой */
+export const ALUM_OBJECT = {
+  video: 'alum-partition-review',
+  work:  'razdvizhnaya-peregorodka-chernyj-profil-kvartira',
+  nav:   'На объекте',
+  title: 'Раздвижные перегородки на объекте',
+  lead:  'Видеообзор перегородки в золотистом профиле между спальней и гостиной, а дальше — фото с объекта: спальню отделяет перегородка в чёрном профиле.',
+  /** Описание ролика для поисковиков (VideoObject) */
+  videoDescription: 'Обзор раздвижной алюминиевой перегородки в золотистом профиле: стеклянные створки разделяют спальню и гостиную и уходят к стенам.',
+}
+
 /** «Как к нам добраться» внизу страницы */
 export const ALUM_VISIT_LEAD = `Приезжайте обсудить проект: подберём раскладку, профиль и стекло перегородки ${ALUM_SYSTEM} и рассчитаем её по вашим размерам.`
 

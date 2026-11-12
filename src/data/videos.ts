@@ -50,6 +50,10 @@ export interface Video {
   link?:    { href: string; label: string }
   /** Заглушка (PLACEHOLDER): ролика ещё нет — карточка без плеера */
   placeholder?: boolean
+  /** День публикации на сайте (ГГГГ-ММ-ДД) — uploadDate в VideoObject
+   *  (src/lib/video-schema.ts). Нужен ролику, у которого есть своя
+   *  страница с разметкой видео */
+  uploaded?: string
 }
 
 /* Ролики салона в облаке */
@@ -62,6 +66,20 @@ const CDN = 'https://storage.yandexcloud.net/vfd.moscow.compass/hero.block/short
 export const HOME_VIDEOS = 5
 
 export const VIDEOS: Video[] = [
+  {
+    /* Разметка VideoObject — только на /partitions/alum/ (ALUM_OBJECT):
+       там ролик главный, здесь и на главной — просто карточка */
+    id:       'alum-partition-review',
+    title:    'Обзор алюминиевой\nраздвижной перегородки',
+    text:     'Перегородка в золотистом профиле между спальней и гостиной: стеклянные створки уходят к стенам.',
+    src:      'https://storage.yandexcloud.net/vfd.moscow.compass/video.block/alum_doors.mp4',
+    cover:    '/renders/home/videos/alum-partition-review.webp',
+    coverAt:  5,     // в начале ролика — субтитры поверх кадра
+    duration: '0:18',
+    vertical: true,
+    link:     { href: '/partitions/alum/', label: 'Раздвижные перегородки на сайте' },
+    uploaded: '2026-11-12',
+  },
   {
     id:       'club-designers-2026-10',
     title:    'Встреча клуба\nдизайнеров в\u00A0Москве',

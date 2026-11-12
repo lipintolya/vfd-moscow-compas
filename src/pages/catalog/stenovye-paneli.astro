@@ -47,6 +47,7 @@ import { typograph } from '../../lib/typograph'
 import { relatedArticle as relatedArticleFor } from '../../lib/articles'
 import { rub } from '../../data/services'
 import { PHONE, SITE } from '../../config/site'
+import { videoSchema } from '../../lib/video-schema'
 
 const page = WALL_PANELS_PAGE
 const pageUrl = new URL(page.path, SITE.url).href
@@ -112,16 +113,14 @@ const structuredData = [
     provider: sellerRef(),
     areaServed: AREA_SERVED,
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'VideoObject',
+  videoSchema({
     name: PANEL_HERO_VIDEO.title,
     description: PANEL_HERO_VIDEO.description,
     thumbnailUrl: PANEL_HERO_VIDEO.poster,
     contentUrl: PANEL_HERO_VIDEO.src,
     uploadDate: PANEL_HERO_VIDEO.uploadDate,
-    duration: `PT${PANEL_HERO_VIDEO.seconds}S`,
-  },
+    duration: PANEL_HERO_VIDEO.seconds,
+  }),
   {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

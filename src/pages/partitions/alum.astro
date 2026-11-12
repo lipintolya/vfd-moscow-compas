@@ -11,6 +11,8 @@
  * сеткой (AlumLeaf; «Собрать такую» подставляет отделку в конструктор) →
  * профиль и стекло, материалы фабрики → преимущества → как заказать
  * (StepsRow) → статьи по теме → вопросы → призыв рассчитать → как добраться.
+ * После раскладок — «На объекте» (ALUM_OBJECT): видеообзор и фото работы из
+ * Strapi; VideoObject этого ролика — только на этой странице.
  * Цен на страницах фабрики нет — и здесь их нет.
  *
  * Тексты, цифры и фото — src/data/alum-partitions.ts (в разметке — только
@@ -25,7 +27,7 @@ import {
   ALUM_SYSTEM, ALUM_PAGE, ALUM_FACTS, ALUM_LAYOUT_COUNT, ALUM_HERO, ALUM_SECTIONS as SEC,
   ALUM_MODELS, ALUM_SPECS, ALUM_KIT, ALUM_COMPONENTS, ALUM_OPTI_WHITE, ALUM_PROFILES,
   ALUM_GLASSES, ALUM_GLASS_GROUPS, ALUM_ENAMEL_NOTE, ALUM_BENEFITS,
-  ALUM_REFERENCES, ALUM_STEPS, ALUM_ARTICLES, ALUM_VISIT_LEAD, ALUM_FAQ, profileById, glassById,
+  ALUM_REFERENCES, ALUM_STEPS, ALUM_ARTICLES, ALUM_VISIT_LEAD, ALUM_FAQ, ALUM_OBJECT, profileById, glassById,
   type AlumGlass,
 } from '../../data/alum-partitions'
 import { getArticles } from '../../lib/articles'
@@ -42,6 +44,11 @@ import VisitBand from '../../components/home/VisitBand.astro'
 import ArticleCard from '../../components/articles/ArticleCard.astro'
 import ArticleNav from '../../components/articles/ArticleNav.astro'
 import ArticleLightbox from '../../components/articles/ArticleLightbox.astro'
+import InlineVideo from '../../components/articles/InlineVideo.astro'
+import RailBar from '../../components/ui/RailBar.astro'
+import { VIDEOS } from '../../data/videos'
+import { getWorks } from '../../lib/works'
+import { videoSchema } from '../../lib/video-schema'
 import '../../styles/home.css'
 import { PHONE, SITE } from '../../config/site'
 import { localBusinessSchema, LOCAL_BUSINESS_ID } from '../../lib/local-business-schema'
@@ -82,6 +89,29 @@ const faqSchema = {
   })),
 }
 
+/* На объекте: ролик из VIDEOS и фото работы из Strapi; пропали — сборка падает */
+const objVideo = VIDEOS.find((v) => v.id === ALUM_OBJECT.video)
+if (!objVideo?.src || !objVideo.cover || !objVideo.duration || !objVideo.uploaded) {
+  throw new Error(`Перегородки ALUM: у ролика «${ALUM_OBJECT.video}» в VIDEOS нет src / cover / duration / uploaded (ALUM_OBJECT)`)
+}
+const objVideoTitle = objVideo.title.replace(/\s+/g, ' ')
+const objWork = (await getWorks()).find((w) => w.id === ALUM_OBJECT.work)
+if (!objWork) throw new Error(`Перегородки ALUM: нет работы «${ALUM_OBJECT.work}» в Strapi (ALUM_OBJECT)`)
+const objPhotos = objWork.photos.map((p, i) => ({
+  ...p,
+  full: objWork.images[i] ?? p.src,
+  ratio: p.width && p.height ? p.width / p.height : 3 / 4,
+}))
+
+const videoLd = videoSchema({
+  name: objVideoTitle,
+  description: ALUM_OBJECT.videoDescription,
+  thumbnailUrl: objVideo.cover,
+  contentUrl: objVideo.src,
+  uploadDate: objVideo.uploaded,
+  duration: objVideo.duration,
+})
+
 const breadcrumbItems = [
   { label: 'Главная', href: '/' },
   { label: 'Перегородки', href: '/partitions/' },
@@ -91,6 +121,7 @@ const breadcrumbItems = [
 const navItems = [
   { id: 'oa-builder', label: SEC.builder.nav },
   { id: 'oa-layouts', label: SEC.photos.nav },
+  { id: 'oa-object',  label: ALUM_OBJECT.nav },
   { id: 'oa-finish',  label: SEC.finish.nav },
   { id: 'oa-order',   label: SEC.order.nav },
   { id: 'oa-faq',     label: SEC.faq.nav },
@@ -125,7 +156,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
   description={description}
   canonical={pageUrl}
   ogImage={abs(ALUM_HERO.image.src)}
-  structuredData={[localBusinessSchema({ url: SITE.url }), serviceSchema, faqSchema]}
+  structuredData={[localBusinessSchema({ url: SITE.url }), serviceSchema, videoLd, faqSchema]}
   preloadImage={ALUM_HERO.image.src}
   preloadImageSrcset={ALUM_HERO.image.srcset}
   preloadImageSizes="(min-width: 62.5rem) 52vw, 100vw"
@@ -245,8 +276,39 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
       </div>
     </section>
 
+    {/* ── На объекте: ролик (по «плей») и фото работы (крупно по нажатию), одной лентой ── */}
+    <section id="oa-object" class="h-sec" aria-labelledby="oa-object-title">
+      <div class="container">
+        <header class="h-head">
+          <h2 id="oa-object-title" class="h-h2">{typograph(ALUM_OBJECT.title)}</h2>
+          <div>
+            <p class="h-lead">{typograph(ALUM_OBJECT.lead)}</p>
+          </div>
+        </header>
+        <div class="rail" data-rail>
+          <ul class="rail__track oa-obj" data-track role="list">
+            <li style="--ar: 0.5625">
+              <InlineVideo src={objVideo.src} poster={objVideo.cover} title={objVideoTitle} ratio="9 / 16" />
+            </li>
+            {objPhotos.map((p) => (
+              <li style={`--ar: ${p.ratio.toFixed(4)}`}>
+                <button type="button" class="h-media oa-obj__photo" data-zoom={p.full} data-zoom-caption={p.alt} aria-label={zoom(p.alt)}>
+                  <img src={p.src} srcset={p.srcset} sizes="(min-width: 43.75rem) 28rem, 75vw" alt={p.alt} width={p.width} height={p.height} loading="lazy" decoding="async" />
+                </button>
+              </li>
+            ))}
+          </ul>
+          <RailBar />
+        </div>
+        <p class="oa-obj__links">
+          <a class="h-link" href={`/portfolio/${objWork.id}/`}>Объект в портфолио</a>
+          <a class="h-link" href="/video/">Все видео</a>
+        </p>
+      </div>
+    </section>
+
     {/* ── Профиль и стекло, материалы фабрики ── */}
-    <section id="oa-finish" class="h-sec" aria-labelledby="oa-finish-title">
+    <section id="oa-finish" class="h-sec h-sec--wall" aria-labelledby="oa-finish-title">
       <div class="container">
         <header class="h-head">
           <h2 id="oa-finish-title" class="h-h2">{typograph(SEC.finish.title)}</h2>
@@ -311,7 +373,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
     </section>
 
     {/* ── Преимущества — светлый список, без второго тёмного блока рядом с шагами ── */}
-    <section id="oa-benefits" class="h-sec h-sec--wall" aria-labelledby="oa-benefits-title">
+    <section id="oa-benefits" class="h-sec" aria-labelledby="oa-benefits-title">
       <div class="container">
         <header class="h-head">
           <h2 id="oa-benefits-title" class="h-h2">{typograph(SEC.benefits.title)}</h2>
@@ -390,6 +452,9 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
 </BaseLayout>
 
 <script>
+  import { initRails } from '../../lib/rail'
+  initRails()
+
   /* Справочные списки на телефоне свёрнуты под заголовки (без JS —
      раскрыты). Когда сворачивать, решает CSS (--oa-fold), а не второй
      брейкпоинт в скрипте */
@@ -468,6 +533,17 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
   .oa-card__layout { margin: 0.25rem 0 0; font-size: 0.9375rem; line-height: 1.4; color: var(--h-ink); }
   .oa-card__shown { margin: 0.25rem 0 0.875rem; color: var(--h-muted); }
   .oa-card__apply { align-self: flex-start; margin-top: auto; cursor: pointer; font: inherit; font-size: 0.875rem; }
+
+  /* ── На объекте: лента одной высоты, ширина — по пропорции кадра ── */
+  .oa-obj { --obj-h: min(21rem, 70vw); display: flex; --rail-gap: 1rem; }
+  .oa-obj > li { flex: none; width: calc(var(--obj-h) * var(--ar)); }
+  @media (min-width: 43.75rem) { .oa-obj { --obj-h: clamp(22rem, 32vw, 28rem); --rail-gap: 1.5rem; } }
+  .oa-obj :global(.ivideo) { margin: 0; }
+  .oa-obj__photo { display: block; width: 100%; aspect-ratio: var(--ar); padding: 0; border: 0; cursor: zoom-in; }
+  .oa-obj__photo img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 700ms var(--ease-out); }
+  @media (hover: hover) { .oa-obj__photo:hover img { transform: scale(1.03); } }
+  .oa-obj__photo:focus-visible { outline: 0.1875rem solid var(--color-secondary-700); outline-offset: 0.125rem; }
+  .oa-obj__links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin: 1.5rem 0 0; }
 
   /* ── Профиль и стекло: образцы-плитки, по сетке auto-fit ── */
   .oa-finish { display: grid; gap: clamp(2.5rem, 5vw, 3.5rem); }
@@ -559,6 +635,7 @@ const arrow = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" aria-
     .oa-order__call > .h-btn { width: 100%; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .oa-card__leaf, .oa-card__apply { transition: none; }
+    .oa-card__leaf, .oa-card__apply, .oa-obj__photo img { transition: none; }
+    .oa-obj__photo:hover img { transform: none; }
   }
 </style>

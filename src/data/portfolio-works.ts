@@ -88,6 +88,7 @@ export const CATALOG_LINKS: Record<string, { href: string; label: string }> = {
   'Серые и графитовые двери': { href: '/catalog/seryye-dveri/',  label: 'Серые и графитовые двери в каталоге' },
   'Белые двери':              { href: '/catalog/belye-dveri/',   label: 'Белые двери в каталоге' },
   'Перегородки':              { href: '/partitions/',            label: 'Алюминиевые перегородки' },
+  'Раздвижные перегородки':   { href: '/partitions/alum/',       label: 'Раздвижные алюминиевые перегородки' },
   'Декор и погонаж':          { href: '/catalog/decor/',         label: 'Декор и погонаж' },
   'Входные двери':            { href: '/catalog/vhodnye-dveri/', label: 'Входные двери в каталоге' },
 }
