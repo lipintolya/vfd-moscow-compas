@@ -209,6 +209,29 @@ export const VIDEOS: Video[] = [
 const WORK = 'https://storage.yandexcloud.net/vfd.moscow.compass/video.block'
 
 export const WORK_VIDEOS: Video[] = [
+  /* Замер на объектах (12 Nov 2026): обход на черновой отделке, основатель
+     комментирует в окошке. Речь не расшифрована — в подписях только то, что
+     видно в кадре, и общие правила замера. Источник — облако, video.block/object1.mp4 и object2.mp4 */
+  {
+    id:       'work-measure-house',
+    title:    'Замер в\u00A0частном доме\nна\u00A0черновой отделке',
+    text:     'Проёмы меряем ещё до отделки: ширину, высоту и толщину стены в каждом, чтобы дверь встала точно.',
+    src:      `${WORK}/object1.mp4`,
+    cover:    '/renders/home/videos/work-measure-house.webp',
+    coverAt:  15,
+    duration: '1:02',
+    vertical: true,
+  },
+  {
+    id:       'work-measure-why',
+    title:    'Почему замер\nделает специалист',
+    text:     'Ошибка в пару сантиметров — и дверь не встанет. Замерщик учтёт неровные стены и будущий пол.',
+    src:      `${WORK}/object2.mp4`,
+    cover:    '/renders/home/videos/work-measure-why.webp',
+    coverAt:  3,
+    duration: '0:28',
+    vertical: true,
+  },
   /* Два ролика с отзывом клиента по объекту «Эмалекс в новостройке» (12 Nov 2026).
      Сжатые копии — в облаке, video.block/FILE 2026-11-12 17_26_24/30_compross.mp4 */
   {
