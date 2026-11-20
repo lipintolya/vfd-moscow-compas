@@ -55,11 +55,11 @@
     "server:setup": "node scripts/deploy-site.mjs setup"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.4",
-    "@astrojs/vue": "^7.0.2",
+    "@astrojs/sitemap": "^3.7.5",
+    "@astrojs/vue": "^7.1.6",
     "@supabase/supabase-js": "^2.106.0",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^7.3.2",
+    "astro": "^7.4.12",
     "github-slugger": "2.0.0",
     "tailwindcss": "^4.3.0",
     "vue": "^3.5.34"
